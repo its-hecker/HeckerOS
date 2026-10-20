@@ -31,7 +31,7 @@ jobs:
           print('Verified Google Settings library; face classes:',len(names),flush=True)
           for name in names: print(name,flush=True)
           for name in names:
-              if '$' not in name:
+              if '.anim.' in name:
                   print('\nDECLARATIONS:',name,flush=True)
-                  subprocess.run(['javap','-p','-classpath','/tmp/pixel-settings.jar',name],check=True)
+                  subprocess.run(['javap','-p','-c','-classpath','/tmp/pixel-settings.jar',name],check=True)
           PYTHON
