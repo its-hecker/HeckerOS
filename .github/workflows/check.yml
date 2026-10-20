@@ -9,6 +9,19 @@ concurrency:
   group: hecker-source-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  public-metadata:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Smoke-check public Google metadata without changing a phone
+        run: python3 tools/check_platform_features.py --metadata-only
   source:
     runs-on: ubuntu-24.04
     timeout-minutes: 25

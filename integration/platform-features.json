@@ -1,7 +1,7 @@
 {
   "settings": {
     "repository": "its-hecker/heckeros_packages_apps_Settings",
-    "revision": "3aecc6bc6aae14a5c86505faf05d99b252754011",
+    "revision": "6e5c229db3239d69fa321264181075e92223aabc",
     "files": {
       "Android.bp": "7734560e9290e57348a9da9626045091388829dc909ca1bea49a91ec827e2f41",
       "AndroidManifest.xml": "73f27add49dce3e9f93738fc5cd963d3b0cf42bec0836cc987b92c248130d12c",
@@ -31,10 +31,10 @@
       "src/com/android/settings/biometrics/face/PixelFaceAnimationLifecycle.java": "f3dac03146d72f7580104b7df8445b7b784a594a93b75851f9eca0336b80d917",
       "src/com/android/settings/hecker/HeckerIntegrityActivity.java": "e4b6987cd9c425aab8172180b20ccca0c1fd2279d77458c443ac13c0c7ea3443",
       "src/com/android/settings/hecker/PifProfile.java": "e4132e74e93e7937efc35d330d274b7520a6baa75afafcf56a23dc8a652031c9",
-      "src/com/android/settings/hecker/PixelBetaProfileFetcher.java": "768bab355ab2f379c0cb6b90b025ab1fab07490d88c67d09ea99953a617cf321",
+      "src/com/android/settings/hecker/PixelBetaProfileFetcher.java": "5100f5185b147185279a21ef98092c7a2b73cd66988b87e86ab4a48f3bedd37f",
       "src/com/google/android/settings/biometrics/face/anim/FaceEnrollAnimationMultiAngleDrawable.java": "7e69811a92b9e649b6d26b8fa67e9dcbe034865da45f9c3d2b7264e672cbe1d4",
       "tools/hecker/tests/FacePoseEnrollmentStateTest.java": "8036525e926c65bce883b89c787bbcc74f049dc1bb5178f08ac2078155525e45",
-      "tools/hecker/tests/PifProfileTest.java": "f891cc1d5753bb4b9298a6836780a6f5999f42fbd632f80755adaa54c64bdf04"
+      "tools/hecker/tests/PifProfileTest.java": "6d620f65605fe7fd39eebd2831fd480c368388ec17609a10eb6f08746a1f2721"
     }
   },
   "framework": {

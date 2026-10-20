@@ -45,11 +45,23 @@ def main():
     parser.add_argument('--settings-source', type=Path)
     parser.add_argument('--framework-source', type=Path)
     parser.add_argument('--source-cache', type=Path, default=ROOT/'out/platform-feature-sources')
-    parser.add_argument('--sdk-cache', type=Path, required=True)
+    parser.add_argument('--sdk-cache', type=Path)
+    parser.add_argument('--metadata-only', action='store_true',
+                        help='Read-only smoke check of public Google beta metadata; no phone changes')
     args = parser.parse_args()
     lock = json.loads((ROOT/'integration/platform-features.json').read_text())
     settings = args.settings_source or source(lock['settings'], args.source_cache)
+    if args.metadata_only:
+        with tempfile.TemporaryDirectory(prefix='hecker-beta-metadata-') as temporary:
+            out = Path(temporary)
+            run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-d',out,
+                settings/'src/com/android/settings/hecker/PifProfile.java',
+                settings/'src/com/android/settings/hecker/PixelBetaProfileFetcher.java',
+                settings/'tools/hecker/tests/PifProfileTest.java')
+            run('java','-cp',out,'com.android.settings.hecker.PifProfileTest','--live')
+        return
     framework = args.framework_source or source(lock['framework'], args.source_cache)
+    if args.sdk_cache is None: parser.error('--sdk-cache is required for the compilation checks')
     sdk = args.sdk_cache.resolve()
     jar = settings/'libs/pixel-face-ui/stock-pose-grid.jar'
     origin = json.loads((settings/'libs/pixel-face-ui/ORIGIN.json').read_text())
