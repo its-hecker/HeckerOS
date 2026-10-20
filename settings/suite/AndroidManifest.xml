@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.hecker.suite">
+    <uses-permission android:name="org.hecker.suite.permission.OPEN_FEATURE" />
+    <application>
+        <!-- A Settings page, without another launcher or injected System entry. -->
+        <activity android:name="org.hecker.suite.SuiteActivity"
+            android:exported="true" android:label="@string/suite_title"
+            android:theme="@style/SuiteTheme" />
+    </application>
+</manifest>

@@ -30,7 +30,7 @@ public final class HeckerBrandPreference extends Preference {
         });
     }
     private void suite(boolean about) {
-        Intent intent = new Intent().setClassName("org.hecker.suite", "org.hecker.suite.SuiteActivity")
+        Intent intent = new Intent().setClassName("com.android.settings", "org.hecker.suite.SuiteActivity")
                 .putExtra("org.hecker.suite.SHOW_ABOUT", about);
         try { getContext().startActivity(intent); }
         catch (android.content.ActivityNotFoundException unavailable) {

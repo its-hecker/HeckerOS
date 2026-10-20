@@ -5,7 +5,11 @@ HeckerOS Android 17 targets coral first. The approved Settings design, two-colum
 ## Architecture
 
 `HeckerSuite` is platform-signed, privileged, installed on `system_ext`, and has
-its own UID. The dashboard is exported; the three Quick Settings services require the system BIND_QUICK_SETTINGS_TILE permission. App Lock configuration is guarded
+its own UID. The dashboard and About page are compiled into the native Settings
+APK. Motion Sense controls and their child pages also live in Settings, without
+installing the standalone plugin Settings APK. A signature-protected router with
+an explicit page allowlist opens the private service-package pages; the three
+Quick Settings services require the system BIND_QUICK_SETTINGS_TILE permission. App Lock configuration is guarded
 by a strong biometric/device-credential prompt; every actual selection change
 is authenticated again by Android's system-owned setup flow.
 
@@ -33,7 +37,7 @@ The preparation command validates every source anchor before writing, is idempot
 python3 vendor/hecker/floral/suite/tools/prepare.py --revert
 ```
 
-Motion Sense's separate Settings entry and duplicate maintainer/contact sections are hidden in Suite builds. Original plugin files, hardware permissions and upstream credits remain intact.
+Motion Sense's separate Settings entry and duplicate maintainer/contact sections are hidden in Suite builds. Original plugin files, hardware permissions and upstream credits remain intact. Native Settings links the generated UI library; the independently usable plugin APK remains available to other ROM builders. The Suite and Face Unlock tiles open native Settings pages.
 
 The Launcher page sets Android's native HOME role and offers an explicit restart when changing the signed Recents provider overlay. Double tap to sleep calls the native power API; it does not use device administrator locking. Pixel Launcher remains installed.
 

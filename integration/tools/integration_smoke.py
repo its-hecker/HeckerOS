@@ -86,7 +86,7 @@ def check_product_make(rom):
     packages = values.get("MAKE_PACKAGES", "").split()
     copies = values.get("MAKE_COPIES", "").split()
     require(motion in namespaces and face in namespaces, "Plugin Soong namespaces are missing")
-    require({"KeepMe", "FloralOsloFeedback", "FloralMotionSensePrivappPermissions", "FloralFaceIDHal", "FloralFaceIDManifest"} <=
+    require({"KeepMe", "FloralOsloFeedback", "FloralFaceIDHal", "FloralFaceIDManifest"} <=
             set(packages), "Prepared plugin packages are missing")
     require("GoogleCameraCoral" in packages and "Aperture" not in packages,
             "Google Camera must replace Aperture in the resolved PixelOS product")
@@ -96,6 +96,8 @@ def check_product_make(rom):
             "Suite package and experimental release config are missing")
     require(not {"android.hardware.biometrics.face@1.0-service.google", "OsloFeedback"} &
             set(packages), "Replaced stock plugin packages were retained")
+    require(not {"FloralMotionSenseSettings", "FloralMotionSensePrivappPermissions"} & set(packages),
+            "Motion Sense UI must be installed in Settings only")
     require({"libbase-v33", "libcrypto-v33", "libstagefright_foundation-v33"} <= set(packages) and
             not {"FloralFaceIDV33Base", "FloralFaceIDV33Crypto", "FloralFaceIDV33Foundation"} & set(packages),
             "Face ID must select the shared multilib v33 providers")

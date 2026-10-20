@@ -6,7 +6,7 @@
             <intent android:action="android.intent.action.SET_WALLPAPER" />
         </Preference>
         <Preference android:key="hecker_theme_pack" android:title="@string/hecker_theme_pack_title" android:summary="@string/hecker_theme_pack_summary" android:icon="@drawable/hecker_palette">
-            <intent android:targetPackage="org.hecker.suite" android:targetClass="org.hecker.suite.SuiteActivity">
+            <intent android:targetPackage="com.android.settings" android:targetClass="org.hecker.suite.SuiteActivity">
                 <extra android:name="org.hecker.suite.PAGE" android:value="themes" />
             </intent>
         </Preference>

@@ -14,6 +14,20 @@ reversible; the main activity/fragment names stay native.
 Suite retains its random offline Lottie greeting and the previously selected
 App Lock, Gaming, launcher, infrared camera and About pages alongside the new grid.
 
+The Suite dashboard and About UI are built as `HeckerSuiteSettingsUi`, a static
+library of the native `Settings` APK. The existing Motion Sense controls and
+their child pages are linked through `HeckerMotionSenseSettingsUi` in the plugin
+namespace. The separate Motion Sense settings APK and its package allowlist are
+excluded from the coral product. There are no additional launcher icons or
+injected duplicate entries under System.
+
+The separately installed, privileged `HeckerSuite` system package retains Gaming,
+camera and other feature services under its own UID. Settings reaches its private
+feature pages through an allowlisted router protected by a signature permission;
+the router cannot select arbitrary classes or bypass native App Lock authentication.
+3D Face Unlock opens Android's existing Face Settings page for both enrollment and
+management, retaining the native credential, removal and biometric flows.
+
 Asset: `res/drawable-nodpi/hecker_mascot.webp`, also shared by Suite. Generated
 with the built-in image generation tool, transparent-background mode, from the
 approved caracal brand reference. Final prompt direction: a friendly polished 3D

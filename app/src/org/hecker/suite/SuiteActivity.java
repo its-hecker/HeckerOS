@@ -6,9 +6,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.GradientDrawable;
-import android.hardware.biometrics.BiometricManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,7 +26,7 @@ public final class SuiteActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         if (state == null && "themes".equals(getIntent().getStringExtra("org.hecker.suite.PAGE"))) {
-            startActivity(new Intent(this, ThemePackActivity.class)); finish(); return;
+            open("ThemePackActivity"); finish(); return;
         }
         showingAbout = state != null ? state.getBoolean("about")
                 : getIntent().getBooleanExtra("org.hecker.suite.SHOW_ABOUT", false);
@@ -59,18 +57,18 @@ public final class SuiteActivity extends Activity {
     private void showTab(boolean selectedAbout) {
         showingAbout=selectedAbout; customizations.setEnabled(selectedAbout); about.setEnabled(!selectedAbout); content.removeAllViews();
         if(selectedAbout){SuiteAbout.populate(this,content);return;}
-        addRow(tile(R.string.qs_title,R.string.qs_summary,R.drawable.ic_qs,v->open(QuickSettingsActivity.class)),
-                tile(R.string.lock_screen_title,R.string.lock_screen_summary,R.drawable.ic_lock,v->open(LockScreenSettingsActivity.class)));
-        addRow(tile(R.string.status_bar_title,R.string.status_bar_summary,R.drawable.ic_signal,v->open(StatusBarSettingsActivity.class)),
-                tile(R.string.themes_title,R.string.themes_summary,R.drawable.ic_palette,v->open(ThemePackActivity.class)));
+        addRow(tile(R.string.qs_title,R.string.qs_summary,R.drawable.ic_qs,v->open("QuickSettingsActivity")),
+                tile(R.string.lock_screen_title,R.string.lock_screen_summary,R.drawable.ic_lock,v->open("LockScreenSettingsActivity")));
+        addRow(tile(R.string.status_bar_title,R.string.status_bar_summary,R.drawable.ic_signal,v->open("StatusBarSettingsActivity")),
+                tile(R.string.themes_title,R.string.themes_summary,R.drawable.ic_palette,v->open("ThemePackActivity")));
         addRow(tile(R.string.motion_sense_title,R.string.motion_sense_summary,R.drawable.ic_motion_sense,v->openMotionSense()),
                 tile(R.string.face_title,R.string.face_summary,R.drawable.ic_face_unlock,v->openFace()));
-        addRow(tile(R.string.navigation_title,R.string.navigation_summary,R.drawable.ic_navigation,v->SuitePages.settings(this,"com.android.settings.NAVIGATION_MODE_SETTINGS")),
-                tile(R.string.animations_title,R.string.animations_summary,R.drawable.ic_animations,v->open(AnimationSettingsActivity.class)));
-        addRow(tile(R.string.app_lock_title,R.string.app_lock_summary,R.drawable.ic_lock,v->open(AppLockActivity.class)),
-                tile(R.string.gaming_title,R.string.gaming_summary,R.drawable.ic_gaming,v->open(GamingActivity.class)));
-        addRow(tile(R.string.launcher_title,R.string.launcher_summary,R.drawable.ic_qs,v->open(LauncherSettingsActivity.class)),
-                tile(R.string.ir_title,R.string.ir_summary,R.drawable.ic_face_unlock,v->open(InfraredCameraActivity.class)));
+        addRow(tile(R.string.navigation_title,R.string.navigation_summary,R.drawable.ic_navigation,v->settings("com.android.settings.NAVIGATION_MODE_SETTINGS")),
+                tile(R.string.animations_title,R.string.animations_summary,R.drawable.ic_animations,v->open("AnimationSettingsActivity")));
+        addRow(tile(R.string.app_lock_title,R.string.app_lock_summary,R.drawable.ic_lock,v->open("AppLockActivity")),
+                tile(R.string.gaming_title,R.string.gaming_summary,R.drawable.ic_gaming,v->open("GamingActivity")));
+        addRow(tile(R.string.launcher_title,R.string.launcher_summary,R.drawable.ic_qs,v->open("LauncherSettingsActivity")),
+                tile(R.string.ir_title,R.string.ir_summary,R.drawable.ic_face_unlock,v->open("InfraredCameraActivity")));
         LinearLayout footer=Ui.card(this); footer.addView(Ui.text(this,"HeckerOS",17,true));
         footer.addView(Ui.text(this,getString(R.string.suite_footer),12,false));content.addView(footer);
     }
@@ -91,10 +89,24 @@ public final class SuiteActivity extends Activity {
         a.setMarginEnd(Ui.dp(this,5));b.setMarginStart(Ui.dp(this,5));a.bottomMargin=b.bottomMargin=Ui.dp(this,10);
         row.addView(left,a);row.addView(right,b);content.addView(row);
     }
-    private void open(Class<? extends Activity> activity){startActivity(new Intent(this,activity));}
-    private void openFace(){startActivity(new Intent(Settings.ACTION_BIOMETRIC_ENROLL).putExtra(Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,BiometricManager.Authenticators.BIOMETRIC_STRONG));}
+    private void open(String page) {
+        try {
+            startActivity(new Intent().setClassName("org.hecker.suite", "org.hecker.suite.SuiteRouterActivity")
+                    .putExtra("org.hecker.suite.PAGE", page)
+                    .putExtra("category", getIntent().getIntExtra("category", -1)));
+        } catch (ActivityNotFoundException | SecurityException unavailable) {
+            Toast.makeText(this, R.string.native_page_unavailable, Toast.LENGTH_LONG).show();
+        }
+    }
+    private void openFace(){settings("android.settings.FACE_SETTINGS");}
+    private void settings(String action) {
+        try { startActivity(new Intent(action).setPackage("com.android.settings")); }
+        catch (ActivityNotFoundException | SecurityException unavailable) {
+            Toast.makeText(this, R.string.native_page_unavailable, Toast.LENGTH_LONG).show();
+        }
+    }
     private void openMotionSense(){
-        try{startActivity(new Intent().setClassName("org.hecker.floral.motionsense","org.hecker.floral.motionsense.motionsense.MotionSenseActivity"));}
+        try{startActivity(new Intent().setClassName("com.android.settings","org.hecker.floral.motionsense.motionsense.MotionSenseActivity"));}
         catch(ActivityNotFoundException|SecurityException unavailable){Toast.makeText(this,R.string.motion_sense_unavailable,Toast.LENGTH_LONG).show();}
     }
     @Override protected void onSaveInstanceState(Bundle state){state.putBoolean("about",showingAbout);state.putInt("message",message);super.onSaveInstanceState(state);}

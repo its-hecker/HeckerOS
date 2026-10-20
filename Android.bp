@@ -14,6 +14,7 @@ android_app {
     name: "HeckerSuite",
     manifest: "app/AndroidManifest.xml",
     srcs: ["app/src/**/*.java"],
+    exclude_srcs: ["app/src/org/hecker/suite/SuiteActivity.java"],
     resource_dirs: ["app/res"],
     asset_dirs: ["app/assets"],
     platform_apis: true,
@@ -25,6 +26,23 @@ android_app {
     optimize: {
         proguard_flags_files: ["app/proguard.flags"],
     },
+}
+
+// UI is linked into the native Settings APK. Privileged feature services retain
+// the separate HeckerSuite UID and are reached through a signature-only router.
+android_library {
+    name: "HeckerSuiteSettingsUi",
+    manifest: "settings/suite/AndroidManifest.xml",
+    srcs: [
+        "app/src/org/hecker/suite/SuiteActivity.java",
+        "app/src/org/hecker/suite/SuiteAbout.java",
+        "app/src/org/hecker/suite/SuiteAnimation.java",
+        "app/src/org/hecker/suite/SuiteGreetings.java",
+        "app/src/org/hecker/suite/Ui.java",
+    ],
+    resource_dirs: ["app/res"],
+    platform_apis: true,
+    static_libs: ["lottie"],
 }
 
 prebuilt_etc {

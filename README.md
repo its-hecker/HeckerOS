@@ -12,6 +12,8 @@ Hecker Suite feature branch in this project.
 - Native Quick Settings with large Wi-Fi/Bluetooth cards, round tiles, media,
   separate volume/brightness controls, and the optional HeckerOS dashboard layout.
 - Hardware 3D Face Unlock and Motion Sense, with their ROM integration owned here.
+- Suite and Motion Sense pages built directly into Settings. Feature services
+  retain their separate system UID; there are no extra launcher apps to install.
 - Native App Lock, infrared camera viewer, and an in-game Gaming dashboard with
   real task FPS, battery temperature, controls and native popup app shortcuts.
 - Pixel Launcher and Ortus-derived **Hecker's Launcher**, including native double

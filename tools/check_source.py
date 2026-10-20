@@ -41,7 +41,15 @@ def main():
     assert app.get(A + "allowBackup") == "false"
     exported = [node.get(A + "name") for node in app.findall("activity")
                 if node.get(A + "exported") == "true"]
-    assert exported == [".SuiteActivity"]
+    assert exported == [".SuiteRouterActivity"]
+    permission = manifest.find("permission")
+    assert permission.get(A + "name") == "org.hecker.suite.permission.OPEN_FEATURE"
+    assert permission.get(A + "protectionLevel") == "signature"
+    assert app.find("activity").get(A + "permission") == permission.get(A + "name")
+    assert not manifest.findall(".//action[@" + A + "name='com.android.settings.action.IA_SETTINGS']")
+    native = ET.parse(ROOT / "settings/suite/AndroidManifest.xml").getroot()
+    assert native.find("application/activity").get(A + "name") == "org.hecker.suite.SuiteActivity"
+    assert native.find("uses-permission").get(A + "name") == permission.get(A + "name")
     assert not manifest.findall(".//category[@" + A + "name='android.intent.category.LAUNCHER']")
     services = {node.get(A + "name"): node for node in app.findall("service")}
     tiles = {".SuiteTileService", ".MotionSenseTileService", ".FaceUnlockTileService"}

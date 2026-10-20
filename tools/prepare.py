@@ -20,6 +20,29 @@ PERMISSION = "android.permission.HECKER_SUITE_APP_LOCK"
 HELPER = "services/core/java/com/android/server/pm/HeckerSuiteAppLockAccess.java"
 MOTION = Path("vendor/hecker/floral/motionsense/settings")
 MOTION_MANIFEST = "generated/hecker-suite/AndroidManifest.xml"
+MOTION_NATIVE_MANIFEST = "generated/hecker-settings/AndroidManifest.xml"
+MOTION_NATIVE_LIBRARY = '''
+// HeckerOS: share controls with native Settings; the standalone plugin stays reusable.
+android_library {
+    name: "HeckerMotionSenseSettingsUi",
+    visibility: ["//visibility:public"],
+    manifest: "generated/hecker-settings/AndroidManifest.xml",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    platform_apis: true,
+    static_libs: ["FloralMotionSenseSettingsResources", "lottie"],
+}
+'''
+MOTION_PRODUCT_OLD = '''    FloralOsloFeedback \\
+    FloralMotionSenseBridge \\
+    FloralMotionSenseSettings \\
+    FloralMotionSensePrivappPermissions \\
+    FloralOsloSystemUIOverlay \\
+'''
+MOTION_PRODUCT_NEW = '''    FloralOsloFeedback \\
+    FloralMotionSenseBridge \\
+    FloralOsloSystemUIOverlay \\
+'''
 MOTION_ACTIVITY = "org.hecker.floral.motionsense.motionsense.MotionSenseActivity"
 MOTION_BP_OLD = 'android_app {\n    name: "FloralMotionSenseSettings",'
 MOTION_BP_NEW = MOTION_BP_OLD + '\n    manifest: "' + MOTION_MANIFEST + '",'
@@ -167,16 +190,47 @@ def motion_manifest(source):
     return '<?xml version="1.0" encoding="utf-8"?>\n' + ET.tostring(manifest, encoding="unicode") + "\n"
 
 
+def motion_native_manifest(source):
+    """Link existing UI classes into Settings without adopting the plugin app identity."""
+    original = ET.fromstring(source)
+    package = original.get("package")
+    # Validate the independently usable plugin before deriving the Settings library.
+    motion_manifest(source)
+    manifest = ET.Element("manifest", {"package": package})
+    for node in original:
+        if node.tag in {"queries", "uses-permission", "uses-feature"}:
+            manifest.append(ET.fromstring(ET.tostring(node)))
+    app = ET.SubElement(manifest, "application")
+    for node in original.findall("application/activity"):
+        activity = ET.fromstring(ET.tostring(node))
+        name = activity.get(ANDROID + "name")
+        activity.set(ANDROID + "name", package + name if name.startswith(".") else name)
+        activity.set(ANDROID + "exported", "false")
+        for child in list(activity):
+            if child.tag == "intent-filter" or (child.tag == "meta-data" and
+                    child.get(ANDROID + "name", "").startswith("com.android.settings.")):
+                activity.remove(child)
+        app.append(activity)
+    ET.register_namespace("android", ANDROID[1:-1])
+    ET.indent(manifest, space="    ")
+    return '<?xml version="1.0" encoding="utf-8"?>\n' + ET.tostring(manifest, encoding="unicode") + "\n"
+
+
 def motion_plan(rom, revert=False):
     settings = rom / MOTION
     if not settings.is_dir():
         return {}  # The standalone Suite can also be built without the Motion Sense plugin.
     source = (settings / "AndroidManifest.xml").read_text()
-    generated = settings / MOTION_MANIFEST
-    expected = motion_manifest(source)
-    if generated.exists() and generated.read_text() != expected:
-        raise ValueError("Preserving an unfamiliar generated Motion Sense manifest: " + str(generated))
+    manifests = {settings / MOTION_MANIFEST: motion_manifest(source),
+                 settings / MOTION_NATIVE_MANIFEST: motion_native_manifest(source)}
+    for generated, expected in manifests.items():
+        if generated.exists() and generated.read_text() != expected:
+            raise ValueError("Preserving an unfamiliar generated Motion Sense manifest: " + str(generated))
     changes = {}
+    product = settings.parent / "motionsense.mk"
+    current = product.read_text()
+    target = replace_guarded(current, MOTION_PRODUCT_OLD, MOTION_PRODUCT_NEW, str(product), revert)
+    if target != current: changes[product] = target
     fragment = settings / MOTION_FRAGMENT
     current = fragment.read_text()
     target = replace_guarded(current, MOTION_ABOUT_OLD, MOTION_ABOUT_NEW, str(fragment), revert)
@@ -191,12 +245,20 @@ def motion_plan(rom, revert=False):
                 '\n    manifest: "' + MOTION_MANIFEST + '",', '')):
             raise ValueError("Unfamiliar Motion Sense app manifest selection: " + str(path))
         target = replace_guarded(current, MOTION_BP_OLD, MOTION_BP_NEW, str(path), revert)
+        if target.count(MOTION_NATIVE_LIBRARY) > 1 or (
+                'name: "HeckerMotionSenseSettingsUi"' in target and MOTION_NATIVE_LIBRARY not in target):
+            raise ValueError("Unfamiliar native Motion Sense library: " + str(path))
+        if revert:
+            target = target.replace(MOTION_NATIVE_LIBRARY, "", 1)
+        elif MOTION_NATIVE_LIBRARY not in target:
+            target += MOTION_NATIVE_LIBRARY
         if target != current:
             changes[path] = target
-    if revert:
-        if generated.exists(): changes[generated] = None
-    elif not generated.exists():
-        changes[generated] = expected
+    for generated, expected in manifests.items():
+        if revert:
+            if generated.exists(): changes[generated] = None
+        elif not generated.exists():
+            changes[generated] = expected
     return changes
 
 

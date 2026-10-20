@@ -97,8 +97,16 @@ def main():
             "-d", output / "classes", output / "generated/org/hecker/suite/R.java",
             *sorted((ROOT / "tests/platform-api-stubs").rglob("*.java")),
             *sorted((ROOT / "app/src").rglob("*.java")))
+        # Compile exactly the Settings UI module without backend classes on its
+        # classpath, so a feature Activity reference cannot silently join its UID.
+        (output / "settings-ui-classes").mkdir()
+        run("java", "-m", "jdk.compiler/com.sun.tools.javac.Main", "-cp", classpath,
+            "-d", output / "settings-ui-classes", output / "generated/org/hecker/suite/R.java",
+            *[ROOT / "app/src/org/hecker/suite" / (name + ".java") for name in
+              ("SuiteActivity", "SuiteAbout", "SuiteAnimation", "SuiteGreetings", "Ui")])
     print("Complete app Java compilation with locked system SDK and checked platform declarations,")
     print("Android resource linking and native AIDL permission generation: PASS")
+    print("Native Settings dashboard compiles independently of the service package: PASS")
 
 
 if __name__ == "__main__": main()

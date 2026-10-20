@@ -34,12 +34,13 @@ class PreparationTests(unittest.TestCase):
 
     def contents(self):
         return {str(p.relative_to(self.rom)): p.read_bytes()
-                for root in (prepare.FRAMEWORK, prepare.MOTION)
+                for root in (prepare.FRAMEWORK, prepare.MOTION.parent)
                 for p in (self.rom / root).rglob("*") if p.is_file()}
 
     def stage_motion(self):
         settings = self.rom / prepare.MOTION
         settings.mkdir(parents=True)
+        (settings.parent / "motionsense.mk").write_text(prepare.MOTION_PRODUCT_OLD)
         (settings / "Android.bp.in").write_text(prepare.MOTION_BP_OLD + '''
     srcs: ["src/**/*.java"],
     privileged: true,
@@ -87,6 +88,16 @@ class PreparationTests(unittest.TestCase):
         self.assertEqual(manifest.find("application/service").get(prepare.ANDROID + "permission"),
                          "android.permission.BIND_QUICK_SETTINGS_TILE")
         self.assertEqual(manifest.get(prepare.ANDROID + "sharedUserId"), "android.uid.system")
+        native = ET.parse(settings / prepare.MOTION_NATIVE_MANIFEST).getroot()
+        self.assertNotIn(prepare.ANDROID + "sharedUserId", native.attrib)
+        self.assertIsNone(native.find("uses-sdk"))
+        self.assertEqual(native.find("application").attrib, {})
+        self.assertFalse(native.findall("application/service"))
+        self.assertTrue(all(node.get(prepare.ANDROID + "exported") == "false"
+                            for node in native.findall("application/activity")))
+        self.assertTrue(all(node.get(prepare.ANDROID + "name").startswith("org.hecker.floral.")
+                            for node in native.findall("application/activity")))
+        self.assertIn(prepare.MOTION_NATIVE_LIBRARY, (settings / "Android.bp").read_text())
         applied = self.contents()
         prepare.apply(self.rom, "verify")
         prepare.apply(self.rom, "apply")

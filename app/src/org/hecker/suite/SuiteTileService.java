@@ -16,7 +16,8 @@ public class SuiteTileService extends TileService {
         tile.updateTile();
     }
     @Override public void onClick() {
-        Intent intent = new Intent(this, SuiteActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent intent = new Intent().setClassName("com.android.settings", "org.hecker.suite.SuiteActivity")
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivityAndCollapse(PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
     }

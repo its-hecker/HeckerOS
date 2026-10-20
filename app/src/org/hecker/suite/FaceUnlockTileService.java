@@ -4,7 +4,6 @@ package org.hecker.suite;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.hardware.biometrics.BiometricManager;
-import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 
@@ -22,8 +21,7 @@ public final class FaceUnlockTileService extends TileService {
         tile.updateTile();
     }
     @Override public void onClick() {
-        Intent intent = new Intent(Settings.ACTION_BIOMETRIC_ENROLL)
-                .putExtra(Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED, BiometricManager.Authenticators.BIOMETRIC_STRONG)
+        Intent intent = new Intent("android.settings.FACE_SETTINGS").setPackage("com.android.settings")
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivityAndCollapse(PendingIntent.getActivity(this, 1, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));

@@ -220,5 +220,11 @@
       "old": "new BaseSearchIndexProvider(R.xml.display_settings)",
       "new": "new BaseSearchIndexProvider(R.xml.hecker_display_settings)"
     }
+  ],
+  "packages/apps/Settings/Android.bp": [
+    {
+      "old": "    static_libs: [\n        // External dependencies",
+      "new": "    static_libs: [\n        \"HeckerSuiteSettingsUi\",\n        \"//vendor/hecker/floral/motionsense:HeckerMotionSenseSettingsUi\",\n        // External dependencies"
+    }
   ]
 }
