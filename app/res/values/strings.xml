@@ -41,4 +41,6 @@
     <string name="ir_saved">Saved to Pictures/HeckerSuite</string>
     <string name="ir_save_failed">Couldn\'t save this photo.</string>
     <string name="back">Back</string>
+    <string name="integrity_title">Play Integrity</string>
+    <string name="integrity_summary">Manage the Google Play compatibility profile</string>
 </resources>

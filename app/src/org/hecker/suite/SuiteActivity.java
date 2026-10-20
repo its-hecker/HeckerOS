@@ -69,6 +69,11 @@ public final class SuiteActivity extends Activity {
                 tile(R.string.gaming_title,R.string.gaming_summary,R.drawable.ic_gaming,v->open("GamingActivity")));
         addRow(tile(R.string.launcher_title,R.string.launcher_summary,R.drawable.ic_qs,v->open("LauncherSettingsActivity")),
                 tile(R.string.ir_title,R.string.ir_summary,R.drawable.ic_face_unlock,v->open("InfraredCameraActivity")));
+        LinearLayout integrity=Ui.card(this);
+        integrity.addView(Ui.text(this,getString(R.string.integrity_title),17,true));
+        integrity.addView(Ui.text(this,getString(R.string.integrity_summary),12,false));
+        integrity.setFocusable(true);integrity.setClickable(true);
+        integrity.setOnClickListener(v->openIntegrity());content.addView(integrity);
         LinearLayout footer=Ui.card(this); footer.addView(Ui.text(this,"HeckerOS",17,true));
         footer.addView(Ui.text(this,getString(R.string.suite_footer),12,false));content.addView(footer);
     }
@@ -97,6 +102,10 @@ public final class SuiteActivity extends Activity {
         } catch (ActivityNotFoundException | SecurityException unavailable) {
             Toast.makeText(this, R.string.native_page_unavailable, Toast.LENGTH_LONG).show();
         }
+    }
+    private void openIntegrity(){
+        try{startActivity(new Intent().setClassName("com.android.settings","com.android.settings.hecker.HeckerIntegrityActivity"));}
+        catch(ActivityNotFoundException|SecurityException unavailable){Toast.makeText(this,R.string.native_page_unavailable,Toast.LENGTH_LONG).show();}
     }
     private void openFace(){settings("android.settings.FACE_SETTINGS");}
     private void settings(String action) {

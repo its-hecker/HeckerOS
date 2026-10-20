@@ -1,0 +1,818 @@
+[
+  {
+    "path": "art",
+    "name": "PixelOS-AOSP/android_art",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_art",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "bionic",
+    "name": "PixelOS-AOSP/android_bionic",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_bionic",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "bootable/deprecated-ota",
+    "name": "PixelOS-AOSP/android_bootable_deprecated-ota",
+    "groups": "pdk-cw,pdk-arsp-ag-sot,pdk-arsp-common",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_bootable_deprecated-ota",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "bootable/recovery",
+    "name": "PixelOS-AOSP/android_bootable_recovery",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_bootable_recovery",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "build/make",
+    "name": "PixelOS-AOSP/android_build",
+    "groups": "pdk,sysui-studio",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_build",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "build/soong",
+    "name": "PixelOS-AOSP/android_build_soong",
+    "groups": "pdk,tradefed,sysui-studio",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_build_soong",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "development",
+    "name": "PixelOS-AOSP/android_development",
+    "groups": "developers,pdk-cw-fs,pdk-fs,sysui-studio",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_development",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "device/custom/sepolicy",
+    "name": "PixelOS-AOSP/android_device_custom_sepolicy",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_device_custom_sepolicy",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/avb",
+    "name": "PixelOS-AOSP/android_external_avb",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_avb",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/bouncycastle",
+    "name": "PixelOS-AOSP/android_external_bouncycastle",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_bouncycastle",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/dtc",
+    "name": "PixelOS-AOSP/android_external_dtc",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_dtc",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/dng_sdk",
+    "name": "PixelOS-AOSP/android_external_dng_sdk",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_dng_sdk",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/e2fsprogs",
+    "name": "PixelOS-AOSP/android_external_e2fsprogs",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_e2fsprogs",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/exfatprogs",
+    "name": "PixelOS-AOSP/android_external_exfatprogs",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_exfatprogs",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/freetype",
+    "name": "PixelOS-AOSP/android_external_freetype",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_freetype",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/gptfdisk",
+    "name": "PixelOS-AOSP/android_external_gptfdisk",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_gptfdisk",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/libcupsfilters",
+    "name": "PixelOS-AOSP/android_external_libcupsfilters",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_libcupsfilters",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/libhevc",
+    "name": "PixelOS-AOSP/android_external_libhevc",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_libhevc",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/libjxl",
+    "name": "PixelOS-AOSP/android_external_libjxl",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_libjxl",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/libopenapv",
+    "name": "PixelOS-AOSP/android_external_libopenapv",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_libopenapv",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/libpng",
+    "name": "PixelOS-AOSP/android_external_libpng",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_libpng",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/libppd",
+    "name": "PixelOS-AOSP/android_external_libppd",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_libppd",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/mksh",
+    "name": "PixelOS-AOSP/android_external_mksh",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_mksh",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/tinycompress",
+    "name": "PixelOS-AOSP/android_external_tinycompress",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_tinycompress",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/wpa_supplicant_8",
+    "name": "PixelOS-AOSP/android_external_wpa_supplicant_8",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_wpa_supplicant_8",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "external/zstd",
+    "name": "PixelOS-AOSP/android_external_zstd",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_external_zstd",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "frameworks/av",
+    "name": "PixelOS-AOSP/android_frameworks_av",
+    "groups": "pdk,sysui-studio",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_frameworks_av",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "frameworks/base",
+    "name": "PixelOS-AOSP/android_frameworks_base",
+    "groups": "pdk-cw-fs,pdk-fs,sysui-studio",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_frameworks_base",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17",
+    "source_revision": "81b912ee97d9d4673ed4696bde30f14841b26c99",
+    "destination_revision": "8d52af5d81a7123d28c675fcfc7c15c3fff33ddb"
+  },
+  {
+    "path": "frameworks/native",
+    "name": "PixelOS-AOSP/android_frameworks_native",
+    "groups": "pdk,sysui-studio",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_frameworks_native",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "frameworks/opt/telephony",
+    "name": "PixelOS-AOSP/android_frameworks_opt_telephony",
+    "groups": "pdk,sysui-studio",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_frameworks_opt_telephony",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "hardware/google/pixel",
+    "name": "PixelOS-AOSP/android_hardware_google_pixel",
+    "groups": "generic_fs,pixel,pdk-gs-arm,pdk-gs-imgtec,pdk-desktop",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_hardware_google_pixel",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "hardware/google/pixel-sepolicy",
+    "name": "PixelOS-AOSP/android_hardware_google_pixel-sepolicy",
+    "groups": "generic_fs,pixel,pdk-desktop",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_hardware_google_pixel-sepolicy",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "hardware/interfaces",
+    "name": "PixelOS-AOSP/android_hardware_interfaces",
+    "groups": "pdk,sysui-studio",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_hardware_interfaces",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "hardware/libhardware",
+    "name": "PixelOS-AOSP/android_hardware_libhardware",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_hardware_libhardware",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "hardware/nxp/nfc",
+    "name": "PixelOS-AOSP/android_hardware_nxp_nfc",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_hardware_nxp_nfc",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "hardware/nxp/secure_element",
+    "name": "PixelOS-AOSP/android_hardware_nxp_secure_element",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_hardware_nxp_secure_element",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "hardware/st/nfc",
+    "name": "PixelOS-AOSP/android_hardware_st_nfc",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_hardware_st_nfc",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "kernel/configs",
+    "name": "PixelOS-AOSP/android_kernel_configs",
+    "groups": "vts,pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_kernel_configs",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/apps/ContactsPicker",
+    "name": "PixelOS-AOSP/android_packages_apps_ContactsPicker",
+    "groups": "pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_apps_ContactsPicker",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/apps/ParanoidSense",
+    "name": "PixelOS-AOSP/android_packages_apps_ParanoidSense",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_apps_ParanoidSense",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/apps/Settings",
+    "name": "PixelOS-AOSP/android_packages_apps_Settings",
+    "groups": "pdk-fs,pdk-cw-tvc,sysui-studio",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_apps_Settings",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17",
+    "source_revision": "9c2cdaad64508ddce1a2cc55a2ebad422bcac818",
+    "destination_revision": "3aecc6bc6aae14a5c86505faf05d99b252754011"
+  },
+  {
+    "path": "packages/apps/TouchGestures",
+    "name": "PixelOS-AOSP/android_packages_apps_TouchGestures",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_apps_TouchGestures",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/apps/TV",
+    "name": "PixelOS-AOSP/android_packages_apps_TV",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_apps_TV",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/apps/Updater",
+    "name": "PixelOS-AOSP/android_packages_apps_Updater",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_apps_Updater",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/apps/DolbyAtmos",
+    "name": "PixelOS-AOSP/android_packages_apps_DolbyAtmos",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_apps_DolbyAtmos",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17",
+    "source_revision": "13bbe61cf3e1046e3a1f0bda4719c321c953ce50"
+  },
+  {
+    "path": "packages/apps/ColumbusService",
+    "name": "PixelOS-AOSP/android_packages_apps_ColumbusService",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_apps_ColumbusService",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/modules/adb",
+    "name": "PixelOS-AOSP/android_packages_modules_adb",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_modules_adb",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/modules/Bluetooth",
+    "name": "PixelOS-AOSP/android_packages_modules_Bluetooth",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_modules_Bluetooth",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/modules/Connectivity",
+    "name": "PixelOS-AOSP/android_packages_modules_Connectivity",
+    "groups": "pdk-cw-fs,pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_modules_Connectivity",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/modules/Nfc",
+    "name": "PixelOS-AOSP/android_packages_modules_Nfc",
+    "groups": "pdk-cw-fs,pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_modules_Nfc",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/modules/Permission",
+    "name": "PixelOS-AOSP/android_packages_modules_Permission",
+    "groups": "pdk-cw-fs,pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_modules_Permission",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/modules/Telephony",
+    "name": "PixelOS-AOSP/android_packages_modules_Telephony",
+    "groups": "pdk-cw-fs,pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_modules_Telephony",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/modules/UprobeStats",
+    "name": "PixelOS-AOSP/android_packages_modules_UprobeStats",
+    "groups": "pdk-cw-fs,pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_modules_UprobeStats",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/modules/Uwb",
+    "name": "PixelOS-AOSP/android_packages_modules_Uwb",
+    "groups": "pdk-cw-fs,pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_modules_Uwb",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/modules/Wifi",
+    "name": "PixelOS-AOSP/android_packages_modules_Wifi",
+    "groups": "pdk-cw-fs,pdk-fs,sysui-studio",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_modules_Wifi",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/providers/ContactsProvider",
+    "name": "PixelOS-AOSP/android_packages_providers_ContactsProvider",
+    "groups": "pdk-cw-fs,pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_providers_ContactsProvider",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/providers/DownloadProvider",
+    "name": "PixelOS-AOSP/android_packages_providers_DownloadProvider",
+    "groups": "pdk-cw-fs,pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_providers_DownloadProvider",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/providers/MediaProvider",
+    "name": "PixelOS-AOSP/android_packages_providers_MediaProvider",
+    "groups": "pdk-cw-fs,pdk-fs,sysui-studio",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_providers_MediaProvider",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/providers/TelephonyProvider",
+    "name": "PixelOS-AOSP/android_packages_providers_TelephonyProvider",
+    "groups": "pdk-cw-fs,pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_providers_TelephonyProvider",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/services/BuiltInPrintService",
+    "name": "PixelOS-AOSP/android_packages_services_BuiltInPrintService",
+    "groups": "pdk-cw-fs,pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_services_BuiltInPrintService",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/services/DeviceAsWebcam",
+    "name": "PixelOS-AOSP/android_packages_services_DeviceAsWebcam",
+    "groups": "pdk-cw-fs,pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_services_DeviceAsWebcam",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/services/Telecomm",
+    "name": "PixelOS-AOSP/android_packages_services_Telecomm",
+    "groups": "pdk-cw-fs,pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_services_Telecomm",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "packages/services/Telephony",
+    "name": "PixelOS-AOSP/android_packages_services_Telephony",
+    "groups": "pdk-cw-fs,pdk-fs",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_packages_services_Telephony",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/bpf",
+    "name": "PixelOS-AOSP/android_system_bpf",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_bpf",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/chre",
+    "name": "PixelOS-AOSP/android_system_chre",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_chre",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/core",
+    "name": "PixelOS-AOSP/android_system_core",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_core",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17",
+    "source_revision": "a5313eaec0219b021aaa5e59cc10dd07cfa8504c"
+  },
+  {
+    "path": "system/extras",
+    "name": "PixelOS-AOSP/android_system_extras",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_extras",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/fs/fs_mgr",
+    "name": "PixelOS-AOSP/android_system_fs_fs_mgr",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_fs_fs_mgr",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/logging",
+    "name": "PixelOS-AOSP/android_system_logging",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_logging",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/libfmq",
+    "name": "PixelOS-AOSP/android_system_libfmq",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_libfmq",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/libufdt",
+    "name": "PixelOS-AOSP/android_system_libufdt",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_libufdt",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/libziparchive",
+    "name": "PixelOS-AOSP/android_system_libziparchive",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_libziparchive",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/media",
+    "name": "PixelOS-AOSP/android_system_media",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_media",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/memory/libion",
+    "name": "PixelOS-AOSP/android_system_memory_libion",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_memory_libion",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/memory/libdmabufheap",
+    "name": "PixelOS-AOSP/android_system_memory_libdmabufheap",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_memory_libdmabufheap",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/sepolicy",
+    "name": "PixelOS-AOSP/android_system_sepolicy",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_sepolicy",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17",
+    "source_revision": "99c58a7cc9a44fe33c93808452d018e756d84753"
+  },
+  {
+    "path": "system/security",
+    "name": "PixelOS-AOSP/android_system_security",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_security",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/update_engine",
+    "name": "PixelOS-AOSP/android_system_update_engine",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_update_engine",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "system/vold",
+    "name": "PixelOS-AOSP/android_system_vold",
+    "groups": "pdk",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_system_vold",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "vendor/lineage",
+    "name": "PixelOS-AOSP/android_vendor_lineage",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_vendor_lineage",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17",
+    "source_revision": "0d2ff0b8055eb745d36dfef3600a73f5185a4fff",
+    "destination_revision": "0d2ff0b8055eb745d36dfef3600a73f5185a4fff"
+  },
+  {
+    "path": "vendor/custom",
+    "name": "PixelOS-AOSP/android_vendor_custom",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_vendor_custom",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17",
+    "source_revision": "e389a1e2caec0cd1e8dc5a5459b88cc2bad38897",
+    "destination_revision": "e389a1e2caec0cd1e8dc5a5459b88cc2bad38897"
+  },
+  {
+    "path": "vendor/custom-preference",
+    "name": "PixelOS-AOSP/android_vendor_custom-preference",
+    "remote": "github",
+    "destination": "its-hecker/heckeros_vendor_custom-preference",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "vendor/crowdin",
+    "name": "PixelOS-AOSP/android_vendor_crowdin",
+    "remote": "github",
+    "revision": "seventeen",
+    "destination": "its-hecker/heckeros_vendor_crowdin",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "lineage/scripts",
+    "name": "PixelOS-AOSP/scripts",
+    "groups": "tools",
+    "remote": "github",
+    "revision": "main",
+    "destination": "its-hecker/heckeros_scripts",
+    "branch": "main",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "vendor/pixel/extract-utils",
+    "name": "PixelOS-AOSP/android_vendor_pixel_extract-utils",
+    "remote": "gitlab",
+    "revision": "seventeen",
+    "destination": "its-hecker/heckeros_vendor_pixel_extract-utils",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "vendor/pixel/clocks",
+    "name": "PixelOS-AOSP/proprietary_vendor_pixel_clocks",
+    "remote": "gitlab",
+    "destination": "its-hecker/heckeros_proprietary_vendor_pixel_clocks",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "vendor/pixel/gms",
+    "name": "PixelOS-AOSP/proprietary_vendor_pixel_gms-17",
+    "remote": "gitlab",
+    "destination": "its-hecker/heckeros_proprietary_vendor_pixel_gms-17",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "vendor/pixel/gsans",
+    "name": "PixelOS-AOSP/proprietary_vendor_pixel_gsans",
+    "remote": "gitlab",
+    "destination": "its-hecker/heckeros_proprietary_vendor_pixel_gsans",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "vendor/pixel/launcher",
+    "name": "PixelOS-AOSP/proprietary_vendor_pixel_launcher",
+    "remote": "gitlab",
+    "destination": "its-hecker/heckeros_proprietary_vendor_pixel_launcher",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "vendor/pixel/sounds",
+    "name": "PixelOS-AOSP/proprietary_vendor_pixel_sounds",
+    "remote": "gitlab",
+    "destination": "its-hecker/heckeros_proprietary_vendor_pixel_sounds",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  },
+  {
+    "path": "vendor/pixel/themepicker",
+    "name": "PixelOS-AOSP/proprietary_vendor_pixel_themepicker",
+    "remote": "gitlab",
+    "destination": "its-hecker/heckeros_proprietary_vendor_pixel_themepicker",
+    "branch": "seventeen",
+    "destination_branch": "heckeros-17"
+  }
+]

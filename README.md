@@ -81,3 +81,15 @@ See [Suite behavior and phone checks](docs/Suite.md),
 [source provenance](docs/Origins.md), [Settings design](settings/README.md), and
 [boot animation](bootanimation/README.md). Preserve upstream licenses and credits;
 the Lunaris resource binaries and Google Camera retain their original terms.
+
+Platform checkpoint (21 October 2026)
+
+Native Settings now includes the original Pixel pose-grid enrollment renderer and
+Play Integrity profile controls based on Axion's verified October 19 change,
+adapted to the pinned Android 17 framework. Settings, frameworks/base,
+vendor/custom and vendor/lineage now use owned `heckeros-17` branches. The other
+87 of 91 PixelOS-derived platform projects still need copying; this is a partial
+standalone migration. See [migration/README.md](migration/README.md) for the
+verified fork/mirror helper and [docs/face-integrity.md](docs/face-integrity.md)
+for behavior and validation limits. Full platform compilation, coral testing and
+an actual Play Integrity verdict remain required.

@@ -1,0 +1,63 @@
+{
+  "settings": {
+    "repository": "its-hecker/heckeros_packages_apps_Settings",
+    "revision": "3aecc6bc6aae14a5c86505faf05d99b252754011",
+    "files": {
+      "Android.bp": "7734560e9290e57348a9da9626045091388829dc909ca1bea49a91ec827e2f41",
+      "AndroidManifest.xml": "73f27add49dce3e9f93738fc5cd963d3b0cf42bec0836cc987b92c248130d12c",
+      "libs/pixel-face-ui/NOTICE": "fe1e7fc9a8acae869c235871efe45d6663c101813120d119d379380a6b82ec85",
+      "libs/pixel-face-ui/ORIGIN.json": "923f13b0e4950eec4f5360a913e6c1f514201123d491c5cc0ba784859a78d4b8",
+      "libs/pixel-face-ui/README.md": "2fe9c219033bc3d8a20c19e1716f60cfb7ca057780b21b7c7cc7a871be9bdebb",
+      "libs/pixel-face-ui/stock-pose-grid.jar": "6516137ab316b225094a51fa4cf510f9e95a9091ee177c9881c282240b3b3e9e",
+      "proguard.flags": "c46b6772a3536570ccc68de753f53a9ff7c909735c3b8b06aa867ab8047c0d9d",
+      "res/animator/face_indicator_triangle__1.xml": "ad113fe482fb78bbce13426f103b7c756c5ba1c8fc438890846827136b9acd39",
+      "res/animator/face_indicator_triangle__2.xml": "ca3303d1ded4df965e2b1c1cc250bc3edd4a076d7ad2882f4af914e0b406ad17",
+      "res/animator/face_indicator_triangle__3.xml": "5367f3707b31c4cd092ac1a3423cce8ce50f395ad455ebe45743bee6f6815ab2",
+      "res/drawable/face_indicator_triangle.xml": "7a7867b7ff1746350f9b6122285ebeda32753b2478b2342462efcf22b388c3fc",
+      "res/drawable/face_indicator_triangle__0.xml": "e6c38cc7984e5979dbdd69ba760352c07ab50d5aff17e533763af092b2251220",
+      "res/interpolator/face_indicator_triangle__1__0.xml": "ae94fb106894ea2a4f605940fe222d1771697f8c25d42af88ebaf0923c48b32a",
+      "res/interpolator/face_indicator_triangle__1__1.xml": "ae94fb106894ea2a4f605940fe222d1771697f8c25d42af88ebaf0923c48b32a",
+      "res/interpolator/face_indicator_triangle__1__2.xml": "ae94fb106894ea2a4f605940fe222d1771697f8c25d42af88ebaf0923c48b32a",
+      "res/interpolator/face_indicator_triangle__2__0.xml": "1faf52d17335599f6b0437fd9b5dcda13c500cab7b7e8c7796ee30e344275a08",
+      "res/layout/face_enroll_enrolling.xml": "f5ae2347d787e285550a2549a5867d6d431028e07177296ba8c95930f78158bc",
+      "res/values/hecker_face_pose_grid.xml": "c2b0855fe44724e156395c1bd25465db25dfc00dd5a6317ade1260f43913938f",
+      "res/values/hecker_integrity.xml": "2110250ab17469b5edfbac61157fc4385356aedbfaacd73267ec9f53b44f336d",
+      "src/com/android/settings/biometrics/face/FaceEnrollEnrolling.java": "2cdc4e7393f280e104c9d27046d41a6181609efbd94fe1c42b12defdeaf321d3",
+      "src/com/android/settings/biometrics/face/FaceEnrollPreviewFragment.java": "46be98bca9d61d537421cdd6177c3c908e95715a13e71c4ce75baa4f732f234b",
+      "src/com/android/settings/biometrics/face/FaceEnrollProgressView.java": "7a0ac5e4c3c3ee3957b40ad34251dae31393a2b28c40fd04da33579f5001f764",
+      "src/com/android/settings/biometrics/face/FaceEnrollRingView.java": "655b6a6e57cca20b24ec15b4fe3fdad59b0f638ccecccfa59f6ac73bb31a7f09",
+      "src/com/android/settings/biometrics/face/FacePoseEnrollmentState.java": "2da19d45992783f934368f279f1b50dcdab671aac3ed8f80c6adf6134f8d40b2",
+      "src/com/android/settings/biometrics/face/FacePoseGridView.java": "243bf98fdf5e8e1026971d411fb17f5ac620521d68408b87e2323956a626c4fd",
+      "src/com/android/settings/biometrics/face/PixelFaceAnimationLifecycle.java": "f3dac03146d72f7580104b7df8445b7b784a594a93b75851f9eca0336b80d917",
+      "src/com/android/settings/hecker/HeckerIntegrityActivity.java": "e4b6987cd9c425aab8172180b20ccca0c1fd2279d77458c443ac13c0c7ea3443",
+      "src/com/android/settings/hecker/PifProfile.java": "e4132e74e93e7937efc35d330d274b7520a6baa75afafcf56a23dc8a652031c9",
+      "src/com/android/settings/hecker/PixelBetaProfileFetcher.java": "768bab355ab2f379c0cb6b90b025ab1fab07490d88c67d09ea99953a617cf321",
+      "src/com/google/android/settings/biometrics/face/anim/FaceEnrollAnimationMultiAngleDrawable.java": "7e69811a92b9e649b6d26b8fa67e9dcbe034865da45f9c3d2b7264e672cbe1d4",
+      "tools/hecker/tests/FacePoseEnrollmentStateTest.java": "8036525e926c65bce883b89c787bbcc74f049dc1bb5178f08ac2078155525e45",
+      "tools/hecker/tests/PifProfileTest.java": "f891cc1d5753bb4b9298a6836780a6f5999f42fbd632f80755adaa54c64bdf04"
+    }
+  },
+  "framework": {
+    "repository": "its-hecker/heckeros_frameworks_base",
+    "revision": "8d52af5d81a7123d28c675fcfc7c15c3fff33ddb",
+    "files": {
+      "core/java/android/app/ActivityThread.java": "e83927e273667b28a1cf3da378e671ec684f01302ef3a519b6535c4e477e9562",
+      "core/java/android/security/pif/HECKEROS-ORIGIN.json": "c752c6dc63c4acba64ef86d41193c41d2250c97fd7347a6643355239171fbf4e",
+      "core/java/android/security/pif/PlayIntegritySpoofService.java": "c9c4788189e0d8d5c63e46b1ef4587585e2c794245d47158c271152407f0eb18",
+      "core/jni/android_os_SystemProperties.cpp": "a71f1e41e91d27039fb9311f38808233b9c48623c738aadd995038e60da59751",
+      "tests/hecker/NativeVirtualizationTest.cpp": "8d8685aa6648fb1cd7fa4bc34b3a10da75017e293db1f8b089038e5f93893c6b",
+      "tests/hecker/PlayIntegrityScopeTest.java": "1838bd6b38997b5dbda1bd5f5fc225b465f14e66dce6ecaa7ae0ae8e7894a7b3"
+    }
+  },
+  "settings_java": [
+    "com/android/settings/hecker/PixelBetaProfileFetcher.java",
+    "com/android/settings/hecker/HeckerIntegrityActivity.java",
+    "com/android/settings/hecker/PifProfile.java",
+    "com/android/settings/biometrics/face/PixelFaceAnimationLifecycle.java",
+    "com/android/settings/biometrics/face/FaceEnrollProgressView.java",
+    "com/android/settings/biometrics/face/FacePoseGridView.java",
+    "com/android/settings/biometrics/face/FaceEnrollRingView.java",
+    "com/android/settings/biometrics/face/FacePoseEnrollmentState.java",
+    "com/google/android/settings/biometrics/face/anim/FaceEnrollAnimationMultiAngleDrawable.java"
+  ]
+}

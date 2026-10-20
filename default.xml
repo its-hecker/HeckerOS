@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
+  <remote name="heckeros" fetch="https://github.com/" revision="refs/heads/heckeros-17" />
 
   <remote  name="aosp"
            fetch="https://android.googlesource.com"
@@ -13,7 +14,7 @@
   <remote  name="github"
            fetch="https://github.com/"
            revision="refs/heads/seventeen"
-           review="review.pixelos.net" />
+ />
 
   <remote  name="gitlab"
            fetch="https://gitlab.com/"
@@ -1133,5 +1134,5 @@
   <include name="snippets/lineage.xml" />
   <include name="snippets/pixelos.xml" />
 
-  <!-- HeckerOS device and feature sources are applied after the PixelOS base. -->
+  <!-- HeckerOS device and feature sources are applied after the platform base. -->
 </manifest>

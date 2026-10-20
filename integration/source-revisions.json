@@ -1,5 +1,5 @@
 {
-  "checked_on": "2026-10-20",
+  "checked_on": "2026-10-21",
   "pixelos_manifest": {
     "repository": "PixelOS-AOSP/android_manifest",
     "branch": "seventeen",
@@ -60,8 +60,8 @@
       ]
     },
     "vendor/custom": {
-      "repository": "PixelOS-AOSP/android_vendor_custom",
-      "branch": "seventeen",
+      "repository": "its-hecker/heckeros_vendor_custom",
+      "branch": "heckeros-17",
       "revision": "e389a1e2caec0cd1e8dc5a5459b88cc2bad38897",
       "files": [
         "config/",
@@ -70,8 +70,8 @@
       ]
     },
     "vendor/lineage": {
-      "repository": "PixelOS-AOSP/android_vendor_lineage",
-      "branch": "seventeen",
+      "repository": "its-hecker/heckeros_vendor_lineage",
+      "branch": "heckeros-17",
       "revision": "0d2ff0b8055eb745d36dfef3600a73f5185a4fff",
       "files": [
         "overlay/common/",
@@ -79,9 +79,9 @@
       ]
     },
     "frameworks/base": {
-      "repository": "PixelOS-AOSP/android_frameworks_base",
-      "branch": "seventeen",
-      "revision": "81b912ee97d9d4673ed4696bde30f14841b26c99",
+      "repository": "its-hecker/heckeros_frameworks_base",
+      "branch": "heckeros-17",
+      "revision": "8d52af5d81a7123d28c675fcfc7c15c3fff33ddb",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -144,9 +144,9 @@
       ]
     },
     "packages/apps/Settings": {
-      "repository": "PixelOS-AOSP/android_packages_apps_Settings",
-      "branch": "seventeen",
-      "revision": "9c2cdaad64508ddce1a2cc55a2ebad422bcac818",
+      "repository": "its-hecker/heckeros_packages_apps_Settings",
+      "branch": "heckeros-17",
+      "revision": "3aecc6bc6aae14a5c86505faf05d99b252754011",
       "files": [
         "src/com/android/settings/homepage/",
         "src/com/android/settings/DisplaySettings.java",
@@ -187,5 +187,13 @@
       "branch": "main",
       "revision": "f8648fd85fb258165c6a2dd6cb8ea34bae206af5"
     }
+  },
+  "platform_ownership": {
+    "status": "partial",
+    "owned_projects": 4,
+    "total_pixelos_projects": 91,
+    "remaining_projects": 87,
+    "migration": "migration/README.md",
+    "updates": "Owned branches receive upstream changes only through explicit review and merges."
   }
 }
