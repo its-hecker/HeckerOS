@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# Metadata is first-stage mounted on Coral. Start before fs/post-fs can block.
+on early-fs && property:ro.debuggable=1
+    start pixelos-boot-capture
+
+service pixelos-boot-capture /system/bin/sh /system/etc/pixelos/boot_capture.sh
+    disabled
+    oneshot
+    user root
+    group root log readproc
+    seclabel u:r:su:s0

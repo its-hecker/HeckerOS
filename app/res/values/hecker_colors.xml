@@ -1,0 +1,9 @@
+<resources>
+    <color name="hecker_background">#F4F7FD</color>
+    <color name="hecker_card">#FFFFFF</color>
+    <color name="hecker_border">#D7E1EE</color>
+    <color name="hecker_foreground">#152236</color>
+    <color name="hecker_secondary">#596C85</color>
+    <color name="hecker_accent">#477CD6</color>
+    <color name="hecker_icon_background">#DFEAFE</color>
+</resources>

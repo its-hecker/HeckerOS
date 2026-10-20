@@ -1,0 +1,12 @@
+HeckerOS — Android 17 coral integration
+Original Suite implementation, guarded platform adapters and Lottie artwork: Hecker.
+Android platform UI, App Lock, BiometricPrompt and Camera2: AOSP and PixelOS.
+Hecker's Launcher derives from RisingOS Revived Ortus/Launcher3 and AOSP Launcher3.
+Dynamic color and OmniJaws adapters preserve RisingOS/AOSP/OmniROM credits.
+Lock-screen lyric matching/timing integration is adapted from Infinity-X.
+Theme engine source retains AxionOS/Lunaris copyright and Apache-2.0 notices.
+Lunaris theme resource APKs and Google Camera are not relicensed by this project.
+The Lottie runtime is supplied by the ROM's external/lottie module (Apache-2.0).
+Caracal Settings artwork and boot keyframes are generated assets from the approved
+design references. No personal photographs, face templates or calibration are added.
+See docs/Origins.md for immutable source revisions and asset origins.

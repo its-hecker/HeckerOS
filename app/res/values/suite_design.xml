@@ -1,0 +1,26 @@
+<resources>
+    <string name="suite_hero_summary">Customize, enhance and unlock your device with HeckerOS features.</string>
+    <string name="lock_screen_title">Lock Screen</string>
+    <string name="lock_screen_summary">Lyrics, wallpaper, charging and always-on display</string>
+    <string name="status_bar_title">Status Bar</string>
+    <string name="status_bar_summary">Signal, Wi-Fi and battery indicators</string>
+    <string name="face_title">3D Face Unlock</string>
+    <string name="face_summary">Infrared authentication and enrollment</string>
+    <string name="navigation_title">Navigation</string>
+    <string name="navigation_summary">System gestures and buttons</string>
+    <string name="animations_title">Animations</string>
+    <string name="animations_summary">Lottie and system animation speed</string>
+    <string name="animations_lottie">Play Lottie animations</string>
+    <string name="animations_scale_summary">Adjust window, transition and animator duration together. The system’s accessibility animation setting is respected.</string>
+    <string-array name="animation_speeds"><item>Off</item><item>Fast — 0.5× duration</item><item>Default — 1× duration</item><item>Relaxed — 1.5× duration</item></string-array>
+    <string name="native_page_unavailable">This setting is unavailable in the current build.</string>
+    <string name="lockscreen_wallpaper_title">Wallpaper &amp; style</string>
+    <string name="lockscreen_wallpaper_summary">Open the native lock screen and wallpaper editor</string>
+    <string name="lockscreen_display_title">Lock screen display</string>
+    <string name="lockscreen_display_summary">Always-on display and other native display options</string>
+    <string name="charging_theme_summary">Choose the wired charging animation</string>
+    <string name="signal_theme_summary">Choose the mobile signal indicator</string>
+    <string name="wifi_theme_summary">Choose the Wi-Fi indicator</string>
+    <string name="battery_theme_summary">Choose the battery meter shape</string>
+    <string name="suite_footer">Small changes. Big difference.</string>
+</resources>

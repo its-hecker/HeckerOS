@@ -1,0 +1,13 @@
+{
+  "repository": "Lunaris-AOSP/frameworks_base",
+  "branch": "16.2",
+  "revision": "de64d90a6746e3e6cb85154b860b4dc3dad8db17",
+  "license": "Apache-2.0",
+  "files": [
+    "core/java/android/content/res/ThemeEngine.java",
+    "core/java/android/content/res/IThemeEngineManager.aidl",
+    "core/java/android/content/res/IThemeEngineCallback.aidl",
+    "services/core/java/com/android/server/theme/ThemeEngineManagerService.java"
+  ],
+  "changes": "Native Android 17 service lookup, public resource access and current-user callbacks; original AxionOS copyright/license retained."
+}

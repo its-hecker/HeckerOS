@@ -1,0 +1,6 @@
+{
+  "repository": "its-hecker/infinity_cnb_proprietary_vendor_google_coral",
+  "revision": "d1409c6066f977639a99d276709e3a70e7a9b3c0",
+  "path": "camera/prebuilt",
+  "payload": "Unchanged Google Camera 8.7.250 APK set tested in the stable Infinity-X Coral build."
+}

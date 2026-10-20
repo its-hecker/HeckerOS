@@ -1,0 +1,7 @@
+{
+  "repository": "RisingOS-Revived/android_frameworks_base-new",
+  "revision": "6b7698f836aeeb0b944ed464ec77c4e3163f1480",
+  "path": "core/java/com/android/internal/util/android/OmniJawsClient.java",
+  "sha256": "408432f45a9f4bdcd644b3b7ff2a4a1cc1f831f94132a819f1a88054e6658cf0",
+  "changes": "Package namespace only; original copyright/license retained."
+}

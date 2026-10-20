@@ -1,0 +1,17 @@
+<resources>
+    <string name="hecker_brand_tagline">Clean. Powerful. Uniquely Yours.</string>
+    <string name="hecker_android_version">Android 17</string>
+    <string name="hecker_maintained_by">Maintained by</string>
+    <string name="hecker_maintainer_name">Hecker</string>
+    <string name="hecker_suite_name">Hecker Suite</string>
+    <string name="hecker_suite_unavailable">Hecker Suite is unavailable in this build.</string>
+    <string name="hecker_display_title">Display &amp; Personalization</string>
+    <string name="hecker_display_hero_title">Make it look\nlike you.</string>
+    <string name="hecker_display_hero_summary">Your device. Your style.\nExplore endless ways to\nmake it feel like home.</string>
+    <string name="hecker_theme_pack_title">Themes &amp; icons</string>
+    <string name="hecker_theme_pack_summary">System icons, signal, Wi-Fi, battery and charging styles</string>
+    <string name="hecker_wallpaper_title">Wallpaper &amp; style</string>
+    <string name="hecker_wallpaper_summary">Wallpapers, colors, themed icons</string>
+    <string name="hecker_open_more_display">Display settings</string>
+    <string name="hecker_open_more_display_summary">Advanced display options</string>
+</resources>

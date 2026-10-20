@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="SuiteTheme" parent="android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowBackground">@color/hecker_background</item>
+        <item name="android:colorBackground">@color/hecker_background</item>
+        <item name="android:colorAccent">@color/hecker_accent</item>
+        <item name="android:textColorPrimary">@color/hecker_foreground</item>
+        <item name="android:textColorSecondary">@color/hecker_secondary</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Unique Android tile specs. Nearby Share and Quick Share are the same service. -->
+    <string name="quick_settings_tiles_default" translatable="false">wifi,bt,cell,flashlight,rotation,battery,airplane,dark,location,screenrecord,hotspot,dnd,reduce_brightness,inversion,mictoggle,cameratoggle,custom(org.hecker.suite/.MotionSenseTileService),custom(org.hecker.suite/.FaceUnlockTileService),custom(org.hecker.suite/.SuiteTileService),wallet,nfc,controls</string>
+    <string name="quick_settings_tiles_default_split" translatable="false">wifi,bt,cell,flashlight,rotation,battery,airplane,dark,location,screenrecord,hotspot,dnd,reduce_brightness,inversion,mictoggle,cameratoggle,custom(org.hecker.suite/.MotionSenseTileService),custom(org.hecker.suite/.FaceUnlockTileService),custom(org.hecker.suite/.SuiteTileService),wallet,nfc,controls</string>
+</resources>

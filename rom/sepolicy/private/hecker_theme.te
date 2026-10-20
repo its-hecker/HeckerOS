@@ -1,0 +1,3 @@
+# ThemeEngine write methods enforce WRITE_SECURE_SETTINGS; read APIs return theme resources.
+type hecker_theme_service, app_api_service, system_server_service, service_manager_type;
+add_service(system_server, hecker_theme_service)

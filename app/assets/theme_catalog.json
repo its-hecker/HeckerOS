@@ -1,0 +1,2161 @@
+{
+  "version": 3,
+  "lastUpdated": "2026-04-06T12:33:14Z",
+  "repository": {
+    "name": "AxThemeStore Official Repository",
+    "description": "Official theme repository for AxionAOSP Theme Store",
+    "maintainer": "AxionAOSP Team",
+    "baseUrl": "https://github.com/Lunaris-AOSP/AxThemeStore_themes_repository/tree/6cb99e5f70586d557ad3650e8d669996ab106403"
+  },
+  "components": [
+    {
+      "id": "signal",
+      "name": "Signal Icons",
+      "description": "Mobile signal indicator icons",
+      "targetPackage": "android",
+      "icon": "signal"
+    },
+    {
+      "id": "wifi",
+      "name": "WiFi Icons",
+      "description": "WiFi signal indicator icons",
+      "targetPackage": "android",
+      "icon": "wifi"
+    },
+    {
+      "id": "charging_animation",
+      "name": "Charging Animation",
+      "description": "Wired charging animation style",
+      "targetPackage": "com.android.systemui",
+      "icon": "bolt"
+    },
+    {
+      "id": "battery_style",
+      "name": "Battery Style",
+      "description": "Battery icon style themes",
+      "targetPackage": "com.android.systemui",
+      "icon": "battery_full"
+    }
+  ],
+  "categories": [
+    {
+      "id": "signal_icons",
+      "name": "Signal Icons",
+      "description": "Mobile signal bar themes",
+      "icon": "signal_cellular_alt"
+    },
+    {
+      "id": "wifi_icons",
+      "name": "WiFi Icons",
+      "description": "WiFi signal bar themes",
+      "icon": "wifi"
+    },
+    {
+      "id": "icon_packs",
+      "name": "Icon Packs",
+      "description": "System-wide icon style themes",
+      "icon": "category"
+    },
+    {
+      "id": "charging_animation",
+      "name": "Charging Animation",
+      "description": "Wired charging animation styles",
+      "icon": "bolt"
+    },
+    {
+      "id": "battery_style",
+      "name": "Battery Style",
+      "description": "Battery icon style themes",
+      "icon": "battery_full"
+    }
+  ],
+  "themes": [
+    {
+      "id": "aquarium_signal",
+      "name": "Aquarium Signal",
+      "description": "Aquarium signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_aa",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "aurora_signal",
+      "name": "Aurora Signal",
+      "description": "Aurora signal icons",
+      "author": "DrDisagree",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.custom.overlay.systemui.signalAurora",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bars_signal",
+      "name": "Bars Signal",
+      "description": "Bars signal icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_h",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "butterfly_signal",
+      "name": "Butterfly Signal",
+      "description": "Butterfly signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_ab",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "circle_signal",
+      "name": "Circle Signal",
+      "description": "Circle signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_aq",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "daun_signal",
+      "name": "Daun Signal",
+      "description": "Daun signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_ac",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "dec_signal",
+      "name": "Dec Signal",
+      "description": "Dec signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_ad",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "deep_signal",
+      "name": "Deep Signal",
+      "description": "Deep signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_ae",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "dora_signal",
+      "name": "Dora Signal",
+      "description": "Dora signal icons",
+      "author": "F5LAYD",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_j",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "equal_signal",
+      "name": "Equal Signal",
+      "description": "Equal signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_af",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "faintui_signal",
+      "name": "FaintUI Signal",
+      "description": "FaintUI signal icons",
+      "author": "DrDisagree",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.custom.overlay.systemui.signalFaintUI",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "fan_signal",
+      "name": "Fan Signal",
+      "description": "Fan signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_ag",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "forlorn_signal",
+      "name": "Forlorn Signal",
+      "description": "Forlorn signal icons",
+      "author": "DrDisagree",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.custom.overlay.systemui.signalForlorn",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "gradicon_signal",
+      "name": "Gradicon Signal",
+      "description": "Gradicon signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalGradicon",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "huawei_signal",
+      "name": "Huawei Signal",
+      "description": "Huawei signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_ah",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "inside_signal",
+      "name": "Inside Signal",
+      "description": "Inside signal icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_g",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "ios_signal",
+      "name": "Ios Signal",
+      "description": "Ios signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_ar",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "mini_signal",
+      "name": "Mini Signal",
+      "description": "Mini signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_as",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "nothingdot_signal",
+      "name": "NothingDot Signal",
+      "description": "NothingDot signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalNothingDot",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "odin_signal",
+      "name": "Odin Signal",
+      "description": "Odin signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_ap",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "pills_signal",
+      "name": "Pills Signal",
+      "description": "Pills signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_at",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "plumpy_signal",
+      "name": "Plumpy Signal",
+      "description": "Plumpy signal icons",
+      "author": "DrDisagree",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.custom.overlay.systemui.signalPlumpy",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "rel_signal",
+      "name": "Rel Signal",
+      "description": "Rel signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_ai",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "roman_signal",
+      "name": "Roman Signal",
+      "description": "Roman signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_au",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "round_signal",
+      "name": "Round Signal",
+      "description": "Round signal icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_f",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "scroll_signal",
+      "name": "Scroll Signal",
+      "description": "Scroll signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_aj",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "sea_signal",
+      "name": "Sea Signal",
+      "description": "Sea signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_ak",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "sneaky_signal",
+      "name": "Sneaky Signal",
+      "description": "Sneaky signal icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_b",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "stack_signal",
+      "name": "Stack Signal",
+      "description": "Stack signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_al",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "stroke_signal",
+      "name": "Stroke Signal",
+      "description": "Stroke signal icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_a",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "wannui_signal",
+      "name": "Wannui Signal",
+      "description": "Wannui signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_am",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "wavy_signal",
+      "name": "Wavy Signal",
+      "description": "Wavy signal icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.crdroid.systemui.signalbar_e",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "windows_signal",
+      "name": "Windows Signal",
+      "description": "Windows signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_an",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "wing_signal",
+      "name": "Wing Signal",
+      "description": "Wing signal icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_ao",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "xperia_signal",
+      "name": "Xperia Signal",
+      "description": "Xperia signal icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_c",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "zigzag_signal",
+      "name": "ZigZag Signal",
+      "description": "ZigZag signal icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "signal_icons",
+      "tags": [
+        "signal",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "signal",
+          "packageName": "com.android.systemui.signalbar_d",
+          "targets": [
+            "signal"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "aurora_wifi",
+      "name": "Aurora WiFi",
+      "description": "Aurora WiFi icons",
+      "author": "DrDisagree",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.custom.overlay.systemui.wifiAurora",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "bars_wifi",
+      "name": "Bars WiFi",
+      "description": "Bars WiFi icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.android.systemui.wifibar_h",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "dora_wifi",
+      "name": "Dora WiFi",
+      "description": "Dora WiFi icons",
+      "author": "F5LAYD",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.android.systemui.wifibar_j",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "faintui_wifi",
+      "name": "FaintUI WiFi",
+      "description": "FaintUI WiFi icons",
+      "author": "DrDisagree",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.custom.overlay.systemui.wifiFaintUI",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "forlorn_wifi",
+      "name": "Forlorn WiFi",
+      "description": "Forlorn WiFi icons",
+      "author": "DrDisagree",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.custom.overlay.systemui.wifiForlorn",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "gradicon_wifi",
+      "name": "Gradicon WiFi",
+      "description": "Gradicon WiFi icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.android.systemui.wifiGradicon",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "inside_wifi",
+      "name": "Inside WiFi",
+      "description": "Inside WiFi icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.android.systemui.wifibar_g",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "nothingdot_wifi",
+      "name": "NothingDot WiFi",
+      "description": "NothingDot WiFi icons",
+      "author": "rdx420",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.android.systemui.wifiNothingDot",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "plumpy_wifi",
+      "name": "Plumpy WiFi",
+      "description": "Plumpy WiFi icons",
+      "author": "DrDisagree",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.custom.overlay.systemui.wifiPlumpy",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "round_wifi",
+      "name": "Round WiFi",
+      "description": "Round WiFi icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.android.systemui.wifibar_f",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "sneaky_wifi",
+      "name": "Sneaky WiFi",
+      "description": "Sneaky WiFi icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.android.systemui.wifibar_b",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "stroke_wifi",
+      "name": "Stroke WiFi",
+      "description": "Stroke WiFi icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.android.systemui.wifibar_a",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "wavy_wifi",
+      "name": "Wavy WiFi",
+      "description": "Wavy WiFi icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.android.systemui.wifibar_e",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "weed_wifi",
+      "name": "Weed WiFi",
+      "description": "Weed WiFi icons",
+      "author": "F5LAYD",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.android.systemui.wifibar_i",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "xperia_wifi",
+      "name": "Xperia WiFi",
+      "description": "Xperia WiFi icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.android.systemui.wifibar_c",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "zigzag_wifi",
+      "name": "ZigZag WiFi",
+      "description": "ZigZag WiFi icons",
+      "author": "Advaith Bhat",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "wifi_icons",
+      "tags": [
+        "wifi",
+        "statusbar"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "wifi",
+          "packageName": "com.android.systemui.wifibar_d",
+          "targets": [
+            "wifi"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_acherus",
+      "name": "Acherus",
+      "description": "Acherus icon pack",
+      "author": "Pranav",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.acherus.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.acherus.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_aurora",
+      "name": "Aurora",
+      "description": "Aurora icon pack",
+      "author": "DrDisagree",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.aurora.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.aurora.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_circular",
+      "name": "Circular",
+      "description": "Circular icon pack",
+      "author": "Amin Shaikh",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.circular.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.circular.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_filled",
+      "name": "Filled",
+      "description": "Filled icon pack",
+      "author": "Amin Shaikh",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.filled.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.filled.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_gradicon",
+      "name": "Gradicon",
+      "description": "Gradicon icon pack",
+      "author": "DrDisagree",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.gradicon.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.gradicon.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_kai",
+      "name": "Kai",
+      "description": "Kai icon pack",
+      "author": "Jay Aliomer",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.kai.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.kai.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_lorn",
+      "name": "Lorn",
+      "description": "Lorn icon pack",
+      "author": "DrDisagree",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.lorn.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.lorn.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_nostalgic",
+      "name": "Nostalgic",
+      "description": "Nostalgic icon pack",
+      "author": "Rados\u0142aw B\u0142\u0119dowski",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.nostalgic.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.nostalgic.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_oos",
+      "name": "OOS",
+      "description": "OOS icon pack",
+      "author": "AshutoshSundresh",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.oos.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.oos.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_outline",
+      "name": "Outline",
+      "description": "Outline icon pack",
+      "author": "Niklas Schnettler",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.outline.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.outline.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_plumpy",
+      "name": "Plumpy",
+      "description": "Plumpy icon pack",
+      "author": "DrDisagree",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.plumpy.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.plumpy.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_pui",
+      "name": "PUI",
+      "description": "PUI icon pack",
+      "author": "spkal01",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.pui.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.pui.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_rounded",
+      "name": "Rounded",
+      "description": "Rounded icon pack",
+      "author": "Amin Shaikh",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.rounded.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.rounded.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_sam",
+      "name": "Sam",
+      "description": "Sam icon pack",
+      "author": "Jay Aliomer",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.sam.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.sam.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_victor",
+      "name": "Victor",
+      "description": "Victor icon pack",
+      "author": "Jay Aliomer",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.victor.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.victor.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "iconpack_xperia",
+      "name": "Xperia",
+      "description": "Xperia icon pack",
+      "author": "AndroBuddy",
+      "version": "1.0.0",
+      "versionCode": 1,
+      "minSdk": 35,
+      "previewImages": [],
+      "category": "icon_packs",
+      "tags": [
+        "icons",
+        "system"
+      ],
+      "isUnified": false,
+      "overlays": [
+        {
+          "componentId": "android.theme.customization.icon_pack.android",
+          "packageName": "com.android.theme.icon_pack.xperia.android",
+          "targets": [
+            "android"
+          ],
+          "enabled": true
+        },
+        {
+          "componentId": "android.theme.customization.icon_pack.systemui",
+          "packageName": "com.android.theme.icon_pack.xperia.systemui",
+          "targets": [
+            "systemui"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "charging_anim_nothing",
+      "name": "Nothing OS",
+      "description": "Nothing Phone ripple charging animation with glare effect",
+      "author": "AxionOS",
+      "version": "1.0",
+      "versionCode": 1,
+      "minSdk": 36,
+      "previewImages": [],
+      "category": "charging_animation",
+      "tags": [
+        "charging_animation",
+        "nothing",
+        "ripple"
+      ],
+      "isUnified": true,
+      "overlays": [
+        {
+          "componentId": "charging_animation",
+          "packageName": "com.android.systemui.charging_animation.nothing",
+          "targets": [
+            "android.theme.customization.charging_animation"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "charging_anim_moto",
+      "name": "Moto",
+      "description": "Motorola wired charging animation",
+      "author": "AxionOS",
+      "version": "1.0",
+      "versionCode": 1,
+      "minSdk": 36,
+      "previewImages": [],
+      "category": "charging_animation",
+      "tags": [
+        "charging_animation",
+        "motorola",
+        "wire"
+      ],
+      "isUnified": true,
+      "overlays": [
+        {
+          "componentId": "charging_animation",
+          "packageName": "com.android.systemui.charging_animation.moto",
+          "targets": [
+            "android.theme.customization.charging_animation"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "battery_ios15",
+      "name": "iOS 15",
+      "description": "iOS 15-style horizontal battery with rounded fill",
+      "author": "Iconify",
+      "version": "1.0",
+      "versionCode": 1,
+      "minSdk": 36,
+      "previewImages": [],
+      "category": "battery_style",
+      "tags": [
+        "battery_style",
+        "ios",
+        "horizontal"
+      ],
+      "isUnified": true,
+      "overlays": [
+        {
+          "componentId": "battery_style",
+          "packageName": "com.android.systemui.battery.ios15",
+          "targets": [
+            "android.theme.customization.battery_style"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "battery_ios16",
+      "name": "iOS 16",
+      "description": "iOS 16-style horizontal battery with inside percent",
+      "author": "Iconify",
+      "version": "1.0",
+      "versionCode": 1,
+      "minSdk": 36,
+      "previewImages": [],
+      "category": "battery_style",
+      "tags": [
+        "battery_style",
+        "ios",
+        "horizontal",
+        "percent"
+      ],
+      "isUnified": true,
+      "overlays": [
+        {
+          "componentId": "battery_style",
+          "packageName": "com.android.systemui.battery.ios16",
+          "targets": [
+            "android.theme.customization.battery_style"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "battery_oneui7",
+      "name": "One UI 7",
+      "description": "Samsung One UI 7-style rounded pill battery",
+      "author": "Arman-ATI",
+      "version": "1.0",
+      "versionCode": 1,
+      "minSdk": 36,
+      "previewImages": [],
+      "category": "battery_style",
+      "tags": [
+        "battery_style",
+        "samsung",
+        "oneui",
+        "horizontal"
+      ],
+      "isUnified": true,
+      "overlays": [
+        {
+          "componentId": "battery_style",
+          "packageName": "com.android.systemui.battery.oneui7",
+          "targets": [
+            "android.theme.customization.battery_style"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "battery_origami",
+      "name": "Origami",
+      "description": "Origami-folded capsule battery",
+      "author": "Iconify",
+      "version": "1.0",
+      "versionCode": 1,
+      "minSdk": 36,
+      "previewImages": [],
+      "category": "battery_style",
+      "tags": [
+        "battery_style",
+        "origami",
+        "capsule"
+      ],
+      "isUnified": true,
+      "overlays": [
+        {
+          "componentId": "battery_style",
+          "packageName": "com.android.systemui.battery.origami",
+          "targets": [
+            "android.theme.customization.battery_style"
+          ],
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "battery_smiley",
+      "name": "Smiley",
+      "description": "Cheerful smiley face battery",
+      "author": "AncientOS",
+      "version": "1.0",
+      "versionCode": 1,
+      "minSdk": 36,
+      "previewImages": [],
+      "category": "battery_style",
+      "tags": [
+        "battery_style",
+        "smiley",
+        "fun"
+      ],
+      "isUnified": true,
+      "overlays": [
+        {
+          "componentId": "battery_style",
+          "packageName": "com.android.systemui.battery.smiley",
+          "targets": [
+            "android.theme.customization.battery_style"
+          ],
+          "enabled": true
+        }
+      ]
+    }
+  ]
+}

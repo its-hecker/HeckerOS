@@ -1,0 +1,106 @@
+{
+  "Android.bp": [
+    {
+      "old": "\"dynamiccolors\",",
+      "new": "\"HeckerLauncherDynamicColors\","
+    },
+    {
+      "old": "        \"org.lineageos.platform\",",
+      "new": "        // HeckerOS uses the native Android settings providers."
+    },
+    {
+      "old": "    name: \"Launcher3QuickStep\",",
+      "new": "    name: \"HeckerLauncher\","
+    },
+    {
+      "old": "    resource_dirs: [\"quickstep/res\"],",
+      "new": "    resource_dirs: [\"generated/hecker-suite/res\", \"quickstep/res\"],"
+    }
+  ],
+  "src/com/android/launcher3/util/SettingsCache.java": [
+    {
+      "old": "import lineageos.providers.LineageSettings;",
+      "new": "// Native PixelOS settings providers are used in this port."
+    },
+    {
+      "old": "    private static final String LINEAGE_SYSTEM_URI_PREFIX =\n            LineageSettings.System.CONTENT_URI.toString();\n    private static final String LINEAGE_SECURE_URI_PREFIX =\n            LineageSettings.Secure.CONTENT_URI.toString();",
+      "new": "    // No LineageSettings dependency is needed by this launcher."
+    },
+    {
+      "old": "        } else if (uriString.startsWith(LINEAGE_SYSTEM_URI_PREFIX)) {\n            newVal = LineageSettings.System.getInt(mResolver, key, defaultValue);\n        } else if (uriString.startsWith(LINEAGE_SECURE_URI_PREFIX)) {\n            newVal = LineageSettings.Secure.getInt(mResolver, key, defaultValue);",
+      "new": "        // Continue with the native Secure provider below."
+    }
+  ],
+  "quickstep/src/com/android/launcher3/taskbar/TaskbarManagerImpl.java": [
+    {
+      "old": "import com.android.internal.util.android.Utils;",
+      "new": "import com.android.launcher3.hecker.HeckerPlatform;"
+    },
+    {
+      "old": "Utils.hasNavbarByDefault(mBaseContext)",
+      "new": "HeckerPlatform.hasNavbarByDefault(mBaseContext)"
+    }
+  ],
+  "quickstep/src/com/android/launcher3/taskbar/TaskbarActivityContext.java": [
+    {
+      "old": "import com.android.internal.util.android.Utils;",
+      "new": "import com.android.launcher3.hecker.HeckerPlatform;"
+    },
+    {
+      "old": "Utils.hasNavbarByDefault(mWindowContext)",
+      "new": "HeckerPlatform.hasNavbarByDefault(mWindowContext)"
+    }
+  ],
+  "src/com/android/launcher3/quickspace/QuickspaceController.java": [
+    {
+      "old": "import com.android.internal.util.android.OmniJawsClient;",
+      "new": "import com.android.launcher3.hecker.OmniJawsClient;"
+    }
+  ],
+  "quickstep/src/com/android/launcher3/uioverrides/QuickstepLauncher.java": [
+    {
+      "old": "        SystemUiProxy.INSTANCE.get(this).onSleepEvent(ev);",
+      "new": "        com.android.launcher3.hecker.HeckerPlatform.sleep(this);"
+    }
+  ],
+  "quickstep/src/com/android/quickstep/SystemUiProxy.kt": [
+    {
+      "old": "    @MainThread\n    fun onSleepEvent(event: MotionEvent) {\n        Preconditions.assertUIThread()\n        executeWithErrorLog({ \"Failed call onSleepEvent with arg: $event\" }) {\n            systemUiProxy?.onSleepEvent(event)\n        }\n    }\n\n",
+      "new": "    // Sleep is handled by HeckerPlatform using the native Android power API.\n\n"
+    },
+    {
+      "old": "    fun onLongPressKeyEvent(keycode: Int, displayId: Int) =\n        executeWithErrorLog({\n            \"Failed call onLongPressKeyEvent ${KeyEvent.keyCodeToString(keycode)}\"\n        }) {\n            systemUiProxy?.onLongPressKeyEvent(keycode, displayId)\n        }\n\n",
+      "new": "    fun onLongPressKeyEvent(keycode: Int, displayId: Int) =\n        com.android.launcher3.hecker.HeckerPlatform.longPressKey(context, keycode, displayId)\n\n"
+    }
+  ],
+  "src/com/android/launcher3/Utilities.java": [
+    {
+      "old": "        final Intent intent = new Intent(FREEFORM_INTENT)\n                .setPackage(FREEFORM_PACKAGE)\n                .putExtra(\"packageName\", activity.getPackageName())\n                .putExtra(\"activityName\", activity.getClassName())\n                .putExtra(\"userId\", userId)\n                .putExtra(\"taskId\", taskId);\n        context.sendBroadcast(intent);",
+      "new": "        com.android.launcher3.hecker.HeckerPlatform.openFreeform(\n                context, activity, userId, taskId);"
+    }
+  ],
+  "AndroidManifest-common.xml": [
+    {
+      "old": "    <uses-permission android:name=\"android.permission.INJECT_EVENTS\" />",
+      "new": "    <uses-permission android:name=\"android.permission.INJECT_EVENTS\" />\n    <uses-permission android:name=\"android.permission.DEVICE_POWER\" />"
+    }
+  ],
+  "res/xml/launcher_preferences.xml": [
+    {
+      "old": "    <Preference\n        android:key=\"icons\"",
+      "new": "    <Preference\n        android:key=\"hecker_hero\"\n        android:selectable=\"false\"\n        android:layout=\"@layout/hecker_header\" />\n\n    <Preference\n        android:key=\"hecker_suite\"\n        android:title=\"@string/hecker_suite_title\"\n        android:summary=\"@string/hecker_suite_summary\"\n        android:icon=\"@drawable/ic_settings_misc\">\n        <intent android:action=\"android.intent.action.MAIN\"\n            android:targetPackage=\"org.hecker.suite\"\n            android:targetClass=\"org.hecker.suite.SuiteActivity\" />\n    </Preference>\n\n    <Preference\n        android:key=\"icons\""
+    }
+  ],
+  "res/xml/launcher_about_preferences.xml": [
+    {
+      "old": "    <!-- Credits -->",
+      "new": "    <Preference android:key=\"hecker_about\" android:title=\"@string/hecker_suite_title\"\n        android:summary=\"@string/hecker_suite_summary\">\n        <intent android:action=\"android.intent.action.MAIN\"\n            android:targetPackage=\"org.hecker.suite\"\n            android:targetClass=\"org.hecker.suite.SuiteActivity\">\n            <extra android:name=\"org.hecker.suite.SHOW_ABOUT\" android:value=\"true\" />\n        </intent>\n    </Preference>\n    <Preference android:title=\"RisingOS Revived \u00b7 Ortus Launcher\" android:persistent=\"false\">\n        <intent android:action=\"android.intent.action.VIEW\"\n            android:data=\"https://github.com/RisingOS-Revived/android_packages_apps_Launcher3\" />\n    </Preference>\n\n    <!-- Credits -->"
+    }
+  ],
+  "seraphixgoogle/Android.bp": [
+    {
+      "old": "    min_sdk_version: min_launcher3_sdk_version,",
+      "new": "    min_sdk_version: \"36\","
+    }
+  ]
+}

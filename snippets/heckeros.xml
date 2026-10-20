@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<manifest>
+  <remote name="floral-github" fetch="https://github.com/" />
+  <remove-project path="device/google/coral" optional="true" />
+  <remove-project path="vendor/google/coral" optional="true" />
+  <remove-project path="kernel/google/msm-4.14" optional="true" />
+  <remove-project path="packages/apps/ElmyraService" optional="true" />
+  <remove-project path="vendor/lunaris/dolby" optional="true" />
+  <remove-project path="vendor/hecker/floral/motionsense" optional="true" />
+  <remove-project path="vendor/hecker/floral/faceid" optional="true" />
+  <remove-project path="vendor/hecker/floral/suite" optional="true" />
+  <project name="its-hecker/heckeros-floral-devicetree" path="device/google/coral" remote="floral-github" revision="8e19009ad632f66473ddcdb10c00595fefdb79b4" upstream="refs/heads/main" dest-branch="main" />
+  <project name="its-hecker/heckeros-coral-vendor" path="vendor/google/coral" remote="floral-github" revision="60b0c615e939cd09ce956e6fe6df5d5aa6ccbdd4" upstream="refs/heads/main" dest-branch="main" />
+  <project name="its-hecker/heckeros-floral-kernel" path="kernel/google/msm-4.14" remote="floral-github" revision="f8648fd85fb258165c6a2dd6cb8ea34bae206af5" upstream="refs/heads/main" dest-branch="main" sync-s="true" />
+  <project name="LineageOS/android_packages_apps_ElmyraService" path="packages/apps/ElmyraService" remote="floral-github" revision="baab2beb7165caef27b4ee235641775e9d189acc" upstream="refs/heads/lineage-24.0" />
+  <project name="its-hecker/vendor_lunaris_dolby" path="vendor/lunaris/dolby" remote="floral-github" revision="544e6271c955e2bf450c8481ac1e71551cb5a800" upstream="refs/heads/pixelos-compat" dest-branch="pixelos-compat" />
+  <project name="its-hecker/floral-motionsense-plugin" path="vendor/hecker/floral/motionsense" remote="floral-github" revision="92d0051faf53acac3dfefec6597a12d587eefa73" upstream="refs/heads/main" dest-branch="main" />
+  <project name="its-hecker/floral-3D-faceid-plugin" path="vendor/hecker/floral/faceid" remote="floral-github" revision="d998995e1452d2c3d9882bfdf659e1db760a99be" upstream="refs/heads/main" dest-branch="main" />
+  <project name="its-hecker/HeckerOS" path="vendor/hecker/floral/suite" remote="floral-github" revision="refs/heads/main" upstream="refs/heads/main" dest-branch="main" />
+  <remove-project path="packages/apps/Launcher3" optional="true" />
+  <project path="packages/apps/Launcher3" name="RisingOS-Revived/android_packages_apps_Launcher3" remote="floral-github" revision="e2331fb7bc34fa33ecbe6040615457324a9ea60d" upstream="refs/heads/seventeen" dest-branch="seventeen" />
+  <remove-project path="packages/services/OmniJaws" optional="true" />
+  <project path="packages/services/OmniJaws" name="RisingOS-Revived/android_packages_services_OmniJaws" remote="floral-github" revision="83f9fb29597f91e6b3685d46c3068449af440e2a" upstream="refs/heads/seventeen" dest-branch="seventeen" />
+  <extend-project name="PixelOS-AOSP/android_packages_apps_DolbyAtmos" path="packages/apps/DolbyAtmos" revision="13bbe61cf3e1046e3a1f0bda4719c321c953ce50" upstream="refs/heads/seventeen" />
+  <extend-project name="LineageOS/android_hardware_lineage_compat" path="hardware/lineage/compat" revision="590c94850e079642136a4577305d02e4174caabc" upstream="refs/heads/lineage-24.0" />
+  <extend-project name="LineageOS/android_vendor_qcom_opensource_audioreach-graphservices" path="hardware/qcom-caf/sm8750/audio/graphservices" revision="62591b81ddb14cb1ddecf2a8e7162f2082456793" upstream="refs/heads/lineage-24.0-caf-sm8750" />
+  <extend-project name="LineageOS/android_hardware_qcom-caf_common" path="hardware/qcom-caf/common" revision="5e84e6f8fc47530881fa8d95cf533617ff51e820" upstream="refs/heads/lineage-24.0" />
+  <extend-project name="PixelOS-AOSP/android_vendor_custom" path="vendor/custom" revision="e389a1e2caec0cd1e8dc5a5459b88cc2bad38897" upstream="refs/heads/seventeen" />
+  <extend-project name="PixelOS-AOSP/android_vendor_lineage" path="vendor/lineage" revision="0d2ff0b8055eb745d36dfef3600a73f5185a4fff" upstream="refs/heads/seventeen" />
+  <extend-project name="PixelOS-AOSP/android_frameworks_base" path="frameworks/base" revision="81b912ee97d9d4673ed4696bde30f14841b26c99" upstream="refs/heads/seventeen" />
+  <extend-project name="platform/hardware/google/camera" path="hardware/google/camera" revision="cd15337bd229dd521a860d88bca3e37c3ca845f7" upstream="refs/tags/android-17.0.0_r1" />
+  <extend-project name="PixelOS-AOSP/android_system_sepolicy" path="system/sepolicy" revision="99c58a7cc9a44fe33c93808452d018e756d84753" upstream="refs/heads/seventeen" />
+  <extend-project name="PixelOS-AOSP/android_system_core" path="system/core" revision="a5313eaec0219b021aaa5e59cc10dd07cfa8504c" upstream="refs/heads/seventeen" />
+  <extend-project name="PixelOS-AOSP/android_packages_apps_Settings" path="packages/apps/Settings" revision="9c2cdaad64508ddce1a2cc55a2ebad422bcac818" upstream="refs/heads/seventeen" />
+</manifest>

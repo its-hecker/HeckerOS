@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qs_title">Quick Settings</string>
+    <string name="qs_summary">Glass cards, circular tiles and separate volume controls</string>
+    <string name="qs_description">Choose a layout. Use the native tile editor to select and reorder your tiles. Colors follow your wallpaper and system theme.</string>
+    <string name="qs_classic">Expanded cards — Wi-Fi and Bluetooth first</string>
+    <string name="qs_dashboard">Hecker dashboard — vertical sliders and Suite shortcuts</string>
+    <string name="qs_make_it_yours">Make it yours</string>
+    <string name="qs_on">On</string>
+    <string name="qs_off">Off</string>
+    <string name="qs_unavailable">Unavailable</string>
+    <string name="qs_face_unlock">Face unlock</string>
+    <string name="qs_ready">Ready</string>
+    <string name="qs_setup">Set up</string>
+</resources>

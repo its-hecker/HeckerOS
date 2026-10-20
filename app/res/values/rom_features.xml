@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lyrics_title">Lock-screen lyrics</string>
+    <string name="lyrics_summary">Follow your music, one line at a time.</string>
+    <string name="lyrics_enable">Show synchronized lyrics</string>
+    <string name="lyrics_description">Shows three lines below the lock-screen music player and follows playback and seeking. When enabled, song title and artist are sent to LRCLIB to find matching lyrics. Uses the internet and stays hidden on the always-on display.</string>
+    <string name="lyrics_source">Adapted from Project Infinity X. Lyrics availability depends on LRCLIB and the metadata supplied by your music app. Instrumental tracks and songs without a matching synchronized recording show no lyrics.</string>
+    <string name="lyrics_unavailable">Couldn\'t update this setting in the current build.</string>
+    <string name="themes_title">Theme Pack</string>
+    <string name="themes_summary">Lunaris themes, adapted for HeckerOS on Android 17.</string>
+    <string name="themes_unavailable">The HeckerOS Theme Pack is unavailable in this build.</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.hecker.launcher.recents">
+    <application android:hasCode="false" android:label="Hecker Launcher Recents" />
+    <overlay android:targetPackage="android" android:isStatic="false"
+        android:priority="999" android:category="org.hecker.launcher.recents" />
+</manifest>

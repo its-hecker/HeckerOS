@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: Apache-2.0
+// Deliberately use the global namespace, like other framework feature plugins.
+package {
+    default_applicable_licenses: ["hecker_suite_license"],
+}
+
+license {
+    name: "hecker_suite_license",
+    license_kinds: ["SPDX-license-identifier-Apache-2.0"],
+    license_text: ["LICENSE"],
+}
+
+android_app {
+    name: "HeckerSuite",
+    manifest: "app/AndroidManifest.xml",
+    srcs: ["app/src/**/*.java"],
+    resource_dirs: ["app/res"],
+    asset_dirs: ["app/assets"],
+    platform_apis: true,
+    certificate: "platform",
+    privileged: true,
+    system_ext_specific: true,
+    static_libs: ["lottie"],
+    required: ["HeckerSuitePrivappPermissions", "HeckerSuiteFreeformFeature"],
+    optimize: {
+        proguard_flags_files: ["app/proguard.flags"],
+    },
+}
+
+prebuilt_etc {
+    name: "HeckerSuitePrivappPermissions",
+    src: "configs/privapp-permissions-hecker-suite.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}
+
+prebuilt_etc {
+    name: "HeckerSuiteFreeformFeature",
+    src: "configs/hecker-suite-freeform.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}
+
+aconfig_values {
+    name: "hecker_suite_security_flags",
+    package: "android.security",
+    srcs: ["flags/security/*_flag_values.textproto"],
+}
+
+aconfig_value_set {
+    name: "hecker_suite_aconfig_value_set",
+    values: ["hecker_suite_security_flags", "hecker_suite_systemui_flags"],
+}
+
+// Disabled by default: Pixel Launcher remains the initial Recents provider.
+// Suite enables this signed overlay only when its owner selects Hecker's Launcher.
+runtime_resource_overlay {
+    name: "HeckerLauncherRecentsOverlay",
+    manifest: "launcher/recents/AndroidManifest.xml",
+    resource_dirs: ["launcher/recents/res"],
+    certificate: "platform",
+    product_specific: true,
+}
+
+prebuilt_media {
+    name: "bootanimation_heckeros",
+    src: "bootanimation/bootanimation.zip",
+    filename: "bootanimation.zip",
+    product_specific: true,
+}
+
+aconfig_values {
+    name: "hecker_suite_systemui_flags",
+    package: "com.android.systemui",
+    srcs: ["flags/systemui/*_flag_values.textproto"],
+}

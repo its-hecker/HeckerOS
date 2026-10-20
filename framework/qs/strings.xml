@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hecker_media_volume">Media volume</string>
+    <string name="hecker_brand">HeckerOS</string>
+    <string name="hecker_brand_tagline">Make it yours</string>
+    <string name="hecker_edit_tiles">Edit tiles</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_margin="16dp" android:orientation="vertical" android:padding="24dp"
+    android:background="@drawable/hecker_header_background">
+    <com.android.launcher3.hecker.HeckerLottieView
+        android:layout_width="match_parent" android:layout_height="136dp"
+        android:importantForAccessibility="no" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/hecker_header_eyebrow" android:textSize="12sp"
+        android:letterSpacing="0.12" android:textStyle="bold" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" android:text="@string/hecker_header_title"
+        android:textSize="29sp" android:textStyle="bold" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" android:text="@string/hecker_header_summary" android:textSize="14sp" />
+</LinearLayout>

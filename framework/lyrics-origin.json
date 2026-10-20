@@ -1,0 +1,11 @@
+{
+  "repository": "https://gitea.com/projectInfinity-x/frameworks_base",
+  "branch": "17",
+  "revision": "fdf9e5dc49a30a79a25660dcbb9184adeeb7397c",
+  "license": "Apache-2.0",
+  "files": [
+    "packages/SystemUI/src/com/android/systemui/statusbar/quickactions/media/domain/interactor/MediaControlChipInteractor.kt",
+    "packages/SystemUI/src/com/android/systemui/statusbar/featurepods/media/ui/compose/LyricsCard.kt"
+  ],
+  "changes": "Adapted LRCLIB recording matching and synchronized lyric presentation to native PixelOS lock-screen media; opt-in, current-user, lifecycle and bounded-network handling."
+}

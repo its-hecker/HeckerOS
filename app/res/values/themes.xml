@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="themes_description">75 styles from the Lunaris Theme Pack. All theme resources ship with HeckerOS and work offline. Icon packs apply to Android and System UI. Charging styles appear the next time you connect a cable.</string>
+    <string name="theme_signal">Signal icons</string>
+    <string name="theme_wifi">Wi-Fi icons</string>
+    <string name="theme_icons">System icon packs</string>
+    <string name="theme_battery">Battery styles</string>
+    <string name="theme_charging">Charging animations</string>
+    <string name="theme_default">System default</string>
+    <string name="theme_default_summary">Restore the native appearance for this category</string>
+    <string name="theme_apply">Apply</string>
+    <string name="theme_apply_message">Apply this style to the current user? Other theme categories keep their selections.</string>
+    <string name="theme_failed">Could not apply the theme. Confirm that the HeckerOS theme resources are installed.</string>
+</resources>

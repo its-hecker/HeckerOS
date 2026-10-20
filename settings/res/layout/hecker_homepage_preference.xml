@@ -1,0 +1,17 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="64dp" android:paddingStart="12dp" android:paddingEnd="12dp" android:gravity="center_vertical" android:background="?android:attr/selectableItemBackground" android:baselineAligned="false">
+    <FrameLayout android:id="@+id/icon_frame" android:layout_width="36dp" android:layout_height="36dp" android:background="@drawable/hecker_icon_background">
+        <androidx.preference.internal.PreferenceImageView android:id="@android:id/icon" android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="center" android:scaleType="centerInside" android:tint="@color/hecker_accent"/>
+    </FrameLayout>
+    <LinearLayout android:id="@+id/text_frame" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:paddingTop="10dp" android:paddingBottom="10dp" android:paddingStart="14dp" android:paddingEnd="8dp" android:orientation="vertical">
+        <TextView android:id="@android:id/title" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="15sp" android:textColor="@color/hecker_foreground" android:maxLines="2"/>
+        <TextView android:id="@android:id/summary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:textSize="11sp" android:textColor="@color/hecker_secondary" android:maxLines="3"/>
+    </LinearLayout>
+    <FrameLayout android:id="@+id/alert_frame" android:layout_width="24dp" android:layout_height="24dp" android:layout_marginEnd="8dp" android:visibility="gone">
+        <TextView android:id="@+id/alert_unnumbered" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:text="•" android:textColor="@color/hecker_accent" android:textSize="26sp" android:importantForAccessibility="no" />
+        <FrameLayout android:id="@+id/alert_numbered_frame" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/hecker_icon_background" android:visibility="gone">
+            <TextView android:id="@+id/alert_number_fg" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:textColor="@color/hecker_accent" android:textSize="12sp" android:importantForAccessibility="no" />
+        </FrameLayout>
+    </FrameLayout>
+    <TextView android:layout_width="16dp" android:layout_height="wrap_content" android:text="›" android:textSize="25sp" android:textColor="@color/hecker_secondary" android:importantForAccessibility="no"/>
+    <LinearLayout android:id="@android:id/widget_frame" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical"/>
+</LinearLayout>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="launcher_title">Launcher</string>
+    <string name="launcher_summary">Hecker\'s Launcher or Pixel Launcher. Make home your own.</string>
+    <string name="hecker_launcher">Hecker\'s Launcher</string>
+    <string name="pixel_launcher">Pixel Launcher</string>
+    <string name="launcher_intro">Your home screen, your way. Based on RisingOS Revived\'s Ortus Launcher for Android 17.</string>
+    <string name="hecker_launcher_features">Double-tap to sleep, icon packs, grids, folders, drawer styles and more.</string>
+    <string name="pixel_launcher_features">The familiar Pixel home screen and Google integration.</string>
+    <string name="launcher_current">Default home: %1$s</string>
+    <string name="launcher_other">Another launcher or no default</string>
+    <string name="launcher_select">Select launcher</string>
+    <string name="launcher_selected">Selected</string>
+    <string name="launcher_switching">Switching…</string>
+    <string name="launcher_not_installed">Not installed</string>
+    <string name="launcher_switch_explanation">This changes your default home app. Restart your phone afterward to finish switching gesture navigation and Recents. Both launchers keep their own home-screen layouts.</string>
+    <string name="launcher_restart_needed">Restart to finish switching</string>
+    <string name="launcher_restart_body">Your default home has changed. Restart so gesture navigation and Recents use the selected launcher.</string>
+    <string name="launcher_restart">Restart phone</string>
+    <string name="launcher_restart_confirm">Restart now to finish switching launchers?</string>
+    <string name="launcher_restart_manual">Restart your phone from the power menu to finish.</string>
+    <string name="launcher_switch_failed">Couldn\'t finish switching. Check the default home and try again.</string>
+    <string name="launcher_build_missing">Launcher switching needs the complete Hecker experimental build.</string>
+    <string name="launcher_owner_only">Switch the system gesture provider from the phone owner\'s profile.</string>
+    <string name="launcher_customize">Customize Hecker\'s Launcher</string>
+    <string name="launcher_customize_summary">Home screen, double-tap to sleep, icons, app drawer and Recents</string>
+    <string name="launcher_system_home">Default home settings</string>
+    <string name="launcher_system_home_summary">Manage other installed launchers. Use the choices above to switch their gesture provider too.</string>
+    <string name="launcher_open_failed">These launcher settings are unavailable.</string>
+</resources>
