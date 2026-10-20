@@ -1,0 +1,37 @@
+name: Stock Pixel enrollment compatibility audit
+on:
+  push:
+    paths:
+      - .github/workflows/face-enrollment-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Inspect pinned Pixel Settings enrollment classes without running them
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            'https://raw.githubusercontent.com/Evolution-X/vendor_pixel-framework/5c7520b9a7b4e08abf96ce95e8bf087ee851d920/SettingsGoogle/libs/SettingsGoogle-lib.jar' \
+            --output /tmp/pixel-settings.jar
+          python3 - <<'PYTHON'
+          import hashlib, subprocess, zipfile
+          from pathlib import Path
+          raw=Path('/tmp/pixel-settings.jar').read_bytes()
+          assert hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest() == 'a91c47b1b6361c61cb5bb8dfcae776aacfda4e05'
+          with zipfile.ZipFile('/tmp/pixel-settings.jar') as archive:
+              names=[n[:-6].replace('/', '.') for n in archive.namelist() if n.endswith('.class') and '/biometrics/face/' in n]
+          print('Verified Google Settings library; face classes:',len(names),flush=True)
+          for name in names: print(name,flush=True)
+          for name in names:
+              if '$' not in name:
+                  print('\nDECLARATIONS:',name,flush=True)
+                  subprocess.run(['javap','-p','-classpath','/tmp/pixel-settings.jar',name],check=True)
+          PYTHON
