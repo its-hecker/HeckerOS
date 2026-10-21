@@ -9,6 +9,7 @@ import tempfile
 import urllib.request
 from customization_port import customization_plan
 from launcher_port import launcher_plan
+from omnijaws_port import omnijaws_plan
 from prepare import replace_guarded
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,9 +36,11 @@ def main():
     sources = json.loads((ROOT / 'integration/source-revisions.json').read_text())['pixelos_inputs']
     launcher = json.loads((ROOT / 'launcher/ORIGIN.json').read_text())
     sources['packages/apps/Launcher3'] = launcher
+    sources['packages/services/OmniJaws'] = json.loads((ROOT / 'omnijaws/ORIGIN.json').read_text())
     paths = set(json.loads((ROOT / 'framework/customization-patches.json').read_text()))
     paths.add('frameworks/base/core/java/android/content/res/Resources.java')
     paths.update('packages/apps/Launcher3/' + p for p in json.loads((ROOT / 'launcher/patches.json').read_text()))
+    paths.update('packages/services/OmniJaws/' + p for p in json.loads((ROOT / 'omnijaws/patches.json').read_text()))
     def cached_source(relative):
         project = max((p for p in sources if relative.startswith(p + '/')), key=len)
         # A pin update must never reuse content fetched for an older revision.
@@ -66,7 +69,7 @@ def main():
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(cached_source(relative), target)
         before = snapshot(folder)
-        plans = (customization_plan, launcher_plan)
+        plans = (customization_plan, launcher_plan, omnijaws_plan)
         count = 0
         for plan in plans:
             changes = plan(folder, replace_guarded)

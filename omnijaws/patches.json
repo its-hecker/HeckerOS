@@ -1,0 +1,154 @@
+{
+  "Android.bp": [
+    {
+      "old": "    \"ax_compose\",\n",
+      "new": "    // Weather preferences use the app-local native Material adapter.\n"
+    },
+    {
+      "old": "    \"com.crdroid.apps.resources\", \n",
+      "new": "    // Widget styles use the existing Material resource library.\n"
+    }
+  ],
+  "app/src/main/res/values/styles.xml": [
+    {
+      "old": "parent=\"Theme.Material3Expressive.DynamicColors.Light\"",
+      "new": "parent=\"Theme.Material3.DynamicColors.Light\""
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/WeatherContentProvider.java": [
+    {
+      "old": "import com.android.internal.util.android.OmniJawsClient;",
+      "new": "import org.omnirom.omnijaws.hecker.OmniJawsClient;"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/icon/IconProvider.java": [
+    {
+      "old": "import com.android.internal.util.android.OmniJawsClient;",
+      "new": "import org.omnirom.omnijaws.hecker.OmniJawsClient;"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/ui/LocationPickerActivity.kt": [
+    {
+      "old": "import com.android.axion.compose.theme.AxionTheme",
+      "new": "import org.omnirom.omnijaws.hecker.HeckerWeatherTheme as AxionTheme"
+    },
+    {
+      "old": "import com.android.axion.compose.scaffold.AxionScaffold",
+      "new": "import org.omnirom.omnijaws.hecker.HeckerWeatherScaffold as AxionScaffold"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/ui/SettingsViewModel.kt": [
+    {
+      "old": "import com.android.internal.util.android.OmniJawsClient",
+      "new": "import org.omnirom.omnijaws.hecker.OmniJawsClient"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/ui/WeatherDashboardActivity.kt": [
+    {
+      "old": "import com.android.internal.util.android.OmniJawsClient",
+      "new": "import org.omnirom.omnijaws.hecker.OmniJawsClient"
+    },
+    {
+      "old": "import com.android.axion.compose.theme.AxionTheme",
+      "new": "import org.omnirom.omnijaws.hecker.HeckerWeatherTheme as AxionTheme"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/ui/WeatherDashboardScreen.kt": [
+    {
+      "old": "import com.android.internal.util.android.OmniJawsClient",
+      "new": "import org.omnirom.omnijaws.hecker.OmniJawsClient"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/ui/WeatherSettingsActivity.kt": [
+    {
+      "old": "import com.android.internal.util.android.OmniJawsClient",
+      "new": "import org.omnirom.omnijaws.hecker.OmniJawsClient"
+    },
+    {
+      "old": "import com.android.axion.compose.theme.AxionTheme",
+      "new": "import org.omnirom.omnijaws.hecker.HeckerWeatherTheme as AxionTheme"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/ui/WeatherSettingsScreen.kt": [
+    {
+      "old": "import com.android.axion.compose.scaffold.AxionScaffold",
+      "new": "import org.omnirom.omnijaws.hecker.HeckerWeatherScaffold as AxionScaffold"
+    },
+    {
+      "old": "import com.android.axion.compose.preferences.ClickablePreference",
+      "new": "import org.omnirom.omnijaws.hecker.ClickablePreference"
+    },
+    {
+      "old": "import com.android.axion.compose.preferences.ListPreference",
+      "new": "import org.omnirom.omnijaws.hecker.ListPreference"
+    },
+    {
+      "old": "import com.android.axion.compose.preferences.PreferenceGroup",
+      "new": "import org.omnirom.omnijaws.hecker.PreferenceGroup"
+    },
+    {
+      "old": "import com.android.axion.compose.preferences.SwitchPreference",
+      "new": "import org.omnirom.omnijaws.hecker.SwitchPreference"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/ui/WeatherViewModel.kt": [
+    {
+      "old": "import com.android.internal.util.android.OmniJawsClient",
+      "new": "import org.omnirom.omnijaws.hecker.OmniJawsClient"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/ui/components/DailyForecastCard.kt": [
+    {
+      "old": "import com.android.internal.util.android.OmniJawsClient",
+      "new": "import org.omnirom.omnijaws.hecker.OmniJawsClient"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/ui/components/DetailCards.kt": [
+    {
+      "old": "import com.android.internal.util.android.OmniJawsClient",
+      "new": "import org.omnirom.omnijaws.hecker.OmniJawsClient"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/ui/components/HourlyForecastCard.kt": [
+    {
+      "old": "import com.android.internal.util.android.OmniJawsClient",
+      "new": "import org.omnirom.omnijaws.hecker.OmniJawsClient"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/widget/WeatherAppWidgetConfigureActivity.kt": [
+    {
+      "old": "import com.android.axion.compose.theme.AxionTheme",
+      "new": "import org.omnirom.omnijaws.hecker.HeckerWeatherTheme as AxionTheme"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/widget/WeatherAppWidgetConfigureScreen.kt": [
+    {
+      "old": "import com.android.axion.compose.scaffold.AxionScaffold",
+      "new": "import org.omnirom.omnijaws.hecker.HeckerWeatherScaffold as AxionScaffold"
+    },
+    {
+      "old": "import com.android.axion.compose.preferences.ClickablePreference",
+      "new": "import org.omnirom.omnijaws.hecker.ClickablePreference"
+    },
+    {
+      "old": "import com.android.axion.compose.preferences.ListPreference",
+      "new": "import org.omnirom.omnijaws.hecker.ListPreference"
+    },
+    {
+      "old": "import com.android.axion.compose.preferences.PreferenceGroup",
+      "new": "import org.omnirom.omnijaws.hecker.PreferenceGroup"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/widget/WeatherAppWidgetProvider.kt": [
+    {
+      "old": "import com.android.internal.util.android.OmniJawsClient",
+      "new": "import org.omnirom.omnijaws.hecker.OmniJawsClient"
+    }
+  ],
+  "app/src/main/java/org/omnirom/omnijaws/widget/WeatherPebbleAppWidgetProvider.kt": [
+    {
+      "old": "import com.android.internal.util.android.OmniJawsClient",
+      "new": "import org.omnirom.omnijaws.hecker.OmniJawsClient"
+    }
+  ]
+}

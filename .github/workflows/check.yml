@@ -37,6 +37,8 @@ jobs:
         run: python3 tools/compile_sdk.py --cache generated/sdk
       - name: Compile native About Phone and verify HeckerOS release identity
         run: python3 tools/check_about_phone.py --sdk-cache generated/sdk
+      - name: Compile the app-local OmniJaws Material adapter and shared weather client
+        run: python3 tools/check_omnijaws.py --sdk-cache generated/sdk
       - name: Check owned Pixel enrollment and Axion integrity adapters
         run: python3 tools/check_platform_features.py --sdk-cache generated/sdk
       - name: Check Android 17 keystore integration and private spoofing configuration
