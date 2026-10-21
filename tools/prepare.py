@@ -22,6 +22,10 @@ MOTION = Path("vendor/hecker/floral/motionsense/settings")
 MOTION_MANIFEST = "generated/hecker-suite/AndroidManifest.xml"
 MOTION_NATIVE_MANIFEST = "generated/hecker-settings/AndroidManifest.xml"
 MOTION_RESOURCES_MANIFEST = "generated/hecker-resources/AndroidManifest.xml"
+# Settings defines this name with product="default"/"tablet" variants. An
+# unqualified plugin string also counts as a default during aapt2 product
+# selection, so normal resource overlay precedence cannot resolve the clash.
+MOTION_STRING_NAMES = {"ambient_display_title": "hecker_motion_ambient_display_title"}
 MOTION_RESOURCES_BP_OLD = 'android_library {\n    name: "FloralMotionSenseSettingsResources",'
 MOTION_RESOURCES_BP_NEW = MOTION_RESOURCES_BP_OLD + '\n    manifest: "' + MOTION_RESOURCES_MANIFEST + '",'
 MOTION_NATIVE_LIBRARY = '''
@@ -277,6 +281,20 @@ def motion_plan(rom, revert=False):
             if generated.exists(): changes[generated] = None
         elif not generated.exists():
             changes[generated] = expected
+    # Keep the reusable plugin's translations and references together under a
+    # private name. Join the atomic plan so failures cannot leave half-renamed
+    # resources, and reverting restores the original plugin byte for byte.
+    for directory in ("common-res", "res", "src"):
+        for path in sorted((settings / directory).rglob("*")):
+            if not path.is_file() or path.suffix not in {".xml", ".java", ".kt"}:
+                continue
+            current = path.read_text()
+            target = changes.get(path, current)
+            for original, private in MOTION_STRING_NAMES.items():
+                old, new = (private, original) if revert else (original, private)
+                target = re.sub(r"\b" + re.escape(old) + r"\b", new, target)
+            if target != current:
+                changes[path] = target
     return changes
 
 
