@@ -81,6 +81,7 @@ bash tests/run_host_tests.sh
 python3 tools/compile_sdk.py --cache generated/sdk
 python3 tools/check_about_phone.py --sdk-cache generated/sdk
 python3 tools/check_omnijaws.py --sdk-cache generated/sdk
+python3 tools/check_motion_manifest.py
 python3 tools/check_native_ports.py
 python3 tools/check_spoofing.py
 python3 tools/freeze_upstream.py --check

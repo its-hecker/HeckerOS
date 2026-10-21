@@ -41,7 +41,11 @@ class PreparationTests(unittest.TestCase):
         settings = self.rom / prepare.MOTION
         settings.mkdir(parents=True)
         (settings.parent / "motionsense.mk").write_text(prepare.MOTION_PRODUCT_OLD)
-        (settings / "Android.bp.in").write_text(prepare.MOTION_BP_OLD + '''
+        (settings / "Android.bp.in").write_text(prepare.MOTION_RESOURCES_BP_OLD + '''
+    resource_dirs: ["common-res"],
+}
+
+''' + prepare.MOTION_BP_OLD + '''
     srcs: ["src/**/*.java"],
     privileged: true,
     system_ext_specific: true,
@@ -98,6 +102,11 @@ class PreparationTests(unittest.TestCase):
         self.assertTrue(all(node.get(prepare.ANDROID + "name").startswith("org.hecker.floral.")
                             for node in native.findall("application/activity")))
         self.assertIn(prepare.MOTION_NATIVE_LIBRARY, (settings / "Android.bp").read_text())
+        resources = ET.parse(settings / prepare.MOTION_RESOURCES_MANIFEST).getroot()
+        self.assertEqual(resources.attrib, {"package": "org.hecker.floral.motionsense"})
+        self.assertEqual(resources.find("application").attrib, {})
+        self.assertFalse(list(resources.find("application")))
+        self.assertEqual([node.tag for node in resources], ["application"])
         applied = self.contents()
         prepare.apply(self.rom, "verify")
         prepare.apply(self.rom, "apply")
@@ -116,11 +125,44 @@ class PreparationTests(unittest.TestCase):
 
     def test_foreign_generated_motion_manifest_is_preserved(self):
         settings = self.stage_motion()
-        generated = settings / prepare.MOTION_MANIFEST
-        generated.parent.mkdir(parents=True)
-        generated.write_text("unrelated local file")
+        for name in (prepare.MOTION_MANIFEST, prepare.MOTION_NATIVE_MANIFEST,
+                     prepare.MOTION_RESOURCES_MANIFEST):
+            with self.subTest(manifest=name):
+                generated = settings / name
+                generated.parent.mkdir(parents=True, exist_ok=True)
+                generated.write_text("unrelated local file")
+                before = self.contents()
+                with self.assertRaisesRegex(ValueError, "unfamiliar generated Motion Sense manifest"):
+                    prepare.apply(self.rom, "apply")
+                self.assertEqual(before, self.contents())
+                generated.unlink()
+
+    def test_upgrade_existing_motion_integration_keeps_native_and_standalone_manifests(self):
+        settings = self.stage_motion()
+        original = self.contents()
+        prepare.apply(self.rom, "apply")
+        # Reproduce the previous adapter's already-applied state in a user's checkout.
+        for name in ("Android.bp.in", "Android.bp"):
+            path = settings / name
+            path.write_text(path.read_text().replace(prepare.MOTION_RESOURCES_BP_NEW,
+                                                     prepare.MOTION_RESOURCES_BP_OLD))
+        (settings / prepare.MOTION_RESOURCES_MANIFEST).unlink()
+        manifests = {name: (settings / name).read_bytes()
+                     for name in (prepare.MOTION_MANIFEST, prepare.MOTION_NATIVE_MANIFEST)}
+        prepare.apply(self.rom, "apply")
+        prepare.apply(self.rom, "verify")
+        for name, content in manifests.items():
+            self.assertEqual(content, (settings / name).read_bytes())
+        prepare.apply(self.rom, "revert")
+        self.assertEqual(original, self.contents())
+
+    def test_foreign_resource_manifest_selection_refuses_before_writes(self):
+        settings = self.stage_motion()
+        blueprint = settings / "Android.bp.in"
+        blueprint.write_text(blueprint.read_text().replace(prepare.MOTION_RESOURCES_BP_OLD,
+            prepare.MOTION_RESOURCES_BP_OLD + '\n    manifest: "maintainer-manifest.xml",'))
         before = self.contents()
-        with self.assertRaisesRegex(ValueError, "unfamiliar generated Motion Sense manifest"):
+        with self.assertRaisesRegex(ValueError, "resource manifest selection"):
             prepare.apply(self.rom, "apply")
         self.assertEqual(before, self.contents())
 

@@ -39,6 +39,14 @@ python3 vendor/hecker/floral/suite/tools/prepare.py --revert
 
 Motion Sense's separate Settings entry and duplicate maintainer/contact sections are hidden in Suite builds. Original plugin files, hardware permissions and upstream credits remain intact. Native Settings links the generated UI library; the independently usable plugin APK remains available to other ROM builders. The Suite and Face Unlock tiles open native Settings pages.
 
+The shared Motion Sense resource library uses a generated manifest containing
+only its resource package and an empty application. It contributes no standalone
+activities, tile service, app flags or SDK declarations to native Settings.
+`tools/check_motion_manifest.py` reproduces the old exported-activity conflict
+with Android 17's manifest-merger, then checks the private native UI, a Settings
+host and the standalone plugin against the pinned source. Source application,
+reapplication and exact reversion are checked as well.
+
 The Launcher page sets Android's native HOME role and offers an explicit restart when changing the signed Recents provider overlay. Double tap to sleep calls the native power API; it does not use device administrator locking. Pixel Launcher remains installed.
 
 Lock-screen lyrics are off by default. After opt-in, SystemUI sends the playing song's artist/title to LRCLIB, matches the recording and synchronizes LRC timestamps with native playback position/speed. They follow lock-screen media visibility and stop on AOD. Suite itself has no Internet permission.
