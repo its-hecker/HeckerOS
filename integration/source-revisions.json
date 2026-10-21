@@ -61,8 +61,8 @@
     },
     "vendor/custom": {
       "repository": "its-hecker/heckeros_vendor_custom",
-      "branch": "heckeros-17",
-      "revision": "e389a1e2caec0cd1e8dc5a5459b88cc2bad38897",
+      "branch": "feat/about-phone-official",
+      "revision": "302ac1f722258085326e38d45e2742a067316d59",
       "files": [
         "config/",
         "overlay/common/",

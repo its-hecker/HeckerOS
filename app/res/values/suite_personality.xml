@@ -15,7 +15,11 @@
         <item>A little mischief. A lot of Pixel.</item>
         <item>Make yourself at home.</item>
     </string-array>
-    <string name="about_hecker">PixelOS customizations and Pixel 4 series ports by Hecker (@its-hecker).</string>
+    <string name="about_hecker">HeckerOS and Pixel 4 series ports by Hecker (@its-hecker).</string>
+    <string name="about_rom_build">HeckerOS %1$s · %2$s</string>
+    <string name="about_build_official">Official</string>
+    <string name="about_build_unofficial">Unofficial</string>
+    <string name="about_build_unspecified">Build type unavailable</string>
     <string name="about_channel">Telegram channel</string>
     <string name="about_channel_summary">Pixel 4 series updates · @pixel4seriesupdates</string>
     <string name="about_group">Telegram community</string>

@@ -9,6 +9,8 @@ platform customization forks use `heckeros-17`.
 
 - The approved navy Settings UI: caracal hero, maintainer row, grouped native
   categories, a two-column Hecker Suite dashboard, and Display & Personalization.
+- One native About Phone card with a small animated phone, live device details,
+  maintainer/community access and an Official badge tied to build properties.
 - Native Quick Settings with large Wi-Fi/Bluetooth cards, round tiles, media,
   separate volume/brightness controls, and the optional HeckerOS dashboard layout.
 - Hardware 3D Face Unlock and Motion Sense, with their ROM integration owned here.
@@ -52,6 +54,8 @@ The script prepares and verifies the plugins, GCam and theme payloads, applies
 guarded source adapters, then selects `hecker_coral-hecker_suite-userdebug` and
 runs `m heckeros`. Set `HECKER_BUILD_JOBS` to control build parallelism. The ROM
 ZIP is named `HeckerOS_*.zip`. No stock PixelOS OTA channel is configured.
+Official identifies the maintainer's HeckerOS build channel. It does not establish
+a tested release, production signing keys, an OTA feed or a certification result.
 
 Do not also copy `snippets/heckeros.xml` into `.repo/local_manifests`; it is the
 source template for the dedicated manifest, and would duplicate its projects.
@@ -72,7 +76,8 @@ policy, Google Camera packaging, boot diagnostics and branding live in this repo
 
 ```bash
 bash tests/run_host_tests.sh
-python3 tools/compile_sdk.py
+python3 tools/compile_sdk.py --cache generated/sdk
+python3 tools/check_about_phone.py --sdk-cache generated/sdk
 python3 tools/check_native_ports.py
 python3 tools/check_spoofing.py
 python3 tools/freeze_upstream.py --check

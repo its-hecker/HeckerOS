@@ -10,6 +10,9 @@ PRODUCT_NO_CAMERA := true
 TARGET_SCREEN_WIDTH := 1440
 TARGET_SCREEN_HEIGHT := 3040
 CUSTOM_BUILD := coral
+# Set release identity before inheriting the base version/OTA configuration.
+IS_OFFICIAL := true
+HECKER_BUILD_TYPE := OFFICIAL
 
 # Retain the source-built mainline configuration used by the working Floral base.
 PRODUCT_BUILD_IGNORE_APEX_CONTRIBUTION_CONTENTS := true

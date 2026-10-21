@@ -31,5 +31,10 @@
   "packages/apps/Settings/res/drawable/hecker_refresh.xml": "settings/res/drawable/hecker_refresh.xml",
   "packages/apps/Settings/res/drawable/hecker_card_background.xml": "settings/res/drawable/hecker_card_background.xml",
   "packages/apps/Settings/res/drawable/hecker_icon_background.xml": "settings/res/drawable/hecker_icon_background.xml",
-  "packages/apps/Settings/res/drawable/hecker_phone_art.xml": "settings/res/drawable/hecker_phone_art.xml"
+  "packages/apps/Settings/res/drawable/hecker_phone_art.xml": "settings/res/drawable/hecker_phone_art.xml",
+  "packages/apps/Settings/res/values/hecker_about.xml": "settings/res/values/hecker_about.xml",
+  "packages/apps/Settings/res/drawable/hecker_about_badge.xml": "settings/res/drawable/hecker_about_badge.xml",
+  "packages/apps/Settings/res/layout/hecker_about_phone.xml": "settings/res/layout/hecker_about_phone.xml",
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutPhonePreference.java": "settings/src/com/android/settings/hecker/HeckerAboutPhonePreference.java",
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerPhoneArtView.java": "settings/src/com/android/settings/hecker/HeckerPhoneArtView.java"
 }

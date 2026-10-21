@@ -7,11 +7,12 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.SystemProperties;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/** The single maintainer, community and donation page for the experimental ROM. */
+/** Maintainer, build identity, community and credits for HeckerOS. */
 final class SuiteAbout {
     private SuiteAbout() {}
 
@@ -19,6 +20,12 @@ final class SuiteAbout {
         LinearLayout profile = Ui.card(activity);
         profile.addView(Ui.text(activity, "Hecker", 30, true));
         profile.addView(Ui.text(activity, activity.getString(R.string.about_hecker), 16, false));
+        String type = SystemProperties.get("ro.heckeros.build_type", "");
+        int label = "OFFICIAL".equals(type) ? R.string.about_build_official
+                : "UNOFFICIAL".equals(type) ? R.string.about_build_unofficial
+                : R.string.about_build_unspecified;
+        profile.addView(Ui.text(activity, activity.getString(R.string.about_rom_build,
+                SystemProperties.get("ro.heckeros.version", "—"), activity.getString(label)), 15, true));
         page.addView(profile);
         Ui.actionCard(activity, page, R.string.about_channel, R.string.about_channel_summary,
                 v -> open(activity, "https://t.me/pixel4seriesupdates"));

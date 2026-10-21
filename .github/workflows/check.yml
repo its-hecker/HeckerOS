@@ -35,6 +35,8 @@ jobs:
         run: bash tests/run_host_tests.sh
       - name: Compile Suite Java and link Android resources with locked dependencies
         run: python3 tools/compile_sdk.py --cache generated/sdk
+      - name: Compile native About Phone and verify HeckerOS release identity
+        run: python3 tools/check_about_phone.py --sdk-cache generated/sdk
       - name: Check owned Pixel enrollment and Axion integrity adapters
         run: python3 tools/check_platform_features.py --sdk-cache generated/sdk
       - name: Check Android 17 keystore integration and private spoofing configuration

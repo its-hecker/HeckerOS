@@ -44,3 +44,27 @@ The generated PNG was losslessly converted to WebP; no pixel editing was used.
 
 Phone screenshot comparison, font-scale testing and the complete Settings APK
 build remain part of coral validation. Resource compilation alone is not that test.
+
+## Native About Phone
+
+`MyDeviceInfoFragment` hosts one `HeckerAboutPhonePreference` above its original
+information categories. The previous account/avatar header stays hidden; device
+name editing, identifiers, legal/regulatory information, search and the build-number
+developer-options flow keep their native controllers, including the partial
+Catalyst hierarchy. The new card uses the same light/dark Hecker palette.
+
+The compact phone illustration is a native animated view, with no downloaded
+assets. It stops when hidden, detached or the page stops and respects the system
+animator setting. Model, codename, Android, processor, kernel, maintainer and ROM
+version come from this build. RAM and data-partition usage are queried off the UI
+thread; the battery value follows the battery broadcast only while the page is
+started. Unknown values are displayed as unavailable. Data storage means the
+data filesystem, not an invented retail storage capacity.
+
+The Official badge and Suite About page both read `ro.heckeros.build_type`.
+Coral sets its release identity before inheriting platform configuration. The
+vendor/custom adapter keeps HeckerOS away from the inherited PixelOS OTA channel;
+an Official maintainer build does not imply an OTA feed or a certification verdict.
+
+Device validation still needs normal/large fonts, dark/light mode, TalkBack,
+page exit/return, rotation, live battery changes and the existing native controls.
