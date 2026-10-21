@@ -14,6 +14,12 @@ preview and checksum record. Requires Pillow, numpy, ffmpeg and DejaVu Sans.
 `python3 tools/build_bootanimation.py --check` checks the shipped ZIP without dependencies
 beyond Pillow and numpy. The ROM consumes the checked-in ZIP; it never renders at boot.
 
+`bootanimation_heckeros` is the sole enabled prebuilt installing
+`product/media/bootanimation.zip`. The guarded source adapter selects that package
+and disables the inherited PixelOS prebuilt. Package selection alone does not
+remove Soong's other install action. Native source checks verify the single
+owner against both actual module definitions and check exact patch reversion.
+
 Keyframe source was created with the built-in image generation tool from Hecker's
 approved storyboard. Prompt: a registered 4 × 3 sheet of the same realistic suited
 caracal on black, progressively removing blue sunglasses, looking at the viewer,

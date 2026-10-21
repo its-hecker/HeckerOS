@@ -4,6 +4,7 @@
 import argparse
 import json
 from pathlib import Path
+import re
 import shutil
 import tempfile
 import urllib.request
@@ -26,6 +27,21 @@ def write(changes):
 
 def snapshot(folder):
     return {str(p.relative_to(folder)): p.read_bytes() for p in folder.rglob('*') if p.is_file()}
+
+
+def check_bootanimation_owner(folder):
+    # Check the real module definitions, independently of PRODUCT_PACKAGES: Soong
+    # exports install actions even for the unselected PixelOS prebuilt.
+    owners = []
+    for path in (ROOT / 'Android.bp', folder / 'vendor/custom/bootanimation/Android.bp'):
+        for block in re.findall(r'(?ms)^prebuilt_media\s*\{(.*?)^\}', path.read_text()):
+            if not re.search(r'(?m)^\s*filename:\s*"bootanimation\.zip",', block):
+                continue
+            assert re.search(r'(?m)^\s*product_specific:\s*true,', block), 'Boot animation partition changed'
+            if not re.search(r'(?m)^\s*enabled:\s*false,', block):
+                owners.append(re.search(r'(?m)^\s*name:\s*"([^"]+)"', block).group(1))
+    assert owners == ['bootanimation_heckeros'], 'Conflicting boot animation install owners: ' + str(owners)
+    print('product/media/bootanimation.zip has exactly one enabled prebuilt owner: HeckerOS')
 
 
 def main():
@@ -76,6 +92,7 @@ def main():
             count += len(changes)
             write(changes)
             assert not plan(folder, replace_guarded), 'Adapter is not idempotent'
+        check_bootanimation_owner(folder)
         for plan in reversed(plans):
             write(plan(folder, replace_guarded, True))
         assert before == snapshot(folder), 'Revert changed upstream content'

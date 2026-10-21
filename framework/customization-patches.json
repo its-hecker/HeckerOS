@@ -244,5 +244,11 @@
       "old": "    <com.android.settingslib.widget.LayoutPreference\n        android:key=\"my_device_info_header\"",
       "new": "    <com.android.settings.hecker.HeckerAboutPhonePreference\n        android:key=\"hecker_about_phone\"\n        android:order=\"-100\"\n        android:selectable=\"false\" />\n\n    <com.android.settingslib.widget.LayoutPreference\n        android:key=\"my_device_info_header\""
     }
+  ],
+  "vendor/custom/bootanimation/Android.bp": [
+    {
+      "old": "    name: \"bootanimation_pixelos\",",
+      "new": "    name: \"bootanimation_pixelos\",\n    // HeckerOS owns product/media/bootanimation.zip; disable the other install rule.\n    enabled: false,"
+    }
   ]
 }
