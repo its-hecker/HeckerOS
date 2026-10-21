@@ -12,6 +12,21 @@ from check_built_output import check, check_motion_sense, check_suite, SERVICE
 
 
 class BuiltOutputTests(unittest.TestCase):
+    def test_rejects_retired_weather_apk_in_each_install_partition(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for partition in ("system", "system_ext", "product", "vendor"):
+                for app_type in ("app", "priv-app"):
+                    with self.subTest(partition=partition, app_type=app_type):
+                        app = root / partition / app_type / "OmniJaws"
+                        app.mkdir(parents=True)
+                        apk = app / "OmniJaws.apk"
+                        apk.write_bytes(b"stale apk")
+                        with self.assertRaisesRegex(ValueError, "Removed OmniJaws"):
+                            check(root, root)
+                        apk.unlink()
+                        app.rmdir()
+
     def test_selected_camera_needs_its_exact_init_binary_and_manifest(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

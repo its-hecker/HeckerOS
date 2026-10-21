@@ -11,7 +11,6 @@
 | Ortus Launcher | `RisingOS-Revived/android_packages_apps_Launcher3@e2331fb7bc34fa33ecbe6040615457324a9ea60d` |
 | Launcher dynamic colors | `RisingOS-Revived/android_frameworks_libs_systemui@bd7bae87451e7820535570e6a3499376dc928bf9` |
 | OmniJaws client | `RisingOS-Revived/android_frameworks_base-new@6b7698f836aeeb0b944ed464ec77c4e3163f1480` |
-| OmniJaws service | `RisingOS-Revived/android_packages_services_OmniJaws@83f9fb29597f91e6b3685d46c3068449af440e2a` |
 
 Theme resource origin, catalog revision, every asset URL and SHA-256 are recorded
 in `themes/payload.lock.json`. Original resource authors remain in the bundled
@@ -41,3 +40,8 @@ Generated Settings artwork and its prompt/mode are documented in
 registered caracal keyframes plus separately rendered ring/typography; see
 `bootanimation/README.md`. GitHub Actions generates the checked-in ROM ZIP and
 preview from that source. No image generation or rendering runs on the phone.
+
+OmniJaws is not shipped or synced. The launcher retains its licensed client types
+for source compatibility, but the OmniJaws provider startup/fallback and provider
+preferences are disabled. Google weather remains available through the separate
+Seraphix integration when its provider is present.

@@ -8,6 +8,19 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ProductEntryTests(unittest.TestCase):
+    def test_rom_removes_inherited_omnijaws_and_excludes_stale_source(self):
+        source = "\n".join([
+            "PRODUCT_PACKAGES := OmniJaws ExistingApp",
+            "include " + str(ROOT / "rom/common.mk"),
+            "$(info PACKAGES=$(PRODUCT_PACKAGES))",
+            "$(info EXCLUSIONS=$(PRODUCT_SOURCE_ROOT_DIRS))",
+            "all:", "\t@:", ""])
+        result = subprocess.run(["make", "--no-print-directory", "-f", "-", "all"],
+                                input=source, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("PACKAGES=ExistingApp HeckerSystemUIOverlay", result.stdout)
+        self.assertIn("EXCLUSIONS=-packages/services/OmniJaws", result.stdout)
+
     def test_release_map_is_available_before_android_defines_my_dir(self):
         with tempfile.TemporaryDirectory() as temp:
             rom = Path(temp)

@@ -1,7 +1,0 @@
-{
-  "repository": "RisingOS-Revived/android_packages_services_OmniJaws",
-  "branch": "seventeen",
-  "revision": "83f9fb29597f91e6b3685d46c3068449af440e2a",
-  "license": "Apache-2.0",
-  "port": "PixelOS-compatible Material weather preferences, theme and scaffold; app-local shared OmniJaws client; preserve providers, dashboard, location and widgets."
-}

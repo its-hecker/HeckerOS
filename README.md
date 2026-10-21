@@ -23,8 +23,6 @@ platform customization forks use `heckeros-17`.
 - Pixel Launcher and Ortus-derived **Hecker's Launcher**, including native double
   tap to sleep, Lottie artwork and launcher selection. Changing the Recents
   provider requires the explicit reboot shown by Suite.
-- OmniJaws weather, dashboard and widgets with app-local Material settings and a
-  shared weather client adapted to the PixelOS base. See [weather integration](omnijaws/README.md).
 - Opt-in synchronized lock-screen lyrics adapted from Infinity-X. The settings
   page discloses the LRCLIB artist/title lookup before it is enabled.
 - A native offline picker for 75 Lunaris theme styles and 91 checksum-pinned
@@ -51,6 +49,22 @@ git clone https://github.com/its-hecker/HeckerOs-localmanifest .repo/local_manif
 repo sync -c -j8 --fail-fast --no-clone-bundle --no-tags
 bash .repo/local_manifests/build.sh
 ```
+
+OmniJaws is excluded from the ROM and source sync. When upgrading a checkout
+that previously included it, preserve its locally adapted files before syncing:
+
+```bash
+git -C .repo/local_manifests pull --ff-only
+python3 .repo/local_manifests/tools/retire_omnijaws.py
+repo sync -c -j2 --fail-fast --no-clone-bundle --no-tags vendor/hecker/floral/suite
+HECKER_BUILD_JOBS=8 bash .repo/local_manifests/build.sh
+```
+
+Run this from the existing Android source root. The retirement helper moves the
+old checkout under `out/retired-projects/`; the build helper uses `installclean`
+only if a removed app is still staged. Launcher weather uses the independent
+Google feed when available. ServerHive builds retain the provider's existing RBE
+environment and should run in the initialized Byobu build session.
 
 The script prepares and verifies the plugins, GCam and theme payloads, applies
 guarded source adapters, then selects `hecker_coral-hecker_suite-userdebug` and
@@ -80,7 +94,6 @@ policy, Google Camera packaging, boot diagnostics and branding live in this repo
 bash tests/run_host_tests.sh
 python3 tools/compile_sdk.py --cache generated/sdk
 python3 tools/check_about_phone.py --sdk-cache generated/sdk
-python3 tools/check_omnijaws.py --sdk-cache generated/sdk
 python3 tools/check_motion_manifest.py
 python3 tools/check_native_ports.py
 python3 tools/check_spoofing.py

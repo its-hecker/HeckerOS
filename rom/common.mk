@@ -11,4 +11,7 @@ PRODUCT_PRODUCT_PROPERTIES += \
 
 $(call inherit-product, vendor/hecker/floral/suite/suite.mk)
 $(call inherit-product, vendor/hecker/floral/suite/themes/themes.mk)
-PRODUCT_PACKAGES += OmniJaws HeckerSystemUIOverlay
+# Ignore the removed weather service, including stale source directories.
+PRODUCT_SOURCE_ROOT_DIRS += -packages/services/OmniJaws
+PRODUCT_PACKAGES := $(filter-out OmniJaws,$(PRODUCT_PACKAGES))
+PRODUCT_PACKAGES += HeckerSystemUIOverlay

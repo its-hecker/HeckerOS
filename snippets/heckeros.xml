@@ -20,7 +20,6 @@
   <remove-project path="packages/apps/Launcher3" optional="true" />
   <project path="packages/apps/Launcher3" name="RisingOS-Revived/android_packages_apps_Launcher3" remote="floral-github" revision="e2331fb7bc34fa33ecbe6040615457324a9ea60d" upstream="refs/heads/seventeen" dest-branch="seventeen" />
   <remove-project path="packages/services/OmniJaws" optional="true" />
-  <project path="packages/services/OmniJaws" name="RisingOS-Revived/android_packages_services_OmniJaws" remote="floral-github" revision="83f9fb29597f91e6b3685d46c3068449af440e2a" upstream="refs/heads/seventeen" dest-branch="seventeen" />
   <extend-project name="PixelOS-AOSP/android_packages_apps_DolbyAtmos" path="packages/apps/DolbyAtmos" revision="13bbe61cf3e1046e3a1f0bda4719c321c953ce50" upstream="refs/heads/seventeen" />
   <extend-project name="LineageOS/android_hardware_lineage_compat" path="hardware/lineage/compat" revision="590c94850e079642136a4577305d02e4174caabc" upstream="refs/heads/lineage-24.0" />
   <extend-project name="LineageOS/android_vendor_qcom_opensource_audioreach-graphservices" path="hardware/qcom-caf/sm8750/audio/graphservices" revision="62591b81ddb14cb1ddecf2a8e7162f2082456793" upstream="refs/heads/lineage-24.0-caf-sm8750" />

@@ -11,7 +11,6 @@ import sys
 import xml.etree.ElementTree as ET
 from launcher_port import launcher_plan
 from customization_port import customization_plan
-from omnijaws_port import omnijaws_plan
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -310,7 +309,6 @@ def plan(rom, revert=False):
         changes[helper] = expected
     changes.update(motion_plan(rom, revert))
     changes.update(launcher_plan(rom, replace_guarded, revert))
-    changes.update(omnijaws_plan(rom, replace_guarded, revert))
     changes.update(customization_plan(rom, replace_guarded, revert))
     return changes
 

@@ -34,18 +34,18 @@ source build/envsetup.sh
 # Select the native App Lock and Compose QS flags for HeckerOS.
 lunch "hecker_coral-hecker_suite-${HECKER_BUILD_VARIANT:-userdebug}"
 floral_product_out="$(get_build_var PRODUCT_OUT)"
-floral_stale_camera=false
+floral_stale_app=false
 for floral_partition in system system_ext product vendor; do
     for floral_app_type in app priv-app; do
-        for floral_stock_camera in Aperture Camera2; do
-            if [[ -d "$floral_product_out/$floral_partition/$floral_app_type/$floral_stock_camera" ]]; then
-                floral_stale_camera=true
+        for floral_removed_app in Aperture Camera2 OmniJaws; do
+            if [[ -d "$floral_product_out/$floral_partition/$floral_app_type/$floral_removed_app" ]]; then
+                floral_stale_app=true
             fi
         done
     done
 done
-if [[ "$floral_stale_camera" == true ]]; then
-    echo "Removing previous stock camera installations from build outputs (installclean)."
+if [[ "$floral_stale_app" == true ]]; then
+    echo "Removing stale camera/weather app installations from build outputs (installclean)."
     m installclean
 fi
 m -j"${HECKER_BUILD_JOBS:-$(nproc)}" heckeros

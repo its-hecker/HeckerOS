@@ -37,7 +37,16 @@ def check_motion_sense(output):
         raise ValueError("Built product image needs exactly one pixel.oslo.allowed_override=1")
 
 
+def check_removed_weather(output):
+    for partition in ("system", "system_ext", "product", "vendor"):
+        for app_type in ("app", "priv-app"):
+            directory = output / partition / app_type / "OmniJaws"
+            if directory.exists():
+                raise ValueError("Removed OmniJaws installation remains: " + str(directory))
+
+
 def check(rom, output):
+    check_removed_weather(output)
     filename = SERVICE + ".rc"
     original = rom / "vendor/google/coral/proprietary/vendor/etc/init" / filename
     installed = output / "vendor/etc/init" / filename
@@ -51,7 +60,8 @@ def check(rom, output):
     check_motion_sense(output)
     check_suite(rom, output)
     print("Built output: camera provider binary/init/VINTF, original ten-APK Google Camera set "
-          "and Motion Sense country override, Hecker Suite APK/permissions/freeform: PASS")
+          "and Motion Sense country override, Hecker Suite APK/permissions/freeform; "
+          "OmniJaws absent: PASS")
 
 
 if __name__ == "__main__":

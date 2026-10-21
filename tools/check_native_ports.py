@@ -8,9 +8,9 @@ import re
 import shutil
 import tempfile
 import urllib.request
+import xml.etree.ElementTree as ET
 from customization_port import customization_plan
 from launcher_port import launcher_plan
-from omnijaws_port import omnijaws_plan
 from prepare import replace_guarded
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,6 +44,23 @@ def check_bootanimation_owner(folder):
     print('product/media/bootanimation.zip has exactly one enabled prebuilt owner: HeckerOS')
 
 
+def check_launcher_weather(folder):
+    launcher = folder / 'packages/apps/Launcher3'
+    controller = (launcher / 'src/com/android/launcher3/quickspace/QuickspaceController.java').read_text()
+    assert 'switchProvider(WeatherProvider.SERAPHIX)' in controller, 'Google weather was removed'
+    assert 'mProvider = WeatherProvider.OMNIJAWS' not in controller, 'OmniJaws fallback remains'
+    assert 'OmniJawsClient.get(' not in controller, 'OmniJaws client startup remains'
+    assert 'addOmniJawsIfEnabled(' not in controller, 'OmniJaws startup remains'
+    preferences = ET.parse(launcher / 'res/xml/launcher_home_screen_preferences.xml').getroot()
+    android = '{http://schemas.android.com/apk/res/android}'
+    keys = {node.get(android + 'key') for node in preferences.iter()}
+    assert 'pref_quickspace_weather' in keys, 'Google weather toggle was removed'
+    assert not keys.intersection({'pref_quickspace_weather_provider',
+                                  'pref_quickspace_weather_city',
+                                  'pref_quickspace_weather_text'}), 'OmniJaws preferences remain'
+    print('Launcher keeps Google weather; OmniJaws startup, fallback and controls are absent')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cache', type=Path, default=ROOT / 'out/native-source-cache')
@@ -52,11 +69,9 @@ def main():
     sources = json.loads((ROOT / 'integration/source-revisions.json').read_text())['pixelos_inputs']
     launcher = json.loads((ROOT / 'launcher/ORIGIN.json').read_text())
     sources['packages/apps/Launcher3'] = launcher
-    sources['packages/services/OmniJaws'] = json.loads((ROOT / 'omnijaws/ORIGIN.json').read_text())
     paths = set(json.loads((ROOT / 'framework/customization-patches.json').read_text()))
     paths.add('frameworks/base/core/java/android/content/res/Resources.java')
     paths.update('packages/apps/Launcher3/' + p for p in json.loads((ROOT / 'launcher/patches.json').read_text()))
-    paths.update('packages/services/OmniJaws/' + p for p in json.loads((ROOT / 'omnijaws/patches.json').read_text()))
     def cached_source(relative):
         project = max((p for p in sources if relative.startswith(p + '/')), key=len)
         # A pin update must never reuse content fetched for an older revision.
@@ -85,7 +100,7 @@ def main():
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(cached_source(relative), target)
         before = snapshot(folder)
-        plans = (customization_plan, launcher_plan, omnijaws_plan)
+        plans = (customization_plan, launcher_plan)
         count = 0
         for plan in plans:
             changes = plan(folder, replace_guarded)
@@ -93,6 +108,7 @@ def main():
             write(changes)
             assert not plan(folder, replace_guarded), 'Adapter is not idempotent'
         check_bootanimation_owner(folder)
+        check_launcher_weather(folder)
         for plan in reversed(plans):
             write(plan(folder, replace_guarded, True))
         assert before == snapshot(folder), 'Revert changed upstream content'

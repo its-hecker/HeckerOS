@@ -55,6 +55,18 @@
     {
       "old": "import com.android.internal.util.android.OmniJawsClient;",
       "new": "import com.android.launcher3.hecker.OmniJawsClient;"
+    },
+    {
+      "old": "    private void decideWeatherProvider() {\n        if (!LauncherPrefs.SHOW_QUICKSPACE_WEATHER.get(mContext)) {\n            if (mProvider != null) {\n                unbindSeraphix();\n                removeOmniIfRegistered();\n                mProvider = null;\n                notifyListeners();\n            }\n            return;\n        }\n\n        String pref = LauncherPrefs.SHOW_QUICKSPACE_WEATHER_PROVIDER.get(mContext);\n        WeatherProvider target = WeatherProvider.SERAPHIX;\n        if (\"seraphix\".equals(pref)) {\n            target = WeatherProvider.SERAPHIX;\n        } else if (\"auto\".equals(pref)) {\n            // Try seraphix first; if bind fails, fall back to OmniJaws\n            target = tryBindSeraphix(true) ? WeatherProvider.SERAPHIX : WeatherProvider.OMNIJAWS;\n        } else if (\"omnijaws\".equals(pref)) {\n            target = WeatherProvider.OMNIJAWS;\n        }\n        switchProvider(target);\n    }",
+      "new": "    private void decideWeatherProvider() {\n        // HeckerOS does not ship OmniJaws. Preserve Google's independent feed.\n        if (!LauncherPrefs.SHOW_QUICKSPACE_WEATHER.get(mContext)) {\n            unbindSeraphix();\n            removeOmniIfRegistered();\n            mProvider = null;\n            notifyListeners();\n            return;\n        }\n        switchProvider(WeatherProvider.SERAPHIX);\n    }"
+    },
+    {
+      "old": "        // Bring up (or re-validate) the chosen provider\n        if (mProvider == WeatherProvider.SERAPHIX && !tryBindSeraphix(false)) {\n            // fallback if bind fails at runtime\n            mProvider = WeatherProvider.OMNIJAWS;\n            changed = true;\n        }\n        if (mProvider == WeatherProvider.OMNIJAWS) {\n            addOmniJawsIfEnabled();\n        }",
+      "new": "        // Missing Google weather means unavailable weather; no service fallback.\n        if (mProvider == WeatherProvider.SERAPHIX && !tryBindSeraphix(false)) {\n            mProvider = null;\n            changed = true;\n        }"
+    },
+    {
+      "old": "    private void addOmniJawsIfEnabled() {\n        if (!LauncherPrefs.SHOW_QUICKSPACE_WEATHER.get(mContext)) return;\n        if (mWeatherClient == null) mWeatherClient = OmniJawsClient.get();\n        if (!mOmniRegistered) {\n            mWeatherClient.addObserver(mContext, this);\n            mOmniRegistered = true;\n        }\n        queryAndUpdateWeather();\n    }",
+      "new": "    // OmniJaws startup is intentionally absent from HeckerOS."
     }
   ],
   "quickstep/src/com/android/launcher3/uioverrides/QuickstepLauncher.java": [
@@ -101,6 +113,12 @@
     {
       "old": "    min_sdk_version: min_launcher3_sdk_version,",
       "new": "    min_sdk_version: \"36\","
+    }
+  ],
+  "res/xml/launcher_home_screen_preferences.xml": [
+    {
+      "old": "        <ListPreference\n            android:key=\"pref_quickspace_weather_provider\"\n            android:title=\"@string/quickspace_weather_provider_title\"\n            android:summary=\"%s\"\n            android:entries=\"@array/quickspace_weather_provider_entries\"\n            android:entryValues=\"@array/quickspace_weather_provider_values\"\n            android:dependency=\"pref_quickspace_weather\"\n            android:defaultValue=\"auto\"\n            launcher:iconSpaceReserved=\"false\" />\n\n        <SwitchPreferenceCompat\n            android:key=\"pref_quickspace_weather_city\"\n            android:title=\"@string/quick_event_weather_city_title\"\n            android:summary=\"@string/quick_event_weather_city_summary\"\n            android:dependency=\"pref_quickspace_weather\"\n            android:defaultValue=\"false\"\n            android:persistent=\"true\"\n            launcher:iconSpaceReserved=\"false\" />\n\n        <SwitchPreferenceCompat\n            android:key=\"pref_quickspace_weather_text\"\n            android:title=\"@string/quick_event_weather_text_title\"\n            android:summary=\"@string/quick_event_weather_text_summary\"\n            android:dependency=\"pref_quickspace_weather\"\n            android:defaultValue=\"true\"\n            android:persistent=\"true\"\n            launcher:iconSpaceReserved=\"false\" />",
+      "new": "        <!-- Google weather has no OmniJaws provider, city or condition-text controls. -->"
     }
   ]
 }
