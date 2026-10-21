@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
-  <project path="art" name="PixelOS-AOSP/android_art" groups="pdk" remote="github" />
-  <project path="bionic" name="PixelOS-AOSP/android_bionic" groups="pdk" remote="github" />
-  <project path="bootable/deprecated-ota" name="PixelOS-AOSP/android_bootable_deprecated-ota" groups="pdk-cw,pdk-arsp-ag-sot,pdk-arsp-common" remote="github" />
-  <project path="bootable/recovery" name="PixelOS-AOSP/android_bootable_recovery" groups="pdk" remote="github" />
-  <project path="build/make" name="PixelOS-AOSP/android_build" groups="pdk,sysui-studio" remote="github">
+  <project path="art" name="PixelOS-AOSP/android_art" groups="pdk" remote="github"  revision="03ecb9ce33814e78460a2714d0c4d75bf6f8f2da"  upstream="refs/heads/seventeen" />
+  <project path="bionic" name="PixelOS-AOSP/android_bionic" groups="pdk" remote="github"  revision="5d705964bdc742639dd256871119209f1c65d688"  upstream="refs/heads/seventeen" />
+  <project path="bootable/deprecated-ota" name="PixelOS-AOSP/android_bootable_deprecated-ota" groups="pdk-cw,pdk-arsp-ag-sot,pdk-arsp-common" remote="github"  revision="783c2ac44772079587cece5f4c6a681e32ad5847"  upstream="refs/heads/seventeen" />
+  <project path="bootable/recovery" name="PixelOS-AOSP/android_bootable_recovery" groups="pdk" remote="github"  revision="410707c908dc61faec79bf9fec2ef17712fde8ce"  upstream="refs/heads/seventeen" />
+  <project path="build/make" name="PixelOS-AOSP/android_build" groups="pdk,sysui-studio" remote="github" revision="f201c9c3ec3184695f012df5ef79d79b04fe2d36" upstream="refs/heads/seventeen">
     <linkfile src="CleanSpec.mk" dest="build/CleanSpec.mk" />
     <linkfile src="buildspec.mk.default" dest="build/buildspec.mk.default" />
     <linkfile src="core" dest="build/core" />
@@ -12,96 +12,96 @@
     <linkfile src="target" dest="build/target" />
     <linkfile src="tools" dest="build/tools" />
   </project>
-  <project path="build/soong" name="PixelOS-AOSP/android_build_soong" groups="pdk,tradefed,sysui-studio" remote="github" />
-  <project path="development" name="PixelOS-AOSP/android_development" groups="developers,pdk-cw-fs,pdk-fs,sysui-studio" remote="github" />
-  <project path="device/custom/sepolicy" name="PixelOS-AOSP/android_device_custom_sepolicy" remote="github" />
-  <project path="external/avb" name="PixelOS-AOSP/android_external_avb" groups="pdk" remote="github" />
-  <project path="external/bouncycastle" name="PixelOS-AOSP/android_external_bouncycastle" groups="pdk" remote="github" />
-  <project path="external/dtc" name="PixelOS-AOSP/android_external_dtc" groups="pdk" remote="github" />
-  <project path="external/dng_sdk" name="PixelOS-AOSP/android_external_dng_sdk" groups="pdk" remote="github" />
-  <project path="external/e2fsprogs" name="PixelOS-AOSP/android_external_e2fsprogs" groups="pdk" remote="github" />
-  <project path="external/exfatprogs" name="PixelOS-AOSP/android_external_exfatprogs" groups="pdk" remote="github" />
-  <project path="external/freetype" name="PixelOS-AOSP/android_external_freetype" groups="pdk" remote="github" />
-  <project path="external/gptfdisk" name="PixelOS-AOSP/android_external_gptfdisk" groups="pdk" remote="github" />
-  <project path="external/libcupsfilters" name="PixelOS-AOSP/android_external_libcupsfilters" groups="pdk" remote="github" />
-  <project path="external/libhevc" name="PixelOS-AOSP/android_external_libhevc" groups="pdk" remote="github" />
-  <project path="external/libjxl" name="PixelOS-AOSP/android_external_libjxl" groups="pdk" remote="github" />
-  <project path="external/libopenapv" name="PixelOS-AOSP/android_external_libopenapv" groups="pdk" remote="github" />
-  <project path="external/libpng" name="PixelOS-AOSP/android_external_libpng" groups="pdk" remote="github" />
-  <project path="external/libppd" name="PixelOS-AOSP/android_external_libppd" groups="pdk" remote="github" />
-  <project path="external/mksh" name="PixelOS-AOSP/android_external_mksh" groups="pdk" remote="github" />
-  <project path="external/tinycompress" name="PixelOS-AOSP/android_external_tinycompress" groups="pdk" remote="github" />
-  <project path="external/wpa_supplicant_8" name="PixelOS-AOSP/android_external_wpa_supplicant_8" groups="pdk" remote="github" />
-  <project path="external/zstd" name="PixelOS-AOSP/android_external_zstd" groups="pdk" remote="github" />
-  <project path="frameworks/av" name="PixelOS-AOSP/android_frameworks_av" groups="pdk,sysui-studio" remote="github" />
+  <project path="build/soong" name="PixelOS-AOSP/android_build_soong" groups="pdk,tradefed,sysui-studio" remote="github"  revision="321ecf4fc740482603b917c5de30a0e27e97595e"  upstream="refs/heads/seventeen" />
+  <project path="development" name="PixelOS-AOSP/android_development" groups="developers,pdk-cw-fs,pdk-fs,sysui-studio" remote="github"  revision="a732e6c75f9a4fff94f36d0cfc27211cebf95a4a"  upstream="refs/heads/seventeen" />
+  <project path="device/custom/sepolicy" name="PixelOS-AOSP/android_device_custom_sepolicy" remote="github"  revision="4ac6362144ecaa9dfea1b512bc67e2c2d68c2b30"  upstream="refs/heads/seventeen" />
+  <project path="external/avb" name="PixelOS-AOSP/android_external_avb" groups="pdk" remote="github"  revision="15b4e85b56cdd7e32601074dbb269f5d3ba43eaf"  upstream="refs/heads/seventeen" />
+  <project path="external/bouncycastle" name="PixelOS-AOSP/android_external_bouncycastle" groups="pdk" remote="github"  revision="f5e089c319a22ab66740c494d735ffbc87b40790"  upstream="refs/heads/seventeen" />
+  <project path="external/dtc" name="PixelOS-AOSP/android_external_dtc" groups="pdk" remote="github"  revision="248659cba0376c296f3a92bc3159397b70fb3956"  upstream="refs/heads/seventeen" />
+  <project path="external/dng_sdk" name="PixelOS-AOSP/android_external_dng_sdk" groups="pdk" remote="github"  revision="abfb92d7448cd05bd9d85bbcbfcd9b164403a13c"  upstream="refs/heads/seventeen" />
+  <project path="external/e2fsprogs" name="PixelOS-AOSP/android_external_e2fsprogs" groups="pdk" remote="github"  revision="fafbf466cbd35af4884f4ab178f8b0f8d8663494"  upstream="refs/heads/seventeen" />
+  <project path="external/exfatprogs" name="PixelOS-AOSP/android_external_exfatprogs" groups="pdk" remote="github"  revision="96fc1f47bbfb4508fd5e4f5cc78c2cfac2dacc70"  upstream="refs/heads/seventeen" />
+  <project path="external/freetype" name="PixelOS-AOSP/android_external_freetype" groups="pdk" remote="github"  revision="07e81e3e06eb63858e96a8393c7f615e3d744056"  upstream="refs/heads/seventeen" />
+  <project path="external/gptfdisk" name="PixelOS-AOSP/android_external_gptfdisk" groups="pdk" remote="github"  revision="0986c41e89e30bc062fe6af11aea45c9ec1e991a"  upstream="refs/heads/seventeen" />
+  <project path="external/libcupsfilters" name="PixelOS-AOSP/android_external_libcupsfilters" groups="pdk" remote="github"  revision="7acd60402ad1c99af6d4066504c0a7b16b03f2c8"  upstream="refs/heads/seventeen" />
+  <project path="external/libhevc" name="PixelOS-AOSP/android_external_libhevc" groups="pdk" remote="github"  revision="4b4ea30f94ed47ff83d54befb86f202f661e7130"  upstream="refs/heads/seventeen" />
+  <project path="external/libjxl" name="PixelOS-AOSP/android_external_libjxl" groups="pdk" remote="github"  revision="cbd5d8a0e4e7232e440ad64e712bc8a45fd52a11"  upstream="refs/heads/seventeen" />
+  <project path="external/libopenapv" name="PixelOS-AOSP/android_external_libopenapv" groups="pdk" remote="github"  revision="1f7d75914d98c47ec2109d94c9561aa9718bd75c"  upstream="refs/heads/seventeen" />
+  <project path="external/libpng" name="PixelOS-AOSP/android_external_libpng" groups="pdk" remote="github"  revision="3fa0286f7c33499e3e837478b364484b4ea296d7"  upstream="refs/heads/seventeen" />
+  <project path="external/libppd" name="PixelOS-AOSP/android_external_libppd" groups="pdk" remote="github"  revision="4d7dca4bc1885a72219db07156a48a1f3989b160"  upstream="refs/heads/seventeen" />
+  <project path="external/mksh" name="PixelOS-AOSP/android_external_mksh" groups="pdk" remote="github"  revision="1b341806f76fe175557756eed3e79aa282cea49a"  upstream="refs/heads/seventeen" />
+  <project path="external/tinycompress" name="PixelOS-AOSP/android_external_tinycompress" groups="pdk" remote="github"  revision="b58bf8a87b615be95e4107ff33c0d841269fb417"  upstream="refs/heads/seventeen" />
+  <project path="external/wpa_supplicant_8" name="PixelOS-AOSP/android_external_wpa_supplicant_8" groups="pdk" remote="github"  revision="3346cba3ebae1c14aed18ed97ee7345d6799dcb5"  upstream="refs/heads/seventeen" />
+  <project path="external/zstd" name="PixelOS-AOSP/android_external_zstd" groups="pdk" remote="github"  revision="ec76dd347d213816a4a6b0bdf6830885cc5812a2"  upstream="refs/heads/seventeen" />
+  <project path="frameworks/av" name="PixelOS-AOSP/android_frameworks_av" groups="pdk,sysui-studio" remote="github"  revision="3a806486c35d4825bd97d95af3e172309aed2fda"  upstream="refs/heads/seventeen" />
   <project path="frameworks/base" name="its-hecker/heckeros_frameworks_base" groups="pdk-cw-fs,pdk-fs,sysui-studio" remote="heckeros" />
-  <project path="frameworks/native" name="PixelOS-AOSP/android_frameworks_native" groups="pdk,sysui-studio" remote="github" />
-  <project path="frameworks/opt/telephony" name="PixelOS-AOSP/android_frameworks_opt_telephony" groups="pdk,sysui-studio" remote="github" />
-  <project path="hardware/google/pixel" name="PixelOS-AOSP/android_hardware_google_pixel" groups="generic_fs,pixel,pdk-gs-arm,pdk-gs-imgtec,pdk-desktop" remote="github" />
-  <project path="hardware/google/pixel-sepolicy" name="PixelOS-AOSP/android_hardware_google_pixel-sepolicy" groups="generic_fs,pixel,pdk-desktop" remote="github" />
-  <project path="hardware/interfaces" name="PixelOS-AOSP/android_hardware_interfaces" groups="pdk,sysui-studio" remote="github" />
-  <project path="hardware/libhardware" name="PixelOS-AOSP/android_hardware_libhardware" groups="pdk" remote="github" />
-  <project path="hardware/nxp/nfc" name="PixelOS-AOSP/android_hardware_nxp_nfc" groups="pdk" remote="github" />
-  <project path="hardware/nxp/secure_element" name="PixelOS-AOSP/android_hardware_nxp_secure_element" groups="pdk" remote="github" />
-  <project path="hardware/st/nfc" name="PixelOS-AOSP/android_hardware_st_nfc" groups="pdk" remote="github" />
-  <project path="kernel/configs" name="PixelOS-AOSP/android_kernel_configs" groups="vts,pdk" remote="github" />
-  <project path="packages/apps/ContactsPicker" name="PixelOS-AOSP/android_packages_apps_ContactsPicker" groups="pdk-fs" remote="github" />
-  <project path="packages/apps/ParanoidSense" name="PixelOS-AOSP/android_packages_apps_ParanoidSense" remote="github" />
+  <project path="frameworks/native" name="PixelOS-AOSP/android_frameworks_native" groups="pdk,sysui-studio" remote="github"  revision="fe64500f2fb0b0053667f3e1af3603122643e270"  upstream="refs/heads/seventeen" />
+  <project path="frameworks/opt/telephony" name="PixelOS-AOSP/android_frameworks_opt_telephony" groups="pdk,sysui-studio" remote="github"  revision="7ee96142e28c3580c2426760a4b533256743d06f"  upstream="refs/heads/seventeen" />
+  <project path="hardware/google/pixel" name="PixelOS-AOSP/android_hardware_google_pixel" groups="generic_fs,pixel,pdk-gs-arm,pdk-gs-imgtec,pdk-desktop" remote="github"  revision="697c4370a439248b35f8cbc17dde3974425b4fc2"  upstream="refs/heads/seventeen" />
+  <project path="hardware/google/pixel-sepolicy" name="PixelOS-AOSP/android_hardware_google_pixel-sepolicy" groups="generic_fs,pixel,pdk-desktop" remote="github"  revision="ef0ea0b5ce600712c586e880d6876eeba1f85cc7"  upstream="refs/heads/seventeen" />
+  <project path="hardware/interfaces" name="PixelOS-AOSP/android_hardware_interfaces" groups="pdk,sysui-studio" remote="github"  revision="7447ce416bbc527a1e7100196eddd568d084b413"  upstream="refs/heads/seventeen" />
+  <project path="hardware/libhardware" name="PixelOS-AOSP/android_hardware_libhardware" groups="pdk" remote="github"  revision="60142e668356ae78ebd3b6d4af8b8e99524feee3"  upstream="refs/heads/seventeen" />
+  <project path="hardware/nxp/nfc" name="PixelOS-AOSP/android_hardware_nxp_nfc" groups="pdk" remote="github"  revision="af6bbbc37a3812db5810f633326e0d17037e9c8c"  upstream="refs/heads/seventeen" />
+  <project path="hardware/nxp/secure_element" name="PixelOS-AOSP/android_hardware_nxp_secure_element" groups="pdk" remote="github"  revision="9994eafd37af36bfd18df4bb75a6f4e7e848d525"  upstream="refs/heads/seventeen" />
+  <project path="hardware/st/nfc" name="PixelOS-AOSP/android_hardware_st_nfc" groups="pdk" remote="github"  revision="31f568a0b25c85bd00919091bfbe497e2f8757fd"  upstream="refs/heads/seventeen" />
+  <project path="kernel/configs" name="PixelOS-AOSP/android_kernel_configs" groups="vts,pdk" remote="github"  revision="3c25f55b591d2689c8f7dee0c01b135e87a863a2"  upstream="refs/heads/seventeen" />
+  <project path="packages/apps/ContactsPicker" name="PixelOS-AOSP/android_packages_apps_ContactsPicker" groups="pdk-fs" remote="github"  revision="2874941c128ccc4bc8a6d254f90e2ce535e8a49b"  upstream="refs/heads/seventeen" />
+  <project path="packages/apps/ParanoidSense" name="PixelOS-AOSP/android_packages_apps_ParanoidSense" remote="github"  revision="912c40b765915c9d6a6eb90763ed4c48f53cd86e"  upstream="refs/heads/seventeen" />
   <project path="packages/apps/Settings" name="its-hecker/heckeros_packages_apps_Settings" groups="pdk-fs,pdk-cw-tvc,sysui-studio" remote="heckeros" />
-  <project path="packages/apps/TouchGestures" name="PixelOS-AOSP/android_packages_apps_TouchGestures" remote="github" />
-  <project path="packages/apps/TV" name="PixelOS-AOSP/android_packages_apps_TV" groups="pdk" remote="github" />
-  <project path="packages/apps/Updater" name="PixelOS-AOSP/android_packages_apps_Updater" remote="github" />
-  <project path="packages/apps/DolbyAtmos" name="PixelOS-AOSP/android_packages_apps_DolbyAtmos" remote="github" />
-  <project path="packages/apps/ColumbusService" name="PixelOS-AOSP/android_packages_apps_ColumbusService" remote="github" />
-  <project path="packages/modules/adb" name="PixelOS-AOSP/android_packages_modules_adb" groups="pdk" remote="github" />
-  <project path="packages/modules/Bluetooth" name="PixelOS-AOSP/android_packages_modules_Bluetooth" groups="pdk" remote="github" />
-  <project path="packages/modules/Connectivity" name="PixelOS-AOSP/android_packages_modules_Connectivity" groups="pdk-cw-fs,pdk-fs" remote="github" />
-  <project path="packages/modules/Nfc" name="PixelOS-AOSP/android_packages_modules_Nfc" groups="pdk-cw-fs,pdk-fs" remote="github" />
-  <project path="packages/modules/Permission" name="PixelOS-AOSP/android_packages_modules_Permission" groups="pdk-cw-fs,pdk-fs" remote="github" />
-  <project path="packages/modules/Telephony" name="PixelOS-AOSP/android_packages_modules_Telephony" groups="pdk-cw-fs,pdk-fs" remote="github" />
-  <project path="packages/modules/UprobeStats" name="PixelOS-AOSP/android_packages_modules_UprobeStats" groups="pdk-cw-fs,pdk-fs" remote="github" />
-  <project path="packages/modules/Uwb" name="PixelOS-AOSP/android_packages_modules_Uwb" groups="pdk-cw-fs,pdk-fs" remote="github" />
-  <project path="packages/modules/Wifi" name="PixelOS-AOSP/android_packages_modules_Wifi" groups="pdk-cw-fs,pdk-fs,sysui-studio" remote="github" />
-  <project path="packages/providers/ContactsProvider" name="PixelOS-AOSP/android_packages_providers_ContactsProvider" groups="pdk-cw-fs,pdk-fs" remote="github" />
-  <project path="packages/providers/DownloadProvider" name="PixelOS-AOSP/android_packages_providers_DownloadProvider" groups="pdk-cw-fs,pdk-fs" remote="github" />
-  <project path="packages/providers/MediaProvider" name="PixelOS-AOSP/android_packages_providers_MediaProvider" groups="pdk-cw-fs,pdk-fs,sysui-studio" remote="github" />
-  <project path="packages/providers/TelephonyProvider" name="PixelOS-AOSP/android_packages_providers_TelephonyProvider" groups="pdk-cw-fs,pdk-fs" remote="github" />
-  <project path="packages/services/BuiltInPrintService" name="PixelOS-AOSP/android_packages_services_BuiltInPrintService" groups="pdk-cw-fs,pdk-fs" remote="github" />
-  <project path="packages/services/DeviceAsWebcam" name="PixelOS-AOSP/android_packages_services_DeviceAsWebcam" groups="pdk-cw-fs,pdk-fs" remote="github" />
-  <project path="packages/services/Telecomm" name="PixelOS-AOSP/android_packages_services_Telecomm" groups="pdk-cw-fs,pdk-fs" remote="github" />
-  <project path="packages/services/Telephony" name="PixelOS-AOSP/android_packages_services_Telephony" groups="pdk-cw-fs,pdk-fs" remote="github" />
-  <project path="system/bpf" name="PixelOS-AOSP/android_system_bpf" groups="pdk" remote="github" />
-  <project path="system/chre" name="PixelOS-AOSP/android_system_chre" groups="pdk" remote="github" />
-  <project path="system/core" name="PixelOS-AOSP/android_system_core" groups="pdk" remote="github" />
-  <project path="system/extras" name="PixelOS-AOSP/android_system_extras" groups="pdk" remote="github" />
-  <project path="system/fs/fs_mgr" name="PixelOS-AOSP/android_system_fs_fs_mgr" groups="pdk" remote="github" />
-  <project path="system/logging" name="PixelOS-AOSP/android_system_logging" groups="pdk" remote="github" />
-  <project path="system/libfmq" name="PixelOS-AOSP/android_system_libfmq" groups="pdk" remote="github" />
-  <project path="system/libufdt" name="PixelOS-AOSP/android_system_libufdt" groups="pdk" remote="github" />
-  <project path="system/libziparchive" name="PixelOS-AOSP/android_system_libziparchive" groups="pdk" remote="github" />
-  <project path="system/media" name="PixelOS-AOSP/android_system_media" groups="pdk" remote="github" />
-  <project path="system/memory/libion" name="PixelOS-AOSP/android_system_memory_libion" groups="pdk" remote="github" />
-  <project path="system/memory/libdmabufheap" name="PixelOS-AOSP/android_system_memory_libdmabufheap" groups="pdk" remote="github" />
-  <project path="system/sepolicy" name="PixelOS-AOSP/android_system_sepolicy" groups="pdk" remote="github" />
-  <project path="system/security" name="PixelOS-AOSP/android_system_security" groups="pdk" remote="github" />
-  <project path="system/update_engine" name="PixelOS-AOSP/android_system_update_engine" groups="pdk" remote="github" />
-  <project path="system/vold" name="PixelOS-AOSP/android_system_vold" groups="pdk" remote="github" />
+  <project path="packages/apps/TouchGestures" name="PixelOS-AOSP/android_packages_apps_TouchGestures" remote="github"  revision="5294f537f8100d2f98e705fd54b55becd4ad76ec"  upstream="refs/heads/seventeen" />
+  <project path="packages/apps/TV" name="PixelOS-AOSP/android_packages_apps_TV" groups="pdk" remote="github"  revision="d8ecbce13f949d3a96f3ec8b74710cd83a8985cc"  upstream="refs/heads/seventeen" />
+  <project path="packages/apps/Updater" name="PixelOS-AOSP/android_packages_apps_Updater" remote="github"  revision="19b609fb0fa63c31405a69de97ed5aa5cc927e9d"  upstream="refs/heads/seventeen" />
+  <project path="packages/apps/DolbyAtmos" name="PixelOS-AOSP/android_packages_apps_DolbyAtmos" remote="github"  revision="13bbe61cf3e1046e3a1f0bda4719c321c953ce50"  upstream="refs/heads/seventeen" />
+  <project path="packages/apps/ColumbusService" name="PixelOS-AOSP/android_packages_apps_ColumbusService" remote="github"  revision="ec1c0be9381f7ba0272bd021ad5f940675058823"  upstream="refs/heads/seventeen" />
+  <project path="packages/modules/adb" name="PixelOS-AOSP/android_packages_modules_adb" groups="pdk" remote="github"  revision="df369002b065c10ebc72923a2e449353a14d7209"  upstream="refs/heads/seventeen" />
+  <project path="packages/modules/Bluetooth" name="PixelOS-AOSP/android_packages_modules_Bluetooth" groups="pdk" remote="github"  revision="04618720b1bcefe990ab2d14e713a39393ae1072"  upstream="refs/heads/seventeen" />
+  <project path="packages/modules/Connectivity" name="PixelOS-AOSP/android_packages_modules_Connectivity" groups="pdk-cw-fs,pdk-fs" remote="github"  revision="12221cef10c09c64c8af109a5361e65b13c4c794"  upstream="refs/heads/seventeen" />
+  <project path="packages/modules/Nfc" name="PixelOS-AOSP/android_packages_modules_Nfc" groups="pdk-cw-fs,pdk-fs" remote="github"  revision="11ddd3b7b6cfa506f5959332dfda5390d3baac71"  upstream="refs/heads/seventeen" />
+  <project path="packages/modules/Permission" name="PixelOS-AOSP/android_packages_modules_Permission" groups="pdk-cw-fs,pdk-fs" remote="github"  revision="f3f8a6a4db88915ada8e26475796a5e3a3e18c87"  upstream="refs/heads/seventeen" />
+  <project path="packages/modules/Telephony" name="PixelOS-AOSP/android_packages_modules_Telephony" groups="pdk-cw-fs,pdk-fs" remote="github"  revision="bb5e4093999c322ebfdbe9acd5c06139c4f021a5"  upstream="refs/heads/seventeen" />
+  <project path="packages/modules/UprobeStats" name="PixelOS-AOSP/android_packages_modules_UprobeStats" groups="pdk-cw-fs,pdk-fs" remote="github"  revision="7cffa93ccbe6c25182cf27a46eeba75f4f9f551f"  upstream="refs/heads/seventeen" />
+  <project path="packages/modules/Uwb" name="PixelOS-AOSP/android_packages_modules_Uwb" groups="pdk-cw-fs,pdk-fs" remote="github"  revision="980c421e23a8bcd527e1c5ab1891b57f78d9f2a3"  upstream="refs/heads/seventeen" />
+  <project path="packages/modules/Wifi" name="PixelOS-AOSP/android_packages_modules_Wifi" groups="pdk-cw-fs,pdk-fs,sysui-studio" remote="github"  revision="656098301250bc79e3faa6907bdf15fa8996a93d"  upstream="refs/heads/seventeen" />
+  <project path="packages/providers/ContactsProvider" name="PixelOS-AOSP/android_packages_providers_ContactsProvider" groups="pdk-cw-fs,pdk-fs" remote="github"  revision="61bc235dd966bf14b6052a68a11e48977d71f7e3"  upstream="refs/heads/seventeen" />
+  <project path="packages/providers/DownloadProvider" name="PixelOS-AOSP/android_packages_providers_DownloadProvider" groups="pdk-cw-fs,pdk-fs" remote="github"  revision="a647f32c19c629ebf80f24ec669b0b4c4914531c"  upstream="refs/heads/seventeen" />
+  <project path="packages/providers/MediaProvider" name="PixelOS-AOSP/android_packages_providers_MediaProvider" groups="pdk-cw-fs,pdk-fs,sysui-studio" remote="github"  revision="eaf62ef2f7f864c5345a2da747cef320690568e8"  upstream="refs/heads/seventeen" />
+  <project path="packages/providers/TelephonyProvider" name="PixelOS-AOSP/android_packages_providers_TelephonyProvider" groups="pdk-cw-fs,pdk-fs" remote="github"  revision="f0b80a81153e60540ad81439d96422e90e8e7157"  upstream="refs/heads/seventeen" />
+  <project path="packages/services/BuiltInPrintService" name="PixelOS-AOSP/android_packages_services_BuiltInPrintService" groups="pdk-cw-fs,pdk-fs" remote="github"  revision="0d48be3c94036879a4036f4d28620572e1ffd2e7"  upstream="refs/heads/seventeen" />
+  <project path="packages/services/DeviceAsWebcam" name="PixelOS-AOSP/android_packages_services_DeviceAsWebcam" groups="pdk-cw-fs,pdk-fs" remote="github"  revision="4a4554596a7fc0515286da9a22ee9076e49fc824"  upstream="refs/heads/seventeen" />
+  <project path="packages/services/Telecomm" name="PixelOS-AOSP/android_packages_services_Telecomm" groups="pdk-cw-fs,pdk-fs" remote="github"  revision="b49dd5a651541d9085a74137e230636868ff7b2a"  upstream="refs/heads/seventeen" />
+  <project path="packages/services/Telephony" name="PixelOS-AOSP/android_packages_services_Telephony" groups="pdk-cw-fs,pdk-fs" remote="github"  revision="b2505ac94a9d7cd32ad58632f58fae1762a55f6b"  upstream="refs/heads/seventeen" />
+  <project path="system/bpf" name="PixelOS-AOSP/android_system_bpf" groups="pdk" remote="github"  revision="16da9ba083bf8e7fe5c22fd8bf67a839ec22386c"  upstream="refs/heads/seventeen" />
+  <project path="system/chre" name="PixelOS-AOSP/android_system_chre" groups="pdk" remote="github"  revision="dc3929147750efdacc115da8356347d64f0e6305"  upstream="refs/heads/seventeen" />
+  <project path="system/core" name="PixelOS-AOSP/android_system_core" groups="pdk" remote="github"  revision="a5313eaec0219b021aaa5e59cc10dd07cfa8504c"  upstream="refs/heads/seventeen" />
+  <project path="system/extras" name="PixelOS-AOSP/android_system_extras" groups="pdk" remote="github"  revision="c2e4fff651e4f211085dd5396ea3a9c9b66f16c4"  upstream="refs/heads/seventeen" />
+  <project path="system/fs/fs_mgr" name="PixelOS-AOSP/android_system_fs_fs_mgr" groups="pdk" remote="github"  revision="65789bc4a63799efb145840627882b508cf08838"  upstream="refs/heads/seventeen" />
+  <project path="system/logging" name="PixelOS-AOSP/android_system_logging" groups="pdk" remote="github"  revision="e0f7d46a9dbe8525ef36e8428a9ead57e8722186"  upstream="refs/heads/seventeen" />
+  <project path="system/libfmq" name="PixelOS-AOSP/android_system_libfmq" groups="pdk" remote="github"  revision="a44984387afd59414e59c1d4bbb00f731c99dab0"  upstream="refs/heads/seventeen" />
+  <project path="system/libufdt" name="PixelOS-AOSP/android_system_libufdt" groups="pdk" remote="github"  revision="fd2ed4526bd68b87ecd4473fbee3ba704d44ea57"  upstream="refs/heads/seventeen" />
+  <project path="system/libziparchive" name="PixelOS-AOSP/android_system_libziparchive" groups="pdk" remote="github"  revision="1dde1511787ad976a3bc296bfa2d704f91deca0f"  upstream="refs/heads/seventeen" />
+  <project path="system/media" name="PixelOS-AOSP/android_system_media" groups="pdk" remote="github"  revision="8e2feccd03b17e6efe6544f336b85c9383f24c35"  upstream="refs/heads/seventeen" />
+  <project path="system/memory/libion" name="PixelOS-AOSP/android_system_memory_libion" groups="pdk" remote="github"  revision="abd899da1a42064c66067bc84f427bf27edd81f9"  upstream="refs/heads/seventeen" />
+  <project path="system/memory/libdmabufheap" name="PixelOS-AOSP/android_system_memory_libdmabufheap" groups="pdk" remote="github"  revision="57925b760460430b1424bf0fa4cb0ffe001b9cfd"  upstream="refs/heads/seventeen" />
+  <project path="system/sepolicy" name="PixelOS-AOSP/android_system_sepolicy" groups="pdk" remote="github"  revision="99c58a7cc9a44fe33c93808452d018e756d84753"  upstream="refs/heads/seventeen" />
+  <project path="system/security" name="PixelOS-AOSP/android_system_security" groups="pdk" remote="github"  revision="7feccd559d2781778a05ea718459572b77f7c3c4"  upstream="refs/heads/seventeen" />
+  <project path="system/update_engine" name="PixelOS-AOSP/android_system_update_engine" groups="pdk" remote="github"  revision="1938420295a90e0bfef3ce9ed867b87da2e63a6f"  upstream="refs/heads/seventeen" />
+  <project path="system/vold" name="PixelOS-AOSP/android_system_vold" groups="pdk" remote="github"  revision="11d8982f824d52e8122c7aa732207ba66b8f23c8"  upstream="refs/heads/seventeen" />
   <project path="vendor/lineage" name="its-hecker/heckeros_vendor_lineage" remote="heckeros" />
   <project path="vendor/custom" name="its-hecker/heckeros_vendor_custom" remote="heckeros" />
-  <project path="vendor/custom-preference" name="PixelOS-AOSP/android_vendor_custom-preference" remote="github" />
-  <project path="vendor/crowdin" name="PixelOS-AOSP/android_vendor_crowdin" remote="github" revision="seventeen" />
+  <project path="vendor/custom-preference" name="PixelOS-AOSP/android_vendor_custom-preference" remote="github"  revision="4d569cc0e76cb4183c0761bebd1f8c81f5fc7a95"  upstream="refs/heads/seventeen" />
+  <project path="vendor/crowdin" name="PixelOS-AOSP/android_vendor_crowdin" remote="github" revision="b19ea47aaa62ed4b72b3d21267b54bb12270c2f4"  upstream="refs/heads/seventeen" />
 
   <!-- Tools -->
-  <project path="lineage/scripts" name="PixelOS-AOSP/scripts" groups="tools" remote="github" revision="main" />
+  <project path="lineage/scripts" name="PixelOS-AOSP/scripts" groups="tools" remote="github" revision="0404400be1907b50e3c037957cc7c736e2ec7bea"  upstream="refs/heads/main" />
 
   <!-- google/pixel apps -->
-  <project path="vendor/pixel/extract-utils" name="PixelOS-AOSP/android_vendor_pixel_extract-utils" remote="gitlab" revision="seventeen" >
+  <project path="vendor/pixel/extract-utils" name="PixelOS-AOSP/android_vendor_pixel_extract-utils" remote="gitlab" revision="1d33f8006c517d40e1cc2266583806d557db4680"  upstream="refs/heads/seventeen">
     <linkfile src="extract-all.sh" dest="vendor/pixel/extract-all.sh" />
   </project>
-  <project path="vendor/pixel/clocks" name="PixelOS-AOSP/proprietary_vendor_pixel_clocks" remote="gitlab" />
-  <project path="vendor/pixel/gms" name="PixelOS-AOSP/proprietary_vendor_pixel_gms-17" remote="gitlab" />
-  <project path="vendor/pixel/gsans" name="PixelOS-AOSP/proprietary_vendor_pixel_gsans" remote="gitlab" />
-  <project path="vendor/pixel/launcher" name="PixelOS-AOSP/proprietary_vendor_pixel_launcher" remote="gitlab" />
-  <project path="vendor/pixel/sounds" name="PixelOS-AOSP/proprietary_vendor_pixel_sounds" remote="gitlab" />
-  <project path="vendor/pixel/themepicker" name="PixelOS-AOSP/proprietary_vendor_pixel_themepicker" remote="gitlab" />
+  <project path="vendor/pixel/clocks" name="PixelOS-AOSP/proprietary_vendor_pixel_clocks" remote="gitlab"  revision="ac4dbf812786b6fc4dc2295a2da89e7ad0006031"  upstream="refs/heads/seventeen" />
+  <project path="vendor/pixel/gms" name="PixelOS-AOSP/proprietary_vendor_pixel_gms-17" remote="gitlab"  revision="7feb3322ac4a0849f32d8b95e565e73cf6774a20"  upstream="refs/heads/seventeen" />
+  <project path="vendor/pixel/gsans" name="PixelOS-AOSP/proprietary_vendor_pixel_gsans" remote="gitlab"  revision="704c1ad882d640d7052dbd59d40b79162d339bf5"  upstream="refs/heads/seventeen" />
+  <project path="vendor/pixel/launcher" name="PixelOS-AOSP/proprietary_vendor_pixel_launcher" remote="gitlab"  revision="67ed56a43d89158436bb249e8e5633afdfc845a0"  upstream="refs/heads/seventeen" />
+  <project path="vendor/pixel/sounds" name="PixelOS-AOSP/proprietary_vendor_pixel_sounds" remote="gitlab"  revision="7e322bfc120005918bd6d2800f46ed31ad8c3b74"  upstream="refs/heads/seventeen" />
+  <project path="vendor/pixel/themepicker" name="PixelOS-AOSP/proprietary_vendor_pixel_themepicker" remote="gitlab"  revision="28a194eb2eeddb8985723501a1688a9b71d3c356"  upstream="refs/heads/seventeen" />
 </manifest>

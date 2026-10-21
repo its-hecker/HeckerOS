@@ -1,0 +1,615 @@
+{
+  "checked_on": "2026-10-21",
+  "policy": "Pinned upstream sources with owned HeckerOS customization forks; bulk migration is optional.",
+  "projects": [
+    {
+      "path": "art",
+      "repository": "PixelOS-AOSP/android_art",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "03ecb9ce33814e78460a2714d0c4d75bf6f8f2da"
+    },
+    {
+      "path": "bionic",
+      "repository": "PixelOS-AOSP/android_bionic",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "5d705964bdc742639dd256871119209f1c65d688"
+    },
+    {
+      "path": "bootable/deprecated-ota",
+      "repository": "PixelOS-AOSP/android_bootable_deprecated-ota",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "783c2ac44772079587cece5f4c6a681e32ad5847"
+    },
+    {
+      "path": "bootable/recovery",
+      "repository": "PixelOS-AOSP/android_bootable_recovery",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "410707c908dc61faec79bf9fec2ef17712fde8ce"
+    },
+    {
+      "path": "build/make",
+      "repository": "PixelOS-AOSP/android_build",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "f201c9c3ec3184695f012df5ef79d79b04fe2d36"
+    },
+    {
+      "path": "build/soong",
+      "repository": "PixelOS-AOSP/android_build_soong",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "321ecf4fc740482603b917c5de30a0e27e97595e"
+    },
+    {
+      "path": "development",
+      "repository": "PixelOS-AOSP/android_development",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "a732e6c75f9a4fff94f36d0cfc27211cebf95a4a"
+    },
+    {
+      "path": "device/custom/sepolicy",
+      "repository": "PixelOS-AOSP/android_device_custom_sepolicy",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "4ac6362144ecaa9dfea1b512bc67e2c2d68c2b30"
+    },
+    {
+      "path": "external/avb",
+      "repository": "PixelOS-AOSP/android_external_avb",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "15b4e85b56cdd7e32601074dbb269f5d3ba43eaf"
+    },
+    {
+      "path": "external/bouncycastle",
+      "repository": "PixelOS-AOSP/android_external_bouncycastle",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "f5e089c319a22ab66740c494d735ffbc87b40790"
+    },
+    {
+      "path": "external/dtc",
+      "repository": "PixelOS-AOSP/android_external_dtc",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "248659cba0376c296f3a92bc3159397b70fb3956"
+    },
+    {
+      "path": "external/dng_sdk",
+      "repository": "PixelOS-AOSP/android_external_dng_sdk",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "abfb92d7448cd05bd9d85bbcbfcd9b164403a13c"
+    },
+    {
+      "path": "external/e2fsprogs",
+      "repository": "PixelOS-AOSP/android_external_e2fsprogs",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "fafbf466cbd35af4884f4ab178f8b0f8d8663494"
+    },
+    {
+      "path": "external/exfatprogs",
+      "repository": "PixelOS-AOSP/android_external_exfatprogs",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "96fc1f47bbfb4508fd5e4f5cc78c2cfac2dacc70"
+    },
+    {
+      "path": "external/freetype",
+      "repository": "PixelOS-AOSP/android_external_freetype",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "07e81e3e06eb63858e96a8393c7f615e3d744056"
+    },
+    {
+      "path": "external/gptfdisk",
+      "repository": "PixelOS-AOSP/android_external_gptfdisk",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "0986c41e89e30bc062fe6af11aea45c9ec1e991a"
+    },
+    {
+      "path": "external/libcupsfilters",
+      "repository": "PixelOS-AOSP/android_external_libcupsfilters",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "7acd60402ad1c99af6d4066504c0a7b16b03f2c8"
+    },
+    {
+      "path": "external/libhevc",
+      "repository": "PixelOS-AOSP/android_external_libhevc",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "4b4ea30f94ed47ff83d54befb86f202f661e7130"
+    },
+    {
+      "path": "external/libjxl",
+      "repository": "PixelOS-AOSP/android_external_libjxl",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "cbd5d8a0e4e7232e440ad64e712bc8a45fd52a11"
+    },
+    {
+      "path": "external/libopenapv",
+      "repository": "PixelOS-AOSP/android_external_libopenapv",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "1f7d75914d98c47ec2109d94c9561aa9718bd75c"
+    },
+    {
+      "path": "external/libpng",
+      "repository": "PixelOS-AOSP/android_external_libpng",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "3fa0286f7c33499e3e837478b364484b4ea296d7"
+    },
+    {
+      "path": "external/libppd",
+      "repository": "PixelOS-AOSP/android_external_libppd",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "4d7dca4bc1885a72219db07156a48a1f3989b160"
+    },
+    {
+      "path": "external/mksh",
+      "repository": "PixelOS-AOSP/android_external_mksh",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "1b341806f76fe175557756eed3e79aa282cea49a"
+    },
+    {
+      "path": "external/tinycompress",
+      "repository": "PixelOS-AOSP/android_external_tinycompress",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "b58bf8a87b615be95e4107ff33c0d841269fb417"
+    },
+    {
+      "path": "external/wpa_supplicant_8",
+      "repository": "PixelOS-AOSP/android_external_wpa_supplicant_8",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "3346cba3ebae1c14aed18ed97ee7345d6799dcb5"
+    },
+    {
+      "path": "external/zstd",
+      "repository": "PixelOS-AOSP/android_external_zstd",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "ec76dd347d213816a4a6b0bdf6830885cc5812a2"
+    },
+    {
+      "path": "frameworks/av",
+      "repository": "PixelOS-AOSP/android_frameworks_av",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "3a806486c35d4825bd97d95af3e172309aed2fda"
+    },
+    {
+      "path": "frameworks/native",
+      "repository": "PixelOS-AOSP/android_frameworks_native",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "fe64500f2fb0b0053667f3e1af3603122643e270"
+    },
+    {
+      "path": "frameworks/opt/telephony",
+      "repository": "PixelOS-AOSP/android_frameworks_opt_telephony",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "7ee96142e28c3580c2426760a4b533256743d06f"
+    },
+    {
+      "path": "hardware/google/pixel",
+      "repository": "PixelOS-AOSP/android_hardware_google_pixel",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "697c4370a439248b35f8cbc17dde3974425b4fc2"
+    },
+    {
+      "path": "hardware/google/pixel-sepolicy",
+      "repository": "PixelOS-AOSP/android_hardware_google_pixel-sepolicy",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "ef0ea0b5ce600712c586e880d6876eeba1f85cc7"
+    },
+    {
+      "path": "hardware/interfaces",
+      "repository": "PixelOS-AOSP/android_hardware_interfaces",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "7447ce416bbc527a1e7100196eddd568d084b413"
+    },
+    {
+      "path": "hardware/libhardware",
+      "repository": "PixelOS-AOSP/android_hardware_libhardware",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "60142e668356ae78ebd3b6d4af8b8e99524feee3"
+    },
+    {
+      "path": "hardware/nxp/nfc",
+      "repository": "PixelOS-AOSP/android_hardware_nxp_nfc",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "af6bbbc37a3812db5810f633326e0d17037e9c8c"
+    },
+    {
+      "path": "hardware/nxp/secure_element",
+      "repository": "PixelOS-AOSP/android_hardware_nxp_secure_element",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "9994eafd37af36bfd18df4bb75a6f4e7e848d525"
+    },
+    {
+      "path": "hardware/st/nfc",
+      "repository": "PixelOS-AOSP/android_hardware_st_nfc",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "31f568a0b25c85bd00919091bfbe497e2f8757fd"
+    },
+    {
+      "path": "kernel/configs",
+      "repository": "PixelOS-AOSP/android_kernel_configs",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "3c25f55b591d2689c8f7dee0c01b135e87a863a2"
+    },
+    {
+      "path": "packages/apps/ContactsPicker",
+      "repository": "PixelOS-AOSP/android_packages_apps_ContactsPicker",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "2874941c128ccc4bc8a6d254f90e2ce535e8a49b"
+    },
+    {
+      "path": "packages/apps/ParanoidSense",
+      "repository": "PixelOS-AOSP/android_packages_apps_ParanoidSense",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "912c40b765915c9d6a6eb90763ed4c48f53cd86e"
+    },
+    {
+      "path": "packages/apps/TouchGestures",
+      "repository": "PixelOS-AOSP/android_packages_apps_TouchGestures",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "5294f537f8100d2f98e705fd54b55becd4ad76ec"
+    },
+    {
+      "path": "packages/apps/TV",
+      "repository": "PixelOS-AOSP/android_packages_apps_TV",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "d8ecbce13f949d3a96f3ec8b74710cd83a8985cc"
+    },
+    {
+      "path": "packages/apps/Updater",
+      "repository": "PixelOS-AOSP/android_packages_apps_Updater",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "19b609fb0fa63c31405a69de97ed5aa5cc927e9d"
+    },
+    {
+      "path": "packages/apps/DolbyAtmos",
+      "repository": "PixelOS-AOSP/android_packages_apps_DolbyAtmos",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "13bbe61cf3e1046e3a1f0bda4719c321c953ce50"
+    },
+    {
+      "path": "packages/apps/ColumbusService",
+      "repository": "PixelOS-AOSP/android_packages_apps_ColumbusService",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "ec1c0be9381f7ba0272bd021ad5f940675058823"
+    },
+    {
+      "path": "packages/modules/adb",
+      "repository": "PixelOS-AOSP/android_packages_modules_adb",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "df369002b065c10ebc72923a2e449353a14d7209"
+    },
+    {
+      "path": "packages/modules/Bluetooth",
+      "repository": "PixelOS-AOSP/android_packages_modules_Bluetooth",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "04618720b1bcefe990ab2d14e713a39393ae1072"
+    },
+    {
+      "path": "packages/modules/Connectivity",
+      "repository": "PixelOS-AOSP/android_packages_modules_Connectivity",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "12221cef10c09c64c8af109a5361e65b13c4c794"
+    },
+    {
+      "path": "packages/modules/Nfc",
+      "repository": "PixelOS-AOSP/android_packages_modules_Nfc",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "11ddd3b7b6cfa506f5959332dfda5390d3baac71"
+    },
+    {
+      "path": "packages/modules/Permission",
+      "repository": "PixelOS-AOSP/android_packages_modules_Permission",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "f3f8a6a4db88915ada8e26475796a5e3a3e18c87"
+    },
+    {
+      "path": "packages/modules/Telephony",
+      "repository": "PixelOS-AOSP/android_packages_modules_Telephony",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "bb5e4093999c322ebfdbe9acd5c06139c4f021a5"
+    },
+    {
+      "path": "packages/modules/UprobeStats",
+      "repository": "PixelOS-AOSP/android_packages_modules_UprobeStats",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "7cffa93ccbe6c25182cf27a46eeba75f4f9f551f"
+    },
+    {
+      "path": "packages/modules/Uwb",
+      "repository": "PixelOS-AOSP/android_packages_modules_Uwb",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "980c421e23a8bcd527e1c5ab1891b57f78d9f2a3"
+    },
+    {
+      "path": "packages/modules/Wifi",
+      "repository": "PixelOS-AOSP/android_packages_modules_Wifi",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "656098301250bc79e3faa6907bdf15fa8996a93d"
+    },
+    {
+      "path": "packages/providers/ContactsProvider",
+      "repository": "PixelOS-AOSP/android_packages_providers_ContactsProvider",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "61bc235dd966bf14b6052a68a11e48977d71f7e3"
+    },
+    {
+      "path": "packages/providers/DownloadProvider",
+      "repository": "PixelOS-AOSP/android_packages_providers_DownloadProvider",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "a647f32c19c629ebf80f24ec669b0b4c4914531c"
+    },
+    {
+      "path": "packages/providers/MediaProvider",
+      "repository": "PixelOS-AOSP/android_packages_providers_MediaProvider",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "eaf62ef2f7f864c5345a2da747cef320690568e8"
+    },
+    {
+      "path": "packages/providers/TelephonyProvider",
+      "repository": "PixelOS-AOSP/android_packages_providers_TelephonyProvider",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "f0b80a81153e60540ad81439d96422e90e8e7157"
+    },
+    {
+      "path": "packages/services/BuiltInPrintService",
+      "repository": "PixelOS-AOSP/android_packages_services_BuiltInPrintService",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "0d48be3c94036879a4036f4d28620572e1ffd2e7"
+    },
+    {
+      "path": "packages/services/DeviceAsWebcam",
+      "repository": "PixelOS-AOSP/android_packages_services_DeviceAsWebcam",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "4a4554596a7fc0515286da9a22ee9076e49fc824"
+    },
+    {
+      "path": "packages/services/Telecomm",
+      "repository": "PixelOS-AOSP/android_packages_services_Telecomm",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "b49dd5a651541d9085a74137e230636868ff7b2a"
+    },
+    {
+      "path": "packages/services/Telephony",
+      "repository": "PixelOS-AOSP/android_packages_services_Telephony",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "b2505ac94a9d7cd32ad58632f58fae1762a55f6b"
+    },
+    {
+      "path": "system/bpf",
+      "repository": "PixelOS-AOSP/android_system_bpf",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "16da9ba083bf8e7fe5c22fd8bf67a839ec22386c"
+    },
+    {
+      "path": "system/chre",
+      "repository": "PixelOS-AOSP/android_system_chre",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "dc3929147750efdacc115da8356347d64f0e6305"
+    },
+    {
+      "path": "system/core",
+      "repository": "PixelOS-AOSP/android_system_core",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "a5313eaec0219b021aaa5e59cc10dd07cfa8504c"
+    },
+    {
+      "path": "system/extras",
+      "repository": "PixelOS-AOSP/android_system_extras",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "c2e4fff651e4f211085dd5396ea3a9c9b66f16c4"
+    },
+    {
+      "path": "system/fs/fs_mgr",
+      "repository": "PixelOS-AOSP/android_system_fs_fs_mgr",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "65789bc4a63799efb145840627882b508cf08838"
+    },
+    {
+      "path": "system/logging",
+      "repository": "PixelOS-AOSP/android_system_logging",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "e0f7d46a9dbe8525ef36e8428a9ead57e8722186"
+    },
+    {
+      "path": "system/libfmq",
+      "repository": "PixelOS-AOSP/android_system_libfmq",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "a44984387afd59414e59c1d4bbb00f731c99dab0"
+    },
+    {
+      "path": "system/libufdt",
+      "repository": "PixelOS-AOSP/android_system_libufdt",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "fd2ed4526bd68b87ecd4473fbee3ba704d44ea57"
+    },
+    {
+      "path": "system/libziparchive",
+      "repository": "PixelOS-AOSP/android_system_libziparchive",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "1dde1511787ad976a3bc296bfa2d704f91deca0f"
+    },
+    {
+      "path": "system/media",
+      "repository": "PixelOS-AOSP/android_system_media",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "8e2feccd03b17e6efe6544f336b85c9383f24c35"
+    },
+    {
+      "path": "system/memory/libion",
+      "repository": "PixelOS-AOSP/android_system_memory_libion",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "abd899da1a42064c66067bc84f427bf27edd81f9"
+    },
+    {
+      "path": "system/memory/libdmabufheap",
+      "repository": "PixelOS-AOSP/android_system_memory_libdmabufheap",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "57925b760460430b1424bf0fa4cb0ffe001b9cfd"
+    },
+    {
+      "path": "system/sepolicy",
+      "repository": "PixelOS-AOSP/android_system_sepolicy",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "99c58a7cc9a44fe33c93808452d018e756d84753"
+    },
+    {
+      "path": "system/security",
+      "repository": "PixelOS-AOSP/android_system_security",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "7feccd559d2781778a05ea718459572b77f7c3c4"
+    },
+    {
+      "path": "system/update_engine",
+      "repository": "PixelOS-AOSP/android_system_update_engine",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "1938420295a90e0bfef3ce9ed867b87da2e63a6f"
+    },
+    {
+      "path": "system/vold",
+      "repository": "PixelOS-AOSP/android_system_vold",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "11d8982f824d52e8122c7aa732207ba66b8f23c8"
+    },
+    {
+      "path": "vendor/custom-preference",
+      "repository": "PixelOS-AOSP/android_vendor_custom-preference",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "4d569cc0e76cb4183c0761bebd1f8c81f5fc7a95"
+    },
+    {
+      "path": "vendor/crowdin",
+      "repository": "PixelOS-AOSP/android_vendor_crowdin",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "b19ea47aaa62ed4b72b3d21267b54bb12270c2f4"
+    },
+    {
+      "path": "lineage/scripts",
+      "repository": "PixelOS-AOSP/scripts",
+      "remote": "github",
+      "branch": "main",
+      "revision": "0404400be1907b50e3c037957cc7c736e2ec7bea"
+    },
+    {
+      "path": "vendor/pixel/extract-utils",
+      "repository": "PixelOS-AOSP/android_vendor_pixel_extract-utils",
+      "remote": "gitlab",
+      "branch": "seventeen",
+      "revision": "1d33f8006c517d40e1cc2266583806d557db4680"
+    },
+    {
+      "path": "vendor/pixel/clocks",
+      "repository": "PixelOS-AOSP/proprietary_vendor_pixel_clocks",
+      "remote": "gitlab",
+      "branch": "seventeen",
+      "revision": "ac4dbf812786b6fc4dc2295a2da89e7ad0006031"
+    },
+    {
+      "path": "vendor/pixel/gms",
+      "repository": "PixelOS-AOSP/proprietary_vendor_pixel_gms-17",
+      "remote": "gitlab",
+      "branch": "seventeen",
+      "revision": "7feb3322ac4a0849f32d8b95e565e73cf6774a20"
+    },
+    {
+      "path": "vendor/pixel/gsans",
+      "repository": "PixelOS-AOSP/proprietary_vendor_pixel_gsans",
+      "remote": "gitlab",
+      "branch": "seventeen",
+      "revision": "704c1ad882d640d7052dbd59d40b79162d339bf5"
+    },
+    {
+      "path": "vendor/pixel/launcher",
+      "repository": "PixelOS-AOSP/proprietary_vendor_pixel_launcher",
+      "remote": "gitlab",
+      "branch": "seventeen",
+      "revision": "67ed56a43d89158436bb249e8e5633afdfc845a0"
+    },
+    {
+      "path": "vendor/pixel/sounds",
+      "repository": "PixelOS-AOSP/proprietary_vendor_pixel_sounds",
+      "remote": "gitlab",
+      "branch": "seventeen",
+      "revision": "7e322bfc120005918bd6d2800f46ed31ad8c3b74"
+    },
+    {
+      "path": "vendor/pixel/themepicker",
+      "repository": "PixelOS-AOSP/proprietary_vendor_pixel_themepicker",
+      "remote": "gitlab",
+      "branch": "seventeen",
+      "revision": "28a194eb2eeddb8985723501a1688a9b71d3c356"
+    }
+  ]
+}
