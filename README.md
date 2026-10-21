@@ -2,8 +2,8 @@
 
 Hecker's custom PixelOS-based ROM for the Google Pixel 4 XL (**coral**).
 The first integration targets coral only. Pixel 4/flame support will follow after
-coral testing. All new repositories use one `main` branch; there is no second
-Hecker Suite feature branch in this project.
+coral testing. Integration and hardware repositories use `main`; the owned
+platform customization forks use `heckeros-17`.
 
 ## Included source
 
@@ -35,8 +35,9 @@ full ROM builds or boots. A full Soong build and coral hardware tests are requir
 Use a fresh Android source directory with the normal AOSP build prerequisites,
 Git LFS, Python 3, Pillow and numpy. `repo sync` also initializes the kernel's
 existing KernelSU submodule. The dedicated local manifest supplies exact hardware,
-plugin, Settings and framework revisions; this root manifest retains the PixelOS
-platform projects.
+plugin, Settings and framework revisions. The remaining 87 platform projects use
+their existing upstream repositories at exact commit pins. Forking them is
+optional and is not a build prerequisite.
 
 ```bash
 repo init -u https://github.com/its-hecker/HeckerOS -b main --git-lfs
@@ -71,6 +72,8 @@ policy, Google Camera packaging, boot diagnostics and branding live in this repo
 bash tests/run_host_tests.sh
 python3 tools/compile_sdk.py
 python3 tools/check_native_ports.py
+python3 tools/check_spoofing.py
+python3 tools/freeze_upstream.py --check
 python3 integration/tools/validate.py
 python3 -m unittest discover -s integration/tests -p 'test_*.py'
 python3 tools/fetch_theme_assets.py
@@ -82,14 +85,15 @@ See [Suite behavior and phone checks](docs/Suite.md),
 [boot animation](bootanimation/README.md). Preserve upstream licenses and credits;
 the Lunaris resource binaries and Google Camera retain their original terms.
 
-Platform checkpoint (21 October 2026)
+Build source policy (21 October 2026)
 
-Native Settings now includes the original Pixel pose-grid enrollment renderer and
-Play Integrity profile controls based on Axion's verified October 19 change,
-adapted to the pinned Android 17 framework. Settings, frameworks/base,
-vendor/custom and vendor/lineage now use owned `heckeros-17` branches. The other
-87 of 91 PixelOS-derived platform projects still need copying; this is a partial
-standalone migration. See [migration/README.md](migration/README.md) for the
-verified fork/mirror helper and [docs/face-integrity.md](docs/face-integrity.md)
-for behavior and validation limits. Full platform compilation, coral testing and
-an actual Play Integrity verdict remain required.
+Native Settings includes the original Pixel pose-grid renderer and Axion-derived
+PIF, game profile, keybox import and TrickyStore controls adapted to Android 17.
+Photos retains the PixelOS implementation. Settings, frameworks/base,
+vendor/custom and vendor/lineage use owned `heckeros-17` branches. The other 87
+projects remain upstream and are pinned. Our customizations are retained without
+copying those repositories. PixelOS changes require an explicit pin update,
+review and rebuild. See [migration/README.md](migration/README.md) for optional
+full ownership and [docs/face-integrity.md](docs/face-integrity.md) for configuration
+and validation limits. Full platform compilation, coral testing and an actual
+Play Integrity verdict remain required.

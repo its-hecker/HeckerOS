@@ -112,6 +112,7 @@ def main():
         java = [p for p in java if str(p.relative_to(settings/'src')) in lock['settings_java']]
         run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',str(sdk/'android-system.jar')+os.pathsep+str(jar),
             '-d',out/'settings-classes',out/'generated/com/android/settings/R.java',*java,
+            ROOT/'tests/platform-api-stubs/android/security/spoof/HeckerSpoofConfig.java',
             *sorted((settings/'tools/hecker/tests').glob('*.java')))
         for test in ['com.android.settings.biometrics.face.FacePoseEnrollmentStateTest',
                      'com.android.settings.hecker.PifProfileTest']:

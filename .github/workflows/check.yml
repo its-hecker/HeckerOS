@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
       - name: Smoke-check public Google metadata without changing a phone
         run: python3 tools/check_platform_features.py --metadata-only
   source:
@@ -30,13 +30,17 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
       - name: Verify authorization, raw decoding, gaming, lyrics and patch safety
         run: bash tests/run_host_tests.sh
       - name: Compile Suite Java and link Android resources with locked dependencies
         run: python3 tools/compile_sdk.py --cache generated/sdk
       - name: Check owned Pixel enrollment and Axion integrity adapters
         run: python3 tools/check_platform_features.py --sdk-cache generated/sdk
+      - name: Check Android 17 keystore integration and private spoofing configuration
+        run: python3 tools/check_spoofing.py
+      - name: Verify pinned upstream sources without requiring platform forks
+        run: python3 tools/freeze_upstream.py --check
       - name: Verify coral integration and recovery tools
         run: |
           python3 integration/tools/validate.py

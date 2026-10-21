@@ -26,23 +26,62 @@ public Google metadata and at most the first 4 KB of an OTA; it does not downloa
 or install the OTA. Profile writes use privileged native Settings. The framework
 reads public build metadata from the hecker_pif_config Global setting and applies
 it only to the attestation process and Play Store. Native property virtualization,
-optional provider/signature hooks run only in the attestation process. No Photos,
-game, keybox or TrickyStore hooks are installed. No private attestation keys are
-included. Other processes retain the ROM's real build properties.
+optional provider/signature hooks run only in the attestation process. Photos
+retains its existing PixelOS implementation; no Axion Photos hook is added.
+
+The same native page now includes Axion GameProps and TrickyStore support from
+framework revision `2017624b588861735445868ca809260bf2499f58`:
+
+* Game profiles import an Axion JSON object with `enabled` and a `games` map.
+  Each package maps to device identity strings, for example
+  `{"enabled":true,"games":{"com.example.game":{"MODEL":"Custom model"}}}`.
+  Only that package's real UID receives its profile. Android API-level fields
+  are not exposed by the game editor.
+* TrickyStore targets accept JSON arrays of `package`/`mode` objects, or one
+  package per line. No suffix selects AUTO; `?` selects LEAF_HACK; `!` selects
+  GENERATE. Targets are explicitly selected and limited to the primary user.
+* Keybox import accepts XML or base64 XML. No private attestation keys are bundled
+  or downloaded. The parser validates key/certificate pairing and rejects XML
+  entities and oversized input. Import your own keybox and choose its target apps.
+* Optional patch dates accept a JSON object with `system`, `vendor`, `boot` or
+  `all`, or text such as `all=2026-10-05`. These are attestation values, not an
+  installed Android security update. Each configuration can be removed separately.
+
+Game/target/keybox/patch configurations are stored atomically in private 0600
+system files and managed through native Settings's system UID. Private keys are
+never stored in SettingsProvider. Binder reads scope targets and game profiles
+to packages owned by the caller's real UID; only selected app UIDs receive a
+keybox. System/secondary/isolated UIDs do not use the app certificate hooks.
+The earlier PixelOS PIF/keybox paths defer when the corresponding Axion profile
+owns the request. The optional PIF blocking provider is skipped for a configured
+TrickyStore keybox, so it cannot block that certificate path.
+
+Both leaf replacement and software generation are implemented. Software generation
+requires an attestation challenge and an imported keybox. Authentication-bound,
+device-ID, explicit attestation-key, ML-DSA and Curve25519 generation keep their
+native Android 17 behavior. The real keystore still stores imported app keys.
+The port fixes EC signing with Android 17's repackaged Bouncy Castle, preserves
+certificate metadata after import, and reads the app signing identity from
+PackageManager even before Application creation. Unconfigured apps retain their
+normal build properties and certificate handling.
 
 Validation performed: locked SDK Java/resource compilation for the new Settings
 classes, standalone Suite UI compilation, face pose state regressions, profile
 and partial OTA metadata parsing, framework PIF parser/process-scope regressions,
 and native mapping/rule/write-bound tests under address/undefined-behavior
-sanitizers. Source adapters apply idempotently and revert against pinned native
-files. The standalone migration helper refuses manifest activation when any owned
-repository or reviewed source revision is missing.
+sanitizers. The expanded port type-checks the modified keystore classes and
+support classes against a checksum-locked Android 17 implementation JAR; stubs
+cover generated flags and the added/private PixelOS API surfaces. Host tests run
+the production configuration and RSA/EC certificate code with Android 17's JSON
+and repackaged Bouncy Castle, replacing OS/Binder boundaries with fakes.
+Source adapters apply idempotently and revert against pinned native files.
 
 A full Soong/Settings/framework build has not been run. Coral testing must still
 confirm the preview, pose directions, cancel/retry, screen off/on, dark theme,
 reduced motion, removal/re-enrollment and the actual Play Integrity verdict.
 Passing a host test does not establish a Google attestation verdict.
 
-The platform source migration is partial: four of 91 PixelOS-derived projects
-have verified owned branches. Follow migration/README.md for the remaining 87.
-Owned forks do not automatically receive upstream changes or phone updates.
+Four of 91 PixelOS-derived projects have owned branches. The remaining 87 stay
+upstream with exact source pins. Full repository migration is optional and is not
+a build prerequisite. Neither upstream fixes nor phone updates arrive
+automatically; updates require explicit source changes, another build and testing.

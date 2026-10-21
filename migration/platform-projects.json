@@ -277,7 +277,7 @@
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
     "source_revision": "81b912ee97d9d4673ed4696bde30f14841b26c99",
-    "destination_revision": "8d52af5d81a7123d28c675fcfc7c15c3fff33ddb"
+    "destination_revision": "7367a79dcb02c6388ab80b1cdf9ed7d223f8fcea"
   },
   {
     "path": "frameworks/native",
@@ -407,7 +407,7 @@
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
     "source_revision": "9c2cdaad64508ddce1a2cc55a2ebad422bcac818",
-    "destination_revision": "6e5c229db3239d69fa321264181075e92223aabc"
+    "destination_revision": "924f5306fee94a3ef37dd6e422c2ae4b9ebcda37"
   },
   {
     "path": "packages/apps/TouchGestures",

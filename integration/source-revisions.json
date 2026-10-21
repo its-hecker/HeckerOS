@@ -81,7 +81,7 @@
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
       "branch": "heckeros-17",
-      "revision": "8d52af5d81a7123d28c675fcfc7c15c3fff33ddb",
+      "revision": "7367a79dcb02c6388ab80b1cdf9ed7d223f8fcea",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -146,7 +146,7 @@
     "packages/apps/Settings": {
       "repository": "its-hecker/heckeros_packages_apps_Settings",
       "branch": "heckeros-17",
-      "revision": "6e5c229db3239d69fa321264181075e92223aabc",
+      "revision": "924f5306fee94a3ef37dd6e422c2ae4b9ebcda37",
       "files": [
         "src/com/android/settings/homepage/",
         "src/com/android/settings/DisplaySettings.java",
@@ -189,11 +189,13 @@
     }
   },
   "platform_ownership": {
-    "status": "partial",
+    "status": "pinned-upstream-with-owned-customizations",
     "owned_projects": 4,
     "total_pixelos_projects": 91,
     "remaining_projects": 87,
     "migration": "migration/README.md",
-    "updates": "Owned branches receive upstream changes only through explicit review and merges."
+    "updates": "Upstream changes require explicit pin updates, review and another build. No automatic merges or phone updates.",
+    "bulk_migration_required": false,
+    "upstream_lock": "integration/upstream-platform-lock.json"
   }
 }

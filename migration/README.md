@@ -1,15 +1,24 @@
-HeckerOS platform ownership
+HeckerOS platform ownership (optional full migration)
 
 The manifest has 91 PixelOS-derived platform projects: 84 on GitHub and seven
 on GitLab. Settings, frameworks/base, vendor/custom and vendor/lineage have
 verified HeckerOS forks and independent `heckeros-17` branches. The remaining
-87 repositories must exist and be verified before the full manifest is switched.
-This checkpoint is not a completed standalone source migration.
+87 repositories stay at their existing upstream locations and are pinned to
+exact commits in `snippets/pixelos.xml` and `integration/upstream-platform-lock.json`.
+They do not need to be forked to sync or build HeckerOS. Settings, Quick Settings,
+Suite, face enrollment, Motion Sense, branding and device integration remain in
+our owned sources and guarded adapters.
 
-The connected GitHub API can edit repositories but cannot create/fork them.
-The browser session timed out during further repository creation. The helper
-below completes the remaining work using GitHub CLI authentication on a machine
-with access to GitHub and GitLab. Do not paste access tokens into chat.
+Normal builds follow the root README; do not run the migration helper as a build
+prerequisite. Upstream updates enter this manifest only after explicitly changing
+the relevant commit pin, reviewing the change and building again. There is no
+automatic upstream merge or phone update. Verify the current source lock offline
+with `python3 tools/freeze_upstream.py --check`.
+
+The optional helper below can later move all platform sources into owned forks
+and mirrors. Its activation step requires all 91 destinations to exist and be
+verified. That all-or-nothing rule applies only to full ownership activation.
+Do not paste access tokens into chat.
 
 From a current HeckerOS manifest checkout, with git, Python 3, gh and git-lfs:
 

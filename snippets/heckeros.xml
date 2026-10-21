@@ -25,11 +25,11 @@
   <extend-project name="LineageOS/android_hardware_lineage_compat" path="hardware/lineage/compat" revision="590c94850e079642136a4577305d02e4174caabc" upstream="refs/heads/lineage-24.0" />
   <extend-project name="LineageOS/android_vendor_qcom_opensource_audioreach-graphservices" path="hardware/qcom-caf/sm8750/audio/graphservices" revision="62591b81ddb14cb1ddecf2a8e7162f2082456793" upstream="refs/heads/lineage-24.0-caf-sm8750" />
   <extend-project name="LineageOS/android_hardware_qcom-caf_common" path="hardware/qcom-caf/common" revision="5e84e6f8fc47530881fa8d95cf533617ff51e820" upstream="refs/heads/lineage-24.0" />
-  <extend-project name="PixelOS-AOSP/android_vendor_custom" path="vendor/custom" revision="e389a1e2caec0cd1e8dc5a5459b88cc2bad38897" upstream="refs/heads/seventeen" />
-  <extend-project name="PixelOS-AOSP/android_vendor_lineage" path="vendor/lineage" revision="0d2ff0b8055eb745d36dfef3600a73f5185a4fff" upstream="refs/heads/seventeen" />
-  <extend-project name="PixelOS-AOSP/android_frameworks_base" path="frameworks/base" revision="81b912ee97d9d4673ed4696bde30f14841b26c99" upstream="refs/heads/seventeen" />
+  <extend-project name="its-hecker/heckeros_vendor_custom" path="vendor/custom" revision="e389a1e2caec0cd1e8dc5a5459b88cc2bad38897" upstream="refs/heads/heckeros-17" />
+  <extend-project name="its-hecker/heckeros_vendor_lineage" path="vendor/lineage" revision="0d2ff0b8055eb745d36dfef3600a73f5185a4fff" upstream="refs/heads/heckeros-17" />
+  <extend-project name="its-hecker/heckeros_frameworks_base" path="frameworks/base" revision="7367a79dcb02c6388ab80b1cdf9ed7d223f8fcea" upstream="refs/heads/heckeros-17" />
   <extend-project name="platform/hardware/google/camera" path="hardware/google/camera" revision="cd15337bd229dd521a860d88bca3e37c3ca845f7" upstream="refs/tags/android-17.0.0_r1" />
   <extend-project name="PixelOS-AOSP/android_system_sepolicy" path="system/sepolicy" revision="99c58a7cc9a44fe33c93808452d018e756d84753" upstream="refs/heads/seventeen" />
   <extend-project name="PixelOS-AOSP/android_system_core" path="system/core" revision="a5313eaec0219b021aaa5e59cc10dd07cfa8504c" upstream="refs/heads/seventeen" />
-  <extend-project name="PixelOS-AOSP/android_packages_apps_Settings" path="packages/apps/Settings" revision="9c2cdaad64508ddce1a2cc55a2ebad422bcac818" upstream="refs/heads/seventeen" />
+  <extend-project name="its-hecker/heckeros_packages_apps_Settings" path="packages/apps/Settings" revision="924f5306fee94a3ef37dd6e422c2ae4b9ebcda37" upstream="refs/heads/heckeros-17" />
 </manifest>
