@@ -1,0 +1,28 @@
+name: Freeze upstream platform sources
+on:
+  push:
+    branches: [main]
+    paths: [tools/freeze_upstream.py, .github/workflows/freeze-upstream.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: hecker-platform-freeze
+  cancel-in-progress: false
+jobs:
+  freeze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Resolve public upstream branches without cloning or creating repositories
+        run: python3 tools/freeze_upstream.py --freeze
+      - name: Publish the reviewed source lock
+        run: |
+          git config user.name 'HeckerOS build bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add integration/upstream-platform-lock.json migration/platform-projects.json snippets/pixelos.xml
+          if ! git diff --cached --quiet; then
+            git commit -m 'Pin upstream platform sources for the first HeckerOS build'
+            git push origin HEAD:main
+          fi
