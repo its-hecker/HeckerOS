@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Public, read-only ROM identity consumed by native Settings and Suite About.
+ro.heckeros.version      u:object_r:build_prop:s0 exact string
+ro.heckeros.maintainer   u:object_r:build_prop:s0 exact string
+ro.heckeros.device       u:object_r:build_prop:s0 exact string
+ro.heckeros.build_type   u:object_r:build_prop:s0 exact string

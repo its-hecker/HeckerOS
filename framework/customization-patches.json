@@ -165,12 +165,6 @@
       "new": "# HeckerOS provides no stock PixelOS OTA channel."
     }
   ],
-  "vendor/custom/config/version.mk": [
-    {
-      "old": "ro.custom.version=PixelOS_$(CUSTOM_VERSION)",
-      "new": "ro.custom.version=HeckerOS_$(CUSTOM_VERSION)"
-    }
-  ],
   "vendor/custom/build/tasks/pixelos.mk": [
     {
       "old": "$(PRODUCT_OUT)/PixelOS_$(CUSTOM_VERSION).zip",

@@ -38,8 +38,13 @@ def main():
     paths = set(json.loads((ROOT / 'framework/customization-patches.json').read_text()))
     paths.add('frameworks/base/core/java/android/content/res/Resources.java')
     paths.update('packages/apps/Launcher3/' + p for p in json.loads((ROOT / 'launcher/patches.json').read_text()))
+    def cached_source(relative):
+        project = max((p for p in sources if relative.startswith(p + '/')), key=len)
+        # A pin update must never reuse content fetched for an older revision.
+        return args.cache / sources[project]['revision'] / relative
+
     for relative in sorted(paths):
-        cached = args.cache / relative
+        cached = cached_source(relative)
         if cached.is_file():
             continue
         if args.offline:
@@ -59,7 +64,7 @@ def main():
         for relative in paths:
             target = folder / relative
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(args.cache / relative, target)
+            shutil.copyfile(cached_source(relative), target)
         before = snapshot(folder)
         plans = (customization_plan, launcher_plan)
         count = 0

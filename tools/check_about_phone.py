@@ -63,6 +63,15 @@ def check_branding(vendor):
                 assert props.count("ro.heckeros.maintainer=Hecker") == 1, result.stdout
                 assert "net.pixelos.build_type=ci" not in props, result.stdout
                 assert "Updater" not in packages, result.stdout
+                contexts = {}
+                for line in (ROOT / "rom/sepolicy/private/property_contexts").read_text().splitlines():
+                    fields = line.split()
+                    if fields and not fields[0].startswith("#"):
+                        contexts[fields[0]] = fields[1:]
+                for value in props:
+                    key = value.split("=", 1)[0]
+                    if key.startswith("ro.heckeros."):
+                        assert contexts.get(key) == ["u:object_r:build_prop:s0", "exact", "string"], key
             else:
                 assert version.startswith("ro.custom.version=PixelOS_"), result.stdout
                 assert ("net.pixelos.build_type=ci" in props) == official, result.stdout
