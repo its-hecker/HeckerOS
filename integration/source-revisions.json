@@ -146,7 +146,7 @@
     "packages/apps/Settings": {
       "repository": "its-hecker/heckeros_packages_apps_Settings",
       "branch": "heckeros-17",
-      "revision": "f48943c0a7cefaf8b6f4458e41c5a732bb5091b0",
+      "revision": "63e2adf289417fb9a3578216754c2281d8f46c7e",
       "files": [
         "src/com/android/settings/homepage/",
         "src/com/android/settings/DisplaySettings.java",

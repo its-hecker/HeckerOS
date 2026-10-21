@@ -1,7 +1,7 @@
 {
   "settings": {
     "repository": "its-hecker/heckeros_packages_apps_Settings",
-    "revision": "f48943c0a7cefaf8b6f4458e41c5a732bb5091b0",
+    "revision": "63e2adf289417fb9a3578216754c2281d8f46c7e",
     "files": {
       "Android.bp": "7734560e9290e57348a9da9626045091388829dc909ca1bea49a91ec827e2f41",
       "AndroidManifest.xml": "73f27add49dce3e9f93738fc5cd963d3b0cf42bec0836cc987b92c248130d12c",
@@ -27,7 +27,7 @@
       "src/com/android/settings/biometrics/face/FaceEnrollProgressView.java": "7a0ac5e4c3c3ee3957b40ad34251dae31393a2b28c40fd04da33579f5001f764",
       "src/com/android/settings/biometrics/face/FaceEnrollRingView.java": "655b6a6e57cca20b24ec15b4fe3fdad59b0f638ccecccfa59f6ac73bb31a7f09",
       "src/com/android/settings/biometrics/face/FacePoseEnrollmentState.java": "2da19d45992783f934368f279f1b50dcdab671aac3ed8f80c6adf6134f8d40b2",
-      "src/com/android/settings/biometrics/face/FacePoseGridView.java": "b8d87e20869b5e004fa26e937fc0b45eaec0014f6f1ac780490ad9ef7c033e92",
+      "src/com/android/settings/biometrics/face/FacePoseGridView.java": "db180ebb8e494439bae427f8f03314879b12cb8e2b35c91819a4f5774bb7fe78",
       "src/com/android/settings/biometrics/face/PixelFaceAnimationLifecycle.java": "f3dac03146d72f7580104b7df8445b7b784a594a93b75851f9eca0336b80d917",
       "src/com/android/settings/hecker/HeckerIntegrityActivity.java": "b58a86dbf0d5c1a8cd92156a17a703ff99d3e243c7346d589a06ec5b425729e4",
       "src/com/android/settings/hecker/PifProfile.java": "e4132e74e93e7937efc35d330d274b7520a6baa75afafcf56a23dc8a652031c9",
@@ -35,7 +35,7 @@
       "src/com/google/android/settings/biometrics/face/anim/FaceEnrollAnimationMultiAngleDrawable.java": "7e69811a92b9e649b6d26b8fa67e9dcbe034865da45f9c3d2b7264e672cbe1d4",
       "tools/hecker/tests/FacePoseEnrollmentStateTest.java": "8036525e926c65bce883b89c787bbcc74f049dc1bb5178f08ac2078155525e45",
       "tools/hecker/tests/PifProfileTest.java": "6d620f65605fe7fd39eebd2831fd480c368388ec17609a10eb6f08746a1f2721",
-      "src/com/android/settings/biometrics/face/FacePoseGridGeometry.java": "9de17931413c60061644b2eb4c2f01de5abfad81c575f01708c0b7514dbad908",
+      "src/com/android/settings/biometrics/face/FacePoseGridGeometry.java": "76dfc0dbf9a27431e4a6017c31d2ea1e378c9992e04e5b35cb6be537dedd9afc",
       "tools/hecker/tests/FacePoseGridGeometryTest.java": "94598e1b7742ea70f4a6ae375a14be8122458990b641da88d54d2aa96fd44e3e"
     }
   },

@@ -31,5 +31,5 @@
   <extend-project name="platform/hardware/google/camera" path="hardware/google/camera" revision="cd15337bd229dd521a860d88bca3e37c3ca845f7" upstream="refs/tags/android-17.0.0_r1" />
   <extend-project name="PixelOS-AOSP/android_system_sepolicy" path="system/sepolicy" revision="99c58a7cc9a44fe33c93808452d018e756d84753" upstream="refs/heads/seventeen" />
   <extend-project name="PixelOS-AOSP/android_system_core" path="system/core" revision="a5313eaec0219b021aaa5e59cc10dd07cfa8504c" upstream="refs/heads/seventeen" />
-  <extend-project name="its-hecker/heckeros_packages_apps_Settings" path="packages/apps/Settings" revision="f48943c0a7cefaf8b6f4458e41c5a732bb5091b0" upstream="refs/heads/heckeros-17" />
+  <extend-project name="its-hecker/heckeros_packages_apps_Settings" path="packages/apps/Settings" revision="63e2adf289417fb9a3578216754c2281d8f46c7e" upstream="refs/heads/heckeros-17" />
 </manifest>
