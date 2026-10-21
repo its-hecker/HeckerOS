@@ -27,6 +27,12 @@ feature pages through an allowlisted router protected by a signature permission;
 the router cannot select arbitrary classes or bypass native App Lock authentication.
 3D Face Unlock opens Android's existing Face Settings page for both enrollment and
 management, retaining the native credential, removal and biometric flows.
+Its enrollment overlay is now Hecker's native curved 25-cell mesh, with translucent
+accent capture feedback and a brief missing-angle cue. The Pixel HAL bucket order,
+camera buffer/cutout, accessibility help and native completion gate are preserved.
+The mesh renders only for callbacks or bounded animations and respects reduced
+motion. The original Pixel rendering archive remains pinned for provenance; the
+new mesh does not instantiate its renderer.
 
 Asset: `res/drawable-nodpi/hecker_mascot.webp`, also shared by Suite. Generated
 with the built-in image generation tool, transparent-background mode, from the
