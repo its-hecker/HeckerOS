@@ -1,4 +1,10 @@
 {
+  "frameworks/base/core/res/AndroidManifest.xml": [
+    {
+      "old": "    <protected-broadcast android:name=\"android.intent.action.OVERLAY_CHANGED\" />",
+      "new": "    <protected-broadcast android:name=\"android.intent.action.OVERLAY_CHANGED\" />\n    <protected-broadcast android:name=\"android.intent.action.THEME_ENGINE_CHANGED\" />"
+    }
+  ],
   "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/keyguard/ui/composable/elements/MediaElementProvider.kt": [
     {
       "old": "                Media(\n                    viewModelFactory = viewModel.mediaViewModelFactory,\n                    presentationStyle = MediaPresentationStyle.Default,\n                    behavior = viewModel.mediaUiBehavior,\n                    onDismissed = viewModel::onSwipeToDismiss,\n                    modifier = Modifier.fillMaxWidth(),\n                    location = Media.Location.LOCKSCREEN,\n                )",

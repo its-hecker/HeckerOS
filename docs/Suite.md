@@ -69,6 +69,13 @@ font and color settings. ThemeOverlayController applies these RROs and keeps
 their selection when dynamic colors refresh or the device reboots; Default
 removes both Suite-selected icon-pack categories.
 
+The framework declares `android.intent.action.THEME_ENGINE_CHANGED` as a protected
+system broadcast. This fixes the repeated unprotected-broadcast warning observed
+when changing themes in the October 22 phone logs. It preserves the existing
+registered receivers and Binder callbacks; icon appearance still needs phone
+validation. Native source checks require exactly one declaration matching the
+theme engine's action.
+
 Wi-Fi and cellular packs also apply in Android 17's Compose status bar, alongside
 the older view binders. Theme generations invalidate the displayed icon without
 requiring a network-state change. Three-bar native Wi-Fi symbols are mapped to

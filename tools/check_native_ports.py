@@ -32,6 +32,16 @@ def snapshot(folder):
     return {str(p.relative_to(folder)): p.read_bytes() for p in folder.rglob('*') if p.is_file()}
 
 
+def check_theme_broadcast(folder):
+    engine = (ROOT / 'framework/themes/ThemeEngine.java').read_text()
+    action = re.search(r'ACTION_THEME_CHANGED\s*=\s*"([^"]+)"', engine).group(1)
+    manifest = ET.parse(folder / 'frameworks/base/core/res/AndroidManifest.xml').getroot()
+    names = [node.get('{http://schemas.android.com/apk/res/android}name')
+             for node in manifest.findall('protected-broadcast')]
+    assert names.count(action) == 1, 'Theme engine update must have exactly one protected system broadcast'
+    print('Theme engine update is declared once as a protected system broadcast')
+
+
 def check_bootanimation_owner(folder):
     # Check the real module definitions, independently of PRODUCT_PACKAGES: Soong
     # exports install actions even for the unselected PixelOS prebuilt.
@@ -212,6 +222,7 @@ def main():
             count += len(changes)
             write(changes)
             assert not plan(folder, replace_guarded), 'Adapter is not idempotent'
+        check_theme_broadcast(folder)
         check_bootanimation_owner(folder)
         check_launcher_weather(folder)
         check_launcher_weather_module(folder)
