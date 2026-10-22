@@ -114,7 +114,10 @@
     },
     {
       "old": "        t.traceBegin(\"StartBootPhaseSystemServicesReady\");",
-      "new": "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");"
+      "new": "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartHeckerGameService\");\n        mSystemServiceManager.startService(com.android.server.hecker.HeckerGameService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");",
+      "previous": [
+        "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/ConfigurationControllerImpl.kt": [
@@ -432,6 +435,32 @@
     {
       "old": "    suspend fun loadImage(@DrawableRes resId: Int, context: Context): Icon.Loaded? {\n        return withTimeoutOrNull(500L) {\n            imageLoader\n                .loadDrawable(\n                    android.graphics.drawable.Icon.createWithResource(context, resId),\n                    context = context,\n                    maxHeight = 200,\n                    maxWidth = 200,\n                )\n                ?.asIcon(null, resId)\n        }\n    }",
       "new": "    suspend fun loadImage(@DrawableRes resId: Int, context: Context): Icon.Loaded? {\n        return withTimeoutOrNull(500L) {\n            // These are XML vector resources. ImageDecoder only accepts encoded images.\n            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {\n                context.getDrawable(resId)?.asIcon(null, resId)\n            }\n        }\n    }"
+    }
+  ],
+  "frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java": [
+    {
+      "old": "    public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {",
+      "new": "    public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {\n        if (com.android.server.hecker.HeckerGameService.blocksKey(event.getKeyCode())) return 0;"
+    },
+    {
+      "old": "    private void launchAssistAction(String hint, int deviceId, int displayId, long eventTime,\n            int invocationType) {",
+      "new": "    private void launchAssistAction(String hint, int deviceId, int displayId, long eventTime,\n            int invocationType) {\n        if (com.android.server.hecker.HeckerGameService.blocksAssistant()) return;"
+    },
+    {
+      "old": "    private void launchVoiceAssist(boolean allowDuringSetup) {",
+      "new": "    private void launchVoiceAssist(boolean allowDuringSetup) {\n        if (com.android.server.hecker.HeckerGameService.blocksAssistant()) return;"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/gestural/EdgeBackGestureHandler.java": [
+    {
+      "old": "            boolean isBackAllowedCommon = !mDisabledForQuickstep && mIsBackGestureAllowed",
+      "new": "            boolean heckerGameEdgeBlocked = android.provider.Settings.Global.getInt(\n                    mContext.getContentResolver(), \"hecker_game_block_edge\", 0) != 0;\n            boolean isBackAllowedCommon = !heckerGameEdgeBlocked && !mDisabledForQuickstep && mIsBackGestureAllowed"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/assist/AssistManager.java": [
+    {
+      "old": "    public void startAssist(Context context, Bundle args) {",
+      "new": "    public void startAssist(Context context, Bundle args) {\n        if (android.provider.Settings.Global.getInt(context.getContentResolver(),\n                \"hecker_game_block_assistant\", 0) != 0) return;"
     }
   ]
 }

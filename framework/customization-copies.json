@@ -83,5 +83,8 @@
   "packages/apps/Settings/res/drawable/hecker_caracal_mark.xml": "settings/res/drawable/hecker_caracal_mark.xml",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsScene.kt": "framework/qs/HeckerQsScene.kt",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerConnectivityIcons.kt": "framework/themes/HeckerConnectivityIcons.kt",
-  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/ThemeIconNames.java": "framework/themes/ThemeIconNames.java"
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/ThemeIconNames.java": "framework/themes/ThemeIconNames.java",
+  "frameworks/base/core/java/android/os/IHeckerGameService.aidl": "framework/gaming/IHeckerGameService.aidl",
+  "frameworks/base/services/core/java/com/android/server/hecker/HeckerGameService.java": "framework/gaming/HeckerGameService.java",
+  "frameworks/base/services/core/java/com/android/server/hecker/GameTelemetry.java": "framework/gaming/GameTelemetry.java"
 }

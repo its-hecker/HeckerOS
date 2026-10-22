@@ -48,3 +48,7 @@ java -cp "$suite_test_output" com.android.systemui.hecker.HeckerQsTileOrderTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     framework/themes/ThemeIconNames.java tests/ThemeIconNamesTest.java
 java -cp "$suite_test_output" com.android.systemui.hecker.ThemeIconNamesTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/gaming/GameTelemetry.java tests/GameTelemetryTest.java
+java -cp "$suite_test_output" com.android.server.hecker.GameTelemetryTest

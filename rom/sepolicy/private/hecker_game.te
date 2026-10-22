@@ -1,0 +1,8 @@
+# Only system_server talks to hardware; the overlay stays in the platform_app domain.
+type hecker_game_service, app_api_service, system_server_service, service_manager_type;
+add_service(system_server, hecker_game_service)
+allow platform_app hecker_game_service:service_manager find;
+type sysfs_hecker_game_gpu, fs_type, sysfs_type;
+type sysfs_hecker_game_charge, fs_type, sysfs_type;
+allow system_server sysfs_hecker_game_gpu:file r_file_perms;
+allow system_server sysfs_hecker_game_charge:file rw_file_perms;
