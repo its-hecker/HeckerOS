@@ -13,6 +13,8 @@ public class Context {
  public final android.content.om.OverlayManager overlays = new android.content.om.OverlayManager();
  public static final int MODE_PRIVATE=0;
  public final SharedPreferences preferences=new SharedPreferences();
+ public final android.content.res.Resources resources=new android.content.res.Resources();
+ public android.content.res.Resources getResources() { return resources; }
  public SharedPreferences getSharedPreferences(String name,int mode) { return preferences; }
  public Context getApplicationContext() { return this; }
  public <T> T getSystemService(Class<T> type) {
@@ -20,6 +22,21 @@ public class Context {
  }
  public android.content.pm.PackageManager getPackageManager() { return new android.content.pm.PackageManager(); }
  public java.util.concurrent.Executor getMainExecutor() { return Runnable::run; }
+}''',
+    "android/content/ComponentName.java": '''package android.content;
+public class ComponentName {
+ private final String pkg;
+ public ComponentName(String value) { pkg=value; }
+ public String getPackageName() { return pkg; }
+ public static ComponentName unflattenFromString(String value) {
+  int split=value.indexOf('/');return split<0 ? null : new ComponentName(value.substring(0,split));
+ }
+}''',
+    "android/content/res/Resources.java": '''package android.content.res;
+public class Resources {
+ public String recents="com.google.android.apps.nexuslauncher";
+ public int getIdentifier(String name,String type,String pkg) { return 1; }
+ public String getString(int id) { return recents+"/com.android.quickstep.RecentsActivity"; }
 }''',
     "android/content/SharedPreferences.java": '''package android.content;
 public class SharedPreferences {
@@ -142,6 +159,13 @@ public class LauncherSwitchHarness {
    context.roles.fail=true;
    controller.restart(() -> { throw new AssertionError("must not reboot"); }, error -> {});
    check(context.overlays.writes==0 && controller.restartNeeded());
+  } else if (args[0].equals("stale")) {
+   context.roles.home=LauncherController.HECKER;
+   context.overlays.enabled=true;
+   check(controller.restartNeeded());
+   check(LauncherController.PIXEL.equals(controller.recentsPackage()));
+   controller.restart(() -> context.resources.recents=LauncherController.HECKER, error -> { throw new AssertionError(error); });
+   check(context.overlays.priorities==1 && !controller.restartNeeded());
   } else if (args[0].equals("empty")) {
    boolean[] reported={false};
    controller.restart(() -> { throw new SecurityException("reboot denied"); }, error -> reported[0]=true);
@@ -157,6 +181,7 @@ public class LauncherSwitchHarness {
    controller.restart(() -> {
     check(context.overlays.enabled && context.overlays.priorities==1);
     check(LauncherController.HECKER.equals(controller.current()));
+    context.resources.recents=LauncherController.HECKER;
    }, error -> { throw new AssertionError(error); });
    check(!controller.restartNeeded());
    controller.select(LauncherController.PIXEL, success -> check(success));
@@ -205,3 +230,6 @@ class LauncherSwitchTests(unittest.TestCase):
 
     def test_failed_restart_preserves_an_empty_previous_home_role(self):
         self.invoke("empty")
+
+    def test_enabled_overlay_with_a_stale_effective_provider_still_offers_restart(self):
+        self.invoke("stale")

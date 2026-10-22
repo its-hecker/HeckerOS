@@ -61,6 +61,8 @@ to highest priority. Selecting a
 Home app, cancelling a switch and a rejected role request leave the overlay
 untouched. Double tap to sleep calls the native power API; it does not use device
 administrator locking. Pixel Launcher remains installed.
+The restart prompt compares Android's effective Recents component as well as the
+enabled overlay, so an older enabled overlay at a lower priority can be repaired.
 
 Wallpaper & Styles uses the same bundled clock providers that SystemUI must
 load on the lock screen. The production plugin policy adds the nine exact

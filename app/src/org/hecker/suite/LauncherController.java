@@ -3,6 +3,7 @@ package org.hecker.suite;
 
 import android.app.role.RoleManager;
 import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.om.OverlayInfo;
@@ -75,7 +76,17 @@ final class LauncherController {
     boolean restartNeeded() {
         String home = selected();
         return available() && (HECKER.equals(home) || PIXEL.equals(home))
-                && (!home.equals(current()) || HECKER.equals(home) != heckerRecents());
+                && (!home.equals(current()) || HECKER.equals(home) != heckerRecents()
+                        || !home.equals(recentsPackage()));
+    }
+
+    String recentsPackage() {
+        try {
+            int id = context.getResources().getIdentifier("config_recentsComponentName", "string", "android");
+            ComponentName component = id == 0 ? null
+                    : ComponentName.unflattenFromString(context.getResources().getString(id));
+            return component == null ? "" : component.getPackageName();
+        } catch (RuntimeException unavailable) { return ""; }
     }
 
     String selected() { return preferences.getString("pending_home", current()); }
