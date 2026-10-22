@@ -77,6 +77,8 @@ def main():
     assert 'mProgressView.setEnrollmentActive(false);' in fragment
     assert 'mSurfaceView.getHolder().setFixedSize(' in fragment
     enrolling = (settings/'src/com/android/settings/biometrics/face/FaceEnrollEnrolling.java').read_text()
+    progress = (settings/'src/com/android/settings/biometrics/face/FaceEnrollProgressView.java').read_text()
+    assert 'FacePoseEnrollmentState.usesPoseGrid(Build.DEVICE,' in progress
     assert 'if (remaining == 0 && !mCompletionStarted)' in enrolling
     assert 'launchFinish(mToken);' in enrolling
     manifest = (settings/'AndroidManifest.xml').read_text()

@@ -49,6 +49,24 @@ public final class GamingPolicyTest {
         check(Float.isNaN(GamingPolicy.usableFps(-1)));
         check(Float.isNaN(GamingPolicy.usableFps(Float.NaN)));
         check(Float.isNaN(GamingPolicy.usableFps(Float.POSITIVE_INFINITY)));
+        // Reproduce a task callback arriving before the first visible game frame.
+        GamingPolicy.TaskObservation observation=new GamingPolicy.TaskObservation();
+        check(observation.nextDelay(1000,false,0)==-1);
+        observation.changed(1000);
+        check(GamingPolicy.activeGame(List.of(new GamingPolicy.Task(1,"game",false,false,false)),games,Set.of(),-1,true)==null);
+        check(observation.nextDelay(1100,false,0)==150);
+        check(observation.nextDelay(1400,false,0)==150);
+        check(GamingPolicy.activeGame(List.of(game),games,Set.of(),-1,true).id==1);
+        check(observation.nextDelay(1500,true,0)==1000);
+        // Leaving a game retries only for the bounded transition window.
+        observation.changed(2000);
+        check(observation.nextDelay(4499,false,0)==150);
+        check(observation.nextDelay(4500,false,0)==-1);
+        // Screen-off cleanup cancels retries; recording consent has its own deadline.
+        observation.changed(5000);observation.clear();
+        check(observation.nextDelay(5100,false,0)==-1);
+        check(observation.nextDelay(5100,false,6000)==1000);
+        check(observation.nextDelay(6000,false,6000)==-1);
         System.out.println("Gaming detection, popup visibility, cleanup protection and real FPS: "+checks+" checks passed");
     }
 }

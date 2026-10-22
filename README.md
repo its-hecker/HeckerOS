@@ -9,16 +9,28 @@ platform customization forks use `heckeros-17`.
 
 - The approved navy Settings UI: caracal hero, maintainer row, grouped native
   categories, a two-column Hecker Suite dashboard, and Display & Personalization.
+- One native About Phone card with a small animated phone, live device details,
+  maintainer/community access and an Official badge tied to build properties.
 - Native Quick Settings with large Wi-Fi/Bluetooth cards, round tiles, media,
   separate volume/brightness controls, and the optional HeckerOS dashboard layout.
+- Connection popups for Bluetooth, wired and USB headphones, including AirPods
+  and Soundcore R50i; original-signed LibrePods for optional AirPods controls.
+- Axion/Infinity-X sandboxed-app restrictions with per-user network/storage
+  controls and native app-data isolation; system/shared-UID packages are excluded.
+- HeckerOS recovery with the approved caracal logo, readable Suite text/buttons,
+  native Settings icons, and Simplified Chinese custom-page translations.
+- An animated native face-unlock island on the portrait lock screen, with a
+  per-user switch and no change to authentication or unlock timing.
 - Hardware 3D Face Unlock and Motion Sense, with their ROM integration owned here.
   Face enrollment uses Hecker's curved 25-cell pose mesh, subtle capture feedback
   and missing-angle guidance over the native infrared preview.
 - Suite and Motion Sense pages built directly into Settings. Feature services
   retain their separate system UID; there are no extra launcher apps to install.
-- Native App Lock, infrared camera viewer, and an in-game Gaming dashboard with
-  real task FPS, battery temperature, controls and native popup app shortcuts.
-- Pixel Launcher and Ortus-derived **Hecker's Launcher**, including native double
+- Native App Lock, infrared camera viewer, and compact OEM-style **Game Space**
+  with a circular real-task FPS gauge, battery telemetry, red accents, game/app
+  tabs, capture controls and native floating app shortcuts. Performance profiles
+  are exposed only when the Android game service supports the active game.
+- Pixel Launcher and Infinity-X-derived **Hecker Launcher**, including native double
   tap to sleep, Lottie artwork and launcher selection. Changing the Recents
   provider requires the explicit reboot shown by Suite.
 - Opt-in synchronized lock-screen lyrics adapted from Infinity-X. The settings
@@ -48,10 +60,44 @@ repo sync -c -j8 --fail-fast --no-clone-bundle --no-tags
 bash .repo/local_manifests/build.sh
 ```
 
+OmniJaws is excluded from the ROM and source sync. When upgrading a checkout
+that previously included it, preserve its locally adapted files before syncing:
+
+```bash
+git -C .repo/local_manifests pull --ff-only
+python3 .repo/local_manifests/tools/retire_launcher.py
+python3 .repo/local_manifests/tools/retire_omnijaws.py
+repo sync -c -j2 --fail-fast --no-clone-bundle --no-tags --force-sync vendor/hecker/floral/suite packages/apps/Launcher3 packages/apps/Settings
+HECKER_BUILD_JOBS=8 bash .repo/local_manifests/build.sh
+```
+
+Run this from the existing Android source root. The retirement helper moves the
+old checkouts and launcher edits under `out/retired-projects/`. Infinity-X is
+pinned from its official Gitea source, and its optional automation listener
+handles role-access rejection without preventing HOME from starting. The build helper uses `installclean`
+only if a removed app is still staged. Launcher weather uses the independent
+Google feed when available. ServerHive builds retain the provider's existing RBE
+environment and should run in the initialized Byobu build session.
+
+The launcher's Suite page stages your choice until its **Restart phone** action.
+That action changes HOME and the Recents overlay together, with the overlay at
+highest priority. If applying the overlay or restarting fails, it restores the
+previous HOME and overlay. Choosing a launcher keeps the current home and
+gestures active until that restart. Switching through Android's generic default
+home picker does not select a new Recents provider.
+
 The script prepares and verifies the plugins, GCam and theme payloads, applies
 guarded source adapters, then selects `hecker_coral-hecker_suite-userdebug` and
 runs `m heckeros`. Set `HECKER_BUILD_JOBS` to control build parallelism. The ROM
 ZIP is named `HeckerOS_*.zip`. No stock PixelOS OTA channel is configured.
+Official identifies the maintainer's HeckerOS build channel. It does not establish
+a tested release, production signing keys, an OTA feed or a certification result.
+
+This development branch enables USB debugging and accepts every connected PC on
+`userdebug`/`eng` builds. For the final build, restore PC authorization with
+`HECKER_DEV_USB_ADB=false HECKER_BUILD_JOBS=8 bash .repo/local_manifests/build.sh`.
+Rebuild and flash to apply that change. See [development ADB](rom/adb/README.md)
+for property checks and dirty-flash behavior.
 
 Do not also copy `snippets/heckeros.xml` into `.repo/local_manifests`; it is the
 source template for the dedicated manifest, and would duplicate its projects.
@@ -72,7 +118,10 @@ policy, Google Camera packaging, boot diagnostics and branding live in this repo
 
 ```bash
 bash tests/run_host_tests.sh
-python3 tools/compile_sdk.py
+python3 tools/compile_sdk.py --cache generated/sdk
+python3 tools/check_launcher.py --sdk-cache generated/sdk
+python3 tools/check_about_phone.py --sdk-cache generated/sdk
+python3 tools/check_motion_manifest.py
 python3 tools/check_native_ports.py
 python3 tools/check_spoofing.py
 python3 tools/freeze_upstream.py --check

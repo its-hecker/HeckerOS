@@ -31,6 +31,11 @@ device-wide runtime configuration are overwritten.
 
 Use the coral build instructions in the root README. All sources are pinned by the dedicated HeckerOS local manifest. The complete product is `hecker_coral-hecker_suite-userdebug`; rebuilding Suite alone cannot enable framework, Settings or SystemUI changes.
 
+The development branch defaults to USB debugging without PC authorization on
+`userdebug`/`eng`. Build the final image with `HECKER_DEV_USB_ADB=false` to restore
+authorization. The helper verifies the resulting product properties; rebuild and
+flash before testing a mode change. See [development ADB](../rom/adb/README.md).
+
 The preparation command validates every source anchor before writing, is idempotent, and preserves backups under `out/hecker-suite-source-backups`. To undo only owned, unchanged adapters before syncing a different source baseline, run:
 
 ```bash
@@ -39,26 +44,106 @@ python3 vendor/hecker/floral/suite/tools/prepare.py --revert
 
 Motion Sense's separate Settings entry and duplicate maintainer/contact sections are hidden in Suite builds. Original plugin files, hardware permissions and upstream credits remain intact. Native Settings links the generated UI library; the independently usable plugin APK remains available to other ROM builders. The Suite and Face Unlock tiles open native Settings pages.
 
-The Launcher page sets Android's native HOME role and offers an explicit restart when changing the signed Recents provider overlay. Double tap to sleep calls the native power API; it does not use device administrator locking. Pixel Launcher remains installed.
+The shared Motion Sense resource library uses a generated manifest containing
+only its resource package and an empty application. It contributes no standalone
+activities, tile service, app flags or SDK declarations to native Settings.
+`tools/check_motion_manifest.py` reproduces the old exported-activity conflict
+with Android 17's manifest-merger, then checks the private native UI, a Settings
+host and the standalone plugin against the pinned source. Source application,
+reapplication and exact reversion are checked as well.
 
-Lock-screen lyrics are off by default. After opt-in, SystemUI sends the playing song's artist/title to LRCLIB, matches the recording and synchronizes LRC timestamps with native playback position/speed. They follow lock-screen media visibility and stop on AOD. Suite itself has no Internet permission.
+The Launcher page stages a choice while keeping the running HOME/Recents pair.
+The HOME role and signed Recents overlay change only when the owner uses
+**Restart phone** on that page, immediately before requesting the reboot. If the
+overlay or reboot request fails, the controller restores the previous HOME and
+overlay. Enabling Recents uses a native overlay transaction, which also moves it
+to highest priority. Selecting a
+Home app, cancelling a switch and a rejected role request leave the overlay
+untouched. Double tap to sleep calls the native power API; it does not use device
+administrator locking. Pixel Launcher remains installed.
+The restart prompt compares Android's effective Recents component as well as the
+enabled overlay, so an older enabled overlay at a lower priority can be repaired.
+
+Wallpaper & Styles uses the same bundled clock providers that SystemUI must
+load on the lock screen. The production plugin policy adds the nine exact
+packages listed in the pinned ClockRegistry, preserving the existing allowlist.
+It does not enable arbitrary plugins or depend on `ro.debuggable`. Native probes
+compile the actual policy provider and PackageConfig and reject unrelated names.
+Brightness icons load as Android drawables on a worker, so XML vectors do not go
+through ImageDecoder. The existing 500 ms timeout and icon resource IDs remain.
+
+Lock-screen lyrics are available directly from the Suite dashboard and from its
+Lock screen page, through the signature-protected router. Action-card labels
+leave taps and keyboard focus to the card. Lyrics are off by default. After
+opt-in, SystemUI sends the playing song's artist/title to LRCLIB, matches the
+recording and synchronizes LRC timestamps with native playback position/speed.
+They follow lock-screen media visibility and stop on AOD. Suite itself has no
+Internet permission.
 
 Theme assets are hash-verified before Soong. The picker uses preinstalled, platform-signed resource APKs and native overlay transactions; it does not download or sideload apps at runtime. Keep warning/no-internet/satellite/unknown battery states native when no matching themed state exists.
 
+SystemServer starts the theme engine before system-services-ready. Its
+activity-manager-ready callback loads the current user's saved choices and
+registers the settings observer before SystemUI starts. Applying or clearing a
+style then notifies the battery, Wi-Fi, signal and charging consumers immediately.
+Preparation rejects a late or duplicate service start and upgrades the earlier
+published late-start adapter without touching unrelated source edits.
+System icon packs also update Android's native theme category map, preserving
+font and color settings. ThemeOverlayController applies these RROs and keeps
+their selection when dynamic colors refresh or the device reboots; Default
+removes both Suite-selected icon-pack categories.
+
+SystemUI observes the saved theme data and user switches directly. A worker reads
+the active user's selection and publishes a cached snapshot; icon rendering does
+not wait on theme-service Binder calls. Changes invalidate both Compose icons and
+the legacy battery view, including Default reset. Wi-Fi/signal vectors use the
+current theme for attribute resolution. The picker logs successful choices and
+failures; missing resources are reported once per selection.
+
+The framework declares `android.intent.action.THEME_ENGINE_CHANGED` as a protected
+system broadcast. This fixes the repeated unprotected-broadcast warning observed
+when changing themes in the October 22 phone logs. It preserves the existing
+registered receivers and Binder callbacks; icon appearance still needs phone
+validation. Native source checks require exactly one declaration matching the
+theme engine's action.
+
+Wi-Fi and cellular packs also apply in Android 17's Compose status bar, alongside
+the older view binders. Theme generations invalidate the displayed icon without
+requiring a network-state change. Three-bar native Wi-Fi symbols are mapped to
+the pack's five strength levels; error, hotspot, carrier-change and satellite
+states keep their native presentation. QQS has its own scene element, faded and
+anchored during expansion in both scene-container and legacy Compose transitions.
+The initial layout reads the saved setting before composition, and mascot bitmap
+decoding runs off the main thread. The face-feedback window is 160 by 36 dp; its
+32 dp pill uses smaller scan brackets and an unlock/check animation.
+
+Hecker's vertical brightness control keeps native brightness policy, gamma,
+falsing and drag events while suppressing the horizontal brightness mirror and
+overlay drawing during that control's drag. The reference panel retains native
+horizontal mirroring. Infrared camera actions have a 12 dp gap between equal-width
+buttons and a separate full-width Retry row, with spacing above and below.
+
 ## Gaming mode
 
-The native hub follows the approved charcoal/cyan design: original procedural
-game artwork with the installed app's icon, game cards, and Games/Tools/Style tabs.
+The native hub uses charcoal/red surfaces: original procedural game artwork with
+the installed app's icon, a game carousel, and Games/Tools/Style tabs.
 Games declaring `CATEGORY_GAME` or `FLAG_IS_GAME` are detected automatically;
 untagged games can be added manually. Long-press a game card to remove it.
-Accent choices are cyan, violet, lime and amber, with edge positioning and opacity.
+Accent choices are red, cyan, violet, lime and amber, with edge positioning and opacity.
 
-Enable Gaming mode once in the hub. The user-enabled foreground service has an
-ongoing notification with a Turn off action. It restores after boot only if
-previously enabled. Native task-stack events discover games opened from any
-launcher. There is no idle polling; active sessions refresh status once a second.
-An inward swipe on the edge handle opens the dashboard. The floating counter can
-be moved by holding and dragging it.
+Adding a game or using Play in the hub enables Gaming mode and requests Android's
+overlay permission when needed. A Play request resumes after that permission is
+granted. The foreground service has an ongoing notification with a Turn off
+action and restores after boot only if previously enabled. Games opened from any
+launcher are discovered through native task-stack events. Each event permits a
+short, bounded retry window while the game becomes visible; a settled idle
+service does not poll, and active sessions refresh status once a second.
+
+The panel opens when a gaming session starts. Tapping outside collapses it and
+passes the touch to the game. A 28 by 56 dp gamepad handle remains on the selected left
+or right edge; tap or swipe it inward to reopen the panel. Restyling or rotation
+preserves whether the panel was open or collapsed. The optional floating counter
+can be moved by holding and dragging it.
 
 The dashboard includes:
 
@@ -145,9 +230,11 @@ Phone checks after flashing:
 7. Grant camera access, try both available IR sensors, save a photo, leave the
    viewer, and test Face Unlock immediately afterward. Also lock the screen while
    viewing IR, and test permission revocation and concurrent-camera handling.
-8. Enable Gaming mode, open a detected game from another launcher, and check the
-   edge handle, inward swipe, live FPS, graph, battery readings and Wi-Fi panel.
-   Add an untagged game, remove one, and verify the detection settings persist.
+8. Add an untagged game while Gaming mode is off, grant overlay access, and open
+   it from another launcher. Check automatic panel entry, outside-touch collapse,
+   gamepad-button reopening on either edge, live FPS, graph, battery readings and
+   Wi-Fi panel. Repeat slow launches, permission denial, rotation while collapsed,
+   leaving/re-entering a game, removal and reboot to check persisted choices.
 9. Add a chat/gallery shortcut; open it over a game, drag/resize/close the native
    window, and confirm the game remains underneath. Repeat with a shortcut
    protected by App Lock: authentication must run and gaming overlays must hide.
@@ -172,3 +259,37 @@ adb logcat -b all -d > hecker-suite-logcat.txt
 
 
 Additional coral checks: compare all three approved Settings pages at normal and large font scales, in light/dark mode and work profiles; verify search/category badges; test both QS layouts, pagination/editor and volume limits; switch both launchers and validate Recents after reboot; check all theme categories, lyric pause/seek/song switching and AOD; verify boot intro-to-loop transition and early exit.
+
+
+## Compact Game Space and Infinity Launcher
+
+The launcher base is Infinity-X Android 17 at the immutable commit in
+`launcher/ORIGIN.json`. Sleep, navigation gestures, native App Lock, icon packs,
+Google weather and the existing explicit Recents-provider restart remain wired
+through guarded adapters. The optional computer-control listener tolerates
+role-access rejection; rejected registrations never schedule an unregister.
+Pixel Launcher remains the initial HOME/Recents provider.
+
+Game Space uses an original dark charcoal/red implementation of the supplied OEM
+reference. Its tool window is at most 280 dp wide in landscape, 304 dp in portrait
+and 400 dp high, reduced for the usable display area. It wraps short content and
+scrolls longer content at large font scales rather than filling the screen.
+Game Tools and Game Center tabs expose a circular task-FPS instrument, real
+battery temperature/level, brightness, volume, cached-app cleanup, Focus,
+screenshot/recording, touch lock, Internet and floating app shortcuts. Balanced
+and Performance map to Android GameManager modes and appear only when supported;
+there are no fabricated CPU/GPU, network acceleration or fan-boost readouts.
+Outside touches and Back collapse the panel to a 28 by 56 dp edge handle. The
+optional draggable FPS HUD remains separate. The library has an installed-game
+icon carousel, selected-game hero, launch action and native tool shortcuts.
+
+Upgrade an existing tree using `retire_launcher.py` before the targeted launcher
+sync. It preserves the old checkout (including untracked files), revision and a
+binary diff under `out/retired-projects/`, and refuses unfamiliar repositories or
+symlinks. Hardware and ServerHive RBE configuration are unchanged by this port.
+
+Required phone checks: launch Hecker Launcher and its app drawer, switch HOME and
+Recents with the advertised reboot, exercise both orientations and font sizes,
+open/close the edge handle, verify that FPS belongs to the game, change supported
+performance modes and test capture, Focus, touch lock and floating shortcuts.
+Host/source compilation does not replace a complete ROM build or these checks.

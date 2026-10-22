@@ -19,6 +19,8 @@ public final class LyricsSettingsActivity extends Activity {
         card.addView(Ui.text(this, getString(R.string.lyrics_description), 16, false));
         Switch enabled = new Switch(this);
         enabled.setText(R.string.lyrics_enable);
+        enabled.setTextColor(getColor(R.color.hecker_foreground));
+        enabled.setMinHeight(Ui.dp(this, 56));
         enabled.setPadding(0, Ui.dp(this, 20), 0, Ui.dp(this, 20));
         enabled.setChecked(Settings.Secure.getInt(getContentResolver(), "hecker_lockscreen_lyrics", 0) == 1);
         enabled.setOnCheckedChangeListener((button, checked) -> {

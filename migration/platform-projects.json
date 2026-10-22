@@ -801,9 +801,9 @@
     "remote": "github",
     "destination": "its-hecker/heckeros_vendor_custom",
     "branch": "seventeen",
-    "destination_branch": "heckeros-17",
+    "destination_branch": "feat/about-phone-official",
     "source_revision": "e389a1e2caec0cd1e8dc5a5459b88cc2bad38897",
-    "destination_revision": "e389a1e2caec0cd1e8dc5a5459b88cc2bad38897"
+    "destination_revision": "302ac1f722258085326e38d45e2742a067316d59"
   },
   {
     "path": "vendor/custom-preference",

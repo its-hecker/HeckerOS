@@ -26,9 +26,12 @@ public final class SuiteRouterActivity extends Activity {
         switch (page) {
             case "QuickSettingsActivity": return QuickSettingsActivity.class;
             case "LockScreenSettingsActivity": return LockScreenSettingsActivity.class;
+            case "LyricsSettingsActivity": return LyricsSettingsActivity.class;
             case "StatusBarSettingsActivity": return StatusBarSettingsActivity.class;
             case "ThemePackActivity": return ThemePackActivity.class;
             case "AnimationSettingsActivity": return AnimationSettingsActivity.class;
+            case "SandboxActivity": return SandboxActivity.class;
+            case "HeadphonesActivity": return HeadphonesActivity.class;
             case "AppLockActivity": return AppLockActivity.class;
             case "GamingActivity": return GamingActivity.class;
             case "LauncherSettingsActivity": return LauncherSettingsActivity.class;

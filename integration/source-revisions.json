@@ -61,12 +61,13 @@
     },
     "vendor/custom": {
       "repository": "its-hecker/heckeros_vendor_custom",
-      "branch": "heckeros-17",
-      "revision": "e389a1e2caec0cd1e8dc5a5459b88cc2bad38897",
+      "branch": "feat/about-phone-official",
+      "revision": "302ac1f722258085326e38d45e2742a067316d59",
       "files": [
         "config/",
         "overlay/common/",
-        "overlay/rro_packages/FrameworkOverlayCustom/"
+        "overlay/rro_packages/FrameworkOverlayCustom/",
+        "bootanimation/Android.bp"
       ]
     },
     "vendor/lineage": {
@@ -76,6 +77,14 @@
       "files": [
         "overlay/common/",
         "config/common_mobile_full.mk"
+      ]
+    },
+    "frameworks/libs/systemui": {
+      "repository": "https://android.googlesource.com/platform/frameworks/libs/systemui",
+      "branch": "android-17.0.0_r1",
+      "revision": "11e04f60f563aed48e4ec080bd7bde06bae1b2f3",
+      "files": [
+        "iconloaderlib/src/com/android/launcher3/icons/BaseIconFactory.kt"
       ]
     },
     "frameworks/base": {
@@ -146,7 +155,7 @@
     "packages/apps/Settings": {
       "repository": "its-hecker/heckeros_packages_apps_Settings",
       "branch": "heckeros-17",
-      "revision": "63e2adf289417fb9a3578216754c2281d8f46c7e",
+      "revision": "0c2c5aed4fd8e4a9507cfc26fa7a38f36f28dcba",
       "files": [
         "src/com/android/settings/homepage/",
         "src/com/android/settings/DisplaySettings.java",

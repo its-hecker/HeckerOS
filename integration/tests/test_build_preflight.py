@@ -102,6 +102,31 @@ class BuildPreflightTests(unittest.TestCase):
         self.rejected("Missing or mismatched Qualcomm chipset namespace exports")
         self.assertEqual(path.read_text(), "local namespace\n")
 
+    def test_staged_weather_triggers_installclean_and_keeps_provider_rbe(self):
+        binary = self.rom / "test-bin"
+        for name in ("git", "python3"):
+            command = binary / name
+            command.write_text("#!/bin/sh\nexit 0\n")
+            command.chmod(0o755)
+        (self.rom / "build/make/envsetup.sh").write_text(
+            'lunch() { :; }\n'
+            'get_build_var() { echo out/target/product/coral; }\n'
+            'm() { printf "%s RBE=%s\\n" "$*" "${USE_RBE-unset}" >> m-calls; }\n')
+        self.environment["USE_RBE"] = "true"
+        self.environment["HECKER_BUILD_JOBS"] = "8"
+        calls = self.rom / "m-calls"
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(calls.read_text().splitlines(), ["-j8 heckeros RBE=true"])
+        calls.unlink()
+        stale = self.rom / "out/target/product/coral/product/app/OmniJaws"
+        stale.mkdir(parents=True)
+        (stale / "OmniJaws.apk").write_bytes(b"stale apk")
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(calls.read_text().splitlines(),
+                         ["installclean RBE=true", "-j8 heckeros RBE=true"])
+
 
 if __name__ == "__main__":
     unittest.main()

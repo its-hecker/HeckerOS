@@ -1,8 +1,17 @@
 {
+  "frameworks/base/core/res/AndroidManifest.xml": [
+    {
+      "old": "    <protected-broadcast android:name=\"android.intent.action.OVERLAY_CHANGED\" />",
+      "new": "    <protected-broadcast android:name=\"android.intent.action.OVERLAY_CHANGED\" />\n    <protected-broadcast android:name=\"android.intent.action.THEME_ENGINE_CHANGED\" />"
+    }
+  ],
   "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/keyguard/ui/composable/elements/MediaElementProvider.kt": [
     {
       "old": "                Media(\n                    viewModelFactory = viewModel.mediaViewModelFactory,\n                    presentationStyle = MediaPresentationStyle.Default,\n                    behavior = viewModel.mediaUiBehavior,\n                    onDismissed = viewModel::onSwipeToDismiss,\n                    modifier = Modifier.fillMaxWidth(),\n                    location = Media.Location.LOCKSCREEN,\n                )",
-      "new": "                androidx.compose.foundation.layout.Column {\n                    Media(\n                        viewModelFactory = viewModel.mediaViewModelFactory,\n                        presentationStyle = MediaPresentationStyle.Default,\n                        behavior = viewModel.mediaUiBehavior,\n                        onDismissed = viewModel::onSwipeToDismiss,\n                        modifier = Modifier.fillMaxWidth(),\n                        location = Media.Location.LOCKSCREEN,\n                    )\n                    com.android.systemui.hecker.HeckerLockscreenLyrics(context)\n                }"
+      "new": "                androidx.compose.foundation.layout.Column {\n                    Media(\n                        viewModelFactory = viewModel.mediaViewModelFactory,\n                        presentationStyle = MediaPresentationStyle.Default,\n                        behavior = viewModel.mediaUiBehavior,\n                        onDismissed = viewModel::onSwipeToDismiss,\n                        modifier = Modifier.fillMaxWidth(),\n                        location = Media.Location.LOCKSCREEN,\n                    )\n                    com.android.systemui.hecker.HeckerLockscreenLyrics(this@MediaElementProvider.context)\n                }",
+      "previous": [
+        "                androidx.compose.foundation.layout.Column {\n                    Media(\n                        viewModelFactory = viewModel.mediaViewModelFactory,\n                        presentationStyle = MediaPresentationStyle.Default,\n                        behavior = viewModel.mediaUiBehavior,\n                        onDismissed = viewModel::onSwipeToDismiss,\n                        modifier = Modifier.fillMaxWidth(),\n                        location = Media.Location.LOCKSCREEN,\n                    )\n                    com.android.systemui.hecker.HeckerLockscreenLyrics(context)\n                }"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/qs/ui/composable/QuickSettingsContent.kt": [
@@ -29,12 +38,19 @@
     {
       "old": "            tiles()\n            media()",
       "new": "            tiles()\n            media()\n            footer()"
+    },
+    {
+      "old": "    QuickSettingsPanelLayout(\n",
+      "new": "    if (!com.android.systemui.hecker.heckerCustomizedLayout()) {\n        var listening by remember { mutableStateOf(false) }\n        LifecycleStartEffect(Unit) {\n            listening = true\n            onStopOrDispose { listening = false }\n        }\n        Box(modifier.element(Elements.QuickSettingsContent)\n            .padding(horizontal = dimensionResource(id = R.dimen.qs_horizontal_margin))\n            .sysuiResTag(\"quick_settings_panel\")) {\n            GridAnchor()\n            com.android.systemui.hecker.HeckerReferenceQuickSettings(\n                tiles = viewModel.tileGridViewModel.tileViewModels,\n                listening = { listening },\n                modifier = Modifier.element(Elements.QuickSettingsTiles),\n                brightness = if (!viewModel.isBrightnessSliderVisible) null else {\n                    @Composable {\n                        var interactable by remember { mutableStateOf(false) }\n                        LaunchedEffect(Unit) {\n                            snapshotFlow { Elements.QuickSettingsContent.currentAlpha() }\n                                .filterNotNull().collect { interactable = it >= .5f }\n                        }\n                        Element(modifier = Modifier, key = Elements.BrightnessSlider) {\n                            BrightnessSliderContainer(\n                                viewModel.brightnessSliderViewModel,\n                                containerColors = ContainerColors(Color.Transparent, Color.Transparent),\n                                modifier = Modifier.thenIf(!interactable) { Modifier.gesturesDisabled() },\n                            )\n                        }\n                    }\n                },\n            )\n        }\n        return\n    }\n    QuickSettingsPanelLayout(\n"
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/qs/panels/ui/compose/QuickQuickSettings.kt": [
     {
       "old": "    val columns = viewModel.columns\n    val sizedTiles = viewModel.tileViewModels\n    val tiles = sizedTiles.fastMap { it.tile }\n    val squishiness by viewModel.squishinessViewModel.squishiness.collectAsStateWithLifecycle()\n    val scope = rememberCoroutineScope()\n\n    Box(modifier = modifier) {\n        GridAnchor()\n\n        val bounceables =\n            remember(sizedTiles) { List(sizedTiles.size) { BounceableTileViewModel() } }\n        val spans by remember(sizedTiles) { derivedStateOf { sizedTiles.fastMap { it.width } } }\n        VerticalSpannedGrid(\n            columns = columns,\n            columnSpacing = dimensionResource(R.dimen.qs_tile_margin_horizontal),\n            rowSpacing = dimensionResource(R.dimen.qs_tile_margin_vertical),\n            spans = spans,\n            modifier = Modifier.sysuiResTag(\"qqs_tile_layout\"),\n            keys = { sizedTiles[it].tile.spec },\n        ) { spanIndex, column, isFirstInColumn, isLastInColumn ->\n            val it = sizedTiles[spanIndex]\n            Element(it.tile.spec.toElementKey(), Modifier) {\n                Tile(\n                    tile = it.tile,\n                    iconOnly = it.isIcon,\n                    squishiness = { squishiness },\n                    coroutineScope = scope,\n                    bounceableInfo =\n                        bounceables.bounceableInfo(\n                            it,\n                            index = spanIndex,\n                            column = column,\n                            columns = columns,\n                            isFirstInRow = isFirstInColumn,\n                            isLastInRow = isLastInColumn,\n                        ),\n                    tileHapticsViewModelFactory = viewModel.tileHapticsViewModelFactory,\n                    // There should be no QuickQuickSettings when the details view is enabled.\n                    detailsViewModel = null,\n                    isVisible = listening,\n                )\n            }\n        }\n    }\n\n    TileListener(tiles, listening)",
-      "new": "    Box(modifier = modifier) {\n        GridAnchor()\n        com.android.systemui.hecker.HeckerTileGrid(\n            tiles = viewModel.tileViewModels.map { it.tile },\n            listening = listening,\n            compact = true,\n        )\n    }"
+      "new": "    Box(modifier = modifier.element(com.android.systemui.hecker.HeckerQsScene.Compact)) {\n        GridAnchor()\n        com.android.systemui.hecker.HeckerTileGrid(\n            tiles = viewModel.tileViewModels.map { it.tile },\n            listening = listening,\n            compact = true,\n        )\n    }",
+      "previous": [
+        "    Box(modifier = modifier) {\n        GridAnchor()\n        com.android.systemui.hecker.HeckerTileGrid(\n            tiles = viewModel.tileViewModels.map { it.tile },\n            listening = listening,\n            compact = true,\n        )\n    }"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/qs/panels/ui/viewmodel/QuickQuickSettingsViewModel.kt": [
@@ -56,19 +72,49 @@
     },
     {
       "old": "        Column(\n            verticalArrangement = Arrangement.spacedBy(space = 16.dp, alignment = Alignment.Bottom),\n            modifier =\n                Modifier.fillMaxWidth()\n                    .defaultMinSize(minHeight = ShadeHeader.Dimensions.ExpandedHeight),\n        ) {\n            Box(modifier = Modifier.fillMaxWidth()) {\n                Clock(\n                    onClick = viewModel::onClockClicked,\n                    scale = 2.57f,\n                    textColor = textColor,\n                    modifier =\n                        Modifier.sysuiResTag(\"expanded_header_clock\")\n                            .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)\n                            .wrapContentSize(Alignment.CenterStart),\n                )\n                if (!viewModel.isPrivacyChipVisible) {\n                    Box(\n                        modifier =\n                            Modifier.element(ShadeHeader.Elements.ShadeCarrierGroup).fillMaxWidth()\n                    ) {\n                        ShadeCarrierGroup(\n                            viewModel = viewModel,\n                            modifier = Modifier.align(Alignment.CenterEnd).widthIn(max = 180.dp),\n                        )\n                    }\n                }\n            }\n            Row(\n                verticalAlignment = Alignment.CenterVertically,\n                horizontalArrangement = Arrangement.SpaceBetween,\n                modifier = Modifier.element(ShadeHeader.Elements.ExpandedContent).fillMaxWidth(),\n            ) {\n                VariableDayDate(\n                    longerDateText = viewModel.longerDateText,\n                    shorterDateText = viewModel.shorterDateText,\n                    textColor = textColor,\n                    modifier = Modifier.sysuiResTag(\"expanded_shade_header_day_date\"),\n                )\n                ShadeHighlightChip {\n                    val paddingEnd = with(LocalDensity.current) { 3.sp.toDp() }\n                    StatusIcons(\n                        viewModel = viewModel,\n                        useExpandedFormat = useExpandedFormat,\n                        foregroundColor = textColor.toArgb(),\n                        backgroundColor = ShadeHeader.Colors.inverseTextColor.toArgb(),\n                        modifier = Modifier.padding(end = paddingEnd).weight(1f, fill = false),\n                    )\n                    BatteryInfo(\n                        viewModel = viewModel,\n                        showIcon = true,\n                        useExpandedFormat = true,\n                        textColor = textColor,\n                    )\n                }\n            }\n        }",
-      "new": "        Column(\n            verticalArrangement = Arrangement.spacedBy(10.dp),\n            modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 104.dp),\n        ) {\n            Row(Modifier.element(ShadeHeader.Elements.ExpandedContent).fillMaxWidth(),\n                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {\n                ShadeCarrierGroup(viewModel = viewModel, modifier = Modifier.widthIn(max = 160.dp))\n                if (!viewModel.isPrivacyChipVisible) ShadeHighlightChip {\n                    StatusIcons(viewModel = viewModel, useExpandedFormat = useExpandedFormat,\n                        foregroundColor = textColor.toArgb(), backgroundColor = ShadeHeader.Colors.inverseTextColor.toArgb(),\n                        modifier = Modifier.weight(1f, fill = false))\n                    BatteryInfo(viewModel = viewModel, showIcon = true, useExpandedFormat = true, textColor = textColor)\n                }\n            }\n            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {\n                Clock(onClick = viewModel::onClockClicked, scale = 1.35f, textColor = textColor,\n                    modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp).wrapContentSize(Alignment.CenterStart))\n                VariableDayDate(longerDateText = viewModel.longerDateText, shorterDateText = viewModel.shorterDateText,\n                    textColor = textColor, modifier = Modifier.padding(start = 6.dp).weight(1f))\n                actions()\n            }\n        }"
+      "new": "        androidx.compose.runtime.CompositionLocalProvider(\n            com.android.systemui.hecker.LocalHeckerReferenceGlass provides\n                !com.android.systemui.hecker.heckerCustomizedLayout()\n        ) {\n            val foreground = ShadeHeader.Colors.textColor\n            Column(\n                verticalArrangement = Arrangement.spacedBy(8.dp),\n                modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 104.dp),\n            ) {\n                Row(Modifier.element(ShadeHeader.Elements.ExpandedContent).fillMaxWidth(),\n                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {\n                    ShadeCarrierGroup(viewModel = viewModel, modifier = Modifier.weight(1f).padding(end = 8.dp))\n                    if (!viewModel.isPrivacyChipVisible) Row(verticalAlignment = Alignment.CenterVertically) {\n                        StatusIcons(viewModel = viewModel, useExpandedFormat = useExpandedFormat,\n                            foregroundColor = foreground.toArgb(), backgroundColor = Color.Transparent.toArgb(),\n                            modifier = Modifier.weight(1f, fill = false))\n                        BatteryInfo(viewModel = viewModel, showIcon = true, useExpandedFormat = false,\n                            textColor = foreground, modifier = Modifier.padding(start = 4.dp))\n                    }\n                }\n                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {\n                    if (com.android.systemui.hecker.LocalHeckerReferenceGlass.current) {\n                        Element(key = ShadeHeader.Elements.Clock, modifier = Modifier) {\n                            com.android.systemui.hecker.HeckerReferenceClock(viewModel::onClockClicked)\n                        }\n                    } else {\n                        Clock(onClick = viewModel::onClockClicked, scale = 1f, textColor = foreground,\n                            modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp).wrapContentSize(Alignment.CenterStart))\n                    }\n                    Text(viewModel.shorterDateText, color = foreground, fontSize = 12.sp,\n                        maxLines = 1, overflow = TextOverflow.Ellipsis,\n                        modifier = Modifier.padding(start = 5.dp).weight(1f))\n                    actions()\n                }\n            }\n        }",
+      "previous": [
+        "        Column(\n            verticalArrangement = Arrangement.spacedBy(10.dp),\n            modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 104.dp),\n        ) {\n            Row(Modifier.element(ShadeHeader.Elements.ExpandedContent).fillMaxWidth(),\n                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {\n                ShadeCarrierGroup(viewModel = viewModel, modifier = Modifier.widthIn(max = 160.dp))\n                if (!viewModel.isPrivacyChipVisible) ShadeHighlightChip {\n                    StatusIcons(viewModel = viewModel, useExpandedFormat = useExpandedFormat,\n                        foregroundColor = textColor.toArgb(), backgroundColor = ShadeHeader.Colors.inverseTextColor.toArgb(),\n                        modifier = Modifier.weight(1f, fill = false))\n                    BatteryInfo(viewModel = viewModel, showIcon = true, useExpandedFormat = true, textColor = textColor)\n                }\n            }\n            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {\n                Clock(onClick = viewModel::onClockClicked, scale = 1.35f, textColor = textColor,\n                    modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp).wrapContentSize(Alignment.CenterStart))\n                VariableDayDate(longerDateText = viewModel.longerDateText, shorterDateText = viewModel.shorterDateText,\n                    textColor = textColor, modifier = Modifier.padding(start = 6.dp).weight(1f))\n                actions()\n            }\n        }"
+      ]
+    },
+    {
+      "old": "get() = if (isSystemInDarkTheme()) Color.White else Color.Black",
+      "new": "get() = if (com.android.systemui.hecker.LocalHeckerReferenceGlass.current || isSystemInDarkTheme()) Color.White else Color.Black"
+    },
+    {
+      "old": "import androidx.compose.ui.text.TextStyle\n",
+      "new": "import androidx.compose.ui.text.TextStyle\nimport androidx.compose.ui.text.style.TextOverflow\n"
+    },
+    {
+      "old": "    val isQuickSettingsDarkTheme = isSystemInDarkTheme()",
+      "new": "    val isQuickSettingsDarkTheme = com.android.systemui.hecker.LocalHeckerReferenceGlass.current || isSystemInDarkTheme()"
     }
   ],
   "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/qs/ui/composable/QuickSettingsScene.kt": [
     {
       "old": "                                    modifier = Modifier.padding(horizontal = 16.dp),",
       "new": "                                    modifier = Modifier.padding(horizontal = 16.dp),\n                                    actions = {\n                                        com.android.systemui.hecker.HeckerHeaderActions(footerActionsViewModel) {\n                                            viewModel.qsContainerViewModel.editModeViewModel.startEditing()\n                                        }\n                                    },"
+    },
+    {
+      "old": "import androidx.compose.runtime.Composable\n",
+      "new": "import androidx.compose.runtime.Composable\nimport androidx.compose.runtime.collectAsState\n"
+    },
+    {
+      "old": "            FooterActionsWithAnimatedVisibility(\n                viewModel = footerActionsViewModel,\n                isCustomizing = false,\n                customizingAnimationDuration = 0,\n                modifier =\n                    Modifier.align(Alignment.CenterHorizontally)\n                        .sysuiResTag(\"qs_footer_actions\")\n                        .padding(horizontal = shadeHorizontalPadding),\n            )",
+      "new": "            val heckerSecurity by footerActionsViewModel.security.collectAsState(initial = null)\n            val heckerActiveApps by footerActionsViewModel.foregroundServices.collectAsState(initial = null)\n            val heckerUserSwitcher by footerActionsViewModel.userSwitcher.collectAsState(initial = null)\n            if (com.android.systemui.hecker.heckerCustomizedLayout() || heckerSecurity != null ||\n                heckerActiveApps != null || heckerUserSwitcher != null) {\n                FooterActionsWithAnimatedVisibility(\n                    viewModel = footerActionsViewModel,\n                    isCustomizing = false,\n                    customizingAnimationDuration = 0,\n                    modifier =\n                        Modifier.align(Alignment.CenterHorizontally)\n                            .sysuiResTag(\"qs_footer_actions\")\n                            .padding(horizontal = shadeHorizontalPadding),\n                )\n            }"
     }
   ],
   "frameworks/base/services/java/com/android/server/SystemServer.java": [
     {
       "old": "        mSystemServiceManager.sealStartedServices();",
-      "new": "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        mSystemServiceManager.sealStartedServices();"
+      "new": "        // Hecker theme engine starts before system-services-ready.\n        mSystemServiceManager.sealStartedServices();",
+      "previous": [
+        "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        mSystemServiceManager.sealStartedServices();"
+      ]
+    },
+    {
+      "old": "        t.traceBegin(\"StartBootPhaseSystemServicesReady\");",
+      "new": "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");"
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/ConfigurationControllerImpl.kt": [
@@ -88,7 +134,10 @@
     },
     {
       "old": "                            IconViewBinder.bind(wifiIcon.icon, iconView)",
-      "new": "                            IconViewBinder.bind(wifiIcon.icon, iconView)\n                            com.android.systemui.hecker.HeckerThemeAssets.wifi(view.context, wifiIcon.icon.res)?.let {\n                                iconView.setImageDrawable(it)\n                            }"
+      "new": "                            IconViewBinder.bind(wifiIcon.icon, iconView)\n                            com.android.systemui.hecker.HeckerThemeAssets.wifi(view.context, wifiIcon.res)?.let {\n                                iconView.setImageDrawable(it)\n                            }",
+      "previous": [
+        "                            IconViewBinder.bind(wifiIcon.icon, iconView)\n                            com.android.systemui.hecker.HeckerThemeAssets.wifi(view.context, wifiIcon.icon.res)?.let {\n                                iconView.setImageDrawable(it)\n                            }"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/pipeline/mobile/ui/binder/MobileIconBinder.kt": [
@@ -126,7 +175,10 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/battery/BatteryMeterView.java": [
     {
       "old": "    private final AccessorizedBatteryDrawable mDrawable;",
-      "new": "    private com.android.systemui.hecker.HeckerBatteryDrawable mHeckerBattery;\n    private final android.content.res.ThemeEngine.ThemeChangeListener mHeckerThemeListener =\n            category -> post(this::reloadHeckerBattery);\n\n    @Override protected void onAttachedToWindow() {\n        super.onAttachedToWindow();\n        android.content.res.ThemeEngine engine = android.content.res.ThemeEngine.getInstance(getContext());\n        if (engine != null) engine.addThemeChangeListener(mHeckerThemeListener);\n        reloadHeckerBattery();\n    }\n    @Override protected void onDetachedFromWindow() {\n        android.content.res.ThemeEngine engine = android.content.res.ThemeEngine.getInstance(getContext());\n        if (engine != null) engine.removeThemeChangeListener(mHeckerThemeListener);\n        super.onDetachedFromWindow();\n    }\n    private void reloadHeckerBattery() {\n        mHeckerBattery = com.android.systemui.hecker.HeckerBatteryDrawable.create(getContext());\n        scaleBatteryMeterViews();\n        updateHeckerBattery();\n    }\n    private void updateHeckerBattery() {\n        if (mBatteryIconView == null) return;\n        if (mHeckerBattery == null || mBatteryStateUnknown || mIsBatteryDefender || mIsIncompatibleCharging) {\n            mBatteryIconView.setImageDrawable(mBatteryStateUnknown ? getUnknownStateDrawable()\n                    : NewStatusBarIcons.isEnabled() ? mUnifiedBattery : mDrawable);\n            return;\n        }\n        boolean percent = NewStatusBarIcons.isEnabled() ? mUnifiedBatteryState.getShowPercent()\n                : mBatteryPercentView != null;\n        mHeckerBattery.update(mLevel, isCharging(), mPowerSaveEnabled, percent, mTextColor);\n        mBatteryIconView.setImageDrawable(mHeckerBattery);\n        android.view.ViewGroup.LayoutParams params = mBatteryIconView.getLayoutParams();\n        int width = Math.round(params.height * mHeckerBattery.getIntrinsicWidth()\n                / (float) mHeckerBattery.getIntrinsicHeight());\n        if (params.width != width) { params.width = width; mBatteryIconView.setLayoutParams(params); }\n    }\n\n    private final AccessorizedBatteryDrawable mDrawable;"
+      "new": "    private com.android.systemui.hecker.HeckerBatteryDrawable mHeckerBattery;\n    private final Runnable mHeckerThemeListener = this::reloadHeckerBattery;\n\n    @Override protected void onAttachedToWindow() {\n        super.onAttachedToWindow();\n        com.android.systemui.hecker.HeckerThemeAssets.addChangeListener(getContext(), mHeckerThemeListener);\n        reloadHeckerBattery();\n    }\n    @Override protected void onDetachedFromWindow() {\n        com.android.systemui.hecker.HeckerThemeAssets.removeChangeListener(mHeckerThemeListener);\n        super.onDetachedFromWindow();\n    }\n    private void reloadHeckerBattery() {\n        mHeckerBattery = com.android.systemui.hecker.HeckerBatteryDrawable.create(getContext());\n        scaleBatteryMeterViews();\n        updateHeckerBattery();\n    }\n    private void updateHeckerBattery() {\n        if (mBatteryIconView == null) return;\n        if (mHeckerBattery == null || mBatteryStateUnknown || mIsBatteryDefender || mIsIncompatibleCharging) {\n            mBatteryIconView.setImageDrawable(mBatteryStateUnknown ? getUnknownStateDrawable()\n                    : NewStatusBarIcons.isEnabled() ? mUnifiedBattery : mDrawable);\n            return;\n        }\n        boolean percent = NewStatusBarIcons.isEnabled() ? mUnifiedBatteryState.getShowPercent()\n                : mBatteryPercentView != null;\n        mHeckerBattery.update(mLevel, isCharging(), mPowerSaveEnabled, percent, mTextColor);\n        mBatteryIconView.setImageDrawable(mHeckerBattery);\n        android.view.ViewGroup.LayoutParams params = mBatteryIconView.getLayoutParams();\n        int width = Math.round(params.height * mHeckerBattery.getIntrinsicWidth()\n                / (float) mHeckerBattery.getIntrinsicHeight());\n        if (params.width != width) { params.width = width; mBatteryIconView.setLayoutParams(params); }\n    }\n\n    private final AccessorizedBatteryDrawable mDrawable;",
+      "previous": [
+        "    private com.android.systemui.hecker.HeckerBatteryDrawable mHeckerBattery;\n    private final android.content.res.ThemeEngine.ThemeChangeListener mHeckerThemeListener =\n            category -> post(this::reloadHeckerBattery);\n\n    @Override protected void onAttachedToWindow() {\n        super.onAttachedToWindow();\n        android.content.res.ThemeEngine engine = android.content.res.ThemeEngine.getInstance(getContext());\n        if (engine != null) engine.addThemeChangeListener(mHeckerThemeListener);\n        reloadHeckerBattery();\n    }\n    @Override protected void onDetachedFromWindow() {\n        android.content.res.ThemeEngine engine = android.content.res.ThemeEngine.getInstance(getContext());\n        if (engine != null) engine.removeThemeChangeListener(mHeckerThemeListener);\n        super.onDetachedFromWindow();\n    }\n    private void reloadHeckerBattery() {\n        mHeckerBattery = com.android.systemui.hecker.HeckerBatteryDrawable.create(getContext());\n        scaleBatteryMeterViews();\n        updateHeckerBattery();\n    }\n    private void updateHeckerBattery() {\n        if (mBatteryIconView == null) return;\n        if (mHeckerBattery == null || mBatteryStateUnknown || mIsBatteryDefender || mIsIncompatibleCharging) {\n            mBatteryIconView.setImageDrawable(mBatteryStateUnknown ? getUnknownStateDrawable()\n                    : NewStatusBarIcons.isEnabled() ? mUnifiedBattery : mDrawable);\n            return;\n        }\n        boolean percent = NewStatusBarIcons.isEnabled() ? mUnifiedBatteryState.getShowPercent()\n                : mBatteryPercentView != null;\n        mHeckerBattery.update(mLevel, isCharging(), mPowerSaveEnabled, percent, mTextColor);\n        mBatteryIconView.setImageDrawable(mHeckerBattery);\n        android.view.ViewGroup.LayoutParams params = mBatteryIconView.getLayoutParams();\n        int width = Math.round(params.height * mHeckerBattery.getIntrinsicWidth()\n                / (float) mHeckerBattery.getIntrinsicHeight());\n        if (params.width != width) { params.width = width; mBatteryIconView.setLayoutParams(params); }\n    }\n\n    private final AccessorizedBatteryDrawable mDrawable;"
+      ]
     },
     {
       "old": "        setContentDescription(contentDescription);",
@@ -163,12 +215,6 @@
     {
       "old": "include vendor/custom/config/ota.mk",
       "new": "# HeckerOS provides no stock PixelOS OTA channel."
-    }
-  ],
-  "vendor/custom/config/version.mk": [
-    {
-      "old": "ro.custom.version=PixelOS_$(CUSTOM_VERSION)",
-      "new": "ro.custom.version=HeckerOS_$(CUSTOM_VERSION)"
     }
   ],
   "vendor/custom/build/tasks/pixelos.mk": [
@@ -225,6 +271,167 @@
     {
       "old": "    static_libs: [\n        // External dependencies",
       "new": "    static_libs: [\n        \"HeckerSuiteSettingsUi\",\n        \"//vendor/hecker/floral/motionsense:HeckerMotionSenseSettingsUi\",\n        // External dependencies"
+    }
+  ],
+  "packages/apps/Settings/src/com/android/settings/deviceinfo/aboutphone/MyDeviceInfoFragment.java": [
+    {
+      "old": "    private void initHeader() {\n        // TODO: Migrate into its own controller.\n        final LayoutPreference headerPreference =\n                getPreferenceScreen().findPreference(KEY_MY_DEVICE_INFO_HEADER);\n        final boolean shouldDisplayHeader = getContext().getResources().getBoolean(\n                R.bool.config_show_device_header_in_device_info);\n        headerPreference.setVisible(shouldDisplayHeader);\n        if (!shouldDisplayHeader) {\n            return;\n        }\n        final View headerView = headerPreference.findViewById(R.id.entity_header);\n        final Activity context = getActivity();\n        final Bundle bundle = getArguments();\n        final EntityHeaderController controller = EntityHeaderController\n                .newInstance(context, this, headerView)\n                .setButtonActions(EntityHeaderController.ActionType.ACTION_NONE,\n                        EntityHeaderController.ActionType.ACTION_NONE);\n\n        // TODO: There may be an avatar setting action we can use here.\n        final int iconId = bundle != null ? bundle.getInt(\"icon_id\", 0) : 0;\n        if (iconId == 0) {\n            final UserManager userManager = (UserManager) getActivity().getSystemService(\n                    Context.USER_SERVICE);\n            final UserInfo info = Utils.getExistingUser(userManager,\n                    android.os.Process.myUserHandle());\n            controller.setLabel(info.name);\n            controller.setIcon(\n                    com.android.settingslib.Utils.getUserIcon(getActivity(), userManager, info));\n        }\n\n        controller.done(true /* rebindActions */);\n    }\n\n",
+      "new": "    private void initHeader() {\n        final LayoutPreference legacyHeader = findPreference(KEY_MY_DEVICE_INFO_HEADER);\n        if (legacyHeader != null) legacyHeader.setVisible(false);\n        final com.android.settings.hecker.HeckerAboutPhonePreference card =\n                findPreference(com.android.settings.hecker.HeckerAboutPhonePreference.KEY);\n        if (card != null) card.setActive(true);\n    }\n\n"
+    },
+    {
+      "old": "    @Override\n    protected String getLogTag() {",
+      "new": "    @Override\n    public void onStop() {\n        final com.android.settings.hecker.HeckerAboutPhonePreference card =\n                findPreference(com.android.settings.hecker.HeckerAboutPhonePreference.KEY);\n        if (card != null) card.setActive(false);\n        super.onStop();\n    }\n\n    @Override\n    protected String getLogTag() {"
+    },
+    {
+      "old": "import static androidx.core.content.ContextCompat.getMainExecutor;\n\nimport android.app.Activity;\nimport android.app.settings.SettingsEnums;\nimport android.content.Context;\nimport android.content.Intent;\nimport android.content.pm.UserInfo;\nimport android.os.Bundle;\nimport android.os.UserManager;\nimport android.view.View;\n\nimport androidx.annotation.NonNull;\nimport androidx.annotation.Nullable;\nimport androidx.preference.PreferenceScreen;\n\nimport com.android.settings.R;\nimport com.android.settings.Utils;\nimport com.android.settings.dashboard.DashboardFragment;\nimport com.android.settings.deviceinfo.BluetoothAddressPreferenceController;\nimport com.android.settings.deviceinfo.BuildNumberPreferenceController;\nimport com.android.settings.deviceinfo.DeviceNamePreferenceController;\nimport com.android.settings.deviceinfo.FccEquipmentIdPreferenceController;\nimport com.android.settings.deviceinfo.FeedbackPreferenceController;\nimport com.android.settings.deviceinfo.IpAddressPreferenceController;\nimport com.android.settings.deviceinfo.ManualPreferenceController;\nimport com.android.settings.deviceinfo.RegulatoryInfoPreferenceController;\nimport com.android.settings.deviceinfo.SafetyInfoPreferenceController;\nimport com.android.settings.deviceinfo.UptimePreferenceController;\nimport com.android.settings.deviceinfo.WifiMacAddressPreferenceController;\nimport com.android.settings.deviceinfo.imei.ImeiInfoPreferenceController;\nimport com.android.settings.deviceinfo.simstatus.EidStatus;\nimport com.android.settings.deviceinfo.simstatus.SimEidPreferenceController;\nimport com.android.settings.deviceinfo.simstatus.SimStatusPreferenceController;\nimport com.android.settings.deviceinfo.simstatus.SlotSimStatus;\nimport com.android.settings.flags.Flags;\nimport com.android.settings.search.BaseSearchIndexProvider;\nimport com.android.settings.widget.EntityHeaderController;\nimport com.android.settingslib.core.AbstractPreferenceController;\nimport com.android.settingslib.core.lifecycle.Lifecycle;\nimport com.android.settingslib.search.SearchIndexable;\nimport com.android.settingslib.widget.LayoutPreference;\n\nimport java.util.ArrayList;\nimport java.util.List;\nimport java.util.Set;\nimport java.util.concurrent.Executor;\nimport java.util.concurrent.ExecutorService;\nimport java.util.concurrent.Executors;\nimport java.util.function.Consumer;\n\n",
+      "new": "import static androidx.core.content.ContextCompat.getMainExecutor;\n\nimport android.app.settings.SettingsEnums;\nimport android.content.Context;\nimport android.content.Intent;\n\nimport androidx.annotation.NonNull;\nimport androidx.annotation.Nullable;\nimport androidx.preference.PreferenceScreen;\n\nimport com.android.settings.R;\nimport com.android.settings.dashboard.DashboardFragment;\nimport com.android.settings.deviceinfo.BluetoothAddressPreferenceController;\nimport com.android.settings.deviceinfo.BuildNumberPreferenceController;\nimport com.android.settings.deviceinfo.DeviceNamePreferenceController;\nimport com.android.settings.deviceinfo.FccEquipmentIdPreferenceController;\nimport com.android.settings.deviceinfo.FeedbackPreferenceController;\nimport com.android.settings.deviceinfo.IpAddressPreferenceController;\nimport com.android.settings.deviceinfo.ManualPreferenceController;\nimport com.android.settings.deviceinfo.RegulatoryInfoPreferenceController;\nimport com.android.settings.deviceinfo.SafetyInfoPreferenceController;\nimport com.android.settings.deviceinfo.UptimePreferenceController;\nimport com.android.settings.deviceinfo.WifiMacAddressPreferenceController;\nimport com.android.settings.deviceinfo.imei.ImeiInfoPreferenceController;\nimport com.android.settings.deviceinfo.simstatus.EidStatus;\nimport com.android.settings.deviceinfo.simstatus.SimEidPreferenceController;\nimport com.android.settings.deviceinfo.simstatus.SimStatusPreferenceController;\nimport com.android.settings.deviceinfo.simstatus.SlotSimStatus;\nimport com.android.settings.flags.Flags;\nimport com.android.settings.search.BaseSearchIndexProvider;\nimport com.android.settingslib.core.AbstractPreferenceController;\nimport com.android.settingslib.core.lifecycle.Lifecycle;\nimport com.android.settingslib.search.SearchIndexable;\nimport com.android.settingslib.widget.LayoutPreference;\n\nimport java.util.ArrayList;\nimport java.util.List;\nimport java.util.Set;\nimport java.util.concurrent.Executor;\nimport java.util.concurrent.ExecutorService;\nimport java.util.concurrent.Executors;\nimport java.util.function.Consumer;\n\n"
+    },
+    {
+      "old": "        initHeader();",
+      "new": "        initHeader();\n        getListView().setBackgroundColor(getContext().getColor(R.color.hecker_background));"
+    }
+  ],
+  "packages/apps/Settings/res/xml/my_device_info.xml": [
+    {
+      "old": "    <com.android.settingslib.widget.LayoutPreference\n        android:key=\"my_device_info_header\"",
+      "new": "    <com.android.settings.hecker.HeckerAboutPhonePreference\n        android:key=\"hecker_about_phone\"\n        android:order=\"-100\"\n        android:selectable=\"false\" />\n\n    <com.android.settingslib.widget.LayoutPreference\n        android:key=\"my_device_info_header\""
+    }
+  ],
+  "frameworks/base/core/java/android/security/spoof/HeckerSpoofConfig.java": [
+    {
+      "old": "/** Private framework API used by native Settings. @hide */",
+      "new": "/**\n * Private framework API used by native Settings.\n * @hide\n */"
+    }
+  ],
+  "frameworks/libs/systemui/iconloaderlib/src/com/android/launcher3/icons/BaseIconFactory.kt": [
+    {
+      "old": "        if (options.wrapNonAdaptiveIcon) tempIcon = wrapToAdaptiveIcon(tempIcon, options)\n\n        val drawFullBleed = options.drawFullBleed ?: drawFullBleedIcons",
+      "new": "        // Preserve icon-pack masks instead of wrapping them a second time.\n        val noWrapHintSet = (tempIcon.changingConfigurations and CONFIG_HINT_NO_WRAP) != 0\n        if (options.wrapNonAdaptiveIcon && !noWrapHintSet) {\n            tempIcon = wrapToAdaptiveIcon(tempIcon, options)\n        }\n\n        val drawFullBleed = if (noWrapHintSet) false\n            else options.drawFullBleed ?: drawFullBleedIcons"
+    },
+    {
+      "old": "        private const val DEFAULT_WRAPPER_BACKGROUND = Color.WHITE",
+      "new": "        private const val DEFAULT_WRAPPER_BACKGROUND = Color.WHITE\n\n        // Private drawable hint shared with ThirdPartyIconProvider.\n        const val CONFIG_HINT_NO_WRAP: Int = 0x1000000"
+    }
+  ],
+  "vendor/custom/bootanimation/Android.bp": [
+    {
+      "old": "    name: \"bootanimation_pixelos\",",
+      "new": "    name: \"bootanimation_pixelos\",\n    // HeckerOS owns product/media/bootanimation.zip; disable the other install rule.\n    enabled: false,"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/SystemUIService.java": [
+    {
+      "old": "        ((SystemUIApplication) getApplication()).startSystemUserServicesIfNeeded();",
+      "new": "        ((SystemUIApplication) getApplication()).startSystemUserServicesIfNeeded();\n        com.android.systemui.hecker.HeckerHeadphonePopup.start(this);"
+    }
+  ],
+  "frameworks/base/services/core/java/com/android/server/am/ProcessList.java": [
+    {
+      "old": "                gids = computeGidsForProcess(mountExternal, uid, permGids, externalStorageAccess);",
+      "new": "                gids = computeGidsForProcess(mountExternal, uid, permGids, externalStorageAccess);\n                gids = com.android.internal.hecker.HeckerSandboxRules.restrictGids(gids,\n                        HeckerSandboxPolicy.mask(mService.mContext, app.info, app.userId));"
+    },
+    {
+      "old": "        return mVoldAppDataIsolationEnabled && UserHandle.isApp(app.uid)",
+      "new": "        return (mVoldAppDataIsolationEnabled\n                || HeckerSandboxPolicy.isolate(mService.mContext, app.info, app.userId))\n                && UserHandle.isApp(app.uid)"
+    },
+    {
+      "old": "            boolean bindMountAppsData = mAppDataIsolationEnabled",
+      "new": "            boolean heckerSandboxDataIsolation = HeckerSandboxPolicy.isolate(\n                    mService.mContext, app.info, app.userId);\n            boolean bindMountAppsData = (mAppDataIsolationEnabled || heckerSandboxDataIsolation)"
+    },
+    {
+      "old": "                    && mPlatformCompat.isChangeEnabled(APP_DATA_DIRECTORY_ISOLATION, app.info);",
+      "new": "                    && (heckerSandboxDataIsolation\n                        || mPlatformCompat.isChangeEnabled(APP_DATA_DIRECTORY_ISOLATION, app.info));"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/dagger/SystemUIModule.java": [
+    {
+      "old": "public abstract class SystemUIModule {",
+      "new": "public abstract class SystemUIModule {\n\n    @Binds\n    @IntoMap\n    @ClassKey(com.android.systemui.hecker.HeckerFaceUnlockStartable.class)\n    abstract CoreStartable bindHeckerFaceUnlockIsland(\n            com.android.systemui.hecker.HeckerFaceUnlockStartable startable);\n\n    @Binds\n    @IntoMap\n    @ClassKey(com.android.systemui.hecker.HeckerQsActions.class)\n    abstract CoreStartable bindHeckerQuickSettingsActions(\n            com.android.systemui.hecker.HeckerQsActions startable);",
+      "previous": [
+        "public abstract class SystemUIModule {\n\n    @Binds\n    @IntoMap\n    @ClassKey(com.android.systemui.hecker.HeckerFaceUnlockStartable.class)\n    abstract CoreStartable bindHeckerFaceUnlockIsland(\n            com.android.systemui.hecker.HeckerFaceUnlockStartable startable);"
+      ]
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/brightness/ui/compose/BrightnessSlider.kt": [
+    {
+      "old": "    val colors = SystemUISliderColors.Defaults\n",
+      "new": "    val colors = SystemUISliderColors.Defaults\n    val heckerGlass = com.android.systemui.hecker.LocalHeckerReferenceGlass.current\n"
+    },
+    {
+      "old": "        thumb = {\n            SliderDefaults.Thumb(\n                interactionSource = interactionSource,\n                enabled = enabled,\n                thumbSize = DpSize(dimensions.thumbWidth, dimensions.thumbHeight),\n                colors = colors,\n            )\n        },",
+      "new": "        thumb = {\n            if (!heckerGlass) SliderDefaults.Thumb(\n                interactionSource = interactionSource,\n                enabled = enabled,\n                thumbSize = DpSize(dimensions.thumbWidth, dimensions.thumbHeight),\n                colors = colors,\n            )\n        },"
+    },
+    {
+      "old": "        track = { sliderState ->\n            var showIconActive by remember { mutableStateOf(true) }\n            val iconActiveAlphaAnimatable = remember {\n                Animatable(\n                    initialValue = 1f,\n                    typeConverter = Float.VectorConverter,\n                    label = \"iconActiveAlpha\",\n                )\n            }\n\n            val iconInactiveAlphaAnimatable = remember {\n                Animatable(\n                    initialValue = 0f,\n                    typeConverter = Float.VectorConverter,\n                    label = \"iconInactiveAlpha\",\n                )\n            }\n\n            LaunchedEffect(iconActiveAlphaAnimatable, iconInactiveAlphaAnimatable, showIconActive) {\n                if (showIconActive) {\n                    launch { iconActiveAlphaAnimatable.appear() }\n                    launch { iconInactiveAlphaAnimatable.disappear() }\n                } else {\n                    launch { iconActiveAlphaAnimatable.disappear() }\n                    launch { iconInactiveAlphaAnimatable.appear() }\n                }\n            }\n\n            SliderDefaults.Track(\n                sliderState = sliderState,\n                modifier =\n                    Modifier.motionTestValues {\n                            iconActiveAlphaAnimatable.value exportAs\n                                BrightnessSliderMotionTestKeys.ActiveIconAlpha\n                            iconInactiveAlphaAnimatable.value exportAs\n                                BrightnessSliderMotionTestKeys.InactiveIconAlpha\n                        }\n                        .height(dimensions.trackHeight)\n                        .drawWithContent {\n                            drawContent()\n\n                            val yOffset = size.height / 2 - iconSize.toSize().height / 2\n                            val activeTrackStart = 0f\n                            val activeTrackEnd =\n                                size.width * sliderState.coercedValueAsFraction -\n                                    ThumbTrackGapSize.toPx()\n                            val inactiveTrackStart = activeTrackEnd + ThumbTrackGapSize.toPx() * 2\n                            val inactiveTrackEnd = size.width\n\n                            val activeTrackWidth = activeTrackEnd - activeTrackStart\n                            val inactiveTrackWidth = inactiveTrackEnd - inactiveTrackStart\n\n                            if (\n                                iconSize.toSize().width <\n                                    inactiveTrackWidth - IconPadding.toPx() * 2\n                            ) {\n                                showIconActive = false\n                                trackIcon(\n                                    Offset(inactiveTrackEnd, yOffset),\n                                    inactiveIconColor,\n                                    iconInactiveAlphaAnimatable.value,\n                                )\n                            } else if (\n                                iconSize.toSize().width < activeTrackWidth - IconPadding.toPx() * 2\n                            ) {\n                                showIconActive = true\n                                trackIcon(\n                                    Offset(activeTrackEnd, yOffset),\n                                    activeIconColor,\n                                    iconActiveAlphaAnimatable.value,\n                                )\n                            }\n                        },\n                trackCornerSize = SliderTrackRoundedCorner,\n                trackInsideCornerSize = 2.dp,\n                drawStopIndicator = null,\n                thumbTrackGapSize = ThumbTrackGapSize,\n                colors = colors,\n            )\n        },",
+      "new": "        track = { sliderState ->\n            if (heckerGlass) {\n                com.android.systemui.hecker.HeckerGlassTrack(\n                    sliderState.coercedValueAsFraction,\n                    com.android.systemui.res.R.drawable.hecker_qs_sun,\n                )\n            } else {\n                var showIconActive by remember { mutableStateOf(true) }\n                val iconActiveAlphaAnimatable = remember {\n                    Animatable(\n                        initialValue = 1f,\n                        typeConverter = Float.VectorConverter,\n                        label = \"iconActiveAlpha\",\n                    )\n                }\n    \n                val iconInactiveAlphaAnimatable = remember {\n                    Animatable(\n                        initialValue = 0f,\n                        typeConverter = Float.VectorConverter,\n                        label = \"iconInactiveAlpha\",\n                    )\n                }\n    \n                LaunchedEffect(iconActiveAlphaAnimatable, iconInactiveAlphaAnimatable, showIconActive) {\n                    if (showIconActive) {\n                        launch { iconActiveAlphaAnimatable.appear() }\n                        launch { iconInactiveAlphaAnimatable.disappear() }\n                    } else {\n                        launch { iconActiveAlphaAnimatable.disappear() }\n                        launch { iconInactiveAlphaAnimatable.appear() }\n                    }\n                }\n    \n                SliderDefaults.Track(\n                    sliderState = sliderState,\n                    modifier =\n                        Modifier.motionTestValues {\n                                iconActiveAlphaAnimatable.value exportAs\n                                    BrightnessSliderMotionTestKeys.ActiveIconAlpha\n                                iconInactiveAlphaAnimatable.value exportAs\n                                    BrightnessSliderMotionTestKeys.InactiveIconAlpha\n                            }\n                            .height(dimensions.trackHeight)\n                            .drawWithContent {\n                                drawContent()\n    \n                                val yOffset = size.height / 2 - iconSize.toSize().height / 2\n                                val activeTrackStart = 0f\n                                val activeTrackEnd =\n                                    size.width * sliderState.coercedValueAsFraction -\n                                        ThumbTrackGapSize.toPx()\n                                val inactiveTrackStart = activeTrackEnd + ThumbTrackGapSize.toPx() * 2\n                                val inactiveTrackEnd = size.width\n    \n                                val activeTrackWidth = activeTrackEnd - activeTrackStart\n                                val inactiveTrackWidth = inactiveTrackEnd - inactiveTrackStart\n    \n                                if (\n                                    iconSize.toSize().width <\n                                        inactiveTrackWidth - IconPadding.toPx() * 2\n                                ) {\n                                    showIconActive = false\n                                    trackIcon(\n                                        Offset(inactiveTrackEnd, yOffset),\n                                        inactiveIconColor,\n                                        iconInactiveAlphaAnimatable.value,\n                                    )\n                                } else if (\n                                    iconSize.toSize().width < activeTrackWidth - IconPadding.toPx() * 2\n                                ) {\n                                    showIconActive = true\n                                    trackIcon(\n                                        Offset(activeTrackEnd, yOffset),\n                                        activeIconColor,\n                                        iconActiveAlphaAnimatable.value,\n                                    )\n                                }\n                            },\n                    trackCornerSize = SliderTrackRoundedCorner,\n                    trackInsideCornerSize = 2.dp,\n                    drawStopIndicator = null,\n                    thumbTrackGapSize = ThumbTrackGapSize,\n                    colors = colors,\n                )\n            }\n        },"
+    },
+    {
+      "old": "    val gamma = viewModel.currentBrightness.value",
+      "new": "    val heckerVertical = com.android.systemui.hecker.LocalHeckerVerticalBrightness.current\n    val gamma = viewModel.currentBrightness.value"
+    },
+    {
+      "old": "            if (dragging && viewModel.supportsMirroring) {",
+      "new": "            if (dragging && viewModel.supportsMirroring && !heckerVertical) {"
+    },
+    {
+      "old": "                viewModel.setIsDragging(true)",
+      "new": "                viewModel.setIsDragging(!heckerVertical)"
+    },
+    {
+      "old": "                    .then(if (viewModel.showMirror) Modifier.drawInOverlay() else Modifier)",
+      "new": "                    .then(if (viewModel.showMirror && !heckerVertical) Modifier.drawInOverlay() else Modifier)"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/shade/ui/composable/ShadePanelScrim.kt": [
+    {
+      "old": ".background(color = scrimColor(isTransparencyEnabled))",
+      "new": ".background(color = if (com.android.systemui.hecker.heckerCustomizedLayout()) {\n                    scrimColor(isTransparencyEnabled)\n                } else {\n                    com.android.systemui.hecker.heckerReferenceScrim(isTransparencyEnabled)\n                })"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/scene/ui/composable/transitions/FromShadeToQuickSettingsTransition.kt": [
+    {
+      "old": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n",
+      "new": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/qs/composefragment/ui/FromQuickQuickSettingsToQuickSettings.kt": [
+    {
+      "old": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n",
+      "new": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/ui/compose/WifiIcon.kt": [
+    {
+      "old": "    val icon = viewModel.icon ?: return",
+      "new": "    val nativeIcon = viewModel.icon ?: return\n    val icon = com.android.systemui.hecker.heckerWifiIcon(nativeIcon)"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/pipeline/mobile/ui/compose/MobileIcon.kt": [
+    {
+      "old": "    Canvas(\n        modifier.width(width).height(height).graphicsLayer {",
+      "new": "    if (viewModel is SignalIconModel.CellularTypeIconModel.Cellular &&\n        !viewModel.showExclamationMark && !viewModel.carrierNetworkChange &&\n        com.android.systemui.hecker.HeckerSignalIcon(\n            viewModel.level, viewModel.numberOfLevels, color, modifier.width(width).height(height)\n        )) return\n\n    Canvas(\n        modifier.width(width).height(height).graphicsLayer {"
+    }
+  ],
+  "frameworks/base/cmds/bootanimation/BootAnimation.cpp": [
+    {
+      "old": "        APEX_BOOTANIMATION_FILE, productBootanimationFile,\n        OEM_BOOTANIMATION_FILE, SYSTEM_BOOTANIMATION_FILE",
+      "new": "        // Product branding takes priority; dark boot may have no separate asset.\n        productBootanimationFile,\n        std::string(PRODUCT_BOOTANIMATION_DIR) + PRODUCT_BOOTANIMATION_FILE,\n        APEX_BOOTANIMATION_FILE, OEM_BOOTANIMATION_FILE, SYSTEM_BOOTANIMATION_FILE"
+    },
+    {
+      "old": "            mZipFileName = f.c_str();\n            return true;",
+      "new": "            mZipFileName = f.c_str();\n            SLOGI(\"Boot animation selected: %s\", f.c_str());\n            return true;"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/plugins/PluginsModule.kt": [
+    {
+      "old": "            val privilegedPlugins = context.resources.getStringArray(R.array.config_pluginAllowlist)",
+      "new": "            val privilegedPlugins = context.resources.getStringArray(R.array.config_pluginAllowlist) +\n                arrayOf(\n                    // Bundled clock providers must work in production and spoofed user builds.\n                    \"com.android.systemui.clocks.bignum\",\n                    \"com.android.systemui.clocks.calligraphy\",\n                    \"com.android.systemui.clocks.flex\",\n                    \"com.android.systemui.clocks.growth\",\n                    \"com.android.systemui.clocks.handwritten\",\n                    \"com.android.systemui.clocks.inflate\",\n                    \"com.android.systemui.clocks.metro\",\n                    \"com.android.systemui.clocks.numoverlap\",\n                    \"com.android.systemui.clocks.weather\",\n                )"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/brightness/ui/viewmodel/BrightnessSliderViewModel.kt": [
+    {
+      "old": "    suspend fun loadImage(@DrawableRes resId: Int, context: Context): Icon.Loaded? {\n        return withTimeoutOrNull(500L) {\n            imageLoader\n                .loadDrawable(\n                    android.graphics.drawable.Icon.createWithResource(context, resId),\n                    context = context,\n                    maxHeight = 200,\n                    maxWidth = 200,\n                )\n                ?.asIcon(null, resId)\n        }\n    }",
+      "new": "    suspend fun loadImage(@DrawableRes resId: Int, context: Context): Icon.Loaded? {\n        return withTimeoutOrNull(500L) {\n            // These are XML vector resources. ImageDecoder only accepts encoded images.\n            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {\n                context.getDrawable(resId)?.asIcon(null, resId)\n            }\n        }\n    }"
     }
   ]
 }

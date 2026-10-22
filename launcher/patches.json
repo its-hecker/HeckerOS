@@ -14,7 +14,18 @@
     },
     {
       "old": "    resource_dirs: [\"quickstep/res\"],",
-      "new": "    resource_dirs: [\"generated/hecker-suite/res\", \"quickstep/res\"],"
+      "new": "    // Hecker resources compile with Launcher3QuickStepLib.\n    resource_dirs: [\"quickstep/res\"],",
+      "previous": [
+        "    resource_dirs: [\"generated/hecker-suite/res\", \"quickstep/res\"],"
+      ]
+    },
+    {
+      "old": "    name: \"Launcher3QuickStepLib\",\n    srcs: [\n        \":launcher-src\",\n        \":launcher-quickstep-src\",\n        \":launcher-quickstep-dagger\",\n        \":launcher-build-config\",\n    ],\n    resource_dirs: [],",
+      "new": "    name: \"Launcher3QuickStepLib\",\n    srcs: [\n        \":launcher-src\",\n        \":launcher-quickstep-src\",\n        \":launcher-quickstep-dagger\",\n        \":launcher-build-config\",\n    ],\n    resource_dirs: [\"generated/hecker-suite/res\"],"
+    },
+    {
+      "old": "        \"libGoogleFeed\",",
+      "new": "        \"libGoogleFeed\",\n        \"HeckerLauncherGoogleWeather\","
     }
   ],
   "src/com/android/launcher3/util/SettingsCache.java": [
@@ -33,28 +44,82 @@
   ],
   "quickstep/src/com/android/launcher3/taskbar/TaskbarManagerImpl.java": [
     {
-      "old": "import com.android.internal.util.android.Utils;",
+      "old": "import com.android.internal.util.infinity.Utils;",
       "new": "import com.android.launcher3.hecker.HeckerPlatform;"
     },
     {
       "old": "Utils.hasNavbarByDefault(mBaseContext)",
       "new": "HeckerPlatform.hasNavbarByDefault(mBaseContext)"
+    },
+    {
+      "old": "import lineageos.providers.LineageSettings;",
+      "new": "// Taskbar settings use Android's native providers."
+    },
+    {
+      "old": "LineageSettings.System.getUriFor(\n            LineageSettings.System.ENABLE_TASKBAR)",
+      "new": "Settings.System.getUriFor(\"enable_taskbar\")"
+    },
+    {
+      "old": "LineageSettings.System.getUriFor(\n            LineageSettings.System.NAVIGATION_BAR_HINT)",
+      "new": "Settings.System.getUriFor(\"navigation_bar_hint\")"
+    },
+    {
+      "old": "LineageSettings.System.getUriFor(\n            LineageSettings.System.FORCE_SHOW_NAVBAR)",
+      "new": "Settings.System.getUriFor(\"force_show_navbar\")"
+    },
+    {
+      "old": "Settings.Secure.getUriFor(\n            Settings.Secure.NAVBAR_LAYOUT_MODE)",
+      "new": "Settings.Secure.getUriFor(\"navbar_layout_mode\")"
+    },
+    {
+      "old": "Settings.System.GESTURE_NAVBAR_LENGTH_MODE",
+      "new": "\"gesture_navbar_length_mode\""
+    },
+    {
+      "old": "Settings.System.GESTURE_NAVBAR_HEIGHT_MODE",
+      "new": "\"gesture_navbar_height_mode\""
+    },
+    {
+      "old": "Settings.Secure.NAVBAR_IME_SPACE",
+      "new": "\"navbar_ime_space\""
     }
   ],
   "quickstep/src/com/android/launcher3/taskbar/TaskbarActivityContext.java": [
     {
-      "old": "import com.android.internal.util.android.Utils;",
+      "old": "import com.android.internal.util.infinity.Utils;",
       "new": "import com.android.launcher3.hecker.HeckerPlatform;"
     },
     {
       "old": "Utils.hasNavbarByDefault(mWindowContext)",
       "new": "HeckerPlatform.hasNavbarByDefault(mWindowContext)"
-    }
-  ],
-  "src/com/android/launcher3/quickspace/QuickspaceController.java": [
+    },
     {
-      "old": "import com.android.internal.util.android.OmniJawsClient;",
-      "new": "import com.android.launcher3.hecker.OmniJawsClient;"
+      "old": "import lineageos.providers.LineageSettings;",
+      "new": "// Taskbar settings use Android's native providers."
+    },
+    {
+      "old": "LineageSettings.System.getUriFor(\n            LineageSettings.System.ENABLE_TASKBAR)",
+      "new": "Settings.System.getUriFor(\"enable_taskbar\")"
+    },
+    {
+      "old": "LineageSettings.System.getUriFor(\n            LineageSettings.System.NAVIGATION_BAR_HINT)",
+      "new": "Settings.System.getUriFor(\"navigation_bar_hint\")"
+    },
+    {
+      "old": "LineageSettings.System.getUriFor(\n            LineageSettings.System.FORCE_SHOW_NAVBAR)",
+      "new": "Settings.System.getUriFor(\"force_show_navbar\")"
+    },
+    {
+      "old": "Secure.getUriFor(Secure.NAVBAR_LAYOUT_MODE)",
+      "new": "Secure.getUriFor(\"navbar_layout_mode\")"
+    },
+    {
+      "old": "System.getUriFor(System.GESTURE_NAVBAR_LENGTH_MODE)",
+      "new": "System.getUriFor(\"gesture_navbar_length_mode\")"
+    },
+    {
+      "old": "System.getUriFor(System.GESTURE_NAVBAR_HEIGHT_MODE)",
+      "new": "System.getUriFor(\"gesture_navbar_height_mode\")"
     }
   ],
   "quickstep/src/com/android/launcher3/uioverrides/QuickstepLauncher.java": [
@@ -83,24 +148,162 @@
     {
       "old": "    <uses-permission android:name=\"android.permission.INJECT_EVENTS\" />",
       "new": "    <uses-permission android:name=\"android.permission.INJECT_EVENTS\" />\n    <uses-permission android:name=\"android.permission.DEVICE_POWER\" />"
+    },
+    {
+      "old": "    <uses-permission android:name=\"android.permission.SUSPEND_APPS\" />",
+      "new": "    <uses-permission android:name=\"android.permission.SUSPEND_APPS\" />\n    <!-- Persist the launcher's recent-task lock setting through the native provider. -->\n    <uses-permission android:name=\"android.permission.WRITE_SETTINGS\" />"
     }
   ],
   "res/xml/launcher_preferences.xml": [
     {
       "old": "    <Preference\n        android:key=\"icons\"",
-      "new": "    <Preference\n        android:key=\"hecker_hero\"\n        android:selectable=\"false\"\n        android:layout=\"@layout/hecker_header\" />\n\n    <Preference\n        android:key=\"hecker_suite\"\n        android:title=\"@string/hecker_suite_title\"\n        android:summary=\"@string/hecker_suite_summary\"\n        android:icon=\"@drawable/ic_settings_misc\">\n        <intent android:action=\"android.intent.action.MAIN\"\n            android:targetPackage=\"org.hecker.suite\"\n            android:targetClass=\"org.hecker.suite.SuiteActivity\" />\n    </Preference>\n\n    <Preference\n        android:key=\"icons\""
+      "new": "    <Preference\n        android:key=\"hecker_hero\"\n        android:selectable=\"false\"\n        android:layout=\"@layout/hecker_header\" />\n\n    <Preference\n        android:key=\"hecker_suite\"\n        android:title=\"@string/hecker_suite_title\"\n        android:summary=\"@string/hecker_suite_summary\"\n        android:icon=\"@drawable/ic_settings_misc\">\n        <intent android:action=\"android.intent.action.MAIN\"\n            android:targetPackage=\"com.android.settings\"\n            android:targetClass=\"org.hecker.suite.SuiteActivity\" />\n    </Preference>\n\n    <Preference\n        android:key=\"icons\""
+    },
+    {
+      "old": "</androidx.preference.PreferenceScreen>",
+      "new": "    <Preference\n        android:key=\"hecker_launcher_origin\"\n        android:title=\"@string/hecker_launcher_origin_title\"\n        android:summary=\"@string/hecker_launcher_origin_summary\"\n        android:icon=\"@drawable/ic_settings_misc\">\n        <intent android:action=\"android.intent.action.VIEW\"\n            android:data=\"https://gitea.com/projectInfinity-x/packages_apps_Launcher3\" />\n    </Preference>\n\n</androidx.preference.PreferenceScreen>"
     }
   ],
-  "res/xml/launcher_about_preferences.xml": [
+  "src/com/android/launcher3/graphics/DrawableFactory.java": [
     {
-      "old": "    <!-- Credits -->",
-      "new": "    <Preference android:key=\"hecker_about\" android:title=\"@string/hecker_suite_title\"\n        android:summary=\"@string/hecker_suite_summary\">\n        <intent android:action=\"android.intent.action.MAIN\"\n            android:targetPackage=\"org.hecker.suite\"\n            android:targetClass=\"org.hecker.suite.SuiteActivity\">\n            <extra android:name=\"org.hecker.suite.SHOW_ABOUT\" android:value=\"true\" />\n        </intent>\n    </Preference>\n    <Preference android:title=\"RisingOS Revived \u00b7 Ortus Launcher\" android:persistent=\"false\">\n        <intent android:action=\"android.intent.action.VIEW\"\n            android:data=\"https://github.com/RisingOS-Revived/android_packages_apps_Launcher3\" />\n    </Preference>\n\n    <!-- Credits -->"
+      "old": "import static com.android.launcher3.util.override.MainThreadInitializedObject.forOverride;",
+      "new": "// HeckerOS resolves the configured icon factory through its local provider."
+    },
+    {
+      "old": "import com.android.launcher3.util.override.ResourceBasedOverride;\nimport com.android.launcher3.util.override.MainThreadInitializedObject;",
+      "new": "import com.android.launcher3.hecker.HeckerDrawableFactoryProvider;"
+    },
+    {
+      "old": "public class DrawableFactory implements ResourceBasedOverride, SafeCloseable {",
+      "new": "public class DrawableFactory implements SafeCloseable {"
+    },
+    {
+      "old": "    public static final MainThreadInitializedObject<DrawableFactory> INSTANCE =\n            forOverride(DrawableFactory.class, R.string.drawable_factory_class);",
+      "new": "    public static final HeckerDrawableFactoryProvider INSTANCE =\n            new HeckerDrawableFactoryProvider();"
     }
   ],
-  "seraphixgoogle/Android.bp": [
+  "quickstep/src/com/android/quickstep/util/AxSandboxState.kt": [
     {
-      "old": "    min_sdk_version: min_launcher3_sdk_version,",
-      "new": "    min_sdk_version: \"36\","
+      "old": "/*\n * Copyright 2025-2026 AxionOS\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\npackage com.android.quickstep.util\n\nimport android.app.AxSandboxManager\nimport android.content.Context\nimport android.database.ContentObserver\nimport android.provider.Settings\nimport android.util.Log\nimport com.android.internal.app.IAppLockStateListener\nimport com.android.launcher3.concurrent.annotations.Ui\nimport com.android.launcher3.dagger.ApplicationContext\nimport com.android.launcher3.dagger.LauncherAppSingleton\nimport com.android.launcher3.util.DaggerSingletonTracker\nimport com.android.launcher3.util.LooperExecutor\nimport java.lang.Runnable\nimport java.util.concurrent.ConcurrentHashMap\nimport java.util.concurrent.CopyOnWriteArrayList\nimport javax.inject.Inject\n\n/**\n * Caches per-package app lock state from [AxSandboxManager] and notifies listeners (on the UI\n * thread) whenever it may have changed.\n */\n@LauncherAppSingleton\nclass AxSandboxState\n@Inject\nconstructor(\n    @ApplicationContext private val context: Context,\n    @Ui private val uiExecutor: LooperExecutor,\n    lifecycle: DaggerSingletonTracker,\n) {\n    private val sandboxManager: AxSandboxManager? =\n        context.getSystemService(AxSandboxManager::class.java)\n    private val lockCache = ConcurrentHashMap<String, Boolean>()\n    private val listeners = CopyOnWriteArrayList<Runnable>()\n\n    private val lockStateListener =\n        object : IAppLockStateListener.Stub() {\n            override fun onAppLockStateChanged(packageName: String, locked: Boolean) {\n                if (packageName.isBlank()) return\n                // Only notify on a real change; every dispatch invalidates the recents list.\n                if (lockCache.put(packageName, locked) != locked) {\n                    dispatchChanged()\n                }\n            }\n        }\n\n    private val configObserver =\n        object : ContentObserver(null) {\n            override fun onChange(selfChange: Boolean) {\n                lockCache.clear()\n                dispatchChanged()\n            }\n        }\n\n    init {\n        registerLockListener()\n        context.contentResolver.registerContentObserver(\n            Settings.Secure.getUriFor(AxSandboxManager.SETTING_SANDBOX_CONFIG),\n            false,\n            configObserver,\n        )\n        lifecycle.addCloseable {\n            unregisterLockListener()\n            context.contentResolver.unregisterContentObserver(configObserver)\n        }\n    }\n\n    fun addChangeListener(listener: Runnable) {\n        listeners.addIfAbsent(listener)\n    }\n\n    fun removeChangeListener(listener: Runnable) {\n        listeners.remove(listener)\n    }\n\n    /** May be called from any thread; the first lookup per package is a binder call. */\n    fun hasAppLock(packageName: String?, userId: Int): Boolean {\n        if (packageName.isNullOrBlank()) return false\n        val cacheKey = \"$packageName:$userId\"\n        lockCache[cacheKey]?.let { return it }\n        val hasLock = getHasAppLock(packageName, userId)\n        lockCache[cacheKey] = hasLock\n        return hasLock\n    }\n\n    private fun registerLockListener() {\n        val manager = sandboxManager ?: return\n        try {\n            manager.registerAppLockStateListener(lockStateListener)\n        } catch (e: RuntimeException) {\n            Log.w(TAG, \"registerLockListener failed\", e)\n        }\n    }\n\n    private fun unregisterLockListener() {\n        val manager = sandboxManager ?: return\n        try {\n            manager.unregisterAppLockStateListener(lockStateListener)\n        } catch (e: RuntimeException) {\n            Log.w(TAG, \"unregisterLockListener failed\", e)\n        }\n    }\n\n    private fun getHasAppLock(packageName: String, userId: Int): Boolean {\n        val manager = sandboxManager ?: return false\n        return try {\n            manager.getAppLockState(packageName, userId).hasAppLock()\n        } catch (e: RuntimeException) {\n            Log.w(TAG, \"getHasAppLock failed\", e)\n            false\n        }\n    }\n\n    private fun dispatchChanged() {\n        if (listeners.isEmpty()) return\n        uiExecutor.execute { listeners.forEach { it.run() } }\n    }\n\n    private companion object {\n        const val TAG = \"AxSandboxState\"\n    }\n}\n",
+      "new": "/*\n * Copyright 2025-2026 AxionOS\n * Copyright (C) 2026 HeckerOS\n * SPDX-License-Identifier: Apache-2.0\n */\npackage com.android.quickstep.util\n\nimport android.content.Context\nimport com.android.launcher3.concurrent.annotations.Ui\nimport com.android.launcher3.dagger.ApplicationContext\nimport com.android.launcher3.dagger.LauncherAppSingleton\nimport com.android.launcher3.hecker.HeckerAppLockState\nimport com.android.launcher3.util.DaggerSingletonTracker\nimport com.android.launcher3.util.LooperExecutor\nimport javax.inject.Inject\n\n/** Keeps the existing recents injection contract on Android 17's native App Lock. */\n@LauncherAppSingleton\nclass AxSandboxState\n@Inject\nconstructor(\n    @ApplicationContext context: Context,\n    @Ui uiExecutor: LooperExecutor,\n    lifecycle: DaggerSingletonTracker,\n) : HeckerAppLockState(context, uiExecutor) {\n    init {\n        lifecycle.addCloseable { close() }\n    }\n}\n"
+    }
+  ],
+  "src/com/android/launcher3/data/AppDatabase.kt": [
+    {
+      "old": "import com.android.launcher3.util.override.MainThreadInitializedObject",
+      "new": "import com.android.launcher3.hecker.HeckerMainThreadObject"
+    },
+    {
+      "old": "        val INSTANCE = MainThreadInitializedObject { context ->",
+      "new": "        val INSTANCE = HeckerMainThreadObject<AppDatabase> { context: Context ->"
+    }
+  ],
+  "quickstep/src/com/android/quickstep/LockedTaskManager.kt": [
+    {
+      "old": "Settings.System.getUriFor(Settings.System.RECENTS_LOCKED_TASKS)",
+      "new": "Settings.System.getUriFor(RECENTS_LOCKED_TASKS)"
+    },
+    {
+      "old": "        Settings.System.putStringForUser(\n            contentResolver,\n            Settings.System.RECENTS_LOCKED_TASKS,",
+      "new": "        Settings.System.putStringForUser(\n            contentResolver,\n            RECENTS_LOCKED_TASKS,"
+    },
+    {
+      "old": "        Settings.System.getStringForUser(\n                contentResolver,\n                Settings.System.RECENTS_LOCKED_TASKS,",
+      "new": "        Settings.System.getStringForUser(\n                contentResolver,\n                RECENTS_LOCKED_TASKS,"
+    },
+    {
+      "old": "        private const val SEPARATOR = \",\"",
+      "new": "        private const val SEPARATOR = \",\"\n        // Keep the upstream storage key without requiring a custom framework constant.\n        private const val RECENTS_LOCKED_TASKS = \"recents_locked_tasks\""
+    }
+  ],
+  "src/com/android/launcher3/dagger/LauncherBaseAppComponent.java": [
+    {
+      "old": "    ThemeManager getThemeManager();",
+      "new": "    ThemeManager getThemeManager();\n    /** The same icon-pack-aware provider used by IconCache. */\n    com.android.launcher3.icons.ThirdPartyIconProvider getThirdPartyIconProvider();"
+    }
+  ],
+  "quickstep/src/com/android/quickstep/split/SplitSelectStateController.java": [
+    {
+      "old": "IconProvider.INSTANCE.get(mContext)",
+      "new": "com.android.launcher3.dagger.LauncherComponentProvider.get(mContext)\n                    .getThirdPartyIconProvider()"
+    }
+  ],
+  "quickstep/src/com/android/quickstep/util/SwipePipToHomeAnimator.java": [
+    {
+      "old": "IconProvider.INSTANCE.get(context)",
+      "new": "com.android.launcher3.dagger.LauncherComponentProvider.get(context)\n                    .getThirdPartyIconProvider()"
+    }
+  ],
+  "src/com/android/launcher3/icons/pack/IconPackHeaderPreference.java": [
+    {
+      "old": "IconProvider.INSTANCE.get(context)",
+      "new": "com.android.launcher3.dagger.LauncherComponentProvider.get(context)\n                    .getThirdPartyIconProvider()"
+    }
+  ],
+  "quickstep/src/com/android/quickstep/split/SplitFromRunningTaskController.java": [
+    {
+      "old": "IconProvider.INSTANCE.get(mContext)",
+      "new": "com.android.launcher3.dagger.LauncherComponentProvider.get(mContext)\n                    .getThirdPartyIconProvider()"
+    }
+  ],
+  "src/com/android/launcher3/icons/pack/IconResolverMasked.java": [
+    {
+      "old": "import static com.android.launcher3.icons.LauncherIcons.CONFIG_HINT_NO_WRAP;",
+      "new": "// No-wrap hints are consumed by the native BaseIconFactory."
+    }
+  ],
+  "quickstep/src/com/android/quickstep/inputconsumers/AssistantInputConsumer.java": [
+    {
+      "old": "        sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HOME, KeyEvent.FLAG_LONG_SWIPE);\n        sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HOME, KeyEvent.FLAG_LONG_SWIPE);",
+      "new": "        android.os.Bundle args = new android.os.Bundle();\n        args.putInt(\"invocation_type\",\n                com.android.internal.app.AssistUtils.INVOCATION_TYPE_GESTURE);\n        SystemUiProxy.INSTANCE.get(mContext).startAssistant(args);"
+    }
+  ],
+  "src/com/android/launcher3/popup/WorkspaceLongPressOptions.kt": [
+    {
+      "old": "import com.android.internal.util.infinity.Utils",
+      "new": "import com.android.launcher3.hecker.HeckerPlatform as Utils"
+    }
+  ],
+  "res/xml/launcher_home_screen_preferences.xml": [
+    {
+      "old": "        <SwitchPreferenceCompat\n            android:key=\"pref_quickspace_weather_city\"\n            android:title=\"@string/quick_event_weather_city_title\"\n            android:summary=\"@string/quick_event_weather_city_summary\"\n            android:dependency=\"pref_quickspace_weather\"\n            android:defaultValue=\"false\"\n            android:persistent=\"true\"\n            launcher:iconSpaceReserved=\"false\" />",
+      "new": "        <!-- Google Smartspace supplies city formatting. -->"
+    },
+    {
+      "old": "        <SwitchPreferenceCompat\n            android:key=\"pref_quickspace_weather_text\"\n            android:title=\"@string/quick_event_weather_text_title\"\n            android:summary=\"@string/quick_event_weather_text_summary\"\n            android:dependency=\"pref_quickspace_weather\"\n            android:defaultValue=\"true\"\n            android:persistent=\"true\"\n            launcher:iconSpaceReserved=\"false\" />",
+      "new": "        <!-- Google Smartspace supplies condition-text formatting. -->"
+    },
+    {
+      "old": "        <Preference\n            android:title=\"@string/weather_settings_title\"\n            android:summary=\"@string/weather_settings_summary\">\n            <intent\n                android:action=\"android.intent.action.MAIN\"\n                android:targetPackage=\"org.omnirom.omnijaws\"\n                android:targetClass=\"org.omnirom.omnijaws.SettingsActivity\" />\n        </Preference>",
+      "new": "        <!-- Google weather has no separate OmniJaws settings activity. -->"
+    }
+  ],
+  "quickstep/src/com/android/quickstep/AutomationRepositoryImpl.kt": [
+    {
+      "old": "    init {\n        computerControlExtensions?.registerAutomatedPackageListener(\n            context,\n            packageListenerExecutor,\n            automatedPackageListener,\n        )\n\n        lifecycle.addCloseable {\n            computerControlExtensions?.unregisterAutomatedPackageListener(\n                context,\n                automatedPackageListener,\n            )\n        }\n    }\n",
+      "new": "    init {\n        lifecycle.addCloseable(\n            com.android.launcher3.hecker.HeckerAutomationListener.register(\n                {\n                    computerControlExtensions?.registerAutomatedPackageListener(\n                        context, packageListenerExecutor, automatedPackageListener,\n                    )\n                },\n                {\n                    computerControlExtensions?.unregisterAutomatedPackageListener(\n                        context, automatedPackageListener,\n                    )\n                },\n            )\n        )\n    }\n"
+    }
+  ],
+  "src/com/android/launcher3/quickspace/QuickspaceController.java": [
+    {
+      "old": "/*\n * Copyright (C) 2021-2026 crDroid Android Project\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\npackage com.android.launcher3.quickspace;\n\nimport static com.android.launcher3.util.Executors.MAIN_EXECUTOR;\nimport static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;\n\nimport android.annotation.NonNull;\nimport android.content.Context;\nimport android.graphics.drawable.Drawable;\nimport android.os.Handler;\nimport android.graphics.drawable.Icon;\nimport android.media.MediaMetadata;\nimport android.media.session.MediaController;\nimport android.media.session.MediaSession;\nimport android.media.session.MediaSessionManager;\nimport android.media.session.PlaybackState;\nimport android.text.TextUtils;\nimport android.util.Log;\nimport android.view.View.OnClickListener;\n\nimport com.android.internal.util.infinity.OmniJawsClient;\n\nimport com.android.launcher3.LauncherPrefs;\nimport com.android.launcher3.R;\nimport com.android.launcher3.util.MediaSessionTrackHelper;\nimport com.android.launcher3.util.PackageUserKey;\n\nimport java.util.ArrayList;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.List;\nimport java.util.Locale;\nimport java.util.Map;\n\npublic class QuickspaceController implements OmniJawsClient.OmniJawsObserver,\n        MediaSessionTrackHelper.MediaMetadataListener {\n\n    private static final String TAG = \"Launcher3:QuickspaceController\";\n\n    private final List<OnDataListener> mListeners =\n        Collections.synchronizedList(new ArrayList<>());\n    private final Context mContext;\n    private final MediaSessionTrackHelper mMediaSessionHelper;\n    private final Map<String, Integer> mConditionMap;\n    private QuickEventsController mEventsController;\n    private OmniJawsClient mWeatherClient;\n    private volatile OmniJawsClient.WeatherInfo mWeatherInfo;\n    private volatile Drawable mConditionImage;\n    private volatile boolean mOmniJawsEnabled;\n\n    private final Handler mBgHandler = UI_HELPER_EXECUTOR.getHandler();\n\n    private Runnable mOnDataUpdatedRunnable = new Runnable() {\n            @Override\n            public void run() {\n                for (OnDataListener list : mListeners) {\n                    list.onDataUpdated();\n                }\n            }\n        };\n\n    private final Runnable mWeatherRunnable = new Runnable() {\n            @Override\n            public void run() {\n                try {\n                    final OmniJawsClient client = mWeatherClient;\n                    if (client == null) return;\n                    final boolean enabled = client.isOmniJawsEnabled(mContext);\n                    mOmniJawsEnabled = enabled;\n                    if (!enabled) {\n                        mWeatherInfo = null;\n                        mConditionImage = null;\n                        notifyListeners();\n                        return;\n                    }\n                    client.queryWeather(mContext);\n                    final OmniJawsClient.WeatherInfo info = client.getWeatherInfo();\n                    mWeatherInfo = info;\n                    if (info != null) {\n                        mConditionImage = client.getWeatherConditionImage(mContext, info.conditionCode);\n                    } else {\n                        mConditionImage = null;\n                    }\n                    notifyListeners();\n                } catch (Exception e) {\n                    Log.w(TAG, \"weather update failed\", e);\n                }\n            }\n        };\n\n    public interface OnDataListener {\n        void onDataUpdated();\n    }\n\n    public QuickspaceController(Context context) {\n        mContext = context;\n        mConditionMap = initializeConditionMap();\n        mEventsController = new QuickEventsController(context);\n        mWeatherClient = OmniJawsClient.get();\n        mMediaSessionHelper = MediaSessionTrackHelper.getInstance(context);\n    }\n\n    private void addWeatherProvider() {\n        if (!LauncherPrefs.SHOW_QUICKSPACE_WEATHER.get(mContext)) return;\n        mWeatherClient.addObserver(mContext, this);\n        queryAndUpdateWeather();\n    }\n\n    public void addListener(OnDataListener listener) {\n        mListeners.add(listener);\n        addWeatherProvider();\n        mMediaSessionHelper.addMediaMetadataListener(this);\n        listener.onDataUpdated();\n    }\n\n    public void removeListener(OnDataListener listener) {\n        mListeners.remove(listener);\n        // Only cleanup weather observer if no more listeners\n        if (mListeners.isEmpty()) {\n            mBgHandler.removeCallbacks(mWeatherRunnable);\n            if (mWeatherClient != null) {\n                mWeatherClient.removeObserver(mContext, this);\n            }\n            mMediaSessionHelper.removeMediaMetadataListener(this);\n            mOmniJawsEnabled = false;\n        }\n    }\n\n    public boolean isQuickEvent() {\n        return mEventsController.isQuickEvent();\n    }\n\n    public QuickEventsController getEventController() {\n        return mEventsController;\n    }\n\n    public boolean isWeatherAvailable() {\n        return mWeatherClient != null && mOmniJawsEnabled;\n    }\n\n    public Drawable getWeatherIcon() {\n        return mConditionImage;\n    }\n\n    public String getWeatherTemp() {\n        final OmniJawsClient.WeatherInfo info = mWeatherInfo;\n        if (info == null) return null;\n\n        boolean shouldShowCity = LauncherPrefs.SHOW_QUICKSPACE_WEATHER_CITY.get(mContext);\n        boolean showWeatherText = LauncherPrefs.SHOW_QUICKSPACE_WEATHER_TEXT.get(mContext);\n\n        StringBuilder weatherTemp = new StringBuilder();\n        if (shouldShowCity) {\n            weatherTemp.append(info.city).append(\" \");\n        }\n        weatherTemp.append(info.temp)\n                   .append(info.tempUnits);\n\n        if (showWeatherText) {\n            weatherTemp.append(\" • \").append(getConditionText(info.condition));\n        }\n\n        return weatherTemp.toString();\n    }\n\n    private String getConditionText(String input) {\n        if (input == null || input.isEmpty()) return \"\";\n\n        Locale locale = mContext.getResources().getConfiguration().getLocales().get(0);\n        boolean isEnglish = locale.getLanguage().toLowerCase(Locale.ROOT).startsWith(\"en\");\n        String lowerCaseInput = input.toLowerCase();\n\n        if (!isEnglish) {\n            for (Map.Entry<String, Integer> entry : mConditionMap.entrySet()) {\n                if (lowerCaseInput.contains(entry.getKey())) {\n                    return mContext.getResources().getString(entry.getValue());\n                }\n            }\n        }\n        return capitalizeWords(lowerCaseInput);\n    }\n\n    private Map<String, Integer> initializeConditionMap() {\n        Map<String, Integer> map = new HashMap<>();\n        map.put(\"clouds\", R.string.quick_event_weather_clouds);\n        map.put(\"rain\", R.string.quick_event_weather_rain);\n        map.put(\"clear\", R.string.quick_event_weather_clear);\n        map.put(\"storm\", R.string.quick_event_weather_storm);\n        map.put(\"snow\", R.string.quick_event_weather_snow);\n        map.put(\"wind\", R.string.quick_event_weather_wind);\n        map.put(\"mist\", R.string.quick_event_weather_mist);\n        return map;\n    }\n\n    private String capitalizeWords(String input) {\n        if (input == null || input.isEmpty()) return input;\n\n        String[] words = input.split(\"\\\\s+\");\n        StringBuilder capitalized = new StringBuilder();\n        for (String word : words) {\n            if (!word.isEmpty()) {\n                capitalized.append(Character.toUpperCase(word.charAt(0)))\n                           .append(word.substring(1).toLowerCase())\n                           .append(\" \");\n            }\n        }\n        return capitalized.toString().trim();\n    }\n\n    public void onPause() {\n        cancelListeners();\n    }\n\n    public void onResume() {\n        mEventsController.onResume();\n        updateMediaController();\n        notifyListeners();\n    }\n\n    private void cancelListeners() {\n        mBgHandler.removeCallbacks(mWeatherRunnable);\n        if (mEventsController != null) {\n            mEventsController.onPause();\n        }\n        // Clear all listeners safely\n        synchronized (mListeners) {\n            for (OnDataListener listener : new ArrayList<>(mListeners)) {\n                if (mWeatherClient != null) {\n                    mWeatherClient.removeObserver(mContext, this);\n                }\n                mListeners.remove(listener);\n            }\n        }\n        unregisterMediaController();\n    }\n\n    public void onDestroy() {\n        cancelListeners();\n        mBgHandler.removeCallbacks(mWeatherRunnable);\n        // Aggressively clean up all drawable and bitmap references\n        if (mConditionImage != null) {\n            mConditionImage.setCallback(null);\n            mConditionImage = null;\n        }\n        mWeatherClient = null;\n        mWeatherInfo = null;\n        mOmniJawsEnabled = false;\n        if (mEventsController != null) {\n            mEventsController.cleanup();\n            mEventsController = null;\n        }\n    }\n\n    @Override\n    public void weatherUpdated() {\n        queryAndUpdateWeather();\n    }\n\n    @Override\n    public void weatherError(int errorReason) {\n        Log.d(TAG, \"weatherError \" + errorReason);\n        if (errorReason == OmniJawsClient.EXTRA_ERROR_DISABLED) {\n            mWeatherInfo = null;\n            notifyListeners();\n        }\n    }\n\n    @Override\n    public void updateSettings() {\n        Log.i(TAG, \"updateSettings\");\n        queryAndUpdateWeather();\n    }\n\n    private void queryAndUpdateWeather() {\n        mBgHandler.removeCallbacks(mWeatherRunnable);\n        mBgHandler.post(mWeatherRunnable);\n    }\n\n    public void notifyListeners() {\n        MAIN_EXECUTOR\n            .getHandler()\n            .post(mOnDataUpdatedRunnable);\n    }\n\n    private void unregisterMediaController() {\n        mMediaSessionHelper.removeMediaMetadataListener(this);\n    }\n\n    private void updateMediaController() {\n        if (!LauncherPrefs.SHOW_QUICKSPACE_NOWPLAYING.get(mContext)) {\n            unregisterMediaController();\n            return;\n        }\n        MediaMetadata mediaMetadata = mMediaSessionHelper.getCurrentMediaMetadata();\n        boolean isPlaying = mMediaSessionHelper.isMediaPlaying();\n        String trackArtist = isPlaying && mediaMetadata != null ?\n                mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST) : \"\";\n        String trackTitle = isPlaying && mediaMetadata != null ?\n                mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE) : \"\";\n        Drawable mediaIcon = mMediaSessionHelper.getMediaAppIcon();\n        OnClickListener launchMediaApp =\n                view -> mMediaSessionHelper.launchMediaApp();\n        mEventsController.setMediaInfo(trackTitle, trackArtist, isPlaying,\n                mediaIcon, launchMediaApp);\n        mEventsController.updateQuickEvents();\n        notifyListeners();\n    }\n\n    @Override\n    public void onMediaMetadataChanged() {\n        updateMediaController();\n    }\n\n    @Override\n    public void onPlaybackStateChanged() {\n        updateMediaController();\n    }\n}\n",
+      "new": "/*\n * Copyright (C) 2021-2026 crDroid Android Project\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\npackage com.android.launcher3.quickspace;\n\nimport static com.android.launcher3.util.Executors.MAIN_EXECUTOR;\nimport static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;\n\nimport android.annotation.NonNull;\nimport android.content.Context;\nimport android.graphics.drawable.Drawable;\nimport android.os.Handler;\nimport android.graphics.drawable.Icon;\nimport android.media.MediaMetadata;\nimport android.media.session.MediaController;\nimport android.media.session.MediaSession;\nimport android.media.session.MediaSessionManager;\nimport android.media.session.PlaybackState;\nimport android.text.TextUtils;\nimport android.util.Log;\nimport android.view.View.OnClickListener;\n\nimport com.android.launcher3.hecker.HeckerWeather;\n\nimport com.android.launcher3.LauncherPrefs;\nimport com.android.launcher3.R;\nimport com.android.launcher3.util.MediaSessionTrackHelper;\nimport com.android.launcher3.util.PackageUserKey;\n\nimport java.util.ArrayList;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.List;\nimport java.util.Locale;\nimport java.util.Map;\n\npublic class QuickspaceController implements MediaSessionTrackHelper.MediaMetadataListener {\n\n    private static final String TAG = \"Launcher3:QuickspaceController\";\n\n    private final List<OnDataListener> mListeners =\n        Collections.synchronizedList(new ArrayList<>());\n    private final Context mContext;\n    private final MediaSessionTrackHelper mMediaSessionHelper;\n    private QuickEventsController mEventsController;\n    private final HeckerWeather mWeather;\n\n    private final Handler mBgHandler = UI_HELPER_EXECUTOR.getHandler();\n\n    private Runnable mOnDataUpdatedRunnable = new Runnable() {\n            @Override\n            public void run() {\n                for (OnDataListener list : mListeners) {\n                    list.onDataUpdated();\n                }\n            }\n        };\n\n    public interface OnDataListener {\n        void onDataUpdated();\n    }\n\n    public QuickspaceController(Context context) {\n        mContext = context;\n        mWeather = new HeckerWeather(context, this::notifyListeners);\n        mEventsController = new QuickEventsController(context);\n        mMediaSessionHelper = MediaSessionTrackHelper.getInstance(context);\n    }\n\n    private void addWeatherProvider() {\n        if (LauncherPrefs.SHOW_QUICKSPACE_WEATHER.get(mContext)) mWeather.start();\n        else mWeather.stop();\n    }\n\n    public void addListener(OnDataListener listener) {\n        mListeners.add(listener);\n        addWeatherProvider();\n        mMediaSessionHelper.addMediaMetadataListener(this);\n        listener.onDataUpdated();\n    }\n\n    public void removeListener(OnDataListener listener) {\n        mListeners.remove(listener);\n        // Only cleanup weather observer if no more listeners\n        if (mListeners.isEmpty()) {\n            mWeather.stop();\n            mMediaSessionHelper.removeMediaMetadataListener(this);\n        }\n    }\n\n    public boolean isQuickEvent() {\n        return mEventsController.isQuickEvent();\n    }\n\n    public QuickEventsController getEventController() {\n        return mEventsController;\n    }\n\n    public boolean isWeatherAvailable() { return mWeather.available(); }\n    public Drawable getWeatherIcon() { return mWeather.icon(); }\n    public String getWeatherTemp() { return mWeather.text(); }\n\n    public void onPause() {\n        cancelListeners();\n    }\n\n    public void onResume() {\n        addWeatherProvider();\n        mEventsController.onResume();\n        updateMediaController();\n        notifyListeners();\n    }\n\n    private void cancelListeners() {\n        mWeather.stop();\n        if (mEventsController != null) {\n            mEventsController.onPause();\n        }\n        // Clear all listeners safely\n        synchronized (mListeners) {\n            for (OnDataListener listener : new ArrayList<>(mListeners)) {\n                mListeners.remove(listener);\n            }\n        }\n        unregisterMediaController();\n    }\n\n    public void onDestroy() {\n        cancelListeners();\n        if (mEventsController != null) {\n            mEventsController.cleanup();\n            mEventsController = null;\n        }\n    }\n\n    public void notifyListeners() {\n        MAIN_EXECUTOR\n            .getHandler()\n            .post(mOnDataUpdatedRunnable);\n    }\n\n    private void unregisterMediaController() {\n        mMediaSessionHelper.removeMediaMetadataListener(this);\n    }\n\n    private void updateMediaController() {\n        if (!LauncherPrefs.SHOW_QUICKSPACE_NOWPLAYING.get(mContext)) {\n            unregisterMediaController();\n            return;\n        }\n        MediaMetadata mediaMetadata = mMediaSessionHelper.getCurrentMediaMetadata();\n        boolean isPlaying = mMediaSessionHelper.isMediaPlaying();\n        String trackArtist = isPlaying && mediaMetadata != null ?\n                mediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST) : \"\";\n        String trackTitle = isPlaying && mediaMetadata != null ?\n                mediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE) : \"\";\n        Drawable mediaIcon = mMediaSessionHelper.getMediaAppIcon();\n        OnClickListener launchMediaApp =\n                view -> mMediaSessionHelper.launchMediaApp();\n        mEventsController.setMediaInfo(trackTitle, trackArtist, isPlaying,\n                mediaIcon, launchMediaApp);\n        mEventsController.updateQuickEvents();\n        notifyListeners();\n    }\n\n    @Override\n    public void onMediaMetadataChanged() {\n        updateMediaController();\n    }\n\n    @Override\n    public void onPlaybackStateChanged() {\n        updateMediaController();\n    }\n}\n"
+    }
+  ],
+  "quickstep/src/com/android/launcher3/taskbar/navbutton/AbstractNavButtonLayoutter.kt": [
+    {
+      "old": "import android.provider.Settings.Secure.NAVIGATIONBAR_KEY_ORDER",
+      "new": "// Native Android provider key is local below."
+    },
+    {
+      "old": "NAVIGATIONBAR_KEY_ORDER",
+      "new": "\"navigationbar_key_order\""
+    }
+  ],
+  "quickstep/src/com/android/launcher3/taskbar/NavbarButtonsViewController.java": [
+    {
+      "old": "Settings.Secure.NAVIGATIONBAR_KEY_ORDER",
+      "new": "\"navigationbar_key_order\""
     }
   ]
 }

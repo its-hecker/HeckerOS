@@ -10,6 +10,9 @@ PRODUCT_NO_CAMERA := true
 TARGET_SCREEN_WIDTH := 1440
 TARGET_SCREEN_HEIGHT := 3040
 CUSTOM_BUILD := coral
+# Set release identity before inheriting the base version/OTA configuration.
+IS_OFFICIAL := true
+HECKER_BUILD_TYPE := OFFICIAL
 
 # Retain the source-built mainline configuration used by the working Floral base.
 PRODUCT_BUILD_IGNORE_APEX_CONTRIBUTION_CONTENTS := true
@@ -80,6 +83,7 @@ $(call inherit-product, vendor/hecker/floral/faceid/faceid.mk)
 # Use the original signed Camera package tested on Infinity-X Coral.
 $(call inherit-product, vendor/hecker/floral/suite/prebuilts/google-camera/camera.mk)
 PRODUCT_PACKAGES := $(filter-out Aperture Camera2,$(PRODUCT_PACKAGES))
+PRODUCT_PACKAGES += HeckerLibrePods
 
 # Preserve bounded startup evidence on userdebug/eng builds.
 include vendor/hecker/floral/suite/rom/boot_diagnostics/boot_capture.mk

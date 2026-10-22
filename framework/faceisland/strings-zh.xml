@@ -1,0 +1,5 @@
+<resources>
+    <string name="hecker_face_island_label">面容识别</string>
+    <string name="hecker_face_island_scanning">正在识别面容</string>
+    <string name="hecker_face_island_unlocked">已解锁</string>
+</resources>

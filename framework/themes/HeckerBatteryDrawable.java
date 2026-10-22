@@ -3,7 +3,6 @@ package com.android.systemui.hecker;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.ThemeEngine;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -35,8 +34,7 @@ public final class HeckerBatteryDrawable extends Drawable {
     }
     public static HeckerBatteryDrawable create(Context context) {
         try {
-            ThemeEngine engine = ThemeEngine.getInstance(context);
-            String pkg = engine == null ? null : engine.getEnabledPackage("battery_style");
+            String pkg = HeckerThemeAssets.packageName(context, "battery_style");
             Resources res = HeckerThemeAssets.resources(context, "battery_style");
             return pkg == null || res == null ? null : new HeckerBatteryDrawable(res, pkg);
         } catch (Exception malformed) { return null; }

@@ -21,5 +21,30 @@ java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     app/src/org/hecker/suite/GamingPolicy.java tests/GamingPolicyTest.java
 java -cp "$suite_test_output" org.hecker.suite.GamingPolicyTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    app/src/org/hecker/suite/GamingPanelLayout.java tests/GamingPanelLayoutTest.java
+java -cp "$suite_test_output" org.hecker.suite.GamingPanelLayoutTest
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    app/src/org/hecker/suite/NativeIconPackSelection.java tests/NativeIconPackSelectionTest.java
+java -cp "$suite_test_output" org.hecker.suite.NativeIconPackSelectionTest
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     framework/lyrics/LyricsPolicy.java tests/LyricsPolicyTest.java
 java -cp "$suite_test_output" com.android.systemui.hecker.LyricsPolicyTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/headphones/HeadphoneBattery.java tests/HeadphoneBatteryTest.java
+java -cp "$suite_test_output" com.android.systemui.hecker.HeadphoneBatteryTest
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/sandbox/HeckerSandboxRules.java tests/HeckerSandboxRulesTest.java
+java -cp "$suite_test_output" com.android.internal.hecker.HeckerSandboxRulesTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/faceisland/FaceIslandState.java tests/FaceIslandStateTest.java
+java -cp "$suite_test_output" com.android.systemui.hecker.FaceIslandStateTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/qs/HeckerQsTileOrder.java tests/HeckerQsTileOrderTest.java
+java -cp "$suite_test_output" com.android.systemui.hecker.HeckerQsTileOrderTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/themes/ThemeIconNames.java tests/ThemeIconNamesTest.java
+java -cp "$suite_test_output" com.android.systemui.hecker.ThemeIconNamesTest

@@ -11,6 +11,8 @@ import sys
 import xml.etree.ElementTree as ET
 from launcher_port import launcher_plan
 from customization_port import customization_plan
+from recovery_port import recovery_plan
+from privapp_permissions import check_privapp_permissions
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,6 +23,13 @@ HELPER = "services/core/java/com/android/server/pm/HeckerSuiteAppLockAccess.java
 MOTION = Path("vendor/hecker/floral/motionsense/settings")
 MOTION_MANIFEST = "generated/hecker-suite/AndroidManifest.xml"
 MOTION_NATIVE_MANIFEST = "generated/hecker-settings/AndroidManifest.xml"
+MOTION_RESOURCES_MANIFEST = "generated/hecker-resources/AndroidManifest.xml"
+# Settings defines this name with product="default"/"tablet" variants. An
+# unqualified plugin string also counts as a default during aapt2 product
+# selection, so normal resource overlay precedence cannot resolve the clash.
+MOTION_STRING_NAMES = {"ambient_display_title": "hecker_motion_ambient_display_title"}
+MOTION_RESOURCES_BP_OLD = 'android_library {\n    name: "FloralMotionSenseSettingsResources",'
+MOTION_RESOURCES_BP_NEW = MOTION_RESOURCES_BP_OLD + '\n    manifest: "' + MOTION_RESOURCES_MANIFEST + '",'
 MOTION_NATIVE_LIBRARY = '''
 // HeckerOS: share controls with native Settings; the standalone plugin stays reusable.
 android_library {
@@ -216,13 +225,23 @@ def motion_native_manifest(source):
     return '<?xml version="1.0" encoding="utf-8"?>\n' + ET.tostring(manifest, encoding="unicode") + "\n"
 
 
+def motion_resources_manifest(source):
+    """The shared resource library must not contribute the standalone app's components."""
+    motion_manifest(source)
+    manifest = ET.Element("manifest", {"package": ET.fromstring(source).get("package")})
+    ET.SubElement(manifest, "application")
+    ET.indent(manifest, space="    ")
+    return '<?xml version="1.0" encoding="utf-8"?>\n' + ET.tostring(manifest, encoding="unicode") + "\n"
+
+
 def motion_plan(rom, revert=False):
     settings = rom / MOTION
     if not settings.is_dir():
         return {}  # The standalone Suite can also be built without the Motion Sense plugin.
     source = (settings / "AndroidManifest.xml").read_text()
     manifests = {settings / MOTION_MANIFEST: motion_manifest(source),
-                 settings / MOTION_NATIVE_MANIFEST: motion_native_manifest(source)}
+                 settings / MOTION_NATIVE_MANIFEST: motion_native_manifest(source),
+                 settings / MOTION_RESOURCES_MANIFEST: motion_resources_manifest(source)}
     for generated, expected in manifests.items():
         if generated.exists() and generated.read_text() != expected:
             raise ValueError("Preserving an unfamiliar generated Motion Sense manifest: " + str(generated))
@@ -245,6 +264,11 @@ def motion_plan(rom, revert=False):
                 '\n    manifest: "' + MOTION_MANIFEST + '",', '')):
             raise ValueError("Unfamiliar Motion Sense app manifest selection: " + str(path))
         target = replace_guarded(current, MOTION_BP_OLD, MOTION_BP_NEW, str(path), revert)
+        resource_block = re.search(r'(?ms)^android_library\s*\{\s*name:\s*"FloralMotionSenseSettingsResources",.*?^\}', current)
+        if resource_block is None or re.search(r'\bmanifest\s*:', resource_block.group().replace(
+                '\n    manifest: "' + MOTION_RESOURCES_MANIFEST + '",', '')):
+            raise ValueError("Unfamiliar Motion Sense resource manifest selection: " + str(path))
+        target = replace_guarded(target, MOTION_RESOURCES_BP_OLD, MOTION_RESOURCES_BP_NEW, str(path), revert)
         if target.count(MOTION_NATIVE_LIBRARY) > 1 or (
                 'name: "HeckerMotionSenseSettingsUi"' in target and MOTION_NATIVE_LIBRARY not in target):
             raise ValueError("Unfamiliar native Motion Sense library: " + str(path))
@@ -259,12 +283,36 @@ def motion_plan(rom, revert=False):
             if generated.exists(): changes[generated] = None
         elif not generated.exists():
             changes[generated] = expected
+    # Keep the reusable plugin's translations and references together under a
+    # private name. Join the atomic plan so failures cannot leave half-renamed
+    # resources, and reverting restores the original plugin byte for byte.
+    for directory in ("common-res", "res", "src"):
+        for path in sorted((settings / directory).rglob("*")):
+            if not path.is_file() or path.suffix not in {".xml", ".java", ".kt"}:
+                continue
+            current = path.read_text()
+            target = changes.get(path, current)
+            for original, private in MOTION_STRING_NAMES.items():
+                old, new = (private, original) if revert else (original, private)
+                target = re.sub(r"\b" + re.escape(old) + r"\b", new, target)
+            if target != current:
+                changes[path] = target
+    # UI-only translations are shared by the standalone app and native Settings.
+    locale = settings / "res/values-zh-rCN/hecker_motion_strings.xml"
+    expected = (ROOT / "motion/res/values-zh-rCN/strings.xml").read_text()
+    if locale.exists() and locale.read_text() != expected:
+        raise ValueError("Preserving unfamiliar Motion Sense translations: " + str(locale))
+    if revert:
+        if locale.exists(): changes[locale] = None
+    elif not locale.exists():
+        changes[locale] = expected
     return changes
 
 
 def plan(rom, revert=False):
     base = rom / FRAMEWORK
     if not revert:
+        check_privapp_permissions(base / "core/res/AndroidManifest.xml", ROOT)
         for relative, markers in CAPABILITIES.items():
             content = (base / relative).read_text()
             if not all(marker in content for marker in markers):
@@ -292,6 +340,7 @@ def plan(rom, revert=False):
     changes.update(motion_plan(rom, revert))
     changes.update(launcher_plan(rom, replace_guarded, revert))
     changes.update(customization_plan(rom, replace_guarded, revert))
+    changes.update(recovery_plan(rom, revert))
     return changes
 
 

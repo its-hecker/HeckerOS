@@ -41,7 +41,11 @@ class PreparationTests(unittest.TestCase):
         settings = self.rom / prepare.MOTION
         settings.mkdir(parents=True)
         (settings.parent / "motionsense.mk").write_text(prepare.MOTION_PRODUCT_OLD)
-        (settings / "Android.bp.in").write_text(prepare.MOTION_BP_OLD + '''
+        (settings / "Android.bp.in").write_text(prepare.MOTION_RESOURCES_BP_OLD + '''
+    resource_dirs: ["common-res"],
+}
+
+''' + prepare.MOTION_BP_OLD + '''
     srcs: ["src/**/*.java"],
     privileged: true,
     system_ext_specific: true,
@@ -98,6 +102,11 @@ class PreparationTests(unittest.TestCase):
         self.assertTrue(all(node.get(prepare.ANDROID + "name").startswith("org.hecker.floral.")
                             for node in native.findall("application/activity")))
         self.assertIn(prepare.MOTION_NATIVE_LIBRARY, (settings / "Android.bp").read_text())
+        resources = ET.parse(settings / prepare.MOTION_RESOURCES_MANIFEST).getroot()
+        self.assertEqual(resources.attrib, {"package": "org.hecker.floral.motionsense"})
+        self.assertEqual(resources.find("application").attrib, {})
+        self.assertFalse(list(resources.find("application")))
+        self.assertEqual([node.tag for node in resources], ["application"])
         applied = self.contents()
         prepare.apply(self.rom, "verify")
         prepare.apply(self.rom, "apply")
@@ -114,13 +123,105 @@ class PreparationTests(unittest.TestCase):
             prepare.apply(self.rom, "apply")
         self.assertEqual(before, self.contents())
 
+    def test_motion_product_string_collision_preserves_translations_and_references(self):
+        settings = self.stage_motion()
+        for locale, title in (("values", "Ambient display"), ("values-ca", "Pantalla ambient"),
+                              ("values-lt", "Aplinkos ekranas")):
+            path = settings / "common-res" / locale / "strings.xml"
+            path.parent.mkdir(parents=True)
+            path.write_text('<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">\n'
+                '    <!-- Keep translated text and unrelated resource names. -->\n'
+                '    <string name="ambient_display_title">' + title + '</string>\n'
+                '    <string name="ambient_display_title_suffix">Keep</string>\n'
+                '</resources>\n')
+        xml = settings / "res/xml/ambient.xml"
+        xml.parent.mkdir(parents=True)
+        xml.write_text('<Preference xmlns:android="http://schemas.android.com/apk/res/android" '
+                       'android:title="@string/ambient_display_title" />\n')
+        # Exercise composition with the existing MotionSenseFragment edit.
+        fragment = settings / prepare.MOTION_FRAGMENT
+        fragment.write_text(fragment.read_text() + '\nint title = R.string.ambient_display_title;\n')
+        host = self.rom / "packages/apps/Settings/res-product/values/strings.xml"
+        host.parent.mkdir(parents=True)
+        host.write_text('<resources><string name="ambient_display_title" product="default">'
+                        'Double-tap to check phone</string><string name="ambient_display_title" '
+                        'product="tablet">Double-tap to check tablet</string></resources>\n')
+        host_before = host.read_bytes()
+        before = self.contents()
+        prepare.apply(self.rom, "check")
+        self.assertEqual(before, self.contents())
+        prepare.apply(self.rom, "apply")
+        for locale, title in (("values", "Ambient display"), ("values-ca", "Pantalla ambient"),
+                              ("values-lt", "Aplinkos ekranas")):
+            root = ET.parse(settings / "common-res" / locale / "strings.xml").getroot()
+            self.assertIsNone(root.find("string[@name='ambient_display_title']"))
+            self.assertEqual(root.find("string[@name='hecker_motion_ambient_display_title']").text, title)
+            self.assertEqual(root.find("string[@name='ambient_display_title_suffix']").text, "Keep")
+        self.assertIn('@string/hecker_motion_ambient_display_title', xml.read_text())
+        self.assertIn('R.string.hecker_motion_ambient_display_title', fragment.read_text())
+        self.assertIn(prepare.MOTION_ABOUT_NEW, fragment.read_text())
+        self.assertEqual(host_before, host.read_bytes())
+        applied = self.contents()
+        prepare.apply(self.rom, "verify")
+        prepare.apply(self.rom, "apply")
+        self.assertEqual(applied, self.contents())
+        prepare.apply(self.rom, "revert")
+        self.assertEqual(before, self.contents())
+        self.assertEqual(host_before, host.read_bytes())
+
+    def test_motion_resource_rename_validates_all_inputs_before_writes(self):
+        settings = self.stage_motion()
+        path = settings / "common-res/values/strings.xml"
+        path.parent.mkdir(parents=True)
+        path.write_text('<resources><string name="ambient_display_title">Ambient display</string></resources>')
+        blueprint = settings / "Android.bp.in"
+        blueprint.write_text(blueprint.read_text().replace('name: "FloralMotionSenseSettings",',
+                                                          'name: "UnfamiliarSettings",'))
+        before = self.contents()
+        with self.assertRaisesRegex(ValueError, "app manifest selection"):
+            prepare.apply(self.rom, "apply")
+        self.assertEqual(before, self.contents())
+
     def test_foreign_generated_motion_manifest_is_preserved(self):
         settings = self.stage_motion()
-        generated = settings / prepare.MOTION_MANIFEST
-        generated.parent.mkdir(parents=True)
-        generated.write_text("unrelated local file")
+        for name in (prepare.MOTION_MANIFEST, prepare.MOTION_NATIVE_MANIFEST,
+                     prepare.MOTION_RESOURCES_MANIFEST):
+            with self.subTest(manifest=name):
+                generated = settings / name
+                generated.parent.mkdir(parents=True, exist_ok=True)
+                generated.write_text("unrelated local file")
+                before = self.contents()
+                with self.assertRaisesRegex(ValueError, "unfamiliar generated Motion Sense manifest"):
+                    prepare.apply(self.rom, "apply")
+                self.assertEqual(before, self.contents())
+                generated.unlink()
+
+    def test_upgrade_existing_motion_integration_keeps_native_and_standalone_manifests(self):
+        settings = self.stage_motion()
+        original = self.contents()
+        prepare.apply(self.rom, "apply")
+        # Reproduce the previous adapter's already-applied state in a user's checkout.
+        for name in ("Android.bp.in", "Android.bp"):
+            path = settings / name
+            path.write_text(path.read_text().replace(prepare.MOTION_RESOURCES_BP_NEW,
+                                                     prepare.MOTION_RESOURCES_BP_OLD))
+        (settings / prepare.MOTION_RESOURCES_MANIFEST).unlink()
+        manifests = {name: (settings / name).read_bytes()
+                     for name in (prepare.MOTION_MANIFEST, prepare.MOTION_NATIVE_MANIFEST)}
+        prepare.apply(self.rom, "apply")
+        prepare.apply(self.rom, "verify")
+        for name, content in manifests.items():
+            self.assertEqual(content, (settings / name).read_bytes())
+        prepare.apply(self.rom, "revert")
+        self.assertEqual(original, self.contents())
+
+    def test_foreign_resource_manifest_selection_refuses_before_writes(self):
+        settings = self.stage_motion()
+        blueprint = settings / "Android.bp.in"
+        blueprint.write_text(blueprint.read_text().replace(prepare.MOTION_RESOURCES_BP_OLD,
+            prepare.MOTION_RESOURCES_BP_OLD + '\n    manifest: "maintainer-manifest.xml",'))
         before = self.contents()
-        with self.assertRaisesRegex(ValueError, "unfamiliar generated Motion Sense manifest"):
+        with self.assertRaisesRegex(ValueError, "resource manifest selection"):
             prepare.apply(self.rom, "apply")
         self.assertEqual(before, self.contents())
 

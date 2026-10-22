@@ -35,6 +35,16 @@ jobs:
         run: bash tests/run_host_tests.sh
       - name: Compile Suite Java and link Android resources with locked dependencies
         run: python3 tools/compile_sdk.py --cache generated/sdk
+      - name: Compile retained Google weather and Hecker Launcher artwork
+        run: python3 tools/check_launcher.py --sdk-cache generated/sdk
+      - name: Compile headphone, sandbox and face-island native adapter Java and resources
+        run: python3 tools/check_device_features.py --sdk-cache generated/sdk
+      - name: Compile Quick Settings Kotlin and Java with locked Compose dependencies
+        run: python3 tools/check_quick_settings.py --sdk-cache generated/sdk
+      - name: Compile native About Phone and verify HeckerOS release identity
+        run: python3 tools/check_about_phone.py --sdk-cache generated/sdk
+      - name: Merge the native and standalone Motion Sense manifests with Android 17's merger
+        run: python3 tools/check_motion_manifest.py
       - name: Check owned Pixel enrollment and Axion integrity adapters
         run: python3 tools/check_platform_features.py --sdk-cache generated/sdk
       - name: Check Android 17 keystore integration and private spoofing configuration
@@ -46,11 +56,13 @@ jobs:
           python3 integration/tools/validate.py
           python3 -m unittest discover -s integration/tests -p 'test_*.py'
       - name: Apply and revert adapters against pinned native sources
-        run: python3 tools/check_native_ports.py
+        run: python3 tools/check_native_ports.py --sdk-cache generated/sdk
       - name: Verify all pinned theme payloads
         run: python3 tools/fetch_theme_assets.py
       - name: Compile Settings artwork and layouts
-        run: generated/sdk/aapt2 compile --dir settings/res -o /tmp/hecker-settings-resources.zip
+        run: |
+          generated/sdk/aapt2 compile --dir settings/res -o /tmp/hecker-settings-resources.zip
+          generated/sdk/aapt2 compile --dir motion/res -o /tmp/hecker-motion-resources.zip
   boot-assets:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04

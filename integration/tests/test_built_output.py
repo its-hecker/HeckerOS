@@ -2,16 +2,33 @@
 """Reject the missing runtime init script found in the phone bug report."""
 
 from pathlib import Path
+import hashlib
+import json
 import sys
 import tempfile
 import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from check_built_output import check, check_motion_sense, check_suite, SERVICE
+from check_built_output import check, check_bootanimation, check_development_adb, check_motion_sense, check_suite, check_librepods, SERVICE
 
 
 class BuiltOutputTests(unittest.TestCase):
+    def test_rejects_retired_weather_apk_in_each_install_partition(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for partition in ("system", "system_ext", "product", "vendor"):
+                for app_type in ("app", "priv-app"):
+                    with self.subTest(partition=partition, app_type=app_type):
+                        app = root / partition / app_type / "OmniJaws"
+                        app.mkdir(parents=True)
+                        apk = app / "OmniJaws.apk"
+                        apk.write_bytes(b"stale apk")
+                        with self.assertRaisesRegex(ValueError, "Removed OmniJaws"):
+                            check(root, root)
+                        apk.unlink()
+                        app.rmdir()
+
     def test_selected_camera_needs_its_exact_init_binary_and_manifest(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -37,12 +54,36 @@ class BuiltOutputTests(unittest.TestCase):
             properties = output / "product/etc/build.prop"
             properties.parent.mkdir(parents=True)
             properties.write_text("pixel.oslo.allowed_override=1\n")
-            with patch("check_built_output.verify_installed") as apks, patch("check_built_output.check_suite"):
+            with patch("check_built_output.verify_installed") as apks, patch("check_built_output.check_suite"), \
+                    patch("check_built_output.check_bootanimation"), \
+                    patch("check_built_output.check_librepods"), \
+                    patch("check_built_output.check_development_adb") as adb:
                 check(root, output)
                 apks.assert_called_once_with(root, output)
+                adb.assert_called_once()
+                self.assertEqual((output,), adb.call_args.args)
             init.write_text("service camera /wrong/binary\n")
             with self.assertRaisesRegex(ValueError, "exact camera provider init"):
                 check(root, output)
+
+    def test_boot_animation_must_reach_the_product_image_unchanged(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "output"
+            metadata = root / "vendor/hecker/floral/suite/bootanimation/payload.json"
+            metadata.parent.mkdir(parents=True)
+            payload = b"locked animation bytes"
+            metadata.write_text(json.dumps({"size": len(payload), "sha256": hashlib.sha256(payload).hexdigest()}))
+            installed = output / "product/media/bootanimation.zip"
+            with self.assertRaisesRegex(ValueError, "exact HeckerOS boot animation"):
+                check_bootanimation(root, output)
+            installed.parent.mkdir(parents=True)
+            for data in (b"wrong size", b"x" * len(payload)):
+                installed.write_bytes(data)
+                with self.assertRaisesRegex(ValueError, "exact HeckerOS boot animation"):
+                    check_bootanimation(root, output)
+            installed.write_bytes(payload)
+            check_bootanimation(root, output)
 
     def test_motion_sense_requires_the_country_override_in_built_product_properties(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -62,6 +103,61 @@ class BuiltOutputTests(unittest.TestCase):
             legacy = output / "product/build.prop"
             properties.rename(legacy)
             check_motion_sense(output)
+
+    def test_development_adb_requires_an_unambiguous_built_mode(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            with self.assertRaisesRegex(ValueError, "missing development ADB"):
+                check_development_adb(output)
+            properties = output / "product/etc/build.prop"
+            properties.parent.mkdir(parents=True)
+            for value in ("", "ro.heckeros.dev_usb_adb=true\n",
+                          "ro.heckeros.dev_usb_adb=1\nro.heckeros.dev_usb_adb=1\n"):
+                with self.subTest(properties=value):
+                    properties.write_text(value)
+                    with self.assertRaisesRegex(ValueError, "exactly one ro.heckeros"):
+                        check_development_adb(output)
+
+    def test_development_adb_checks_authentication_and_usb_defaults(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            properties = output / "product/etc/build.prop"
+            properties.parent.mkdir(parents=True)
+            for mode, secure in (("1", "0"), ("0", "1")):
+                base = "ro.heckeros.dev_usb_adb=" + mode + "\n"
+                usb = "persist.sys.usb.config=adb\n" if mode == "1" else ""
+                for value in ("", "ro.adb.secure=" + ("1" if secure == "0" else "0") + "\n",
+                              "ro.adb.secure=" + secure + "\nro.adb.secure=" + secure + "\n"):
+                    with self.subTest(mode=mode, properties=value):
+                        properties.write_text(base + value + usb)
+                        with self.assertRaisesRegex(ValueError, "exactly one ro.adb.secure=" + secure):
+                            check_development_adb(output)
+                properties.write_text(base + "ro.adb.secure=" + secure + "\n" + usb)
+                check_development_adb(output)
+            base = "ro.heckeros.dev_usb_adb=1\nro.adb.secure=0\n"
+            for usb in ("", "persist.sys.usb.config=mtp\n",
+                        "persist.sys.usb.config=adb\npersist.sys.usb.config=adb\n"):
+                properties.write_text(base + usb)
+                with self.assertRaisesRegex(ValueError, "USB default containing adb"):
+                    check_development_adb(output)
+            properties.write_text(base + "persist.sys.usb.config=mtp,adb\n")
+            check_development_adb(output)
+            properties.rename(output / "product/build.prop")
+            check_development_adb(output)
+
+    def test_development_adb_detects_a_final_switch_that_did_not_reach_the_image(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            properties = output / "product/etc/build.prop"
+            properties.parent.mkdir(parents=True)
+            for mode, secure, expected in (("1", "0", "true"), ("0", "1", "false")):
+                properties.write_text("ro.heckeros.dev_usb_adb=" + mode + "\nro.adb.secure=" + secure +
+                                      "\npersist.sys.usb.config=adb\n")
+                check_development_adb(output, expected)
+                with self.assertRaisesRegex(ValueError, "differs from HECKER_DEV_USB_ADB"):
+                    check_development_adb(output, "false" if expected == "true" else "true")
+                with self.assertRaisesRegex(ValueError, "must be true or false"):
+                    check_development_adb(output, "1")
 
     def test_suite_requires_installed_apk_and_matching_permission_xml(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -90,6 +186,36 @@ class BuiltOutputTests(unittest.TestCase):
             installed_feature = output / "system_ext/etc/permissions/hecker-suite-freeform.xml"
             installed_feature.write_bytes(feature.read_bytes())
             check_suite(root, output)
+
+    def test_librepods_requires_original_bytes_and_both_permission_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "output"
+            source = root / "vendor/hecker/floral/suite/prebuilts/librepods"
+            source.mkdir(parents=True)
+            data = b"original signed APK fixture"
+            (source / "source.json").write_text(json.dumps({
+                "size": len(data), "sha256": hashlib.sha256(data).hexdigest()}))
+            with self.assertRaisesRegex(ValueError, "LibrePods APK"):
+                check_librepods(root, output)
+            apk = output / "system_ext/priv-app/HeckerLibrePods/HeckerLibrePods.apk"
+            apk.parent.mkdir(parents=True)
+            apk.write_bytes(b"wrong APK bytes")
+            with self.assertRaisesRegex(ValueError, "LibrePods APK"):
+                check_librepods(root, output)
+            apk.write_bytes(data)
+            for folder, name in (("permissions", "privapp-permissions-librepods.xml"),
+                                 ("default-permissions", "default-permissions-librepods.xml")):
+                (source / name).write_text('<permissions />')
+                with self.assertRaisesRegex(ValueError, "LibrePods permissions"):
+                    check_librepods(root, output)
+                installed = output / "system_ext/etc" / folder / name
+                installed.parent.mkdir(parents=True, exist_ok=True)
+                installed.write_bytes((source / name).read_bytes())
+            check_librepods(root, output)
+            apk.write_bytes(b"X" + data[1:])
+            with self.assertRaisesRegex(ValueError, "LibrePods APK"):
+                check_librepods(root, output)
 
 
 if __name__ == "__main__":

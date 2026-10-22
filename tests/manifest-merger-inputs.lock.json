@@ -1,0 +1,50 @@
+{
+  "manifest-merger.jar": {
+    "url": "https://android.googlesource.com/platform/prebuilts/manifest-merger/+/93603b6f7483f14666f74f67977794a3a8fc1594/com/android/tools/build/manifest-merger/31.9.0-alpha03/manifest-merger-31.9.0-alpha03.jar?format=TEXT",
+    "base64": true,
+    "sha256": "b7118321aa42f99e9557f30ca8ba2680ec8c4f3093c7ddf8fc9bc38fc453b8cd"
+  },
+  "common.jar": {
+    "url": "https://android.googlesource.com/platform/prebuilts/manifest-merger/+/93603b6f7483f14666f74f67977794a3a8fc1594/com/android/tools/common/31.9.0-alpha03/common-31.9.0-alpha03.jar?format=TEXT",
+    "base64": true,
+    "sha256": "4eb263ca169fccee6a8b345ae996f5b1280461864d000d82c2f03b7db487a654"
+  },
+  "sdk-common.jar": {
+    "url": "https://android.googlesource.com/platform/prebuilts/manifest-merger/+/93603b6f7483f14666f74f67977794a3a8fc1594/com/android/tools/sdk-common/31.9.0-alpha03/sdk-common-31.9.0-alpha03.jar?format=TEXT",
+    "base64": true,
+    "sha256": "a7dbac9d7c39736f9c5a9e12800bab8b97698f63a7e430597672109dde246436"
+  },
+  "sdklib.jar": {
+    "url": "https://android.googlesource.com/platform/prebuilts/manifest-merger/+/93603b6f7483f14666f74f67977794a3a8fc1594/com/android/tools/sdklib/31.9.0-alpha03/sdklib-31.9.0-alpha03.jar?format=TEXT",
+    "base64": true,
+    "sha256": "71338150688852b3dea9e5c7e31ca4d49309188cf5acea0647aa99647c5d8ca4"
+  },
+  "guava.jar": {
+    "url": "https://repo.maven.apache.org/maven2/com/google/guava/guava/33.3.1-jre/guava-33.3.1-jre.jar",
+    "sha256": "4bf0e2c5af8e4525c96e8fde17a4f7307f97f8478f11c4c8e35a0e3298ae4e90"
+  },
+  "gson.jar": {
+    "url": "https://repo.maven.apache.org/maven2/com/google/code/gson/gson/2.11.0/gson-2.11.0.jar",
+    "sha256": "57928d6e5a6edeb2abd3770a8f95ba44dce45f3b23b7a9dc2b309c581552a78b"
+  },
+  "kotlin-stdlib.jar": {
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/2.1.20/kotlin-stdlib-2.1.20.jar",
+    "sha256": "1bcc74e8ce84e2c25eaafde10f1248349cce3062b6e36978cbeec610db1e930a"
+  },
+  "source/motionsense.mk": {
+    "url": "https://raw.githubusercontent.com/its-hecker/floral-motionsense-plugin/92d0051faf53acac3dfefec6597a12d587eefa73/motionsense.mk",
+    "sha256": "a378e13ddabf501fc19ed09800a1158e25a48d2d37882348915efec6d47c3546"
+  },
+  "source/settings/AndroidManifest.xml": {
+    "url": "https://raw.githubusercontent.com/its-hecker/floral-motionsense-plugin/92d0051faf53acac3dfefec6597a12d587eefa73/settings/AndroidManifest.xml",
+    "sha256": "17f31b652375129aa33ada32e3bd082d45f7fe96232953241efe838d78cc967d"
+  },
+  "source/settings/Android.bp.in": {
+    "url": "https://raw.githubusercontent.com/its-hecker/floral-motionsense-plugin/92d0051faf53acac3dfefec6597a12d587eefa73/settings/Android.bp.in",
+    "sha256": "3f2be7bbba14c6fc79fddefcb7724a275cc3d317f55b81212a4fae6518ce664e"
+  },
+  "source/settings/src/org/hecker/floral/motionsense/motionsense/MotionSenseFragment.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/floral-motionsense-plugin/92d0051faf53acac3dfefec6597a12d587eefa73/settings/src/org/hecker/floral/motionsense/motionsense/MotionSenseFragment.java",
+    "sha256": "4bc0269256bfaf1c7e99d4696b4706c103437073e712297b86d9ee1fdbd32ede"
+  }
+}

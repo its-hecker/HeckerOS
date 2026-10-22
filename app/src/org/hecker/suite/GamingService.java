@@ -41,6 +41,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
     private static final String CHANNEL="gaming",STOP="org.hecker.suite.STOP_GAMING";
     private final Handler main=new Handler(Looper.getMainLooper());
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
+    private final GamingPolicy.TaskObservation observation=new GamingPolicy.TaskObservation();
     private Set<String> games=new HashSet<>(),popups=new HashSet<>();
     private ActivityManager am;private WindowManager wm;private GamingOverlay overlay;
     private int gameTask=-1,fpsTask=-1,catalogGeneration;
@@ -54,8 +55,8 @@ public final class GamingService extends Service implements GamingOverlay.Action
     private final Runnable evaluate=this::evaluate;
     private final BroadcastReceiver state=new BroadcastReceiver(){@Override public void onReceive(Context c,Intent i){
         if(Intent.ACTION_BATTERY_CHANGED.equals(i.getAction())){battery=i;updateStatus();}
-        else if(Intent.ACTION_SCREEN_OFF.equals(i.getAction())){recordGrace=0;pause();}
-        else schedule(250);
+        else if(Intent.ACTION_SCREEN_OFF.equals(i.getAction())){recordGrace=0;observation.clear();pause();}
+        else taskChanged();
     }};
     private final BroadcastReceiver packages=new BroadcastReceiver(){@Override public void onReceive(Context c,Intent i){loadCatalog();}};
 
@@ -74,7 +75,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
         // Clear only this target-37 app's implicit DND rule after a restart.
         focusState(false);
         try{
-            taskObserver=new GamingTaskObserver(()->main.post(()->schedule(120)));
+            taskObserver=new GamingTaskObserver(()->main.post(this::taskChanged));
             IntentFilter filter=new IntentFilter(Intent.ACTION_SCREEN_OFF);filter.addAction(Intent.ACTION_SCREEN_ON);filter.addAction(Intent.ACTION_USER_PRESENT);filter.addAction(Intent.ACTION_BATTERY_CHANGED);
             battery=registerReceiver(state,filter,Context.RECEIVER_NOT_EXPORTED);stateRegistered=true;
             IntentFilter packageFilter=new IntentFilter(Intent.ACTION_PACKAGE_ADDED);packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);packageFilter.addDataScheme("package");
@@ -86,7 +87,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
             GamingPrefs.get(this).edit().putBoolean("enabled",false).apply();stopSelf();return START_NOT_STICKY;
         }
         if(i!=null&&RECORD_STARTED.equals(i.getAction()))recordGrace=SystemClock.elapsedRealtime()+2500;
-        schedule(150);return START_STICKY;
+        taskChanged();return START_STICKY;
     }
     @Override public IBinder onBind(Intent i){return null;}
     private Notification notification(){
@@ -99,10 +100,11 @@ public final class GamingService extends Service implements GamingOverlay.Action
     private void loadCatalog(){
         int request=++catalogGeneration;worker.execute(()->{
             Set<String> found=new HashSet<>();for(GamingCatalog.App app:GamingCatalog.load(this,true))found.add(app.info.packageName);
-            main.post(()->{if(destroyed||request!=catalogGeneration)return;games=found;schedule(0);});
+            main.post(()->{if(destroyed||request!=catalogGeneration)return;games=found;taskChanged();});
         });
     }
     private void schedule(long delay){if(destroyed)return;main.removeCallbacks(evaluate);main.postDelayed(evaluate,delay);}
+    private void taskChanged(){observation.changed(SystemClock.elapsedRealtime());schedule(100);}
     private boolean unlocked(){return getSystemService(PowerManager.class).isInteractive()&&!getSystemService(KeyguardManager.class).isKeyguardLocked();}
     private static String pkg(ActivityManager.RunningTaskInfo task){return task.topActivity==null?"":task.topActivity.getPackageName();}
     private boolean focused(ActivityManager.RunningTaskInfo task){
@@ -130,10 +132,11 @@ public final class GamingService extends Service implements GamingOverlay.Action
                 if(changed)getSystemService(NotificationManager.class).notify(31,notification());
             }else{pause();if(!previousVisible){gameTask=-1;gamePackage=null;popups.clear();}}
         }catch(RuntimeException e){Log.w("HeckerGaming","Task observation failed",e);pause();}
-        if(active||SystemClock.elapsedRealtime()<recordGrace)schedule(1000);
+        long delay=observation.nextDelay(SystemClock.elapsedRealtime(),active,recordGrace);
+        if(delay>=0)schedule(delay);
     }
     private void activate(){
-        if(!active){active=true;overlay.show();getSystemService(NotificationManager.class).notify(31,notification());}
+        if(!active){overlay.show();active=true;getSystemService(NotificationManager.class).notify(31,notification());}
         focusState(GamingPrefs.get(this).getBoolean("focus",false));syncFps();updateStatus();
     }
     private void pause(){
@@ -181,6 +184,15 @@ public final class GamingService extends Service implements GamingOverlay.Action
         }catch(SecurityException e){Log.w("HeckerGaming","Focus access was revoked",e);}
     }
     @Override public void panelChanged(boolean open){syncFps();}
+    @Override public boolean performanceSupported(){return GamingPlatform.performanceSupported(this,gamePackage);}
+    @Override public int gameMode(){return GamingPlatform.gameMode(this,gamePackage);}
+    @Override public void gameMode(int mode){
+        if(!active||gamePackage==null)return;
+        if(!GamingPlatform.gameMode(this,gamePackage,mode))toast(getString(R.string.gaming_mode_unavailable));
+        overlay.restyle();updateStatus();
+    }
+    @Override public String gameLabel(){return gamePackage==null?getString(R.string.gaming_title):GamingCatalog.label(this,gamePackage);}
+    @Override public void gameSpace(){startActivity(new Intent(this,GamingActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));}
     @Override public void clean(){
         if(!active||gamePackage==null)return;String protectedGame=gamePackage;
         worker.execute(()->{try{int count=GamingPlatform.clean(this,protectedGame);main.post(()->toast(getString(R.string.gaming_clean_result,count)));}
@@ -218,7 +230,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
         catch(ReflectiveOperationException|RuntimeException e){Log.w("HeckerGaming","Popup launch failed",e);toast(getString(R.string.gaming_popup_unavailable));}
     }
     @Override public void chooseShortcuts(){worker.execute(()->{
-        List<GamingCatalog.App> apps=GamingCatalog.load(this,false);main.post(()->{if(!destroyed&&active)overlay.showShortcutPicker(apps);});
+        List<GamingCatalog.App> apps=GamingCatalog.load(this,false);main.post(()->{if(!destroyed&&active&&overlay.isOpen())overlay.showShortcutPicker(apps);});
     });}
     @Override public void toggleShortcut(String pkg){
         if(!GamingPrefs.shortcuts(this).contains(pkg)&&GamingPrefs.shortcuts(this).size()>=5){toast(getString(R.string.gaming_limit));return;}GamingPrefs.toggleShortcut(this,pkg);

@@ -11,7 +11,10 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
+import time
+import urllib.error
 import urllib.request
 import zipfile
 
@@ -25,8 +28,20 @@ def fetch(cache, name, item):
             raise ValueError("Cached SDK input differs: " + name)
         return target
     request = urllib.request.Request(item["url"], headers={"User-Agent": "HeckerSuite-source-check/1"})
-    with urllib.request.urlopen(request, timeout=90) as response:
-        data = response.read()
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(request, timeout=90) as response:
+                data = response.read()
+            break
+        except (urllib.error.URLError, TimeoutError) as error:
+            # Only transient transport/server failures are retryable. Invalid
+            # URLs, authorization errors and checksum mismatches remain fatal.
+            if (attempt == 3 or isinstance(error, urllib.error.HTTPError)
+                    and error.code not in {408, 429, 500, 502, 503, 504}):
+                raise
+            print(f"Temporary download failure for {name}; retry {attempt + 1}/3",
+                  file=sys.stderr)
+            time.sleep(2 ** attempt)
     if item.get("base64"):
         data = base64.b64decode(data, validate=True)
     if hashlib.sha256(data).hexdigest() != item["sha256"]:
@@ -96,7 +111,8 @@ def main():
         run("java", "-m", "jdk.compiler/com.sun.tools.javac.Main", "-cp", classpath,
             "-d", output / "classes", output / "generated/org/hecker/suite/R.java",
             *sorted((ROOT / "tests/platform-api-stubs").rglob("*.java")),
-            *sorted((ROOT / "app/src").rglob("*.java")))
+            *sorted((ROOT / "app/src").rglob("*.java")),
+            ROOT / "framework/sandbox/HeckerSandboxRules.java")
         # Compile exactly the Settings UI module without backend classes on its
         # classpath, so a feature Activity reference cannot silently join its UID.
         (output / "settings-ui-classes").mkdir()

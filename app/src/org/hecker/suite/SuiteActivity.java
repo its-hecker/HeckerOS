@@ -43,19 +43,19 @@ public final class SuiteActivity extends Activity {
         row.addView(mascot, new LinearLayout.LayoutParams(Ui.dp(this, 116), Ui.dp(this, 132))); hero.addView(row);
         LinearLayout controls = new LinearLayout(this); controls.setGravity(Gravity.CENTER_VERTICAL);
         LinearLayout orbit = new LinearLayout(this); animation = new SuiteAnimation(this, orbit, 40); controls.addView(orbit);
-        Button shuffle = new Button(this); shuffle.setText(R.string.greeting_shuffle); shuffle.setTextSize(11);
+        Button shuffle = Ui.button(this); shuffle.setText(R.string.greeting_shuffle); shuffle.setTextSize(11);
         shuffle.setOnClickListener(v -> { message = SuiteGreetings.next(this); greeting.setText(SuiteGreetings.text(this,message)); animation.show(R.raw.suite_orbit,true); });
         controls.addView(shuffle, new LinearLayout.LayoutParams(0,-2,1)); hero.addView(controls); page.addView(hero);
         LinearLayout tabs = new LinearLayout(this);
-        customizations = new Button(this); customizations.setText(R.string.tab_customizations);
-        about = new Button(this); about.setText(R.string.tab_about);
+        customizations = Ui.button(this); customizations.setText(R.string.tab_customizations);
+        about = Ui.button(this); about.setText(R.string.tab_about);
         tabs.addView(customizations,new LinearLayout.LayoutParams(0,-2,1)); tabs.addView(about,new LinearLayout.LayoutParams(0,-2,1));
         customizations.setOnClickListener(v->showTab(false)); about.setOnClickListener(v->showTab(true)); page.addView(tabs);
         content = new LinearLayout(this); content.setOrientation(LinearLayout.VERTICAL); page.addView(content); showTab(showingAbout);
         Ui.scroll(this,page);
     }
     private void showTab(boolean selectedAbout) {
-        showingAbout=selectedAbout; customizations.setEnabled(selectedAbout); about.setEnabled(!selectedAbout); content.removeAllViews();
+        showingAbout=selectedAbout; customizations.setSelected(!selectedAbout); about.setSelected(selectedAbout); content.removeAllViews();
         if(selectedAbout){SuiteAbout.populate(this,content);return;}
         addRow(tile(R.string.qs_title,R.string.qs_summary,R.drawable.ic_qs,v->open("QuickSettingsActivity")),
                 tile(R.string.lock_screen_title,R.string.lock_screen_summary,R.drawable.ic_lock,v->open("LockScreenSettingsActivity")));
@@ -69,6 +69,9 @@ public final class SuiteActivity extends Activity {
                 tile(R.string.gaming_title,R.string.gaming_summary,R.drawable.ic_gaming,v->open("GamingActivity")));
         addRow(tile(R.string.launcher_title,R.string.launcher_summary,R.drawable.ic_qs,v->open("LauncherSettingsActivity")),
                 tile(R.string.ir_title,R.string.ir_summary,R.drawable.ic_face_unlock,v->open("InfraredCameraActivity")));
+        addRow(tile(R.string.sandbox_title,R.string.sandbox_summary,R.drawable.ic_sandbox,v->open("SandboxActivity")),
+                tile(R.string.headphones_title,R.string.headphones_summary,R.drawable.ic_headphones,v->open("HeadphonesActivity")));
+        Ui.actionCard(this,content,R.string.lyrics_title,R.string.lyrics_summary,v->open("LyricsSettingsActivity"));
         LinearLayout integrity=Ui.card(this);
         integrity.addView(Ui.text(this,getString(R.string.integrity_title),17,true));
         integrity.addView(Ui.text(this,getString(R.string.integrity_summary),12,false));

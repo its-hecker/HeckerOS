@@ -1,0 +1,19 @@
+<resources>
+    <string name="hecker_media_volume">媒体音量</string>
+    <string name="hecker_brand">HeckerOS</string>
+    <string name="hecker_brand_tagline">随心定制</string>
+    <string name="hecker_edit_tiles">编辑快捷设置</string>
+    <string name="hecker_qs_dark">深色模式</string>
+    <string name="hecker_qs_mute">媒体静音</string>
+    <string name="hecker_qs_unmute">取消媒体静音</string>
+    <string name="hecker_qs_play_last">播放上一首歌曲</string>
+    <string name="hecker_qs_media_output">媒体输出</string>
+    <string name="hecker_qs_smart_view">投屏</string>
+    <string name="hecker_qs_mirror_screen">屏幕镜像</string>
+    <string name="hecker_qs_modes">模式</string>
+    <string name="hecker_qs_nearby">附近设备</string>
+    <string name="hecker_qs_smartthings">SmartThings</string>
+    <string name="hecker_qs_device_control">设备控制</string>
+    <string name="hecker_qs_play">播放</string>
+    <string name="hecker_qs_pause">暂停</string>
+</resources>

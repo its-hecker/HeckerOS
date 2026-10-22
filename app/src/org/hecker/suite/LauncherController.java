@@ -3,20 +3,22 @@ package org.hecker.suite;
 
 import android.app.role.RoleManager;
 import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.om.OverlayInfo;
+import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayManager;
+import android.content.om.OverlayManagerTransaction;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Process;
 import android.os.UserHandle;
-import android.provider.Settings;
 import java.util.List;
 import java.util.function.Consumer;
 
-/** HOME role is the source of truth. A mutable signed RRO selects Recents at next boot. */
+/** Stage a choice, then change HOME and the signed Recents overlay immediately before reboot. */
 final class LauncherController {
     static final String HECKER = "com.android.launcher3";
     static final String PIXEL = "com.google.android.apps.nexuslauncher";
@@ -24,19 +26,13 @@ final class LauncherController {
     private final Context context;
     private final RoleManager roles;
     private final OverlayManager overlays;
-    private final SharedPreferences prefs;
+    private final SharedPreferences preferences;
 
     LauncherController(Context context) {
         this.context = context.getApplicationContext();
         roles = context.getSystemService(RoleManager.class);
         overlays = context.getSystemService(OverlayManager.class);
-        prefs = context.getSharedPreferences("launcher_switch", 0);
-        if (primaryUser() && available()) {
-            int boot = Settings.Global.getInt(context.getContentResolver(), Settings.Global.BOOT_COUNT, -1);
-            if (!prefs.contains("boot") || prefs.getInt("boot", -2) != boot) {
-                prefs.edit().putInt("boot", boot).putBoolean("boot_hecker", heckerRecents()).commit();
-            }
-        }
+        preferences = this.context.getSharedPreferences("launcher_switch", Context.MODE_PRIVATE);
     }
 
     static boolean primaryUser() { return Process.myUserHandle().equals(UserHandle.SYSTEM); }
@@ -78,35 +74,97 @@ final class LauncherController {
     }
 
     boolean restartNeeded() {
-        return available() && prefs.contains("boot_hecker")
-                && prefs.getBoolean("boot_hecker", false) != heckerRecents();
+        String home = selected();
+        return available() && (HECKER.equals(home) || PIXEL.equals(home))
+                && (!home.equals(current()) || HECKER.equals(home) != heckerRecents()
+                        || !home.equals(recentsPackage()));
     }
 
+    String recentsPackage() {
+        try {
+            int id = context.getResources().getIdentifier("config_recentsComponentName", "string", "android");
+            ComponentName component = id == 0 ? null
+                    : ComponentName.unflattenFromString(context.getResources().getString(id));
+            return component == null ? "" : component.getPackageName();
+        } catch (RuntimeException unavailable) { return ""; }
+    }
+
+    String selected() { return preferences.getString("pending_home", current()); }
+
     boolean matches(String packageName) {
-        return available() && HECKER.equals(packageName) == heckerRecents();
+        return packageName.equals(selected());
     }
 
     void select(String packageName, Consumer<Boolean> result) {
         if (!primaryUser() || !available() || !installed(packageName)) { result.accept(false); return; }
+        try {
+            // Keep the working HOME/Quickstep pair until the explicit restart action.
+            result.accept(preferences.edit().putString("pending_home", packageName).commit());
+        } catch (RuntimeException failure) {
+            result.accept(false);
+        }
+    }
+
+    void restart(Runnable reboot, Consumer<RuntimeException> onFailure) {
+        String home = selected();
+        if (!primaryUser() || !available() || !installed(home)) {
+            onFailure.accept(new IllegalStateException("Selected system launcher is unavailable"));
+            return;
+        }
+        String previousHome = current();
         boolean previous = heckerRecents();
         try {
-            // Runtime resources can update now, but PMS/ATMS/SystemUI load Recents at boot.
-            // Keep the previous provider until the user explicitly restarts their phone.
-            overlays.setEnabled(OVERLAY, HECKER.equals(packageName), UserHandle.SYSTEM);
-            roles.addRoleHolderAsUser(RoleManager.ROLE_HOME, packageName,
+            roles.addRoleHolderAsUser(RoleManager.ROLE_HOME, home,
                     RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP, UserHandle.SYSTEM,
                     context.getMainExecutor(), success -> {
-                        boolean selected = success && packageName.equals(current());
-                        if (!selected) {
-                            try { overlays.setEnabled(OVERLAY, previous, UserHandle.SYSTEM); }
-                            catch (RuntimeException failure) { /* UI reports the actual state. */ }
+                        if (!success || !home.equals(current())) {
+                            onFailure.accept(new IllegalStateException("HOME role change was rejected"));
+                            return;
                         }
-                        result.accept(selected);
+                        try {
+                            // TYPE_SET_ENABLED also moves the overlay to highest priority
+                            // in OverlayManagerService, in the same transaction.
+                            overlays.commit(new OverlayManagerTransaction.Builder()
+                                    .setEnabled(new OverlayIdentifier(OVERLAY), HECKER.equals(home),
+                                            UserHandle.SYSTEM.getIdentifier()).build());
+                            if (heckerRecents() != HECKER.equals(home)) {
+                                throw new IllegalStateException("Recents overlay could not be enabled");
+                            }
+                            if (!preferences.edit().remove("pending_home").commit()) {
+                                throw new IllegalStateException("Launcher choice could not be saved");
+                            }
+                            reboot.run();
+                        } catch (RuntimeException failure) {
+                            preferences.edit().putString("pending_home", home).commit();
+                            rollback(previousHome, home, previous, failure, onFailure);
+                        }
                     });
         } catch (RuntimeException failure) {
-            try { overlays.setEnabled(OVERLAY, previous, UserHandle.SYSTEM); }
-            catch (RuntimeException ignored) { }
-            result.accept(false);
+            onFailure.accept(failure);
+        }
+    }
+
+    private void rollback(String previousHome, String selectedHome, boolean previous,
+            RuntimeException failure, Consumer<RuntimeException> onFailure) {
+        try { overlays.setEnabled(OVERLAY, previous, UserHandle.SYSTEM); }
+        catch (RuntimeException rollback) { failure.addSuppressed(rollback); }
+        Consumer<Boolean> restored = success -> {
+            if (!success) failure.addSuppressed(new IllegalStateException("HOME rollback was rejected"));
+            onFailure.accept(failure);
+        };
+        try {
+            if (previousHome.isEmpty()) {
+                roles.removeRoleHolderAsUser(RoleManager.ROLE_HOME, selectedHome,
+                        RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP, UserHandle.SYSTEM,
+                        context.getMainExecutor(), restored);
+            } else {
+                roles.addRoleHolderAsUser(RoleManager.ROLE_HOME, previousHome,
+                        RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP, UserHandle.SYSTEM,
+                        context.getMainExecutor(), restored);
+            }
+        } catch (RuntimeException rollback) {
+            failure.addSuppressed(rollback);
+            onFailure.accept(failure);
         }
     }
 }

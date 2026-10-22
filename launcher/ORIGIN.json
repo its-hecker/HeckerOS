@@ -1,7 +1,7 @@
 {
-  "repository": "RisingOS-Revived/android_packages_apps_Launcher3",
-  "branch": "seventeen",
-  "revision": "e2331fb7bc34fa33ecbe6040615457324a9ea60d",
+  "repository": "https://gitea.com/projectInfinity-x/packages_apps_Launcher3",
+  "branch": "17",
+  "revision": "8a89db313ebfafc80572795e613679050095d5db",
   "license": "Apache-2.0",
-  "port": "Native PixelOS sleep, key gestures, freeform and settings adapters; Hecker branding and animated header."
+  "port": "Infinity-X Android 17 launcher with Hecker branding, native PixelOS gesture/App Lock/icon adapters, independent Google weather and guarded optional automation listener."
 }

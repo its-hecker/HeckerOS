@@ -5,7 +5,9 @@ has no usable Android ADB connection, saved crash files or pstore records.
 
 The init service starts at `early-fs`, after Coral's first-stage Metadata mount
 and before filesystem/checkpoint actions or `late-fs` can block on userdata. It uses the existing AOSP `su` diagnostic domain on
-debug builds; the device-wide SELinux setting and ADB authentication are unchanged.
+debug builds; the capture itself does not change device-wide SELinux or ADB
+authentication. The separate [development ADB option](../adb/README.md) controls
+PC authorization on this branch.
 The product does not install the capture on `user` builds, and the script also
 checks `ro.debuggable` and skips recovery/fastboot boots.
 
