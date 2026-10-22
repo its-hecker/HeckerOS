@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from check_built_output import check, check_development_adb, check_motion_sense, check_suite, check_librepods, SERVICE
+from check_built_output import check, check_bootanimation, check_development_adb, check_motion_sense, check_suite, check_librepods, SERVICE
 
 
 class BuiltOutputTests(unittest.TestCase):
@@ -55,6 +55,7 @@ class BuiltOutputTests(unittest.TestCase):
             properties.parent.mkdir(parents=True)
             properties.write_text("pixel.oslo.allowed_override=1\n")
             with patch("check_built_output.verify_installed") as apks, patch("check_built_output.check_suite"), \
+                    patch("check_built_output.check_bootanimation"), \
                     patch("check_built_output.check_librepods"), \
                     patch("check_built_output.check_development_adb") as adb:
                 check(root, output)
@@ -64,6 +65,25 @@ class BuiltOutputTests(unittest.TestCase):
             init.write_text("service camera /wrong/binary\n")
             with self.assertRaisesRegex(ValueError, "exact camera provider init"):
                 check(root, output)
+
+    def test_boot_animation_must_reach_the_product_image_unchanged(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "output"
+            metadata = root / "vendor/hecker/floral/suite/bootanimation/payload.json"
+            metadata.parent.mkdir(parents=True)
+            payload = b"locked animation bytes"
+            metadata.write_text(json.dumps({"size": len(payload), "sha256": hashlib.sha256(payload).hexdigest()}))
+            installed = output / "product/media/bootanimation.zip"
+            with self.assertRaisesRegex(ValueError, "exact HeckerOS boot animation"):
+                check_bootanimation(root, output)
+            installed.parent.mkdir(parents=True)
+            for data in (b"wrong size", b"x" * len(payload)):
+                installed.write_bytes(data)
+                with self.assertRaisesRegex(ValueError, "exact HeckerOS boot animation"):
+                    check_bootanimation(root, output)
+            installed.write_bytes(payload)
+            check_bootanimation(root, output)
 
     def test_motion_sense_requires_the_country_override_in_built_product_properties(self):
         with tempfile.TemporaryDirectory() as directory:

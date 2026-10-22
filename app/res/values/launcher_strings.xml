@@ -4,7 +4,7 @@
     <string name="launcher_summary">Hecker Launcher or Pixel Launcher. Make home your own.</string>
     <string name="hecker_launcher">Hecker Launcher</string>
     <string name="pixel_launcher">Pixel Launcher</string>
-    <string name="launcher_intro">Your home screen, your way. Based on RisingOS Revived\'s Ortus Launcher for Android 17.</string>
+    <string name="launcher_intro">Your home screen, your way. Based on Infinity-X Launcher for Android 17.</string>
     <string name="hecker_launcher_features">Double-tap to sleep, icon packs, grids, folders, drawer styles and more.</string>
     <string name="pixel_launcher_features">The familiar Pixel home screen and Google integration.</string>
     <string name="launcher_current">Default home: %1$s</string>
@@ -13,9 +13,9 @@
     <string name="launcher_selected">Selected</string>
     <string name="launcher_switching">Switching…</string>
     <string name="launcher_not_installed">Not installed</string>
-    <string name="launcher_switch_explanation">This changes your default home app. Use Restart phone on this page to finish switching gesture navigation and Recents. Both launchers keep their own home-screen layouts.</string>
+    <string name="launcher_switch_explanation">Choose this launcher for the next restart. Tap Restart phone on this page to switch the home screen, gesture navigation and Recents together. Both launchers keep their own layouts.</string>
     <string name="launcher_restart_needed">Restart to finish switching</string>
-    <string name="launcher_restart_body">Your default home has changed. Recents keeps the previous provider until you tap Restart phone below.</string>
+    <string name="launcher_restart_body">Your choice is saved. Tap Restart phone below to apply it. Your current home screen and gestures stay active until then.</string>
     <string name="launcher_restart">Restart phone</string>
     <string name="launcher_restart_confirm">Restart now to finish switching launchers?</string>
     <string name="launcher_restart_manual">Couldn\'t restart. Try Restart phone again from this page.</string>

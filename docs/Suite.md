@@ -52,13 +52,23 @@ with Android 17's manifest-merger, then checks the private native UI, a Settings
 host and the standalone plugin against the pinned source. Source application,
 reapplication and exact reversion are checked as well.
 
-The Launcher page sets Android's native HOME role without changing the running
-Recents provider. The signed Recents overlay changes only when the owner uses
+The Launcher page stages a choice while keeping the running HOME/Recents pair.
+The HOME role and signed Recents overlay change only when the owner uses
 **Restart phone** on that page, immediately before requesting the reboot. If the
-reboot request fails, the controller restores the previous overlay. Selecting a
+overlay or reboot request fails, the controller restores the previous HOME and
+overlay. Enabling Recents uses a native overlay transaction, which also moves it
+to highest priority. Selecting a
 Home app, cancelling a switch and a rejected role request leave the overlay
 untouched. Double tap to sleep calls the native power API; it does not use device
 administrator locking. Pixel Launcher remains installed.
+
+Wallpaper & Styles uses the same bundled clock providers that SystemUI must
+load on the lock screen. The production plugin policy adds the nine exact
+packages listed in the pinned ClockRegistry, preserving the existing allowlist.
+It does not enable arbitrary plugins or depend on `ro.debuggable`. Native probes
+compile the actual policy provider and PackageConfig and reject unrelated names.
+Brightness icons load as Android drawables on a worker, so XML vectors do not go
+through ImageDecoder. The existing 500 ms timeout and icon resource IDs remain.
 
 Lock-screen lyrics are available directly from the Suite dashboard and from its
 Lock screen page, through the signature-protected router. Action-card labels

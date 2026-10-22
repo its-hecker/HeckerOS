@@ -40,6 +40,14 @@ def check_motion_sense(output):
         raise ValueError("Built product image needs exactly one pixel.oslo.allowed_override=1")
 
 
+def check_bootanimation(rom, output):
+    metadata = json.loads((rom / "vendor/hecker/floral/suite/bootanimation/payload.json").read_text())
+    installed = output / "product/media/bootanimation.zip"
+    if not installed.is_file() or installed.stat().st_size != metadata["size"] \
+            or hashlib.sha256(installed.read_bytes()).hexdigest() != metadata["sha256"]:
+        raise ValueError("Built product image is missing the exact HeckerOS boot animation")
+
+
 def check_development_adb(output, expected_mode=None):
     paths = [output / "product/etc/build.prop", output / "product/build.prop"]
     properties = next((path for path in paths if path.is_file()), None)
@@ -106,10 +114,12 @@ def check(rom, output):
     check_motion_sense(output)
     check_development_adb(output, expected_mode=os.environ.get("HECKER_DEV_USB_ADB"))
     check_suite(rom, output)
+    check_bootanimation(rom, output)
     check_librepods(rom, output)
     print("Built output: camera provider binary/init/VINTF, original ten-APK Google Camera set "
           "and Motion Sense country override, Hecker Suite APK/permissions/freeform; "
-          "original LibrePods APK/permissions; development ADB mode/authentication; OmniJaws absent: PASS")
+          "original LibrePods APK/permissions; exact HeckerOS boot animation; "
+          "development ADB mode/authentication; OmniJaws absent: PASS")
 
 
 if __name__ == "__main__":

@@ -79,6 +79,13 @@ only if a removed app is still staged. Launcher weather uses the independent
 Google feed when available. ServerHive builds retain the provider's existing RBE
 environment and should run in the initialized Byobu build session.
 
+The launcher's Suite page stages your choice until its **Restart phone** action.
+That action changes HOME and the Recents overlay together, with the overlay at
+highest priority. If applying the overlay or restarting fails, it restores the
+previous HOME and overlay. Choosing a launcher keeps the current home and
+gestures active until that restart. Switching through Android's generic default
+home picker does not select a new Recents provider.
+
 The script prepares and verifies the plugins, GCam and theme payloads, applies
 guarded source adapters, then selects `hecker_coral-hecker_suite-userdebug` and
 runs `m heckeros`. Set `HECKER_BUILD_JOBS` to control build parallelism. The ROM

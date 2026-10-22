@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -56,10 +57,15 @@ public final class LauncherSettingsActivity extends Activity {
                     .setTitle(R.string.launcher_restart).setMessage(R.string.launcher_restart_confirm)
                     .setNegativeButton(R.string.cancel, null)
                     .setPositiveButton(R.string.launcher_restart, (dialog, which) -> {
-                        try { controller.restart(() -> getSystemService(PowerManager.class).reboot(null)); }
-                        catch (RuntimeException failure) {
+                        switching = true;
+                        render();
+                        controller.restart(() -> getSystemService(PowerManager.class).reboot(null), failure -> {
+                            Log.e("HeckerLauncherSwitch", "Launcher restart failed", failure);
+                            switching = false;
+                            if (isDestroyed() || isFinishing()) return;
+                            render();
                             Toast.makeText(this, R.string.launcher_restart_manual, Toast.LENGTH_LONG).show();
-                        }
+                        });
                     }).show());
             restart.addView(button);
             page.addView(restart);
@@ -79,7 +85,7 @@ public final class LauncherSettingsActivity extends Activity {
         card.addView(Ui.text(this, getString(summary), 15, false));
         Button select = Ui.button(this);
         boolean installed = controller.installed(packageName);
-        boolean selected = packageName.equals(controller.current()) && controller.matches(packageName);
+        boolean selected = controller.matches(packageName);
         select.setText(!installed ? R.string.launcher_not_installed : switching ? R.string.launcher_switching
                 : selected ? R.string.launcher_selected : R.string.launcher_select);
         select.setEnabled(installed && !switching && !selected && LauncherController.primaryUser()

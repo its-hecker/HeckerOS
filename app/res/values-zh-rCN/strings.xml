@@ -135,7 +135,7 @@
     <string name="launcher_summary">选择 Hecker 启动器或 Pixel Launcher，打造自己的主屏幕。</string>
     <string name="hecker_launcher">Hecker 启动器</string>
     <string name="pixel_launcher">Pixel Launcher</string>
-    <string name="launcher_intro">你的主屏幕，由你做主。基于适用于 Android 17 的 RisingOS Revived Ortus Launcher。</string>
+    <string name="launcher_intro">你的主屏幕，由你做主。基于适用于 Android 17 的 Infinity-X Launcher。</string>
     <string name="hecker_launcher_features">支持双击休眠、图标包、网格、文件夹、抽屉样式等。</string>
     <string name="pixel_launcher_features">熟悉的 Pixel 主屏幕和 Google 集成。</string>
     <string name="launcher_current">默认主屏幕：%1$s</string>
@@ -144,9 +144,9 @@
     <string name="launcher_selected">已选择</string>
     <string name="launcher_switching">正在切换…</string>
     <string name="launcher_not_installed">未安装</string>
-    <string name="launcher_switch_explanation">这将更改默认主屏幕应用。请使用本页的“重启设备”按钮完成手势导航和最近任务界面的切换。两个启动器会分别保留各自的主屏幕布局。</string>
+    <string name="launcher_switch_explanation">选择下次重启后使用的启动器。点击本页的“重启设备”可一起切换主屏幕、手势导航和最近任务。两个启动器会分别保留各自的布局。</string>
     <string name="launcher_restart_needed">重启以完成切换</string>
-    <string name="launcher_restart_body">默认主屏幕已更改。在点击下方的“重启设备”之前，最近任务界面会继续使用原来的提供程序。</string>
+    <string name="launcher_restart_body">你的选择已保存。点击下方的“重启设备”即可应用。在此之前，当前主屏幕和手势将保持可用。</string>
     <string name="launcher_restart">重启设备</string>
     <string name="launcher_restart_confirm">立即重启以完成启动器切换？</string>
     <string name="launcher_restart_manual">无法重启。请在本页再次点击“重启设备”。</string>

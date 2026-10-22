@@ -411,5 +411,27 @@
       "old": "    Canvas(\n        modifier.width(width).height(height).graphicsLayer {",
       "new": "    if (viewModel is SignalIconModel.CellularTypeIconModel.Cellular &&\n        !viewModel.showExclamationMark && !viewModel.carrierNetworkChange &&\n        com.android.systemui.hecker.HeckerSignalIcon(\n            viewModel.level, viewModel.numberOfLevels, color, modifier.width(width).height(height)\n        )) return\n\n    Canvas(\n        modifier.width(width).height(height).graphicsLayer {"
     }
+  ],
+  "frameworks/base/cmds/bootanimation/BootAnimation.cpp": [
+    {
+      "old": "        APEX_BOOTANIMATION_FILE, productBootanimationFile,\n        OEM_BOOTANIMATION_FILE, SYSTEM_BOOTANIMATION_FILE",
+      "new": "        // Product branding takes priority; dark boot may have no separate asset.\n        productBootanimationFile,\n        std::string(PRODUCT_BOOTANIMATION_DIR) + PRODUCT_BOOTANIMATION_FILE,\n        APEX_BOOTANIMATION_FILE, OEM_BOOTANIMATION_FILE, SYSTEM_BOOTANIMATION_FILE"
+    },
+    {
+      "old": "            mZipFileName = f.c_str();\n            return true;",
+      "new": "            mZipFileName = f.c_str();\n            SLOGI(\"Boot animation selected: %s\", f.c_str());\n            return true;"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/plugins/PluginsModule.kt": [
+    {
+      "old": "            val privilegedPlugins = context.resources.getStringArray(R.array.config_pluginAllowlist)",
+      "new": "            val privilegedPlugins = context.resources.getStringArray(R.array.config_pluginAllowlist) +\n                arrayOf(\n                    // Bundled clock providers must work in production and spoofed user builds.\n                    \"com.android.systemui.clocks.bignum\",\n                    \"com.android.systemui.clocks.calligraphy\",\n                    \"com.android.systemui.clocks.flex\",\n                    \"com.android.systemui.clocks.growth\",\n                    \"com.android.systemui.clocks.handwritten\",\n                    \"com.android.systemui.clocks.inflate\",\n                    \"com.android.systemui.clocks.metro\",\n                    \"com.android.systemui.clocks.numoverlap\",\n                    \"com.android.systemui.clocks.weather\",\n                )"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/brightness/ui/viewmodel/BrightnessSliderViewModel.kt": [
+    {
+      "old": "    suspend fun loadImage(@DrawableRes resId: Int, context: Context): Icon.Loaded? {\n        return withTimeoutOrNull(500L) {\n            imageLoader\n                .loadDrawable(\n                    android.graphics.drawable.Icon.createWithResource(context, resId),\n                    context = context,\n                    maxHeight = 200,\n                    maxWidth = 200,\n                )\n                ?.asIcon(null, resId)\n        }\n    }",
+      "new": "    suspend fun loadImage(@DrawableRes resId: Int, context: Context): Icon.Loaded? {\n        return withTimeoutOrNull(500L) {\n            // These are XML vector resources. ImageDecoder only accepts encoded images.\n            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {\n                context.getDrawable(resId)?.asIcon(null, resId)\n            }\n        }\n    }"
+    }
   ]
 }
