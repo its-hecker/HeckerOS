@@ -53,6 +53,17 @@ Lock-screen lyrics are off by default. After opt-in, SystemUI sends the playing 
 
 Theme assets are hash-verified before Soong. The picker uses preinstalled, platform-signed resource APKs and native overlay transactions; it does not download or sideload apps at runtime. Keep warning/no-internet/satellite/unknown battery states native when no matching themed state exists.
 
+SystemServer starts the theme engine before system-services-ready. Its
+activity-manager-ready callback loads the current user's saved choices and
+registers the settings observer before SystemUI starts. Applying or clearing a
+style then notifies the battery, Wi-Fi, signal and charging consumers immediately.
+Preparation rejects a late or duplicate service start and upgrades the earlier
+published late-start adapter without touching unrelated source edits.
+System icon packs also update Android's native theme category map, preserving
+font and color settings. ThemeOverlayController applies these RROs and keeps
+their selection when dynamic colors refresh or the device reboots; Default
+removes both Suite-selected icon-pack categories.
+
 ## Gaming mode
 
 The native hub follows the approved charcoal/cyan design: original procedural
@@ -61,12 +72,19 @@ Games declaring `CATEGORY_GAME` or `FLAG_IS_GAME` are detected automatically;
 untagged games can be added manually. Long-press a game card to remove it.
 Accent choices are cyan, violet, lime and amber, with edge positioning and opacity.
 
-Enable Gaming mode once in the hub. The user-enabled foreground service has an
-ongoing notification with a Turn off action. It restores after boot only if
-previously enabled. Native task-stack events discover games opened from any
-launcher. There is no idle polling; active sessions refresh status once a second.
-An inward swipe on the edge handle opens the dashboard. The floating counter can
-be moved by holding and dragging it.
+Adding a game or using Play in the hub enables Gaming mode and requests Android's
+overlay permission when needed. A Play request resumes after that permission is
+granted. The foreground service has an ongoing notification with a Turn off
+action and restores after boot only if previously enabled. Games opened from any
+launcher are discovered through native task-stack events. Each event permits a
+short, bounded retry window while the game becomes visible; a settled idle
+service does not poll, and active sessions refresh status once a second.
+
+The panel opens when a gaming session starts. Tapping outside collapses it and
+passes the touch to the game. A 48dp gamepad button remains on the selected left
+or right edge; tap or swipe it inward to reopen the panel. Restyling or rotation
+preserves whether the panel was open or collapsed. The optional floating counter
+can be moved by holding and dragging it.
 
 The dashboard includes:
 
@@ -153,9 +171,11 @@ Phone checks after flashing:
 7. Grant camera access, try both available IR sensors, save a photo, leave the
    viewer, and test Face Unlock immediately afterward. Also lock the screen while
    viewing IR, and test permission revocation and concurrent-camera handling.
-8. Enable Gaming mode, open a detected game from another launcher, and check the
-   edge handle, inward swipe, live FPS, graph, battery readings and Wi-Fi panel.
-   Add an untagged game, remove one, and verify the detection settings persist.
+8. Add an untagged game while Gaming mode is off, grant overlay access, and open
+   it from another launcher. Check automatic panel entry, outside-touch collapse,
+   gamepad-button reopening on either edge, live FPS, graph, battery readings and
+   Wi-Fi panel. Repeat slow launches, permission denial, rotation while collapsed,
+   leaving/re-entering a game, removal and reboot to check persisted choices.
 9. Add a chat/gallery shortcut; open it over a game, drag/resize/close the native
    window, and confirm the game remains underneath. Repeat with a shortcut
    protected by App Lock: authentication must run and gaming overlays must hide.

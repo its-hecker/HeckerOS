@@ -60,9 +60,10 @@ final class GamingOverlay {
         p.setTitle("Hecker Gaming");p.gravity=Gravity.RIGHT|Gravity.CENTER_VERTICAL;
         return p;
     }
-    void show(){
+    void show(){show(true);}
+    private void show(boolean expanded){
         if(visible)return;visible=true;
-        try{buildHandle();if(GamingPrefs.get(c).getBoolean("fps",true))buildHud();}
+        try{buildHandle();if(GamingPrefs.get(c).getBoolean("fps",true))buildHud();if(expanded)openPanel();}
         catch(RuntimeException e){hide();throw e;}
     }
     void hide(){
@@ -70,16 +71,19 @@ final class GamingOverlay {
     }
     void restyle(){
         boolean wasVisible=visible,wasOpen=open;List<GamingCatalog.App> oldPicker=picker;
-        hide();if(wasVisible){show();if(wasOpen){openPanel();if(oldPicker!=null)showShortcutPicker(oldPicker);}}
+        hide();if(wasVisible){show(wasOpen);if(wasOpen&&oldPicker!=null)showShortcutPicker(oldPicker);}
     }
     private void buildHandle(){
-        View v=new View(c);v.setBackground(GamingUi.background(c,GamingUi.accent(c),8,false));
+        FrameLayout v=new FrameLayout(c);v.setBackground(GamingUi.background(c,0xee101b25,16,true));
+        GamingUi.Icon icon=new GamingUi.Icon(c,"gamepad",GamingUi.accent(c));
+        icon.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        v.addView(icon,new FrameLayout.LayoutParams(dp(26),dp(26),Gravity.CENTER));
         v.setContentDescription(c.getString(R.string.gaming_open_dashboard));v.setFocusable(true);v.setOnClickListener(w->openPanel());
         v.setOnTouchListener(new View.OnTouchListener(){float down;
             public boolean onTouch(View view,MotionEvent e){if(e.getActionMasked()==MotionEvent.ACTION_DOWN){down=e.getRawX();return true;}
                 if(e.getActionMasked()==MotionEvent.ACTION_MOVE&&Math.abs(e.getRawX()-down)>dp(12)){openPanel();return true;}
                 if(e.getActionMasked()==MotionEvent.ACTION_UP){view.performClick();return true;}return true;}});
-        WindowManager.LayoutParams p=params(dp(10),dp(66),false);p.x=dp(7);
+        WindowManager.LayoutParams p=params(dp(48),dp(48),false);p.x=dp(4);
         if(GamingPrefs.get(c).getBoolean("left",false))p.gravity=Gravity.LEFT|Gravity.CENTER_VERTICAL;
         wm.addView(v,p);handle=v;
     }
@@ -108,11 +112,15 @@ final class GamingOverlay {
     }
     void openPanel(){
         if(!visible||open||captureHidden)return;open=true;picker=null;
-        LinearLayout shell=new LinearLayout(c){@Override public boolean dispatchKeyEvent(KeyEvent e){
+        LinearLayout shell=new LinearLayout(c){
+            @Override public boolean dispatchTouchEvent(MotionEvent event){
+                if(event.getActionMasked()==MotionEvent.ACTION_OUTSIDE){closePanel();return true;}
+                return super.dispatchTouchEvent(event);
+            }
+            @Override public boolean dispatchKeyEvent(KeyEvent e){
             if(e.getKeyCode()==KeyEvent.KEYCODE_BACK){if(e.getAction()==KeyEvent.ACTION_UP)closePanel();return true;}return super.dispatchKeyEvent(e);}};
         int alpha=Math.round(GamingPrefs.get(c).getInt("opacity",94)*2.55f);
         shell.setBackground(GamingUi.background(c,Color.argb(alpha,12,22,32),24,true));shell.setPadding(dp(7),dp(10),dp(10),dp(10));shell.setFocusableInTouchMode(true);
-        shell.setOnTouchListener((v,e)->{if(e.getActionMasked()==MotionEvent.ACTION_OUTSIDE){closePanel();return true;}return false;});
         LinearLayout rail=GamingUi.column(c);rail.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL);rail.setPadding(0,dp(4),dp(8),0);
         for(String pkg:GamingPrefs.shortcuts(c)){
             try{ImageView icon=new ImageView(c);icon.setImageDrawable(c.getPackageManager().getApplicationIcon(pkg));icon.setPadding(dp(6),dp(6),dp(6),dp(6));
@@ -126,7 +134,7 @@ final class GamingOverlay {
         Rect screen=wm.getMaximumWindowMetrics().getBounds();int width=Math.min(dp(410),screen.width()-dp(28));
         WindowManager.LayoutParams p=params(width,Math.max(dp(200),screen.height()-dp(32)),true);p.x=dp(12);
         if(GamingPrefs.get(c).getBoolean("left",false))p.gravity=Gravity.LEFT|Gravity.CENTER_VERTICAL;
-        try{wm.addView(shell,p);panel=shell;shell.requestFocus();if(hud!=null)hud.setVisibility(View.GONE);actions.panelChanged(true);}
+        try{wm.addView(shell,p);panel=shell;shell.requestFocus();if(handle!=null)handle.setVisibility(View.GONE);if(hud!=null)hud.setVisibility(View.GONE);actions.panelChanged(true);}
         catch(RuntimeException e){open=false;throw e;}
     }
     private View iconButton(String icon,int title,Runnable action){
@@ -175,6 +183,7 @@ final class GamingOverlay {
     }
     void closePanel(){
         boolean wasOpen=open;open=false;picker=null;remove(panel);panel=null;fpsText=null;tempText=null;batteryText=null;wifiText=null;chart=null;recordText=null;
+        if(handle!=null)handle.setVisibility(visible&&!captureHidden?View.VISIBLE:View.GONE);
         if(hud!=null&&!captureHidden)hud.setVisibility(View.VISIBLE);if(wasOpen)actions.panelChanged(false);
     }
     void update(String fps,String temperature,String battery,String wifi){

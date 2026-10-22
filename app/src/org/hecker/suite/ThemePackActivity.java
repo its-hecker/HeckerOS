@@ -3,16 +3,10 @@ package org.hecker.suite;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.om.OverlayIdentifier;
-import android.content.om.OverlayInfo;
-import android.content.om.OverlayManager;
-import android.content.om.OverlayManagerTransaction;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Process;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
@@ -24,12 +18,15 @@ import android.widget.Toast;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 /** Native Suite UI for the pinned Lunaris theme pack. No network or APK installer is used. */
 public final class ThemePackActivity extends Activity {
     private static final String KEY = "theme_engine_data";
+    private static final String NATIVE_KEY = "theme_customization_overlay_packages";
     private static final String[] CATEGORIES = {"signal_icons", "wifi_icons", "icon_packs", "battery_style", "charging_animation"};
     private static final String[] ENGINE = {"statusbar_signal", "statusbar_wifi", "system_icons", "battery_style", "charging_animation"};
     private JSONArray catalog;
@@ -108,29 +105,27 @@ public final class ThemePackActivity extends Activity {
             }
         }
     }
-    private JSONArray iconOverlays(JSONArray selected) throws Exception {
-        OverlayManager manager = getSystemService(OverlayManager.class);
-        if (manager == null) throw new IllegalStateException("Overlay manager unavailable");
-        UserHandle user = Process.myUserHandle();
-        OverlayManagerTransaction.Builder transaction = new OverlayManagerTransaction.Builder();
-        JSONArray previous = new JSONArray();
-        for (String target : new String[]{"android", "com.android.systemui"}) {
-            for (OverlayInfo info : manager.getOverlayInfosForTarget(target, user)) {
-                String type = info.getCategory();
-                if (type != null && type.startsWith("android.theme.customization.icon_pack.")) {
-                    if (info.isEnabled()) previous.put(new JSONObject().put("packageName", info.getPackageName()));
-                    transaction.setEnabled(new OverlayIdentifier(info.getPackageName()), false, user.getIdentifier());
-                }
-            }
+    private void iconOverlays(JSONArray selected, String previous) throws Exception {
+        JSONObject data = previous == null || previous.isEmpty() ? new JSONObject() : new JSONObject(previous);
+        Map<String, Object> current = new LinkedHashMap<>();
+        for (java.util.Iterator<String> keys = data.keys(); keys.hasNext();) {
+            String key = keys.next(); current.put(key, data.get(key));
         }
+        Map<String, String> overlays = new LinkedHashMap<>();
         if (selected != null) for (int n = 0; n < selected.length(); n++) {
-            transaction.setEnabled(new OverlayIdentifier(selected.getJSONObject(n).getString("packageName")), true, user.getIdentifier());
+            JSONObject overlay = selected.getJSONObject(n);
+            overlays.put(overlay.getString("componentId"), overlay.getString("packageName"));
         }
-        manager.commit(transaction.build());
-        return previous;
+        // ThemeOverlayController owns these RROs. Persist its native category map
+        // so wallpaper/dynamic-color refreshes and reboot keep the same choice.
+        String value = new JSONObject(NativeIconPackSelection.apply(current, overlays)).toString();
+        if (!Settings.Secure.putString(getContentResolver(), NATIVE_KEY, value)) {
+            throw new SecurityException("Could not persist native icon overlays");
+        }
     }
     private void apply(JSONObject theme) {
-        JSONArray previousIcons = null;
+        String previousIcons = null;
+        boolean iconsChanged = false;
         try {
             JSONObject data = config();
             JSONArray overlays = theme == null ? null : theme.getJSONArray("overlays");
@@ -139,8 +134,9 @@ public final class ThemePackActivity extends Activity {
             JSONObject categories = data.optJSONObject("categoryThemes"); if (categories == null) categories = new JSONObject();
             JSONObject styles = data.optJSONObject("selectedStyles"); if (styles == null) styles = new JSONObject();
             if (category == 2) {
-                // Original platform-signed Android/SystemUI RROs map resources by name on Android 17.
-                previousIcons = iconOverlays(overlays);
+                previousIcons = Settings.Secure.getString(getContentResolver(), NATIVE_KEY);
+                iconOverlays(overlays, previousIcons);
+                iconsChanged = true;
             } else {
                 String key = ENGINE[category];
                 if (theme == null) { themes.remove(key); categories.remove(key); }
@@ -155,7 +151,9 @@ public final class ThemePackActivity extends Activity {
             if (!Settings.Secure.putString(getContentResolver(), KEY, data.toString())) throw new SecurityException();
             show();
         } catch (Exception unavailable) {
-            if (previousIcons != null) try { iconOverlays(previousIcons); } catch (Exception ignored) { }
+            if (iconsChanged) try {
+                Settings.Secure.putString(getContentResolver(), NATIVE_KEY, previousIcons);
+            } catch (RuntimeException ignored) { }
             Toast.makeText(this, R.string.theme_failed, Toast.LENGTH_LONG).show();
         }
     }

@@ -98,7 +98,14 @@
   "frameworks/base/services/java/com/android/server/SystemServer.java": [
     {
       "old": "        mSystemServiceManager.sealStartedServices();",
-      "new": "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        mSystemServiceManager.sealStartedServices();"
+      "new": "        // Hecker theme engine starts before system-services-ready.\n        mSystemServiceManager.sealStartedServices();",
+      "previous": [
+        "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        mSystemServiceManager.sealStartedServices();"
+      ]
+    },
+    {
+      "old": "        t.traceBegin(\"StartBootPhaseSystemServicesReady\");",
+      "new": "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");"
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/ConfigurationControllerImpl.kt": [

@@ -6,7 +6,7 @@ import tempfile
 import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
-from customization_port import customization_plan
+from customization_port import customization_plan, SYSTEM_SERVER
 from prepare import replace_guarded
 
 class CustomizationPortTests(unittest.TestCase):
@@ -16,7 +16,13 @@ class CustomizationPortTests(unittest.TestCase):
         base.parent.mkdir(parents=True,exist_ok=True);base.write_text('// fixture')
         for relative,pairs in patches.items():
             path=folder/relative;path.parent.mkdir(parents=True,exist_ok=True)
-            path.write_text('\n// next anchor\n'.join(pair['old'] for pair in pairs))
+            if relative == SYSTEM_SERVER:
+                path.write_text(pairs[1]['old'] + '\n'
+                    '        mSystemServiceManager.startBootPhase(t, SystemService.PHASE_SYSTEM_SERVICES_READY);\n'
+                    '        mSystemServiceManager.startBootPhase(t, SystemService.PHASE_ACTIVITY_MANAGER_READY);\n'
+                    + pairs[0]['old'])
+            else:
+                path.write_text('\n// next anchor\n'.join(pair['old'] for pair in pairs))
     def write(self, changes):
         for path,source in changes.items():
             if source is None:path.unlink()
@@ -61,8 +67,12 @@ class CustomizationPortTests(unittest.TestCase):
                     if not pair.get('previous'):continue
                     path=folder/relative
                     self.assertEqual(1,path.read_text().count(pair['new']))
-                    path.write_text(path.read_text().replace(pair['new'],pair['previous'][0])
-                                    +'\n// unrelated maintainer edit\n')
+                    previous=path.read_text().replace(pair['new'],pair['previous'][0])
+                    if relative == SYSTEM_SERVER:
+                        # The published version had the late block instead of
+                        # the new early block, rather than two service starts.
+                        previous=previous.replace(pairs[1]['new'],pairs[1]['old'])
+                    path.write_text(previous+'\n// unrelated maintainer edit\n')
                     original[relative]+='\n// unrelated maintainer edit\n'.encode()
                     upgraded.append(path)
             self.assertGreaterEqual(len(upgraded),2)

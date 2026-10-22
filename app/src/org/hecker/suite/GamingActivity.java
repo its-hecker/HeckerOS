@@ -35,22 +35,27 @@ public final class GamingActivity extends Activity implements SharedPreferences.
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
     private LinearLayout page, library;
     private String tab="games";
+    private String pendingGame;
     private int generation;
     private boolean pendingEnable,visible;
 
     @Override public void onCreate(Bundle state){
-        super.onCreate(state); if(state!=null){tab=state.getString("tab","games");pendingEnable=state.getBoolean("pending_enable",false);}
+        super.onCreate(state); if(state!=null){tab=state.getString("tab","games");pendingEnable=state.getBoolean("pending_enable",false);pendingGame=state.getString("pending_game");}
         GamingPrefs.get(this).registerOnSharedPreferenceChangeListener(this);
         render();
     }
     @Override protected void onResume(){
         super.onResume();visible=true;
-        if(pendingEnable && Settings.canDrawOverlays(this)){pendingEnable=false;setEnabled(true);}
+        if(pendingEnable){
+            pendingEnable=false;String game=pendingGame;pendingGame=null;
+            if(Settings.canDrawOverlays(this)){setEnabled(true);if(game!=null){playGame(game);return;}}
+            else toast(R.string.gaming_overlay_access);
+        }
         render();
         if(GamingPrefs.enabled(this))GamingService.start(this);
     }
     @Override protected void onPause(){visible=false;super.onPause();}
-    @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putString("tab",tab);out.putBoolean("pending_enable",pendingEnable);}
+    @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putString("tab",tab);out.putBoolean("pending_enable",pendingEnable);out.putString("pending_game",pendingGame);}
     @Override protected void onDestroy(){
         generation++;GamingPrefs.get(this).unregisterOnSharedPreferenceChangeListener(this);worker.shutdownNow();super.onDestroy();
     }
@@ -107,13 +112,17 @@ public final class GamingActivity extends Activity implements SharedPreferences.
         Drawable icon=app.info.loadIcon(getPackageManager());card.addView(new GamingUi.Banner(this,icon,featured),new LinearLayout.LayoutParams(-1,GamingUi.dp(this,featured?148:104)));
         LinearLayout row=GamingUi.row(this);row.setPadding(GamingUi.dp(this,14),GamingUi.dp(this,12),GamingUi.dp(this,14),0);
         TextView label=GamingUi.text(this,app.label,featured?19:14,GamingUi.TEXT,true);label.setMaxLines(2);label.setEllipsize(android.text.TextUtils.TruncateAt.END);GamingUi.weighted(row,label);
-        TextView play=GamingUi.button(this,featured?getString(R.string.gaming_play):"▶",true,()->{
-            Intent launch=GamingCatalog.launch(this,app.info.packageName);
-            if(launch!=null)try{startActivity(launch);}catch(RuntimeException e){toast(R.string.gaming_launch_error);}
-        });play.setContentDescription(getString(R.string.gaming_play)+" "+app.label);row.addView(play);card.addView(row);
+        TextView play=GamingUi.button(this,featured?getString(R.string.gaming_play):"▶",true,()->playGame(app.info.packageName));play.setContentDescription(getString(R.string.gaming_play)+" "+app.label);row.addView(play);card.addView(row);
         card.setOnLongClickListener(v->{new AlertDialog.Builder(this).setTitle(app.label).setItems(new String[]{getString(R.string.gaming_remove)},(d,i)->GamingPrefs.include(this,app.info.packageName,false)).show();return true;});return card;
     }
     private interface Change{void set(boolean value);}
+    private void playGame(String packageName){
+        if(!Settings.canDrawOverlays(this)){pendingGame=packageName;setEnabled(true);return;}
+        if(!GamingPrefs.enabled(this))setEnabled(true);else GamingService.start(this);
+        Intent launch=GamingCatalog.launch(this,packageName);
+        if(launch!=null)try{startActivity(launch);}catch(RuntimeException e){toast(R.string.gaming_launch_error);}
+        else toast(R.string.gaming_launch_error);
+    }
     private void toggle(int label,int summary,boolean checked,Change change){
         LinearLayout card=GamingUi.card(this),row=GamingUi.row(this),copy=GamingUi.column(this);
         copy.addView(GamingUi.text(this,getString(label),16,GamingUi.TEXT,true));
@@ -165,7 +174,13 @@ public final class GamingActivity extends Activity implements SharedPreferences.
                     boolean selected=shortcuts?GamingPrefs.shortcuts(this).contains(app.info.packageName):GamingPolicy.isGame(app.info.packageName,tagged,GamingPrefs.get(this).getBoolean("automatic",true),GamingPrefs.added(this),GamingPrefs.excluded(this));
                     TextView row=GamingUi.button(this,(selected?"✓  ":"")+app.label,selected,()->{
                         if(shortcuts){if(!GamingPrefs.shortcuts(this).contains(app.info.packageName)&&GamingPrefs.shortcuts(this).size()>=5){toast(R.string.gaming_limit);return;}GamingPrefs.toggleShortcut(this,app.info.packageName);}
-                        else GamingPrefs.include(this,app.info.packageName,!selected);
+                        else {
+                            GamingPrefs.include(this,app.info.packageName,!selected);
+                            if(!selected&&!GamingPrefs.enabled(this)){
+                                if(!Settings.canDrawOverlays(this))dialog.dismiss();
+                                setEnabled(true);
+                            }
+                        }
                         fill[0].run();
                     });list.addView(row);GamingUi.gap(list,6);
                 }};fill[0].run();search.addTextChangedListener(new TextWatcher(){public void beforeTextChanged(CharSequence s,int st,int count,int after){}public void onTextChanged(CharSequence s,int st,int before,int count){fill[0].run();}public void afterTextChanged(Editable e){}});

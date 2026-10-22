@@ -21,6 +21,9 @@ java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     app/src/org/hecker/suite/GamingPolicy.java tests/GamingPolicyTest.java
 java -cp "$suite_test_output" org.hecker.suite.GamingPolicyTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    app/src/org/hecker/suite/NativeIconPackSelection.java tests/NativeIconPackSelectionTest.java
+java -cp "$suite_test_output" org.hecker.suite.NativeIconPackSelectionTest
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     framework/lyrics/LyricsPolicy.java tests/LyricsPolicyTest.java
 java -cp "$suite_test_output" com.android.systemui.hecker.LyricsPolicyTest
 

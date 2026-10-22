@@ -5,6 +5,15 @@ import hashlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+SYSTEM_SERVER = "frameworks/base/services/java/com/android/server/SystemServer.java"
+
+
+def verify_theme_service_startup(source):
+    start = "mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);"
+    phase = "mSystemServiceManager.startBootPhase(t, SystemService.PHASE_SYSTEM_SERVICES_READY);"
+    if source.count(start) != 1 or source.count(phase) != 1 or source.index(start) > source.index(phase):
+        raise ValueError("Theme engine must start exactly once before system-services-ready; "
+                         "a late start misses its settings observer boot phase")
 
 
 def customization_plan(rom, replace, revert=False):
@@ -23,6 +32,8 @@ def customization_plan(rom, replace, revert=False):
                     if previous in target and pair["new"] not in target:
                         target = replace(target, previous, pair["new"], str(path))
             target = replace(target, pair["old"], pair["new"], str(path), revert)
+        if not revert and relative == SYSTEM_SERVER:
+            verify_theme_service_startup(target)
         if target != current: changes[path] = target
     copies = json.loads((ROOT / "framework/customization-copies.json").read_text())
     history_file = ROOT / "framework/customization-copy-history.json"
