@@ -12,7 +12,8 @@
     "96e250b69d2ba3e6a4d353eea9cbe68cb891ddf9",
     "5d6499a4795cd344fd08b9a963f4838fb03755c6",
     "a8fbaeb05dc66c60ce51084d6fbfd144a443fee3",
-    "3597785e7cf6ee82b1955bae13f229b79fd1a877"
+    "3597785e7cf6ee82b1955bae13f229b79fd1a877",
+    "f4665d784b337119aba7878dd6078c27fb57b5c5"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerBattery.kt": [
     "006348861f13e89e4a0c1be873e91c8f8e8d50fc"
@@ -21,7 +22,8 @@
     "896bb6fead26af0fe224d311886fe736f11d2d03"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerThemeAssets.kt": [
-    "3c28bc60f5b84e5ad9625291968218c65467a780"
+    "3c28bc60f5b84e5ad9625291968218c65467a780",
+    "e83a340e15b476661004a985bfed94e5481f659b"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerChargingAnimation.kt": [
     "dd677705deee6dc099e9cb2e18f4004fbed80dbd"

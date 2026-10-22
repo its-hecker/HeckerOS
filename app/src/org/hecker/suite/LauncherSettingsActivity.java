@@ -56,7 +56,7 @@ public final class LauncherSettingsActivity extends Activity {
                     .setTitle(R.string.launcher_restart).setMessage(R.string.launcher_restart_confirm)
                     .setNegativeButton(R.string.cancel, null)
                     .setPositiveButton(R.string.launcher_restart, (dialog, which) -> {
-                        try { getSystemService(PowerManager.class).reboot(null); }
+                        try { controller.restart(() -> getSystemService(PowerManager.class).reboot(null)); }
                         catch (RuntimeException failure) {
                             Toast.makeText(this, R.string.launcher_restart_manual, Toast.LENGTH_LONG).show();
                         }

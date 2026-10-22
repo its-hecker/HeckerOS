@@ -6,7 +6,6 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Resources
-import android.content.res.ThemeEngine
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -22,7 +21,7 @@ object HeckerChargingAnimation {
     private val active = WeakHashMap<WindowManager, ChargingView>()
     @JvmStatic fun show(context: Context, manager: WindowManager, parameters: WindowManager.LayoutParams, level: Int): Boolean {
         val res = HeckerThemeAssets.resources(context, "charging_animation") ?: return false
-        val pkg = ThemeEngine.getInstance(context)?.getEnabledPackage("charging_animation") ?: return false
+        val pkg = HeckerThemeAssets.packageName(context, "charging_animation") ?: return false
         if (!ValueAnimator.areAnimatorsEnabled()) return true
         if (active.containsKey(manager)) return true
         return try {

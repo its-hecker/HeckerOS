@@ -149,8 +149,11 @@ public final class ThemePackActivity extends Activity {
             if (theme == null) styles.remove(CATEGORIES[category]); else styles.put(CATEGORIES[category], theme.getString("id"));
             data.put("themes", themes).put("categoryThemes", categories).put("selectedStyles", styles);
             if (!Settings.Secure.putString(getContentResolver(), KEY, data.toString())) throw new SecurityException();
+            android.util.Log.i("HeckerThemes", "Applied " + CATEGORIES[category] + ": "
+                    + (theme == null ? "default" : theme.optString("id")));
             show();
         } catch (Exception unavailable) {
+            android.util.Log.e("HeckerThemes", "Cannot apply " + CATEGORIES[category], unavailable);
             if (iconsChanged) try {
                 Settings.Secure.putString(getContentResolver(), NATIVE_KEY, previousIcons);
             } catch (RuntimeException ignored) { }

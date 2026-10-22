@@ -13,12 +13,12 @@
     <string name="launcher_selected">Selected</string>
     <string name="launcher_switching">Switching…</string>
     <string name="launcher_not_installed">Not installed</string>
-    <string name="launcher_switch_explanation">This changes your default home app. Restart your phone afterward to finish switching gesture navigation and Recents. Both launchers keep their own home-screen layouts.</string>
+    <string name="launcher_switch_explanation">This changes your default home app. Use Restart phone on this page to finish switching gesture navigation and Recents. Both launchers keep their own home-screen layouts.</string>
     <string name="launcher_restart_needed">Restart to finish switching</string>
-    <string name="launcher_restart_body">Your default home has changed. Restart so gesture navigation and Recents use the selected launcher.</string>
+    <string name="launcher_restart_body">Your default home has changed. Recents keeps the previous provider until you tap Restart phone below.</string>
     <string name="launcher_restart">Restart phone</string>
     <string name="launcher_restart_confirm">Restart now to finish switching launchers?</string>
-    <string name="launcher_restart_manual">Restart your phone from the power menu to finish.</string>
+    <string name="launcher_restart_manual">Couldn\'t restart. Try Restart phone again from this page.</string>
     <string name="launcher_switch_failed">Couldn\'t finish switching. Check the default home and try again.</string>
     <string name="launcher_build_missing">Launcher switching needs the complete Hecker experimental build.</string>
     <string name="launcher_owner_only">Switch the system gesture provider from the phone owner\'s profile.</string>

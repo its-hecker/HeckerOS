@@ -131,7 +131,11 @@ fun HeckerTileGrid(
                             }
                         }
                     }
-                    if (brightness != null) VerticalControl { brightness() }
+                    if (brightness != null) {
+                        androidx.compose.runtime.CompositionLocalProvider(LocalHeckerVerticalBrightness provides true) {
+                            VerticalControl { brightness() }
+                        }
+                    }
                     VerticalControl { HeckerVolumeSlider() }
                 }
             }
@@ -237,6 +241,9 @@ private fun VerticalControl(content: @Composable () -> Unit) {
         Box(Modifier.requiredSize(width = 200.dp, height = 62.dp).graphicsLayer { rotationZ = -90f }) { content() }
     }
 }
+
+/** Native overlay drawing does not retain this control's rotation. */
+val LocalHeckerVerticalBrightness = androidx.compose.runtime.staticCompositionLocalOf { false }
 
 /** Real media-stream volume, including fixed-volume and safe-volume framework policy. */
 @Composable

@@ -18,6 +18,10 @@ from compile_sdk import fetch
 
 ROOT = Path(__file__).resolve().parents[1]
 JAVA = {
+    'android/util/PathParser.java': '''package android.util;
+public class PathParser {
+ public static android.graphics.Path createPathFromPathData(String data) { return null; }
+}''',
     'android/content/res/ThemeEngine.java': '''package android.content.res;
 public final class ThemeEngine {
  public interface ThemeChangeListener { void onThemeChanged(String category); }
@@ -43,7 +47,7 @@ public final class Settings {
 }''',
     'android/os/UserHandle.java': '''package android.os;
 public final class UserHandle implements Parcelable {
- public static final int USER_ALL=-1;
+ public static final int USER_ALL=-1, USER_CURRENT=-2;
  public static final UserHandle ALL=null, SYSTEM=null;
  public static UserHandle of(int user) { return null; }
  public int describeContents() { return 0; }
@@ -74,6 +78,15 @@ public interface ActivityStarter { void postStartActivityDismissingKeyguard(andr
 ''',
 }
 KOTLIN = {
+    'BatteryModels.kt': '''package com.android.systemui.statusbar.pipeline.battery.shared.ui
+import androidx.compose.ui.graphics.Color
+sealed interface BatteryGlyph { data object Defend: BatteryGlyph; data object Question: BatteryGlyph; data object Plus: BatteryGlyph }
+class BatteryColors(val fill: Color)
+''',
+    'BatteryViewModel.kt': '''package com.android.systemui.statusbar.pipeline.battery.ui.viewmodel
+import com.android.systemui.statusbar.pipeline.battery.shared.ui.BatteryGlyph
+class BatteryViewModel(val level: Int?,val attribution: BatteryGlyph?,val isCharging: Boolean,val glyphList: List<BatteryGlyph>)
+''',
     'SceneKey.kt': '''package com.android.compose.animation.scene
 class ElementKey(val debugName: String)
 ''',
@@ -222,7 +235,13 @@ def main():
             '-d', out / 'classes-kotlin', *sorted((out / 'kotlin').glob('*.kt')),
             *sorted((ROOT / 'framework/qs').glob('*.kt')),
             ROOT / 'framework/themes/HeckerThemeAssets.kt',
-            ROOT / 'framework/themes/HeckerConnectivityIcons.kt')
+            ROOT / 'framework/themes/HeckerConnectivityIcons.kt',
+            ROOT / 'framework/themes/HeckerBattery.kt',
+            ROOT / 'framework/themes/HeckerChargingAnimation.kt',
+            ROOT / 'framework/themes/HeckerBatteryDrawable.java')
+        run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp',
+            os.pathsep.join([str(out / 'classes-kotlin'), classpath]),
+            '-d', out / 'classes', ROOT / 'framework/themes/HeckerBatteryDrawable.java')
     print('QS Kotlin/Java, Compose and drawable/string resource compilation: PASS')
     print('Full SystemUI Soong compilation and visual/device testing remain required.')
 

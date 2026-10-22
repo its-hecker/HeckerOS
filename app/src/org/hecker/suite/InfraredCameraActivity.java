@@ -90,6 +90,12 @@ public final class InfraredCameraActivity extends Activity {
         page.addView(status);
         page.addView(Ui.text(this, getString(R.string.ir_note), 14, false));
         LinearLayout buttons = new LinearLayout(this);
+        buttons.setOrientation(LinearLayout.HORIZONTAL);
+        buttons.setBaselineAligned(false);
+        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(-1, -2);
+        rowParams.topMargin = Ui.dp(this, 16);
+        rowParams.bottomMargin = Ui.dp(this, 12);
+        buttons.setLayoutParams(rowParams);
         next = Ui.button(this);
         next.setText(R.string.ir_switch);
         next.setEnabled(false);
@@ -99,17 +105,21 @@ public final class InfraredCameraActivity extends Activity {
             streamIndex = 0;
             openSensor();
         });
-        buttons.addView(next, new LinearLayout.LayoutParams(0, -2, 1));
+        LinearLayout.LayoutParams nextParams = new LinearLayout.LayoutParams(0, -2, 1);
+        nextParams.setMarginEnd(Ui.dp(this, 6));
+        buttons.addView(next, nextParams);
         save = Ui.button(this);
         save.setText(R.string.ir_save);
         save.setEnabled(false);
         save.setOnClickListener(v -> savePhoto());
-        buttons.addView(save, new LinearLayout.LayoutParams(0, -2, 1));
+        LinearLayout.LayoutParams saveParams = new LinearLayout.LayoutParams(0, -2, 1);
+        saveParams.setMarginStart(Ui.dp(this, 6));
+        buttons.addView(save, saveParams);
         page.addView(buttons);
         Button retry = Ui.button(this);
         retry.setText(R.string.ir_retry);
         retry.setOnClickListener(v -> startPreview());
-        page.addView(retry);
+        page.addView(retry, new LinearLayout.LayoutParams(-1, -2));
         Ui.scroll(this, page);
         registerReceiver(screenOff, new IntentFilter(Intent.ACTION_SCREEN_OFF), Context.RECEIVER_NOT_EXPORTED);
     }

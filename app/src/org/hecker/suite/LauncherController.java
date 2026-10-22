@@ -4,7 +4,6 @@ package org.hecker.suite;
 import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayManager;
 import android.content.pm.ApplicationInfo;
@@ -12,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Process;
 import android.os.UserHandle;
-import android.provider.Settings;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -24,19 +22,11 @@ final class LauncherController {
     private final Context context;
     private final RoleManager roles;
     private final OverlayManager overlays;
-    private final SharedPreferences prefs;
 
     LauncherController(Context context) {
         this.context = context.getApplicationContext();
         roles = context.getSystemService(RoleManager.class);
         overlays = context.getSystemService(OverlayManager.class);
-        prefs = context.getSharedPreferences("launcher_switch", 0);
-        if (primaryUser() && available()) {
-            int boot = Settings.Global.getInt(context.getContentResolver(), Settings.Global.BOOT_COUNT, -1);
-            if (!prefs.contains("boot") || prefs.getInt("boot", -2) != boot) {
-                prefs.edit().putInt("boot", boot).putBoolean("boot_hecker", heckerRecents()).commit();
-            }
-        }
     }
 
     static boolean primaryUser() { return Process.myUserHandle().equals(UserHandle.SYSTEM); }
@@ -78,35 +68,43 @@ final class LauncherController {
     }
 
     boolean restartNeeded() {
-        return available() && prefs.contains("boot_hecker")
-                && prefs.getBoolean("boot_hecker", false) != heckerRecents();
+        String home = current();
+        return available() && (HECKER.equals(home) || PIXEL.equals(home))
+                && HECKER.equals(home) != heckerRecents();
     }
 
     boolean matches(String packageName) {
-        return available() && HECKER.equals(packageName) == heckerRecents();
+        return packageName.equals(current());
     }
 
     void select(String packageName, Consumer<Boolean> result) {
         if (!primaryUser() || !available() || !installed(packageName)) { result.accept(false); return; }
-        boolean previous = heckerRecents();
         try {
-            // Runtime resources can update now, but PMS/ATMS/SystemUI load Recents at boot.
-            // Keep the previous provider until the user explicitly restarts their phone.
-            overlays.setEnabled(OVERLAY, HECKER.equals(packageName), UserHandle.SYSTEM);
+            // A HOME change must not replace framework resources under the running
+            // Recents processes. Apply that overlay only in the explicit restart action.
             roles.addRoleHolderAsUser(RoleManager.ROLE_HOME, packageName,
                     RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP, UserHandle.SYSTEM,
                     context.getMainExecutor(), success -> {
-                        boolean selected = success && packageName.equals(current());
-                        if (!selected) {
-                            try { overlays.setEnabled(OVERLAY, previous, UserHandle.SYSTEM); }
-                            catch (RuntimeException failure) { /* UI reports the actual state. */ }
-                        }
-                        result.accept(selected);
+                        result.accept(success && packageName.equals(current()));
                     });
         } catch (RuntimeException failure) {
-            try { overlays.setEnabled(OVERLAY, previous, UserHandle.SYSTEM); }
-            catch (RuntimeException ignored) { }
             result.accept(false);
+        }
+    }
+
+    void restart(Runnable reboot) {
+        String home = current();
+        if (!primaryUser() || !available() || !installed(home)) {
+            throw new IllegalStateException("Selected system launcher is unavailable");
+        }
+        boolean previous = heckerRecents();
+        try {
+            overlays.setEnabled(OVERLAY, HECKER.equals(home), UserHandle.SYSTEM);
+            reboot.run();
+        } catch (RuntimeException failure) {
+            try { overlays.setEnabled(OVERLAY, previous, UserHandle.SYSTEM); }
+            catch (RuntimeException rollback) { failure.addSuppressed(rollback); }
+            throw failure;
         }
     }
 }

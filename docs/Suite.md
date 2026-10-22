@@ -52,9 +52,21 @@ with Android 17's manifest-merger, then checks the private native UI, a Settings
 host and the standalone plugin against the pinned source. Source application,
 reapplication and exact reversion are checked as well.
 
-The Launcher page sets Android's native HOME role and offers an explicit restart when changing the signed Recents provider overlay. Double tap to sleep calls the native power API; it does not use device administrator locking. Pixel Launcher remains installed.
+The Launcher page sets Android's native HOME role without changing the running
+Recents provider. The signed Recents overlay changes only when the owner uses
+**Restart phone** on that page, immediately before requesting the reboot. If the
+reboot request fails, the controller restores the previous overlay. Selecting a
+Home app, cancelling a switch and a rejected role request leave the overlay
+untouched. Double tap to sleep calls the native power API; it does not use device
+administrator locking. Pixel Launcher remains installed.
 
-Lock-screen lyrics are off by default. After opt-in, SystemUI sends the playing song's artist/title to LRCLIB, matches the recording and synchronizes LRC timestamps with native playback position/speed. They follow lock-screen media visibility and stop on AOD. Suite itself has no Internet permission.
+Lock-screen lyrics are available directly from the Suite dashboard and from its
+Lock screen page, through the signature-protected router. Action-card labels
+leave taps and keyboard focus to the card. Lyrics are off by default. After
+opt-in, SystemUI sends the playing song's artist/title to LRCLIB, matches the
+recording and synchronizes LRC timestamps with native playback position/speed.
+They follow lock-screen media visibility and stop on AOD. Suite itself has no
+Internet permission.
 
 Theme assets are hash-verified before Soong. The picker uses preinstalled, platform-signed resource APKs and native overlay transactions; it does not download or sideload apps at runtime. Keep warning/no-internet/satellite/unknown battery states native when no matching themed state exists.
 
@@ -68,6 +80,13 @@ System icon packs also update Android's native theme category map, preserving
 font and color settings. ThemeOverlayController applies these RROs and keeps
 their selection when dynamic colors refresh or the device reboots; Default
 removes both Suite-selected icon-pack categories.
+
+SystemUI observes the saved theme data and user switches directly. A worker reads
+the active user's selection and publishes a cached snapshot; icon rendering does
+not wait on theme-service Binder calls. Changes invalidate both Compose icons and
+the legacy battery view, including Default reset. Wi-Fi/signal vectors use the
+current theme for attribute resolution. The picker logs successful choices and
+failures; missing resources are reported once per selection.
 
 The framework declares `android.intent.action.THEME_ENGINE_CHANGED` as a protected
 system broadcast. This fixes the repeated unprotected-broadcast warning observed
@@ -85,6 +104,12 @@ anchored during expansion in both scene-container and legacy Compose transitions
 The initial layout reads the saved setting before composition, and mascot bitmap
 decoding runs off the main thread. The face-feedback window is 160 by 36 dp; its
 32 dp pill uses smaller scan brackets and an unlock/check animation.
+
+Hecker's vertical brightness control keeps native brightness policy, gamma,
+falsing and drag events while suppressing the horizontal brightness mirror and
+overlay drawing during that control's drag. The reference panel retains native
+horizontal mirroring. Infrared camera actions have a 12 dp gap between equal-width
+buttons and a separate full-width Retry row, with spacing above and below.
 
 ## Gaming mode
 

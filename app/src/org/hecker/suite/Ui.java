@@ -109,8 +109,17 @@ final class Ui {
     static void actionCard(Activity activity, LinearLayout page, int title, int summary,
             View.OnClickListener action) {
         LinearLayout card = card(activity);
-        card.addView(text(activity, activity.getString(title), 22, true));
-        card.addView(text(activity, activity.getString(summary), 15, false));
+        TextView titleView = text(activity, activity.getString(title), 22, true);
+        TextView summaryView = text(activity, activity.getString(summary), 15, false);
+        // Theme-supplied TextView interaction must not consume the card's tap.
+        for (TextView label : new TextView[] { titleView, summaryView }) {
+            label.setClickable(false);
+            label.setLongClickable(false);
+            label.setFocusable(false);
+        }
+        card.addView(titleView);
+        card.addView(summaryView);
+        card.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         TypedValue selectable = new TypedValue();
         activity.getTheme().resolveAttribute(android.R.attr.selectableItemBackground,
                 selectable, true);

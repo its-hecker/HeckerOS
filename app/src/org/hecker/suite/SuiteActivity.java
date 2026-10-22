@@ -71,6 +71,7 @@ public final class SuiteActivity extends Activity {
                 tile(R.string.ir_title,R.string.ir_summary,R.drawable.ic_face_unlock,v->open("InfraredCameraActivity")));
         addRow(tile(R.string.sandbox_title,R.string.sandbox_summary,R.drawable.ic_sandbox,v->open("SandboxActivity")),
                 tile(R.string.headphones_title,R.string.headphones_summary,R.drawable.ic_headphones,v->open("HeadphonesActivity")));
+        Ui.actionCard(this,content,R.string.lyrics_title,R.string.lyrics_summary,v->open("LyricsSettingsActivity"));
         LinearLayout integrity=Ui.card(this);
         integrity.addView(Ui.text(this,getString(R.string.integrity_title),17,true));
         integrity.addView(Ui.text(this,getString(R.string.integrity_summary),12,false));

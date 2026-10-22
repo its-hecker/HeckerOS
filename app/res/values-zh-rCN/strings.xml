@@ -144,12 +144,12 @@
     <string name="launcher_selected">已选择</string>
     <string name="launcher_switching">正在切换…</string>
     <string name="launcher_not_installed">未安装</string>
-    <string name="launcher_switch_explanation">这将更改默认主屏幕应用。请随后重启设备，完成手势导航和最近任务界面的切换。两个启动器会分别保留各自的主屏幕布局。</string>
+    <string name="launcher_switch_explanation">这将更改默认主屏幕应用。请使用本页的“重启设备”按钮完成手势导航和最近任务界面的切换。两个启动器会分别保留各自的主屏幕布局。</string>
     <string name="launcher_restart_needed">重启以完成切换</string>
-    <string name="launcher_restart_body">默认主屏幕已更改。请重启，让手势导航和最近任务界面使用所选启动器。</string>
+    <string name="launcher_restart_body">默认主屏幕已更改。在点击下方的“重启设备”之前，最近任务界面会继续使用原来的提供程序。</string>
     <string name="launcher_restart">重启设备</string>
     <string name="launcher_restart_confirm">立即重启以完成启动器切换？</string>
-    <string name="launcher_restart_manual">请通过电源菜单重启设备以完成切换。</string>
+    <string name="launcher_restart_manual">无法重启。请在本页再次点击“重启设备”。</string>
     <string name="launcher_switch_failed">未能完成切换。请检查默认主屏幕后重试。</string>
     <string name="launcher_build_missing">切换启动器需要完整的 HeckerOS 版本。</string>
     <string name="launcher_owner_only">请从设备所有者的用户空间切换系统手势提供方。</string>
