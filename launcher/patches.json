@@ -95,6 +95,10 @@
     {
       "old": "    <uses-permission android:name=\"android.permission.INJECT_EVENTS\" />",
       "new": "    <uses-permission android:name=\"android.permission.INJECT_EVENTS\" />\n    <uses-permission android:name=\"android.permission.DEVICE_POWER\" />"
+    },
+    {
+      "old": "    <uses-permission android:name=\"android.permission.SUSPEND_APPS\" />",
+      "new": "    <uses-permission android:name=\"android.permission.SUSPEND_APPS\" />\n    <!-- Persist the launcher's recent-task lock setting through the native provider. -->\n    <uses-permission android:name=\"android.permission.WRITE_SETTINGS\" />"
     }
   ],
   "res/xml/launcher_preferences.xml": [
@@ -143,6 +147,34 @@
     {
       "old": "/*\n * Copyright 2025-2026 AxionOS\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\npackage com.android.quickstep.util\n\nimport android.app.AxSandboxManager\nimport android.content.Context\nimport android.database.ContentObserver\nimport android.provider.Settings\nimport android.util.Log\nimport com.android.internal.app.IAppLockStateListener\nimport com.android.launcher3.concurrent.annotations.Ui\nimport com.android.launcher3.dagger.ApplicationContext\nimport com.android.launcher3.dagger.LauncherAppSingleton\nimport com.android.launcher3.util.DaggerSingletonTracker\nimport com.android.launcher3.util.LooperExecutor\nimport java.lang.Runnable\nimport java.util.concurrent.ConcurrentHashMap\nimport java.util.concurrent.CopyOnWriteArrayList\nimport javax.inject.Inject\n\n/**\n * Caches per-package app lock state from [AxSandboxManager] and notifies listeners (on the UI\n * thread) whenever it may have changed.\n */\n@LauncherAppSingleton\nclass AxSandboxState\n@Inject\nconstructor(\n    @ApplicationContext private val context: Context,\n    @Ui private val uiExecutor: LooperExecutor,\n    lifecycle: DaggerSingletonTracker,\n) {\n    private val sandboxManager: AxSandboxManager? =\n        context.getSystemService(AxSandboxManager::class.java)\n    private val lockCache = ConcurrentHashMap<String, Boolean>()\n    private val listeners = CopyOnWriteArrayList<Runnable>()\n\n    private val lockStateListener =\n        object : IAppLockStateListener.Stub() {\n            override fun onAppLockStateChanged(packageName: String, locked: Boolean) {\n                if (packageName.isBlank()) return\n                // Only notify on a real change; every dispatch invalidates the recents list.\n                if (lockCache.put(packageName, locked) != locked) {\n                    dispatchChanged()\n                }\n            }\n        }\n\n    private val configObserver =\n        object : ContentObserver(null) {\n            override fun onChange(selfChange: Boolean) {\n                lockCache.clear()\n                dispatchChanged()\n            }\n        }\n\n    init {\n        registerLockListener()\n        context.contentResolver.registerContentObserver(\n            Settings.Secure.getUriFor(AxSandboxManager.SETTING_SANDBOX_CONFIG),\n            false,\n            configObserver,\n        )\n        lifecycle.addCloseable {\n            unregisterLockListener()\n            context.contentResolver.unregisterContentObserver(configObserver)\n        }\n    }\n\n    fun addChangeListener(listener: Runnable) {\n        listeners.addIfAbsent(listener)\n    }\n\n    fun removeChangeListener(listener: Runnable) {\n        listeners.remove(listener)\n    }\n\n    /** May be called from any thread; the first lookup per package is a binder call. */\n    fun hasAppLock(packageName: String?, userId: Int): Boolean {\n        if (packageName.isNullOrBlank()) return false\n        val cacheKey = \"$packageName:$userId\"\n        lockCache[cacheKey]?.let { return it }\n        val hasLock = getHasAppLock(packageName, userId)\n        lockCache[cacheKey] = hasLock\n        return hasLock\n    }\n\n    private fun registerLockListener() {\n        val manager = sandboxManager ?: return\n        try {\n            manager.registerAppLockStateListener(lockStateListener)\n        } catch (e: RuntimeException) {\n            Log.w(TAG, \"registerLockListener failed\", e)\n        }\n    }\n\n    private fun unregisterLockListener() {\n        val manager = sandboxManager ?: return\n        try {\n            manager.unregisterAppLockStateListener(lockStateListener)\n        } catch (e: RuntimeException) {\n            Log.w(TAG, \"unregisterLockListener failed\", e)\n        }\n    }\n\n    private fun getHasAppLock(packageName: String, userId: Int): Boolean {\n        val manager = sandboxManager ?: return false\n        return try {\n            manager.getAppLockState(packageName, userId).hasAppLock()\n        } catch (e: RuntimeException) {\n            Log.w(TAG, \"getHasAppLock failed\", e)\n            false\n        }\n    }\n\n    private fun dispatchChanged() {\n        if (listeners.isEmpty()) return\n        uiExecutor.execute { listeners.forEach { it.run() } }\n    }\n\n    private companion object {\n        const val TAG = \"AxSandboxState\"\n    }\n}\n",
       "new": "/*\n * Copyright 2025-2026 AxionOS\n * Copyright (C) 2026 HeckerOS\n * SPDX-License-Identifier: Apache-2.0\n */\npackage com.android.quickstep.util\n\nimport android.content.Context\nimport com.android.launcher3.concurrent.annotations.Ui\nimport com.android.launcher3.dagger.ApplicationContext\nimport com.android.launcher3.dagger.LauncherAppSingleton\nimport com.android.launcher3.hecker.HeckerAppLockState\nimport com.android.launcher3.util.DaggerSingletonTracker\nimport com.android.launcher3.util.LooperExecutor\nimport javax.inject.Inject\n\n/** Keeps the existing recents injection contract on Android 17's native App Lock. */\n@LauncherAppSingleton\nclass AxSandboxState\n@Inject\nconstructor(\n    @ApplicationContext context: Context,\n    @Ui uiExecutor: LooperExecutor,\n    lifecycle: DaggerSingletonTracker,\n) : HeckerAppLockState(context, uiExecutor) {\n    init {\n        lifecycle.addCloseable { close() }\n    }\n}\n"
+    }
+  ],
+  "src/com/android/launcher3/data/AppDatabase.kt": [
+    {
+      "old": "import com.android.launcher3.util.override.MainThreadInitializedObject",
+      "new": "import com.android.launcher3.hecker.HeckerMainThreadObject"
+    },
+    {
+      "old": "        val INSTANCE = MainThreadInitializedObject { context ->",
+      "new": "        val INSTANCE = HeckerMainThreadObject<AppDatabase> { context: Context ->"
+    }
+  ],
+  "quickstep/src/com/android/quickstep/LockedTaskManager.kt": [
+    {
+      "old": "Settings.System.getUriFor(Settings.System.RECENTS_LOCKED_TASKS)",
+      "new": "Settings.System.getUriFor(RECENTS_LOCKED_TASKS)"
+    },
+    {
+      "old": "        Settings.System.putStringForUser(\n            contentResolver,\n            Settings.System.RECENTS_LOCKED_TASKS,",
+      "new": "        Settings.System.putStringForUser(\n            contentResolver,\n            RECENTS_LOCKED_TASKS,"
+    },
+    {
+      "old": "        Settings.System.getStringForUser(\n                contentResolver,\n                Settings.System.RECENTS_LOCKED_TASKS,",
+      "new": "        Settings.System.getStringForUser(\n                contentResolver,\n                RECENTS_LOCKED_TASKS,"
+    },
+    {
+      "old": "        private const val SEPARATOR = \",\"",
+      "new": "        private const val SEPARATOR = \",\"\n        // Keep the upstream storage key without requiring a custom framework constant.\n        private const val RECENTS_LOCKED_TASKS = \"recents_locked_tasks\""
     }
   ]
 }

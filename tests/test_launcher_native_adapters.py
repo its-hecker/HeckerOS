@@ -98,6 +98,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.launcher3.graphics.DrawableFactory;
 import com.android.launcher3.hecker.HeckerAppLockState;
 import com.android.launcher3.hecker.HeckerDrawableFactoryProvider;
+import com.android.launcher3.hecker.HeckerMainThreadObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -118,6 +119,14 @@ public class LauncherNativeAdapterTest {
             check(Looper.myLooper() == Looper.getMainLooper(), "Factory must be created on main thread");
             receivedContext = context; count++;
         }
+    }
+    static final class Database {
+        final Context app;
+        Database(Context context) {
+            check(Looper.myLooper() == Looper.getMainLooper(), "Database must initialize on main thread");
+            app = context;
+        }
+        String wallpaperDao() { return "typed-wallpaper-dao"; }
     }
     static final class Packages extends PackageManager {
         final Map<String, Boolean> states = new HashMap<>();
@@ -172,6 +181,29 @@ public class LauncherNativeAdapterTest {
                         "Bad overrides must fall back to the stock factory");
             }
 
+            AtomicInteger databaseCreations = new AtomicInteger();
+            var database = new HeckerMainThreadObject<Database>(context -> {
+                databaseCreations.incrementAndGet(); return new Database(context);
+            });
+            var databases = new ArrayList<Future<Database>>();
+            for (int i = 0; i < 16; i++) databases.add(workers.submit(() -> database.get(activity)));
+            Database room = databases.get(0).get(5, TimeUnit.SECONDS);
+            for (var result : databases) check(result.get() == room, "Database must be shared");
+            check(databaseCreations.get() == 1, "Concurrent calls created more than one database");
+            check(room.app == app, "Database must retain application context only");
+            check(room.wallpaperDao().equals("typed-wallpaper-dao"), "Generic database type was lost");
+            AtomicInteger attempts = new AtomicInteger();
+            var retried = new HeckerMainThreadObject<Object>(context -> {
+                if (attempts.getAndIncrement() == 0) throw new IllegalStateException("Try again");
+                return new Object();
+            });
+            try {
+                retried.get(activity);
+                throw new AssertionError("Initialization failure should propagate");
+            } catch (IllegalStateException expected) { }
+            check(retried.get(activity) != null && attempts.get() == 2,
+                    "Failed initialization must remain retryable");
+
             TestContext root = new TestContext(), owner = new TestContext(), other = new TestContext();
             root.users.put(0, owner); root.users.put(10, other);
             owner.packages.states.put("example.app", false);
@@ -216,6 +248,7 @@ public class LauncherNativeAdapterTest {
             int before = updates.get(); monitor.onPackageModified("example.app");
             check(updates.get() == before, "Removed listener was still notified");
             state.close(); check(!monitor.registered, "Package callbacks must unregister on shutdown");
+            System.out.println("Database singleton and typed DAO: PASS");
             System.out.println("Icon packs, main-thread singleton, user-specific App Lock, updates, privacy and cache race: PASS");
         } finally {
             workers.shutdownNow();
@@ -240,7 +273,8 @@ class LauncherNativeAdapterTests(unittest.TestCase):
             program.write_text(PROGRAM)
             paths.append(str(program))
             paths += [str(ROOT / 'launcher/src' / name) for name in
-                      ('HeckerDrawableFactoryProvider.java', 'HeckerAppLockState.java')]
+                      ('HeckerDrawableFactoryProvider.java', 'HeckerAppLockState.java',
+                       'HeckerMainThreadObject.java')]
             output = folder / 'classes'
             compiled = subprocess.run(['java', '-m', 'jdk.compiler/com.sun.tools.javac.Main',
                 '-d', str(output), *paths], capture_output=True, text=True, timeout=30)
@@ -248,6 +282,7 @@ class LauncherNativeAdapterTests(unittest.TestCase):
             result = subprocess.run(['java', '-cp', str(output), 'LauncherNativeAdapterTest'],
                                     capture_output=True, text=True, timeout=30)
             self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+            self.assertIn('Database singleton and typed DAO: PASS', result.stdout)
             self.assertIn('cache race: PASS', result.stdout)
 
 
