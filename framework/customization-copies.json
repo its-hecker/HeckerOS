@@ -79,5 +79,6 @@
   "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_smartthings.xml": "framework/qs/icons/hecker_qs_smartthings.xml",
   "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_speaker.xml": "framework/qs/icons/hecker_qs_speaker.xml",
   "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_sun.xml": "framework/qs/icons/hecker_qs_sun.xml",
-  "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_wifi.xml": "framework/qs/icons/hecker_qs_wifi.xml"
+  "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_wifi.xml": "framework/qs/icons/hecker_qs_wifi.xml",
+  "packages/apps/Settings/res/drawable/hecker_caracal_mark.xml": "settings/res/drawable/hecker_caracal_mark.xml"
 }

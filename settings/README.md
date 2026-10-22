@@ -53,13 +53,19 @@ name editing, identifiers, legal/regulatory information, search and the build-nu
 developer-options flow keep their native controllers, including the partial
 Catalyst hierarchy. The new card uses the same light/dark Hecker palette.
 
-The compact phone illustration is a native animated view, with no downloaded
-assets. It stops when hidden, detached or the page stops and respects the system
+The square caracal emblem uses a native vector with tall ear tufts, sunglasses
+and a soft accent halo, replacing the tall phone outline and letter H. The mark
+uses the light/dark Settings palette and a small, bounded orbit/bob animation.
+It stops when hidden, detached or the page stops and respects the system
 animator setting. Model, codename, Android, processor, kernel, maintainer and ROM
 version come from this build. RAM and data-partition usage are queried off the UI
 thread; the battery value follows the battery broadcast only while the page is
 started. Unknown values are displayed as unavailable. Data storage means the
 data filesystem, not an invented retail storage capacity.
+
+Artwork preview in dark and light mode (vector rendering, not a device screenshot):
+
+![Caracal emblem artwork preview](../docs/previews/about-phone-logo.png)
 
 The Official badge and Suite About page both read `ro.heckeros.build_type`.
 Coral sets its release identity before inheriting platform configuration. The

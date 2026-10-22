@@ -67,7 +67,7 @@ def main():
     assert {node.get("name") for node in allowlist.findall(".//permission")} == {
         "android.permission.SYSTEM_CAMERA", "android.permission.ACCESS_FPS_COUNTER",
         "android.permission.REAL_GET_TASKS", "android.permission.START_ACTIVITIES_FROM_BACKGROUND",
-        "android.permission.KILL_ALL_BACKGROUND_PROCESSES",
+        "android.permission.KILL_ALL_BACKGROUND_PROCESSES", "android.permission.FORCE_STOP_PACKAGES",
         "android.permission.CHANGE_OVERLAY_PACKAGES", "android.permission.REBOOT",
         "android.permission.WRITE_SECURE_SETTINGS"}
     freeform = ET.parse(ROOT / "configs/hecker-suite-freeform.xml").getroot()

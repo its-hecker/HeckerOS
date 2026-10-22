@@ -103,6 +103,7 @@ def main():
         for name in ("values/hecker_about.xml", "values/hecker_strings.xml",
                      "values/hecker_colors.xml", "values-night/hecker_colors.xml",
                      "drawable/hecker_about_badge.xml", "drawable/hecker_card_background.xml",
+                     "drawable/hecker_caracal_mark.xml",
                      "layout/hecker_about_phone.xml"):
             target = output / "res" / name
             target.parent.mkdir(parents=True, exist_ok=True)

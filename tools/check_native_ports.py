@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 from customization_port import customization_plan
 from launcher_port import launcher_plan
 from prepare import replace_guarded
+from privapp_permissions import check_privapp_permissions
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -87,6 +88,7 @@ def main():
     sources['packages/apps/Launcher3'] = launcher
     paths = set(json.loads((ROOT / 'framework/customization-patches.json').read_text()))
     paths.add('frameworks/base/core/java/android/content/res/Resources.java')
+    paths.add('frameworks/base/core/res/AndroidManifest.xml')
     paths.update('packages/apps/Launcher3/' + p for p in json.loads((ROOT / 'launcher/patches.json').read_text()))
     def cached_source(relative):
         project = max((p for p in sources if relative.startswith(p + '/')), key=len)
@@ -124,6 +126,8 @@ def main():
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(cached_source(relative), target)
         before = snapshot(folder)
+        required = check_privapp_permissions(folder / 'frameworks/base/core/res/AndroidManifest.xml', ROOT)
+        print(f'Suite allowlist covers {len(required)} privileged permissions in the pinned Android framework')
         plans = (customization_plan, launcher_plan)
         count = 0
         for plan in plans:
