@@ -4,4 +4,17 @@
     <string name="hecker_brand">HeckerOS</string>
     <string name="hecker_brand_tagline">Make it yours</string>
     <string name="hecker_edit_tiles">Edit tiles</string>
+    <string name="hecker_qs_dark">Dark mode</string>
+    <string name="hecker_qs_mute">Mute media</string>
+    <string name="hecker_qs_unmute">Unmute media</string>
+    <string name="hecker_qs_play_last">Play last song</string>
+    <string name="hecker_qs_media_output">Media output</string>
+    <string name="hecker_qs_smart_view">Smart View</string>
+    <string name="hecker_qs_mirror_screen">Mirror screen</string>
+    <string name="hecker_qs_modes">Modes</string>
+    <string name="hecker_qs_nearby">Nearby devices</string>
+    <string name="hecker_qs_smartthings">SmartThings</string>
+    <string name="hecker_qs_device_control">Device control</string>
+    <string name="hecker_qs_play">Play</string>
+    <string name="hecker_qs_pause">Pause</string>
 </resources>

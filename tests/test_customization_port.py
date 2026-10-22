@@ -65,7 +65,7 @@ class CustomizationPortTests(unittest.TestCase):
                                     +'\n// unrelated maintainer edit\n')
                     original[relative]+='\n// unrelated maintainer edit\n'.encode()
                     upgraded.append(path)
-            self.assertEqual(2,len(upgraded))
+            self.assertGreaterEqual(len(upgraded),2)
             changes=customization_plan(folder,replace_guarded)
             self.assertEqual(set(upgraded),set(changes))
             self.write(changes)

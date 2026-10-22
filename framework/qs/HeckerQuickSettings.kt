@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  * Hecker's reference layout, backed by the native Android 17 QSTile models.
  */
-@file:OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@file:OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.material3.ExperimentalMaterial3Api::class)
 package com.android.systemui.hecker
 
 import android.app.ActivityManager
@@ -87,6 +88,10 @@ fun HeckerTileGrid(
     brightness: (@Composable () -> Unit)? = null,
     includeFooter: Boolean = true,
 ) {
+    if (compact && !heckerCustomizedLayout()) {
+        HeckerReferenceCompact(tiles, listening, modifier)
+        return
+    }
     TileListener(tiles, listening)
     val columns = if (LocalConfiguration.current.fontScale >= 1.4f) 3 else 4
     val customized = !compact && heckerCustomizedLayout()
@@ -304,24 +309,25 @@ private fun HeckerBrandCard(tile: TileViewModel, modifier: Modifier = Modifier) 
 fun HeckerHeaderActions(viewModel: com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel, edit: () -> Unit) {
     val context = LocalContext.current
     val settings by viewModel.settings.collectAsState(initial = null)
+    val reference = !heckerCustomizedLayout()
+    val tint = if (reference) android.graphics.Color.WHITE else MaterialThemeColor.primaryText(context)
     Row(verticalAlignment = Alignment.CenterVertically) {
-        androidx.compose.material3.IconButton(onClick = edit) {
-            AndroidView(factory = { ImageView(it).apply { setImageResource(android.R.drawable.ic_menu_edit) } },
+        androidx.compose.material3.IconButton(onClick = edit, modifier = Modifier.size(36.dp)) {
+            AndroidView(factory = { ImageView(it) },
                 modifier = Modifier.size(22.dp), update = {
+                    it.setImageResource(com.android.systemui.res.R.drawable.hecker_qs_edit)
                     it.contentDescription = context.getString(com.android.systemui.res.R.string.hecker_edit_tiles)
-                    it.setColorFilter(MaterialThemeColor.primaryText(context))
+                    it.setColorFilter(tint)
                 })
         }
-        listOfNotNull(viewModel.power, settings).forEach { model ->
+        listOfNotNull(viewModel.power?.let { it to com.android.systemui.res.R.drawable.hecker_qs_power },
+            settings?.let { it to com.android.systemui.res.R.drawable.hecker_qs_settings }).forEach { (model, resource) ->
             com.android.compose.animation.Expandable(color = Color.Transparent, shape = CircleShape,
-                onClick = model.onClick, modifier = Modifier.size(42.dp), useModifierBasedImplementation = true) {
-                AndroidView(factory = { ImageView(it) }, modifier = Modifier.padding(9.dp).size(22.dp), update = { view ->
+                onClick = model.onClick, modifier = Modifier.size(36.dp), useModifierBasedImplementation = true) {
+                AndroidView(factory = { ImageView(it) }, modifier = Modifier.padding(7.dp).size(22.dp), update = { view ->
                     val icon = model.icon
-                    view.setImageDrawable(when (icon) {
-                        is com.android.systemui.common.shared.model.Icon.Loaded -> icon.drawable.mutate()
-                        is com.android.systemui.common.shared.model.Icon.Resource -> context.getDrawable(icon.resId)?.mutate()
-                    })
-                    view.setColorFilter(MaterialThemeColor.primaryText(context))
+                    view.setImageResource(resource)
+                    view.setColorFilter(tint)
                     view.contentDescription = when (val description = icon.contentDescription) {
                         is com.android.systemui.common.shared.model.ContentDescription.Loaded -> description.description
                         is com.android.systemui.common.shared.model.ContentDescription.Resource -> context.getString(description.res)

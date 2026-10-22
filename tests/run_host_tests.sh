@@ -34,3 +34,7 @@ java -cp "$suite_test_output" com.android.internal.hecker.HeckerSandboxRulesTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     framework/faceisland/FaceIslandState.java tests/FaceIslandStateTest.java
 java -cp "$suite_test_output" com.android.systemui.hecker.FaceIslandStateTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/qs/HeckerQsTileOrder.java tests/HeckerQsTileOrderTest.java
+java -cp "$suite_test_output" com.android.systemui.hecker.HeckerQsTileOrderTest

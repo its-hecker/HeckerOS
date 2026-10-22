@@ -10,7 +10,8 @@
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQuickSettings.kt": [
     "96e250b69d2ba3e6a4d353eea9cbe68cb891ddf9",
-    "5d6499a4795cd344fd08b9a963f4838fb03755c6"
+    "5d6499a4795cd344fd08b9a963f4838fb03755c6",
+    "a8fbaeb05dc66c60ce51084d6fbfd144a443fee3"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerBattery.kt": [
     "006348861f13e89e4a0c1be873e91c8f8e8d50fc"

@@ -6,10 +6,32 @@ Suite, Settings and Motion Sense pages have Simplified Chinese resources; native
 Android pages keep their existing translations. Theme names and author credits
 remain upstream names.
 
-Quick Settings uses separate large connectivity cards, a circular tile tray,
-a brightness/volume card and footer shortcuts. Tile models, authentication,
-listening, accessibility, editing and long presses remain native Android 17.
-The optional Hecker dashboard layout remains available.
+The default Quick Settings scene follows the supplied reference: a two-row white
+header, paired Wi-Fi/Bluetooth cards, an eight-button circular tile tray, separate
+brightness and media-volume pills, a compact playback/output strip and four
+rounded footer cards. Original vector glyphs replace the reference panel's tile,
+header and shortcut icons. The panel uses translucent glass over Android's real
+window blur, enabled by the native notification-shade flag, a 48dp maximum blur
+radius and SurfaceFlinger support. Native battery-saver, thermal and blur-support
+gates still apply; an opaque dark background keeps the controls legible when
+blur is unavailable. The wallpaper supplies the colors visible through the glass.
+
+On first upgrade, each user's tile list gets the reference's initial order while
+retaining their other selected tiles. Subsequent edits keep the native editor's
+order; additional tiles remain reachable by paging. Connectivity icon taps toggle
+the radio, card taps open the native dialog, and long presses use native settings.
+The brightness track retains Android's gamma, policy, falsing and haptic handling.
+Media uses the active user's real sessions, native transport controls and the
+native output chooser. Security, active-app and user-switcher disclosures remain
+visible. The optional Hecker dashboard layout remains available after migration.
+
+Smart View opens Android screen casting, Modes opens Do Not Disturb settings,
+and Nearby devices opens Bluetooth settings. Device control uses Android's
+native controls tile, with an installed SmartThings app as an optional fallback.
+Samsung's proprietary services are not bundled. The reference's phone/laptop
+glyph represents Android's hotspot tile. Visual fidelity, scrolling with large
+fonts, blur performance and all tile/media actions still require a built ROM
+and comparison on Coral; the source checks cannot certify an exact screen match.
 
 ## Headphones
 
@@ -87,4 +109,6 @@ permission XML files. Face-island tests exercise callback ordering, duplicate
 results, per-user sessions, strong-auth restrictions, sleep and feature disable.
 After building, test the island with both immediate unlock and swipe-to-unlock,
 then recheck face enrollment, Motion Sense, camera, headphone profiles and native
-QS editing/brightness/volume on Coral.
+QS editing/brightness/volume on Coral. The dedicated QS check compiles
+the Kotlin/Java adapters with locked Compose dependencies and links all glyphs
+and English/Chinese strings; reviewed facades cover the native SystemUI APIs.

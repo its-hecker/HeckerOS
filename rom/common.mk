@@ -15,3 +15,5 @@ $(call inherit-product, vendor/hecker/floral/suite/themes/themes.mk)
 PRODUCT_SOURCE_ROOT_DIRS += -packages/services/OmniJaws
 PRODUCT_PACKAGES := $(filter-out OmniJaws,$(PRODUCT_PACKAGES))
 PRODUCT_PACKAGES += HeckerSystemUIOverlay
+# Native window blur still observes SurfaceFlinger, thermal and power-saver capability gates.
+PRODUCT_SYSTEM_PROPERTIES += ro.surface_flinger.supports_background_blur?=1
