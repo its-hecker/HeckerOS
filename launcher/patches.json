@@ -14,7 +14,14 @@
     },
     {
       "old": "    resource_dirs: [\"quickstep/res\"],",
-      "new": "    resource_dirs: [\"generated/hecker-suite/res\", \"quickstep/res\"],"
+      "new": "    // Hecker resources compile with Launcher3QuickStepLib.\n    resource_dirs: [\"quickstep/res\"],",
+      "previous": [
+        "    resource_dirs: [\"generated/hecker-suite/res\", \"quickstep/res\"],"
+      ]
+    },
+    {
+      "old": "    name: \"Launcher3QuickStepLib\",\n    srcs: [\n        \":launcher-src\",\n        \":launcher-quickstep-src\",\n        \":launcher-quickstep-dagger\",\n        \":launcher-build-config\",\n    ],\n    resource_dirs: [],",
+      "new": "    name: \"Launcher3QuickStepLib\",\n    srcs: [\n        \":launcher-src\",\n        \":launcher-quickstep-src\",\n        \":launcher-quickstep-dagger\",\n        \":launcher-build-config\",\n    ],\n    resource_dirs: [\"generated/hecker-suite/res\"],"
     }
   ],
   "src/com/android/launcher3/util/SettingsCache.java": [
@@ -39,6 +46,26 @@
     {
       "old": "Utils.hasNavbarByDefault(mBaseContext)",
       "new": "HeckerPlatform.hasNavbarByDefault(mBaseContext)"
+    },
+    {
+      "old": "import lineageos.providers.LineageSettings;",
+      "new": "// Taskbar settings use Android's native providers."
+    },
+    {
+      "old": "LineageSettings.System.getUriFor(\n            LineageSettings.System.ENABLE_TASKBAR)",
+      "new": "Settings.System.getUriFor(\"enable_taskbar\")"
+    },
+    {
+      "old": "LineageSettings.System.getUriFor(\n            LineageSettings.System.NAVIGATION_BAR_HINT)",
+      "new": "Settings.System.getUriFor(\"navigation_bar_hint\")"
+    },
+    {
+      "old": "LineageSettings.System.getUriFor(\n            LineageSettings.System.FORCE_SHOW_NAVBAR)",
+      "new": "Settings.System.getUriFor(\"force_show_navbar\")"
+    },
+    {
+      "old": "Settings.Secure.getUriFor(\n            Settings.Secure.NAVBAR_LAYOUT_MODE)",
+      "new": "Settings.Secure.getUriFor(\"navbar_layout_mode\")"
     }
   ],
   "quickstep/src/com/android/launcher3/taskbar/TaskbarActivityContext.java": [
@@ -49,6 +76,26 @@
     {
       "old": "Utils.hasNavbarByDefault(mWindowContext)",
       "new": "HeckerPlatform.hasNavbarByDefault(mWindowContext)"
+    },
+    {
+      "old": "import lineageos.providers.LineageSettings;",
+      "new": "// Taskbar settings use Android's native providers."
+    },
+    {
+      "old": "LineageSettings.System.getUriFor(\n            LineageSettings.System.ENABLE_TASKBAR)",
+      "new": "Settings.System.getUriFor(\"enable_taskbar\")"
+    },
+    {
+      "old": "LineageSettings.System.getUriFor(\n            LineageSettings.System.NAVIGATION_BAR_HINT)",
+      "new": "Settings.System.getUriFor(\"navigation_bar_hint\")"
+    },
+    {
+      "old": "LineageSettings.System.getUriFor(\n            LineageSettings.System.FORCE_SHOW_NAVBAR)",
+      "new": "Settings.System.getUriFor(\"force_show_navbar\")"
+    },
+    {
+      "old": "Secure.getUriFor(Secure.NAVBAR_LAYOUT_MODE)",
+      "new": "Secure.getUriFor(\"navbar_layout_mode\")"
     }
   ],
   "src/com/android/launcher3/quickspace/QuickspaceController.java": [
@@ -110,7 +157,7 @@
   "res/xml/launcher_about_preferences.xml": [
     {
       "old": "    <!-- Credits -->",
-      "new": "    <Preference android:key=\"hecker_about\" android:title=\"@string/hecker_suite_title\"\n        android:summary=\"@string/hecker_suite_summary\">\n        <intent android:action=\"android.intent.action.MAIN\"\n            android:targetPackage=\"org.hecker.suite\"\n            android:targetClass=\"org.hecker.suite.SuiteActivity\">\n            <extra android:name=\"org.hecker.suite.SHOW_ABOUT\" android:value=\"true\" />\n        </intent>\n    </Preference>\n    <Preference android:title=\"RisingOS Revived \u00b7 Ortus Launcher\" android:persistent=\"false\">\n        <intent android:action=\"android.intent.action.VIEW\"\n            android:data=\"https://github.com/RisingOS-Revived/android_packages_apps_Launcher3\" />\n    </Preference>\n\n    <!-- Credits -->"
+      "new": "    <Preference android:key=\"hecker_about\" android:title=\"@string/hecker_suite_title\"\n        android:summary=\"@string/hecker_suite_summary\">\n        <intent android:action=\"android.intent.action.MAIN\"\n            android:targetPackage=\"org.hecker.suite\"\n            android:targetClass=\"org.hecker.suite.SuiteActivity\">\n            <extra android:name=\"org.hecker.suite.SHOW_ABOUT\" android:value=\"true\" />\n        </intent>\n    </Preference>\n    <Preference android:title=\"RisingOS Revived · Ortus Launcher\" android:persistent=\"false\">\n        <intent android:action=\"android.intent.action.VIEW\"\n            android:data=\"https://github.com/RisingOS-Revived/android_packages_apps_Launcher3\" />\n    </Preference>\n\n    <!-- Credits -->"
     }
   ],
   "seraphixgoogle/Android.bp": [
@@ -175,6 +222,48 @@
     {
       "old": "        private const val SEPARATOR = \",\"",
       "new": "        private const val SEPARATOR = \",\"\n        // Keep the upstream storage key without requiring a custom framework constant.\n        private const val RECENTS_LOCKED_TASKS = \"recents_locked_tasks\""
+    }
+  ],
+  "src/com/android/launcher3/dagger/LauncherBaseAppComponent.java": [
+    {
+      "old": "    ThemeManager getThemeManager();",
+      "new": "    ThemeManager getThemeManager();\n    /** The same icon-pack-aware provider used by IconCache. */\n    com.android.launcher3.icons.ThirdPartyIconProvider getThirdPartyIconProvider();"
+    }
+  ],
+  "quickstep/src/com/android/quickstep/split/SplitSelectStateController.java": [
+    {
+      "old": "IconProvider.INSTANCE.get(mContext)",
+      "new": "com.android.launcher3.dagger.LauncherComponentProvider.get(mContext)\n                    .getThirdPartyIconProvider()"
+    }
+  ],
+  "quickstep/src/com/android/quickstep/util/SwipePipToHomeAnimator.java": [
+    {
+      "old": "IconProvider.INSTANCE.get(context)",
+      "new": "com.android.launcher3.dagger.LauncherComponentProvider.get(context)\n                    .getThirdPartyIconProvider()"
+    }
+  ],
+  "src/com/android/launcher3/icons/pack/IconPackHeaderPreference.java": [
+    {
+      "old": "IconProvider.INSTANCE.get(context)",
+      "new": "com.android.launcher3.dagger.LauncherComponentProvider.get(context)\n                    .getThirdPartyIconProvider()"
+    }
+  ],
+  "quickstep/src/com/android/quickstep/split/SplitFromRunningTaskController.java": [
+    {
+      "old": "IconProvider.INSTANCE.get(mContext)",
+      "new": "com.android.launcher3.dagger.LauncherComponentProvider.get(mContext)\n                    .getThirdPartyIconProvider()"
+    }
+  ],
+  "src/com/android/launcher3/icons/pack/IconResolverMasked.java": [
+    {
+      "old": "import static com.android.launcher3.icons.LauncherIcons.CONFIG_HINT_NO_WRAP;",
+      "new": "// No-wrap hints are consumed by the native BaseIconFactory."
+    }
+  ],
+  "quickstep/src/com/android/quickstep/inputconsumers/AssistantInputConsumer.java": [
+    {
+      "old": "        sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HOME, KeyEvent.FLAG_LONG_SWIPE);\n        sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HOME, KeyEvent.FLAG_LONG_SWIPE);",
+      "new": "        android.os.Bundle args = new android.os.Bundle();\n        args.putInt(\"invocation_type\",\n                com.android.internal.app.AssistUtils.INVOCATION_TYPE_GESTURE);\n        SystemUiProxy.INSTANCE.get(mContext).startAssistant(args);"
     }
   ]
 }

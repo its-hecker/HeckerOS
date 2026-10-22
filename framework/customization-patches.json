@@ -251,6 +251,22 @@
       "new": "    <com.android.settings.hecker.HeckerAboutPhonePreference\n        android:key=\"hecker_about_phone\"\n        android:order=\"-100\"\n        android:selectable=\"false\" />\n\n    <com.android.settingslib.widget.LayoutPreference\n        android:key=\"my_device_info_header\""
     }
   ],
+  "frameworks/base/core/java/android/security/spoof/HeckerSpoofConfig.java": [
+    {
+      "old": "/** Private framework API used by native Settings. @hide */",
+      "new": "/**\n * Private framework API used by native Settings.\n * @hide\n */"
+    }
+  ],
+  "frameworks/libs/systemui/iconloaderlib/src/com/android/launcher3/icons/BaseIconFactory.kt": [
+    {
+      "old": "        if (options.wrapNonAdaptiveIcon) tempIcon = wrapToAdaptiveIcon(tempIcon, options)\n\n        val drawFullBleed = options.drawFullBleed ?: drawFullBleedIcons",
+      "new": "        // Preserve icon-pack masks instead of wrapping them a second time.\n        val noWrapHintSet = (tempIcon.changingConfigurations and CONFIG_HINT_NO_WRAP) != 0\n        if (options.wrapNonAdaptiveIcon && !noWrapHintSet) {\n            tempIcon = wrapToAdaptiveIcon(tempIcon, options)\n        }\n\n        val drawFullBleed = if (noWrapHintSet) false\n            else options.drawFullBleed ?: drawFullBleedIcons"
+    },
+    {
+      "old": "        private const val DEFAULT_WRAPPER_BACKGROUND = Color.WHITE",
+      "new": "        private const val DEFAULT_WRAPPER_BACKGROUND = Color.WHITE\n\n        // Private drawable hint shared with ThirdPartyIconProvider.\n        const val CONFIG_HINT_NO_WRAP: Int = 0x1000000"
+    }
+  ],
   "vendor/custom/bootanimation/Android.bp": [
     {
       "old": "    name: \"bootanimation_pixelos\",",

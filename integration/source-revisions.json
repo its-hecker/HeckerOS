@@ -79,6 +79,14 @@
         "config/common_mobile_full.mk"
       ]
     },
+    "frameworks/libs/systemui": {
+      "repository": "https://android.googlesource.com/platform/frameworks/libs/systemui",
+      "branch": "android-17.0.0_r1",
+      "revision": "11e04f60f563aed48e4ec080bd7bde06bae1b2f3",
+      "files": [
+        "iconloaderlib/src/com/android/launcher3/icons/BaseIconFactory.kt"
+      ]
+    },
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
       "branch": "heckeros-17",

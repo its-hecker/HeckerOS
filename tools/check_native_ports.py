@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Check adapters against immutable upstream source files; this is not a ROM build."""
 import argparse
+import base64
 import json
 from pathlib import Path
 import re
@@ -61,6 +62,21 @@ def check_launcher_weather(folder):
     print('Launcher keeps Google weather; OmniJaws startup, fallback and controls are absent')
 
 
+def check_launcher_resource_scope(folder):
+    launcher = folder / 'packages/apps/Launcher3'
+    bp = (launcher / 'Android.bp').read_text()
+    libraries = re.findall(r'(?ms)^android_library\s*\{(.*?)^\}', bp)
+    library = next(b for b in libraries if re.search(
+        r'name:\s*"Launcher3QuickStepLib"', b))
+    resources = re.search(r'resource_dirs:\s*\[(.*?)\]', library, re.S).group(1)
+    directories = re.findall(r'"([^"]+)"', resources)
+    view = (launcher / 'src/com/android/launcher3/hecker/HeckerLottieView.java').read_text()
+    for name in re.findall(r'R\.raw\.(\w+)', view):
+        assert any(list((launcher / directory / 'raw').glob(name + '.*'))
+                   for directory in directories), 'Raw resource missing from Java library: ' + name
+    print('Lottie raw resources belong to Launcher3QuickStepLib, where the view compiles')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cache', type=Path, default=ROOT / 'out/native-source-cache')
@@ -85,12 +101,20 @@ def main():
             raise SystemExit('Missing immutable source: ' + relative)
         project = max((p for p in sources if relative.startswith(p + '/')), key=len)
         origin = sources[project]
-        url = 'https://raw.githubusercontent.com/{}/{}/{}'.format(
-            origin['repository'], origin['revision'], relative[len(project) + 1:])
+        repository = origin['repository']
+        googlesource = repository.startswith('https://android.googlesource.com/')
+        if googlesource:
+            url = '{}/+/{}/{}?format=TEXT'.format(
+                repository, origin['revision'], relative[len(project) + 1:])
+        else:
+            url = 'https://raw.githubusercontent.com/{}/{}/{}'.format(
+                repository, origin['revision'], relative[len(project) + 1:])
         with urllib.request.urlopen(url, timeout=45) as response:
             content = response.read(8 * 1024 * 1024 + 1)
         if len(content) > 8 * 1024 * 1024:
             raise SystemExit('Unexpected source size: ' + relative)
+        if googlesource:
+            content = base64.b64decode(content, validate=True)
         cached.parent.mkdir(parents=True, exist_ok=True)
         cached.write_bytes(content)
     with tempfile.TemporaryDirectory(prefix='hecker-native-check-') as temporary:
@@ -109,6 +133,7 @@ def main():
             assert not plan(folder, replace_guarded), 'Adapter is not idempotent'
         check_bootanimation_owner(folder)
         check_launcher_weather(folder)
+        check_launcher_resource_scope(folder)
         for plan in reversed(plans):
             write(plan(folder, replace_guarded, True))
         assert before == snapshot(folder), 'Revert changed upstream content'
