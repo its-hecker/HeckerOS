@@ -2,7 +2,10 @@
   "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/keyguard/ui/composable/elements/MediaElementProvider.kt": [
     {
       "old": "                Media(\n                    viewModelFactory = viewModel.mediaViewModelFactory,\n                    presentationStyle = MediaPresentationStyle.Default,\n                    behavior = viewModel.mediaUiBehavior,\n                    onDismissed = viewModel::onSwipeToDismiss,\n                    modifier = Modifier.fillMaxWidth(),\n                    location = Media.Location.LOCKSCREEN,\n                )",
-      "new": "                androidx.compose.foundation.layout.Column {\n                    Media(\n                        viewModelFactory = viewModel.mediaViewModelFactory,\n                        presentationStyle = MediaPresentationStyle.Default,\n                        behavior = viewModel.mediaUiBehavior,\n                        onDismissed = viewModel::onSwipeToDismiss,\n                        modifier = Modifier.fillMaxWidth(),\n                        location = Media.Location.LOCKSCREEN,\n                    )\n                    com.android.systemui.hecker.HeckerLockscreenLyrics(context)\n                }"
+      "new": "                androidx.compose.foundation.layout.Column {\n                    Media(\n                        viewModelFactory = viewModel.mediaViewModelFactory,\n                        presentationStyle = MediaPresentationStyle.Default,\n                        behavior = viewModel.mediaUiBehavior,\n                        onDismissed = viewModel::onSwipeToDismiss,\n                        modifier = Modifier.fillMaxWidth(),\n                        location = Media.Location.LOCKSCREEN,\n                    )\n                    com.android.systemui.hecker.HeckerLockscreenLyrics(this@MediaElementProvider.context)\n                }",
+      "previous": [
+        "                androidx.compose.foundation.layout.Column {\n                    Media(\n                        viewModelFactory = viewModel.mediaViewModelFactory,\n                        presentationStyle = MediaPresentationStyle.Default,\n                        behavior = viewModel.mediaUiBehavior,\n                        onDismissed = viewModel::onSwipeToDismiss,\n                        modifier = Modifier.fillMaxWidth(),\n                        location = Media.Location.LOCKSCREEN,\n                    )\n                    com.android.systemui.hecker.HeckerLockscreenLyrics(context)\n                }"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/qs/ui/composable/QuickSettingsContent.kt": [
@@ -88,7 +91,10 @@
     },
     {
       "old": "                            IconViewBinder.bind(wifiIcon.icon, iconView)",
-      "new": "                            IconViewBinder.bind(wifiIcon.icon, iconView)\n                            com.android.systemui.hecker.HeckerThemeAssets.wifi(view.context, wifiIcon.icon.res)?.let {\n                                iconView.setImageDrawable(it)\n                            }"
+      "new": "                            IconViewBinder.bind(wifiIcon.icon, iconView)\n                            com.android.systemui.hecker.HeckerThemeAssets.wifi(view.context, wifiIcon.res)?.let {\n                                iconView.setImageDrawable(it)\n                            }",
+      "previous": [
+        "                            IconViewBinder.bind(wifiIcon.icon, iconView)\n                            com.android.systemui.hecker.HeckerThemeAssets.wifi(view.context, wifiIcon.icon.res)?.let {\n                                iconView.setImageDrawable(it)\n                            }"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/pipeline/mobile/ui/binder/MobileIconBinder.kt": [

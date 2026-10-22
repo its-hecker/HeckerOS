@@ -48,3 +48,42 @@ class CustomizationPortTests(unittest.TestCase):
             before=self.snapshot(folder)
             with self.assertRaises(ValueError):customization_plan(folder,replace_guarded)
             self.assertEqual(before,self.snapshot(folder))
+
+    def test_existing_prepared_adapters_upgrade_and_revert_without_losing_edits(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder=Path(temporary);self.stage(folder)
+            original=self.snapshot(folder)
+            self.write(customization_plan(folder,replace_guarded))
+            patches=json.loads((ROOT/'framework/customization-patches.json').read_text())
+            upgraded=[]
+            for relative,pairs in patches.items():
+                for pair in pairs:
+                    if not pair.get('previous'):continue
+                    path=folder/relative
+                    self.assertEqual(1,path.read_text().count(pair['new']))
+                    path.write_text(path.read_text().replace(pair['new'],pair['previous'][0])
+                                    +'\n// unrelated maintainer edit\n')
+                    original[relative]+='\n// unrelated maintainer edit\n'.encode()
+                    upgraded.append(path)
+            self.assertEqual(2,len(upgraded))
+            changes=customization_plan(folder,replace_guarded)
+            self.assertEqual(set(upgraded),set(changes))
+            self.write(changes)
+            self.assertEqual({},customization_plan(folder,replace_guarded))
+            self.write(customization_plan(folder,replace_guarded,True))
+            self.assertEqual(original,self.snapshot(folder))
+
+    def test_unreviewed_previous_adapter_is_preserved(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder=Path(temporary);self.stage(folder)
+            self.write(customization_plan(folder,replace_guarded))
+            patches=json.loads((ROOT/'framework/customization-patches.json').read_text())
+            for relative,pairs in patches.items():
+                candidates=[pair for pair in pairs if pair.get('previous')]
+                if not candidates:continue
+                pair=candidates[0];path=folder/relative
+                path.write_text(path.read_text().replace(pair['new'],'// unreviewed local integration'))
+                break
+            before=self.snapshot(folder)
+            with self.assertRaises(ValueError):customization_plan(folder,replace_guarded)
+            self.assertEqual(before,self.snapshot(folder))

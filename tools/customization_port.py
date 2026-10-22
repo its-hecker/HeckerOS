@@ -15,6 +15,12 @@ def customization_plan(rom, replace, revert=False):
         current = path.read_text()
         target = current
         for pair in reversed(pairs) if revert else pairs:
+            # Upgrade only explicitly reviewed earlier adapters. A prepared
+            # checkout must not require reverting every unrelated native port.
+            if not revert:
+                for previous in pair.get("previous", []):
+                    if previous in target and pair["new"] not in target:
+                        target = replace(target, previous, pair["new"], str(path))
             target = replace(target, pair["old"], pair["new"], str(path), revert)
         if target != current: changes[path] = target
     copies = json.loads((ROOT / "framework/customization-copies.json").read_text())
