@@ -25,23 +25,24 @@ final class GamingPlatform {
             return (int) manager.getClass().getMethod("getGameMode", String.class).invoke(manager, pkg);
         } catch (ReflectiveOperationException | RuntimeException unavailable) { return 1; }
     }
-    static boolean performanceSupported(Context c, String pkg) {
-        if (pkg == null) return false;
-        try {
-            Object manager = c.getSystemService("game");
-            int[] modes = (int[]) manager.getClass().getMethod("getAvailableGameModes", String.class).invoke(manager, pkg);
-            for (int mode : modes) if (mode == 2) return true;
-        } catch (ReflectiveOperationException | RuntimeException unavailable) { }
+    static boolean performanceSupported(Context c,String pkg){return modeSupported(c,pkg,2);}
+    static boolean modeSupported(Context c,String pkg,int wanted){
+        if(pkg==null)return false;
+        if(wanted==1)return true;
+        try{
+            Object manager=c.getSystemService("game");
+            int[] modes=(int[])manager.getClass().getMethod("getAvailableGameModes",String.class).invoke(manager,pkg);
+            for(int mode:modes)if(mode==wanted)return true;
+        }catch(ReflectiveOperationException|RuntimeException ignored){}
         return false;
     }
-    static boolean gameMode(Context c, String pkg, int mode) {
-        if (pkg == null || (mode != 1 && mode != 2)) return false;
-        if (mode == 2 && !performanceSupported(c, pkg)) return false;
-        try {
-            Object manager = c.getSystemService("game");
-            manager.getClass().getMethod("setGameMode", String.class, int.class).invoke(manager, pkg, mode);
-            return gameMode(c, pkg) == mode;
-        } catch (ReflectiveOperationException | RuntimeException unavailable) { return false; }
+    static boolean gameMode(Context c,String pkg,int mode){
+        if(pkg==null||mode<1||mode>3||!modeSupported(c,pkg,mode))return false;
+        try{
+            Object manager=c.getSystemService("game");
+            manager.getClass().getMethod("setGameMode",String.class,int.class).invoke(manager,pkg,mode);
+            return gameMode(c,pkg)==mode;
+        }catch(ReflectiveOperationException|RuntimeException ignored){return false;}
     }
     static boolean ownDisplayTask(ActivityManager.RunningTaskInfo task) {
         try {
@@ -67,8 +68,8 @@ final class GamingPlatform {
         if (!supportsPopup(c, launch)) throw new IllegalArgumentException("This app does not support floating windows");
         Rect screen = c.getSystemService(WindowManager.class).getCurrentWindowMetrics().getBounds();
         int width = Math.min(screen.width() * (screen.width() > screen.height() ? 46 : 88) / 100,
-                screen.height() * 80 / 100);
-        int height = Math.min(screen.height() * 86 / 100, width * 16 / 10);
+                screen.height() * 90 / 100);
+        int height = Math.min(screen.height() * 90 / 100, width * 16 / 10);
         int left = screen.left + (screen.width() - width) / 2;
         int top = screen.top + (screen.height() - height) / 2;
         ActivityOptions options = ActivityOptions.makeBasic();

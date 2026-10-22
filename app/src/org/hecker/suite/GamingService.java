@@ -41,6 +41,8 @@ public final class GamingService extends Service implements GamingOverlay.Action
     private static final String CHANNEL="gaming",STOP="org.hecker.suite.STOP_GAMING";
     private final Handler main=new Handler(Looper.getMainLooper());
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
+    private final GamingSession session=new GamingSession();
+    private boolean sampling; private int sessionGeneration,bypass=-1;
     private final GamingPolicy.TaskObservation observation=new GamingPolicy.TaskObservation();
     private Set<String> games=new HashSet<>(),popups=new HashSet<>();
     private ActivityManager am;private WindowManager wm;private GamingOverlay overlay;
@@ -48,7 +50,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
     private String gamePackage;
     private boolean active,brightnessChanged,stateRegistered,packagesRegistered,destroyed;
     private GamingTaskObserver taskObserver;
-    private float fps=Float.NaN;
+    private float fps=Float.NaN,sessionBrightness=Float.NaN;
     private long fpsAt,recordGrace;
     private Intent battery;
     private TaskFpsCallback fpsCallback;
@@ -71,6 +73,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
         notifications.createNotificationChannel(new NotificationChannel(CHANNEL,getString(R.string.gaming_monitor),NotificationManager.IMPORTANCE_LOW));
         startForeground(31,notification(),ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
         overlay=new GamingOverlay(this,this);
+        GamingPrefs.initializeShortcuts(this);
         GamingPrefs.get(this).registerOnSharedPreferenceChangeListener(this);
         // Clear only this target-37 app's implicit DND rule after a restart.
         focusState(false);
@@ -127,22 +130,31 @@ public final class GamingService extends Service implements GamingOverlay.Action
             GamingPolicy.Task selected=GamingPolicy.activeGame(snapshot,games,popups,gameTask,true);
             if(selected!=null){
                 boolean changed=gameTask!=selected.id;
-                if(changed){stopFps();popups.clear();}
-                gameTask=selected.id;gamePackage=selected.pkg;activate();
+                if(changed){stopFps();popups.clear();sessionGeneration++;worker.execute(session::end);}
+                boolean restyle=changed&&active;gameTask=selected.id;gamePackage=selected.pkg;activate();if(restyle)overlay.restyle();
                 if(changed)getSystemService(NotificationManager.class).notify(31,notification());
             }else{pause();if(!previousVisible){gameTask=-1;gamePackage=null;popups.clear();}}
         }catch(RuntimeException e){Log.w("HeckerGaming","Task observation failed",e);pause();}
         long delay=observation.nextDelay(SystemClock.elapsedRealtime(),active,recordGrace);
         if(delay>=0)schedule(delay);
     }
+    private void sampleSession(){
+        if(sampling||!active)return;sampling=true;int generation=sessionGeneration,task=gameTask;
+        worker.execute(()->{
+            android.os.Bundle stats=session.update(this,task);
+            main.post(()->{sampling=false;if(destroyed||!active||generation!=sessionGeneration)return;
+                bypass=stats.getInt("bypass",-1);overlay.telemetry(stats.getInt("cpu",-1),stats.getInt("gpu",-1),stats.getInt("ram",-1));updateStatus();});
+        });
+    }
     private void activate(){
         if(!active){overlay.show();active=true;getSystemService(NotificationManager.class).notify(31,notification());}
-        focusState(GamingPrefs.get(this).getBoolean("focus",false));syncFps();updateStatus();
+        focusState(GamingPrefs.get(this).getBoolean("focus",false));syncFps();sampleSession();updateStatus();
     }
     private void pause(){
         boolean wasActive=active;active=false;
+        if(wasActive){sessionGeneration++;bypass=-1;worker.execute(session::end);}
         if(overlay!=null)overlay.hide();stopFps();focusState(false);
-        if(brightnessChanged){try{GamingPlatform.brightness(this,Float.NaN);}catch(ReflectiveOperationException|RuntimeException ignored){}brightnessChanged=false;}
+        if(brightnessChanged){try{GamingPlatform.brightness(this,Float.NaN);}catch(ReflectiveOperationException|RuntimeException ignored){}brightnessChanged=false;sessionBrightness=Float.NaN;}
         if(GamingRecordingService.recording&&SystemClock.elapsedRealtime()>=recordGrace)stopService(new Intent(this,GamingRecordingService.class));
         if(wasActive)getSystemService(NotificationManager.class).notify(31,notification());
     }
@@ -184,6 +196,16 @@ public final class GamingService extends Service implements GamingOverlay.Action
         }catch(SecurityException e){Log.w("HeckerGaming","Focus access was revoked",e);}
     }
     @Override public void panelChanged(boolean open){syncFps();}
+    @Override public boolean modeSupported(int mode){return GamingPlatform.modeSupported(this,gamePackage,mode);}
+    @Override public int bypassState(){return bypass;}
+    @Override public void toggle(String key){
+        if(!Set.of("block_navigation","block_edge","block_assistant","block_brightness","bypass","fps").contains(key))return;
+        GamingPrefs.get(this).edit().putBoolean(key,!GamingPrefs.get(this).getBoolean(key,key.equals("fps"))).apply();
+        sampleSession();
+    }
+    @Override public android.graphics.drawable.Drawable gameIcon(){
+        try{return getPackageManager().getApplicationIcon(gamePackage);}catch(android.content.pm.PackageManager.NameNotFoundException|RuntimeException e){return getDrawable(R.drawable.ic_gaming);}
+    }
     @Override public boolean performanceSupported(){return GamingPlatform.performanceSupported(this,gamePackage);}
     @Override public int gameMode(){return GamingPlatform.gameMode(this,gamePackage);}
     @Override public void gameMode(int mode){
@@ -233,14 +255,15 @@ public final class GamingService extends Service implements GamingOverlay.Action
         List<GamingCatalog.App> apps=GamingCatalog.load(this,false);main.post(()->{if(!destroyed&&active&&overlay.isOpen())overlay.showShortcutPicker(apps);});
     });}
     @Override public void toggleShortcut(String pkg){
-        if(!GamingPrefs.shortcuts(this).contains(pkg)&&GamingPrefs.shortcuts(this).size()>=5){toast(getString(R.string.gaming_limit));return;}GamingPrefs.toggleShortcut(this,pkg);
+        if(!GamingPrefs.shortcuts(this).contains(pkg)&&GamingPrefs.shortcuts(this).size()>=6){toast(getString(R.string.gaming_limit));return;}GamingPrefs.toggleShortcut(this,pkg);
     }
-    @Override public void brightness(float brightness){try{GamingPlatform.brightness(this,brightness);brightnessChanged=true;}catch(ReflectiveOperationException|RuntimeException e){toast(getString(R.string.gaming_unavailable));}}
+    @Override public int brightnessLevel(){return Float.isFinite(sessionBrightness)?Math.round(sessionBrightness*255):Settings.System.getInt(getContentResolver(),Settings.System.SCREEN_BRIGHTNESS,128);}
+    @Override public void brightness(float brightness){try{GamingPlatform.brightness(this,brightness);brightnessChanged=true;sessionBrightness=brightness;}catch(ReflectiveOperationException|RuntimeException e){toast(getString(R.string.gaming_unavailable));}}
     @Override public void onSharedPreferenceChanged(SharedPreferences prefs,String key){
         if(destroyed||key.startsWith("hud_")||key.equals("focus_applied"))return;
         if(key.equals("enabled")&&!GamingPrefs.enabled(this)){stopSelf();return;}
         if(key.equals("added")||key.equals("excluded")||key.equals("automatic"))loadCatalog();
-        else if(active){overlay.restyle();syncFps();focusState(prefs.getBoolean("focus",false));updateStatus();}
+        else if(active){overlay.restyle();syncFps();focusState(prefs.getBoolean("focus",false));sampleSession();updateStatus();}
     }
     @Override public void onConfigurationChanged(Configuration config){super.onConfigurationChanged(config);if(active){overlay.restyle();updateStatus();}}
     @Override public void onTaskRemoved(Intent i){if(GamingPrefs.enabled(this))super.onTaskRemoved(i);else stopSelf();}
@@ -248,7 +271,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
         destroyed=true;catalogGeneration++;recordGrace=0;main.removeCallbacksAndMessages(null);pause();
         if(taskObserver!=null)try{taskObserver.close();}catch(RuntimeException ignored){}
         if(stateRegistered)unregisterReceiver(state);if(packagesRegistered)unregisterReceiver(packages);
-        GamingPrefs.get(this).unregisterOnSharedPreferenceChangeListener(this);worker.shutdownNow();stopForeground(STOP_FOREGROUND_REMOVE);super.onDestroy();
+        GamingPrefs.get(this).unregisterOnSharedPreferenceChangeListener(this);worker.shutdown();stopForeground(STOP_FOREGROUND_REMOVE);super.onDestroy();
     }
     private void toast(String message){Toast.makeText(this,message,Toast.LENGTH_LONG).show();}
 }

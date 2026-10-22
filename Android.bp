@@ -22,7 +22,7 @@ android_app {
     privileged: true,
     system_ext_specific: true,
     static_libs: ["lottie"],
-    required: ["HeckerSuitePrivappPermissions", "HeckerSuiteFreeformFeature"],
+    required: ["HeckerSuitePrivappPermissions", "HeckerSuiteFreeformFeature", "HeckerGameInit"],
     optimize: {
         proguard_flags_files: ["app/proguard.flags"],
     },
@@ -93,4 +93,13 @@ aconfig_values {
     name: "hecker_suite_systemui_flags",
     package: "com.android.systemui",
     srcs: ["flags/systemui/*_flag_values.textproto"],
+}
+
+// Grant the trusted game service access to the independent, leased kernel inhibitor.
+prebuilt_etc {
+    name: "HeckerGameInit",
+    src: "configs/hecker-game.rc",
+    filename_from_src: true,
+    sub_dir: "init",
+    system_ext_specific: true,
 }

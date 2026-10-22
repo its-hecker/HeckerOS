@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+on post-fs-data
+    chown system system /sys/class/power_supply/charger/game_charge_disable
+    chmod 0660 /sys/class/power_supply/charger/game_charge_disable
+    write /sys/class/power_supply/charger/game_charge_disable 0

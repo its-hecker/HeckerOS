@@ -21,9 +21,18 @@ final class GamingPrefs {
         }
         return result;
     }
+    static void initializeShortcuts(Context c){
+        if(get(c).contains("shortcuts"))return;
+        String[][] groups={{"com.whatsapp"},{"com.android.chrome","org.lineageos.jelly"},{"com.google.android.youtube"},
+                {"com.google.android.dialer","com.android.dialer"},{"com.google.android.apps.messaging","com.android.messaging"},
+                {"com.google.android.apps.youtube.music","org.lineageos.eleven"}};
+        List<String> selected=new ArrayList<>();
+        for(String[] group:groups)for(String pkg:group)if(c.getPackageManager().getLaunchIntentForPackage(pkg)!=null){selected.add(pkg);break;}
+        get(c).edit().putString("shortcuts",String.join(",",selected)).apply();
+    }
     static void toggleShortcut(Context c, String pkg) {
         List<String> values = shortcuts(c);
-        if (!values.remove(pkg) && values.size() < 5) values.add(pkg);
+        if (!values.remove(pkg) && values.size() < 6) values.add(pkg);
         get(c).edit().putString("shortcuts", String.join(",", values)).apply();
     }
     static void include(Context c, String pkg, boolean include) {
