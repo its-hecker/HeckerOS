@@ -296,5 +296,11 @@
       "old": "                    && mPlatformCompat.isChangeEnabled(APP_DATA_DIRECTORY_ISOLATION, app.info);",
       "new": "                    && (heckerSandboxDataIsolation\n                        || mPlatformCompat.isChangeEnabled(APP_DATA_DIRECTORY_ISOLATION, app.info));"
     }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/dagger/SystemUIModule.java": [
+    {
+      "old": "public abstract class SystemUIModule {",
+      "new": "public abstract class SystemUIModule {\n\n    @Binds\n    @IntoMap\n    @ClassKey(com.android.systemui.hecker.HeckerFaceUnlockStartable.class)\n    abstract CoreStartable bindHeckerFaceUnlockIsland(\n            com.android.systemui.hecker.HeckerFaceUnlockStartable startable);"
+    }
   ]
 }

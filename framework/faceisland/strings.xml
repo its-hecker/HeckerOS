@@ -1,0 +1,5 @@
+<resources>
+    <string name="hecker_face_island_label">Face ID</string>
+    <string name="hecker_face_island_scanning">Recognizing your face</string>
+    <string name="hecker_face_island_unlocked">Unlocked</string>
+</resources>

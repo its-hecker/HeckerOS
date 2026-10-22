@@ -90,7 +90,11 @@ fun HeckerTileGrid(
     TileListener(tiles, listening)
     val columns = if (LocalConfiguration.current.fontScale >= 1.4f) 3 else 4
     val customized = !compact && heckerCustomizedLayout()
-    val regular = if (compact) tiles.take(6) else tiles.filter { it.spec.spec !in FOOTER && (!customized || it.spec.spec !in setOf(MOTION, FACE)) }
+    val selected = if (compact) tiles.take(6) else tiles.filter { it.spec.spec !in FOOTER && (!customized || it.spec.spec !in setOf(MOTION, FACE)) }
+    // Promote selected connectivity controls into the large cards. Other tiles
+    // retain the native editor's order, including across additional pages.
+    val connectivity = if (compact) emptyList() else selected.filter { it.spec.spec in setOf("internet", "wifi", "bt") }.take(2)
+    val regular = connectivity + selected.filter { it !in connectivity }
     val foot = if (compact) emptyList() else tiles.filter { it.spec.spec in FOOTER }
     val pages = if (customized) {
         listOf(regular.drop(2).take(columns * 2)) +

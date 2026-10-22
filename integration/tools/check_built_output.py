@@ -3,6 +3,8 @@
 """Check installed camera files, original APKs and the Motion Sense country override."""
 
 from pathlib import Path
+import hashlib
+import json
 import re
 import sys
 
@@ -37,6 +39,20 @@ def check_motion_sense(output):
         raise ValueError("Built product image needs exactly one pixel.oslo.allowed_override=1")
 
 
+def check_librepods(rom, output):
+    source = rom / "vendor/hecker/floral/suite/prebuilts/librepods"
+    metadata = json.loads((source / "source.json").read_text())
+    apk = output / "system_ext/priv-app/HeckerLibrePods/HeckerLibrePods.apk"
+    if not apk.is_file() or apk.stat().st_size != metadata["size"] \
+            or hashlib.sha256(apk.read_bytes()).hexdigest() != metadata["sha256"]:
+        raise ValueError("Built image is missing the exact original signed LibrePods APK")
+    for folder, name in (("permissions", "privapp-permissions-librepods.xml"),
+                         ("default-permissions", "default-permissions-librepods.xml")):
+        installed = output / "system_ext/etc" / folder / name
+        if not installed.is_file() or installed.read_bytes() != (source / name).read_bytes():
+            raise ValueError("Built image is missing the exact LibrePods permissions: " + name)
+
+
 def check_removed_weather(output):
     for partition in ("system", "system_ext", "product", "vendor"):
         for app_type in ("app", "priv-app"):
@@ -59,9 +75,10 @@ def check(rom, output):
     verify_installed(rom, output)
     check_motion_sense(output)
     check_suite(rom, output)
+    check_librepods(rom, output)
     print("Built output: camera provider binary/init/VINTF, original ten-APK Google Camera set "
           "and Motion Sense country override, Hecker Suite APK/permissions/freeform; "
-          "OmniJaws absent: PASS")
+          "original LibrePods APK/permissions; OmniJaws absent: PASS")
 
 
 if __name__ == "__main__":

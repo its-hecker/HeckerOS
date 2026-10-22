@@ -18,4 +18,6 @@
     <string name="headphones_airpods">AirPods controls</string>
     <string name="headphones_airpods_summary">Set up LibrePods for additional AirPods battery information and supported controls.</string>
     <string name="headphones_airpods_unavailable">LibrePods is unavailable in this build.</string>
+    <string name="face_island_title">Face unlock island</string>
+    <string name="face_island_summary">Animate a pill at the top of the lock screen during face recognition and successful authentication.</string>
 </resources>

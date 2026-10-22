@@ -55,6 +55,21 @@ picker/content-provider grants are not revoked by removing storage GIDs. It does
 not import Axion's private vault, package hiding or spoofed settings. HeckerOS's
 existing native App Lock is retained.
 
+## Face unlock island
+
+**Hecker Suite → Lock screen → Face unlock island** is enabled by default. A black
+pill at the top of the portrait lock screen animates during face recognition.
+A permitted successful authentication for the active user changes the lock into
+a green completion check and displays the localized unlocked label.
+
+The SystemUI CoreStartable observes `KeyguardUpdateMonitor` directly. Fingerprint,
+face-detection-only events, another user's result and strong-auth-blocked results
+cannot produce the success state. The window accepts no input and calls no
+authentication, trust or keyguard-dismissal API. Native unlocking is never delayed.
+The pill disappears when keyguard hides, the device sleeps, the user changes or
+the feature is disabled. It stays off during AOD and respects disabled system
+animations. A central display cutout moves the pill below its safe inset.
+
 ## Recovery and validation
 
 See `recovery/README.md` for the exact recovery base, artwork and rebuild details.
@@ -66,3 +81,10 @@ preservation, exact recovery restoration and safe adapter upgrades. SDK checks
 link resources and compile app Java. Native adapter checks use pinned Android
 sources and verify idempotence and exact reversion. These checks do not replace
 a full Android/Soong build or testing Bluetooth, the sandbox and SystemUI on coral.
+
+The built-output checker verifies the original LibrePods APK bytes and both
+permission XML files. Face-island tests exercise callback ordering, duplicate
+results, per-user sessions, strong-auth restrictions, sleep and feature disable.
+After building, test the island with both immediate unlock and swipe-to-unlock,
+then recheck face enrollment, Motion Sense, camera, headphone profiles and native
+QS editing/brightness/volume on Coral.

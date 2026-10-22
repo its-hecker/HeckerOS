@@ -30,3 +30,7 @@ java -cp "$suite_test_output" com.android.systemui.hecker.HeadphoneBatteryTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     framework/sandbox/HeckerSandboxRules.java tests/HeckerSandboxRulesTest.java
 java -cp "$suite_test_output" com.android.internal.hecker.HeckerSandboxRulesTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/faceisland/FaceIslandState.java tests/FaceIslandStateTest.java
+java -cp "$suite_test_output" com.android.systemui.hecker.FaceIslandStateTest

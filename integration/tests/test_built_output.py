@@ -2,13 +2,15 @@
 """Reject the missing runtime init script found in the phone bug report."""
 
 from pathlib import Path
+import hashlib
+import json
 import sys
 import tempfile
 import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from check_built_output import check, check_motion_sense, check_suite, SERVICE
+from check_built_output import check, check_motion_sense, check_suite, check_librepods, SERVICE
 
 
 class BuiltOutputTests(unittest.TestCase):
@@ -52,7 +54,8 @@ class BuiltOutputTests(unittest.TestCase):
             properties = output / "product/etc/build.prop"
             properties.parent.mkdir(parents=True)
             properties.write_text("pixel.oslo.allowed_override=1\n")
-            with patch("check_built_output.verify_installed") as apks, patch("check_built_output.check_suite"):
+            with patch("check_built_output.verify_installed") as apks, patch("check_built_output.check_suite"), \
+                    patch("check_built_output.check_librepods"):
                 check(root, output)
                 apks.assert_called_once_with(root, output)
             init.write_text("service camera /wrong/binary\n")
@@ -105,6 +108,36 @@ class BuiltOutputTests(unittest.TestCase):
             installed_feature = output / "system_ext/etc/permissions/hecker-suite-freeform.xml"
             installed_feature.write_bytes(feature.read_bytes())
             check_suite(root, output)
+
+    def test_librepods_requires_original_bytes_and_both_permission_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "output"
+            source = root / "vendor/hecker/floral/suite/prebuilts/librepods"
+            source.mkdir(parents=True)
+            data = b"original signed APK fixture"
+            (source / "source.json").write_text(json.dumps({
+                "size": len(data), "sha256": hashlib.sha256(data).hexdigest()}))
+            with self.assertRaisesRegex(ValueError, "LibrePods APK"):
+                check_librepods(root, output)
+            apk = output / "system_ext/priv-app/HeckerLibrePods/HeckerLibrePods.apk"
+            apk.parent.mkdir(parents=True)
+            apk.write_bytes(b"wrong APK bytes")
+            with self.assertRaisesRegex(ValueError, "LibrePods APK"):
+                check_librepods(root, output)
+            apk.write_bytes(data)
+            for folder, name in (("permissions", "privapp-permissions-librepods.xml"),
+                                 ("default-permissions", "default-permissions-librepods.xml")):
+                (source / name).write_text('<permissions />')
+                with self.assertRaisesRegex(ValueError, "LibrePods permissions"):
+                    check_librepods(root, output)
+                installed = output / "system_ext/etc" / folder / name
+                installed.parent.mkdir(parents=True, exist_ok=True)
+                installed.write_bytes((source / name).read_bytes())
+            check_librepods(root, output)
+            apk.write_bytes(b"X" + data[1:])
+            with self.assertRaisesRegex(ValueError, "LibrePods APK"):
+                check_librepods(root, output)
 
 
 if __name__ == "__main__":

@@ -19,6 +19,8 @@ platform customization forks use `heckeros-17`.
   controls and native app-data isolation; system/shared-UID packages are excluded.
 - HeckerOS recovery with the approved caracal logo, readable Suite text/buttons,
   native Settings icons, and Simplified Chinese custom-page translations.
+- An animated native face-unlock island on the portrait lock screen, with a
+  per-user switch and no change to authentication or unlock timing.
 - Hardware 3D Face Unlock and Motion Sense, with their ROM integration owned here.
   Face enrollment uses Hecker's curved 25-cell pose mesh, subtle capture feedback
   and missing-angle guidance over the native infrared preview.
