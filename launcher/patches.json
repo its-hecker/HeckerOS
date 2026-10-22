@@ -112,6 +112,14 @@
     {
       "old": "Secure.getUriFor(Secure.NAVBAR_LAYOUT_MODE)",
       "new": "Secure.getUriFor(\"navbar_layout_mode\")"
+    },
+    {
+      "old": "System.getUriFor(System.GESTURE_NAVBAR_LENGTH_MODE)",
+      "new": "System.getUriFor(\"gesture_navbar_length_mode\")"
+    },
+    {
+      "old": "System.getUriFor(System.GESTURE_NAVBAR_HEIGHT_MODE)",
+      "new": "System.getUriFor(\"gesture_navbar_height_mode\")"
     }
   ],
   "quickstep/src/com/android/launcher3/uioverrides/QuickstepLauncher.java": [

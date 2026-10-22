@@ -56,7 +56,7 @@ jobs:
           python3 integration/tools/validate.py
           python3 -m unittest discover -s integration/tests -p 'test_*.py'
       - name: Apply and revert adapters against pinned native sources
-        run: python3 tools/check_native_ports.py
+        run: python3 tools/check_native_ports.py --sdk-cache generated/sdk
       - name: Verify all pinned theme payloads
         run: python3 tools/fetch_theme_assets.py
       - name: Compile Settings artwork and layouts

@@ -92,12 +92,43 @@ def check_launcher_resource_scope(folder):
     print('Lottie raw resources belong to Launcher3QuickStepLib, where the view compiles')
 
 
+def launcher_navbar_uri_probe(folder):
+    """Compile the actual four navigation-size observers, including imported Settings aliases."""
+    taskbar = folder / 'packages/apps/Launcher3/quickstep/src/com/android/launcher3/taskbar'
+    classes = []
+    for name, prefix in [('TaskbarActivityContext', 'URI_NAVBAR_'),
+                         ('TaskbarManagerImpl', 'GESTURE_NAVBAR_')]:
+        source = (taskbar / (name + '.java')).read_text()
+        names = '|'.join(prefix + axis + '_MODE' + ('_URI' if prefix == 'GESTURE_NAVBAR_' else '')
+                         for axis in ('LENGTH', 'HEIGHT'))
+        declarations = re.findall(
+            r'(?m)^\s*(?:private|public)\s+static\s+final\s+Uri\s+(?:' + names + r')\s*=[^;]+;', source)
+        assert len(declarations) == 2, 'Missing native navigation observers in ' + name
+        classes.append('static class ' + name + ' {\n' + '\n'.join(declarations) + '\n}')
+    return ('import android.net.Uri;\nimport android.provider.Settings;\n'
+            'import android.provider.Settings.System;\n'
+            'public class LauncherNavbarUris {\n' + '\n'.join(classes) + '\n}\n')
+
+
+def check_launcher_navbar_uris(folder, sdk):
+    with tempfile.TemporaryDirectory(prefix='hecker-navbar-uris-') as temporary:
+        output = Path(temporary)
+        source = output / 'LauncherNavbarUris.java'
+        source.write_text(launcher_navbar_uri_probe(folder))
+        subprocess.run(['java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp',
+                        str(sdk / 'android-system.jar'), '-d', str(output / 'classes'),
+                        str(source)], check=True)
+    print('Both taskbar navigation-size URI declarations compile against the Android SDK')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cache', type=Path, default=ROOT / 'out/native-source-cache')
     parser.add_argument('--offline', action='store_true')
     parser.add_argument('--launcher-source', type=Path,
                         help='Read the pinned commit directly from an existing launcher Git checkout')
+    parser.add_argument('--sdk-cache', type=Path,
+                        help='Also compile the prepared taskbar navigation URI declarations with the locked SDK')
     args = parser.parse_args()
     sources = json.loads((ROOT / 'integration/source-revisions.json').read_text())['pixelos_inputs']
     launcher = json.loads((ROOT / 'launcher/ORIGIN.json').read_text())
@@ -185,6 +216,8 @@ def main():
         check_launcher_weather(folder)
         check_launcher_weather_module(folder)
         check_launcher_resource_scope(folder)
+        if args.sdk_cache:
+            check_launcher_navbar_uris(folder, args.sdk_cache.resolve())
         for plan in reversed(plans):
             write(plan(folder, replace_guarded, True))
         assert before == snapshot(folder), 'Revert changed upstream content'
