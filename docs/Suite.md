@@ -31,6 +31,11 @@ device-wide runtime configuration are overwritten.
 
 Use the coral build instructions in the root README. All sources are pinned by the dedicated HeckerOS local manifest. The complete product is `hecker_coral-hecker_suite-userdebug`; rebuilding Suite alone cannot enable framework, Settings or SystemUI changes.
 
+The development branch defaults to USB debugging without PC authorization on
+`userdebug`/`eng`. Build the final image with `HECKER_DEV_USB_ADB=false` to restore
+authorization. The helper verifies the resulting product properties; rebuild and
+flash before testing a mode change. See [development ADB](../rom/adb/README.md).
+
 The preparation command validates every source anchor before writing, is idempotent, and preserves backups under `out/hecker-suite-source-backups`. To undo only owned, unchanged adapters before syncing a different source baseline, run:
 
 ```bash

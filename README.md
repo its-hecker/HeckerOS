@@ -86,6 +86,12 @@ ZIP is named `HeckerOS_*.zip`. No stock PixelOS OTA channel is configured.
 Official identifies the maintainer's HeckerOS build channel. It does not establish
 a tested release, production signing keys, an OTA feed or a certification result.
 
+This development branch enables USB debugging and accepts every connected PC on
+`userdebug`/`eng` builds. For the final build, restore PC authorization with
+`HECKER_DEV_USB_ADB=false HECKER_BUILD_JOBS=8 bash .repo/local_manifests/build.sh`.
+Rebuild and flash to apply that change. See [development ADB](rom/adb/README.md)
+for property checks and dirty-flash behavior.
+
 Do not also copy `snippets/heckeros.xml` into `.repo/local_manifests`; it is the
 source template for the dedicated manifest, and would duplicate its projects.
 

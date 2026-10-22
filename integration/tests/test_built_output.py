@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from check_built_output import check, check_motion_sense, check_suite, check_librepods, SERVICE
+from check_built_output import check, check_development_adb, check_motion_sense, check_suite, check_librepods, SERVICE
 
 
 class BuiltOutputTests(unittest.TestCase):
@@ -55,9 +55,12 @@ class BuiltOutputTests(unittest.TestCase):
             properties.parent.mkdir(parents=True)
             properties.write_text("pixel.oslo.allowed_override=1\n")
             with patch("check_built_output.verify_installed") as apks, patch("check_built_output.check_suite"), \
-                    patch("check_built_output.check_librepods"):
+                    patch("check_built_output.check_librepods"), \
+                    patch("check_built_output.check_development_adb") as adb:
                 check(root, output)
                 apks.assert_called_once_with(root, output)
+                adb.assert_called_once()
+                self.assertEqual((output,), adb.call_args.args)
             init.write_text("service camera /wrong/binary\n")
             with self.assertRaisesRegex(ValueError, "exact camera provider init"):
                 check(root, output)
@@ -80,6 +83,61 @@ class BuiltOutputTests(unittest.TestCase):
             legacy = output / "product/build.prop"
             properties.rename(legacy)
             check_motion_sense(output)
+
+    def test_development_adb_requires_an_unambiguous_built_mode(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            with self.assertRaisesRegex(ValueError, "missing development ADB"):
+                check_development_adb(output)
+            properties = output / "product/etc/build.prop"
+            properties.parent.mkdir(parents=True)
+            for value in ("", "ro.heckeros.dev_usb_adb=true\n",
+                          "ro.heckeros.dev_usb_adb=1\nro.heckeros.dev_usb_adb=1\n"):
+                with self.subTest(properties=value):
+                    properties.write_text(value)
+                    with self.assertRaisesRegex(ValueError, "exactly one ro.heckeros"):
+                        check_development_adb(output)
+
+    def test_development_adb_checks_authentication_and_usb_defaults(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            properties = output / "product/etc/build.prop"
+            properties.parent.mkdir(parents=True)
+            for mode, secure in (("1", "0"), ("0", "1")):
+                base = "ro.heckeros.dev_usb_adb=" + mode + "\n"
+                usb = "persist.sys.usb.config=adb\n" if mode == "1" else ""
+                for value in ("", "ro.adb.secure=" + ("1" if secure == "0" else "0") + "\n",
+                              "ro.adb.secure=" + secure + "\nro.adb.secure=" + secure + "\n"):
+                    with self.subTest(mode=mode, properties=value):
+                        properties.write_text(base + value + usb)
+                        with self.assertRaisesRegex(ValueError, "exactly one ro.adb.secure=" + secure):
+                            check_development_adb(output)
+                properties.write_text(base + "ro.adb.secure=" + secure + "\n" + usb)
+                check_development_adb(output)
+            base = "ro.heckeros.dev_usb_adb=1\nro.adb.secure=0\n"
+            for usb in ("", "persist.sys.usb.config=mtp\n",
+                        "persist.sys.usb.config=adb\npersist.sys.usb.config=adb\n"):
+                properties.write_text(base + usb)
+                with self.assertRaisesRegex(ValueError, "USB default containing adb"):
+                    check_development_adb(output)
+            properties.write_text(base + "persist.sys.usb.config=mtp,adb\n")
+            check_development_adb(output)
+            properties.rename(output / "product/build.prop")
+            check_development_adb(output)
+
+    def test_development_adb_detects_a_final_switch_that_did_not_reach_the_image(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            properties = output / "product/etc/build.prop"
+            properties.parent.mkdir(parents=True)
+            for mode, secure, expected in (("1", "0", "true"), ("0", "1", "false")):
+                properties.write_text("ro.heckeros.dev_usb_adb=" + mode + "\nro.adb.secure=" + secure +
+                                      "\npersist.sys.usb.config=adb\n")
+                check_development_adb(output, expected)
+                with self.assertRaisesRegex(ValueError, "differs from HECKER_DEV_USB_ADB"):
+                    check_development_adb(output, "false" if expected == "true" else "true")
+                with self.assertRaisesRegex(ValueError, "must be true or false"):
+                    check_development_adb(output, "1")
 
     def test_suite_requires_installed_apk_and_matching_permission_xml(self):
         with tempfile.TemporaryDirectory() as directory:
