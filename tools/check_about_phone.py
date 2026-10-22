@@ -50,14 +50,19 @@ def check_branding(vendor):
             else:
                 text += "include vendor/custom/config/common_full_phone.mk\n"
             text += ("$(info PROPS=$(PRODUCT_PRODUCT_PROPERTIES))\n"
+                     "$(info SYSTEM_PROPS=$(PRODUCT_SYSTEM_PROPERTIES) $(PRODUCT_SYSTEM_DEFAULT_PROPERTIES))\n"
                      "$(info PACKAGES=$(PRODUCT_PACKAGES))\nall:\n\t@:\n")
             result = run("make", "--no-print-directory", "-f", "-", "all", cwd=rom,
                          input=text, text=True, capture_output=True)
             lines = result.stdout.splitlines()
             props = next(line[6:].split() for line in lines if line.startswith("PROPS="))
+            system_props = next(line[len("SYSTEM_PROPS="):].split() for line in lines
+                                if line.startswith("SYSTEM_PROPS="))
             packages = next(line[9:].split() for line in lines if line.startswith("PACKAGES="))
             version = next(value for value in props if value.startswith("ro.custom.version="))
             if product == "hecker_coral":
+                assert not system_props, ("Device properties violate generic_system artifact "
+                                          "requirements: " + " ".join(system_props))
                 assert version.startswith("ro.custom.version=HeckerOS_"), result.stdout
                 assert props.count("ro.heckeros.build_type=OFFICIAL") == 1, result.stdout
                 assert props.count("ro.heckeros.maintainer=Hecker") == 1, result.stdout
