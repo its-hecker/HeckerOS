@@ -27,9 +27,14 @@ def launcher_plan(rom, replace, revert=False):
               for path in (ROOT / "launcher/src").glob("*.java")}
     copies.update({"generated/hecker-suite/res/" + str(path.relative_to(ROOT / "launcher/res")): path
                    for path in (ROOT / "launcher/res").rglob("*") if path.is_file()})
-    copies.update({"generated/hecker-google-weather/" + str(path.relative_to(ROOT / "launcher/compat/googleweather")): path
-                   for path in (ROOT / "launcher/compat/googleweather").rglob("*")
-                   if path.is_file() and path.name != "ORIGIN.json"})
+    weather = ROOT / "launcher/compat/googleweather"
+    for source in weather.rglob("*"):
+        if not source.is_file() or source.name == "ORIGIN.json": continue
+        relative = source.relative_to(weather)
+        # Only the generated checkout owns this Soong module. The Suite keeps
+        # an inert template so scanning both source trees cannot define it twice.
+        if source.name == "Android.bp.in": relative = relative.with_name("Android.bp")
+        copies["generated/hecker-google-weather/" + str(relative)] = source
     upgrades = json.loads((ROOT / "launcher/copy-upgrades.json").read_text())
     for relative, source in copies.items():
         path = launcher / relative

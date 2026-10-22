@@ -64,6 +64,19 @@ def check_launcher_weather(folder):
     print('Launcher keeps Google weather; OmniJaws startup, fallback and controls are absent')
 
 
+def check_launcher_weather_module(folder):
+    generated = folder / 'packages/apps/Launcher3/generated/hecker-google-weather'
+    expected = generated / 'Android.bp'
+    # Soong discovers both the Suite sources and the prepared launcher. Checking
+    # only the generated module misses an active definition in its source folder.
+    definitions = [path for root in (ROOT / 'launcher/compat', generated)
+                   for path in root.rglob('Android.bp')
+                   if re.search(r'\bname\s*:\s*"HeckerLauncherGoogleWeather"', path.read_text())]
+    assert definitions == [expected], 'Duplicate or missing Google weather module: ' + str(definitions)
+    assert list((generated / 'src').rglob('*.kt')), 'Google weather module has no Kotlin sources'
+    print('HeckerLauncherGoogleWeather has exactly one active Soong definition')
+
+
 def check_launcher_resource_scope(folder):
     launcher = folder / 'packages/apps/Launcher3'
     bp = (launcher / 'Android.bp').read_text()
@@ -170,6 +183,7 @@ def main():
             assert not plan(folder, replace_guarded), 'Adapter is not idempotent'
         check_bootanimation_owner(folder)
         check_launcher_weather(folder)
+        check_launcher_weather_module(folder)
         check_launcher_resource_scope(folder)
         for plan in reversed(plans):
             write(plan(folder, replace_guarded, True))
