@@ -1,0 +1,21 @@
+<resources>
+    <string name="sandbox_title">Sandboxed apps</string>
+    <string name="sandbox_summary">Per-app network, shared storage and data isolation</string>
+    <string name="sandbox_description">Choose restrictions for an installed app. Applying a change stops the app; its next launch uses the new restrictions. System apps and apps sharing a UID are excluded.</string>
+    <string name="sandbox_default">Standard Android sandbox</string>
+    <string name="sandbox_active">Additional restrictions enabled</string>
+    <string name="sandbox_data">Isolate app data</string>
+    <string name="sandbox_network">Restrict network access</string>
+    <string name="sandbox_storage">Restrict shared storage</string>
+    <string name="sandbox_apply">Apply and stop app</string>
+    <string name="sandbox_changed">Saved. Open the app again to use its updated sandbox.</string>
+    <string name="sandbox_failed">Could not update this app. Check that it is still installed and try again.</string>
+    <string name="sandbox_invalid">The sandbox configuration could not be read. No changes were made.</string>
+    <string name="headphones_title">Headphones</string>
+    <string name="headphones_summary">Connection popups for AirPods, Soundcore and other headphones</string>
+    <string name="headphones_description">Show a connection card while your phone is unlocked. Battery details depend on what your headphones report. Unsupported readings are left unavailable.</string>
+    <string name="headphones_popup">Show connection popup</string>
+    <string name="headphones_airpods">AirPods controls</string>
+    <string name="headphones_airpods_summary">Set up LibrePods for additional AirPods battery information and supported controls.</string>
+    <string name="headphones_airpods_unavailable">LibrePods is unavailable in this build.</string>
+</resources>

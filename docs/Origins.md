@@ -45,3 +45,11 @@ OmniJaws is not shipped or synced. The launcher retains its licensed client type
 for source compatibility, but the OmniJaws provider startup/fallback and provider
 preferences are disabled. Google weather remains available through the separate
 Seraphix integration when its provider is present.
+
+Sandboxed-app restrictions retain AxionOS attribution and use the immutable SDK
+and Infinity-X UI revisions in `framework/sandbox/ORIGIN.json`. The scope and
+native ProcessList adaptation are documented in `docs/device-features.md`.
+LibrePods is a separate, original-signed GPL-3.0-or-later app; its exact release,
+corresponding source and APK hash are in `prebuilts/librepods/source.json`.
+Recovery's five caracal images reuse the approved Hecker mascot and match the
+pinned PixelOS recovery's resource format; see `recovery/README.md`.

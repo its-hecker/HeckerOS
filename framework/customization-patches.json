@@ -272,5 +272,29 @@
       "old": "    name: \"bootanimation_pixelos\",",
       "new": "    name: \"bootanimation_pixelos\",\n    // HeckerOS owns product/media/bootanimation.zip; disable the other install rule.\n    enabled: false,"
     }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/SystemUIService.java": [
+    {
+      "old": "        ((SystemUIApplication) getApplication()).startSystemUserServicesIfNeeded();",
+      "new": "        ((SystemUIApplication) getApplication()).startSystemUserServicesIfNeeded();\n        com.android.systemui.hecker.HeckerHeadphonePopup.start(this);"
+    }
+  ],
+  "frameworks/base/services/core/java/com/android/server/am/ProcessList.java": [
+    {
+      "old": "                gids = computeGidsForProcess(mountExternal, uid, permGids, externalStorageAccess);",
+      "new": "                gids = computeGidsForProcess(mountExternal, uid, permGids, externalStorageAccess);\n                gids = com.android.internal.hecker.HeckerSandboxRules.restrictGids(gids,\n                        HeckerSandboxPolicy.mask(mService.mContext, app.info, app.userId));"
+    },
+    {
+      "old": "        return mVoldAppDataIsolationEnabled && UserHandle.isApp(app.uid)",
+      "new": "        return (mVoldAppDataIsolationEnabled\n                || HeckerSandboxPolicy.isolate(mService.mContext, app.info, app.userId))\n                && UserHandle.isApp(app.uid)"
+    },
+    {
+      "old": "            boolean bindMountAppsData = mAppDataIsolationEnabled",
+      "new": "            boolean heckerSandboxDataIsolation = HeckerSandboxPolicy.isolate(\n                    mService.mContext, app.info, app.userId);\n            boolean bindMountAppsData = (mAppDataIsolationEnabled || heckerSandboxDataIsolation)"
+    },
+    {
+      "old": "                    && mPlatformCompat.isChangeEnabled(APP_DATA_DIRECTORY_ISOLATION, app.info);",
+      "new": "                    && (heckerSandboxDataIsolation\n                        || mPlatformCompat.isChangeEnabled(APP_DATA_DIRECTORY_ISOLATION, app.info));"
+    }
   ]
 }

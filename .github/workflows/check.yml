@@ -35,6 +35,8 @@ jobs:
         run: bash tests/run_host_tests.sh
       - name: Compile Suite Java and link Android resources with locked dependencies
         run: python3 tools/compile_sdk.py --cache generated/sdk
+      - name: Compile headphone and sandbox native adapter Java and resources
+        run: python3 tools/check_device_features.py --sdk-cache generated/sdk
       - name: Compile native About Phone and verify HeckerOS release identity
         run: python3 tools/check_about_phone.py --sdk-cache generated/sdk
       - name: Merge the native and standalone Motion Sense manifests with Android 17's merger
@@ -54,7 +56,9 @@ jobs:
       - name: Verify all pinned theme payloads
         run: python3 tools/fetch_theme_assets.py
       - name: Compile Settings artwork and layouts
-        run: generated/sdk/aapt2 compile --dir settings/res -o /tmp/hecker-settings-resources.zip
+        run: |
+          generated/sdk/aapt2 compile --dir settings/res -o /tmp/hecker-settings-resources.zip
+          generated/sdk/aapt2 compile --dir motion/res -o /tmp/hecker-motion-resources.zip
   boot-assets:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04

@@ -36,5 +36,14 @@
   "packages/apps/Settings/res/drawable/hecker_about_badge.xml": "settings/res/drawable/hecker_about_badge.xml",
   "packages/apps/Settings/res/layout/hecker_about_phone.xml": "settings/res/layout/hecker_about_phone.xml",
   "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutPhonePreference.java": "settings/src/com/android/settings/hecker/HeckerAboutPhonePreference.java",
-  "packages/apps/Settings/src/com/android/settings/hecker/HeckerPhoneArtView.java": "settings/src/com/android/settings/hecker/HeckerPhoneArtView.java"
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerPhoneArtView.java": "settings/src/com/android/settings/hecker/HeckerPhoneArtView.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeadphoneBattery.java": "framework/headphones/HeadphoneBattery.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerHeadphonePopup.java": "framework/headphones/HeckerHeadphonePopup.java",
+  "frameworks/base/packages/SystemUI/res/drawable/hecker_headphones_art.xml": "framework/headphones/hecker_headphones_art.xml",
+  "frameworks/base/packages/SystemUI/res/values/hecker_headphones.xml": "framework/headphones/strings.xml",
+  "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_headphones.xml": "framework/headphones/strings-zh.xml",
+  "frameworks/base/core/java/com/android/internal/hecker/HeckerSandboxRules.java": "framework/sandbox/HeckerSandboxRules.java",
+  "frameworks/base/services/core/java/com/android/server/am/HeckerSandboxPolicy.java": "framework/sandbox/HeckerSandboxPolicy.java",
+  "packages/apps/Settings/res/drawable/hecker_button_background.xml": "settings/res/drawable/hecker_button_background.xml",
+  "packages/apps/Settings/res/values-zh-rCN/hecker_strings.xml": "settings/res/values-zh-rCN/hecker_strings.xml"
 }

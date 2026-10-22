@@ -49,7 +49,7 @@ final class SuiteAbout {
         TextView address = Ui.text(activity, activity.getString(value), 15, false);
         address.setTextIsSelectable(true);
         card.addView(address);
-        android.widget.Button copy = new android.widget.Button(activity);
+        android.widget.Button copy = Ui.button(activity);
         copy.setText(R.string.about_copy);
         copy.setContentDescription(activity.getString(R.string.about_copy_address, activity.getString(title)));
         copy.setOnClickListener(v -> {

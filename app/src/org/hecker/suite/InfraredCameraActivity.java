@@ -90,7 +90,7 @@ public final class InfraredCameraActivity extends Activity {
         page.addView(status);
         page.addView(Ui.text(this, getString(R.string.ir_note), 14, false));
         LinearLayout buttons = new LinearLayout(this);
-        next = new Button(this);
+        next = Ui.button(this);
         next.setText(R.string.ir_switch);
         next.setEnabled(false);
         next.setOnClickListener(v -> {
@@ -100,13 +100,13 @@ public final class InfraredCameraActivity extends Activity {
             openSensor();
         });
         buttons.addView(next, new LinearLayout.LayoutParams(0, -2, 1));
-        save = new Button(this);
+        save = Ui.button(this);
         save.setText(R.string.ir_save);
         save.setEnabled(false);
         save.setOnClickListener(v -> savePhoto());
         buttons.addView(save, new LinearLayout.LayoutParams(0, -2, 1));
         page.addView(buttons);
-        Button retry = new Button(this);
+        Button retry = Ui.button(this);
         retry.setText(R.string.ir_retry);
         retry.setOnClickListener(v -> startPreview());
         page.addView(retry);

@@ -83,6 +83,7 @@ $(call inherit-product, vendor/hecker/floral/faceid/faceid.mk)
 # Use the original signed Camera package tested on Infinity-X Coral.
 $(call inherit-product, vendor/hecker/floral/suite/prebuilts/google-camera/camera.mk)
 PRODUCT_PACKAGES := $(filter-out Aperture Camera2,$(PRODUCT_PACKAGES))
+PRODUCT_PACKAGES += HeckerLibrePods
 
 # Preserve bounded startup evidence on userdebug/eng builds.
 include vendor/hecker/floral/suite/rom/boot_diagnostics/boot_capture.mk

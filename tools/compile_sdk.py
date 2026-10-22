@@ -96,7 +96,8 @@ def main():
         run("java", "-m", "jdk.compiler/com.sun.tools.javac.Main", "-cp", classpath,
             "-d", output / "classes", output / "generated/org/hecker/suite/R.java",
             *sorted((ROOT / "tests/platform-api-stubs").rglob("*.java")),
-            *sorted((ROOT / "app/src").rglob("*.java")))
+            *sorted((ROOT / "app/src").rglob("*.java")),
+            ROOT / "framework/sandbox/HeckerSandboxRules.java")
         # Compile exactly the Settings UI module without backend classes on its
         # classpath, so a feature Activity reference cannot silently join its UID.
         (output / "settings-ui-classes").mkdir()

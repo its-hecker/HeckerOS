@@ -97,11 +97,12 @@ fun HeckerTileGrid(
             (regular.take(2) + regular.drop(2 + columns * 2)).chunked(2 + columns * 2)
     } else regular.chunked(2 + columns * 2).ifEmpty { listOf(emptyList()) }
     val pager = rememberPagerState(pageCount = { pages.size })
-    Column(modifier = modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp))
-        .background(MaterialTheme.colorScheme.surface.copy(alpha = .72f)).padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    // One UI-style modules: connectivity, tile tray and controls have separate
+    // surfaces, rather than disappearing into one large enclosing card.
+    Column(modifier = modifier.fillMaxWidth().padding(horizontal = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)) {
         if (compact) {
-            HeckerRows(regular, columns, true)
+            HeckerRows(regular, columns, true, largeFirst = false)
         } else {
             if (customized && pager.currentPage == 0) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -129,27 +130,37 @@ fun HeckerTileGrid(
                         .background(MaterialTheme.colorScheme.onSurface.copy(alpha = if (pager.currentPage == page) .9f else .3f), CircleShape))
                 }
             }
-            if (!customized && brightness != null) brightness()
-            if (!customized) HeckerVolumeSlider()
-            if (includeFooter && foot.isNotEmpty()) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                foot.filter { !customized || it.spec.spec != SUITE }.forEach { tile ->
-                    HeckerTile(tile, false, Modifier.weight(1f))
-                }
+            if (!customized) Column(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = .94f))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (brightness != null) brightness()
+                HeckerVolumeSlider()
             }
+            if (includeFooter && foot.isNotEmpty()) HeckerTileFooter(tiles)
         }
     }
 }
 
 @Composable
 private fun HeckerRows(tiles: List<TileViewModel>, columns: Int, compact: Boolean, largeFirst: Boolean = true) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        if (largeFirst) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        if (largeFirst && tiles.isNotEmpty()) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             tiles.take(2).forEach { tile -> HeckerTile(tile, true, Modifier.weight(1f)) }
+            if (tiles.size == 1) Spacer(Modifier.weight(1f))
         }
-        (if (largeFirst) tiles.drop(2) else tiles).chunked(columns).forEach { row ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                row.forEach { tile -> HeckerTile(tile, false, Modifier.weight(1f), showLabels = !compact) }
-                repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+        val small = if (largeFirst) tiles.drop(2) else tiles
+        if (small.isNotEmpty()) Column(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(30.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = .94f))
+                .padding(horizontal = 12.dp, vertical = if (compact) 8.dp else 16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            small.chunked(columns).forEach { row ->
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    row.forEach { tile -> HeckerTile(tile, false, Modifier.weight(1f), showLabels = !compact) }
+                    repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+                }
             }
         }
     }
@@ -162,7 +173,7 @@ private fun HeckerTile(tile: TileViewModel, large: Boolean, modifier: Modifier, 
     val state by produceState(tile.currentState, tile) { tile.state.collect { value = it } }
     val ui = state.toUiState(resources)
     val active = ui.visualState == Tile.STATE_ACTIVE
-    val accent by animateColorAsState(if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest, label = "Hecker tile state")
+    val accent by animateColorAsState(if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = .10f), label = "Hecker tile state")
     val foreground = if (active) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
     val accessibility = ui.accessibilityUiState
     val actions = Modifier.semantics(mergeDescendants = true) {
@@ -186,15 +197,16 @@ private fun HeckerTile(tile: TileViewModel, large: Boolean, modifier: Modifier, 
         }
     }
     val labels: @Composable () -> Unit = {
-        Text(ui.label, color = MaterialTheme.colorScheme.onSurface, fontSize = if (large) 14.sp else 11.sp,
-            fontWeight = FontWeight.Medium, maxLines = if (large) 1 else 2, overflow = TextOverflow.Ellipsis,
+        Text(ui.label, color = if (large && active) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface, fontSize = if (large) 15.sp else 12.sp,
+            fontWeight = FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis,
             textAlign = if (large) TextAlign.Start else TextAlign.Center)
-        if (ui.secondaryLabel.isNotBlank()) Text(ui.secondaryLabel, color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+        if (ui.secondaryLabel.isNotBlank()) Text(ui.secondaryLabel, color = if (large && active) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = .8f) else MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
             textAlign = if (large) TextAlign.Start else TextAlign.Center)
     }
-    if (large) Row(modifier.clip(RoundedCornerShape(24.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow)
-        .then(actions).heightIn(min = 78.dp).padding(8.dp), verticalAlignment = Alignment.CenterVertically,
+    if (large) Row(modifier.clip(RoundedCornerShape(30.dp)).background(
+        if (active) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = .94f))
+        .then(actions).heightIn(min = 92.dp).padding(12.dp), verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         icon()
         Column(Modifier.weight(1f)) { labels() }

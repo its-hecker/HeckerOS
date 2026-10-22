@@ -25,7 +25,7 @@
     <string name="about_group">Telegram community</string>
     <string name="about_group_summary">Chat, feedback and support · @Pixel4Roms</string>
     <string name="about_source">Project source</string>
-    <string name="about_source_summary">Hecker\'s experimental PixelOS project on GitHub</string>
+    <string name="about_source_summary">HeckerOS open-source project on GitHub</string>
     <string name="about_donate">Buy Hecker a coffee ☕</string>
     <string name="about_donate_summary">Optional support for the project. Tap Copy to copy the exact ID or address.</string>
     <string name="about_binance">Binance ID</string>
@@ -36,5 +36,5 @@
     <string name="about_copy_address">Copy %1$s</string>
     <string name="about_link_unavailable">Install a browser or Telegram to open this link.</string>
     <string name="about_credits">Built with open source</string>
-    <string name="about_credits_body">PixelOS and AOSP. Hecker\'s Launcher is based on RisingOS Revived\'s Ortus Launcher, with contributions from LineageOS, crDroid, Lawnchair and other upstream projects. Original Motion Sense port by Dirty Unicorns and Aswin. Original licenses and contributor credits are retained in the source.</string>
+    <string name="about_credits_body">PixelOS and AOSP. Hecker\'s Launcher is based on RisingOS Revived\'s Ortus Launcher, with contributions from LineageOS, crDroid, Lawnchair and other upstream projects. Original Motion Sense port by Dirty Unicorns and Aswin. Sandboxed-app restrictions are adapted from AxionOS and Infinity-X. AirPods support is provided by LibrePods. Original licenses and contributor credits are retained in the source.</string>
 </resources>

@@ -72,7 +72,7 @@ public final class ThemePackActivity extends Activity {
             card.addView(Ui.text(this, theme.optString("name") + (theme.optString("id").equals(selected) ? " ✓" : ""), 20, true));
             card.addView(Ui.text(this, theme.optString("description") + "\n" + theme.optString("author"), 13, false));
             preview(card, theme);
-            android.widget.Button choose = new android.widget.Button(this); choose.setText(R.string.theme_apply);
+            android.widget.Button choose = Ui.button(this); choose.setText(R.string.theme_apply);
             choose.setOnClickListener(v -> new AlertDialog.Builder(this).setTitle(theme.optString("name"))
                     .setMessage(R.string.theme_apply_message).setPositiveButton(R.string.theme_apply, (d, which) -> apply(theme))
                     .setNegativeButton(android.R.string.cancel, null).show());

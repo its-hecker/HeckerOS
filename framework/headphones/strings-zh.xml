@@ -1,0 +1,12 @@
+<resources>
+    <string name="hecker_headphones">耳机</string>
+    <string name="hecker_headphones_wired">有线耳机</string>
+    <string name="hecker_headphones_connected">已连接</string>
+    <string name="hecker_headphones_settings">蓝牙设置</string>
+    <string name="hecker_headphones_battery">电量 %1$d%%</string>
+    <string name="hecker_headphones_battery_unknown">暂时无法获取电量信息</string>
+    <string name="hecker_headphones_left">左耳</string>
+    <string name="hecker_headphones_right">右耳</string>
+    <string name="hecker_headphones_case">充电盒</string>
+    <string name="hecker_headphones_sound_settings">声音设置</string>
+</resources>

@@ -49,7 +49,7 @@ public final class LauncherSettingsActivity extends Activity {
             LinearLayout restart = Ui.card(this);
             restart.addView(Ui.text(this, getString(R.string.launcher_restart_needed), 19, true));
             restart.addView(Ui.text(this, getString(R.string.launcher_restart_body), 15, false));
-            Button button = new Button(this);
+            Button button = Ui.button(this);
             button.setText(R.string.launcher_restart);
             button.setEnabled(!switching);
             button.setOnClickListener(v -> new AlertDialog.Builder(this)
@@ -77,7 +77,7 @@ public final class LauncherSettingsActivity extends Activity {
         LinearLayout card = Ui.card(this);
         card.addView(Ui.text(this, getString(title), 23, true));
         card.addView(Ui.text(this, getString(summary), 15, false));
-        Button select = new Button(this);
+        Button select = Ui.button(this);
         boolean installed = controller.installed(packageName);
         boolean selected = packageName.equals(controller.current()) && controller.matches(packageName);
         select.setText(!installed ? R.string.launcher_not_installed : switching ? R.string.launcher_switching

@@ -23,3 +23,10 @@ java -cp "$suite_test_output" org.hecker.suite.GamingPolicyTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     framework/lyrics/LyricsPolicy.java tests/LyricsPolicyTest.java
 java -cp "$suite_test_output" com.android.systemui.hecker.LyricsPolicyTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/headphones/HeadphoneBattery.java tests/HeadphoneBatteryTest.java
+java -cp "$suite_test_output" com.android.systemui.hecker.HeadphoneBatteryTest
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/sandbox/HeckerSandboxRules.java tests/HeckerSandboxRulesTest.java
+java -cp "$suite_test_output" com.android.internal.hecker.HeckerSandboxRulesTest

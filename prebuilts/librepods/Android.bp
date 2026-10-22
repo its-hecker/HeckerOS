@@ -1,0 +1,37 @@
+package {
+    default_applicable_licenses: ["hecker_librepods_license"],
+}
+
+license {
+    name: "hecker_librepods_license",
+    license_kinds: ["SPDX-license-identifier-GPL-3.0"],
+    license_text: ["LICENSE"],
+}
+
+// Keep the upstream signature so its app identity and update checks stay valid.
+android_app_import {
+    name: "HeckerLibrePods",
+    apk: "prebuilt/LibrePods.apk",
+    presigned: true,
+    preprocessed: true,
+    privileged: true,
+    system_ext_specific: true,
+    dex_preopt: { enabled: false },
+    required: ["HeckerLibrePodsPermissions", "HeckerLibrePodsDefaults"],
+}
+
+prebuilt_etc {
+    name: "HeckerLibrePodsPermissions",
+    src: "privapp-permissions-librepods.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}
+
+prebuilt_etc {
+    name: "HeckerLibrePodsDefaults",
+    src: "default-permissions-librepods.xml",
+    filename_from_src: true,
+    sub_dir: "default-permissions",
+    system_ext_specific: true,
+}

@@ -11,6 +11,7 @@ import sys
 import xml.etree.ElementTree as ET
 from launcher_port import launcher_plan
 from customization_port import customization_plan
+from recovery_port import recovery_plan
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -295,6 +296,15 @@ def motion_plan(rom, revert=False):
                 target = re.sub(r"\b" + re.escape(old) + r"\b", new, target)
             if target != current:
                 changes[path] = target
+    # UI-only translations are shared by the standalone app and native Settings.
+    locale = settings / "res/values-zh-rCN/hecker_motion_strings.xml"
+    expected = (ROOT / "motion/res/values-zh-rCN/strings.xml").read_text()
+    if locale.exists() and locale.read_text() != expected:
+        raise ValueError("Preserving unfamiliar Motion Sense translations: " + str(locale))
+    if revert:
+        if locale.exists(): changes[locale] = None
+    elif not locale.exists():
+        changes[locale] = expected
     return changes
 
 
@@ -328,6 +338,7 @@ def plan(rom, revert=False):
     changes.update(motion_plan(rom, revert))
     changes.update(launcher_plan(rom, replace_guarded, revert))
     changes.update(customization_plan(rom, replace_guarded, revert))
+    changes.update(recovery_plan(rom, revert))
     return changes
 
 

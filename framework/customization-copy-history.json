@@ -1,0 +1,116 @@
+{
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/LyricsController.java": [
+    "19d7f073e40903d5d81ce208a490772f29bc84bc"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerLockscreenLyrics.kt": [
+    "191e12def55cc7967f3e09efad53bce28d54850b"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/LyricsPolicy.java": [
+    "2433e96772ed18fe4b9666846e49f16c44715b9b"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQuickSettings.kt": [
+    "96e250b69d2ba3e6a4d353eea9cbe68cb891ddf9"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerBattery.kt": [
+    "006348861f13e89e4a0c1be873e91c8f8e8d50fc"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerBatteryDrawable.java": [
+    "896bb6fead26af0fe224d311886fe736f11d2d03"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerThemeAssets.kt": [
+    "3c28bc60f5b84e5ad9625291968218c65467a780"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerChargingAnimation.kt": [
+    "dd677705deee6dc099e9cb2e18f4004fbed80dbd"
+  ],
+  "frameworks/base/core/java/android/content/res/IThemeEngineCallback.aidl": [
+    "301ff86b863b56de083ae6b59ed3fb1809703aba"
+  ],
+  "frameworks/base/core/java/android/content/res/ThemeEngine.java": [
+    "92c50c5e65bdd9547c743d6dd987c8e932835941"
+  ],
+  "frameworks/base/services/core/java/com/android/server/theme/ThemeEngineManagerService.java": [
+    "98f55684b508bbb90485a4db8d6af1e7f040c357"
+  ],
+  "frameworks/base/core/java/android/content/res/IThemeEngineManager.aidl": [
+    "77d4a4ec040b7dc0b8e754e84da3898dc549e595"
+  ],
+  "frameworks/base/packages/SystemUI/res/values/hecker_strings.xml": [
+    "9f0cc01563b91a8b5f56ba385a4d0d287a199598"
+  ],
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerBrandPreference.java": [
+    "6f5ddd26068e7b517bc83b72189993087b28fc86"
+  ],
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerHomeDecoration.java": [
+    "fd89cc5835425bff36c980c5d8e8bdb5c6b517d9"
+  ],
+  "packages/apps/Settings/res/xml/hecker_display_settings.xml": [
+    "0510f3f2cb179e4ceaa9d7f2580f8b1122a5f13b"
+  ],
+  "packages/apps/Settings/res/xml/hecker_top_level_settings.xml": [
+    "b9a7bc388864e37b7c3d45b77e47ccc7e9c93441"
+  ],
+  "packages/apps/Settings/res/drawable-nodpi/hecker_mascot.webp": [
+    "ca0de473fd30634dea9643d4b87ac3de476f45bb"
+  ],
+  "packages/apps/Settings/res/values/hecker_strings.xml": [
+    "302bf3412d1f63bf8710f9ec3197abf15762f74a"
+  ],
+  "packages/apps/Settings/res/values/hecker_colors.xml": [
+    "cb0f40c0a8e89448df5fb77bb9384f1f3a44e78f"
+  ],
+  "packages/apps/Settings/res/values-night/hecker_colors.xml": [
+    "95315016a56f86b944c68b89e0d69044aa084603"
+  ],
+  "packages/apps/Settings/res/layout/hecker_maintainer_preference.xml": [
+    "9fa88fdeb1c4acb6ed8734a07e21a668173a0fba"
+  ],
+  "packages/apps/Settings/res/layout/hecker_homepage_preference.xml": [
+    "a50ae92a32d573414ab3fcdd24f607777ae10304"
+  ],
+  "packages/apps/Settings/res/layout/hecker_settings_homepage_container.xml": [
+    "052f3cb21a8875a1263552ab0f6968984487af12"
+  ],
+  "packages/apps/Settings/res/layout/hecker_brand_preference.xml": [
+    "a7eac5fcc47fa9a0b65a720606ab8c32480eb0c7"
+  ],
+  "packages/apps/Settings/res/drawable/hecker_text.xml": [
+    "a8773b27e38625a8302507e1452f1594be7af39a"
+  ],
+  "packages/apps/Settings/res/drawable/hecker_lock.xml": [
+    "e80d3b730dfb1b9280d2c3c41e23966fa149f868"
+  ],
+  "packages/apps/Settings/res/drawable/hecker_palette.xml": [
+    "ccf9735e370985ab9938c991b870090f46788e64"
+  ],
+  "packages/apps/Settings/res/drawable/hecker_moon.xml": [
+    "651802ad29000a8d13bdf98636e6c96b74dd3e50"
+  ],
+  "packages/apps/Settings/res/drawable/hecker_refresh.xml": [
+    "a7f71a5c5a4c748d0ae9ce86e0bfb1a395611c45"
+  ],
+  "packages/apps/Settings/res/drawable/hecker_card_background.xml": [
+    "58240deea76ab272bfbb162f140d3e71270dd8cf"
+  ],
+  "packages/apps/Settings/res/drawable/hecker_icon_background.xml": [
+    "ca897b15ce2a756978048cbe2c7fd00a9ccd553b"
+  ],
+  "packages/apps/Settings/res/drawable/hecker_phone_art.xml": [
+    "f1b48ff64ed49461d8f4f038c445e0ff342a759d"
+  ],
+  "packages/apps/Settings/res/values/hecker_about.xml": [
+    "baa4ffbf0378f96989063ecbadf6a918abc9a367"
+  ],
+  "packages/apps/Settings/res/drawable/hecker_about_badge.xml": [
+    "13ce12648574681cc80aef09c067d6fee26f2096"
+  ],
+  "packages/apps/Settings/res/layout/hecker_about_phone.xml": [
+    "5718081f197c2b5a8c0616fd55ce92f760ed6f16"
+  ],
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutPhonePreference.java": [
+    "19e0f05a03cb342192a98c411420f5572b8d0da9"
+  ],
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerPhoneArtView.java": [
+    "ec19450074e3ee432a4365be162f67c99eff4a16"
+  ]
+}

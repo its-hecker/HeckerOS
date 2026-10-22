@@ -3,7 +3,9 @@
     <color name="hecker_card">#101C28</color>
     <color name="hecker_border">#26384D</color>
     <color name="hecker_foreground">#E2E9FA</color>
-    <color name="hecker_secondary">#95A8C5</color>
+    <color name="hecker_secondary">#B2C1D8</color>
     <color name="hecker_accent">#7DAAFF</color>
     <color name="hecker_icon_background">#203958</color>
+    <color name="hecker_button">#263B56</color>
+    <color name="hecker_on_accent">#081527</color>
 </resources>

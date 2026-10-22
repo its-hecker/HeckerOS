@@ -28,7 +28,7 @@ def main():
         "android.permission.ACCESS_FPS_COUNTER", "android.permission.REAL_GET_TASKS",
         "android.permission.MANAGE_ACTIVITY_TASKS", "android.permission.START_ACTIVITIES_FROM_BACKGROUND",
         "android.permission.SYSTEM_ALERT_WINDOW", "android.permission.KILL_BACKGROUND_PROCESSES",
-        "android.permission.KILL_ALL_BACKGROUND_PROCESSES", "android.permission.CONTROL_DISPLAY_BRIGHTNESS",
+        "android.permission.KILL_ALL_BACKGROUND_PROCESSES", "android.permission.FORCE_STOP_PACKAGES", "android.permission.CONTROL_DISPLAY_BRIGHTNESS",
         "android.permission.MODIFY_AUDIO_SETTINGS", "android.permission.ACCESS_NETWORK_STATE",
         "android.permission.ACCESS_NOTIFICATION_POLICY", "android.permission.READ_FRAME_BUFFER",
         "android.permission.POST_NOTIFICATIONS", "android.permission.FOREGROUND_SERVICE",

@@ -13,6 +13,12 @@ platform customization forks use `heckeros-17`.
   maintainer/community access and an Official badge tied to build properties.
 - Native Quick Settings with large Wi-Fi/Bluetooth cards, round tiles, media,
   separate volume/brightness controls, and the optional HeckerOS dashboard layout.
+- Connection popups for Bluetooth, wired and USB headphones, including AirPods
+  and Soundcore R50i; original-signed LibrePods for optional AirPods controls.
+- Axion/Infinity-X sandboxed-app restrictions with per-user network/storage
+  controls and native app-data isolation; system/shared-UID packages are excluded.
+- HeckerOS recovery with the approved caracal logo, readable Suite text/buttons,
+  native Settings icons, and Simplified Chinese custom-page translations.
 - Hardware 3D Face Unlock and Motion Sense, with their ROM integration owned here.
   Face enrollment uses Hecker's curved 25-cell pose mesh, subtle capture feedback
   and missing-angle guidance over the native infrared preview.

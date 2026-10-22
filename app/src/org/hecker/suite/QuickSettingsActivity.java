@@ -19,6 +19,9 @@ public final class QuickSettingsActivity extends Activity {
         int current = Settings.Secure.getInt(getContentResolver(), "hecker_qs_layout", 0);
         for (int index = 0; index < names.length; index++) {
             RadioButton button = new RadioButton(this);
+            button.setTextColor(getColor(R.color.hecker_foreground));
+            button.setButtonTintList(android.content.res.ColorStateList.valueOf(getColor(R.color.hecker_accent)));
+            button.setPadding(0, Ui.dp(this, 10), 0, Ui.dp(this, 10));
             button.setText(names[index]); button.setId(index + 1); group.addView(button);
         }
         group.check(current == 1 ? 2 : 1);

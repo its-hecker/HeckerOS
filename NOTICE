@@ -10,3 +10,6 @@ The Lottie runtime is supplied by the ROM's external/lottie module (Apache-2.0).
 Caracal Settings artwork and boot keyframes are generated assets from the approved
 design references. No personal photographs, face templates or calibration are added.
 See docs/Origins.md for immutable source revisions and asset origins.
+Sandboxed-app GID/data isolation is adapted from AxionOS and Infinity-X (Apache-2.0).
+LibrePods is distributed separately under GPL-3.0-or-later, retaining its signature,
+copyright and license. See prebuilts/librepods for corresponding source references.
