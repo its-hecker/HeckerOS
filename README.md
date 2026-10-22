@@ -26,9 +26,11 @@ platform customization forks use `heckeros-17`.
   and missing-angle guidance over the native infrared preview.
 - Suite and Motion Sense pages built directly into Settings. Feature services
   retain their separate system UID; there are no extra launcher apps to install.
-- Native App Lock, infrared camera viewer, and an in-game Gaming dashboard with
-  real task FPS, battery temperature, controls and native popup app shortcuts.
-- Pixel Launcher and Ortus-derived **Hecker's Launcher**, including native double
+- Native App Lock, infrared camera viewer, and compact OEM-style **Game Space**
+  with a circular real-task FPS gauge, battery telemetry, red accents, game/app
+  tabs, capture controls and native floating app shortcuts. Performance profiles
+  are exposed only when the Android game service supports the active game.
+- Pixel Launcher and Infinity-X-derived **Hecker Launcher**, including native double
   tap to sleep, Lottie artwork and launcher selection. Changing the Recents
   provider requires the explicit reboot shown by Suite.
 - Opt-in synchronized lock-screen lyrics adapted from Infinity-X. The settings
@@ -63,13 +65,16 @@ that previously included it, preserve its locally adapted files before syncing:
 
 ```bash
 git -C .repo/local_manifests pull --ff-only
+python3 .repo/local_manifests/tools/retire_launcher.py
 python3 .repo/local_manifests/tools/retire_omnijaws.py
-repo sync -c -j2 --fail-fast --no-clone-bundle --no-tags vendor/hecker/floral/suite
+repo sync -c -j2 --fail-fast --no-clone-bundle --no-tags --force-sync vendor/hecker/floral/suite packages/apps/Launcher3 packages/apps/Settings
 HECKER_BUILD_JOBS=8 bash .repo/local_manifests/build.sh
 ```
 
 Run this from the existing Android source root. The retirement helper moves the
-old checkout under `out/retired-projects/`; the build helper uses `installclean`
+old checkouts and launcher edits under `out/retired-projects/`. Infinity-X is
+pinned from its official Gitea source, and its optional automation listener
+handles role-access rejection without preventing HOME from starting. The build helper uses `installclean`
 only if a removed app is still staged. Launcher weather uses the independent
 Google feed when available. ServerHive builds retain the provider's existing RBE
 environment and should run in the initialized Byobu build session.
@@ -101,6 +106,7 @@ policy, Google Camera packaging, boot diagnostics and branding live in this repo
 ```bash
 bash tests/run_host_tests.sh
 python3 tools/compile_sdk.py --cache generated/sdk
+python3 tools/check_launcher.py --sdk-cache generated/sdk
 python3 tools/check_about_phone.py --sdk-cache generated/sdk
 python3 tools/check_motion_manifest.py
 python3 tools/check_native_ports.py

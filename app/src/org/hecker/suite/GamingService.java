@@ -184,6 +184,15 @@ public final class GamingService extends Service implements GamingOverlay.Action
         }catch(SecurityException e){Log.w("HeckerGaming","Focus access was revoked",e);}
     }
     @Override public void panelChanged(boolean open){syncFps();}
+    @Override public boolean performanceSupported(){return GamingPlatform.performanceSupported(this,gamePackage);}
+    @Override public int gameMode(){return GamingPlatform.gameMode(this,gamePackage);}
+    @Override public void gameMode(int mode){
+        if(!active||gamePackage==null)return;
+        if(!GamingPlatform.gameMode(this,gamePackage,mode))toast(getString(R.string.gaming_mode_unavailable));
+        overlay.restyle();updateStatus();
+    }
+    @Override public String gameLabel(){return gamePackage==null?getString(R.string.gaming_title):GamingCatalog.label(this,gamePackage);}
+    @Override public void gameSpace(){startActivity(new Intent(this,GamingActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));}
     @Override public void clean(){
         if(!active||gamePackage==null)return;String protectedGame=gamePackage;
         worker.execute(()->{try{int count=GamingPlatform.clean(this,protectedGame);main.post(()->toast(getString(R.string.gaming_clean_result,count)));}
@@ -221,7 +230,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
         catch(ReflectiveOperationException|RuntimeException e){Log.w("HeckerGaming","Popup launch failed",e);toast(getString(R.string.gaming_popup_unavailable));}
     }
     @Override public void chooseShortcuts(){worker.execute(()->{
-        List<GamingCatalog.App> apps=GamingCatalog.load(this,false);main.post(()->{if(!destroyed&&active)overlay.showShortcutPicker(apps);});
+        List<GamingCatalog.App> apps=GamingCatalog.load(this,false);main.post(()->{if(!destroyed&&active&&overlay.isOpen())overlay.showShortcutPicker(apps);});
     });}
     @Override public void toggleShortcut(String pkg){
         if(!GamingPrefs.shortcuts(this).contains(pkg)&&GamingPrefs.shortcuts(this).size()>=5){toast(getString(R.string.gaming_limit));return;}GamingPrefs.toggleShortcut(this,pkg);

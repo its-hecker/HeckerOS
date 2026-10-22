@@ -29,7 +29,7 @@ def main():
         "android.permission.MANAGE_ACTIVITY_TASKS", "android.permission.START_ACTIVITIES_FROM_BACKGROUND",
         "android.permission.SYSTEM_ALERT_WINDOW", "android.permission.KILL_BACKGROUND_PROCESSES",
         "android.permission.KILL_ALL_BACKGROUND_PROCESSES", "android.permission.FORCE_STOP_PACKAGES", "android.permission.CONTROL_DISPLAY_BRIGHTNESS",
-        "android.permission.MODIFY_AUDIO_SETTINGS", "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.MODIFY_AUDIO_SETTINGS", "android.permission.MANAGE_GAME_MODE", "android.permission.ACCESS_NETWORK_STATE",
         "android.permission.ACCESS_NOTIFICATION_POLICY", "android.permission.READ_FRAME_BUFFER",
         "android.permission.POST_NOTIFICATIONS", "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_SPECIAL_USE", "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
@@ -65,7 +65,7 @@ def main():
     assert len(receivers) == 1 and receivers[0].get(A + "exported") == "false"
     allowlist = ET.parse(ROOT / "configs/privapp-permissions-hecker-suite.xml").getroot()
     assert {node.get("name") for node in allowlist.findall(".//permission")} == {
-        "android.permission.SYSTEM_CAMERA", "android.permission.ACCESS_FPS_COUNTER",
+        "android.permission.SYSTEM_CAMERA", "android.permission.ACCESS_FPS_COUNTER", "android.permission.MANAGE_GAME_MODE",
         "android.permission.REAL_GET_TASKS", "android.permission.START_ACTIVITIES_FROM_BACKGROUND",
         "android.permission.KILL_ALL_BACKGROUND_PROCESSES", "android.permission.FORCE_STOP_PACKAGES",
         "android.permission.CHANGE_OVERLAY_PACKAGES", "android.permission.REBOOT",

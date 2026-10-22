@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="risingOS_app_name" translatable="false">Hecker\'s Launcher</string>
+    <string name="infinity_app_name" translatable="false">Hecker Launcher</string>
     <string name="settings_title">Hecker settings</string>
-    <string name="about_category_summary">Hecker\'s Launcher, powered by Ortus</string>
-    <string name="about_version_title">Hecker\'s Launcher</string>
+    <string name="about_category_summary">Hecker Launcher, based on Infinity-X</string>
+    <string name="about_version_title">Hecker Launcher</string>
     <string name="about_launcher_version" translatable="false">1.0 · Android 17</string>
-    <string name="about_version_developer">Hecker · based on RisingOS Revived\'s Ortus</string>
-    <string name="hecker_header_eyebrow">HECKER\'S LAUNCHER</string>
+    <string name="about_version_developer">Hecker · Infinity-X Android 17 base</string>
+    <string name="hecker_header_eyebrow">HECKER LAUNCHER</string>
     <string name="hecker_header_title">Make home feel like you.</string>
-    <string name="hecker_header_summary">Powered by Ortus. Made for your Pixel.</string>
+    <string name="hecker_header_summary">Infinity-X foundations. Hecker personality.</string>
     <string name="hecker_suite_title">Hecker\'s Suite</string>
     <string name="hecker_suite_summary">More customizations, community and project details</string>
     <color name="hecker_launcher_surface">#EBF5F7</color>
+    <string name="hecker_launcher_origin_title">Infinity-X · open source credits</string>
+    <string name="hecker_launcher_origin_summary">Launcher foundations and upstream source</string>
 </resources>

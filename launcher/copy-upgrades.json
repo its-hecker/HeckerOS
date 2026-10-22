@@ -1,5 +1,9 @@
 {
   "src/com/android/launcher3/hecker/HeckerPlatform.java": [
-    "b6c1ce69078f9671b3483e68a2fa67def79d9642f734f37ec687302e284d24d1"
+    "b6c1ce69078f9671b3483e68a2fa67def79d9642f734f37ec687302e284d24d1",
+    "2324ab69604dde1a7d9fa1450aa44177ce12ec85f3631f61ad47889081c74660"
+  ],
+  "generated/hecker-suite/res/values/hecker.xml": [
+    "995c111e0f958e4521570e4e9cc943e0b5a39306c707e5731f21330094a4e147"
   ]
 }

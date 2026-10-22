@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="launcher_title">Launcher</string>
-    <string name="launcher_summary">Hecker\'s Launcher or Pixel Launcher. Make home your own.</string>
-    <string name="hecker_launcher">Hecker\'s Launcher</string>
+    <string name="launcher_summary">Hecker Launcher or Pixel Launcher. Make home your own.</string>
+    <string name="hecker_launcher">Hecker Launcher</string>
     <string name="pixel_launcher">Pixel Launcher</string>
     <string name="launcher_intro">Your home screen, your way. Based on RisingOS Revived\'s Ortus Launcher for Android 17.</string>
     <string name="hecker_launcher_features">Double-tap to sleep, icon packs, grids, folders, drawer styles and more.</string>
@@ -22,7 +22,7 @@
     <string name="launcher_switch_failed">Couldn\'t finish switching. Check the default home and try again.</string>
     <string name="launcher_build_missing">Launcher switching needs the complete Hecker experimental build.</string>
     <string name="launcher_owner_only">Switch the system gesture provider from the phone owner\'s profile.</string>
-    <string name="launcher_customize">Customize Hecker\'s Launcher</string>
+    <string name="launcher_customize">Customize Hecker Launcher</string>
     <string name="launcher_customize_summary">Home screen, double-tap to sleep, icons, app drawer and Recents</string>
     <string name="launcher_system_home">Default home settings</string>
     <string name="launcher_system_home_summary">Manage other installed launchers. Use the choices above to switch their gesture provider too.</string>

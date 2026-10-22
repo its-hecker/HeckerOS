@@ -41,7 +41,10 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/qs/panels/ui/compose/QuickQuickSettings.kt": [
     {
       "old": "    val columns = viewModel.columns\n    val sizedTiles = viewModel.tileViewModels\n    val tiles = sizedTiles.fastMap { it.tile }\n    val squishiness by viewModel.squishinessViewModel.squishiness.collectAsStateWithLifecycle()\n    val scope = rememberCoroutineScope()\n\n    Box(modifier = modifier) {\n        GridAnchor()\n\n        val bounceables =\n            remember(sizedTiles) { List(sizedTiles.size) { BounceableTileViewModel() } }\n        val spans by remember(sizedTiles) { derivedStateOf { sizedTiles.fastMap { it.width } } }\n        VerticalSpannedGrid(\n            columns = columns,\n            columnSpacing = dimensionResource(R.dimen.qs_tile_margin_horizontal),\n            rowSpacing = dimensionResource(R.dimen.qs_tile_margin_vertical),\n            spans = spans,\n            modifier = Modifier.sysuiResTag(\"qqs_tile_layout\"),\n            keys = { sizedTiles[it].tile.spec },\n        ) { spanIndex, column, isFirstInColumn, isLastInColumn ->\n            val it = sizedTiles[spanIndex]\n            Element(it.tile.spec.toElementKey(), Modifier) {\n                Tile(\n                    tile = it.tile,\n                    iconOnly = it.isIcon,\n                    squishiness = { squishiness },\n                    coroutineScope = scope,\n                    bounceableInfo =\n                        bounceables.bounceableInfo(\n                            it,\n                            index = spanIndex,\n                            column = column,\n                            columns = columns,\n                            isFirstInRow = isFirstInColumn,\n                            isLastInRow = isLastInColumn,\n                        ),\n                    tileHapticsViewModelFactory = viewModel.tileHapticsViewModelFactory,\n                    // There should be no QuickQuickSettings when the details view is enabled.\n                    detailsViewModel = null,\n                    isVisible = listening,\n                )\n            }\n        }\n    }\n\n    TileListener(tiles, listening)",
-      "new": "    Box(modifier = modifier) {\n        GridAnchor()\n        com.android.systemui.hecker.HeckerTileGrid(\n            tiles = viewModel.tileViewModels.map { it.tile },\n            listening = listening,\n            compact = true,\n        )\n    }"
+      "new": "    Box(modifier = modifier.element(com.android.systemui.hecker.HeckerQsScene.Compact)) {\n        GridAnchor()\n        com.android.systemui.hecker.HeckerTileGrid(\n            tiles = viewModel.tileViewModels.map { it.tile },\n            listening = listening,\n            compact = true,\n        )\n    }",
+      "previous": [
+        "    Box(modifier = modifier) {\n        GridAnchor()\n        com.android.systemui.hecker.HeckerTileGrid(\n            tiles = viewModel.tileViewModels.map { it.tile },\n            listening = listening,\n            compact = true,\n        )\n    }"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/qs/panels/ui/viewmodel/QuickQuickSettingsViewModel.kt": [
@@ -358,6 +361,30 @@
     {
       "old": ".background(color = scrimColor(isTransparencyEnabled))",
       "new": ".background(color = if (com.android.systemui.hecker.heckerCustomizedLayout()) {\n                    scrimColor(isTransparencyEnabled)\n                } else {\n                    com.android.systemui.hecker.heckerReferenceScrim(isTransparencyEnabled)\n                })"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/scene/ui/composable/transitions/FromShadeToQuickSettingsTransition.kt": [
+    {
+      "old": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n",
+      "new": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/qs/composefragment/ui/FromQuickQuickSettingsToQuickSettings.kt": [
+    {
+      "old": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n",
+      "new": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/ui/compose/WifiIcon.kt": [
+    {
+      "old": "    val icon = viewModel.icon ?: return",
+      "new": "    val nativeIcon = viewModel.icon ?: return\n    val icon = com.android.systemui.hecker.heckerWifiIcon(nativeIcon)"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/pipeline/mobile/ui/compose/MobileIcon.kt": [
+    {
+      "old": "    Canvas(\n        modifier.width(width).height(height).graphicsLayer {",
+      "new": "    if (viewModel is SignalIconModel.CellularTypeIconModel.Cellular &&\n        !viewModel.showExclamationMark && !viewModel.carrierNetworkChange &&\n        com.android.systemui.hecker.HeckerSignalIcon(\n            viewModel.level, viewModel.numberOfLevels, color, modifier.width(width).height(height)\n        )) return\n\n    Canvas(\n        modifier.width(width).height(height).graphicsLayer {"
     }
   ]
 }

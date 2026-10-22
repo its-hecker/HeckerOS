@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="gaming_title">Gaming mode</string>
+    <string name="gaming_title">Game Space</string>
+    <string name="gaming_game_tools">Game Tools</string>
+    <string name="gaming_game_center">Game Center</string>
+    <string name="gaming_battery_label">Battery</string>
+    <string name="gaming_balanced">Balanced</string>
+    <string name="gaming_performance">Performance</string>
+    <string name="gaming_standard_profile">Standard game profile</string>
+    <string name="gaming_mode_unavailable">This game does not support that performance profile.</string>
+    <string name="gaming_open_library">Open Game Space</string>
+    <string name="gaming_launch_game">Launch game</string>
+    <string name="gaming_red">Crimson</string>
     <string name="gaming_summary">Your games, a live dashboard and floating app shortcuts.</string>
     <string name="gaming_ready">Ready to play</string>
     <string name="gaming_enabled">Dashboard enabled</string>
@@ -58,7 +68,7 @@
     <string name="gaming_fps_waiting">— FPS</string>
     <string name="gaming_brightness">Brightness</string>
     <string name="gaming_volume">Volume</string>
-    <string name="gaming_clean">Clear background</string>
+    <string name="gaming_clean">Memory clean</string>
     <string name="gaming_clean_summary">Keep the game and active services running</string>
     <string name="gaming_clean_result">Cleanup requested for %1$d cached apps.</string>
     <string name="gaming_screenshot">Screenshot</string>

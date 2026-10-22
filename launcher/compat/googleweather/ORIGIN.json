@@ -1,0 +1,7 @@
+{
+  "repository": "RisingOS-Revived/android_packages_apps_Launcher3",
+  "revision": "e2331fb7bc34fa33ecbe6040615457324a9ea60d",
+  "path": "seraphixgoogle",
+  "license": "Apache-2.0",
+  "origin": "Chaldeaprjkt Seraphix Google Smartspace widget client; retained independent weather feed, not the launcher base."
+}

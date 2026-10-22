@@ -64,13 +64,23 @@ font and color settings. ThemeOverlayController applies these RROs and keeps
 their selection when dynamic colors refresh or the device reboots; Default
 removes both Suite-selected icon-pack categories.
 
+Wi-Fi and cellular packs also apply in Android 17's Compose status bar, alongside
+the older view binders. Theme generations invalidate the displayed icon without
+requiring a network-state change. Three-bar native Wi-Fi symbols are mapped to
+the pack's five strength levels; error, hotspot, carrier-change and satellite
+states keep their native presentation. QQS has its own scene element, faded and
+anchored during expansion in both scene-container and legacy Compose transitions.
+The initial layout reads the saved setting before composition, and mascot bitmap
+decoding runs off the main thread. The face-feedback window is 160 by 36 dp; its
+32 dp pill uses smaller scan brackets and an unlock/check animation.
+
 ## Gaming mode
 
-The native hub follows the approved charcoal/cyan design: original procedural
-game artwork with the installed app's icon, game cards, and Games/Tools/Style tabs.
+The native hub uses charcoal/red surfaces: original procedural game artwork with
+the installed app's icon, a game carousel, and Games/Tools/Style tabs.
 Games declaring `CATEGORY_GAME` or `FLAG_IS_GAME` are detected automatically;
 untagged games can be added manually. Long-press a game card to remove it.
-Accent choices are cyan, violet, lime and amber, with edge positioning and opacity.
+Accent choices are red, cyan, violet, lime and amber, with edge positioning and opacity.
 
 Adding a game or using Play in the hub enables Gaming mode and requests Android's
 overlay permission when needed. A Play request resumes after that permission is
@@ -81,7 +91,7 @@ short, bounded retry window while the game becomes visible; a settled idle
 service does not poll, and active sessions refresh status once a second.
 
 The panel opens when a gaming session starts. Tapping outside collapses it and
-passes the touch to the game. A 48dp gamepad button remains on the selected left
+passes the touch to the game. A 28 by 56 dp gamepad handle remains on the selected left
 or right edge; tap or swipe it inward to reopen the panel. Restyling or rotation
 preserves whether the panel was open or collapsed. The optional floating counter
 can be moved by holding and dragging it.
@@ -200,3 +210,37 @@ adb logcat -b all -d > hecker-suite-logcat.txt
 
 
 Additional coral checks: compare all three approved Settings pages at normal and large font scales, in light/dark mode and work profiles; verify search/category badges; test both QS layouts, pagination/editor and volume limits; switch both launchers and validate Recents after reboot; check all theme categories, lyric pause/seek/song switching and AOD; verify boot intro-to-loop transition and early exit.
+
+
+## Compact Game Space and Infinity Launcher
+
+The launcher base is Infinity-X Android 17 at the immutable commit in
+`launcher/ORIGIN.json`. Sleep, navigation gestures, native App Lock, icon packs,
+Google weather and the existing explicit Recents-provider restart remain wired
+through guarded adapters. The optional computer-control listener tolerates
+role-access rejection; rejected registrations never schedule an unregister.
+Pixel Launcher remains the initial HOME/Recents provider.
+
+Game Space uses an original dark charcoal/red implementation of the supplied OEM
+reference. Its tool window is at most 280 dp wide in landscape, 304 dp in portrait
+and 400 dp high, reduced for the usable display area. It wraps short content and
+scrolls longer content at large font scales rather than filling the screen.
+Game Tools and Game Center tabs expose a circular task-FPS instrument, real
+battery temperature/level, brightness, volume, cached-app cleanup, Focus,
+screenshot/recording, touch lock, Internet and floating app shortcuts. Balanced
+and Performance map to Android GameManager modes and appear only when supported;
+there are no fabricated CPU/GPU, network acceleration or fan-boost readouts.
+Outside touches and Back collapse the panel to a 28 by 56 dp edge handle. The
+optional draggable FPS HUD remains separate. The library has an installed-game
+icon carousel, selected-game hero, launch action and native tool shortcuts.
+
+Upgrade an existing tree using `retire_launcher.py` before the targeted launcher
+sync. It preserves the old checkout (including untracked files), revision and a
+binary diff under `out/retired-projects/`, and refuses unfamiliar repositories or
+symlinks. Hardware and ServerHive RBE configuration are unchanged by this port.
+
+Required phone checks: launch Hecker Launcher and its app drawer, switch HOME and
+Recents with the advertised reboot, exercise both orientations and font sizes,
+open/close the edge handle, verify that FPS belongs to the game, change supported
+performance modes and test capture, Focus, touch lock and floating shortcuts.
+Host/source compilation does not replace a complete ROM build or these checks.

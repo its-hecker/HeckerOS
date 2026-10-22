@@ -51,6 +51,8 @@ import com.android.systemui.qs.panels.ui.compose.TileListener
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.toIconProvider
 import com.android.systemui.qs.panels.ui.viewmodel.toUiState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 private const val LAYOUT = "hecker_qs_layout"
 private const val SUITE = "custom(org.hecker.suite/.SuiteTileService)"
@@ -61,7 +63,10 @@ private val FOOTER = setOf(SUITE, "wallet", "nfc", "controls")
 @Composable
 fun heckerCustomizedLayout(): Boolean {
     val context = LocalContext.current
-    var value by remember { mutableStateOf(false) }
+    var value by remember(context) {
+        mutableStateOf(Settings.Secure.getIntForUser(context.contentResolver, LAYOUT, 0,
+            ActivityManager.getCurrentUser()) == 1)
+    }
     DisposableEffect(context) {
         fun read() { value = Settings.Secure.getIntForUser(context.contentResolver, LAYOUT, 0, ActivityManager.getCurrentUser()) == 1 }
         val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
@@ -284,13 +289,15 @@ fun HeckerTileFooter(tiles: List<TileViewModel>) {
 @Composable
 private fun HeckerBrandCard(tile: TileViewModel, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val image = remember(context) {
-        try {
-            val app = context.createPackageContext("org.hecker.suite", 0)
-            val id = app.resources.getIdentifier("hecker_mascot", "drawable", "org.hecker.suite")
-            if (id == 0) null else android.graphics.BitmapFactory.decodeResource(app.resources, id,
-                android.graphics.BitmapFactory.Options().apply { inSampleSize = 2 })
-        } catch (_: Exception) { null }
+    val image by produceState<android.graphics.Bitmap?>(null, context) {
+        value = withContext(Dispatchers.IO) {
+            try {
+                val app = context.createPackageContext("org.hecker.suite", 0)
+                val id = app.resources.getIdentifier("hecker_mascot", "drawable", "org.hecker.suite")
+                if (id == 0) null else android.graphics.BitmapFactory.decodeResource(app.resources, id,
+                    android.graphics.BitmapFactory.Options().apply { inSampleSize = 2 })
+            } catch (_: Exception) { null }
+        }
     }
     Row(modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(MaterialTheme.colorScheme.surfaceContainerLow)
         .combinedClickable(onClick = { tile.mainClick(null) }, onLongClick = { tile.settingsClick(null) }).padding(12.dp),

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Guarded Ortus-to-PixelOS adapters; all changes join prepare.py's atomic plan."""
+"""Guarded Infinity-X-to-PixelOS adapters in prepare.py's atomic plan."""
 import hashlib
 import json
 from pathlib import Path
@@ -27,6 +27,9 @@ def launcher_plan(rom, replace, revert=False):
               for path in (ROOT / "launcher/src").glob("*.java")}
     copies.update({"generated/hecker-suite/res/" + str(path.relative_to(ROOT / "launcher/res")): path
                    for path in (ROOT / "launcher/res").rglob("*") if path.is_file()})
+    copies.update({"generated/hecker-google-weather/" + str(path.relative_to(ROOT / "launcher/compat/googleweather")): path
+                   for path in (ROOT / "launcher/compat/googleweather").rglob("*")
+                   if path.is_file() and path.name != "ORIGIN.json"})
     upgrades = json.loads((ROOT / "launcher/copy-upgrades.json").read_text())
     for relative, source in copies.items():
         path = launcher / relative

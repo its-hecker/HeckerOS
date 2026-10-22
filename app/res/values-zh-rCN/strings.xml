@@ -158,7 +158,7 @@
     <string name="launcher_system_home">默认主屏幕设置</string>
     <string name="launcher_system_home_summary">管理其他已安装的启动器。使用上方选项还可切换相应的手势提供方。</string>
     <string name="launcher_open_failed">暂时无法打开启动器设置。</string>
-    <string name="gaming_title">游戏模式</string>
+    <string name="gaming_title">游戏空间</string>
     <string name="gaming_summary">游戏库、实时游戏面板和悬浮应用快捷方式。</string>
     <string name="gaming_ready">准备开玩</string>
     <string name="gaming_enabled">游戏面板已启用</string>
@@ -254,4 +254,14 @@
     <string name="headphones_airpods_unavailable">此版本暂不提供 LibrePods。</string>
     <string name="face_island_title">面容解锁灵动岛</string>
     <string name="face_island_summary">在锁定屏幕顶部显示胶囊动画，提示面容识别及验证成功。</string>
+    <string name="gaming_game_tools">游戏工具</string>
+    <string name="gaming_game_center">游戏中心</string>
+    <string name="gaming_battery_label">电量</string>
+    <string name="gaming_balanced">均衡</string>
+    <string name="gaming_performance">性能</string>
+    <string name="gaming_standard_profile">标准游戏配置</string>
+    <string name="gaming_mode_unavailable">此游戏不支持该性能配置。</string>
+    <string name="gaming_open_library">打开游戏空间</string>
+    <string name="gaming_launch_game">启动游戏</string>
+    <string name="gaming_red">绯红</string>
 </resources>

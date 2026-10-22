@@ -17,9 +17,18 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
-/** Android 17 native implementations for features that previously called RisingOS APIs. */
+/** Native Android 17 implementations of the Infinity-X launcher integration points. */
 public final class HeckerPlatform {
     private HeckerPlatform() {}
+
+    public static boolean isPackageInstalled(Context context, String packageName) {
+        try {
+            context.getPackageManager().getApplicationInfo(packageName, 0);
+            return true;
+        } catch (android.content.pm.PackageManager.NameNotFoundException missing) {
+            return false;
+        }
+    }
 
     public static boolean hasNavbarByDefault(Context context) {
         int id = context.getResources().getIdentifier("config_showNavigationBar", "bool", "android");

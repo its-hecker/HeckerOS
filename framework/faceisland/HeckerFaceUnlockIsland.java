@@ -133,7 +133,7 @@ public final class HeckerFaceUnlockIsland {
         if (view == null && windows != null) {
             IslandView next = new IslandView(context);
             WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                    dp(200), dp(48), WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
+                    dp(160), dp(36), WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
                     WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                             | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                             | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
@@ -141,14 +141,14 @@ public final class HeckerFaceUnlockIsland {
                     PixelFormat.TRANSLUCENT);
             params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
             params.setFitInsetsTypes(0);
-            params.y = dp(8);
+            params.y = dp(6);
             // Move beneath a central camera cutout; Pixel 4's forehead needs no offset.
             DisplayCutout cutout = windows.getCurrentWindowMetrics().getWindowInsets().getDisplayCutout();
             if (cutout != null) {
                 int center = windows.getCurrentWindowMetrics().getBounds().width() / 2;
                 for (Rect bounds : cutout.getBoundingRects()) {
-                    if (bounds.top == 0 && bounds.left < center + dp(100)
-                            && bounds.right > center - dp(100)) {
+                    if (bounds.top == 0 && bounds.left < center + dp(80)
+                            && bounds.right > center - dp(80)) {
                         params.y = Math.max(params.y, cutout.getSafeInsetTop() + dp(4));
                     }
                 }
@@ -178,6 +178,9 @@ public final class HeckerFaceUnlockIsland {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final RectF rect = new RectF();
         private final Path path = new Path();
+        private final android.text.TextPaint text = new android.text.TextPaint(Paint.ANTI_ALIAS_FLAG);
+        private final String scanningLabel;
+        private final String unlockedLabel;
         private ValueAnimator animator;
         private int state;
         private float phase;
@@ -185,6 +188,10 @@ public final class HeckerFaceUnlockIsland {
 
         IslandView(Context context) {
             super(context);
+            scanningLabel = context.getString(R.string.hecker_face_island_label);
+            unlockedLabel = context.getString(R.string.hecker_face_island_unlocked);
+            text.setTypeface(android.graphics.Typeface.create("sans-serif-medium", 0));
+            text.setTextSize(11.5f);
             setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
             setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);
         }
@@ -193,6 +200,8 @@ public final class HeckerFaceUnlockIsland {
             if (state == value) return;
             stop();
             state = value;
+            progress = 0;
+            phase = 0;
             setContentDescription(getContext().getString(value == FaceIslandState.SUCCESS
                     ? R.string.hecker_face_island_unlocked : R.string.hecker_face_island_scanning));
             if (!ValueAnimator.areAnimatorsEnabled()) { progress = 1; invalidate(); return; }
@@ -219,43 +228,47 @@ public final class HeckerFaceUnlockIsland {
             canvas.scale(unit, unit);
             float cx = getWidth() / unit / 2f;
             boolean success = state == FaceIslandState.SUCCESS;
-            float width = success ? 138 + 36 * progress : 138;
-            paint.setStyle(Paint.Style.FILL); paint.setColor(Color.BLACK);
-            rect.set(cx - width / 2, 2, cx + width / 2, 44);
-            canvas.drawRoundRect(rect, 21, 21, paint);
-            float x = cx - width / 2 + 27;
+            float width = success ? 124 + 16 * progress : 124;
+            paint.setStyle(Paint.Style.FILL); paint.setColor(0xF5080D13);
+            rect.set(cx - width / 2, 2, cx + width / 2, 34);
+            canvas.drawRoundRect(rect, 16, 16, paint);
+            paint.setStyle(Paint.Style.STROKE); paint.setStrokeWidth(.7f);
+            paint.setColor(success ? 0x665DDC91 : 0x554F94C7);
+            canvas.drawRoundRect(rect, 16, 16, paint);
+            float x = cx - width / 2 + 20;
             paint.setColor(success ? 0xFF91E6AA : Color.WHITE);
-            paint.setStrokeWidth(2.4f); paint.setStrokeCap(Paint.Cap.ROUND);
+            paint.setStrokeWidth(1.8f); paint.setStrokeCap(Paint.Cap.ROUND);
             paint.setStrokeJoin(Paint.Join.ROUND); paint.setStyle(Paint.Style.STROKE);
             if (success) {
                 // Lock shackle swings open, then resolves into a completion check.
                 paint.setAlpha(Math.round(255 * (1 - progress)));
-                rect.set(x - 6, 10 - progress * 3, x + 6, 25 - progress * 3);
+                rect.set(x - 4.5f, 8 - progress * 2, x + 4.5f, 19 - progress * 2);
                 canvas.drawArc(rect, 180 + progress * 45, 180 - progress * 65, false, paint);
-                rect.set(x - 9, 21, x + 9, 34);
+                rect.set(x - 6.5f, 16, x + 6.5f, 26);
                 canvas.drawRoundRect(rect, 3, 3, paint);
                 paint.setAlpha(Math.round(255 * progress));
-                path.reset(); path.moveTo(x - 9, 23); path.lineTo(x - 2, 30); path.lineTo(x + 11, 16);
+                path.reset(); path.moveTo(x - 6, 18); path.lineTo(x - 1, 23); path.lineTo(x + 8, 13);
                 canvas.drawPath(path, paint);
             } else {
-                rect.set(x - 10, 12, x + 10, 34);
-                canvas.drawRoundRect(rect, 7, 7, paint);
-                canvas.drawPoint(x - 4, 20, paint); canvas.drawPoint(x + 4, 20, paint);
-                path.reset(); path.moveTo(x - 4, 27); path.quadTo(x, 31, x + 4, 27);
+                // Open corners frame the face; a quiet sweep shows active recognition.
+                path.reset();
+                path.moveTo(x - 8, 14); path.lineTo(x - 8, 10); path.lineTo(x - 4, 10);
+                path.moveTo(x + 4, 10); path.lineTo(x + 8, 10); path.lineTo(x + 8, 14);
+                path.moveTo(x - 8, 22); path.lineTo(x - 8, 26); path.lineTo(x - 4, 26);
+                path.moveTo(x + 4, 26); path.lineTo(x + 8, 26); path.lineTo(x + 8, 22);
+                canvas.drawPath(path, paint);
+                canvas.drawPoint(x - 3, 16, paint); canvas.drawPoint(x + 3, 16, paint);
+                path.reset(); path.moveTo(x - 3, 21); path.quadTo(x, 23, x + 3, 21);
                 canvas.drawPath(path, paint);
                 paint.setColor(0xFFAAC9FF);
-                rect.set(x - 15, 7, x + 15, 39);
-                canvas.drawArc(rect, phase * 360, 90, false, paint);
+                paint.setAlpha((int) Math.round(70 + 150 * Math.sin(Math.PI * phase)));
+                canvas.drawLine(x - 5, 11 + phase * 14, x + 5, 11 + phase * 14, paint);
             }
-            paint.setAlpha(255); paint.setStyle(Paint.Style.FILL); paint.setColor(Color.WHITE);
-            paint.setTypeface(android.graphics.Typeface.create("sans-serif-medium", 0));
-            paint.setTextSize(13);
-            String label = getContext().getString(success
-                    ? R.string.hecker_face_island_unlocked : R.string.hecker_face_island_label);
-            float available = width - 62;
-            CharSequence fitted = android.text.TextUtils.ellipsize(label, new android.text.TextPaint(paint),
+            text.setColor(success ? 0xFFB8EFCC : 0xFFE7EFF7);
+            float available = width - 48;
+            CharSequence fitted = android.text.TextUtils.ellipsize(success ? unlockedLabel : scanningLabel, text,
                     available, android.text.TextUtils.TruncateAt.END);
-            canvas.drawText(fitted.toString(), x + 23, 28, paint);
+            canvas.drawText(fitted.toString(), x + 17, 22, text);
             canvas.restore();
         }
     }

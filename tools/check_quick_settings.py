@@ -18,6 +18,13 @@ from compile_sdk import fetch
 
 ROOT = Path(__file__).resolve().parents[1]
 JAVA = {
+    'android/content/res/ThemeEngine.java': '''package android.content.res;
+public final class ThemeEngine {
+ public interface ThemeChangeListener { void onThemeChanged(String category); }
+ public static ThemeEngine getInstance(android.content.Context context) { return null; }
+ public void addThemeChangeListener(ThemeChangeListener listener) {}
+ public String getEnabledPackage(String category) { return null; }
+}''',
     'android/content/ContentResolver.java': '''package android.content;
 public abstract class ContentResolver {
  public final void registerContentObserver(android.net.Uri uri, boolean descendants, android.database.ContentObserver o, int user) {}
@@ -67,6 +74,9 @@ public interface ActivityStarter { void postStartActivityDismissingKeyguard(andr
 ''',
 }
 KOTLIN = {
+    'SceneKey.kt': '''package com.android.compose.animation.scene
+class ElementKey(val debugName: String)
+''',
     'CoreStartable.kt': '''package com.android.systemui
 interface CoreStartable { fun start() }
 ''',
@@ -201,6 +211,7 @@ def main():
             target = out / 'kotlin' / name
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)
         java_sources = list((out / 'java').rglob('*.java')) + list((ROOT / 'framework/qs').glob('*.java'))
+        java_sources += [ROOT / 'framework/themes/ThemeIconNames.java']
         run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', sdk / 'android-system.jar',
             '-d', out / 'classes', *java_sources)
         jars = sorted(cache.glob('*.jar'))
@@ -209,7 +220,9 @@ def main():
             '-no-stdlib', '-no-reflect', '-jvm-target', '17', '-classpath', classpath,
             '-Xplugin=' + str(cache / 'kotlin-compose-compiler-plugin-embeddable.jar'),
             '-d', out / 'classes-kotlin', *sorted((out / 'kotlin').glob('*.kt')),
-            *sorted((ROOT / 'framework/qs').glob('*.kt')))
+            *sorted((ROOT / 'framework/qs').glob('*.kt')),
+            ROOT / 'framework/themes/HeckerThemeAssets.kt',
+            ROOT / 'framework/themes/HeckerConnectivityIcons.kt')
     print('QS Kotlin/Java, Compose and drawable/string resource compilation: PASS')
     print('Full SystemUI Soong compilation and visual/device testing remain required.')
 

@@ -33,6 +33,9 @@ camera buffer/cutout, accessibility help and native completion gate are preserve
 The mesh renders only for callbacks or bounded animations and respects reduced
 motion. The original Pixel rendering archive remains pinned for provenance; the
 new mesh does not instantiate its renderer.
+Coral and flame select that mesh on either preview path. The camera-ownership
+resource still selects the existing camera controller, so a Camera2 preview does
+not silently replace the pose grid with the generic progress ring.
 
 Asset: `res/drawable-nodpi/hecker_mascot.webp`, also shared by Suite. Generated
 with the built-in image generation tool, transparent-background mode, from the

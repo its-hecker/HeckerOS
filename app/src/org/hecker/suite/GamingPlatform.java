@@ -18,6 +18,31 @@ import java.util.Set;
 
 /** Hidden calls are isolated; the prepare step checks their real framework declarations. */
 final class GamingPlatform {
+    static int gameMode(Context c, String pkg) {
+        if (pkg == null) return 1;
+        try {
+            Object manager = c.getSystemService("game");
+            return (int) manager.getClass().getMethod("getGameMode", String.class).invoke(manager, pkg);
+        } catch (ReflectiveOperationException | RuntimeException unavailable) { return 1; }
+    }
+    static boolean performanceSupported(Context c, String pkg) {
+        if (pkg == null) return false;
+        try {
+            Object manager = c.getSystemService("game");
+            int[] modes = (int[]) manager.getClass().getMethod("getAvailableGameModes", String.class).invoke(manager, pkg);
+            for (int mode : modes) if (mode == 2) return true;
+        } catch (ReflectiveOperationException | RuntimeException unavailable) { }
+        return false;
+    }
+    static boolean gameMode(Context c, String pkg, int mode) {
+        if (pkg == null || (mode != 1 && mode != 2)) return false;
+        if (mode == 2 && !performanceSupported(c, pkg)) return false;
+        try {
+            Object manager = c.getSystemService("game");
+            manager.getClass().getMethod("setGameMode", String.class, int.class).invoke(manager, pkg, mode);
+            return gameMode(c, pkg) == mode;
+        } catch (ReflectiveOperationException | RuntimeException unavailable) { return false; }
+    }
     static boolean ownDisplayTask(ActivityManager.RunningTaskInfo task) {
         try {
             return task.getClass().getField("displayId").getInt(task) == 0

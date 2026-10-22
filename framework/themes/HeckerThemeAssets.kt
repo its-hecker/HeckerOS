@@ -17,6 +17,8 @@ object HeckerThemeAssets {
     private var initialized = false
     private var engine: ThemeEngine? = null
 
+    @JvmStatic fun initialize(context: Context) { init(context) }
+
     @Synchronized private fun init(context: Context) {
         if (initialized) return
         engine = ThemeEngine.getInstance(context) ?: return
@@ -45,13 +47,11 @@ object HeckerThemeAssets {
     }
     @JvmStatic fun wifi(context: Context, id: Int): Drawable? {
         val name = try { context.resources.getResourceEntryName(id) } catch (_: Exception) { return null }
-        // Preserve the native no-internet/error indicators rather than concealing their state.
-        val level = Regex("ic_wifi_(?:signal_)?([0-4])").matchEntire(name)?.groupValues?.get(1) ?: return null
-        return drawable(context, "statusbar_wifi", "ic_wifi_signal_$level")
+        val themedName = ThemeIconNames.wifi(name) ?: return null
+        return drawable(context, "statusbar_wifi", themedName)
     }
     @JvmStatic fun signal(context: Context, level: Int, levels: Int): Drawable? {
-        if (level !in 0 until levels) return null
-        val bars = if (levels > 5) 5 else 4
-        return drawable(context, "statusbar_signal", "ic_signal_cellular_${level}_${bars}_bar")
+        val name = ThemeIconNames.signal(level, levels) ?: return null
+        return drawable(context, "statusbar_signal", name)
     }
 }

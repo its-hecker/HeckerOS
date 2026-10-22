@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import re
 import shutil
+import subprocess
 import tempfile
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -49,8 +50,8 @@ def check_bootanimation_owner(folder):
 def check_launcher_weather(folder):
     launcher = folder / 'packages/apps/Launcher3'
     controller = (launcher / 'src/com/android/launcher3/quickspace/QuickspaceController.java').read_text()
-    assert 'switchProvider(WeatherProvider.SERAPHIX)' in controller, 'Google weather was removed'
-    assert 'mProvider = WeatherProvider.OMNIJAWS' not in controller, 'OmniJaws fallback remains'
+    assert 'new HeckerWeather(context, this::notifyListeners)' in controller, 'Google weather was removed'
+    assert 'OmniJawsClient' not in controller, 'OmniJaws dependency remains'
     assert 'OmniJawsClient.get(' not in controller, 'OmniJaws client startup remains'
     assert 'addOmniJawsIfEnabled(' not in controller, 'OmniJaws startup remains'
     preferences = ET.parse(launcher / 'res/xml/launcher_home_screen_preferences.xml').getroot()
@@ -82,10 +83,33 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cache', type=Path, default=ROOT / 'out/native-source-cache')
     parser.add_argument('--offline', action='store_true')
+    parser.add_argument('--launcher-source', type=Path,
+                        help='Read the pinned commit directly from an existing launcher Git checkout')
     args = parser.parse_args()
     sources = json.loads((ROOT / 'integration/source-revisions.json').read_text())['pixelos_inputs']
     launcher = json.loads((ROOT / 'launcher/ORIGIN.json').read_text())
     sources['packages/apps/Launcher3'] = launcher
+    git_sources = {}
+    def git_source(origin):
+        revision = origin['revision']
+        if revision in git_sources:
+            return git_sources[revision]
+        folder = args.launcher_source or args.cache / 'git-sources' / revision
+        folder = folder.resolve()
+        if args.launcher_source is None:
+            if not (folder / '.git').exists():
+                folder.mkdir(parents=True, exist_ok=True)
+                subprocess.run(['git', 'init', '-q', str(folder)], check=True)
+            present = subprocess.run(['git', '-C', str(folder), 'cat-file', '-e', revision + '^{commit}'],
+                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+            if not present:
+                if args.offline:
+                    raise SystemExit('Missing immutable launcher Git source: ' + revision)
+                subprocess.run(['git', '-C', str(folder), 'fetch', '-q', '--depth=1',
+                                origin['repository'], revision], check=True)
+        subprocess.run(['git', '-C', str(folder), 'cat-file', '-e', revision + '^{commit}'], check=True)
+        git_sources[revision] = folder
+        return folder
     paths = set(json.loads((ROOT / 'framework/customization-patches.json').read_text()))
     paths.add('frameworks/base/core/java/android/content/res/Resources.java')
     paths.add('frameworks/base/core/res/AndroidManifest.xml')
@@ -105,6 +129,15 @@ def main():
         origin = sources[project]
         repository = origin['repository']
         googlesource = repository.startswith('https://android.googlesource.com/')
+        if repository.startswith('https://gitea.com/'):
+            # Gitea's raw HTTP endpoint may be unavailable while its Git source is public.
+            # Read immutable Git blobs, never an uncommitted checkout or moving branch.
+            folder = git_source(origin)
+            content = subprocess.check_output(['git', '-C', str(folder), 'show',
+                origin['revision'] + ':' + relative[len(project) + 1:]])
+            cached.parent.mkdir(parents=True, exist_ok=True)
+            cached.write_bytes(content)
+            continue
         if googlesource:
             url = '{}/+/{}/{}?format=TEXT'.format(
                 repository, origin['revision'], relative[len(project) + 1:])

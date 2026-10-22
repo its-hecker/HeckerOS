@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
@@ -36,11 +37,13 @@ public final class GamingActivity extends Activity implements SharedPreferences.
     private LinearLayout page, library;
     private String tab="games";
     private String pendingGame;
+    private String selectedGame;
     private int generation;
     private boolean pendingEnable,visible;
 
     @Override public void onCreate(Bundle state){
         super.onCreate(state); if(state!=null){tab=state.getString("tab","games");pendingEnable=state.getBoolean("pending_enable",false);pendingGame=state.getString("pending_game");}
+        if(state!=null)selectedGame=state.getString("selected_game");
         GamingPrefs.get(this).registerOnSharedPreferenceChangeListener(this);
         render();
     }
@@ -55,7 +58,7 @@ public final class GamingActivity extends Activity implements SharedPreferences.
         if(GamingPrefs.enabled(this))GamingService.start(this);
     }
     @Override protected void onPause(){visible=false;super.onPause();}
-    @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putString("tab",tab);out.putBoolean("pending_enable",pendingEnable);out.putString("pending_game",pendingGame);}
+    @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putString("tab",tab);out.putBoolean("pending_enable",pendingEnable);out.putString("pending_game",pendingGame);out.putString("selected_game",selectedGame);}
     @Override protected void onDestroy(){
         generation++;GamingPrefs.get(this).unregisterOnSharedPreferenceChangeListener(this);worker.shutdownNow();super.onDestroy();
     }
@@ -73,9 +76,8 @@ public final class GamingActivity extends Activity implements SharedPreferences.
         LinearLayout top=GamingUi.row(this);top.setPadding(pad,pad,pad,GamingUi.dp(this,12));
         GamingUi.Icon back=new GamingUi.Icon(this,"back",GamingUi.TEXT);back.setContentDescription(getString(R.string.back));back.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);back.setFocusable(true);
         back.setOnClickListener(v->finish());top.addView(back,new LinearLayout.LayoutParams(GamingUi.dp(this,40),GamingUi.dp(this,40)));
-        top.addView(GamingUi.text(this,getString(R.string.suite_title),15,GamingUi.MUTED,false));root.addView(top);
+        top.addView(GamingUi.text(this,getString(R.string.gaming_title),20,GamingUi.TEXT,true));root.addView(top);
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);page=GamingUi.column(this);page.setPadding(pad,0,pad,pad);
-        page.addView(GamingUi.text(this,getString(R.string.gaming_title),32,GamingUi.TEXT,true));GamingUi.gap(page,20);
         if(tab.equals("games"))games(request);else if(tab.equals("tools"))tools();else style();
         scroll.addView(page);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
         LinearLayout nav=GamingUi.row(this);nav.setPadding(pad,GamingUi.dp(this,8),pad,GamingUi.dp(this,8));
@@ -84,36 +86,83 @@ public final class GamingActivity extends Activity implements SharedPreferences.
         root.addView(nav);setContentView(root);
     }
     private void games(int request){
-        FrameLayout hero=new FrameLayout(this);
-        hero.addView(new GamingUi.Banner(this,getDrawable(R.drawable.ic_gaming),true),new FrameLayout.LayoutParams(-1,GamingUi.dp(this,150)));
-        LinearLayout copy=GamingUi.column(this);copy.setPadding(GamingUi.dp(this,20),GamingUi.dp(this,28),0,0);
-        copy.addView(title(R.string.gaming_ready));GamingUi.gap(copy,12);
-        copy.addView(GamingUi.text(this,getString(GamingPrefs.enabled(this)?R.string.gaming_enabled:R.string.gaming_disabled),13,GamingUi.accent(this),true));hero.addView(copy);page.addView(hero);GamingUi.gap(page,16);
-        toggle(R.string.gaming_enable,0,GamingPrefs.enabled(this),this::setEnabled);
-        toggle(R.string.gaming_auto,R.string.gaming_auto_summary,GamingPrefs.get(this).getBoolean("automatic",true),v->GamingPrefs.get(this).edit().putBoolean("automatic",v).apply());
-        LinearLayout heading=GamingUi.row(this);GamingUi.weighted(heading,title(R.string.gaming_library));heading.addView(GamingUi.button(this,getString(R.string.gaming_add),false,()->picker(false)));page.addView(heading);GamingUi.gap(page,12);
-        library=GamingUi.column(this);library.addView(GamingUi.text(this,getString(R.string.gaming_loading),14,GamingUi.MUTED,false));page.addView(library);
+        library=GamingUi.column(this);
+        library.addView(GamingUi.text(this,getString(R.string.gaming_loading),14,GamingUi.MUTED,false));
+        page.addView(library);
         worker.execute(()->{List<GamingCatalog.App> apps=GamingCatalog.load(this,true);runOnUiThread(()->{
-            if(request!=generation||isDestroyed())return;library.removeAllViews();
-            if(apps.isEmpty())library.addView(GamingUi.text(this,getString(R.string.gaming_empty),16,GamingUi.MUTED,false));
-            if(!apps.isEmpty())library.addView(gameCard(apps.get(0),true));
-            for(int i=1;i<apps.size();i+=2){
-                LinearLayout row=GamingUi.row(this);row.setGravity(Gravity.TOP);
-                for(int j=i;j<i+2;j++){
-                    View item=j<apps.size()?gameCard(apps.get(j),false):new View(this);
-                    LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,-2,1);lp.setMargins(GamingUi.dp(this,3),0,GamingUi.dp(this,3),GamingUi.dp(this,10));row.addView(item,lp);
-                }
-                library.addView(row);
-            }
+            if(request!=generation||isDestroyed())return;
+            gameLibrary(apps);
         });});
     }
-    private View gameCard(GamingCatalog.App app,boolean featured){
-        LinearLayout card=GamingUi.card(this);card.setPadding(0,0,0,GamingUi.dp(this,12));
-        Drawable icon=app.info.loadIcon(getPackageManager());card.addView(new GamingUi.Banner(this,icon,featured),new LinearLayout.LayoutParams(-1,GamingUi.dp(this,featured?148:104)));
-        LinearLayout row=GamingUi.row(this);row.setPadding(GamingUi.dp(this,14),GamingUi.dp(this,12),GamingUi.dp(this,14),0);
-        TextView label=GamingUi.text(this,app.label,featured?19:14,GamingUi.TEXT,true);label.setMaxLines(2);label.setEllipsize(android.text.TextUtils.TruncateAt.END);GamingUi.weighted(row,label);
-        TextView play=GamingUi.button(this,featured?getString(R.string.gaming_play):"▶",true,()->playGame(app.info.packageName));play.setContentDescription(getString(R.string.gaming_play)+" "+app.label);row.addView(play);card.addView(row);
-        card.setOnLongClickListener(v->{new AlertDialog.Builder(this).setTitle(app.label).setItems(new String[]{getString(R.string.gaming_remove)},(d,i)->GamingPrefs.include(this,app.info.packageName,false)).show();return true;});return card;
+    private void gameLibrary(List<GamingCatalog.App> apps){
+        library.removeAllViews();
+        if(apps.isEmpty()){
+            LinearLayout empty=GamingUi.card(this);
+            empty.addView(title(R.string.gaming_library));GamingUi.gap(empty,12);
+            empty.addView(GamingUi.text(this,getString(R.string.gaming_empty),15,GamingUi.MUTED,false));
+            GamingUi.gap(empty,18);
+            empty.addView(GamingUi.button(this,getString(R.string.gaming_add),true,()->picker(false)));
+            library.addView(empty);return;
+        }
+        GamingCatalog.App featured=apps.get(0);
+        for(GamingCatalog.App app:apps)if(app.info.packageName.equals(selectedGame))featured=app;
+        selectedGame=featured.info.packageName;
+        HorizontalScrollView carousel=new HorizontalScrollView(this);carousel.setHorizontalScrollBarEnabled(false);
+        LinearLayout strip=GamingUi.row(this);strip.setPadding(0,0,0,GamingUi.dp(this,14));
+        for(GamingCatalog.App app:apps){
+            FrameLayout slot=new FrameLayout(this);
+            slot.setBackground(GamingUi.background(this,GamingUi.CARD,14,app.info.packageName.equals(selectedGame)));
+            ImageView icon=new ImageView(this);icon.setImageDrawable(app.info.loadIcon(getPackageManager()));
+            slot.addView(icon,new FrameLayout.LayoutParams(GamingUi.dp(this,38),GamingUi.dp(this,38),Gravity.CENTER));
+            slot.setContentDescription(app.label);slot.setFocusable(true);
+            slot.setSelected(app.info.packageName.equals(selectedGame));
+            slot.setOnClickListener(v->{selectedGame=app.info.packageName;gameLibrary(apps);});
+            LinearLayout.LayoutParams item=new LinearLayout.LayoutParams(GamingUi.dp(this,54),GamingUi.dp(this,54));
+            item.rightMargin=GamingUi.dp(this,8);strip.addView(slot,item);
+        }
+        FrameLayout add=new FrameLayout(this);
+        add.setBackground(GamingUi.background(this,GamingUi.CARD,14,false));
+        add.addView(new GamingUi.Icon(this,"plus",GamingUi.TEXT),new FrameLayout.LayoutParams(GamingUi.dp(this,22),GamingUi.dp(this,22),Gravity.CENTER));
+        add.setContentDescription(getString(R.string.gaming_add));add.setFocusable(true);add.setOnClickListener(v->picker(false));
+        strip.addView(add,new LinearLayout.LayoutParams(GamingUi.dp(this,54),GamingUi.dp(this,54)));
+        carousel.addView(strip);library.addView(carousel);
+        library.addView(gameCard(featured));GamingUi.gap(library,12);
+        LinearLayout controls=GamingUi.row(this);
+        hubTool(controls,"focus",R.string.gaming_focus,()->{tab="tools";render();});
+        hubTool(controls,"gamepad",R.string.gaming_fps_toggle,()->{tab="tools";render();});
+        library.addView(controls);GamingUi.gap(library,6);
+        LinearLayout more=GamingUi.row(this);
+        hubTool(more,"apps",R.string.gaming_shortcuts,()->picker(true));
+        hubTool(more,"sun",R.string.gaming_style,()->{tab="style";render();});
+        library.addView(more);
+    }
+    private void hubTool(LinearLayout row,String icon,int label,Runnable action){
+        LinearLayout tile=GamingUi.column(this);tile.setGravity(Gravity.CENTER);
+        tile.setBackground(GamingUi.background(this,GamingUi.CARD,14,false));
+        tile.setPadding(GamingUi.dp(this,10),GamingUi.dp(this,12),GamingUi.dp(this,10),GamingUi.dp(this,12));
+        tile.addView(new GamingUi.Icon(this,icon,GamingUi.TEXT),new LinearLayout.LayoutParams(GamingUi.dp(this,22),GamingUi.dp(this,22)));
+        TextView copy=GamingUi.text(this,getString(label),12,GamingUi.TEXT,true);copy.setGravity(Gravity.CENTER);
+        copy.setPadding(0,GamingUi.dp(this,7),0,0);tile.addView(copy);
+        tile.setFocusable(true);tile.setContentDescription(getString(label));tile.setOnClickListener(v->action.run());
+        LinearLayout.LayoutParams item=new LinearLayout.LayoutParams(0,-2,1);
+        item.setMargins(GamingUi.dp(this,3),0,GamingUi.dp(this,3),0);row.addView(tile,item);
+    }
+    private View gameCard(GamingCatalog.App app){
+        FrameLayout hero=new FrameLayout(this);
+        hero.addView(new GamingUi.Banner(this,app.info.loadIcon(getPackageManager()),true),
+                new FrameLayout.LayoutParams(-1,GamingUi.dp(this,300)));
+        LinearLayout heading=GamingUi.column(this);heading.setPadding(GamingUi.dp(this,20),GamingUi.dp(this,24),GamingUi.dp(this,20),0);
+        TextView name=GamingUi.text(this,app.label,26,GamingUi.TEXT,true);name.setAllCaps(true);name.setMaxLines(3);
+        name.setEllipsize(android.text.TextUtils.TruncateAt.END);heading.addView(name);GamingUi.gap(heading,9);
+        heading.addView(GamingUi.text(this,getString(GamingPrefs.enabled(this)?R.string.gaming_enabled:R.string.gaming_ready),12,GamingUi.accent(this),true));
+        hero.addView(heading,new FrameLayout.LayoutParams(-1,-2,Gravity.TOP));
+        TextView play=GamingUi.button(this,getString(R.string.gaming_launch_game),true,()->playGame(app.info.packageName));
+        play.setContentDescription(getString(R.string.gaming_launch_game)+" "+app.label);
+        FrameLayout.LayoutParams launch=new FrameLayout.LayoutParams(-1,GamingUi.dp(this,52),Gravity.BOTTOM);
+        launch.setMargins(GamingUi.dp(this,16),0,GamingUi.dp(this,16),GamingUi.dp(this,16));hero.addView(play,launch);
+        hero.setOnLongClickListener(v->{new AlertDialog.Builder(this).setTitle(app.label)
+            .setItems(new String[]{getString(R.string.gaming_remove)},(d,i)->GamingPrefs.include(this,app.info.packageName,false)).show();return true;});
+        return hero;
     }
     private interface Change{void set(boolean value);}
     private void playGame(String packageName){
@@ -139,6 +188,7 @@ public final class GamingActivity extends Activity implements SharedPreferences.
         else stopService(new Intent(this,GamingService.class));
     }
     private void tools(){
+        toggle(R.string.gaming_auto,R.string.gaming_auto_summary,GamingPrefs.get(this).getBoolean("automatic",true),v->GamingPrefs.get(this).edit().putBoolean("automatic",v).apply());
         toggle(R.string.gaming_enable,0,GamingPrefs.enabled(this),this::setEnabled);
         toggle(R.string.gaming_fps_toggle,R.string.gaming_fps_summary,GamingPrefs.get(this).getBoolean("fps",true),v->GamingPrefs.get(this).edit().putBoolean("fps",v).apply());
         toggle(R.string.gaming_focus,R.string.gaming_focus_summary,GamingPrefs.get(this).getBoolean("focus",false),v->{
@@ -155,9 +205,9 @@ public final class GamingActivity extends Activity implements SharedPreferences.
     }
     private void style(){
         page.addView(title(R.string.gaming_accent));GamingUi.gap(page,14);LinearLayout colors=GamingUi.row(this);
-        int[] values={0xff35eee3,0xffb29aff,0xffbbf35a,0xffffbe65};int[] labels={R.string.gaming_cyan,R.string.gaming_violet,R.string.gaming_lime,R.string.gaming_amber};
+        int[] values={0xffff334b,0xff35eee3,0xffb29aff,0xffffbe65};int[] labels={R.string.gaming_red,R.string.gaming_cyan,R.string.gaming_violet,R.string.gaming_amber};
         for(int i=0;i<values.length;i++){int color=values[i];TextView chip=GamingUi.button(this,getString(labels[i]),GamingUi.accent(this)==color,()->GamingPrefs.get(this).edit().putInt("accent",color).apply());chip.setTextColor(GamingUi.accent(this)==color?GamingUi.BG:color);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,-2,1);p.setMargins(3,0,3,0);colors.addView(chip,p);}page.addView(colors);GamingUi.gap(page,24);
-        toggle(R.string.gaming_edge,R.string.gaming_edge_summary,GamingPrefs.get(this).getBoolean("left",false),v->GamingPrefs.get(this).edit().putBoolean("left",v).apply());
+        toggle(R.string.gaming_edge,R.string.gaming_edge_summary,GamingPrefs.get(this).getBoolean("left",true),v->GamingPrefs.get(this).edit().putBoolean("left",v).apply());
         page.addView(title(R.string.gaming_opacity));SeekBar opacity=new SeekBar(this);opacity.setMax(40);opacity.setProgress(GamingPrefs.get(this).getInt("opacity",94)-60);opacity.setContentDescription(getString(R.string.gaming_opacity));
         opacity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onStartTrackingTouch(SeekBar s){}public void onProgressChanged(SeekBar s,int p,boolean user){}public void onStopTrackingTouch(SeekBar s){GamingPrefs.get(GamingActivity.this).edit().putInt("opacity",60+s.getProgress()).apply();}});page.addView(opacity);
     }

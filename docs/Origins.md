@@ -8,9 +8,9 @@
 | PixelOS product configuration | `PixelOS-AOSP/android_vendor_custom@e389a1e2caec0cd1e8dc5a5459b88cc2bad38897` |
 | Axion PIF native virtualization | `AxionAOSP/android_frameworks_base@a04d222e97d60c03e28479adf1cf39dd5002827a` |
 | Axion GameProps and TrickyStore/keybox source snapshot | `AxionAOSP/android_frameworks_base@2017624b588861735445868ca809260bf2499f58` |
-| Ortus Launcher | `RisingOS-Revived/android_packages_apps_Launcher3@e2331fb7bc34fa33ecbe6040615457324a9ea60d` |
+| Infinity-X Launcher | `https://gitea.com/projectInfinity-x/packages_apps_Launcher3@8a89db313ebfafc80572795e613679050095d5db` |
 | Launcher dynamic colors | `RisingOS-Revived/android_frameworks_libs_systemui@bd7bae87451e7820535570e6a3499376dc928bf9` |
-| OmniJaws client | `RisingOS-Revived/android_frameworks_base-new@6b7698f836aeeb0b944ed464ec77c4e3163f1480` |
+| Independent Google Smartspace client (Chaldeaprjkt) | `RisingOS-Revived/android_packages_apps_Launcher3@e2331fb7bc34fa33ecbe6040615457324a9ea60d:seraphixgoogle` |
 
 Theme resource origin, catalog revision, every asset URL and SHA-256 are recorded
 in `themes/payload.lock.json`. Original resource authors remain in the bundled
@@ -41,10 +41,11 @@ registered caracal keyframes plus separately rendered ring/typography; see
 `bootanimation/README.md`. GitHub Actions generates the checked-in ROM ZIP and
 preview from that source. No image generation or rendering runs on the phone.
 
-OmniJaws is not shipped or synced. The launcher retains its licensed client types
-for source compatibility, but the OmniJaws provider startup/fallback and provider
-preferences are disabled. Google weather remains available through the separate
-Seraphix integration when its provider is present.
+OmniJaws is not shipped, synced or initialized. The Infinity-X launcher base uses
+its own media/event implementation; the independently licensed Chaldeaprjkt
+Google widget client retains the previous Google weather integration. Launcher
+settings, name, adaptive caracal icon and animation are branded for HeckerOS.
+Original source licenses and credits are retained.
 
 Sandboxed-app restrictions retain AxionOS attribution and use the immutable SDK
 and Infinity-X UI revisions in `framework/sandbox/ORIGIN.json`. The scope and

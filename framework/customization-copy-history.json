@@ -11,7 +11,8 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQuickSettings.kt": [
     "96e250b69d2ba3e6a4d353eea9cbe68cb891ddf9",
     "5d6499a4795cd344fd08b9a963f4838fb03755c6",
-    "a8fbaeb05dc66c60ce51084d6fbfd144a443fee3"
+    "a8fbaeb05dc66c60ce51084d6fbfd144a443fee3",
+    "3597785e7cf6ee82b1955bae13f229b79fd1a877"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerBattery.kt": [
     "006348861f13e89e4a0c1be873e91c8f8e8d50fc"
@@ -114,5 +115,8 @@
   ],
   "packages/apps/Settings/src/com/android/settings/hecker/HeckerPhoneArtView.java": [
     "ec19450074e3ee432a4365be162f67c99eff4a16"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerFaceUnlockIsland.java": [
+    "5f34458d8aae09ff1257d91f5beadc33bb12fe55"
   ]
 }

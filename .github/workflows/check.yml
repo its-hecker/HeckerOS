@@ -35,6 +35,8 @@ jobs:
         run: bash tests/run_host_tests.sh
       - name: Compile Suite Java and link Android resources with locked dependencies
         run: python3 tools/compile_sdk.py --cache generated/sdk
+      - name: Compile retained Google weather and Hecker Launcher artwork
+        run: python3 tools/check_launcher.py --sdk-cache generated/sdk
       - name: Compile headphone, sandbox and face-island native adapter Java and resources
         run: python3 tools/check_device_features.py --sdk-cache generated/sdk
       - name: Compile Quick Settings Kotlin and Java with locked Compose dependencies
