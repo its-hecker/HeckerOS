@@ -132,11 +132,16 @@ fun HeckerTileGrid(
                         }
                     }
                     if (brightness != null) {
-                        androidx.compose.runtime.CompositionLocalProvider(LocalHeckerVerticalBrightness provides true) {
+                        androidx.compose.runtime.CompositionLocalProvider(
+                            LocalHeckerVerticalBrightness provides true,
+                            LocalHeckerReferenceGlass provides true) {
                             VerticalControl { brightness() }
                         }
                     }
                     VerticalControl { HeckerVolumeSlider() }
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    HeckerAutoBrightnessButton()
                 }
             }
             HorizontalPager(state = pager, verticalAlignment = Alignment.Top) { index ->
@@ -153,7 +158,10 @@ fun HeckerTileGrid(
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = .94f))
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                if (brightness != null) brightness()
+                if (brightness != null) Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.weight(1f)) { brightness() }
+                    HeckerAutoBrightnessButton()
+                }
                 HeckerVolumeSlider()
             }
             if (includeFooter && foot.isNotEmpty()) HeckerTileFooter(tiles)
@@ -263,8 +271,6 @@ fun HeckerVolumeSlider() {
         context.registerReceiver(receiver, IntentFilter("android.media.VOLUME_CHANGED_ACTION"), Context.RECEIVER_NOT_EXPORTED)
         onDispose { context.unregisterReceiver(receiver) }
     }
-    val track = MaterialTheme.colorScheme.surfaceContainerHighest
-    val fill = MaterialTheme.colorScheme.onSurface
     Slider(value = volume.coerceIn(minimum, maximum), valueRange = minimum..maximum,
         enabled = !audio.isVolumeFixed, onValueChange = { value ->
             dragging = true
@@ -275,12 +281,9 @@ fun HeckerVolumeSlider() {
         modifier = Modifier.fillMaxWidth().height(56.dp).semantics {
             contentDescription = context.getString(com.android.systemui.res.R.string.hecker_media_volume)
         }, thumb = {}, track = { _ ->
-            Canvas(Modifier.fillMaxWidth().height(46.dp)) {
-                val radius = androidx.compose.ui.geometry.CornerRadius(size.height / 2)
-                drawRoundRect(track, cornerRadius = radius)
-                val progress = ((volume - minimum) / (maximum - minimum).coerceAtLeast(1f)).coerceIn(0f, 1f)
-                drawRoundRect(fill, size = androidx.compose.ui.geometry.Size((size.width * progress).coerceAtLeast(size.height), size.height), cornerRadius = radius)
-            }
+            HeckerGlassTrack(((volume - minimum) / (maximum - minimum).coerceAtLeast(1f)),
+                if (volume <= minimum) com.android.systemui.res.R.drawable.hecker_qs_mute
+                else com.android.systemui.res.R.drawable.hecker_qs_speaker)
         })
 }
 

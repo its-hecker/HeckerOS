@@ -23,7 +23,6 @@ PROJECTS = {
     "vendor/hecker/floral/motionsense": "its-hecker/floral-motionsense-plugin",
     "vendor/hecker/floral/faceid": "its-hecker/floral-3D-faceid-plugin",
     "vendor/hecker/floral/suite": "its-hecker/HeckerOS",
-    "packages/apps/Launcher3": "projectInfinity-x/packages_apps_Launcher3",
 }
 REMOVED_PROJECTS = {"packages/services/OmniJaws"}
 

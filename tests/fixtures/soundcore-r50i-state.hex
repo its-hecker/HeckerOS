@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Based on Oppzippy/OpenSCQ30 200d9e1657dff67d516ed1b6347f312d7a1b01a7
+# a3949.rs r50i_matches_soundcore_app. Serial suffix replaced with synthetic zeros.
+00 01 03 03 00 00 31 39 2e 34 33 31 39 2e 34 33 33 39 34 39 30 30 30 30 30 30 30 30 30 30 30 30 00 00 78 78 78 78 78 78 78 78 78 00 00 00 00 00 00 00 00 00 00 00 0e 01 f6 01 f6 01 62 01 63 01 33 01 33 ff ff ff 31 00 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff

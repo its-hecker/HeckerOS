@@ -18,6 +18,9 @@ from compile_sdk import fetch
 
 ROOT = Path(__file__).resolve().parents[1]
 JAVA = {
+    'com/android/systemui/hecker/HeckerStatusBarPopup.java': '''package com.android.systemui.hecker;
+public final class HeckerStatusBarPopup { public static void start(android.content.Context c) {} public static void boost(android.content.Context c) {} }''',
+
     'android/util/PathParser.java': '''package android.util;
 public class PathParser {
  public static android.graphics.Path createPathFromPathData(String data) { return null; }
@@ -43,6 +46,11 @@ public final class Settings {
   public static String getStringForUser(android.content.ContentResolver r,String n,int u) { return null; }
   public static boolean putIntForUser(android.content.ContentResolver r,String n,int v,int u) { return true; }
   public static boolean putStringForUser(android.content.ContentResolver r,String n,String v,int u) { return true; }
+ }
+ public static final class System {
+  public static android.net.Uri getUriFor(String name) { return null; }
+  public static int getIntForUser(android.content.ContentResolver r,String n,int d,int u) { return d; }
+  public static boolean putIntForUser(android.content.ContentResolver r,String n,int v,int u) { return true; }
  }
 }''',
     'android/os/UserHandle.java': '''package android.os;
@@ -78,6 +86,17 @@ public interface ActivityStarter { void postStartActivityDismissingKeyguard(andr
 ''',
 }
 KOTLIN = {
+    'Controls.kt': '''package com.android.systemui.controls.dagger
+class ControlsComponent {
+ fun getControlsUiController(): java.util.Optional<com.android.systemui.controls.ui.ControlsUiController> = java.util.Optional.empty()
+}
+''',
+    'ControlsUi.kt': '''package com.android.systemui.controls.ui
+interface ControlsUiController {
+ fun resolveActivity(): Class<*>
+ companion object { const val EXTRA_ANIMATE = "extra_animate" }
+}
+''',
     'BatteryModels.kt': '''package com.android.systemui.statusbar.pipeline.battery.shared.ui
 import androidx.compose.ui.graphics.Color
 sealed interface BatteryGlyph { data object Defend: BatteryGlyph; data object Question: BatteryGlyph; data object Plus: BatteryGlyph }
@@ -224,7 +243,7 @@ def main():
             target = out / 'kotlin' / name
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)
         java_sources = list((out / 'java').rglob('*.java')) + list((ROOT / 'framework/qs').glob('*.java'))
-        java_sources += [ROOT / 'framework/themes/ThemeIconNames.java']
+        java_sources += [ROOT / 'framework/themes/ThemeIconNames.java', ROOT / 'framework/applock/HeckerAppLockPrompt.java']
         run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', sdk / 'android-system.jar',
             '-d', out / 'classes', *java_sources)
         jars = sorted(cache.glob('*.jar'))

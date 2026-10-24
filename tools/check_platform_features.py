@@ -112,7 +112,7 @@ def main():
         java = [p for p in (settings/'src').rglob('*.java') if p.name not in excluded]
         # The fetched source set is narrow; --settings-source can point to a full checkout.
         java = [p for p in java if str(p.relative_to(settings/'src')) in lock['settings_java']]
-        run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',str(sdk/'android-system.jar')+os.pathsep+str(jar),
+        run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',os.pathsep.join(map(str,[sdk/'android-system.jar',sdk/'lottie.jar',sdk/'core.jar',sdk/'appcompat.jar',jar])),
             '-d',out/'settings-classes',out/'generated/com/android/settings/R.java',*java,
             ROOT/'tests/platform-api-stubs/android/security/spoof/HeckerSpoofConfig.java',
             *sorted((settings/'tools/hecker/tests').glob('*.java')))

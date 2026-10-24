@@ -1,5 +1,5 @@
 <exceptions>
-    <exception package="me.kavishdevar.librepods">
+    <exception package="org.hecker.librepods">
         <permission name="android.permission.BLUETOOTH_CONNECT" fixed="false" />
         <permission name="android.permission.BLUETOOTH_SCAN" fixed="false" />
         <permission name="android.permission.BLUETOOTH_ADVERTISE" fixed="false" />

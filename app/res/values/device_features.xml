@@ -15,8 +15,8 @@
     <string name="headphones_summary">Connection popups for AirPods, Soundcore and other headphones</string>
     <string name="headphones_description">Show a connection card while your phone is unlocked. Battery details depend on what your headphones report. Unsupported readings are left unavailable.</string>
     <string name="headphones_popup">Show connection popup</string>
-    <string name="headphones_airpods">AirPods controls</string>
-    <string name="headphones_airpods_summary">Set up LibrePods for additional AirPods battery information and supported controls.</string>
+    <string name="headphones_airpods">Headphones and AirPods</string>
+    <string name="headphones_airpods_summary">View connected headphones, Soundcore R50i details and AirPods controls.</string>
     <string name="headphones_airpods_unavailable">LibrePods is unavailable in this build.</string>
     <string name="face_island_title">Face unlock island</string>
     <string name="face_island_summary">Animate a pill at the top of the lock screen during face recognition and successful authentication.</string>

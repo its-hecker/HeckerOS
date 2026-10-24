@@ -12,7 +12,8 @@ class ProductEntryTests(unittest.TestCase):
         source = "\n".join([
             "TARGET_BUILD_VARIANT := userdebug",
             "HECKER_DEV_USB_ADB := true",
-            "PRODUCT_PACKAGES := OmniJaws ExistingApp",
+            "PRODUCT_PACKAGES := OmniJaws ExistingApp HeckerLauncher Launcher3 Launcher3QuickStep HeckerLauncherRecentsOverlay",
+            "inherit-product = $(eval include $(1))",
             "include " + str(ROOT / "rom/common.mk"),
             "$(info PACKAGES=$(PRODUCT_PACKAGES))",
             "$(info EXCLUSIONS=$(PRODUCT_SOURCE_ROOT_DIRS))",
@@ -26,8 +27,12 @@ class ProductEntryTests(unittest.TestCase):
             result = subprocess.run(["make", "--no-print-directory", "-f", "-", "all"],
                                     cwd=rom, input=source, text=True, capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("PACKAGES=ExistingApp HeckerSystemUIOverlay", result.stdout)
+        packages = next(line.removeprefix("PACKAGES=").split() for line in result.stdout.splitlines()
+                        if line.startswith("PACKAGES="))
+        self.assertTrue({"ExistingApp", "HeckerSuite", "HeckerSystemUIOverlay"} <= set(packages))
+        self.assertFalse({"HeckerLauncher", "Launcher3", "Launcher3QuickStep", "HeckerLauncherRecentsOverlay"} & set(packages))
         self.assertIn("EXCLUSIONS=-packages/services/OmniJaws", result.stdout)
+        self.assertNotIn("-packages/apps/Launcher3", result.stdout)
         self.assertIn("ADB=ro.adb.secure=0 persist.sys.usb.config=adb", result.stdout)
 
     def test_release_map_is_available_before_android_defines_my_dir(self):

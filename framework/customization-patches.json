@@ -72,9 +72,10 @@
     },
     {
       "old": "        Column(\n            verticalArrangement = Arrangement.spacedBy(space = 16.dp, alignment = Alignment.Bottom),\n            modifier =\n                Modifier.fillMaxWidth()\n                    .defaultMinSize(minHeight = ShadeHeader.Dimensions.ExpandedHeight),\n        ) {\n            Box(modifier = Modifier.fillMaxWidth()) {\n                Clock(\n                    onClick = viewModel::onClockClicked,\n                    scale = 2.57f,\n                    textColor = textColor,\n                    modifier =\n                        Modifier.sysuiResTag(\"expanded_header_clock\")\n                            .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)\n                            .wrapContentSize(Alignment.CenterStart),\n                )\n                if (!viewModel.isPrivacyChipVisible) {\n                    Box(\n                        modifier =\n                            Modifier.element(ShadeHeader.Elements.ShadeCarrierGroup).fillMaxWidth()\n                    ) {\n                        ShadeCarrierGroup(\n                            viewModel = viewModel,\n                            modifier = Modifier.align(Alignment.CenterEnd).widthIn(max = 180.dp),\n                        )\n                    }\n                }\n            }\n            Row(\n                verticalAlignment = Alignment.CenterVertically,\n                horizontalArrangement = Arrangement.SpaceBetween,\n                modifier = Modifier.element(ShadeHeader.Elements.ExpandedContent).fillMaxWidth(),\n            ) {\n                VariableDayDate(\n                    longerDateText = viewModel.longerDateText,\n                    shorterDateText = viewModel.shorterDateText,\n                    textColor = textColor,\n                    modifier = Modifier.sysuiResTag(\"expanded_shade_header_day_date\"),\n                )\n                ShadeHighlightChip {\n                    val paddingEnd = with(LocalDensity.current) { 3.sp.toDp() }\n                    StatusIcons(\n                        viewModel = viewModel,\n                        useExpandedFormat = useExpandedFormat,\n                        foregroundColor = textColor.toArgb(),\n                        backgroundColor = ShadeHeader.Colors.inverseTextColor.toArgb(),\n                        modifier = Modifier.padding(end = paddingEnd).weight(1f, fill = false),\n                    )\n                    BatteryInfo(\n                        viewModel = viewModel,\n                        showIcon = true,\n                        useExpandedFormat = true,\n                        textColor = textColor,\n                    )\n                }\n            }\n        }",
-      "new": "        androidx.compose.runtime.CompositionLocalProvider(\n            com.android.systemui.hecker.LocalHeckerReferenceGlass provides\n                !com.android.systemui.hecker.heckerCustomizedLayout()\n        ) {\n            val foreground = ShadeHeader.Colors.textColor\n            Column(\n                verticalArrangement = Arrangement.spacedBy(8.dp),\n                modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 104.dp),\n            ) {\n                Row(Modifier.element(ShadeHeader.Elements.ExpandedContent).fillMaxWidth(),\n                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {\n                    ShadeCarrierGroup(viewModel = viewModel, modifier = Modifier.weight(1f).padding(end = 8.dp))\n                    if (!viewModel.isPrivacyChipVisible) Row(verticalAlignment = Alignment.CenterVertically) {\n                        StatusIcons(viewModel = viewModel, useExpandedFormat = useExpandedFormat,\n                            foregroundColor = foreground.toArgb(), backgroundColor = Color.Transparent.toArgb(),\n                            modifier = Modifier.weight(1f, fill = false))\n                        BatteryInfo(viewModel = viewModel, showIcon = true, useExpandedFormat = false,\n                            textColor = foreground, modifier = Modifier.padding(start = 4.dp))\n                    }\n                }\n                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {\n                    if (com.android.systemui.hecker.LocalHeckerReferenceGlass.current) {\n                        Element(key = ShadeHeader.Elements.Clock, modifier = Modifier) {\n                            com.android.systemui.hecker.HeckerReferenceClock(viewModel::onClockClicked)\n                        }\n                    } else {\n                        Clock(onClick = viewModel::onClockClicked, scale = 1f, textColor = foreground,\n                            modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp).wrapContentSize(Alignment.CenterStart))\n                    }\n                    Text(viewModel.shorterDateText, color = foreground, fontSize = 12.sp,\n                        maxLines = 1, overflow = TextOverflow.Ellipsis,\n                        modifier = Modifier.padding(start = 5.dp).weight(1f))\n                    actions()\n                }\n            }\n        }",
+      "new": "        androidx.compose.runtime.CompositionLocalProvider(\n            com.android.systemui.hecker.LocalHeckerReferenceGlass provides\n                !com.android.systemui.hecker.heckerCustomizedLayout()\n        ) {\n            val foreground = ShadeHeader.Colors.textColor\n            Column(\n                verticalArrangement = Arrangement.spacedBy(8.dp),\n                modifier = Modifier.element(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader)\n                    .fillMaxWidth().defaultMinSize(minHeight = 104.dp),\n            ) {\n                Row(Modifier.element(ShadeHeader.Elements.ExpandedContent).fillMaxWidth(),\n                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {\n                    ShadeCarrierGroup(viewModel = viewModel, modifier = Modifier.weight(1f).padding(end = 8.dp))\n                    if (!viewModel.isPrivacyChipVisible) Row(verticalAlignment = Alignment.CenterVertically) {\n                        StatusIcons(viewModel = viewModel, useExpandedFormat = useExpandedFormat,\n                            foregroundColor = foreground.toArgb(), backgroundColor = Color.Transparent.toArgb(),\n                            modifier = Modifier.weight(1f, fill = false))\n                        BatteryInfo(viewModel = viewModel, showIcon = true, useExpandedFormat = false,\n                            textColor = foreground, modifier = Modifier.padding(start = 4.dp))\n                    }\n                }\n                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {\n                    Element(key = com.android.systemui.hecker.HeckerQsScene.ExpandedClock, modifier = Modifier) {\n                        com.android.systemui.hecker.HeckerReferenceClock(viewModel::onClockClicked, textColor = foreground)\n                    }\n                    Text(viewModel.shorterDateText, color = foreground, fontSize = 12.sp,\n                        maxLines = 1, overflow = TextOverflow.Ellipsis,\n                        modifier = Modifier.padding(start = 5.dp).weight(1f))\n                    actions()\n                }\n            }\n        }",
       "previous": [
-        "        Column(\n            verticalArrangement = Arrangement.spacedBy(10.dp),\n            modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 104.dp),\n        ) {\n            Row(Modifier.element(ShadeHeader.Elements.ExpandedContent).fillMaxWidth(),\n                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {\n                ShadeCarrierGroup(viewModel = viewModel, modifier = Modifier.widthIn(max = 160.dp))\n                if (!viewModel.isPrivacyChipVisible) ShadeHighlightChip {\n                    StatusIcons(viewModel = viewModel, useExpandedFormat = useExpandedFormat,\n                        foregroundColor = textColor.toArgb(), backgroundColor = ShadeHeader.Colors.inverseTextColor.toArgb(),\n                        modifier = Modifier.weight(1f, fill = false))\n                    BatteryInfo(viewModel = viewModel, showIcon = true, useExpandedFormat = true, textColor = textColor)\n                }\n            }\n            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {\n                Clock(onClick = viewModel::onClockClicked, scale = 1.35f, textColor = textColor,\n                    modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp).wrapContentSize(Alignment.CenterStart))\n                VariableDayDate(longerDateText = viewModel.longerDateText, shorterDateText = viewModel.shorterDateText,\n                    textColor = textColor, modifier = Modifier.padding(start = 6.dp).weight(1f))\n                actions()\n            }\n        }"
+        "        Column(\n            verticalArrangement = Arrangement.spacedBy(10.dp),\n            modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 104.dp),\n        ) {\n            Row(Modifier.element(ShadeHeader.Elements.ExpandedContent).fillMaxWidth(),\n                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {\n                ShadeCarrierGroup(viewModel = viewModel, modifier = Modifier.widthIn(max = 160.dp))\n                if (!viewModel.isPrivacyChipVisible) ShadeHighlightChip {\n                    StatusIcons(viewModel = viewModel, useExpandedFormat = useExpandedFormat,\n                        foregroundColor = textColor.toArgb(), backgroundColor = ShadeHeader.Colors.inverseTextColor.toArgb(),\n                        modifier = Modifier.weight(1f, fill = false))\n                    BatteryInfo(viewModel = viewModel, showIcon = true, useExpandedFormat = true, textColor = textColor)\n                }\n            }\n            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {\n                Clock(onClick = viewModel::onClockClicked, scale = 1.35f, textColor = textColor,\n                    modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp).wrapContentSize(Alignment.CenterStart))\n                VariableDayDate(longerDateText = viewModel.longerDateText, shorterDateText = viewModel.shorterDateText,\n                    textColor = textColor, modifier = Modifier.padding(start = 6.dp).weight(1f))\n                actions()\n            }\n        }",
+        "        androidx.compose.runtime.CompositionLocalProvider(\n            com.android.systemui.hecker.LocalHeckerReferenceGlass provides\n                !com.android.systemui.hecker.heckerCustomizedLayout()\n        ) {\n            val foreground = ShadeHeader.Colors.textColor\n            Column(\n                verticalArrangement = Arrangement.spacedBy(8.dp),\n                modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 104.dp),\n            ) {\n                Row(Modifier.element(ShadeHeader.Elements.ExpandedContent).fillMaxWidth(),\n                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {\n                    ShadeCarrierGroup(viewModel = viewModel, modifier = Modifier.weight(1f).padding(end = 8.dp))\n                    if (!viewModel.isPrivacyChipVisible) Row(verticalAlignment = Alignment.CenterVertically) {\n                        StatusIcons(viewModel = viewModel, useExpandedFormat = useExpandedFormat,\n                            foregroundColor = foreground.toArgb(), backgroundColor = Color.Transparent.toArgb(),\n                            modifier = Modifier.weight(1f, fill = false))\n                        BatteryInfo(viewModel = viewModel, showIcon = true, useExpandedFormat = false,\n                            textColor = foreground, modifier = Modifier.padding(start = 4.dp))\n                    }\n                }\n                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {\n                    if (com.android.systemui.hecker.LocalHeckerReferenceGlass.current) {\n                        Element(key = ShadeHeader.Elements.Clock, modifier = Modifier) {\n                            com.android.systemui.hecker.HeckerReferenceClock(viewModel::onClockClicked)\n                        }\n                    } else {\n                        Clock(onClick = viewModel::onClockClicked, scale = 1f, textColor = foreground,\n                            modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp).wrapContentSize(Alignment.CenterStart))\n                    }\n                    Text(viewModel.shorterDateText, color = foreground, fontSize = 12.sp,\n                        maxLines = 1, overflow = TextOverflow.Ellipsis,\n                        modifier = Modifier.padding(start = 5.dp).weight(1f))\n                    actions()\n                }\n            }\n        }"
       ]
     },
     {
@@ -101,7 +102,10 @@
     },
     {
       "old": "            FooterActionsWithAnimatedVisibility(\n                viewModel = footerActionsViewModel,\n                isCustomizing = false,\n                customizingAnimationDuration = 0,\n                modifier =\n                    Modifier.align(Alignment.CenterHorizontally)\n                        .sysuiResTag(\"qs_footer_actions\")\n                        .padding(horizontal = shadeHorizontalPadding),\n            )",
-      "new": "            val heckerSecurity by footerActionsViewModel.security.collectAsState(initial = null)\n            val heckerActiveApps by footerActionsViewModel.foregroundServices.collectAsState(initial = null)\n            val heckerUserSwitcher by footerActionsViewModel.userSwitcher.collectAsState(initial = null)\n            if (com.android.systemui.hecker.heckerCustomizedLayout() || heckerSecurity != null ||\n                heckerActiveApps != null || heckerUserSwitcher != null) {\n                FooterActionsWithAnimatedVisibility(\n                    viewModel = footerActionsViewModel,\n                    isCustomizing = false,\n                    customizingAnimationDuration = 0,\n                    modifier =\n                        Modifier.align(Alignment.CenterHorizontally)\n                            .sysuiResTag(\"qs_footer_actions\")\n                            .padding(horizontal = shadeHorizontalPadding),\n                )\n            }"
+      "new": "            val heckerSecurity by footerActionsViewModel.security.collectAsState(initial = null)\n            val heckerActiveApps by footerActionsViewModel.foregroundServices.collectAsState(initial = null)\n            val heckerUserSwitcher by footerActionsViewModel.userSwitcher.collectAsState(initial = null)\n            val heckerWideHeader = LocalWindowSizeClass.current.isWidthAtLeastBreakpoint(\n                WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)\n            if (heckerWideHeader || heckerSecurity != null ||\n                heckerActiveApps != null || heckerUserSwitcher != null) {\n                FooterActionsWithAnimatedVisibility(\n                    viewModel = footerActionsViewModel,\n                    isCustomizing = false,\n                    customizingAnimationDuration = 0,\n                    showSettingsAndPower = heckerWideHeader,\n                    modifier =\n                        Modifier.align(Alignment.CenterHorizontally)\n                            .sysuiResTag(\"qs_footer_actions\")\n                            .padding(horizontal = shadeHorizontalPadding),\n                )\n            }",
+      "previous": [
+        "            val heckerSecurity by footerActionsViewModel.security.collectAsState(initial = null)\n            val heckerActiveApps by footerActionsViewModel.foregroundServices.collectAsState(initial = null)\n            val heckerUserSwitcher by footerActionsViewModel.userSwitcher.collectAsState(initial = null)\n            if (com.android.systemui.hecker.heckerCustomizedLayout() || heckerSecurity != null ||\n                heckerActiveApps != null || heckerUserSwitcher != null) {\n                FooterActionsWithAnimatedVisibility(\n                    viewModel = footerActionsViewModel,\n                    isCustomizing = false,\n                    customizingAnimationDuration = 0,\n                    modifier =\n                        Modifier.align(Alignment.CenterHorizontally)\n                            .sysuiResTag(\"qs_footer_actions\")\n                            .padding(horizontal = shadeHorizontalPadding),\n                )\n            }"
+      ]
     }
   ],
   "frameworks/base/services/java/com/android/server/SystemServer.java": [
@@ -114,9 +118,10 @@
     },
     {
       "old": "        t.traceBegin(\"StartBootPhaseSystemServicesReady\");",
-      "new": "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartHeckerGameService\");\n        mSystemServiceManager.startService(com.android.server.hecker.HeckerGameService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");",
+      "new": "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartHeckerGameService\");\n        mSystemServiceManager.startService(com.android.server.hecker.HeckerGameService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartHeckerLauncherService\");\n        mSystemServiceManager.startService(com.android.server.hecker.HeckerLauncherService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");",
       "previous": [
-        "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");"
+        "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");",
+        "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartHeckerGameService\");\n        mSystemServiceManager.startService(com.android.server.hecker.HeckerGameService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");"
       ]
     }
   ],
@@ -344,6 +349,10 @@
     {
       "old": "                    && mPlatformCompat.isChangeEnabled(APP_DATA_DIRECTORY_ISOLATION, app.info);",
       "new": "                    && (heckerSandboxDataIsolation\n                        || mPlatformCompat.isChangeEnabled(APP_DATA_DIRECTORY_ISOLATION, app.info));"
+    },
+    {
+      "old": "    boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,\n            int zygotePolicyFlags, boolean disableHiddenApiChecks, boolean disableTestApiChecks,\n            String abiOverride) {",
+      "new": "    boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,\n            int zygotePolicyFlags, boolean disableHiddenApiChecks, boolean disableTestApiChecks,\n            String abiOverride) {\n        if (!app.isPendingStart() && HeckerMemoryPolicy.blockStart(app.info, hostingRecord)) return false;\n        HeckerMemoryPolicy.onProcessStarting(app);"
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/dagger/SystemUIModule.java": [
@@ -394,13 +403,19 @@
   "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/scene/ui/composable/transitions/FromShadeToQuickSettingsTransition.kt": [
     {
       "old": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n",
-      "new": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n"
+      "new": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n\n    // Reverse travel fades the expanded-only header in the first 20 percent.\n    fractionRange(start = 0.8f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n",
+      "previous": [
+        "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/qs/composefragment/ui/FromQuickQuickSettingsToQuickSettings.kt": [
     {
       "old": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n",
-      "new": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n"
+      "new": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n\n    // Reverse travel fades the expanded-only header in the first 20 percent.\n    fractionRange(start = 0.8f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n",
+      "previous": [
+        "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/ui/compose/WifiIcon.kt": [
@@ -461,6 +476,141 @@
     {
       "old": "    public void startAssist(Context context, Bundle args) {",
       "new": "    public void startAssist(Context context, Bundle args) {\n        if (android.provider.Settings.Global.getInt(context.getContentResolver(),\n                \"hecker_game_block_assistant\", 0) != 0) return;"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/qs/footer/ui/compose/FooterActions.kt": [
+    {
+      "old": "            IconButton(\n                { settings },\n                useModifierBasedExpandable,\n                Modifier.sysuiResTag(\"settings_button_container\"),\n            )\n            IconButton(\n                { viewModel.power },\n                useModifierBasedExpandable,\n                Modifier.sysuiResTag(\"pm_lite\"),\n            )",
+      "new": "            if (showSettingsAndPower) {\n                IconButton(\n                    { settings },\n                    useModifierBasedExpandable,\n                    Modifier.sysuiResTag(\"settings_button_container\"),\n                )\n                IconButton(\n                    { viewModel.power },\n                    useModifierBasedExpandable,\n                    Modifier.sysuiResTag(\"pm_lite\"),\n                )\n            }"
+    },
+    {
+      "old": "    customizingAnimationDuration: Int,\n    modifier: Modifier = Modifier,",
+      "new": "    customizingAnimationDuration: Int,\n    modifier: Modifier = Modifier,\n    showSettingsAndPower: Boolean = true,"
+    },
+    {
+      "old": "                FooterActions(viewModel = viewModel)",
+      "new": "                FooterActions(viewModel = viewModel, showSettingsAndPower = showSettingsAndPower)"
+    },
+    {
+      "old": "fun FooterActions(viewModel: FooterActionsViewModel, modifier: Modifier = Modifier) {",
+      "new": "fun FooterActions(viewModel: FooterActionsViewModel, modifier: Modifier = Modifier,\n    showSettingsAndPower: Boolean = true) {"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/ui/binder/BiometricViewBinder.kt": [
+    {
+      "old": "            logoView.setImageDrawable(logoInfo.first)",
+      "new": "            logoView.setImageDrawable(logoInfo.first)\n            val heckerAppLock = viewModel.description.first() == view.context.getString(\n                com.android.internal.R.string.locked_app_biometric_prompt_description)\n            if (heckerAppLock) com.android.systemui.hecker.HeckerAppLockPrompt.bind(logoView)"
+    },
+    {
+      "old": "                        if (authState.isAuthenticated) {",
+      "new": "                        if (authState.isAuthenticated) {\n                            if (heckerAppLock) com.android.systemui.hecker.HeckerAppLockPrompt.state(logoView, 1)"
+    },
+    {
+      "old": "                        val isError = promptMessage is PromptMessage.Error",
+      "new": "                        val isError = promptMessage is PromptMessage.Error\n                        if (heckerAppLock) com.android.systemui.hecker.HeckerAppLockPrompt.state(logoView, if (isError) 2 else 0)"
+    }
+  ],
+  "frameworks/base/services/core/java/com/android/server/wm/WindowManagerService.java": [
+    {
+      "old": "Settings.Secure.DISABLE_SECURE_WINDOWS, 0) != 0;",
+      "new": "Settings.Secure.DISABLE_SECURE_WINDOWS, mCurrentUserId) != 0;"
+    },
+    {
+      "old": "            mCurrentUserId = newUserId;",
+      "new": "            mCurrentUserId = newUserId;\n            mSettingsObserver.updateDisableSecureWindows();"
+    },
+    {
+      "old": "        void updateDisableSecureWindows() {\n            if (!SystemProperties.getBoolean(SYSTEM_DEBUGGABLE, false)) {\n                return;\n            }",
+      "new": "        void updateDisableSecureWindows() {\n            // Explicit per-user Hecker capture preference; available on release builds too."
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/authentication/data/repository/AuthenticationRepository.kt": [
+    {
+      "old": "    override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =\n        refreshingFlow(\n            initialValue =\n                lockPatternUtils.isAutoPinConfirmEnabled(userRepository.getSelectedUserInfo().id),\n            getFreshValue = lockPatternUtils::isAutoPinConfirmEnabled,\n        )",
+      "new": "    override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =\n        refreshingFlow(\n            // PIN length may be unavailable before the first credential unlock after boot.\n            // Keep the explicit confirm button visible until auto-confirm is safe to use.\n            initialValue = false,\n            getFreshValue = { userId ->\n                lockPatternUtils.isAutoPinConfirmEnabled(userId) &&\n                    lockPatternUtils.getPinLength(userId) >= LockPatternUtils.MIN_LOCK_PASSWORD_SIZE\n            },\n        )"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/authentication/domain/interactor/AuthenticationInteractor.kt": [
+    {
+      "old": "            Pin -> inputLength < repository.getPinLength()",
+      "new": "            Pin -> {\n                val pinLength = repository.getPinLength()\n                // Unknown PIN length must never turn each digit into a credential attempt.\n                // The caller still permits explicit confirmation through the normal verifier.\n                pinLength < repository.minPasswordLength || inputLength < pinLength\n            }"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfacesImpl.java": [
+    {
+      "old": "                                () -> plugin.setup(\n                                        mNotificationShadeWindowController.getWindowRootView(),\n                                        getNavigationBarView(),\n                                        new Callback(plugin), mDozeParameters));",
+      "new": "                                () -> plugin.setup(\n                                        com.android.systemui.hecker.HeckerOsloOverlayHost.rootFor(plugin, pluginContext,\n                                                mNotificationShadeWindowController.getWindowRootView(), mKeyguardStateController),\n                                        getNavigationBarView(),\n                                        com.android.systemui.hecker.HeckerOsloOverlayHost.callbackFor(plugin,\n                                                new Callback(plugin)), mDozeParameters));"
+    },
+    {
+      "old": "                            mOverlays.remove(plugin);",
+      "new": "                            com.android.systemui.hecker.HeckerOsloOverlayHost.disconnect(plugin);\n                            mOverlays.remove(plugin);"
+    }
+  ],
+  "frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java": [
+    {
+      "old": "            mProcessList.onSystemReady();",
+      "new": "            mProcessList.onSystemReady();\n            HeckerMemoryPolicy.start(this);"
+    }
+  ],
+  "frameworks/base/services/core/java/com/android/server/wm/ActivityTaskSupervisor.java": [
+    {
+      "old": "        // Find any running services associated with this app and stop if needed.",
+      "new": "        if (removeFromRecents) {\n            com.android.server.am.HeckerMemoryPolicy.onTaskRemoved(task.mUserId, component.getPackageName());\n        }\n\n        // Find any running services associated with this app and stop if needed."
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarView.java": [
+    {
+      "old": "    @Override\n    public boolean dispatchTouchEvent(MotionEvent event) {\n        if (mIsStatusBarInteractiveSupplier != null\n                && !mIsStatusBarInteractiveSupplier.getAsBoolean()) {\n            // Consume the event to prevent any calls to #onTouchEvent on status bar view or its\n            // components, essentially making the status bar and its children completely\n            // non-interactive.\n            return true;\n        }\n        return super.dispatchTouchEvent(event);\n    }\n\n    @Override\n    public boolean onTouchEvent(MotionEvent event) {",
+      "new": "    @Override\n    public boolean dispatchTouchEvent(MotionEvent event) {\n        if (mIsStatusBarInteractiveSupplier != null\n                && !mIsStatusBarInteractiveSupplier.getAsBoolean()) {\n            // Consume the event to prevent any calls to #onTouchEvent on status bar view or its\n            // components, essentially making the status bar and its children completely\n            // non-interactive.\n            return true;\n        }\n        if (com.android.systemui.hecker.HeckerStatusBarPopup.onTouch(this, event)) return true;\n        return super.dispatchTouchEvent(event);\n    }\n\n    @Override\n    public boolean onTouchEvent(MotionEvent event) {",
+      "previous": [
+        "    @Override\n    public boolean dispatchTouchEvent(MotionEvent event) {\n        if (mIsStatusBarInteractiveSupplier != null\n                && !mIsStatusBarInteractiveSupplier.getAsBoolean()) {\n            // Consume the event to prevent any calls to #onTouchEvent on status bar view or its\n            // components, essentially making the status bar and its children completely\n            // non-interactive.\n            return true;\n        }\n        return super.dispatchTouchEvent(event);\n    }\n\n    @Override\n    public boolean dispatchTouchEvent(MotionEvent event) {\n        if (com.android.systemui.hecker.HeckerStatusBarPopup.onTouch(this, event)) return true;\n        return super.dispatchTouchEvent(event);\n    }\n\n    @Override\n    public boolean onTouchEvent(MotionEvent event) {"
+      ]
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogComponent.java": [
+    {
+      "old": "            VolumeDialog volumeDialog) {",
+      "new": "            VolumeDialog volumeDialog,\n            SafetyWarningDialogDelegate.Factory heckerSafetyFactory,\n            CsdWarningDialogDelegate.Factory heckerCsdFactory) {"
+    },
+    {
+      "old": "                .withDefault(() -> volumeDialog)",
+      "new": "                .withDefault(() -> new com.android.systemui.hecker.HeckerVolumeDialog(\n                        context, volumeDialogController, volumeDialog,\n                        heckerSafetyFactory, heckerCsdFactory))"
+    }
+  ],
+  "frameworks/base/core/java/android/app/Activity.java": [
+    {
+      "old": "    protected void onPostResume() {",
+      "new": "    protected void onPostResume() {\n        com.android.internal.hecker.HeckerLauncherEnhancements.attach(this);"
+    },
+    {
+      "old": "    protected void onPause() {\n        if (DEBUG_LIFECYCLE)",
+      "new": "    protected void onPause() {\n        com.android.internal.hecker.HeckerLauncherEnhancements.detach(this);\n        if (DEBUG_LIFECYCLE)"
+    },
+    {
+      "old": "    public boolean dispatchTouchEvent(MotionEvent ev) {",
+      "new": "    public boolean dispatchTouchEvent(MotionEvent ev) {\n        if (com.android.internal.hecker.HeckerLauncherEnhancements.touch(this, ev)) return true;"
+    }
+  ],
+  "frameworks/base/core/java/android/app/WallpaperManager.java": [
+    {
+      "old": "    public void setWallpaperOffsets(IBinder windowToken, float xOffset, float yOffset) {",
+      "new": "    public void setWallpaperOffsets(IBinder windowToken, float xOffset, float yOffset) {\n        com.android.internal.hecker.HeckerLauncherEnhancements.wallpaperOffsets(mContext, xOffset, yOffset);"
+    },
+    {
+      "old": "    public void setWallpaperZoomOut(@NonNull IBinder windowToken, float zoom) {",
+      "new": "    public void setWallpaperZoomOut(@NonNull IBinder windowToken, float zoom) {\n        com.android.internal.hecker.HeckerLauncherEnhancements.wallpaperZoom(mContext, zoom);"
+    }
+  ],
+  "system/sepolicy/private/service_contexts": [
+    {
+      "old": "activity                                  u:object_r:activity_service:s0",
+      "new": "activity                                  u:object_r:activity_service:s0\nhecker_memory                             u:object_r:activity_service:s0\nhecker_launcher                           u:object_r:activity_service:s0\nhecker_game                               u:object_r:activity_service:s0"
+    }
+  ],
+  "system/sepolicy/build/soong/service_fuzzer_bindings.go": [
+    {
+      "old": "var (\n\tServiceFuzzerBindings = map[string][]string{",
+      "new": "var (\n\tServiceFuzzerBindings = map[string][]string{\n\t\t// Java Binder services use the documented exception (b/287102710).\n\t\t\"hecker_memory\":   EXCEPTION_NO_FUZZER,\n\t\t\"hecker_launcher\": EXCEPTION_NO_FUZZER,\n\t\t\"hecker_game\":     EXCEPTION_NO_FUZZER,"
     }
   ]
 }

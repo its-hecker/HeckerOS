@@ -56,7 +56,7 @@ object HeckerThemeAssets {
                 val raw = Settings.Secure.getStringForUser(context.contentResolver, KEY, UserHandle.USER_CURRENT)
                 val themes = if (raw.isNullOrBlank()) null else JSONObject(raw).optJSONObject("themes")
                 buildMap<String, String> {
-                    for (category in listOf("statusbar_wifi", "statusbar_signal", "battery_style", "charging_animation")) {
+                    for (category in listOf("statusbar_wifi", "battery_style")) {
                         val theme = themes?.optJSONObject(category) ?: continue
                         val pkg = theme.optString("packageName")
                         if (theme.optBoolean("enabled", false) && pkg.isNotBlank()) put(category, pkg)

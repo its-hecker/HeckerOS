@@ -229,13 +229,18 @@ public final class HeckerFaceUnlockIsland {
             float cx = getWidth() / unit / 2f;
             boolean success = state == FaceIslandState.SUCCESS;
             float width = success ? 124 + 16 * progress : 124;
+            text.setTextSize(11.5f * getResources().getConfiguration().fontScale);
+            CharSequence fitted = android.text.TextUtils.ellipsize(success ? unlockedLabel : scanningLabel, text,
+                    width - 53, android.text.TextUtils.TruncateAt.END);
+            // Center the measured icon, gap and label as a single group.
+            float contentWidth = 16 + 9 + text.measureText(fitted.toString());
+            float x = cx - contentWidth / 2 + 8;
             paint.setStyle(Paint.Style.FILL); paint.setColor(0xF5080D13);
             rect.set(cx - width / 2, 2, cx + width / 2, 34);
             canvas.drawRoundRect(rect, 16, 16, paint);
             paint.setStyle(Paint.Style.STROKE); paint.setStrokeWidth(.7f);
             paint.setColor(success ? 0x665DDC91 : 0x554F94C7);
             canvas.drawRoundRect(rect, 16, 16, paint);
-            float x = cx - width / 2 + 20;
             paint.setColor(success ? 0xFF91E6AA : Color.WHITE);
             paint.setStrokeWidth(1.8f); paint.setStrokeCap(Paint.Cap.ROUND);
             paint.setStrokeJoin(Paint.Join.ROUND); paint.setStyle(Paint.Style.STROKE);
@@ -265,10 +270,8 @@ public final class HeckerFaceUnlockIsland {
                 canvas.drawLine(x - 5, 11 + phase * 14, x + 5, 11 + phase * 14, paint);
             }
             text.setColor(success ? 0xFFB8EFCC : 0xFFE7EFF7);
-            float available = width - 48;
-            CharSequence fitted = android.text.TextUtils.ellipsize(success ? unlockedLabel : scanningLabel, text,
-                    available, android.text.TextUtils.TruncateAt.END);
-            canvas.drawText(fitted.toString(), x + 17, 22, text);
+            Paint.FontMetrics metrics = text.getFontMetrics();
+            canvas.drawText(fitted.toString(), x + 17, 18 - (metrics.ascent + metrics.descent) / 2, text);
             canvas.restore();
         }
     }

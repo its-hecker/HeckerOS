@@ -4,6 +4,8 @@ from pathlib import Path
 import tempfile
 import sys
 import unittest
+from unittest.mock import patch
+import json
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,6 +13,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 spec = importlib.util.spec_from_file_location("suite_prepare", ROOT / "tools/prepare.py")
 prepare = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(prepare)
+import customization_port
 
 
 class PreparationTests(unittest.TestCase):
@@ -76,6 +79,38 @@ class PreparationTests(unittest.TestCase):
         fragment.parent.mkdir(parents=True)
         fragment.write_text(prepare.MOTION_ABOUT_OLD)
         return settings
+
+    def test_fresh_manifest_composes_app_lock_permission_and_theme_broadcast_atomically(self):
+        manifest = self.rom / prepare.FRAMEWORK / "core/res/AndroidManifest.xml"
+        relative = "frameworks/base/core/res/AndroidManifest.xml"
+        theme_pair = json.loads((ROOT / "framework/customization-patches.json").read_text())[relative][0]
+        manifest.write_text(manifest.read_text().replace("</manifest>",
+                theme_pair["old"] + '\n<!-- unrelated local content -->\n</manifest>'))
+        framework_input = self.rom / prepare.FRAMEWORK / "core/java/android/content/res/Resources.java"
+        framework_input.parent.mkdir(parents=True, exist_ok=True)
+        framework_input.write_text("// framework present\n")
+        before = self.contents()
+        # Use the real two manifest edits while keeping unrelated ports out of
+        # this fixture. Both adapters must compose before any writes occur.
+        with tempfile.TemporaryDirectory() as temporary:
+            fixtures = Path(temporary)
+            (fixtures / "framework").mkdir()
+            (fixtures / "framework/customization-patches.json").write_text(
+                    json.dumps({relative: [theme_pair]}))
+            (fixtures / "framework/customization-copies.json").write_text("{}")
+            with patch.object(customization_port, "ROOT", fixtures):
+                planned = prepare.plan(self.rom)
+                self.assertEqual(before, self.contents())
+                self.assertIn(prepare.PERMISSION, planned[manifest])
+                self.assertIn("android.intent.action.THEME_ENGINE_CHANGED", planned[manifest])
+                prepare.apply(self.rom, "apply")
+                applied = self.contents()
+                self.assertEqual({}, prepare.plan(self.rom))
+                prepare.apply(self.rom, "verify")
+                prepare.apply(self.rom, "apply")
+                self.assertEqual(applied, self.contents())
+                prepare.apply(self.rom, "revert")
+                self.assertEqual(before, self.contents())
 
     def test_motion_navigation_is_reversible_and_preserves_controls_tile_and_source_manifest(self):
         settings = self.stage_motion()

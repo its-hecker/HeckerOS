@@ -45,9 +45,9 @@
     <string name="integrity_title">Play 完整性</string>
     <string name="integrity_summary">管理 Google Play 兼容性配置</string>
     <string name="lock_screen_title">锁定屏幕</string>
-    <string name="lock_screen_summary">歌词、壁纸、充电动画和息屏显示</string>
+    <string name="lock_screen_summary">人脸解锁特效、歌词、壁纸和充电动画</string>
     <string name="status_bar_title">状态栏</string>
-    <string name="status_bar_summary">信号、Wi-Fi 和电池图标</string>
+    <string name="status_bar_summary">Wi-Fi 图标和电池样式</string>
     <string name="face_title">3D 人脸解锁</string>
     <string name="face_summary">红外身份验证与人脸录入</string>
     <string name="navigation_title">系统导航</string>
@@ -114,7 +114,7 @@
     <string name="themes_title">主题包</string>
     <string name="themes_summary">为 Android 17 上的 HeckerOS 适配的 Lunaris 主题。</string>
     <string name="themes_unavailable">此版本暂不提供 HeckerOS 主题包。</string>
-    <string name="themes_description">包含 Lunaris 主题包的 75 种样式。所有主题资源均随 HeckerOS 提供，可离线使用。图标包适用于 Android 和系统界面。充电样式将在下次连接充电线时显示。</string>
+    <string name="themes_description">Lunaris 主题包中的 21 种 Wi-Fi 和电池样式，随 HeckerOS 提供，可离线使用。</string>
     <string name="theme_signal">信号图标</string>
     <string name="theme_wifi">Wi-Fi 图标</string>
     <string name="theme_icons">系统图标包</string>
@@ -249,8 +249,8 @@
     <string name="headphones_summary">适用于 AirPods、Soundcore 及其他耳机的连接弹窗</string>
     <string name="headphones_description">设备解锁时显示连接卡片。电量信息取决于耳机实际提供的数据；不支持的读数将显示为不可用。</string>
     <string name="headphones_popup">显示连接弹窗</string>
-    <string name="headphones_airpods">AirPods 控制</string>
-    <string name="headphones_airpods_summary">设置 LibrePods，以获取更多 AirPods 电量信息及支持的控制功能。</string>
+    <string name="headphones_airpods">耳机与 AirPods</string>
+    <string name="headphones_airpods_summary">查看已连接的耳机、Soundcore R50i 详情和 AirPods 控制。</string>
     <string name="headphones_airpods_unavailable">此版本暂不提供 LibrePods。</string>
     <string name="face_island_title">面容解锁灵动岛</string>
     <string name="face_island_summary">在锁定屏幕顶部显示胶囊动画，提示面容识别及验证成功。</string>

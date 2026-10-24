@@ -67,7 +67,9 @@
         "config/",
         "overlay/common/",
         "overlay/rro_packages/FrameworkOverlayCustom/",
-        "bootanimation/Android.bp"
+        "bootanimation/Android.bp",
+        "config/common.mk",
+        "build/tasks/pixelos.mk"
       ]
     },
     "vendor/lineage": {
@@ -123,7 +125,60 @@
         "core/java/android/view/WindowManager.java",
         "core/java/android/window/TaskFpsCallback.java",
         "core/java/android/window/ScreenCapture.java",
-        "core/java/android/hardware/display/DisplayManager.java"
+        "core/java/android/hardware/display/DisplayManager.java",
+        "packages/SystemUI/compose/features/src/com/android/systemui/keyguard/ui/composable/elements/MediaElementProvider.kt",
+        "packages/SystemUI/compose/features/src/com/android/systemui/qs/ui/composable/QuickSettingsContent.kt",
+        "packages/SystemUI/src/com/android/systemui/qs/panels/ui/compose/QuickQuickSettings.kt",
+        "packages/SystemUI/src/com/android/systemui/qs/panels/ui/viewmodel/QuickQuickSettingsViewModel.kt",
+        "packages/SystemUI/src/com/android/systemui/qs/panels/ui/compose/TileGrid.kt",
+        "packages/SystemUI/compose/features/src/com/android/systemui/shade/ui/composable/ShadeHeader.kt",
+        "packages/SystemUI/compose/features/src/com/android/systemui/qs/ui/composable/QuickSettingsScene.kt",
+        "services/java/com/android/server/SystemServer.java",
+        "packages/SystemUI/src/com/android/systemui/statusbar/phone/ConfigurationControllerImpl.kt",
+        "packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/ui/binder/WifiViewBinder.kt",
+        "packages/SystemUI/src/com/android/systemui/statusbar/pipeline/mobile/ui/binder/MobileIconBinder.kt",
+        "packages/SystemUI/src/com/android/systemui/charging/WiredChargingRippleController.kt",
+        "packages/SystemUI/src/com/android/systemui/battery/BatteryMeterView.java",
+        "packages/SystemUI/src/com/android/systemui/statusbar/pipeline/battery/ui/composable/UnifiedBattery.kt",
+        "core/java/android/security/spoof/HeckerSpoofConfig.java",
+        "packages/SystemUI/src/com/android/systemui/SystemUIService.java",
+        "services/core/java/com/android/server/am/ProcessList.java",
+        "packages/SystemUI/src/com/android/systemui/dagger/SystemUIModule.java",
+        "packages/SystemUI/src/com/android/systemui/brightness/ui/compose/BrightnessSlider.kt",
+        "packages/SystemUI/compose/features/src/com/android/systemui/shade/ui/composable/ShadePanelScrim.kt",
+        "packages/SystemUI/compose/features/src/com/android/systemui/scene/ui/composable/transitions/FromShadeToQuickSettingsTransition.kt",
+        "packages/SystemUI/src/com/android/systemui/qs/composefragment/ui/FromQuickQuickSettingsToQuickSettings.kt",
+        "packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/ui/compose/WifiIcon.kt",
+        "packages/SystemUI/src/com/android/systemui/statusbar/pipeline/mobile/ui/compose/MobileIcon.kt",
+        "cmds/bootanimation/BootAnimation.cpp",
+        "packages/SystemUI/src/com/android/systemui/plugins/PluginsModule.kt",
+        "packages/SystemUI/src/com/android/systemui/brightness/ui/viewmodel/BrightnessSliderViewModel.kt",
+        "services/core/java/com/android/server/policy/PhoneWindowManager.java",
+        "packages/SystemUI/src/com/android/systemui/navigationbar/gestural/EdgeBackGestureHandler.java",
+        "packages/SystemUI/src/com/android/systemui/assist/AssistManager.java",
+        "packages/SystemUI/compose/features/src/com/android/systemui/qs/footer/ui/compose/FooterActions.kt",
+        "packages/SystemUI/src/com/android/systemui/biometrics/ui/binder/BiometricViewBinder.kt",
+        "services/core/java/com/android/server/wm/WindowManagerService.java",
+        "packages/SystemUI/src/com/android/systemui/authentication/data/repository/AuthenticationRepository.kt",
+        "packages/SystemUI/src/com/android/systemui/authentication/domain/interactor/AuthenticationInteractor.kt",
+        "packages/SystemUI/src/com/android/systemui/bouncer/ui/viewmodel/PinBouncerViewModel.kt",
+        "packages/SystemUI/src/com/android/systemui/bouncer/ui/viewmodel/AuthMethodBouncerViewModel.kt",
+        "packages/SystemUI/src/com/android/systemui/bouncer/ui/viewmodel/PinInputViewModel.kt",
+        "packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfacesImpl.java",
+        "services/core/java/com/android/server/am/ActivityManagerService.java",
+        "services/core/java/com/android/server/am/ProcessRecord.java",
+        "services/core/java/com/android/server/am/HostingRecord.java",
+        "services/core/java/com/android/server/am/psc/ProcessRecordInternal.java",
+        "services/core/java/com/android/server/am/psc/OomAdjusterImpl.java",
+        "services/core/java/com/android/server/wm/ActivityTaskSupervisor.java",
+        "core/java/android/app/Activity.java",
+        "core/java/android/app/WallpaperManager.java",
+        "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarView.java",
+        "packages/SystemUI/src/com/android/systemui/volume/VolumeDialogComponent.java",
+        "packages/SystemUI/src/com/android/systemui/volume/SafetyWarningDialogDelegate.java",
+        "packages/SystemUI/src/com/android/systemui/volume/CsdWarningDialogDelegate.java",
+        "packages/SystemUI/plugin/src/com/android/systemui/plugins/VolumeDialog.java",
+        "packages/SystemUI/plugin/src/com/android/systemui/plugins/VolumeDialogController.java"
       ]
     },
     "hardware/google/camera": {
@@ -141,7 +196,10 @@
       "revision": "99c58a7cc9a44fe33c93808452d018e756d84753",
       "files": [
         "private/init.te",
-        "private/su.te"
+        "private/su.te",
+        "private/service_contexts",
+        "build/soong/service_fuzzer_bindings.go",
+        "tools/fuzzer_bindings_check.py"
       ]
     },
     "system/core": {
@@ -154,22 +212,49 @@
     },
     "packages/apps/Settings": {
       "repository": "its-hecker/heckeros_packages_apps_Settings",
-      "branch": "heckeros-17",
-      "revision": "0c2c5aed4fd8e4a9507cfc26fa7a38f36f28dcba",
+      "branch": "feat/suite-polish",
+      "revision": "e6fe59aea717e5f206de5c9a4e9c4da336738875",
       "files": [
         "src/com/android/settings/homepage/",
         "src/com/android/settings/DisplaySettings.java",
         "res/xml/",
-        "res/layout/"
+        "res/layout/",
+        "src/com/android/settings/homepage/TopLevelSettings.java",
+        "src/com/android/settings/widget/HomepagePreferenceLayoutHelper.java",
+        "src/com/android/settings/homepage/SettingsHomepageActivity.java",
+        "Android.bp",
+        "src/com/android/settings/deviceinfo/aboutphone/MyDeviceInfoFragment.java",
+        "res/xml/my_device_info.xml"
+      ]
+    },
+    "packages/apps/Launcher3": {
+      "repository": "https://android.googlesource.com/platform/packages/apps/Launcher3",
+      "branch": "refs/tags/android-17.0.0_r1",
+      "revision": "c612e6ece389f21c40f8cb9cd9a4b44239f00009",
+      "files": [
+        "Android.bp",
+        "aconfig/Android.bp"
       ]
     }
   },
   "hecker_suite": {
-    "source_branch": "feat/game-booster-reference",
-    "integration_branch": "feat/game-booster-reference",
+    "source_branch": "feat/suite-polish",
+    "integration_branch": "feat/suite-polish",
     "release": "hecker_suite",
     "base_release": "cp2a",
-    "status": "Source validation only; full ROM build and phone tests required"
+    "status": "Source validation only; full ROM build and phone tests required",
+    "feature_sources": {
+      "risingos": {
+        "repository": "RisingOS-Revived/android_frameworks_base",
+        "revision": "0afe5c947f9c7e61c86e123ac99f870d72464c1a",
+        "notes": "Volume compact/expanded interaction and status-bar action inspiration; independently implemented for Android 17 controllers."
+      },
+      "pixel_launcher_enhanced": {
+        "repository": "Mahmud0808/PixelLauncherEnhanced",
+        "revision": "a0e8e98cd338739aac82ec3bf7b044ee51ba1bdb",
+        "notes": "Inspected Xposed gestures and glass, including per-corner radii and wallpaper zoom fix. Native empty-home double-tap and glass adapters are original Apache-2.0 code, not an Xposed port."
+      }
+    }
   },
   "heckeros": {
     "version": "1.0",

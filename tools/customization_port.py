@@ -16,14 +16,20 @@ def verify_theme_service_startup(source):
                          "a late start misses its settings observer boot phase")
 
 
-def customization_plan(rom, replace, revert=False):
+def customization_plan(rom, replace, revert=False, *, pending_changes=None):
     base = rom / "frameworks/base"
     if not (base / "core/java/android/content/res/Resources.java").exists(): return {}
     changes = {}
+    pending_changes = pending_changes or {}
     for relative, pairs in json.loads((ROOT / "framework/customization-patches.json").read_text()).items():
         path = rom / relative
         current = path.read_text()
-        target = current
+        # Compose with earlier adapters in the same atomic plan. Reading only
+        # disk here would overwrite the App Lock permission in the manifest
+        # when the theme broadcast is added on a fresh checkout.
+        target = pending_changes.get(path, current)
+        if not isinstance(target, str):
+            raise ValueError("Cannot patch non-text pending content: " + str(path))
         for pair in reversed(pairs) if revert else pairs:
             # Upgrade only explicitly reviewed earlier adapters. A prepared
             # checkout must not require reverting every unrelated native port.

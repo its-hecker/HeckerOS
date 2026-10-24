@@ -8,6 +8,7 @@ import json
 import os
 import re
 import sys
+import zipfile
 
 from camera_install import SERVICE
 from google_camera import verify_installed
@@ -81,9 +82,32 @@ def check_librepods(rom, output):
     source = rom / "vendor/hecker/floral/suite/prebuilts/librepods"
     metadata = json.loads((source / "source.json").read_text())
     apk = output / "system_ext/priv-app/HeckerLibrePods/HeckerLibrePods.apk"
-    if not apk.is_file() or apk.stat().st_size != metadata["size"] \
-            or hashlib.sha256(apk.read_bytes()).hexdigest() != metadata["sha256"]:
-        raise ValueError("Built image is missing the exact original signed LibrePods APK")
+    if not apk.is_file():
+        raise ValueError("Built image is missing the Hecker LibrePods APK")
+    built = source / "prebuilt/HeckerLibrePods.apk"
+    record = json.loads((source / "prebuilt/build.json").read_text())
+    if record.get("source_commit") != metadata["source_commit"] \
+            or record.get("package") != metadata["package"] \
+            or not built.is_file() or built.stat().st_size != record.get("size") \
+            or hashlib.sha256(built.read_bytes()).hexdigest() != record.get("sha256"):
+        raise ValueError("Hecker LibrePods APK source-build record is stale or corrupt")
+
+    def payload(path):
+        try:
+            with zipfile.ZipFile(path) as archive:
+                names = [entry.filename for entry in archive.infolist()
+                         if not entry.is_dir() and not entry.filename.startswith("META-INF/")]
+                required = {"AndroidManifest.xml", "classes.dex", "lib/arm64-v8a/libbluetooth_socket.so"}
+                if len(names) != len(set(names)) or not required <= set(names):
+                    raise ValueError("Incomplete or duplicate LibrePods APK entries")
+                return {name: hashlib.sha256(archive.read(name)).digest() for name in names}
+        except zipfile.BadZipFile as error:
+            raise ValueError("Invalid LibrePods APK archive") from error
+
+    # Soong changes the signature, ZIP alignment and compression. Compare every
+    # executable/resource entry to the verified source build, not container bytes.
+    if payload(apk) != payload(built):
+        raise ValueError("Installed LibrePods APK payload differs from the verified source build")
     for folder, name in (("permissions", "privapp-permissions-librepods.xml"),
                          ("default-permissions", "default-permissions-librepods.xml")):
         installed = output / "system_ext/etc" / folder / name
@@ -118,7 +142,7 @@ def check(rom, output):
     check_librepods(rom, output)
     print("Built output: camera provider binary/init/VINTF, original ten-APK Google Camera set "
           "and Motion Sense country override, Hecker Suite APK/permissions/freeform; "
-          "original LibrePods APK/permissions; exact HeckerOS boot animation; "
+          "source-built LibrePods APK payload/permissions; exact HeckerOS boot animation; "
           "development ADB mode/authentication; OmniJaws absent: PASS")
 
 

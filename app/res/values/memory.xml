@@ -1,0 +1,28 @@
+<resources>
+    <string name="memory_title">Memory Boost</string>
+    <string name="memory_summary">App background rules and one-key cleanup</string>
+    <string name="memory_description">Choose how apps run in the background. Memory Boost cleans eligible cached processes and keeps resident, foreground and important apps running.</string>
+    <string name="memory_system">Show system apps</string>
+    <string name="memory_start">Background start</string>
+    <string name="memory_start_summary">Block automatic process starts. Opening the app still works.</string>
+    <string name="memory_background">Background task</string>
+    <string name="memory_background_summary">Clean background processes after they are no longer important. This can delay notifications.</string>
+    <string name="memory_clean_task">Clean task</string>
+    <string name="memory_clean_task_summary">Clean eligible processes when you remove the app from Recents.</string>
+    <string name="memory_resident">Resident app</string>
+    <string name="memory_resident_summary">Protect from cleanup and give running processes higher memory priority. Android can still reclaim them under pressure.</string>
+    <string name="memory_protected">Protected system role or shared UID</string>
+    <string name="memory_default">Default background behavior</string>
+    <string name="memory_active">Custom background rules</string>
+    <string name="memory_boost">Boost now</string>
+    <string name="memory_done">Cleaned %1$d background apps and %2$d processes</string>
+    <string name="memory_none">No eligible background processes to clean</string>
+    <string name="memory_failed">Memory controls are unavailable. Check that the matching ROM build is installed.</string>
+    <string name="memory_save_failed">Could not save app rules</string>
+    <string name="status_popup_title">Status-bar popup actions</string>
+    <string name="status_popup_summary">Long press the clock or status icons for shortcuts and Memory Boost. Swipe normally to open notifications.</string>
+    <string name="volume_style_title">One UI volume panel</string>
+    <string name="volume_style_summary">TouchWiz-style compact and expanded controls, with brightness and native volume warnings</string>
+    <string name="volume_expand">Expand volume controls</string>
+    <string name="volume_collapse">Collapse volume controls</string>
+</resources>

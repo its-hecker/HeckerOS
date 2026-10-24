@@ -8,12 +8,12 @@ license {
     license_text: ["LICENSE"],
 }
 
-// Keep the upstream signature so its app identity and update checks stay valid.
+// Build the GPL source variant first; ROM packaging supplies the signature.
+// Its separate application ID preserves upstream-signed installations.
 android_app_import {
     name: "HeckerLibrePods",
-    apk: "prebuilt/LibrePods.apk",
-    presigned: true,
-    preprocessed: true,
+    apk: "prebuilt/HeckerLibrePods.apk",
+    certificate: "platform",
     privileged: true,
     system_ext_specific: true,
     dex_preopt: { enabled: false },

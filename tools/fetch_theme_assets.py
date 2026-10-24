@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Fetch the 91 exact Lunaris theme APK resources before Soong scans the product."""
+"""Fetch the supported, pinned Lunaris Wi-Fi and battery resources before Soong scans the product."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
@@ -38,7 +38,7 @@ def prepare(offline=False, source=None):
             if not valid(staged,item):raise ValueError('Theme asset differs from locked bytes: '+name)
             staged.replace(target)
     with ThreadPoolExecutor(max_workers=4) as workers:list(workers.map(fetch,lock['files'].items()))
-    print('91 Lunaris theme resource APKs match their pinned hashes.')
+    print(f"{len(lock['files'])} Wi-Fi/battery resource APKs match their pinned hashes.")
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)

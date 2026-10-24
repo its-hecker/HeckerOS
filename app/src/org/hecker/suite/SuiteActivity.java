@@ -26,7 +26,7 @@ public final class SuiteActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         if (state == null && "themes".equals(getIntent().getStringExtra("org.hecker.suite.PAGE"))) {
-            open("ThemePackActivity"); finish(); return;
+            open("StatusBarSettingsActivity"); finish(); return;
         }
         showingAbout = state != null ? state.getBoolean("about")
                 : getIntent().getBooleanExtra("org.hecker.suite.SHOW_ABOUT", false);
@@ -60,18 +60,15 @@ public final class SuiteActivity extends Activity {
         addRow(tile(R.string.qs_title,R.string.qs_summary,R.drawable.ic_qs,v->open("QuickSettingsActivity")),
                 tile(R.string.lock_screen_title,R.string.lock_screen_summary,R.drawable.ic_lock,v->open("LockScreenSettingsActivity")));
         addRow(tile(R.string.status_bar_title,R.string.status_bar_summary,R.drawable.ic_signal,v->open("StatusBarSettingsActivity")),
-                tile(R.string.themes_title,R.string.themes_summary,R.drawable.ic_palette,v->open("ThemePackActivity")));
-        addRow(tile(R.string.motion_sense_title,R.string.motion_sense_summary,R.drawable.ic_motion_sense,v->openMotionSense()),
-                tile(R.string.face_title,R.string.face_summary,R.drawable.ic_face_unlock,v->openFace()));
-        addRow(tile(R.string.navigation_title,R.string.navigation_summary,R.drawable.ic_navigation,v->settings("com.android.settings.NAVIGATION_MODE_SETTINGS")),
-                tile(R.string.animations_title,R.string.animations_summary,R.drawable.ic_animations,v->open("AnimationSettingsActivity")));
+                tile(R.string.motion_sense_title,R.string.motion_sense_summary,R.drawable.ic_motion_sense,v->openMotionSense()));
         addRow(tile(R.string.app_lock_title,R.string.app_lock_summary,R.drawable.ic_lock,v->open("AppLockActivity")),
                 tile(R.string.gaming_title,R.string.gaming_summary,R.drawable.ic_gaming,v->open("GamingActivity")));
-        addRow(tile(R.string.launcher_title,R.string.launcher_summary,R.drawable.ic_qs,v->open("LauncherSettingsActivity")),
-                tile(R.string.ir_title,R.string.ir_summary,R.drawable.ic_face_unlock,v->open("InfraredCameraActivity")));
         addRow(tile(R.string.sandbox_title,R.string.sandbox_summary,R.drawable.ic_sandbox,v->open("SandboxActivity")),
                 tile(R.string.headphones_title,R.string.headphones_summary,R.drawable.ic_headphones,v->open("HeadphonesActivity")));
-        Ui.actionCard(this,content,R.string.lyrics_title,R.string.lyrics_summary,v->open("LyricsSettingsActivity"));
+        addRow(tile(R.string.ir_title,R.string.ir_summary,R.drawable.ic_face_unlock,v->open("InfraredCameraActivity")),
+                tile(R.string.capture_title,R.string.capture_summary,R.drawable.ic_qs,v->open("CaptureSettingsActivity")));
+        addRow(tile(R.string.memory_title,R.string.memory_summary,R.drawable.ic_memory,v->open("MemoryBoostActivity")),
+                tile(R.string.pixel_launcher_title,R.string.pixel_launcher_summary,R.drawable.ic_launcher_enhanced,v->open("PixelLauncherSettingsActivity")));
         LinearLayout integrity=Ui.card(this);
         integrity.addView(Ui.text(this,getString(R.string.integrity_title),17,true));
         integrity.addView(Ui.text(this,getString(R.string.integrity_summary),12,false));
