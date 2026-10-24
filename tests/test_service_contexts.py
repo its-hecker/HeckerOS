@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from service_contexts import CANONICAL, CONTEXT, game_service_plan
+from service_contexts import CANONICAL, CONTEXT, game_service_plan, repair
 
 
 class ServiceContextsTests(unittest.TestCase):
@@ -50,6 +51,67 @@ class ServiceContextsTests(unittest.TestCase):
         self.canonical.write_text("hecker_game u:object_r:activity_service:s0\n")
         with self.assertRaisesRegex(ValueError, "exactly one dedicated"):
             game_service_plan(self.rom)
+
+    def test_scans_hardware_frameworks_and_policy_templates(self):
+        relatives = ("hardware/google/pixel-sepolicy/private/service_contexts",
+                     "frameworks/custom/sepolicy/plat_service_contexts.in",
+                     "system/other/sepolicy/service_contexts.m4")
+        paths = {self.write(name, "hecker_game u:object_r:activity_service:s0\n")
+                 for name in relatives}
+        self.assertEqual(set(game_service_plan(self.rom)), paths)
+
+    def test_ignores_build_outputs_repo_copies_and_backups(self):
+        for name in ("out/soong/merged/service_contexts",
+                     "out/hecker-service-context-backups/old/service_contexts",
+                     ".repo/projects/old/service_contexts",
+                     ".git/old/service_contexts"):
+            self.write(name, "hecker_game u:object_r:foreign_service:s0\n")
+        self.assertEqual(game_service_plan(self.rom), {})
+
+    def test_repair_backs_up_the_source_and_clears_only_cached_context_modules(self):
+        before = "activity u:object_r:activity_service:s0\nhecker_game u:object_r:activity_service:s0\n"
+        legacy = self.write("hardware/google/pixel-sepolicy/private/service_contexts", before)
+        base = "out/soong/.intermediates/system/sepolicy/"
+        merged = self.write(base + "contexts/merged_service_contexts/android_common/merged_service_contexts", before)
+        test = self.write(base + "contexts/merged_service_contexts_test/android_common/timestamp", "old")
+        retained = [self.write(base + "precompiled_sepolicy/android_common/policy", "keep"),
+                    self.write(base + "contexts/plat_property_contexts/android_common/context", "keep"),
+                    self.write("out/target/product/coral/system.img", "keep")]
+        repair(self.rom, apply=True, clear_cache=True)
+        self.assertEqual(legacy.read_text(), "activity u:object_r:activity_service:s0\n")
+        self.assertFalse(merged.exists())
+        self.assertFalse(test.exists())
+        self.assertTrue(all(path.read_text() == "keep" for path in retained))
+        backup = list((self.rom / "out/hecker-service-context-backups").rglob("service_contexts"))
+        self.assertEqual(len(backup), 1)
+        self.assertEqual(backup[0].read_text(), before)
+        self.assertEqual(game_service_plan(self.rom), {})
+        repair(self.rom)
+
+    def test_check_refuses_unrepaired_inputs_and_a_missing_suite(self):
+        legacy = self.write("system/sepolicy/private/service_contexts",
+                            "hecker_game u:object_r:activity_service:s0\n")
+        with self.assertRaisesRegex(ValueError, "rerun this tool with --apply"):
+            repair(self.rom)
+        self.assertIn("activity_service", legacy.read_text())
+        self.assertFalse((self.rom / "out").exists())
+        self.canonical.unlink()
+        with self.assertRaisesRegex(ValueError, "sync vendor/hecker/floral/suite"):
+            repair(self.rom, apply=True)
+
+    def test_cli_discards_a_stale_merge_even_when_the_source_is_already_correct(self):
+        cached = self.write(
+            "out/soong/.intermediates/system/sepolicy/contexts/merged_service_contexts/android_common/merged_service_contexts",
+            "hecker_game " + CONTEXT + "\nhecker_game u:object_r:activity_service:s0\n")
+        source = self.canonical.read_bytes()
+        result = subprocess.run([sys.executable,
+            str(Path(__file__).resolve().parents[1] / "tools/service_contexts.py"),
+            "--rom-root", str(self.rom), "--apply", "--clear-cache"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("whole-source scan v2", result.stdout)
+        self.assertFalse(cached.exists())
+        self.assertEqual(self.canonical.read_bytes(), source)
+        self.assertFalse((self.rom / "out/hecker-service-context-backups").exists())
 
 
 if __name__ == "__main__":

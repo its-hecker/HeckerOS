@@ -51,7 +51,21 @@ The Binder name `hecker_game` belongs to `hecker_game_service`, declared by
 `hecker_game u:object_r:activity_service:s0` fallback from source context files
 before SELinux contexts are merged. It preserves unrelated services and rejects
 unfamiliar replacement labels. The existing atomic source adapter saves originals
-under `out/hecker-suite-source-backups/`; it never edits generated Soong policy.
+under `out/hecker-suite-source-backups/`. The standalone repair also searches
+hardware, framework and other source projects while excluding outputs and repo
+metadata. It reports every removed fallback and stores its originals under
+`out/hecker-service-context-backups/`. The build wrapper repeats this repair after
+all preparation, clears only cached service-context modules and runs
+`m merged_service_contexts_test` before the main ROM target.
+
+For a direct repair of an already prepared checkout:
+
+```bash
+python3 vendor/hecker/floral/suite/tools/service_contexts.py --rom-root "$PWD" --apply --clear-cache
+```
+
+The output starts with `Gaming SELinux repair: whole-source scan v2`. A full clean
+is unnecessary; the compiled policy and ROM images are retained.
 
 - Suite Java compilation and Android resource linking with the locked SDK.
 - Native gaming Java and the real generated AIDL interface.

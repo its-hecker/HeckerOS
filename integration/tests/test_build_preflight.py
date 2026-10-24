@@ -102,7 +102,7 @@ class BuildPreflightTests(unittest.TestCase):
         self.rejected("Missing or mismatched Qualcomm chipset namespace exports")
         self.assertEqual(path.read_text(), "local namespace\n")
 
-    def test_staged_weather_triggers_installclean_and_keeps_provider_rbe(self):
+    def pass_preparation(self):
         binary = self.rom / "test-bin"
         for name in ("git", "python3"):
             command = binary / name
@@ -111,13 +111,18 @@ class BuildPreflightTests(unittest.TestCase):
         (self.rom / "build/make/envsetup.sh").write_text(
             'lunch() { :; }\n'
             'get_build_var() { echo out/target/product/coral; }\n'
-            'm() { printf "%s RBE=%s\\n" "$*" "${USE_RBE-unset}" >> m-calls; }\n')
+            'm() { printf "%s RBE=%s\\n" "$*" "${USE_RBE-unset}" >> m-calls; '
+            'if [[ "$*" == "${FAIL_BUILD_TARGET-}" ]]; then return 63; fi; }\n')
         self.environment["USE_RBE"] = "true"
         self.environment["HECKER_BUILD_JOBS"] = "8"
+
+    def test_staged_weather_triggers_installclean_and_keeps_provider_rbe(self):
+        self.pass_preparation()
         calls = self.rom / "m-calls"
         result = self.invoke()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(calls.read_text().splitlines(), ["-j8 heckeros RBE=true"])
+        self.assertEqual(calls.read_text().splitlines(),
+                         ["merged_service_contexts_test RBE=true", "-j8 heckeros RBE=true"])
         calls.unlink()
         stale = self.rom / "out/target/product/coral/product/app/OmniJaws"
         stale.mkdir(parents=True)
@@ -125,7 +130,24 @@ class BuildPreflightTests(unittest.TestCase):
         result = self.invoke()
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(calls.read_text().splitlines(),
-                         ["installclean RBE=true", "-j8 heckeros RBE=true"])
+                         ["installclean RBE=true", "merged_service_contexts_test RBE=true",
+                          "-j8 heckeros RBE=true"])
+
+    def test_context_test_failure_stops_before_the_main_rom_target(self):
+        self.pass_preparation()
+        self.environment["FAIL_BUILD_TARGET"] = "merged_service_contexts_test"
+        result = self.invoke()
+        self.assertEqual(result.returncode, 63, result.stdout + result.stderr)
+        self.assertEqual((self.rom / "m-calls").read_text().splitlines(),
+                         ["merged_service_contexts_test RBE=true"])
+
+    def test_repair_failure_stops_before_any_build_target(self):
+        self.pass_preparation()
+        (self.rom / "test-bin/python3").write_text(
+            '#!/bin/sh\ncase "$1" in *service_contexts.py) exit 64 ;; *) exit 0 ;; esac\n')
+        result = self.invoke()
+        self.assertEqual(result.returncode, 64, result.stdout + result.stderr)
+        self.assertFalse((self.rom / "m-calls").exists())
 
 
 if __name__ == "__main__":
