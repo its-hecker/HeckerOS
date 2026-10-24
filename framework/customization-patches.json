@@ -530,5 +530,15 @@
       "old": "            Pin -> inputLength < repository.getPinLength()",
       "new": "            Pin -> {\n                val pinLength = repository.getPinLength()\n                // Unknown PIN length must never turn each digit into a credential attempt.\n                // The caller still permits explicit confirmation through the normal verifier.\n                pinLength < repository.minPasswordLength || inputLength < pinLength\n            }"
     }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfacesImpl.java": [
+    {
+      "old": "                                () -> plugin.setup(\n                                        mNotificationShadeWindowController.getWindowRootView(),\n                                        getNavigationBarView(),\n                                        new Callback(plugin), mDozeParameters));",
+      "new": "                                () -> plugin.setup(\n                                        com.android.systemui.hecker.HeckerOsloOverlayHost.rootFor(plugin, pluginContext,\n                                                mNotificationShadeWindowController.getWindowRootView(), mKeyguardStateController),\n                                        getNavigationBarView(),\n                                        com.android.systemui.hecker.HeckerOsloOverlayHost.callbackFor(plugin,\n                                                new Callback(plugin)), mDozeParameters));"
+    },
+    {
+      "old": "                            mOverlays.remove(plugin);",
+      "new": "                            com.android.systemui.hecker.HeckerOsloOverlayHost.disconnect(plugin);\n                            mOverlays.remove(plugin);"
+    }
   ]
 }

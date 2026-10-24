@@ -15,6 +15,18 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 # Declarations reviewed against frameworks/base@7367a79dcb02c6388ab80b1cdf9ed7d223f8fcea.
 FACADES = {
+    'com/android/systemui/plugins/OverlayPlugin.java': '''package com.android.systemui.plugins;
+public interface OverlayPlugin {
+ boolean holdStatusBarOpen();
+ interface Callback { void onHoldStatusBarOpenChange(); }
+}''',
+    'com/android/systemui/statusbar/policy/KeyguardStateController.java': '''package com.android.systemui.statusbar.policy;
+public interface KeyguardStateController {
+ boolean isShowing();
+ void addCallback(Callback callback);
+ void removeCallback(Callback callback);
+ interface Callback { default void onKeyguardShowingChanged() {} }
+}''',
     'android/hardware/biometrics/BiometricSourceType.java': '''
 package android.hardware.biometrics;
 public enum BiometricSourceType { FINGERPRINT, FACE, IRIS }
@@ -104,6 +116,7 @@ def main():
             target = out / 'facades' / name
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)
         sources = sorted((ROOT / 'framework/headphones').glob('*.java'))
+        sources += sorted((ROOT / 'framework/glow').glob('*.java'))
         sources += sorted((ROOT / 'framework/sandbox').glob('*.java'))
         sources += sorted((ROOT / 'framework/faceisland').glob('*.java'))
         run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', sdk / 'android-system.jar',

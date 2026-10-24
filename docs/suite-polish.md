@@ -74,6 +74,15 @@ existing GApps product. No custom launcher or Recents overlay is installed.
 
 ## Validation
 
+Motion Sense's original Oslo glow moves to a non-touchable SystemUI window while
+the device is unlocked and the native plugin requests feedback. On the lockscreen
+and AOD it stays in its native shade host. Plugin callbacks, gesture eligibility,
+colors and minimizer behavior remain native. A lifecycle regression covers host
+changes, duplicate callbacks, unavailable windows and disconnect cleanup.
+
+The face feedback pill centers its icon and measured label as one group and
+centers the text baseline using font metrics, including larger font sizes.
+
 Run the host suite, Suite Java/resource compiler, QS Kotlin/Compose compiler,
 Settings UI compiler, integration suite and immutable native adapter checker.
 The native check executes the prepared WindowManager method against default-off,

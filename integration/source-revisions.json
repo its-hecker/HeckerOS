@@ -163,7 +163,8 @@
         "packages/SystemUI/src/com/android/systemui/authentication/domain/interactor/AuthenticationInteractor.kt",
         "packages/SystemUI/src/com/android/systemui/bouncer/ui/viewmodel/PinBouncerViewModel.kt",
         "packages/SystemUI/src/com/android/systemui/bouncer/ui/viewmodel/AuthMethodBouncerViewModel.kt",
-        "packages/SystemUI/src/com/android/systemui/bouncer/ui/viewmodel/PinInputViewModel.kt"
+        "packages/SystemUI/src/com/android/systemui/bouncer/ui/viewmodel/PinInputViewModel.kt",
+        "packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfacesImpl.java"
       ]
     },
     "hardware/google/camera": {
