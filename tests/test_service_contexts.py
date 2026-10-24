@@ -68,12 +68,29 @@ class ServiceContextsTests(unittest.TestCase):
             self.write(name, "hecker_game u:object_r:foreign_service:s0\n")
         self.assertEqual(game_service_plan(self.rom), {})
 
+    def test_checks_platform_policy_even_when_the_project_directory_is_linked(self):
+        outside = tempfile.TemporaryDirectory()
+        self.addCleanup(outside.cleanup)
+        project = Path(outside.name)
+        (project / "private").mkdir()
+        source = project / "private/service_contexts"
+        source.write_text("activity u:object_r:activity_service:s0\n"
+                          "hecker_game                               u:object_r:activity_service:s0\n")
+        (self.rom / "system").mkdir()
+        (self.rom / "system/sepolicy").symlink_to(project, target_is_directory=True)
+        changes = game_service_plan(self.rom)
+        self.assertEqual(changes, {self.rom / "system/sepolicy/private/service_contexts":
+                                  "activity u:object_r:activity_service:s0\n"})
+        repair(self.rom, apply=True)
+        self.assertEqual(source.read_text(), "activity u:object_r:activity_service:s0\n")
+
     def test_repair_backs_up_the_source_and_clears_only_cached_context_modules(self):
         before = "activity u:object_r:activity_service:s0\nhecker_game u:object_r:activity_service:s0\n"
         legacy = self.write("hardware/google/pixel-sepolicy/private/service_contexts", before)
         base = "out/soong/.intermediates/system/sepolicy/"
         merged = self.write(base + "contexts/merged_service_contexts/android_common/merged_service_contexts", before)
         test = self.write(base + "contexts/merged_service_contexts_test/android_common/timestamp", "old")
+        recovery = self.write(base + "contexts/plat_service_contexts.recovery/android_recovery_common/coral/plat_service_contexts", before)
         retained = [self.write(base + "precompiled_sepolicy/android_common/policy", "keep"),
                     self.write(base + "contexts/plat_property_contexts/android_common/context", "keep"),
                     self.write("out/target/product/coral/system.img", "keep")]
@@ -81,6 +98,7 @@ class ServiceContextsTests(unittest.TestCase):
         self.assertEqual(legacy.read_text(), "activity u:object_r:activity_service:s0\n")
         self.assertFalse(merged.exists())
         self.assertFalse(test.exists())
+        self.assertFalse(recovery.exists())
         self.assertTrue(all(path.read_text() == "keep" for path in retained))
         backup = list((self.rom / "out/hecker-service-context-backups").rglob("service_contexts"))
         self.assertEqual(len(backup), 1)
@@ -108,7 +126,7 @@ class ServiceContextsTests(unittest.TestCase):
             str(Path(__file__).resolve().parents[1] / "tools/service_contexts.py"),
             "--rom-root", str(self.rom), "--apply", "--clear-cache"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("whole-source scan v2", result.stdout)
+        self.assertIn("platform-source scan v3", result.stdout)
         self.assertFalse(cached.exists())
         self.assertEqual(self.canonical.read_bytes(), source)
         self.assertFalse((self.rom / "out/hecker-service-context-backups").exists())

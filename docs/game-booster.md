@@ -64,8 +64,11 @@ For a direct repair of an already prepared checkout:
 python3 vendor/hecker/floral/suite/tools/service_contexts.py --rom-root "$PWD" --apply --clear-cache
 ```
 
-The output starts with `Gaming SELinux repair: whole-source scan v2`. A full clean
-is unnecessary; the compiled policy and ROM images are retained.
+The output starts with `Gaming SELinux repair: platform-source scan v3` and prints
+the actual repair script path. It checks `system/sepolicy/private/service_contexts`
+explicitly even when the platform project is a directory link, then scans the other
+source context files. Cache cleanup includes the `.recovery` service-context modules.
+A full clean is unnecessary; the compiled policy and ROM images are retained.
 
 - Suite Java compilation and Android resource linking with the locked SDK.
 - Native gaming Java and the real generated AIDL interface.

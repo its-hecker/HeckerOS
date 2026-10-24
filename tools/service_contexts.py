@@ -19,12 +19,19 @@ CANONICAL = Path("vendor/hecker/floral/suite/rom/sepolicy/private/service_contex
 def context_files(rom):
     # Policy may also be supplied by hardware/, frameworks/ or another project.
     # Never treat outputs, .repo copies or our backups as editable source inputs.
+    # The platform-private input produces plat_service_contexts. Check it
+    # explicitly: os.walk does not descend into linked project directories.
+    platform = rom / "system/sepolicy/private/service_contexts"
+    if platform.is_file():
+        yield platform
     skipped = {".git", ".repo", "out", ".cache", "node_modules", "__pycache__"}
     for root, directories, filenames in os.walk(rom):
         directories[:] = sorted(name for name in directories if name not in skipped)
         for name in sorted(filenames):
             if name.removesuffix(".in").removesuffix(".m4").endswith("service_contexts"):
-                yield Path(root) / name
+                path = Path(root) / name
+                if path != platform:
+                    yield path
 
 
 def game_service_plan(rom, revert=False):
@@ -64,7 +71,7 @@ def clear_context_cache(rom):
     cleared = []
     if root.is_dir():
         for path in sorted(root.iterdir()):
-            if path.name.endswith(("service_contexts", "service_contexts_test")):
+            if path.name.removesuffix(".recovery").endswith(("service_contexts", "service_contexts_test")):
                 if path.is_symlink() or path.is_file():
                     path.unlink()
                 else:
@@ -74,11 +81,12 @@ def clear_context_cache(rom):
 
 
 def repair(rom, apply=False, clear_cache=False):
+    print("Gaming SELinux repair: platform-source scan v3", flush=True)
+    print("Repair tool:", Path(__file__).resolve(), flush=True)
     canonical = rom / CANONICAL
     if not canonical.is_file():
         raise ValueError("Missing ROM-owned gaming policy; sync vendor/hecker/floral/suite: " + str(canonical))
     changes = game_service_plan(rom)
-    print("Gaming SELinux repair: whole-source scan v2", flush=True)
     print("Keep:", str(CANONICAL), SERVICE, CONTEXT, flush=True)
     for path in changes:
         print("Remove obsolete gaming label:", path.relative_to(rom), flush=True)
