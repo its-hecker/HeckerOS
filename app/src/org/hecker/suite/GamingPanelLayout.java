@@ -10,7 +10,7 @@ final class GamingPanelLayout {
         int availableWidth = Math.max(1, safeWidth - 16);
         int availableHeight = Math.max(1, safeHeight - 20);
         boolean landscape = safeWidth > safeHeight;
-        return new GamingPanelLayout(Math.min(landscape ? 280 : 304, availableWidth),
-                Math.min(400, availableHeight));
+        return new GamingPanelLayout(Math.min(landscape ? Math.min(360, Math.round(safeWidth * .43f)) : 360, availableWidth),
+                Math.min(landscape ? 480 : 560, availableHeight));
     }
 }

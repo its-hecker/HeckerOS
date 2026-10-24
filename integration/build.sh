@@ -48,5 +48,7 @@ if [[ "$floral_stale_app" == true ]]; then
     echo "Removing stale camera/weather app installations from build outputs (installclean)."
     m installclean
 fi
+python3 vendor/hecker/floral/suite/tools/service_contexts.py --rom-root "$PWD" --apply --clear-cache
+m merged_service_contexts_test
 m -j"${HECKER_BUILD_JOBS:-$(nproc)}" heckeros
 python3 "$floral_setup_dir/tools/check_built_output.py" "$floral_product_out"

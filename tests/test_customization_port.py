@@ -65,6 +65,7 @@ class CustomizationPortTests(unittest.TestCase):
             for relative,pairs in patches.items():
                 for pair in pairs:
                     if not pair.get('previous'):continue
+                    if relative == SYSTEM_SERVER and pair is pairs[1]:continue
                     path=folder/relative
                     self.assertEqual(1,path.read_text().count(pair['new']))
                     previous=path.read_text().replace(pair['new'],pair['previous'][0])
@@ -82,6 +83,18 @@ class CustomizationPortTests(unittest.TestCase):
             self.assertEqual({},customization_plan(folder,replace_guarded))
             self.write(customization_plan(folder,replace_guarded,True))
             self.assertEqual(original,self.snapshot(folder))
+
+    def test_existing_early_theme_start_upgrades_to_game_service_start(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder=Path(temporary);self.stage(folder)
+            self.write(customization_plan(folder,replace_guarded))
+            path=folder/SYSTEM_SERVER
+            pairs=json.loads((ROOT/'framework/customization-patches.json').read_text())[SYSTEM_SERVER]
+            path.write_text(path.read_text().replace(pairs[1]['new'],pairs[1]['previous'][-1]))
+            changes=customization_plan(folder,replace_guarded)
+            self.assertEqual({path},set(changes));self.write(changes)
+            self.assertEqual(1,path.read_text().count('startService(com.android.server.hecker.HeckerGameService.class)'))
+            self.assertEqual({},customization_plan(folder,replace_guarded))
 
     def test_unreviewed_previous_adapter_is_preserved(self):
         with tempfile.TemporaryDirectory() as temporary:

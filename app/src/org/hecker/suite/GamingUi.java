@@ -123,6 +123,8 @@ final class GamingUi {
                 case "play": Path play=new Path();play.moveTo(7,4);play.lineTo(20,12);play.lineTo(7,20);play.close();p.setStyle(Paint.Style.FILL);canvas.drawPath(play,p);break;
                 case "back": canvas.drawLine(15,4,7,12,p);canvas.drawLine(7,12,15,20,p);break;
                 case "close": canvas.drawLine(5,5,19,19,p);canvas.drawLine(19,5,5,19,p);break;
+                case "more": p.setStyle(Paint.Style.FILL);for(int y=5;y<22;y+=7)canvas.drawCircle(12,y,1.5f,p);break;
+                case "edit": canvas.drawLine(5,18,17,6,p);canvas.drawLine(8,21,20,9,p);canvas.drawLine(5,18,4,22,p);canvas.drawLine(4,22,8,21,p);canvas.drawLine(16,5,20,9,p);break;
                 case "plus": canvas.drawLine(4,12,20,12,p);canvas.drawLine(12,4,12,20,p);break;
                 case "apps":
                     for(int x=3;x<=14;x+=11)for(int y=3;y<=14;y+=11)canvas.drawRoundRect(x,y,x+7,y+7,1,1,p);break;

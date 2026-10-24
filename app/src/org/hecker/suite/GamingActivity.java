@@ -207,7 +207,7 @@ public final class GamingActivity extends Activity implements SharedPreferences.
         page.addView(title(R.string.gaming_accent));GamingUi.gap(page,14);LinearLayout colors=GamingUi.row(this);
         int[] values={0xffff334b,0xff35eee3,0xffb29aff,0xffffbe65};int[] labels={R.string.gaming_red,R.string.gaming_cyan,R.string.gaming_violet,R.string.gaming_amber};
         for(int i=0;i<values.length;i++){int color=values[i];TextView chip=GamingUi.button(this,getString(labels[i]),GamingUi.accent(this)==color,()->GamingPrefs.get(this).edit().putInt("accent",color).apply());chip.setTextColor(GamingUi.accent(this)==color?GamingUi.BG:color);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,-2,1);p.setMargins(3,0,3,0);colors.addView(chip,p);}page.addView(colors);GamingUi.gap(page,24);
-        toggle(R.string.gaming_edge,R.string.gaming_edge_summary,GamingPrefs.get(this).getBoolean("left",true),v->GamingPrefs.get(this).edit().putBoolean("left",v).apply());
+        toggle(R.string.gaming_edge,R.string.gaming_edge_summary,GamingPrefs.get(this).getBoolean("left",false),v->GamingPrefs.get(this).edit().putBoolean("left",v).apply());
         page.addView(title(R.string.gaming_opacity));SeekBar opacity=new SeekBar(this);opacity.setMax(40);opacity.setProgress(GamingPrefs.get(this).getInt("opacity",94)-60);opacity.setContentDescription(getString(R.string.gaming_opacity));
         opacity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onStartTrackingTouch(SeekBar s){}public void onProgressChanged(SeekBar s,int p,boolean user){}public void onStopTrackingTouch(SeekBar s){GamingPrefs.get(GamingActivity.this).edit().putInt("opacity",60+s.getProgress()).apply();}});page.addView(opacity);
     }
@@ -223,7 +223,7 @@ public final class GamingActivity extends Activity implements SharedPreferences.
                     boolean tagged=app.info.category==android.content.pm.ApplicationInfo.CATEGORY_GAME||(app.info.flags&android.content.pm.ApplicationInfo.FLAG_IS_GAME)!=0;
                     boolean selected=shortcuts?GamingPrefs.shortcuts(this).contains(app.info.packageName):GamingPolicy.isGame(app.info.packageName,tagged,GamingPrefs.get(this).getBoolean("automatic",true),GamingPrefs.added(this),GamingPrefs.excluded(this));
                     TextView row=GamingUi.button(this,(selected?"✓  ":"")+app.label,selected,()->{
-                        if(shortcuts){if(!GamingPrefs.shortcuts(this).contains(app.info.packageName)&&GamingPrefs.shortcuts(this).size()>=5){toast(R.string.gaming_limit);return;}GamingPrefs.toggleShortcut(this,app.info.packageName);}
+                        if(shortcuts){if(!GamingPrefs.shortcuts(this).contains(app.info.packageName)&&GamingPrefs.shortcuts(this).size()>=6){toast(R.string.gaming_limit);return;}GamingPrefs.toggleShortcut(this,app.info.packageName);}
                         else {
                             GamingPrefs.include(this,app.info.packageName,!selected);
                             if(!selected&&!GamingPrefs.enabled(this)){

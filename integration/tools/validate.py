@@ -50,7 +50,7 @@ def manifest(root=ROOT):
             require(project.get("upstream", "").startswith("refs/heads/"), "Missing upstream ref")
         if path.startswith("kernel/"):
             require(project.get("sync-s") == "true", "KernelSU submodule sync is disabled")
-            require(project.get("upstream") == "refs/heads/main", "Wrong HeckerOS kernel branch")
+            require(project.get("upstream") in {"refs/heads/main", "refs/heads/feat/game-booster-reference"}, "Wrong HeckerOS kernel branch")
     print("Local manifest paths, dependency pins and kernel submodule sync: PASS")
 
 

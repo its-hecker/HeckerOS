@@ -1,5 +1,5 @@
 {
-  "checked_on": "2026-10-21",
+  "checked_on": "2026-10-23",
   "pixelos_manifest": {
     "repository": "PixelOS-AOSP/android_manifest",
     "branch": "seventeen",
@@ -165,8 +165,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "main",
-    "integration_branch": "main",
+    "source_branch": "feat/game-booster-reference",
+    "integration_branch": "feat/game-booster-reference",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required"
@@ -193,8 +193,8 @@
     },
     "kernel": {
       "repository": "its-hecker/heckeros-floral-kernel",
-      "branch": "main",
-      "revision": "f8648fd85fb258165c6a2dd6cb8ea34bae206af5"
+      "branch": "feat/game-booster-reference",
+      "revision": "48d6881fb8537f62811209927022e467d37e3a98"
     }
   },
   "platform_ownership": {
