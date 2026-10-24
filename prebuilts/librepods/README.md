@@ -26,6 +26,12 @@ recipe/content hashes are saved in ignored `prebuilt/` files, verified on reuse,
 and signed by Soong during ROM packaging. `--offline` verifies an existing build.
 It is not linked into HeckerSuite or SystemUI.
 
+The tracked `out/.find-ignore` marker excludes the Suite's host-tool caches from
+Android's module discovery, including existing SDK/NDK downloads. Keep this
+marker when reusing the cache; otherwise the downloaded NDK's `cpufeatures`
+makefile conflicts with Android's own `prebuilts/ndk` module. Syncing the fixed
+Suite revision restores the marker without deleting the SDK, APK or ROM outputs.
+
 LibrePods is licensed under GPL version 3 or later. Copyright and license notices are
 retained in LICENSE and the APK. Corresponding source, build instructions and
 dependencies are available at:
