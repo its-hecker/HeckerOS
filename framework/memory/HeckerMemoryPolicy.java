@@ -107,7 +107,7 @@ public final class HeckerMemoryPolicy {
                 ||type.equals(HostingRecord.HOSTING_TYPE_NEXT_TOP_ACTIVITY);
         if(!foreground)for(ProcessRecord process:owner.am.mProcessList.getLruProcessesLOSP())
             if(process.uid==info.uid&&!process.isKilledByAm()
-                    &&process.getCurProcState()<=ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE){foreground=true;break;}
+                    &&process.getProcState()<=ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE){foreground=true;break;}
         return HeckerMemoryRules.blockStart(e.flags,foreground);
     }
     static void onProcessStarting(ProcessRecord app){
@@ -153,14 +153,14 @@ public final class HeckerMemoryPolicy {
             for(ProcessRecord app:before){
                 if(app.getPid()>0&&!app.isKilledByAm())alive.add(app);
                 Entry e=entry(app.info);
-                if(e==null||UserHandle.getUserId(app.uid)!=user||!HeckerMemoryRules.shouldClean(e.flags,app.getCurAdj(),minAdj,app.getCurProcState()==ActivityManager.PROCESS_STATE_HOME,backgroundOnly)
+                if(e==null||UserHandle.getUserId(app.uid)!=user||!HeckerMemoryRules.shouldClean(e.flags,app.getCurAdj(),minAdj,app.getProcState()==ActivityManager.PROCESS_STATE_HOME,backgroundOnly)
                         ||selected!=null&&!selected.equals(app.info.packageName)||app.getPid()<=0||app.isKilledByAm())continue;
                 targets.add(app.info.packageName);
             }
             for(ProcessRecord app:before){
                 Entry e=entry(app.info);
                 if(e==null||UserHandle.getUserId(app.uid)!=user||!targets.contains(app.info.packageName)
-                        ||!HeckerMemoryRules.shouldClean(e.flags,app.getCurAdj(),minAdj,app.getCurProcState()==ActivityManager.PROCESS_STATE_HOME,backgroundOnly)||app.getPid()<=0||app.isKilledByAm())continue;
+                        ||!HeckerMemoryRules.shouldClean(e.flags,app.getCurAdj(),minAdj,app.getProcState()==ActivityManager.PROCESS_STATE_HOME,backgroundOnly)||app.getPid()<=0||app.isKilledByAm())continue;
                 app.killLocked("Hecker Memory Boost","Hecker Memory Boost",ApplicationExitInfo.REASON_USER_REQUESTED,
                         ApplicationExitInfo.SUBREASON_KILL_BACKGROUND,null,false,false);
             }

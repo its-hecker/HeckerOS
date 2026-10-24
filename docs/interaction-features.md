@@ -90,7 +90,13 @@ Run `bash tests/run_host_tests.sh`, `python3 tools/compile_sdk.py --cache genera
 `python3 tools/check_interaction_features.py --sdk-cache generated/sdk`, and
 `python3 tools/check_native_ports.py --sdk-cache generated/sdk`. The new compilation
 check uses actual generated Binder interfaces and pinned volume plugin APIs;
-hidden system declarations are reviewed facades, not a complete platform build.
+the PSC getter facade derives access modifiers from the pinned Android source and
+preserves its separate superclass package. Memory Boost uses the public
+`ProcessRecord.getProcState()` API: `getCurProcState()` is package-private in PSC
+and caused three `services.core.unboosted` javac errors in the first build.
+The adapter upgrades the known published copy during normal preparation; no clean
+checkout or output wipe is needed. Other hidden system declarations are reviewed
+facades, not a complete platform build.
 Source adapters must apply repeatedly, upgrade known copies and revert exactly.
 
 A full Android/Soong build and Coral testing remain required. Check both QS layouts,

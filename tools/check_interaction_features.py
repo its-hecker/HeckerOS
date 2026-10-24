@@ -48,8 +48,8 @@ FACADES.update({
  void updateOomAdjLocked(int reason){}public static class Controller {public void setMaxAdj(ProcessRecord p,int adj){}}
 }''',
 'com/android/server/am/ProcessList.java':'''package com.android.server.am;public class ProcessList {java.util.ArrayList<ProcessRecord> getLruProcessesLOSP(){return null;}}''',
-'com/android/server/am/ProcessRecord.java':'''package com.android.server.am;public class ProcessRecord {
- public android.content.pm.ApplicationInfo info;public int uid;public int getMaxAdj(){return 0;}public int getCurAdj(){return 0;}public int getCurProcState(){return 0;}public int getPid(){return 0;}public boolean isKilledByAm(){return false;}
+'com/android/server/am/ProcessRecord.java':'''package com.android.server.am;public class ProcessRecord extends com.android.server.am.psc.ProcessRecordInternal {
+ public android.content.pm.ApplicationInfo info;public int uid;
  public void killLocked(String reason,String description,int reasonCode,int subReason,android.app.ApplicationExitInfo.AnrInfo info,boolean noisy,boolean async){}
 }''',
 'com/android/server/am/HostingRecord.java':'''package com.android.server.am;public class HostingRecord {
@@ -70,6 +70,22 @@ FACADES['android/provider/Settings.java']=JAVA['android/provider/Settings.java']
 ' public static final String ACTION_DATE_SETTINGS="",ACTION_WIFI_SETTINGS="",ACTION_DATA_USAGE_SETTINGS="",ACTION_SETTINGS="",ACTION_SOUND_SETTINGS="", ACTION_CAST_SETTINGS="",').replace(' public static final class Secure {',' public static final class Secure { public static final String DEFAULT_INPUT_METHOD="default_input_method";')
 FACADES.pop('com/android/systemui/hecker/HeckerStatusBarPopup.java',None)
 
+def process_record_internal_facade(source):
+    # Preserve the actual superclass package and method access. A package-private
+    # PSC getter is not inherited by ProcessRecord in com.android.server.am.
+    methods=[]
+    for name in ['getMaxAdj','getCurAdj','getCurProcState','getProcState','getPid','isKilledByAm']:
+        matches=list(re.finditer(
+            r'^\s*(?:(public|protected|private)\s+)?(?:abstract\s+)?'
+            r'(?:@[\w.]+\s+)*(int|boolean)\s+'+name+r'\s*\(\s*\)\s*[;{]',
+            source,re.MULTILINE))
+        assert len(matches)==1, 'Missing or ambiguous PSC getter declaration: '+name
+        access,result=matches[0].groups()
+        if name!='getCurProcState':assert access=='public', 'PSC getter is not public: '+name
+        methods.append((access+' ' if access else '')+result+' '+name+'(){return '
+                       +('false' if result=='boolean' else '0')+';}')
+    return 'package com.android.server.am.psc;public class ProcessRecordInternal {\n'+'\n'.join(methods)+'\n}'
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--sdk-cache',type=Path,required=True)
     parser.add_argument('--source-cache',type=Path,default=ROOT/'out/native-source-cache');args=parser.parse_args();sdk=args.sdk_cache.resolve()
@@ -82,8 +98,9 @@ def main():
         return file
     # Verify the declarations that changed in Android 17, rather than silently accepting old facades.
     record=native('services/core/java/com/android/server/am/psc/ProcessRecordInternal.java').read_text()
-    for method in ['getMaxAdj','getCurAdj','getCurProcState','getPid','isKilledByAm']:assert re.search(r'\b'+method+r'\s*\(',record),method
+    FACADES['com/android/server/am/psc/ProcessRecordInternal.java']=process_record_internal_facade(record)
     process=native('services/core/java/com/android/server/am/ProcessRecord.java').read_text()
+    assert 'class ProcessRecord extends ProcessRecordInternal' in process
     assert 'String description,' in process and 'boolean asyncKPG)' in process
     plist=native('services/core/java/com/android/server/am/ProcessList.java').read_text()
     assert 'mService.mProcessStateController.setMaxAdj' in plist and 'com.android.server.am.psc.Constants' in plist
