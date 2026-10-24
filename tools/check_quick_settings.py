@@ -44,6 +44,11 @@ public final class Settings {
   public static boolean putIntForUser(android.content.ContentResolver r,String n,int v,int u) { return true; }
   public static boolean putStringForUser(android.content.ContentResolver r,String n,String v,int u) { return true; }
  }
+ public static final class System {
+  public static android.net.Uri getUriFor(String name) { return null; }
+  public static int getIntForUser(android.content.ContentResolver r,String n,int d,int u) { return d; }
+  public static boolean putIntForUser(android.content.ContentResolver r,String n,int v,int u) { return true; }
+ }
 }''',
     'android/os/UserHandle.java': '''package android.os;
 public final class UserHandle implements Parcelable {

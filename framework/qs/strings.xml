@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="hecker_qs_auto_brightness">Automatic brightness</string>
+    <string name="hecker_qs_auto_on">On</string>
+    <string name="hecker_qs_auto_off">Off</string>
     <string name="hecker_media_volume">Media volume</string>
     <string name="hecker_brand">HeckerOS</string>
     <string name="hecker_brand_tagline">Make it yours</string>

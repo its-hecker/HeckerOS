@@ -140,6 +140,9 @@ fun HeckerTileGrid(
                     }
                     VerticalControl { HeckerVolumeSlider() }
                 }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    HeckerAutoBrightnessButton()
+                }
             }
             HorizontalPager(state = pager, verticalAlignment = Alignment.Top) { index ->
                 HeckerRows(pages[index], columns, false, largeFirst = !customized || index != 0)
@@ -155,7 +158,10 @@ fun HeckerTileGrid(
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = .94f))
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                if (brightness != null) brightness()
+                if (brightness != null) Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.weight(1f)) { brightness() }
+                    HeckerAutoBrightnessButton()
+                }
                 HeckerVolumeSlider()
             }
             if (includeFooter && foot.isNotEmpty()) HeckerTileFooter(tiles)

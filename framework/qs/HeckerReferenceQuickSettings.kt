@@ -4,12 +4,18 @@
 package com.android.systemui.hecker
 
 import android.app.UiModeManager
+import android.app.ActivityManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
+import android.database.ContentObserver
 import android.media.AudioManager
+import android.os.Handler
+import android.os.Looper
+import android.os.UserHandle
+import android.os.UserManager
 import android.provider.Settings
 import android.service.quicksettings.Tile
 import android.widget.ImageView
@@ -104,12 +110,61 @@ fun HeckerReferenceQuickSettings(
                 Box(Modifier.weight(1f)) {
                     CompositionLocalProvider(LocalHeckerReferenceGlass provides true) { brightness() }
                 }
+                HeckerAutoBrightnessButton()
                 ReferenceDarkButton(tiles.firstOrNull { it.spec.spec == "dark" })
             }
         }
         ReferenceVolume()
         ReferenceMedia()
         ReferenceShortcuts(tiles)
+    }
+}
+
+/** Observe the native per-user mode, including changes from Display and game mode. */
+@Composable
+fun HeckerAutoBrightnessButton() {
+    val context = LocalContext.current
+    val resolver = context.contentResolver
+    var automatic by remember(context) { mutableStateOf(false) }
+    var restricted by remember(context) { mutableStateOf(false) }
+    fun read() {
+        val user = ActivityManager.getCurrentUser()
+        automatic = Settings.System.getIntForUser(resolver, "screen_brightness_mode", 0, user) == 1
+        restricted = context.createContextAsUser(UserHandle.of(user), 0).getSystemService(UserManager::class.java)
+            .hasUserRestriction(UserManager.DISALLOW_CONFIG_BRIGHTNESS)
+    }
+    DisposableEffect(context) {
+        val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
+            override fun onChange(selfChange: Boolean) = read()
+        }
+        val users = object : BroadcastReceiver() {
+            override fun onReceive(c: Context, intent: Intent) = read()
+        }
+        resolver.registerContentObserver(Settings.System.getUriFor("screen_brightness_mode"), false, observer, UserHandle.USER_ALL)
+        context.registerReceiver(users, IntentFilter(Intent.ACTION_USER_SWITCHED), Context.RECEIVER_NOT_EXPORTED)
+        read()
+        onDispose { resolver.unregisterContentObserver(observer); context.unregisterReceiver(users) }
+    }
+    Box(Modifier.size(48.dp).clip(CircleShape)
+        .background(if (automatic) White.copy(alpha = .88f) else Disc)
+        .semantics {
+            contentDescription = context.getString(R.string.hecker_qs_auto_brightness)
+            role = Role.Switch
+            stateDescription = context.getString(if (automatic) R.string.hecker_qs_auto_on else R.string.hecker_qs_auto_off)
+            if (restricted) disabled()
+        }
+        .clickable(enabled = !restricted) {
+            try {
+                val user = ActivityManager.getCurrentUser()
+                if (!context.createContextAsUser(UserHandle.of(user), 0).getSystemService(UserManager::class.java)
+                        .hasUserRestriction(UserManager.DISALLOW_CONFIG_BRIGHTNESS)) {
+                    val mode = Settings.System.getIntForUser(resolver, "screen_brightness_mode", 0, user)
+                    Settings.System.putIntForUser(resolver, "screen_brightness_mode", if (mode == 1) 0 else 1, user)
+                }
+                read()
+            } catch (_: SecurityException) { HeckerQsActions.settings(Settings.ACTION_DISPLAY_SETTINGS) }
+        }, contentAlignment = Alignment.Center) {
+        Text("A", color = if (automatic) Ink else White, fontSize = 19.sp, fontWeight = FontWeight.Bold)
     }
 }
 

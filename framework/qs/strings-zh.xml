@@ -1,4 +1,7 @@
 <resources>
+    <string name="hecker_qs_auto_brightness">自动亮度</string>
+    <string name="hecker_qs_auto_on">已开启</string>
+    <string name="hecker_qs_auto_off">已关闭</string>
     <string name="hecker_media_volume">媒体音量</string>
     <string name="hecker_brand">HeckerOS</string>
     <string name="hecker_brand_tagline">随心定制</string>
