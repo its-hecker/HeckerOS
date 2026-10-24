@@ -19,6 +19,7 @@ from launcher_port import launcher_plan
 from prepare import replace_guarded
 from privapp_permissions import check_privapp_permissions
 from check_pin_bouncer import PIN_INPUTS, check_pin_bouncer
+from check_interaction_integration import INPUTS as INTERACTION_INPUTS, check_service_bindings, check_statusbar_dispatch
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -389,6 +390,7 @@ def main():
         return folder
     paths = set(json.loads((ROOT / 'framework/customization-patches.json').read_text()))
     paths.update(PIN_INPUTS)
+    paths.update(INTERACTION_INPUTS)
     paths.add('frameworks/base/core/java/android/view/WindowManager.java')
     paths.update('packages/apps/Launcher3/' + name for name in ('Android.bp', 'aconfig/Android.bp'))
     paths.add('frameworks/base/core/java/android/content/res/Resources.java')
@@ -454,6 +456,7 @@ def main():
         check_bootanimation_owner(folder)
         check_bootanimation_selection(folder)
         check_secure_capture(folder)
+        check_service_bindings(folder)
         window_types = (folder / 'frameworks/base/core/java/android/view/WindowManager.java').read_text()
         assert re.search(r'TYPE_STATUS_BAR_ADDITIONAL\s*=\s*FIRST_SYSTEM_WINDOW\s*\+\s*41\s*;', window_types)
         assert 'public void setTrustedOverlay()' in window_types
@@ -465,6 +468,7 @@ def main():
         if args.sdk_cache:
             check_clock_plugins(folder, args.sdk_cache.resolve())
             check_pin_bouncer(folder, args.kotlin_cache.resolve())
+            check_statusbar_dispatch(folder, args.kotlin_cache.resolve())
         for plan in reversed(plans):
             write(plan(folder, replace_guarded, True))
         assert before == snapshot(folder), 'Revert changed upstream content'

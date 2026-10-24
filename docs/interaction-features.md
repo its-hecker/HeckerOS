@@ -99,6 +99,16 @@ checkout or output wipe is needed. Other hidden system declarations are reviewed
 facades, not a complete platform build.
 Source adapters must apply repeatedly, upgrade known copies and revert exactly.
 
+The status popup hooks the existing `PhoneStatusBarView.dispatchTouchEvent()` after
+Android's interactivity check. Preparation removes the known earlier duplicate
+override during an incremental upgrade. The native-port check compiles the actual
+prepared method and a Kotlin caller, then exercises popup consumption and normal
+touch delegation. It also runs Android's pinned fuzzer-binding checker over the
+service declarations, including release-flag branches. The three Java services
+`hecker_memory`, `hecker_launcher` and `hecker_game` use AOSP's documented
+`EXCEPTION_NO_FUZZER` entries because automatic Java service fuzzers are unsupported
+(b/287102710); the global checker remains enabled.
+
 A full Android/Soong build and Coral testing remain required. Check both QS layouts,
 hardware-volume keys, DND/call/remote/caption streams, safety dialogs, brightness,
 rotation and large fonts; swipe/long-press status bar on HOME, apps and lock screen;

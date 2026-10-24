@@ -197,7 +197,9 @@
       "files": [
         "private/init.te",
         "private/su.te",
-        "private/service_contexts"
+        "private/service_contexts",
+        "build/soong/service_fuzzer_bindings.go",
+        "tools/fuzzer_bindings_check.py"
       ]
     },
     "system/core": {
