@@ -38,7 +38,7 @@ platform customization forks use `heckeros-17`.
 - A native offline picker for 75 Lunaris theme styles and 91 checksum-pinned
   resource APKs, with Android 17 status icon, battery and charging adapters.
 - Offline random Lottie greeting, one About/donation/contact page, the existing
-  Google Camera APK set, and the approved small caracal boot animation.
+  Google Camera APK set, and the approved terminal-style caracal boot animation.
 
 These are integrated sources. Suite Java/resource compilation, host checks,
 immutable-source patch checks and asset validation do **not** establish that the

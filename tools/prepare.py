@@ -13,6 +13,7 @@ from launcher_port import launcher_plan
 from customization_port import customization_plan
 from recovery_port import recovery_plan
 from privapp_permissions import check_privapp_permissions
+from service_contexts import game_service_plan
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -341,6 +342,7 @@ def plan(rom, revert=False):
     changes.update(launcher_plan(rom, replace_guarded, revert))
     changes.update(customization_plan(rom, replace_guarded, revert))
     changes.update(recovery_plan(rom, revert))
+    changes.update(game_service_plan(rom, revert))
     return changes
 
 

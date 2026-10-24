@@ -32,7 +32,10 @@ jobs:
           distribution: temurin
           java-version: '21'
       - name: Verify authorization, raw decoding, gaming, lyrics and patch safety
-        run: bash tests/run_host_tests.sh
+        # Boot asset regression tests decode the supplied PNGs.
+        run: |
+          python3 -m pip install Pillow
+          bash tests/run_host_tests.sh
       - name: Compile Suite Java and link Android resources with locked dependencies
         run: python3 tools/compile_sdk.py --cache generated/sdk
       - name: Compile retained Google weather and Hecker Launcher artwork
@@ -64,23 +67,11 @@ jobs:
           generated/sdk/aapt2 compile --dir settings/res -o /tmp/hecker-settings-resources.zip
           generated/sdk/aapt2 compile --dir motion/res -o /tmp/hecker-motion-resources.zip
   boot-assets:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    permissions:
-      contents: write
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-      - name: Install boot renderer dependencies
-        run: sudo apt-get update && sudo apt-get install -y python3-pil python3-numpy ffmpeg fonts-dejavu-core
-      - name: Render and verify the approved animation
-        run: /usr/bin/python3 tools/build_bootanimation.py
-      - name: Publish generated ROM payload and preview
-        run: |
-          git config user.name 'HeckerOS build bot'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add bootanimation/bootanimation.zip bootanimation/preview-coral.mp4 bootanimation/payload.json
-          if ! git diff --cached --quiet; then
-            git commit -m 'Generate approved coral boot animation and preview'
-            git push origin HEAD:main
-          fi
+      - name: Install boot validator dependency
+        run: sudo apt-get update && sudo apt-get install -y python3-pil
+      - name: Verify the approved terminal animation without changing the asset
+        run: /usr/bin/python3 tools/build_bootanimation.py --check

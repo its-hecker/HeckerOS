@@ -46,6 +46,13 @@ isolation and sufficient charger power are hardware-dependent.
 
 ## Verification
 
+The Binder name `hecker_game` belongs to `hecker_game_service`, declared by
+`rom/sepolicy/private/hecker_game.te`. Build preparation removes the obsolete
+`hecker_game u:object_r:activity_service:s0` fallback from source context files
+before SELinux contexts are merged. It preserves unrelated services and rejects
+unfamiliar replacement labels. The existing atomic source adapter saves originals
+under `out/hecker-suite-source-backups/`; it never edits generated Soong policy.
+
 - Suite Java compilation and Android resource linking with the locked SDK.
 - Native gaming Java and the real generated AIDL interface.
 - CPU/GPU/RAM parsing, counter reset and unavailable-reading regressions.
