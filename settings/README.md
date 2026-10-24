@@ -12,7 +12,7 @@ controls and policy handling remain in Settings. Source adapters are guarded and
 reversible; the main activity/fragment names stay native.
 
 Suite retains its random offline Lottie greeting and the previously selected
-App Lock, Gaming, launcher, infrared camera and About pages alongside the new grid.
+App Lock, Gaming, infrared camera and About pages alongside the new grid.
 
 The Suite dashboard and About UI are built as `HeckerSuiteSettingsUi`, a static
 library of the native `Settings` APK. The existing Motion Sense controls and

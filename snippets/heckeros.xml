@@ -1,7 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <manifest>
   <remote name="floral-github" fetch="https://github.com/" />
-  <remote name="floral-gitea" fetch="https://gitea.com/" />
   <remove-project path="device/google/coral" optional="true" />
   <remove-project path="vendor/google/coral" optional="true" />
   <remove-project path="kernel/google/msm-4.14" optional="true" />
@@ -17,9 +16,8 @@
   <project name="its-hecker/vendor_lunaris_dolby" path="vendor/lunaris/dolby" remote="floral-github" revision="544e6271c955e2bf450c8481ac1e71551cb5a800" upstream="refs/heads/pixelos-compat" dest-branch="pixelos-compat" />
   <project name="its-hecker/floral-motionsense-plugin" path="vendor/hecker/floral/motionsense" remote="floral-github" revision="92d0051faf53acac3dfefec6597a12d587eefa73" upstream="refs/heads/main" dest-branch="main" />
   <project name="its-hecker/floral-3D-faceid-plugin" path="vendor/hecker/floral/faceid" remote="floral-github" revision="d998995e1452d2c3d9882bfdf659e1db760a99be" upstream="refs/heads/main" dest-branch="main" />
-  <project name="its-hecker/HeckerOS" path="vendor/hecker/floral/suite" remote="floral-github" revision="refs/heads/main" upstream="refs/heads/main" dest-branch="main" />
+  <project name="its-hecker/HeckerOS" path="vendor/hecker/floral/suite" remote="floral-github" revision="refs/heads/feat/suite-polish" upstream="refs/heads/feat/suite-polish" dest-branch="feat/suite-polish" />
   <remove-project path="packages/apps/Launcher3" optional="true" />
-  <project path="packages/apps/Launcher3" name="projectInfinity-x/packages_apps_Launcher3" remote="floral-gitea" revision="8a89db313ebfafc80572795e613679050095d5db" upstream="refs/heads/17" dest-branch="17" />
   <remove-project path="packages/services/OmniJaws" optional="true" />
   <extend-project name="PixelOS-AOSP/android_packages_apps_DolbyAtmos" path="packages/apps/DolbyAtmos" revision="13bbe61cf3e1046e3a1f0bda4719c321c953ce50" upstream="refs/heads/seventeen" />
   <extend-project name="LineageOS/android_hardware_lineage_compat" path="hardware/lineage/compat" revision="590c94850e079642136a4577305d02e4174caabc" upstream="refs/heads/lineage-24.0" />
@@ -31,5 +29,5 @@
   <extend-project name="platform/hardware/google/camera" path="hardware/google/camera" revision="cd15337bd229dd521a860d88bca3e37c3ca845f7" upstream="refs/tags/android-17.0.0_r1" />
   <extend-project name="PixelOS-AOSP/android_system_sepolicy" path="system/sepolicy" revision="99c58a7cc9a44fe33c93808452d018e756d84753" upstream="refs/heads/seventeen" />
   <extend-project name="PixelOS-AOSP/android_system_core" path="system/core" revision="a5313eaec0219b021aaa5e59cc10dd07cfa8504c" upstream="refs/heads/seventeen" />
-  <extend-project name="its-hecker/heckeros_packages_apps_Settings" path="packages/apps/Settings" revision="0c2c5aed4fd8e4a9507cfc26fa7a38f36f28dcba" upstream="refs/heads/heckeros-17" />
+  <extend-project name="its-hecker/heckeros_packages_apps_Settings" path="packages/apps/Settings" revision="e6fe59aea717e5f206de5c9a4e9c4da336738875" upstream="refs/heads/feat/suite-polish" />
 </manifest>

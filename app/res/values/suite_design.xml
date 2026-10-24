@@ -1,9 +1,9 @@
 <resources>
     <string name="suite_hero_summary">Customize, enhance and unlock your device with HeckerOS features.</string>
     <string name="lock_screen_title">Lock Screen</string>
-    <string name="lock_screen_summary">Lyrics, wallpaper, charging and always-on display</string>
+    <string name="lock_screen_summary">Face unlock effects, lyrics, wallpaper and charging</string>
     <string name="status_bar_title">Status Bar</string>
-    <string name="status_bar_summary">Signal, Wi-Fi and battery indicators</string>
+    <string name="status_bar_summary">Wi-Fi indicators and battery styles</string>
     <string name="face_title">3D Face Unlock</string>
     <string name="face_summary">Infrared authentication and enrollment</string>
     <string name="navigation_title">Navigation</string>

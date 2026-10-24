@@ -35,7 +35,7 @@ public final class SandboxActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         LinearLayout page = Ui.page(this, R.string.sandbox_title);
-        page.addView(Ui.text(this, getString(R.string.sandbox_description), 15, false));
+        Ui.hero(this, page, R.raw.suite_sandbox, R.string.sandbox_description);
         EditText search = new EditText(this);
         search.setSingleLine(true); search.setHint(R.string.search_apps);
         search.setTextColor(getColor(R.color.hecker_foreground));

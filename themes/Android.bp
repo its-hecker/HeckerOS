@@ -3,23 +3,7 @@
 package { default_applicable_licenses: ["hecker_lunaris_theme_assets"], }
 license { name: "hecker_lunaris_theme_assets", license_kinds: ["legacy_proprietary"], }
 
-android_app_import {
-    name: "HeckerThemeAquariumSignalOverlay",
-    apk: "prebuilt/AquariumSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeAuroraSignalOverlay",
-    apk: "prebuilt/AuroraSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeAuroraWiFiOverlay",
@@ -30,14 +14,6 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeBarsSignalOverlay",
-    apk: "prebuilt/BarsSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeBarsWiFiOverlay",
@@ -93,59 +69,11 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeButterflySignalOverlay",
-    apk: "prebuilt/ButterflySignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeCircleSignalOverlay",
-    apk: "prebuilt/CircleSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeDaunSignalOverlay",
-    apk: "prebuilt/DaunSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeDecSignalOverlay",
-    apk: "prebuilt/DecSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeDeepSignalOverlay",
-    apk: "prebuilt/DeepSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeDoraSignalOverlay",
-    apk: "prebuilt/DoraSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeDoraWiFiOverlay",
@@ -156,23 +84,7 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeEqualSignalOverlay",
-    apk: "prebuilt/EqualSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeFaintUISignalOverlay",
-    apk: "prebuilt/FaintUISignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeFaintUIWiFiOverlay",
@@ -183,23 +95,7 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeFanSignalOverlay",
-    apk: "prebuilt/FanSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeForlornSignalOverlay",
-    apk: "prebuilt/ForlornSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeForlornWiFiOverlay",
@@ -210,14 +106,6 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeGradiconSignalOverlay",
-    apk: "prebuilt/GradiconSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeGradiconWiFiOverlay",
@@ -228,311 +116,39 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeHuaweiSignalOverlay",
-    apk: "prebuilt/HuaweiSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackAcherusAndroidOverlay",
-    apk: "prebuilt/IconPackAcherusAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackAcherusSystemUIOverlay",
-    apk: "prebuilt/IconPackAcherusSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackAuroraAndroidOverlay",
-    apk: "prebuilt/IconPackAuroraAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackAuroraSystemUIOverlay",
-    apk: "prebuilt/IconPackAuroraSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackCircularAndroidOverlay",
-    apk: "prebuilt/IconPackCircularAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackCircularSystemUIOverlay",
-    apk: "prebuilt/IconPackCircularSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackFilledAndroidOverlay",
-    apk: "prebuilt/IconPackFilledAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackFilledSystemUIOverlay",
-    apk: "prebuilt/IconPackFilledSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackGradiconAndroidOverlay",
-    apk: "prebuilt/IconPackGradiconAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackGradiconSystemUIOverlay",
-    apk: "prebuilt/IconPackGradiconSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackKaiAndroidOverlay",
-    apk: "prebuilt/IconPackKaiAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackKaiSystemUIOverlay",
-    apk: "prebuilt/IconPackKaiSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackLornAndroidOverlay",
-    apk: "prebuilt/IconPackLornAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackLornSystemUIOverlay",
-    apk: "prebuilt/IconPackLornSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackNostalgicAndroidOverlay",
-    apk: "prebuilt/IconPackNostalgicAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackNostalgicSystemUIOverlay",
-    apk: "prebuilt/IconPackNostalgicSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackOOSAndroidOverlay",
-    apk: "prebuilt/IconPackOOSAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackOOSSystemUIOverlay",
-    apk: "prebuilt/IconPackOOSSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackOutlineAndroidOverlay",
-    apk: "prebuilt/IconPackOutlineAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackOutlineSystemUIOverlay",
-    apk: "prebuilt/IconPackOutlineSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackPUIAndroidOverlay",
-    apk: "prebuilt/IconPackPUIAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackPUISystemUIOverlay",
-    apk: "prebuilt/IconPackPUISystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackPlumpyAndroidOverlay",
-    apk: "prebuilt/IconPackPlumpyAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackPlumpySystemUIOverlay",
-    apk: "prebuilt/IconPackPlumpySystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackRoundedAndroidOverlay",
-    apk: "prebuilt/IconPackRoundedAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackRoundedSystemUIOverlay",
-    apk: "prebuilt/IconPackRoundedSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackSamAndroidOverlay",
-    apk: "prebuilt/IconPackSamAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackSamSystemUIOverlay",
-    apk: "prebuilt/IconPackSamSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackVictorAndroidOverlay",
-    apk: "prebuilt/IconPackVictorAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackVictorSystemUIOverlay",
-    apk: "prebuilt/IconPackVictorSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackXperiaAndroidOverlay",
-    apk: "prebuilt/IconPackXperiaAndroidOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeIconPackXperiaSystemUIOverlay",
-    apk: "prebuilt/IconPackXperiaSystemUIOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeInsideSignalOverlay",
-    apk: "prebuilt/InsideSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeInsideWiFiOverlay",
@@ -543,50 +159,10 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeIosSignalOverlay",
-    apk: "prebuilt/IosSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeMiniSignalOverlay",
-    apk: "prebuilt/MiniSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeMotoChargingAnimationOverlay",
-    apk: "prebuilt/MotoChargingAnimationOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeNothingChargingAnimationOverlay",
-    apk: "prebuilt/NothingChargingAnimationOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeNothingDotSignalOverlay",
-    apk: "prebuilt/NothingDotSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeNothingDotWiFiOverlay",
@@ -597,32 +173,8 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeOdinSignalOverlay",
-    apk: "prebuilt/OdinSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemePillsSignalOverlay",
-    apk: "prebuilt/PillsSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemePlumpySignalOverlay",
-    apk: "prebuilt/PlumpySignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemePlumpyWiFiOverlay",
@@ -633,32 +185,8 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeRelSignalOverlay",
-    apk: "prebuilt/RelSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeRomanSignalOverlay",
-    apk: "prebuilt/RomanSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeRoundSignalOverlay",
-    apk: "prebuilt/RoundSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeRoundWiFiOverlay",
@@ -669,32 +197,8 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeScrollSignalOverlay",
-    apk: "prebuilt/ScrollSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeSeaSignalOverlay",
-    apk: "prebuilt/SeaSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeSneakySignalOverlay",
-    apk: "prebuilt/SneakySignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeSneakyWiFiOverlay",
@@ -705,23 +209,7 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeStackSignalOverlay",
-    apk: "prebuilt/StackSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeStrokeSignalOverlay",
-    apk: "prebuilt/StrokeSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeStrokeWiFiOverlay",
@@ -732,23 +220,7 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeWannuiSignalOverlay",
-    apk: "prebuilt/WannuiSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeWavySignalOverlay",
-    apk: "prebuilt/WavySignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeWavyWiFiOverlay",
@@ -768,32 +240,8 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeWindowsSignalOverlay",
-    apk: "prebuilt/WindowsSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeWingSignalOverlay",
-    apk: "prebuilt/WingSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
-android_app_import {
-    name: "HeckerThemeXperiaSignalOverlay",
-    apk: "prebuilt/XperiaSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeXperiaWiFiOverlay",
@@ -804,14 +252,6 @@ android_app_import {
     dex_preopt: { enabled: false },
 }
 
-android_app_import {
-    name: "HeckerThemeZigZagSignalOverlay",
-    apk: "prebuilt/ZigZagSignalOverlay.apk",
-    certificate: "platform",
-    product_specific: true,
-    enforce_uses_libs: false,
-    dex_preopt: { enabled: false },
-}
 
 android_app_import {
     name: "HeckerThemeZigZagWiFiOverlay",

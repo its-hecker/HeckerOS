@@ -5,11 +5,6 @@
         <Preference android:key="hecker_wallpaper" android:title="@string/hecker_wallpaper_title" android:summary="@string/hecker_wallpaper_summary" android:icon="@drawable/hecker_palette">
             <intent android:action="android.intent.action.SET_WALLPAPER" />
         </Preference>
-        <Preference android:key="hecker_theme_pack" android:title="@string/hecker_theme_pack_title" android:summary="@string/hecker_theme_pack_summary" android:icon="@drawable/hecker_palette">
-            <intent android:targetPackage="com.android.settings" android:targetClass="org.hecker.suite.SuiteActivity">
-                <extra android:name="org.hecker.suite.PAGE" android:value="themes" />
-            </intent>
-        </Preference>
     </PreferenceCategory>
     <PreferenceCategory android:key="category_brightness" android:title="@string/category_name_brightness" android:order="-200">
         <com.android.settingslib.RestrictedPreference android:key="@string/preference_key_brightness_level" android:title="@string/brightness" android:persistent="false" settings:keywords="@string/keywords_display_brightness_level" settings:useAdminDisabledSummary="true" settings:userRestriction="no_config_brightness" />

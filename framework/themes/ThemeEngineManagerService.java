@@ -209,7 +209,26 @@ public class ThemeEngineManagerService extends SystemService {
         notifyThemeChangedInternal(null);
     }
 
+    private void clearRetiredNativeIconOverlays() {
+        try {
+            String raw = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                    "theme_customization_overlay_packages", mUserId);
+            if (raw == null || raw.isEmpty()) return;
+            JSONObject saved = new JSONObject(raw);
+            Map<String, Object> current = new HashMap<>();
+            for (Iterator<String> keys = saved.keys(); keys.hasNext();) {
+                String key = keys.next(); current.put(key, saved.get(key));
+            }
+            Map<String, Object> clean = RetiredThemeSelection.apply(current);
+            if (!clean.equals(current)) Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                    "theme_customization_overlay_packages", new JSONObject(clean).toString(), mUserId);
+        } catch (JSONException | RuntimeException error) {
+            Slog.w(TAG, "Cannot clear retired native icon overlays", error);
+        }
+    }
+
     private synchronized void loadThemeConfig() {
+        clearRetiredNativeIconOverlays();
         mEnabledThemes.clear();
         mThemeResourcesCache.clear();
         mTargetArrayCache.clear();
@@ -232,6 +251,21 @@ public class ThemeEngineManagerService extends SystemService {
             }
 
             JSONObject config = new JSONObject(json);
+            // The Hecker picker now owns Wi-Fi and battery styles only. Ignore
+            // saved legacy categories on upgrades as well as new writes.
+            for (String section : new String[] {"themes", "categoryThemes"}) {
+                JSONObject values = config.optJSONObject(section);
+                if (values != null) {
+                    List<String> retired = new ArrayList<>();
+                    for (Iterator<String> keys = values.keys(); keys.hasNext();) {
+                        String key = keys.next();
+                        if (!"statusbar_wifi".equals(key) && !"battery_style".equals(key)) retired.add(key);
+                    }
+                    for (String key : retired) values.remove(key);
+                }
+            }
+            config.remove("systemThemeIcons"); config.remove("systemThemeIconTargets");
+            config.remove("perAppIconPacks");
             JSONObject themes = config.optJSONObject("themes");
 
             if (themes != null) {

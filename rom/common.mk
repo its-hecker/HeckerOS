@@ -12,7 +12,7 @@ PRODUCT_PRODUCT_PROPERTIES += \
 $(call inherit-product, vendor/hecker/floral/suite/suite.mk)
 $(call inherit-product, vendor/hecker/floral/suite/themes/themes.mk)
 # Ignore the removed weather service, including stale source directories.
-PRODUCT_SOURCE_ROOT_DIRS += -packages/services/OmniJaws
+PRODUCT_SOURCE_ROOT_DIRS += -packages/services/OmniJaws -packages/apps/Launcher3
 PRODUCT_PACKAGES := $(filter-out OmniJaws,$(PRODUCT_PACKAGES))
 PRODUCT_PACKAGES += HeckerSystemUIOverlay
 # Native window blur still observes SurfaceFlinger, thermal and power-saver capability gates.

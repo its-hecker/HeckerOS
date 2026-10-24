@@ -338,7 +338,6 @@ def plan(rom, revert=False):
     elif not helper.exists():
         changes[helper] = expected
     changes.update(motion_plan(rom, revert))
-    changes.update(launcher_plan(rom, replace_guarded, revert))
     changes.update(customization_plan(rom, replace_guarded, revert))
     changes.update(recovery_plan(rom, revert))
     return changes

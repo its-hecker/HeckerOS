@@ -23,29 +23,58 @@ final class Ui {
     static LinearLayout page(Activity activity, int title) {
         activity.setTitle(title);
         if (activity.getActionBar() != null) {
-            activity.getActionBar().setDisplayHomeAsUpEnabled(true);
+            activity.getActionBar().hide();
         }
         LinearLayout page = new LinearLayout(activity);
         page.setOrientation(LinearLayout.VERTICAL);
         int padding = dp(activity, 20);
         page.setPadding(padding, padding, padding, padding);
-        // Android 17 enforces edge-to-edge. Consume system bars around the content.
-        page.setOnApplyWindowInsetsListener((view, insets) -> {
-            android.graphics.Insets bars = insets.getInsets(
-                    android.view.WindowInsets.Type.systemBars()
-                    | android.view.WindowInsets.Type.displayCutout());
-            view.setPadding(padding + bars.left, padding,
-                    padding + bars.right, padding + bars.bottom);
-            return insets;
-        });
         return page;
     }
 
     static void scroll(Activity activity, LinearLayout page) {
+        // A measured toolbar and scroll body are siblings. An overlay ActionBar
+        // cannot cover the first setting, even with edge-to-edge or large fonts.
+        activity.getWindow().setDecorFitsSystemWindows(false);
+        LinearLayout root = new LinearLayout(activity);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(activity.getColor(R.color.hecker_background));
+        LinearLayout toolbar = new LinearLayout(activity);
+        toolbar.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        toolbar.setMinimumHeight(dp(activity, 56));
+        toolbar.setPadding(dp(activity, 8), dp(activity, 4), dp(activity, 20), dp(activity, 4));
+        Button back = button(activity);
+        back.setText("‹"); back.setTextSize(28);
+        back.setContentDescription(activity.getString(R.string.navigate_back));
+        back.setOnClickListener(v -> activity.finish());
+        toolbar.addView(back, new LinearLayout.LayoutParams(dp(activity, 52), -2));
+        TextView title = text(activity, activity.getTitle(), 22, true);
+        title.setAccessibilityHeading(true);
+        toolbar.addView(title, new LinearLayout.LayoutParams(0, -2, 1));
+        root.addView(toolbar);
         ScrollView scroll = new ScrollView(activity);
         scroll.setFillViewport(true);
+        scroll.setClipToPadding(false);
         scroll.addView(page);
-        activity.setContentView(scroll);
+        root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        root.setOnApplyWindowInsetsListener((view, insets) -> {
+            android.graphics.Insets bars = insets.getInsets(
+                    android.view.WindowInsets.Type.systemBars()
+                    | android.view.WindowInsets.Type.displayCutout());
+            android.graphics.Insets ime = insets.getInsets(android.view.WindowInsets.Type.ime());
+            view.setPadding(bars.left, bars.top, bars.right, Math.max(bars.bottom, ime.bottom));
+            return android.view.WindowInsets.CONSUMED;
+        });
+        activity.setContentView(root);
+        root.post(root::requestApplyInsets);
+    }
+
+    static void hero(Activity activity, LinearLayout page, int animation, int summary) {
+        LinearLayout card = card(activity);
+        SuiteAnimation art = new SuiteAnimation(activity, card);
+        art.show(animation, true);
+        card.addView(text(activity, activity.getString(summary), 15, false));
+        page.addView(card);
     }
 
     static TextView text(Activity activity, CharSequence text, int sp, boolean bold) {

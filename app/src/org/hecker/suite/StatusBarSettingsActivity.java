@@ -8,7 +8,7 @@ public final class StatusBarSettingsActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         LinearLayout page=Ui.page(this,R.string.status_bar_title);
-        Ui.actionCard(this,page,R.string.theme_signal,R.string.signal_theme_summary,v->SuitePages.theme(this,0));
+        Ui.hero(this, page, R.raw.suite_status, R.string.status_styles_summary);
         Ui.actionCard(this,page,R.string.theme_wifi,R.string.wifi_theme_summary,v->SuitePages.theme(this,1));
         Ui.actionCard(this,page,R.string.theme_battery,R.string.battery_theme_summary,v->SuitePages.theme(this,3));
         Ui.scroll(this,page);

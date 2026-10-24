@@ -15,7 +15,7 @@ public final class HeadphonesActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         LinearLayout page = Ui.page(this, R.string.headphones_title);
-        page.addView(Ui.text(this, getString(R.string.headphones_description), 15, false));
+        Ui.hero(this, page, R.raw.suite_headphones, R.string.headphones_description);
         LinearLayout card = Ui.card(this);
         Switch enabled = new Switch(this);
         enabled.setText(R.string.headphones_popup);

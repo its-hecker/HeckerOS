@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="navigate_back">返回</string>
+    <string name="status_styles_summary">使用 Wi-Fi 和电池样式打造专属状态栏。</string>
+    <string name="charging_energy_title">能量轨道充电动画</string>
+    <string name="charging_energy_summary">有线充电开始时显示青紫色能量环和实时电量百分比。</string>
+    <string name="capture_title">屏幕截图</string>
+    <string name="capture_summary">控制受保护应用窗口的屏幕捕获。</string>
+    <string name="capture_secure_title">允许安全窗口截图</string>
+    <string name="capture_secure_summary">允许对使用 FLAG_SECURE 的应用窗口截图和录屏。默认关闭。受 DRM 保护的视频可能仍为空白。</string>
+</resources>

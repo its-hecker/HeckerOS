@@ -224,7 +224,7 @@ def main():
             target = out / 'kotlin' / name
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)
         java_sources = list((out / 'java').rglob('*.java')) + list((ROOT / 'framework/qs').glob('*.java'))
-        java_sources += [ROOT / 'framework/themes/ThemeIconNames.java']
+        java_sources += [ROOT / 'framework/themes/ThemeIconNames.java', ROOT / 'framework/applock/HeckerAppLockPrompt.java']
         run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', sdk / 'android-system.jar',
             '-d', out / 'classes', *java_sources)
         jars = sorted(cache.glob('*.jar'))

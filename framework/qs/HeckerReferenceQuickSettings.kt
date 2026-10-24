@@ -189,19 +189,20 @@ fun ReferenceIcon(resource: Int, size: Int = 24, tint: Color = Color.White) {
 
 /** Measure at the final text size so the date never overlaps a scaled clock. */
 @Composable
-fun HeckerReferenceClock(onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun HeckerReferenceClock(onClick: () -> Unit, modifier: Modifier = Modifier, textColor: Color = Color.White) {
     val configuration = LocalConfiguration.current
     val locale = configuration.locales[0]
     AndroidView(factory = { android.widget.TextClock(it).apply {
         textSize = 26f
         typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
-        setTextColor(android.graphics.Color.WHITE)
+        setTextColor(textColor.toArgb())
         isSingleLine = true
         gravity = android.view.Gravity.CENTER_VERTICAL
         isClickable = true
         isFocusable = true
         setOnClickListener { onClick() }
     } }, update = {
+        it.setTextColor(textColor.toArgb())
         it.format12Hour = android.text.format.DateFormat.getBestDateTimePattern(locale, "hm")
         it.format24Hour = android.text.format.DateFormat.getBestDateTimePattern(locale, "Hm")
         it.setOnClickListener { onClick() }

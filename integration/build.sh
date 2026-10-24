@@ -26,6 +26,7 @@ if [[ ! -f trusty/vendor/google/aosp/lk_inc.mk || ! -f lk_inc.mk ]] || \
     exit 1
 fi
 floral_setup_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+python3 "$floral_setup_dir/tools/retire_launcher.py"
 python3 "$floral_setup_dir/tools/check_qcom_namespaces.py"
 git -C vendor/google/coral lfs pull
 python3 "$floral_setup_dir/tools/prepare.py" "$@"
@@ -35,17 +36,19 @@ source build/envsetup.sh
 lunch "hecker_coral-hecker_suite-${HECKER_BUILD_VARIANT:-userdebug}"
 floral_product_out="$(get_build_var PRODUCT_OUT)"
 floral_stale_app=false
+mapfile -t floral_retired_apps < "$floral_setup_dir/retired-apps.txt"
 for floral_partition in system system_ext product vendor; do
     for floral_app_type in app priv-app; do
-        for floral_removed_app in Aperture Camera2 OmniJaws; do
+        for floral_removed_app in Aperture Camera2 OmniJaws "${floral_retired_apps[@]}"; do
             if [[ -d "$floral_product_out/$floral_partition/$floral_app_type/$floral_removed_app" ]]; then
                 floral_stale_app=true
             fi
         done
     done
 done
+if find "$floral_product_out"/product/overlay -maxdepth 3 -iname '*HeckerLauncherRecents*' -print -quit 2>/dev/null | read -r; then floral_stale_app=true; fi
 if [[ "$floral_stale_app" == true ]]; then
-    echo "Removing stale camera/weather app installations from build outputs (installclean)."
+    echo "Removing retired app installations from build outputs (installclean)."
     m installclean
 fi
 m -j"${HECKER_BUILD_JOBS:-$(nproc)}" heckeros

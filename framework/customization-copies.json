@@ -86,5 +86,7 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/ThemeIconNames.java": "framework/themes/ThemeIconNames.java",
   "frameworks/base/core/java/android/os/IHeckerGameService.aidl": "framework/gaming/IHeckerGameService.aidl",
   "frameworks/base/services/core/java/com/android/server/hecker/HeckerGameService.java": "framework/gaming/HeckerGameService.java",
-  "frameworks/base/services/core/java/com/android/server/hecker/GameTelemetry.java": "framework/gaming/GameTelemetry.java"
+  "frameworks/base/services/core/java/com/android/server/hecker/GameTelemetry.java": "framework/gaming/GameTelemetry.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAppLockPrompt.java": "framework/applock/HeckerAppLockPrompt.java",
+  "frameworks/base/services/core/java/com/android/server/theme/RetiredThemeSelection.java": "framework/themes/RetiredThemeSelection.java"
 }
