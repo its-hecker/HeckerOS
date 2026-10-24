@@ -206,8 +206,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "feat/game-booster-reference",
-    "integration_branch": "feat/game-booster-reference",
+    "source_branch": "feat/suite-polish",
+    "integration_branch": "feat/suite-polish",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required"
