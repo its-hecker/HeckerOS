@@ -47,6 +47,7 @@ public final class HeckerAppLockPrompt {
         int status, opacity = 255;
         Orbit(Drawable original) { icon = original == null ? null : original.mutate(); }
         void start() {
+            if (!isVisible()) return;
             if (!ValueAnimator.areAnimatorsEnabled() || animator != null || status == 1) { invalidateSelf(); return; }
             animator = ValueAnimator.ofFloat(0f, 1f);
             animator.setDuration(1400); animator.setRepeatCount(ValueAnimator.INFINITE);
