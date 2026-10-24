@@ -18,6 +18,7 @@ from customization_port import customization_plan
 from launcher_port import launcher_plan
 from prepare import replace_guarded
 from privapp_permissions import check_privapp_permissions
+from check_pin_bouncer import PIN_INPUTS, check_pin_bouncer
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -360,7 +361,9 @@ def main():
     parser.add_argument('--launcher-source', type=Path,
                         help='Read the pinned commit directly from an existing launcher Git checkout')
     parser.add_argument('--sdk-cache', type=Path,
-                        help='Also compile the prepared taskbar navigation URI declarations with the locked SDK')
+                        help='Also compile native declarations and exercise PIN entry with locked compilers')
+    parser.add_argument('--kotlin-cache', type=Path, default=ROOT / 'generated/compose-check',
+                        help='Locked Kotlin dependencies for the PIN bouncer regression check')
     args = parser.parse_args()
     sources = json.loads((ROOT / 'integration/source-revisions.json').read_text())['pixelos_inputs']
     launcher = json.loads((ROOT / 'launcher/ORIGIN.json').read_text())
@@ -387,6 +390,7 @@ def main():
         git_sources[revision] = folder
         return folder
     paths = set(json.loads((ROOT / 'framework/customization-patches.json').read_text()))
+    paths.update(PIN_INPUTS)
     paths.add('frameworks/base/core/java/android/content/res/Resources.java')
     paths.add('frameworks/base/core/res/AndroidManifest.xml')
     paths.add('frameworks/base/packages/SystemUI/shared/src/com/android/systemui/shared/plugins/PackageConfig.kt')
@@ -452,6 +456,7 @@ def main():
         check_secure_capture(folder)
         if args.sdk_cache:
             check_clock_plugins(folder, args.sdk_cache.resolve())
+            check_pin_bouncer(folder, args.kotlin_cache.resolve())
         for plan in reversed(plans):
             write(plan(folder, replace_guarded, True))
         assert before == snapshot(folder), 'Revert changed upstream content'

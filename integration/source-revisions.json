@@ -158,7 +158,12 @@
         "packages/SystemUI/src/com/android/systemui/assist/AssistManager.java",
         "packages/SystemUI/compose/features/src/com/android/systemui/qs/footer/ui/compose/FooterActions.kt",
         "packages/SystemUI/src/com/android/systemui/biometrics/ui/binder/BiometricViewBinder.kt",
-        "services/core/java/com/android/server/wm/WindowManagerService.java"
+        "services/core/java/com/android/server/wm/WindowManagerService.java",
+        "packages/SystemUI/src/com/android/systemui/authentication/data/repository/AuthenticationRepository.kt",
+        "packages/SystemUI/src/com/android/systemui/authentication/domain/interactor/AuthenticationInteractor.kt",
+        "packages/SystemUI/src/com/android/systemui/bouncer/ui/viewmodel/PinBouncerViewModel.kt",
+        "packages/SystemUI/src/com/android/systemui/bouncer/ui/viewmodel/AuthMethodBouncerViewModel.kt",
+        "packages/SystemUI/src/com/android/systemui/bouncer/ui/viewmodel/PinInputViewModel.kt"
       ]
     },
     "hardware/google/camera": {

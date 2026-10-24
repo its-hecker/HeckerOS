@@ -57,6 +57,13 @@ recordings of FLAG_SECURE windows. Hardware DRM video may still be blank.
 
 ## Upgrade
 
+The PIN bouncer falls back to explicit confirmation when stored PIN length is
+unavailable or invalid before the first unlock after a reboot. It keeps entered
+digits, shows the confirm button and uses the normal credential verifier. A valid
+length restores the configured auto-confirm behavior. A second guard prevents
+per-digit credential attempts if length becomes unavailable after the UI loads;
+wrong-PIN rejection and lockout handling remain in their existing paths.
+
 Use the companion `HeckerOs-localmanifest` feature branch. Before syncing a
 checkout that contains the retired Hecker Launcher, run its updated
 `tools/retire_launcher.py`. It accepts the known RisingOS and Infinity-X sources,
@@ -72,6 +79,10 @@ Settings UI compiler, integration suite and immutable native adapter checker.
 The native check executes the prepared WindowManager method against default-off,
 user switching and live surface-refresh cases. Theme migration checks verify
 that retained styles, colors and fonts survive and that repeat runs are harmless.
+The PIN regression compiles prepared guard/confirm-flow bodies with the actual
+input state and base bouncer lifecycle. It covers unavailable lengths, repeated
+boot state, metadata refresh, user isolation, wrong PINs and active lockouts using
+fake platform storage and credential verification.
 
 On Coral, verify every page at normal/large font sizes, in both themes and after
 rotation; drag both QS sliders; interrupt/reverse collapse gestures; open a locked
@@ -79,3 +90,5 @@ app and test success, failure, cancellation and credential fallback; test captur
 with the toggle off/on; switch users; plug/unplug the charger; and confirm Pixel
 HOME/Recents after a dirty upgrade and reboot. A complete ROM build, on-device
 visual comparison and these hardware checks have not been performed in this task.
+Also verify correct and wrong PIN entry before the first unlock after reboot,
+with auto-confirm both enabled and disabled.

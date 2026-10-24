@@ -518,5 +518,17 @@
       "old": "        void updateDisableSecureWindows() {\n            if (!SystemProperties.getBoolean(SYSTEM_DEBUGGABLE, false)) {\n                return;\n            }",
       "new": "        void updateDisableSecureWindows() {\n            // Explicit per-user Hecker capture preference; available on release builds too."
     }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/authentication/data/repository/AuthenticationRepository.kt": [
+    {
+      "old": "    override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =\n        refreshingFlow(\n            initialValue =\n                lockPatternUtils.isAutoPinConfirmEnabled(userRepository.getSelectedUserInfo().id),\n            getFreshValue = lockPatternUtils::isAutoPinConfirmEnabled,\n        )",
+      "new": "    override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =\n        refreshingFlow(\n            // PIN length may be unavailable before the first credential unlock after boot.\n            // Keep the explicit confirm button visible until auto-confirm is safe to use.\n            initialValue = false,\n            getFreshValue = { userId ->\n                lockPatternUtils.isAutoPinConfirmEnabled(userId) &&\n                    lockPatternUtils.getPinLength(userId) >= LockPatternUtils.MIN_LOCK_PASSWORD_SIZE\n            },\n        )"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/authentication/domain/interactor/AuthenticationInteractor.kt": [
+    {
+      "old": "            Pin -> inputLength < repository.getPinLength()",
+      "new": "            Pin -> {\n                val pinLength = repository.getPinLength()\n                // Unknown PIN length must never turn each digit into a credential attempt.\n                // The caller still permits explicit confirmation through the normal verifier.\n                pinLength < repository.minPasswordLength || inputLength < pinLength\n            }"
+    }
   ]
 }
