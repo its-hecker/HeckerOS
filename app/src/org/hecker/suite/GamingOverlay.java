@@ -188,7 +188,7 @@ final class GamingOverlay {
         shell.setBackground(GamingBoosterUi.glass(c,0xc90b101b,20));
         shell.setPadding(dp(10),dp(10),dp(10),dp(8));
         shell.setElevation(dp(10)); shell.setFocusableInTouchMode(true);
-        content=new ScrollView(c); content.setFillViewport(false); content.setVerticalScrollBarEnabled(false);
+        content=new ScrollView(c); content.setFillViewport(false); content.setVerticalScrollBarEnabled(true); content.setScrollbarFadingEnabled(false); content.setVerticalFadingEdgeEnabled(true); content.setFadingEdgeLength(dp(16));
         shell.addView(content,new LinearLayout.LayoutParams(-1,0,1));
         showPage(); buildDock(shell);
         WindowManager.LayoutParams p=params(dp(bounds.width),dp(bounds.height),true);
@@ -215,23 +215,25 @@ final class GamingOverlay {
         v.setOnClickListener(w -> action.run()); return v;
     }
     private void buildTools(LinearLayout main) {
+        Rect bounds = wm.getCurrentWindowMetrics().getBounds();
+        if (bounds.width() > bounds.height()) { buildCompactTools(main); return; }
         FrameLayout header=new FrameLayout(c);
         header.addView(new GamingBoosterUi.Rings(c,actions.gameMode()),new FrameLayout.LayoutParams(-1,-1));
         LinearLayout top=GamingUi.row(c);top.setPadding(dp(10),dp(8),dp(10),0);
         cpuBar=new GamingBoosterUi.LoadBar(c,"CPU",actions.gameMode());
         top.addView(cpuBar,new LinearLayout.LayoutParams(dp(24),dp(55)));
-        LinearLayout frames=metric("FPS",fps,27);fpsText=(TextView)frames.getChildAt(1);
+        LinearLayout frames=metric("FPS",fps,22);fpsText=(TextView)frames.getChildAt(1);
         top.addView(frames,new LinearLayout.LayoutParams(0,dp(58),1));
         ImageView game=new ImageView(c);game.setImageDrawable(actions.gameIcon());game.setContentDescription(actions.gameLabel());
         top.addView(game,new LinearLayout.LayoutParams(dp(48),dp(48)));
-        LinearLayout memory=metric("RAM",number(ram),27);ramText=(TextView)memory.getChildAt(1);
+        LinearLayout memory=metric("RAM",number(ram),22);ramText=(TextView)memory.getChildAt(1);
         top.addView(memory,new LinearLayout.LayoutParams(0,dp(58),1));
         gpuBar=new GamingBoosterUi.LoadBar(c,"GPU",actions.gameMode());top.addView(gpuBar,new LinearLayout.LayoutParams(dp(24),dp(55)));
-        header.addView(top,new FrameLayout.LayoutParams(-1,dp(70),Gravity.TOP));
+        header.addView(top,new FrameLayout.LayoutParams(-1,dp(60),Gravity.TOP));
         LinearLayout modes=GamingUi.row(c);modes.setPadding(dp(6),0,dp(6),dp(8));
         mode(modes,R.string.gaming_performance,2);mode(modes,R.string.gaming_balanced,1);mode(modes,R.string.gaming_battery_saver,3);
         header.addView(modes,new FrameLayout.LayoutParams(-1,dp(45),Gravity.BOTTOM));
-        main.addView(header,new LinearLayout.LayoutParams(-1,dp(118)));GamingUi.gap(main,12);
+        main.addView(header,new LinearLayout.LayoutParams(-1,dp(102)));GamingUi.gap(main,12);
         actionRow(main,R.string.gaming_game_mode,pref("focus"),actions::focus,R.string.gaming_screenshot,false,actions::screenshot);
         LinearLayout record=GamingUi.row(c);
         recordText=tile(record,GamingRecordingService.recording?R.string.gaming_stop_record:R.string.gaming_record,GamingRecordingService.recording,actions::record);
@@ -248,6 +250,46 @@ final class GamingOverlay {
         actionRow(main,R.string.gaming_block_assistant,pref("block_assistant"),()->actions.toggle("block_assistant"),
                 R.string.gaming_floating_menu,GamingPrefs.get(c).getBoolean("fps",true),()->actions.toggle("fps"));
         actionRow(main,R.string.gaming_system_monitor,false,()->{page=2;showPage();},R.string.gaming_booster_settings,false,()->{page=1;showPage();});
+    }
+    private void buildCompactTools(LinearLayout main) {
+        LinearLayout metrics = GamingUi.row(c);
+        LinearLayout frames = metric("FPS", fps, 20); fpsText = (TextView) frames.getChildAt(1);
+        metrics.addView(frames, new LinearLayout.LayoutParams(0, dp(44), 1));
+        ImageView game = new ImageView(c); game.setImageDrawable(actions.gameIcon()); game.setContentDescription(actions.gameLabel());
+        metrics.addView(game, new LinearLayout.LayoutParams(dp(32), dp(32)));
+        LinearLayout memory = metric("RAM", number(ram), 20); ramText = (TextView) memory.getChildAt(1);
+        metrics.addView(memory, new LinearLayout.LayoutParams(0, dp(44), 1)); main.addView(metrics);
+        LinearLayout modes = GamingUi.row(c);
+        mode(modes, R.string.gaming_performance, 2); mode(modes, R.string.gaming_balanced, 1); mode(modes, R.string.gaming_battery_saver, 3);
+        main.addView(modes, new LinearLayout.LayoutParams(-1, dp(44)));
+        LinearLayout first = GamingUi.row(c);
+        tile(first, R.string.gaming_game_mode, pref("focus"), actions::focus);
+        tile(first, R.string.gaming_screenshot, false, actions::screenshot);
+        recordText = tile(first, GamingRecordingService.recording ? R.string.gaming_stop_record : R.string.gaming_record, GamingRecordingService.recording, actions::record);
+        tile(first, R.string.gaming_block_navigation, pref("block_navigation"), () -> actions.toggle("block_navigation"));
+        compactRow(main, first);
+        LinearLayout second = GamingUi.row(c);
+        tile(second, R.string.gaming_block_edge, pref("block_edge"), () -> actions.toggle("block_edge"));
+        tile(second, R.string.gaming_block_brightness, pref("block_brightness"), () -> actions.toggle("block_brightness"));
+        tile(second, R.string.gaming_block_assistant, pref("block_assistant"), () -> actions.toggle("block_assistant"));
+        tile(second, R.string.gaming_floating_menu, GamingPrefs.get(c).getBoolean("fps", true), () -> actions.toggle("fps"));
+        compactRow(main, second);
+        AudioManager audio = c.getSystemService(AudioManager.class);
+        LinearLayout sliders = GamingUi.row(c);
+        brightnessSlider = new GamingBoosterUi.GlassSlider(c, "sun", c.getString(R.string.gaming_brightness), 0, 255, actions.brightnessLevel(), value -> actions.brightness(Math.max(.01f, value / 255f)));
+        volumeSlider = new GamingBoosterUi.GlassSlider(c, "volume", c.getString(R.string.gaming_volume), audio.getStreamMinVolume(AudioManager.STREAM_MUSIC), audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC), audio.getStreamVolume(AudioManager.STREAM_MUSIC), value -> audio.setStreamVolume(AudioManager.STREAM_MUSIC, value, 0));
+        for (View slider : new View[] { brightnessSlider, volumeSlider }) {
+            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, dp(44), 1); p.setMargins(dp(3), dp(3), dp(3), dp(3)); sliders.addView(slider, p);
+        }
+        main.addView(sliders);
+        LinearLayout last = GamingUi.row(c);
+        tile(last, R.string.gaming_system_monitor, false, () -> { page = 2; showPage(); });
+        tile(last, R.string.gaming_booster_settings, false, () -> { page = 1; showPage(); });
+        compactRow(main, last);
+    }
+    private void compactRow(LinearLayout main, LinearLayout row) {
+        for (int i = 0; i < row.getChildCount(); i++) ((TextView) row.getChildAt(i)).setTextSize(10);
+        main.addView(row); GamingUi.gap(main, 3);
     }
     private boolean pref(String key){return GamingPrefs.get(c).getBoolean(key,false);}
     private String number(int value){return value<0?"—":Integer.toString(value);}
@@ -285,7 +327,7 @@ final class GamingOverlay {
         row.addView(iconButton("close",R.string.gaming_close_dashboard,this::closePanel),new LinearLayout.LayoutParams(dp(36),dp(44)));main.addView(row);GamingUi.gap(main,10);
     }
     private int bypassMessage(int state){
-        return state<0?R.string.gaming_bypass_unsupported:state==1?R.string.gaming_bypass_active:state==2?R.string.gaming_bypass_connect:
+        return state<0?R.string.gaming_bypass_missing:state==5?R.string.gaming_bypass_permission:state==1?R.string.gaming_bypass_active:state==2?R.string.gaming_bypass_connect:
                 state==3?R.string.gaming_bypass_battery:state==4?R.string.gaming_bypass_error:R.string.gaming_bypass_ready;
     }
     private void buildSettings(LinearLayout main){
@@ -295,7 +337,7 @@ final class GamingOverlay {
         int state=actions.bypassState();bypassText=GamingUi.text(c,c.getString(bypassMessage(state)),12,GamingBoosterUi.MUTED,false);charging.addView(bypassText);GamingUi.gap(charging,12);
         LinearLayout options=GamingUi.row(c);
         tile(options,R.string.gaming_bypass_off,!pref("bypass"),()->{if(pref("bypass"))actions.toggle("bypass");});
-        TextView on=tile(options,R.string.gaming_bypass_on,pref("bypass"),()->{if(!pref("bypass"))actions.toggle("bypass");});on.setEnabled(state!=-1);on.setAlpha(state==-1?.4f:1f);charging.addView(options);main.addView(charging);
+        TextView on=tile(options,R.string.gaming_bypass_on,pref("bypass"),()->{if(!pref("bypass"))actions.toggle("bypass");});on.setEnabled(state>=0&&state!=5);on.setAlpha(state<0||state==5?.4f:1f);charging.addView(options);main.addView(charging);
         GamingUi.gap(main,12);main.addView(GamingUi.button(c,c.getString(R.string.gaming_open_library),false,()->{closePanel();actions.gameSpace();}));
     }
     private void buildMonitor(LinearLayout main){

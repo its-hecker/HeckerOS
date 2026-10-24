@@ -51,7 +51,9 @@ public final class SuiteActivity extends Activity {
         about = Ui.button(this); about.setText(R.string.tab_about);
         tabs.addView(customizations,new LinearLayout.LayoutParams(0,-2,1)); tabs.addView(about,new LinearLayout.LayoutParams(0,-2,1));
         customizations.setOnClickListener(v->showTab(false)); about.setOnClickListener(v->showTab(true)); page.addView(tabs);
-        content = new LinearLayout(this); content.setOrientation(LinearLayout.VERTICAL); page.addView(content); showTab(showingAbout);
+        content = new LinearLayout(this); content.setOrientation(LinearLayout.VERTICAL);
+        content.setPadding(0, Ui.dp(this, 16), 0, 0);
+        page.addView(content, new LinearLayout.LayoutParams(-1, -2)); showTab(showingAbout);
         Ui.scroll(this,page);
     }
     private void showTab(boolean selectedAbout) {
@@ -90,7 +92,7 @@ public final class SuiteActivity extends Activity {
     }
     private void addRow(LinearLayout left,LinearLayout right) {
         LinearLayout row=new LinearLayout(this);row.setBaselineAligned(false);
-        LinearLayout.LayoutParams a=new LinearLayout.LayoutParams(0,-1,1),b=new LinearLayout.LayoutParams(0,-1,1);
+        LinearLayout.LayoutParams a=new LinearLayout.LayoutParams(0,-2,1),b=new LinearLayout.LayoutParams(0,-2,1);
         a.setMarginEnd(Ui.dp(this,5));b.setMarginStart(Ui.dp(this,5));a.bottomMargin=b.bottomMargin=Ui.dp(this,10);
         row.addView(left,a);row.addView(right,b);content.addView(row);
     }

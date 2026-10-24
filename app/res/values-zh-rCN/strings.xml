@@ -128,7 +128,7 @@
     <string name="lyrics_title">锁屏歌词</string>
     <string name="lyrics_summary">跟随音乐，逐行显示歌词。</string>
     <string name="lyrics_enable">显示同步歌词</string>
-    <string name="lyrics_description">在锁屏音乐播放器下方显示三行歌词，并跟随播放和进度调整。启用后，会将歌曲名和歌手发送到 LRCLIB 查找歌词。需要联网，息屏显示时隐藏。</string>
+    <string name="lyrics_description">在底部锁图标上方显示同步歌词，息屏显示时以较暗的文字显示当前一句。启用后，会将歌曲名和歌手发送到 LRCLIB 查找歌词，需要联网。</string>
     <string name="lyrics_source">改编自 Project Infinity X。歌词可用性取决于 LRCLIB 及音乐应用提供的信息。纯音乐或没有匹配同步歌词的歌曲将不显示歌词。</string>
     <string name="lyrics_unavailable">此版本暂时无法更新此设置。</string>
     <string name="launcher_title">启动器</string>

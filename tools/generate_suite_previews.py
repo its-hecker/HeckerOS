@@ -26,10 +26,15 @@ def generate():
                 for x in (-48,-16,16,48):s+=[group(circle(x,y,18,white if x<0 else violet))]
             for y in (48,67):s+=[group(rect(0,y,116,12,white,6)),group(rect(-24,y,68,12,cyan,6))]
         else:
-            s+=[group(rect(-29,-28,66,67,violet,16)),group(rect(-29,25,66,26,cyan))]
-            for x in (21,49):s+=[group(rect(x,-18,18,90,white,9)),group(rect(x,0,18,54,cyan if x==21 else violet,9))]
-            for x in (-48,-16,16,48):s+=[group(circle(x,57,18,white))]
+            s += [group(rect(-34,-39,59,60,navy,14)),group(rect(34,-39,59,60,violet,14))]
+            for x,y,c in [(-48,-52,cyan),(-20,-52,white),(-48,-24,cyan),(-20,-24,violet)]:s += [group(circle(x,y,19,c))]
+            s += [group(rect(28,-51,24,20,cyan,5)),group(line([[23,-20],[35,-20]],white,3))]
+            for x in (22,52):s += [group(rect(x,23,21,62,white,10)),group(rect(x,7,21,30,cyan if x==22 else violet,10))]
+            s += [group(circle(-49,8,24,white)),group(circle(-17,8,24,cyan)),group(rect(-34,40,57,23,violet,11))]
+            for x in (-48,-16,16,48):s += [group(circle(x,69,18,white))]
         write('qs_'+kind,s)
+    game = [group(rect(0,8,128,76,navy,28)),group(line([[-42,8],[-16,8]],cyan,7)),group(line([[-29,-5],[-29,21]],cyan,7)),group(circle(31,-2,12,violet)),group(circle(46,16,12,cyan)),group(circle(0,35,6,white))]
+    write('gaming',game,[layer(2,[group(circle(66,-52,7,cyan)),group(circle(-66,52,7,violet))],rotate=True)])
     lock=[group(rect(0,10,80,64,navy,20)),group(line([[-21,-12],[-21,-37],[0,-49],[21,-37],[21,-12]],cyan,7)),group(circle(0,8,12,violet)),group(rect(0,20,5,19,violet,3))]
     write('lock',lock,[layer(2,[group(circle(68,-48,7,cyan)),group(circle(-68,48,7,violet))],rotate=True)])
     status=[]

@@ -15,18 +15,21 @@
     "3597785e7cf6ee82b1955bae13f229b79fd1a877",
     "f4665d784b337119aba7878dd6078c27fb57b5c5",
     "7f5e89dc71c622e9200e6a55035a3774e8266249",
-    "7c374e655ce6b0bf50ebaefc34ccd91739cedec2"
+    "7c374e655ce6b0bf50ebaefc34ccd91739cedec2",
+    "88ecbf6e4cb6319a468b363e2ce4098b3fd12ec2"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerBattery.kt": [
     "006348861f13e89e4a0c1be873e91c8f8e8d50fc"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerBatteryDrawable.java": [
-    "896bb6fead26af0fe224d311886fe736f11d2d03"
+    "896bb6fead26af0fe224d311886fe736f11d2d03",
+    "2c67840f2a4ea6d338ae9d754426190a8864550b"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerThemeAssets.kt": [
     "3c28bc60f5b84e5ad9625291968218c65467a780",
     "e83a340e15b476661004a985bfed94e5481f659b",
-    "126c892479b64ccc43843e1fda0c1e3c2b30dda2"
+    "126c892479b64ccc43843e1fda0c1e3c2b30dda2",
+    "b189d691f2f2796c676bb3642e64f3e560b61856"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerChargingAnimation.kt": [
     "dd677705deee6dc099e9cb2e18f4004fbed80dbd",
@@ -47,7 +50,8 @@
   "frameworks/base/packages/SystemUI/res/values/hecker_strings.xml": [
     "9f0cc01563b91a8b5f56ba385a4d0d287a199598",
     "134715be21814cc5e6726f0fa1e2e88a6fbf737a",
-    "3f932e3c57f01689f1c4c105d71af68df0ad1116"
+    "3f932e3c57f01689f1c4c105d71af68df0ad1116",
+    "b8c068150ce24a56a275df451d271bd4cf22634f"
   ],
   "packages/apps/Settings/src/com/android/settings/hecker/HeckerBrandPreference.java": [
     "6f5ddd26068e7b517bc83b72189993087b28fc86"
@@ -131,17 +135,20 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerReferenceQuickSettings.kt": [
     "6982be2b0dd15c000a30fee4d44faabba5e210d3",
     "0b09ad6e27030aeef88c733ab68393dbf6b6c974",
-    "268841ac035788cde44b5a586e099ab3d5f08ce5"
+    "268841ac035788cde44b5a586e099ab3d5f08ce5",
+    "2d9591b6658e4ca24d743d58caf821fba70ae96f"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsScene.kt": [
     "8f4bca91cc5e8d5cc0e34f9400270cf0c4cb0ac1"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAppLockPrompt.java": [
-    "d305f4c5bea66831588683b5e5622c40a4fceb20"
+    "d305f4c5bea66831588683b5e5622c40a4fceb20",
+    "5b8aeda3e162095793fd55b8f3bdce62e6d589c0"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsActions.kt": [
     "f24bd2d7d77a57affc18d8944ad1af045f1d76ad",
-    "f9922202306d54f47f5063becc6bca845788dac8"
+    "f9922202306d54f47f5063becc6bca845788dac8",
+    "d5d47d363c5e035a9b40e4b35b2e73d0ba2a310f"
   ],
   "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_bluetooth.xml": [
     "1e62f74248882595a9cdf304ca6d659d5d2b370e"
@@ -156,13 +163,21 @@
     "6f85e3b8f2aa2772a38e3a2e2be8ce99692087dd"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerOsloOverlayHost.java": [
-    "74c24cebc2ca7542343b1d03eb90f66e9fc6119d"
+    "74c24cebc2ca7542343b1d03eb90f66e9fc6119d",
+    "ca0f0041a99b820f3b491a7ed9b5029848ac6338"
   ],
   "frameworks/base/services/core/java/com/android/server/am/HeckerMemoryPolicy.java": [
     "1edde411f5a743f23e1b59c084f62f5848fc3ab2"
   ],
   "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_strings.xml": [
     "d086944d48156bce7c4bbcf46e806f1eba761b25",
-    "450cd45078a425f50db219059adbc2fefcc6d9e8"
+    "450cd45078a425f50db219059adbc2fefcc6d9e8",
+    "a934e28c584934d82c0638ee48121106f6c33188"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsMedia.java": [
+    "305001f4caeae8be8b9c99e895e0f97843daf364"
+  ],
+  "frameworks/base/services/core/java/com/android/server/hecker/HeckerGameService.java": [
+    "4ac29633cb0d964407cdd5122e3af935b80f06b1"
   ]
 }

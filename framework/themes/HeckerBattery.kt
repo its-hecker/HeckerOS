@@ -9,6 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.layout.layout
+import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import com.android.systemui.statusbar.pipeline.battery.shared.ui.BatteryColors
@@ -24,7 +26,17 @@ fun HeckerBattery(viewModel: BatteryViewModel, colors: () -> BatteryColors,
     val drawable = remember(context, generation) { HeckerBatteryDrawable.create(context) } ?: return false
     val level = viewModel.level ?: return false
     if (viewModel.attribution == BatteryGlyph.Defend || viewModel.attribution == BatteryGlyph.Question) return false
-    Canvas(modifier = modifier.aspectRatio(drawable.intrinsicWidth.toFloat() / drawable.intrinsicHeight),
+    Canvas(modifier = Modifier.layout { measurable, constraints ->
+        val child = measurable.measure(constraints)
+        val scale = HeckerBatteryDrawable.scale(context)
+        val width = (child.width * scale).roundToInt()
+        val height = (child.height * scale).roundToInt()
+        layout(width, height) {
+            child.placeRelativeWithLayer((width - child.width) / 2, (height - child.height) / 2) {
+                scaleX = scale; scaleY = scale
+            }
+        }
+    }.then(modifier).aspectRatio(drawable.intrinsicWidth.toFloat() / drawable.intrinsicHeight),
         contentDescription = contentDescription) {
         drawable.update(level, viewModel.isCharging, viewModel.attribution == BatteryGlyph.Plus,
             viewModel.glyphList.isNotEmpty(), colors().fill.toArgb())

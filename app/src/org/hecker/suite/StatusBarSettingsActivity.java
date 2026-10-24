@@ -11,6 +11,29 @@ public final class StatusBarSettingsActivity extends Activity {
         Ui.hero(this, page, R.raw.suite_status, R.string.status_styles_summary);
         Ui.actionCard(this,page,R.string.theme_wifi,R.string.wifi_theme_summary,v->SuitePages.theme(this,1));
         Ui.actionCard(this,page,R.string.theme_battery,R.string.battery_theme_summary,v->SuitePages.theme(this,3));
+        LinearLayout battery = Ui.card(this);
+        battery.addView(Ui.text(this, getString(R.string.battery_appearance_title), 18, true));
+        android.widget.Switch colors = new android.widget.Switch(this);
+        colors.setText(R.string.battery_colors_title); colors.setTextColor(getColor(R.color.hecker_foreground));
+        colors.setMinHeight(Ui.dp(this, 48));
+        colors.setChecked(android.provider.Settings.Secure.getInt(getContentResolver(), "hecker_battery_colors", 1) != 0);
+        colors.setOnCheckedChangeListener((view, checked) -> android.provider.Settings.Secure.putInt(getContentResolver(), "hecker_battery_colors", checked ? 1 : 0));
+        battery.addView(colors);
+        android.widget.TextView size = Ui.text(this, "", 14, false);
+        int current = Math.max(80, Math.min(140, android.provider.Settings.Secure.getInt(getContentResolver(), "hecker_battery_scale", 100)));
+        size.setText(getString(R.string.battery_size_value, current)); battery.addView(size);
+        android.widget.SeekBar scale = new android.widget.SeekBar(this); scale.setMax(12); scale.setProgress((current - 80) / 5);
+        scale.setContentDescription(getString(R.string.battery_size_title));
+        scale.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+            public void onProgressChanged(android.widget.SeekBar bar, int progress, boolean user) {
+                int percent = 80 + progress * 5;
+                size.setText(getString(R.string.battery_size_value, percent));
+                if (user) android.provider.Settings.Secure.putInt(getContentResolver(), "hecker_battery_scale", percent);
+            }
+            public void onStartTrackingTouch(android.widget.SeekBar bar) {}
+            public void onStopTrackingTouch(android.widget.SeekBar bar) {}
+        });
+        battery.addView(scale); page.addView(battery);
         android.widget.Switch popup=new android.widget.Switch(this);
         popup.setText(R.string.status_popup_title);popup.setTextColor(getColor(R.color.hecker_foreground));
         popup.setChecked(android.provider.Settings.Secure.getInt(getContentResolver(),"hecker_status_popup",1)!=0);

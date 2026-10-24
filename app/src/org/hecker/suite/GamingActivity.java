@@ -68,6 +68,7 @@ public final class GamingActivity extends Activity implements SharedPreferences.
     private TextView title(int string){return GamingUi.text(this,getString(string),22,GamingUi.TEXT,true);}
     private void render(){
         int request=++generation;
+        getWindow().setDecorFitsSystemWindows(false);
         LinearLayout root=GamingUi.column(this);root.setBackgroundColor(GamingUi.BG);
         int pad=GamingUi.dp(this,20);
         root.setOnApplyWindowInsetsListener((v,insets)->{
@@ -83,9 +84,21 @@ public final class GamingActivity extends Activity implements SharedPreferences.
         LinearLayout nav=GamingUi.row(this);nav.setPadding(pad,GamingUi.dp(this,8),pad,GamingUi.dp(this,8));
         String[] names={"games","tools","style"};int[] labels={R.string.gaming_games,R.string.gaming_tools,R.string.gaming_style};
         for(int i=0;i<3;i++){String name=names[i];TextView button=GamingUi.button(this,getString(labels[i]),tab.equals(name),()->{tab=name;render();});LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,-2,1);lp.setMargins(3,0,3,0);nav.addView(button,lp);}
-        root.addView(nav);setContentView(root);
+        root.addView(nav);setContentView(root);root.post(root::requestApplyInsets);
     }
     private void games(int request){
+        LinearLayout intro = GamingUi.card(this);
+        LinearLayout introRow = GamingUi.row(this);
+        LinearLayout art = GamingUi.column(this); new SuiteAnimation(this, art, 104).show(R.raw.suite_gaming, true);
+        introRow.addView(art);
+        LinearLayout copy = GamingUi.column(this);
+        copy.addView(GamingUi.text(this, getString(R.string.gaming_hero_title), 23, GamingUi.TEXT, true));
+        copy.addView(GamingUi.text(this, getString(R.string.gaming_hero_summary), 13, GamingUi.MUTED, false));
+        introRow.addView(copy, new LinearLayout.LayoutParams(0, -2, 1)); intro.addView(introRow);
+        TextView state = GamingUi.text(this, getString(GamingPrefs.enabled(this) ? R.string.gaming_enabled : R.string.gaming_ready), 12, GamingUi.accent(this), true);
+        intro.addView(state);
+        intro.addView(GamingUi.text(this, getString(R.string.gaming_profile_fallback), 11, GamingUi.MUTED, false));
+        page.addView(intro);
         library=GamingUi.column(this);
         library.addView(GamingUi.text(this,getString(R.string.gaming_loading),14,GamingUi.MUTED,false));
         page.addView(library);
@@ -150,9 +163,9 @@ public final class GamingActivity extends Activity implements SharedPreferences.
     private View gameCard(GamingCatalog.App app){
         FrameLayout hero=new FrameLayout(this);
         hero.addView(new GamingUi.Banner(this,app.info.loadIcon(getPackageManager()),true),
-                new FrameLayout.LayoutParams(-1,GamingUi.dp(this,300)));
+                new FrameLayout.LayoutParams(-1,GamingUi.dp(this,226)));
         LinearLayout heading=GamingUi.column(this);heading.setPadding(GamingUi.dp(this,20),GamingUi.dp(this,24),GamingUi.dp(this,20),0);
-        TextView name=GamingUi.text(this,app.label,26,GamingUi.TEXT,true);name.setAllCaps(true);name.setMaxLines(3);
+        TextView name=GamingUi.text(this,app.label,23,GamingUi.TEXT,true);name.setAllCaps(false);name.setMaxLines(3);
         name.setEllipsize(android.text.TextUtils.TruncateAt.END);heading.addView(name);GamingUi.gap(heading,9);
         heading.addView(GamingUi.text(this,getString(GamingPrefs.enabled(this)?R.string.gaming_enabled:R.string.gaming_ready),12,GamingUi.accent(this),true));
         hero.addView(heading,new FrameLayout.LayoutParams(-1,-2,Gravity.TOP));

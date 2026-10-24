@@ -93,7 +93,11 @@ fun HeckerTileGrid(
     brightness: (@Composable () -> Unit)? = null,
     includeFooter: Boolean = true,
 ) {
-    if (compact && !heckerCustomizedLayout()) {
+    if (!compact && heckerCustomizedLayout()) {
+        HeckerGlassQuickSettings(tiles, listening, brightness, modifier)
+        return
+    }
+    if (compact) {
         HeckerReferenceCompact(tiles, listening, modifier)
         return
     }
@@ -278,7 +282,7 @@ fun HeckerVolumeSlider() {
             catch (_: SecurityException) { }
             volume = audio.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat()
         }, onValueChangeFinished = { dragging = false },
-        modifier = Modifier.fillMaxWidth().height(56.dp).semantics {
+        modifier = Modifier.fillMaxWidth().height(64.dp).semantics {
             contentDescription = context.getString(com.android.systemui.res.R.string.hecker_media_volume)
         }, thumb = {}, track = { _ ->
             HeckerGlassTrack(((volume - minimum) / (maximum - minimum).coerceAtLeast(1f)),
@@ -327,7 +331,7 @@ fun HeckerHeaderActions(viewModel: com.android.systemui.qs.footer.ui.viewmodel.F
     val context = LocalContext.current
     val settings by viewModel.settings.collectAsState(initial = null)
     val reference = !heckerCustomizedLayout()
-    val tint = if (reference) android.graphics.Color.WHITE else MaterialThemeColor.primaryText(context)
+    val tint = android.graphics.Color.WHITE
     Row(verticalAlignment = Alignment.CenterVertically) {
         androidx.compose.material3.IconButton(onClick = edit, modifier = Modifier.size(36.dp)) {
             AndroidView(factory = { ImageView(it) },

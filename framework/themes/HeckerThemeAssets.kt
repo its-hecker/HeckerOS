@@ -43,6 +43,12 @@ object HeckerThemeAssets {
             object : ContentObserver(Handler(Looper.getMainLooper())) {
                 override fun onChange(selfChange: Boolean) { reload(app) }
             }, UserHandle.USER_ALL)
+        for (key in listOf("hecker_battery_colors", "hecker_battery_scale")) {
+            app.contentResolver.registerContentObserver(Settings.Secure.getUriFor(key), false,
+                object : ContentObserver(Handler(Looper.getMainLooper())) {
+                    override fun onChange(selfChange: Boolean) { reload(app) }
+                }, UserHandle.USER_ALL)
+        }
         app.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) { reload(app) }
         }, IntentFilter(Intent.ACTION_USER_SWITCHED), Context.RECEIVER_NOT_EXPORTED)

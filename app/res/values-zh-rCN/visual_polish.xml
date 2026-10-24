@@ -1,0 +1,11 @@
+<resources>
+    <string name="battery_appearance_title">电池外观</string>
+    <string name="battery_colors_title">根据电量变色</string>
+    <string name="battery_size_title">电池图标大小</string>
+    <string name="battery_size_value">图标大小 · %1$d%%</string>
+    <string name="gaming_hero_title">进入你的主场。</string>
+    <string name="gaming_hero_summary">专属游戏空间，调整体验，保持专注。</string>
+    <string name="gaming_profile_fallback" formatted="false">ROM 性能模式在原生分辨率下最高 90 FPS；省电模式在允许时使用 30 FPS 和 80% 渲染比例。游戏自身可能有更低的限制。</string>
+    <string name="gaming_bypass_permission">已找到充电控制，但无法访问。更新 ROM 后请重启。</string>
+    <string name="gaming_bypass_missing">暂停充电需要 HeckerOS Coral 内核。</string>
+</resources>

@@ -42,12 +42,19 @@ public final class HeckerOsloOverlayHost {
     public static OverlayPlugin.Callback callbackFor(OverlayPlugin plugin, OverlayPlugin.Callback callback) {
         Host host = HOSTS.get(plugin);
         if (host == null) return callback;
+        host.nativeCallback = callback;
         return () -> {
             if (host.destroyed) return;
             host.refresh();
-            // Preserve native collapse, icon restoration and input-minimizer behavior.
+            // The native callback queries holdsNativeShade(), so an unlocked
+            // feedback surface cannot expand the notification/keyguard window.
             callback.onHoldStatusBarOpenChange();
         };
+    }
+
+    public static boolean holdsNativeShade(OverlayPlugin plugin) {
+        Host host = HOSTS.get(plugin);
+        return plugin.holdStatusBarOpen() && (host == null || host.keyguard.isShowing());
     }
 
     public static void disconnect(OverlayPlugin plugin) {
@@ -64,8 +71,13 @@ public final class HeckerOsloOverlayHost {
         final Handler handler = new Handler(Looper.getMainLooper());
         boolean detached;
         volatile boolean destroyed;
+        OverlayPlugin.Callback nativeCallback;
         final KeyguardStateController.Callback callback = new KeyguardStateController.Callback() {
-            @Override public void onKeyguardShowingChanged() { refresh(); }
+            @Override public void onKeyguardShowingChanged() {
+                refresh();
+                // Release a hold acquired on the lock screen as soon as it unlocks.
+                if (nativeCallback != null) nativeCallback.onHoldStatusBarOpenChange();
+            }
         };
 
         Host(OverlayPlugin plugin, ViewGroup original, KeyguardStateController keyguard) {

@@ -18,8 +18,8 @@ import android.widget.TextView;
 import java.util.ArrayDeque;
 
 final class GamingUi {
-    static final int BG = 0xff111116, CARD = 0xff25252e, TEXT = 0xfff3f3f6, MUTED = 0xffa7a7b5;
-    static int accent(Context c) { return GamingPrefs.get(c).getInt("accent", 0xffff334b); }
+    static final int BG = 0xff0c1321, CARD = 0xff19263a, TEXT = 0xfff3f3f6, MUTED = 0xffa7a7b5;
+    static int accent(Context c) { return GamingPrefs.get(c).getInt("accent", 0xff8fdcff); }
     static int dp(Context c, float v) { return Math.round(v * c.getResources().getDisplayMetrics().density); }
     static GradientDrawable background(Context c, int color, int radius, boolean outline) {
         GradientDrawable d = new GradientDrawable(); d.setColor(color); d.setCornerRadius(dp(c, radius));

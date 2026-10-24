@@ -37,7 +37,13 @@ final class SuiteAnimation {
 
     private static final class AutoAnimationView extends LottieAnimationView {
         boolean active;
-        AutoAnimationView(Activity activity) { super(activity); }
+        AutoAnimationView(Activity activity) {
+            super(activity);
+            setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
+            // Composition loading is asynchronous. Attachment can precede it,
+            // especially for the two previews in the QS picker.
+            addLottieOnCompositionLoadedListener(composition -> post(this::resumeIfVisible));
+        }
         void resumeIfVisible() {
             if (!active) return;
             if (!ValueAnimator.areAnimatorsEnabled()) { setProgress(0.5f); return; }
@@ -48,6 +54,10 @@ final class SuiteAnimation {
         @Override protected void onWindowVisibilityChanged(int visibility) {
             super.onWindowVisibilityChanged(visibility);
             if (visibility == VISIBLE) resumeIfVisible(); else pauseAnimation();
+        }
+        @Override protected void onVisibilityChanged(android.view.View changedView, int visibility) {
+            super.onVisibilityChanged(changedView, visibility);
+            if (visibility == VISIBLE) post(this::resumeIfVisible); else pauseAnimation();
         }
     }
 }

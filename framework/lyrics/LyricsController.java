@@ -38,7 +38,7 @@ import java.util.function.Consumer;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-/** Exists only while the non-dozing lock-screen media element is composed. */
+/** Current-user lyrics while the lock-screen root is composed, including ambient display. */
 public final class LyricsController implements AutoCloseable {
     public static final String SETTING = "hecker_lockscreen_lyrics";
     public static final class Snapshot {

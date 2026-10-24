@@ -16,7 +16,28 @@ import android.widget.ImageView;
 public final class HeckerAppLockPrompt {
     private static final java.util.WeakHashMap<ImageView, Orbit> ACTIVE = new java.util.WeakHashMap<>();
     private HeckerAppLockPrompt() {}
-    public static void bind(ImageView logo) {
+    public static boolean isSuitePrompt(android.content.Context context, String title, String subtitle) {
+        try {
+            android.content.res.Resources res = context.getPackageManager().getResourcesForApplication("org.hecker.suite");
+            int id = res.getIdentifier("authenticate_title", "string", "org.hecker.suite");
+            int detail = res.getIdentifier("authenticate_subtitle", "string", "org.hecker.suite");
+            return id != 0 && detail != 0 && res.getString(id).equals(title) && res.getString(detail).equals(subtitle);
+        } catch (android.content.pm.PackageManager.NameNotFoundException unavailable) { return false; }
+    }
+    public static void bind(ImageView logo, ImageView sensor) {
+        bindLogo(logo);
+        Orbit old = ACTIVE.remove(sensor);
+        if (old != null) { old.stop(); sensor.removeOnAttachStateChangeListener(old.listener); }
+        Orbit ring = new Orbit(null);
+        ring.listener = new View.OnAttachStateChangeListener() {
+            public void onViewAttachedToWindow(View v) { ring.start(); }
+            public void onViewDetachedFromWindow(View v) { ring.stop(); }
+        };
+        ACTIVE.put(sensor, ring); sensor.setForeground(ring);
+        sensor.addOnAttachStateChangeListener(ring.listener);
+        if (sensor.isAttachedToWindow()) ring.start();
+    }
+    private static void bindLogo(ImageView logo) {
         Orbit old = ACTIVE.remove(logo);
         if (old != null) { old.stop(); logo.removeOnAttachStateChangeListener(old.listener); }
         Orbit art = new Orbit(logo.getDrawable());
@@ -35,7 +56,9 @@ public final class HeckerAppLockPrompt {
                     .setInterpolator(new android.view.animation.DecelerateInterpolator()).start();
         }
     }
-    public static void state(ImageView logo, int state) {
+    public static void state(ImageView logo, ImageView sensor, int state) {
+        Orbit ring = ACTIVE.get(sensor);
+        if (ring != null) ring.state(state);
         if (logo.getDrawable() instanceof Orbit) ((Orbit) logo.getDrawable()).state(state);
     }
     private static final class Orbit extends Drawable {
@@ -66,7 +89,7 @@ public final class HeckerAppLockPrompt {
             if (size <= 0) return;
             float x=b.exactCenterX(), y=b.exactCenterY(), radius=size*.46f;
             paint.setAlpha(opacity); paint.setStyle(Paint.Style.FILL); paint.setColor(0xff14273d);
-            c.drawCircle(x,y,radius,paint);
+            if (icon != null) c.drawCircle(x,y,radius,paint);
             paint.setStyle(Paint.Style.STROKE); paint.setStrokeCap(Paint.Cap.ROUND); paint.setStrokeWidth(size*.045f);
             paint.setColor(status==1?0xff60e5ae:status==2?0xffff8e9c:0xff55d9ff);
             float a=phase*360f;

@@ -61,8 +61,10 @@ public class GlowTest {
  View host=HeckerOsloOverlayHost.rootFor(plugin,context,root,lock);check(host!=root&&host.getParent()==root);check(((ViewGroup)host).children.size()==1);
  int[] forwarded={0};var callback=HeckerOsloOverlayHost.callbackFor(plugin,()->forwarded[0]++);
  lock.show(false);check(windows.current==null);plugin.held=true;callback.onHoldStatusBarOpenChange();
+ check(!HeckerOsloOverlayHost.holdsNativeShade(plugin));
  check(windows.current==host&&windows.last.type==2041&&windows.last.trusted);check((windows.last.flags&24)==24);check(root.children.isEmpty());
  callback.onHoldStatusBarOpenChange();check(windows.adds==1);lock.show(true);check(windows.current==null&&host.getParent()==root);
+ check(HeckerOsloOverlayHost.holdsNativeShade(plugin));
  lock.show(false);check(windows.adds==2);plugin.held=false;callback.onHoldStatusBarOpenChange();check(windows.current==null&&host.getParent()==root);
  windows.fail=true;plugin.held=true;callback.onHoldStatusBarOpenChange();check(windows.current==null&&host.getParent()==root);
  callback.onHoldStatusBarOpenChange();check(windows.current==host);int before=forwarded[0];HeckerOsloOverlayHost.disconnect(plugin);

@@ -70,7 +70,14 @@ public class MediaSessionManager {
  public void addOnActiveSessionsChangedListener(android.content.ComponentName component,android.os.UserHandle user,
   java.util.concurrent.Executor executor,OnActiveSessionsChangedListener listener) {}
  public void removeOnActiveSessionsChangedListener(OnActiveSessionsChangedListener listener) {}
+ public void addOnActiveSessionsChangedListener(OnActiveSessionsChangedListener listener, android.content.ComponentName component,android.os.Handler handler) {}
+ public java.util.List<MediaController> getActiveSessions(android.content.ComponentName component) { return null; }
  public java.util.List<MediaController> getActiveSessionsForUser(android.content.ComponentName component, android.os.UserHandle user) { return null; }
+}''',
+    'com/android/systemui/plugins/statusbar/StatusBarStateController.java': '''package com.android.systemui.plugins.statusbar;
+public interface StatusBarStateController {
+ boolean isDozing(); void addCallback(StateListener listener); void removeCallback(StateListener listener);
+ interface StateListener { default void onDozingChanged(boolean dozing) {} }
 }''',
     'com/android/systemui/plugins/ActivityStarter.java': '''package com.android.systemui.plugins;
 public interface ActivityStarter { void postStartActivityDismissingKeyguard(android.content.Intent intent,int delay); }
@@ -228,7 +235,7 @@ def main():
             dest = out / 'res' / folder / 'hecker_strings.xml'
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / 'framework/qs' / resource, dest)
-        (out / 'res/values/native.xml').write_text('<resources><string name="quick_settings_tiles_default">wifi,bt</string><dimen name="qs_horizontal_margin">16dp</dimen></resources>')
+        (out / 'res/values/native.xml').write_text('<resources><item name="keyguard_carrier_text" type="id"/><string name="quick_settings_tiles_default">wifi,bt</string><dimen name="qs_horizontal_margin">16dp</dimen></resources>')
         shutil.copytree(ROOT / 'framework/qs/icons', out / 'res/drawable')
         manifest = out / 'AndroidManifest.xml'
         manifest.write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android" '
@@ -243,6 +250,7 @@ def main():
             target = out / 'kotlin' / name
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)
         java_sources = list((out / 'java').rglob('*.java')) + list((ROOT / 'framework/qs').glob('*.java'))
+        java_sources += sorted((ROOT / 'framework/lyrics').glob('*.java'))
         java_sources += [ROOT / 'framework/themes/ThemeIconNames.java', ROOT / 'framework/applock/HeckerAppLockPrompt.java']
         run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', sdk / 'android-system.jar',
             '-d', out / 'classes', *java_sources)
@@ -253,6 +261,7 @@ def main():
             '-Xplugin=' + str(cache / 'kotlin-compose-compiler-plugin-embeddable.jar'),
             '-d', out / 'classes-kotlin', *sorted((out / 'kotlin').glob('*.kt')),
             *sorted((ROOT / 'framework/qs').glob('*.kt')),
+            ROOT / 'framework/lyrics/HeckerLockscreenLyrics.kt',
             ROOT / 'framework/themes/HeckerThemeAssets.kt',
             ROOT / 'framework/themes/HeckerConnectivityIcons.kt',
             ROOT / 'framework/themes/HeckerBattery.kt',

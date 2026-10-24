@@ -57,6 +57,10 @@ class HeckerQsActions @Inject constructor(
         @Volatile private var current: HeckerQsActions? = null
         @JvmStatic fun boost() { current?.let { HeckerStatusBarPopup.boost(it.context) } }
         @JvmStatic fun settings(action: String) { current?.open(Intent(action)) }
+        fun dolby() {
+            val owner = current ?: return
+            owner.open(Intent().setComponent(ComponentName("co.aospa.dolby", "co.aospa.dolby.DolbyActivity")))
+        }
         fun controls() {
             val owner = current ?: return
             val samsung = owner.context.packageManager.getLaunchIntentForPackage("com.samsung.android.oneconnect")

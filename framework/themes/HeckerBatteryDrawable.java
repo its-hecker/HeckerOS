@@ -20,23 +20,30 @@ public final class HeckerBatteryDrawable extends Drawable {
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path perimeter, mask, bolt, saver;
     private final int width, height;
-    private final boolean horizontal;
+    private final boolean horizontal, oneUi;
+    private final boolean levelColors;
     private int level = 100, tint = Color.WHITE;
     private boolean charging, powerSave, percent;
 
-    private HeckerBatteryDrawable(Resources res, String pkg) {
+    private HeckerBatteryDrawable(Context context, Resources res, String pkg) {
+        oneUi = "com.android.systemui.battery.oneui7".equals(pkg);
+        levelColors = android.provider.Settings.Secure.getIntForUser(context.getContentResolver(), "hecker_battery_colors", 1, android.os.UserHandle.USER_CURRENT) != 0;
         this.res = res; this.pkg = pkg;
-        width = integer("config_batterymeterWidth", 12); height = integer("config_batterymeterHeight", 20);
+        width = oneUi ? 32 : integer("config_batterymeterWidth", 12); height = oneUi ? 16 : integer("config_batterymeterHeight", 20);
         if (width < 1 || width > 128 || height < 1 || height > 128) throw new IllegalArgumentException();
         perimeter = path("config_batterymeterPerimeterPath"); mask = path("config_batterymeterFillMask");
         bolt = path("config_batterymeterBoltPath"); saver = path("config_batterymeterPowersavePath");
-        horizontal = bool("config_batterymeterHorizontalFill", width > height);
+        horizontal = oneUi || bool("config_batterymeterHorizontalFill", width > height);
+        if (oneUi) {
+            perimeter.reset(); perimeter.addRoundRect(0, 0, 32, 16, 5, 5, Path.Direction.CW);
+            mask.reset(); mask.addRoundRect(1.5f, 1.5f, 30.5f, 14.5f, 3.5f, 3.5f, Path.Direction.CW);
+        }
     }
     public static HeckerBatteryDrawable create(Context context) {
         try {
             String pkg = HeckerThemeAssets.packageName(context, "battery_style");
             Resources res = HeckerThemeAssets.resources(context, "battery_style");
-            return pkg == null || res == null ? null : new HeckerBatteryDrawable(res, pkg);
+            return pkg == null || res == null ? null : new HeckerBatteryDrawable(context, res, pkg);
         } catch (Exception malformed) { return null; }
     }
     private int id(String name, String type) { return res.getIdentifier(name, type, pkg); }
@@ -48,6 +55,10 @@ public final class HeckerBatteryDrawable extends Drawable {
         this.level = Math.max(0, Math.min(100, level)); this.charging = charging; this.powerSave = powerSave;
         this.percent = percent; this.tint = tint; invalidateSelf();
     }
+    public static float scale(Context context) {
+        return Math.max(80, Math.min(140, android.provider.Settings.Secure.getIntForUser(
+                context.getContentResolver(), "hecker_battery_scale", 100, android.os.UserHandle.USER_CURRENT))) / 100f;
+    }
     @Override public int getIntrinsicWidth() { return width; }
     @Override public int getIntrinsicHeight() { return height; }
     @Override public void draw(Canvas canvas) {
@@ -55,22 +66,34 @@ public final class HeckerBatteryDrawable extends Drawable {
         canvas.translate(getBounds().left, getBounds().top);
         canvas.scale(getBounds().width() / (float) width, getBounds().height() / (float) height);
         paint.setStyle(Paint.Style.FILL); paint.setColor(tint); paint.setAlpha(65); canvas.drawPath(perimeter, paint);
+        final int fillColor = charging ? (oneUi && levelColors ? 0xff64e4bd : color("config_batterymeterChargingFillColor", tint))
+                : powerSave ? 0xffffcc66 : level <= 15 ? 0xffff6175
+                : oneUi && levelColors ? (level <= 35 ? 0xffffc66b : level <= 70 ? 0xff76cfff : 0xff91e3c1) : tint;
         int fill = canvas.save(); canvas.clipPath(mask);
         RectF bounds = new RectF(); mask.computeBounds(bounds, true);
         if (horizontal) canvas.clipRect(bounds.left, bounds.top, bounds.left + bounds.width() * level / 100f, bounds.bottom);
         else canvas.clipRect(bounds.left, bounds.bottom - bounds.height() * level / 100f, bounds.right, bounds.bottom);
         paint.setAlpha(255);
-        paint.setColor(charging ? color("config_batterymeterChargingFillColor", tint) : powerSave ? color("config_batterymeterPowerSaveFillColor", 0xffffcc0a)
-                : level <= integer("config_batterymeterCriticalLevel", 15) ? 0xffff453a : tint);
+        paint.setColor(fillColor);
         canvas.drawPath(mask, paint); canvas.restoreToCount(fill);
         paint.setColor(tint); paint.setAlpha(255);
         if ((charging || bool("config_batterymeterGlyphFollowFrame", false)) && !(percent && bool("config_themedBatteryPercentWhileCharging", false))) canvas.drawPath(bolt, paint);
         else if (powerSave) canvas.drawPath(saver, paint);
         if (percent && (!charging || bool("config_themedBatteryPercentWhileCharging", false))) {
             paint.setTextAlign(Paint.Align.CENTER); paint.setFakeBoldText(true); paint.setTextSize(height * .62f);
-            paint.setColor(level > 55 ? (Color.luminance(tint) > .5 ? Color.BLACK : Color.WHITE) : tint);
             Paint.FontMetrics metrics = paint.getFontMetrics();
-            canvas.drawText(Integer.toString(level), width / 2f, height / 2f - (metrics.ascent + metrics.descent) / 2f, paint);
+            float baseline = height / 2f - (metrics.ascent + metrics.descent) / 2f;
+            String label = Integer.toString(level);
+            // Draw the unfilled part using the status-bar foreground, then the
+            // filled part with contrast computed from the actual fill color.
+            paint.setColor(tint);
+            canvas.drawText(label, width / 2f, baseline, paint);
+            int textFill = canvas.save(); canvas.clipPath(mask);
+            if (horizontal) canvas.clipRect(bounds.left, bounds.top, bounds.left + bounds.width() * level / 100f, bounds.bottom);
+            else canvas.clipRect(bounds.left, bounds.bottom - bounds.height() * level / 100f, bounds.right, bounds.bottom);
+            paint.setColor(Color.luminance(fillColor) > .4 ? Color.BLACK : Color.WHITE);
+            canvas.drawText(label, width / 2f, baseline, paint);
+            canvas.restoreToCount(textFill);
             paint.setFakeBoldText(false);
         }
         canvas.restoreToCount(save);

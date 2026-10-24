@@ -90,7 +90,8 @@ public final class HeckerGameService extends SystemService {
         }
     }
     private int bypass(int flags){
-        File node=new File(CHARGE);if(!node.canRead()||!node.canWrite())return -1;
+        File node=new File(CHARGE);if(!node.exists())return -1;
+        if(!node.canRead()||!node.canWrite())return 5;
         Intent battery=getContext().registerReceiver(null,new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         int state=0;
         if((flags&BYPASS)!=0){

@@ -115,7 +115,7 @@ fun HeckerReferenceQuickSettings(
             }
         }
         ReferenceVolume()
-        ReferenceMedia()
+        HeckerMediaCard()
         ReferenceShortcuts(tiles)
     }
 }
@@ -219,19 +219,26 @@ private fun referenceActions(tile: TileViewModel, toggleFirst: Boolean = true): 
 }
 
 @Composable
-private fun ReferenceTile(tile: TileViewModel, diameter: Int = 50) {
+internal fun ReferenceTile(tile: TileViewModel, diameter: Int = 50, colored: Boolean = false) {
     val context = LocalContext.current
     val state by produceState(tile.currentState, tile) { tile.state.collect { value = it } }
     val ui = state.toUiState(context.resources)
     val active = ui.visualState == Tile.STATE_ACTIVE
-    Box(Modifier.size(diameter.dp).clip(CircleShape).background(if (active) White else Disc)
+    val activeColor = if (!colored) White else when (tile.spec.spec) {
+        "wifi", "internet", "bt" -> Color(0xFF258BFF)
+        "cell", "hotspot" -> Color(0xFF27A96B)
+        "dnd" -> Color(0xFF8067D8)
+        else -> White
+    }
+    val foreground = if (active && activeColor == White) Ink else Color.White
+    Box(Modifier.size(diameter.dp).clip(CircleShape).background(if (active) activeColor else Disc)
         .then(referenceActions(tile)), contentAlignment = Alignment.Center) {
         val icon = iconFor(tile.spec.spec)
-        if (icon != 0) ReferenceIcon(icon, 27, if (active) Ink else Color.White.copy(alpha = if (ui.handlesMainClick) .88f else .38f))
+        if (icon != 0) ReferenceIcon(icon, 27, foreground.copy(alpha = if (ui.handlesMainClick) 1f else .38f))
         else AndroidView(factory = { ImageView(it).apply { importantForAccessibility = android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO } },
             modifier = Modifier.size(27.dp), update = {
                 it.setImageDrawable(state.toIconProvider().icon?.getDrawable(context)?.mutate())
-                it.setColorFilter((if (active) Ink else Color.White).toArgb())
+                it.setColorFilter(foreground.toArgb())
             })
     }
 }
@@ -293,7 +300,8 @@ private fun ReferenceDarkButton(tile: TileViewModel?) {
 /** Visual track only: native brightness still owns policy, gamma, falsing, haptics and drag events. */
 @Composable
 fun HeckerGlassTrack(fraction: Float, icon: Int, modifier: Modifier = Modifier) {
-    Box(modifier.fillMaxWidth().height(44.dp), contentAlignment = Alignment.CenterStart) {
+    val vertical = LocalHeckerVerticalBrightness.current
+    Box(modifier.fillMaxWidth().height(if (vertical) 64.dp else 44.dp), contentAlignment = Alignment.CenterStart) {
         Canvas(Modifier.fillMaxSize()) {
             val corner = androidx.compose.ui.geometry.CornerRadius(size.height / 2)
             drawRoundRect(Color.White.copy(alpha = .28f), cornerRadius = corner)
@@ -355,33 +363,6 @@ private fun ReferenceVolume() {
 }
 
 @Composable
-private fun ReferenceMedia() {
-    val context = LocalContext.current
-    var title by remember { mutableStateOf<String?>(null) }
-    var playing by remember { mutableStateOf(false) }
-    val media = remember(context) { HeckerQsMedia(context) { value, active -> title = value; playing = active } }
-    DisposableEffect(media) { media.start(); onDispose { media.stop() } }
-    GlassPanel {
-        Row(Modifier.fillMaxWidth().heightIn(min = 70.dp).padding(horizontal = 18.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Row(Modifier.weight(1f).clip(RoundedCornerShape(24.dp)).clickable { media.playPause() }
-                .semantics { contentDescription = context.getString(if (playing) R.string.hecker_qs_pause else R.string.hecker_qs_play) }
-                .padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                ReferenceIcon(if (playing) R.drawable.hecker_qs_pause else R.drawable.hecker_qs_play, 22)
-                Text(title ?: context.getString(R.string.hecker_qs_play_last), color = Color.White,
-                    fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            Box(Modifier.heightIn(min = 40.dp).clip(RoundedCornerShape(24.dp)).background(Disc)
-                .clickable { media.output() }.padding(horizontal = 14.dp, vertical = 10.dp)) {
-                Text(context.getString(R.string.hecker_qs_media_output), color = Color.White, fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold)
-            }
-        }
-    }
-}
-
-@Composable
 private fun ReferenceShortcuts(tiles: List<TileViewModel>) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -393,9 +374,9 @@ private fun ReferenceShortcuts(tiles: List<TileViewModel>) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ReferenceShortcut(R.string.hecker_qs_nearby, 0, R.drawable.hecker_qs_nearby,
                 Modifier.weight(1f)) { HeckerQsActions.settings(Settings.ACTION_BLUETOOTH_SETTINGS) }
-            ReferenceShortcut(R.string.hecker_qs_smartthings, R.string.hecker_qs_device_control, R.drawable.hecker_qs_smartthings,
+            ReferenceShortcut(R.string.hecker_qs_dolby, R.string.hecker_qs_dolby_summary, R.drawable.hecker_qs_dolby,
                 Modifier.weight(1f)) {
-                HeckerQsActions.controls()
+                HeckerQsActions.dolby()
             }
         }
     }

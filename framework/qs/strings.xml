@@ -41,4 +41,11 @@
     <string name="hecker_volume_sound">Sound</string>
     <string name="hecker_volume_vibrate">Vibrate</string>
     <string name="hecker_volume_mute">Mute</string>
+    <string name="hecker_qs_dolby">Dolby Atmos</string>
+    <string name="hecker_qs_dolby_summary">Lunaris audio</string>
+    <string name="hecker_media_previous">Previous track</string>
+    <string name="hecker_media_next">Next track</string>
+    <string name="hecker_media_seek">Track position</string>
+    <string name="hecker_lockscreen_motto">Stay curious.</string>
+    <string name="hecker_qs_focus">Focus</string>
 </resources>
