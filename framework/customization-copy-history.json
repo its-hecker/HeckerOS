@@ -136,7 +136,8 @@
     "6982be2b0dd15c000a30fee4d44faabba5e210d3",
     "0b09ad6e27030aeef88c733ab68393dbf6b6c974",
     "268841ac035788cde44b5a586e099ab3d5f08ce5",
-    "2d9591b6658e4ca24d743d58caf821fba70ae96f"
+    "2d9591b6658e4ca24d743d58caf821fba70ae96f",
+    "f6dd5540ba8a30afc403f1e81400740d045a2cdf"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsScene.kt": [
     "8f4bca91cc5e8d5cc0e34f9400270cf0c4cb0ac1"
@@ -148,7 +149,8 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsActions.kt": [
     "f24bd2d7d77a57affc18d8944ad1af045f1d76ad",
     "f9922202306d54f47f5063becc6bca845788dac8",
-    "d5d47d363c5e035a9b40e4b35b2e73d0ba2a310f"
+    "d5d47d363c5e035a9b40e4b35b2e73d0ba2a310f",
+    "1c0d49c1bbba994ea49625b15a4e2c707e1f50b5"
   ],
   "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_bluetooth.xml": [
     "1e62f74248882595a9cdf304ca6d659d5d2b370e"
@@ -179,5 +181,8 @@
   ],
   "frameworks/base/services/core/java/com/android/server/hecker/HeckerGameService.java": [
     "4ac29633cb0d964407cdd5122e3af935b80f06b1"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsTileOrder.java": [
+    "7ea4d759f6ae2e93e69f68e4ed3c84cc0455f0bb"
   ]
 }

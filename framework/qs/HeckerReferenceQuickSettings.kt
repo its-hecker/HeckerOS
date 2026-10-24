@@ -71,7 +71,8 @@ fun HeckerReferenceQuickSettings(
 ) {
     TileListener(tiles, listening)
     val connectivity = listOf("wifi", "bt").mapNotNull { spec -> tiles.firstOrNull { it.spec.spec == spec } }
-    val regular = tiles.filter { it.spec.spec !in setOf("wifi", "bt", "dark", "controls") }
+    val regular = tiles.filter { it.spec.spec !in setOf("wifi", "bt", "dark", "controls")
+        && !HeckerQsTileOrder.isDolby(it.spec.spec) }
     val pages = regular.chunked(8).ifEmpty { listOf(emptyList()) }
     val pager = rememberPagerState(pageCount = { pages.size })
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -374,10 +375,42 @@ private fun ReferenceShortcuts(tiles: List<TileViewModel>) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ReferenceShortcut(R.string.hecker_qs_nearby, 0, R.drawable.hecker_qs_nearby,
                 Modifier.weight(1f)) { HeckerQsActions.settings(Settings.ACTION_BLUETOOTH_SETTINGS) }
-            ReferenceShortcut(R.string.hecker_qs_dolby, R.string.hecker_qs_dolby_summary, R.drawable.hecker_qs_dolby,
-                Modifier.weight(1f)) {
-                HeckerQsActions.dolby()
-            }
+            ReferenceDolby(tiles.firstOrNull { HeckerQsTileOrder.isDolby(it.spec.spec) }, Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun ReferenceDolby(tile: TileViewModel?, modifier: Modifier) {
+    if (tile == null) {
+        // During binding, or if the user removes the underlying tile in the
+        // native editor, the existing Lunaris controls remain reachable.
+        ReferenceShortcut(R.string.hecker_qs_dolby, R.string.hecker_qs_dolby_summary,
+            R.drawable.hecker_qs_dolby, modifier) { HeckerQsActions.dolby() }
+        return
+    }
+    val context = LocalContext.current
+    val state by produceState(tile.currentState, tile) { tile.state.collect { value = it } }
+    val ui = state.toUiState(context.resources)
+    val active = ui.visualState == Tile.STATE_ACTIVE
+    val accent = Color(0xFF64E4BD)
+    Row(modifier.clip(RoundedCornerShape(38.dp))
+        .background(if (active) accent.copy(alpha = .25f) else Glass)
+        // Dispatch to the existing TileService; its repository owns the effect.
+        // Native long-press handling opens Lunaris's tile preferences.
+        .then(referenceActions(tile, toggleFirst = false))
+        .heightIn(min = 76.dp).padding(horizontal = 11.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(46.dp).background(if (active) accent.copy(alpha = .18f) else Disc, CircleShape),
+            contentAlignment = Alignment.Center) {
+            ReferenceIcon(R.drawable.hecker_qs_dolby, 29, if (active) accent else White)
+        }
+        Column(Modifier.weight(1f)) {
+            Text(ui.label.ifBlank { context.getString(R.string.hecker_qs_dolby) }, color = Color.White,
+                fontSize = 13.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            val subtitle = ui.secondaryLabel.ifBlank { ui.accessibilityUiState.stateDescription }
+            if (subtitle.isNotBlank()) Text(subtitle, color = Color.White.copy(alpha = .72f),
+                fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

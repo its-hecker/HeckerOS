@@ -39,6 +39,16 @@ class HeckerQsActions @Inject constructor(
     private fun migrate() {
         val user = ActivityManager.getCurrentUser()
         val resolver = context.contentResolver
+        // The fixed One UI slot shares Lunaris's real QSTile instance. Ensure
+        // it is selected once for existing users as well as fresh installations.
+        if (Settings.Secure.getIntForUser(resolver, "hecker_qs_dolby_migrated", 0, user) == 0) {
+            val selected = Settings.Secure.getStringForUser(resolver, "sysui_qs_tiles", user)
+                ?: context.getString(R.string.quick_settings_tiles_default)
+            val withDolby = HeckerQsTileOrder.withDolby(selected)
+            if (withDolby == selected || Settings.Secure.putStringForUser(resolver, "sysui_qs_tiles", withDolby, user)) {
+                Settings.Secure.putIntForUser(resolver, "hecker_qs_dolby_migrated", 1, user)
+            }
+        }
         if (Settings.Secure.getIntForUser(resolver, "hecker_qs_reference_migrated", 0, user) != 0) return
         val old = Settings.Secure.getStringForUser(resolver, "sysui_qs_tiles", user)
             ?: context.getString(R.string.quick_settings_tiles_default)
@@ -59,7 +69,7 @@ class HeckerQsActions @Inject constructor(
         @JvmStatic fun settings(action: String) { current?.open(Intent(action)) }
         fun dolby() {
             val owner = current ?: return
-            owner.open(Intent().setComponent(ComponentName("co.aospa.dolby", "co.aospa.dolby.DolbyActivity")))
+            owner.open(Intent().setComponent(ComponentName("org.lunaris.dolby", "org.lunaris.dolby.ui.DolbyActivity")))
         }
         fun controls() {
             val owner = current ?: return
