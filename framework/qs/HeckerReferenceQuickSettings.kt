@@ -340,8 +340,7 @@ private fun ReferenceShortcuts(tiles: List<TileViewModel>) {
                 Modifier.weight(1f)) { HeckerQsActions.settings(Settings.ACTION_BLUETOOTH_SETTINGS) }
             ReferenceShortcut(R.string.hecker_qs_smartthings, R.string.hecker_qs_device_control, R.drawable.hecker_qs_smartthings,
                 Modifier.weight(1f)) {
-                val controls = tiles.firstOrNull { it.spec.spec == "controls" }
-                if (controls != null) controls.mainClick(null) else HeckerQsActions.controls()
+                HeckerQsActions.controls()
             }
         }
     }

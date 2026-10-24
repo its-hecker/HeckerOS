@@ -24,7 +24,7 @@ PROJECTS = {
     "vendor/hecker/floral/faceid": "its-hecker/floral-3D-faceid-plugin",
     "vendor/hecker/floral/suite": "its-hecker/HeckerOS",
 }
-REMOVED_PROJECTS = {"packages/services/OmniJaws", "packages/apps/Launcher3"}
+REMOVED_PROJECTS = {"packages/services/OmniJaws"}
 
 
 def require(condition, message):

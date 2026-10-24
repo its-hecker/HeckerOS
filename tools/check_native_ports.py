@@ -366,8 +366,6 @@ def main():
                         help='Locked Kotlin dependencies for the PIN bouncer regression check')
     args = parser.parse_args()
     sources = json.loads((ROOT / 'integration/source-revisions.json').read_text())['pixelos_inputs']
-    launcher = json.loads((ROOT / 'launcher/ORIGIN.json').read_text())
-    sources['packages/apps/Launcher3'] = launcher
     git_sources = {}
     def git_source(origin):
         revision = origin['revision']
@@ -391,6 +389,7 @@ def main():
         return folder
     paths = set(json.loads((ROOT / 'framework/customization-patches.json').read_text()))
     paths.update(PIN_INPUTS)
+    paths.update('packages/apps/Launcher3/' + name for name in ('Android.bp', 'aconfig/Android.bp'))
     paths.add('frameworks/base/core/java/android/content/res/Resources.java')
     paths.add('frameworks/base/core/res/AndroidManifest.xml')
     paths.add('frameworks/base/packages/SystemUI/shared/src/com/android/systemui/shared/plugins/PackageConfig.kt')
@@ -454,6 +453,11 @@ def main():
         check_bootanimation_owner(folder)
         check_bootanimation_selection(folder)
         check_secure_capture(folder)
+        for relative, module in [('Android.bp', 'launcher-aosp-tapl'),
+                                 ('aconfig/Android.bp', 'com_android_launcher3_flags_lib')]:
+            source = (folder / 'packages/apps/Launcher3' / relative).read_text()
+            assert len(re.findall(r'\bname:\s*"' + module + '"', source)) == 1, module
+        print('Stock Launcher3 SystemUI flag and TAPL build modules retained: PASS')
         if args.sdk_cache:
             check_clock_plugins(folder, args.sdk_cache.resolve())
             check_pin_bouncer(folder, args.kotlin_cache.resolve())

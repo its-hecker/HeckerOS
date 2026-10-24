@@ -78,6 +78,17 @@ public interface ActivityStarter { void postStartActivityDismissingKeyguard(andr
 ''',
 }
 KOTLIN = {
+    'Controls.kt': '''package com.android.systemui.controls.dagger
+class ControlsComponent {
+ fun getControlsUiController(): java.util.Optional<com.android.systemui.controls.ui.ControlsUiController> = java.util.Optional.empty()
+}
+''',
+    'ControlsUi.kt': '''package com.android.systemui.controls.ui
+interface ControlsUiController {
+ fun resolveActivity(): Class<*>
+ companion object { const val EXTRA_ANIMATE = "extra_animate" }
+}
+''',
     'BatteryModels.kt': '''package com.android.systemui.statusbar.pipeline.battery.shared.ui
 import androidx.compose.ui.graphics.Color
 sealed interface BatteryGlyph { data object Defend: BatteryGlyph; data object Question: BatteryGlyph; data object Plus: BatteryGlyph }

@@ -48,6 +48,12 @@ class LauncherMigrationTests(unittest.TestCase):
         self.assertEqual((destination / 'Android.bp').read_text(), 'original\n')
         self.assertFalse(self.source.exists())
 
+    def test_stock_aosp_libraries_are_retained(self):
+        self.git('remote', 'set-url', 'floral-github',
+                 'https://android.googlesource.com/platform/packages/apps/Launcher3')
+        self.assertIsNone(retire(self.rom))
+        self.assertEqual('original\n', (self.source / 'Android.bp').read_text())
+
     def test_unfamiliar_repository_is_preserved(self):
         self.git('remote', 'set-url', 'floral-github', 'https://example.invalid/custom-launcher')
         with self.assertRaisesRegex(ValueError, 'unfamiliar'):

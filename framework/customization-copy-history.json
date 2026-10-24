@@ -122,15 +122,23 @@
     "ec19450074e3ee432a4365be162f67c99eff4a16"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerFaceUnlockIsland.java": [
-    "5f34458d8aae09ff1257d91f5beadc33bb12fe55"
+    "5f34458d8aae09ff1257d91f5beadc33bb12fe55",
+    "74e37a4e7683b5d244d4258bf7369a049a3106a0"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerReferenceQuickSettings.kt": [
-    "6982be2b0dd15c000a30fee4d44faabba5e210d3"
+    "6982be2b0dd15c000a30fee4d44faabba5e210d3",
+    "0b09ad6e27030aeef88c733ab68393dbf6b6c974"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsScene.kt": [
     "8f4bca91cc5e8d5cc0e34f9400270cf0c4cb0ac1"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAppLockPrompt.java": [
     "d305f4c5bea66831588683b5e5622c40a4fceb20"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsActions.kt": [
+    "f24bd2d7d77a57affc18d8944ad1af045f1d76ad"
+  ],
+  "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_bluetooth.xml": [
+    "1e62f74248882595a9cdf304ca6d659d5d2b370e"
   ]
 }

@@ -12,6 +12,8 @@ import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
 import com.android.systemui.CoreStartable
+import com.android.systemui.controls.dagger.ControlsComponent
+import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.ActivityStarter
@@ -23,6 +25,7 @@ import javax.inject.Inject
 class HeckerQsActions @Inject constructor(
     @Application private val context: Context,
     private val activityStarter: ActivityStarter,
+    private val controlsComponent: ControlsComponent,
 ) : CoreStartable {
     override fun start() {
         current = this
@@ -55,8 +58,13 @@ class HeckerQsActions @Inject constructor(
         fun controls() {
             val owner = current ?: return
             val samsung = owner.context.packageManager.getLaunchIntentForPackage("com.samsung.android.oneconnect")
-            owner.open(samsung ?: Intent().setComponent(ComponentName(owner.context.packageName,
-                "com.android.systemui.controls.ui.ControlsActivity")))
+            if (samsung != null) { owner.open(samsung); return }
+            val controller = owner.controlsComponent.getControlsUiController().orElse(null)
+            // Resolve provider setup when no controls have been configured.
+            owner.open(if (controller == null) Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
+                else Intent().setComponent(ComponentName(owner.context, controller.resolveActivity()))
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    .putExtra(ControlsUiController.EXTRA_ANIMATE, true))
         }
         fun dark(enabled: Boolean) {
             val owner = current ?: return

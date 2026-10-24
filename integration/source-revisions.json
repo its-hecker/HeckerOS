@@ -208,6 +208,15 @@
         "src/com/android/settings/deviceinfo/aboutphone/MyDeviceInfoFragment.java",
         "res/xml/my_device_info.xml"
       ]
+    },
+    "packages/apps/Launcher3": {
+      "repository": "https://android.googlesource.com/platform/packages/apps/Launcher3",
+      "branch": "refs/tags/android-17.0.0_r1",
+      "revision": "c612e6ece389f21c40f8cb9cd9a4b44239f00009",
+      "files": [
+        "Android.bp",
+        "aconfig/Android.bp"
+      ]
     }
   },
   "hecker_suite": {
