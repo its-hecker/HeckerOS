@@ -164,7 +164,21 @@
         "packages/SystemUI/src/com/android/systemui/bouncer/ui/viewmodel/PinBouncerViewModel.kt",
         "packages/SystemUI/src/com/android/systemui/bouncer/ui/viewmodel/AuthMethodBouncerViewModel.kt",
         "packages/SystemUI/src/com/android/systemui/bouncer/ui/viewmodel/PinInputViewModel.kt",
-        "packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfacesImpl.java"
+        "packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfacesImpl.java",
+        "services/core/java/com/android/server/am/ActivityManagerService.java",
+        "services/core/java/com/android/server/am/ProcessRecord.java",
+        "services/core/java/com/android/server/am/HostingRecord.java",
+        "services/core/java/com/android/server/am/psc/ProcessRecordInternal.java",
+        "services/core/java/com/android/server/am/psc/OomAdjusterImpl.java",
+        "services/core/java/com/android/server/wm/ActivityTaskSupervisor.java",
+        "core/java/android/app/Activity.java",
+        "core/java/android/app/WallpaperManager.java",
+        "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarView.java",
+        "packages/SystemUI/src/com/android/systemui/volume/VolumeDialogComponent.java",
+        "packages/SystemUI/src/com/android/systemui/volume/SafetyWarningDialogDelegate.java",
+        "packages/SystemUI/src/com/android/systemui/volume/CsdWarningDialogDelegate.java",
+        "packages/SystemUI/plugin/src/com/android/systemui/plugins/VolumeDialog.java",
+        "packages/SystemUI/plugin/src/com/android/systemui/plugins/VolumeDialogController.java"
       ]
     },
     "hardware/google/camera": {
@@ -182,7 +196,8 @@
       "revision": "99c58a7cc9a44fe33c93808452d018e756d84753",
       "files": [
         "private/init.te",
-        "private/su.te"
+        "private/su.te",
+        "private/service_contexts"
       ]
     },
     "system/core": {
@@ -225,7 +240,19 @@
     "integration_branch": "feat/suite-polish",
     "release": "hecker_suite",
     "base_release": "cp2a",
-    "status": "Source validation only; full ROM build and phone tests required"
+    "status": "Source validation only; full ROM build and phone tests required",
+    "feature_sources": {
+      "risingos": {
+        "repository": "RisingOS-Revived/android_frameworks_base",
+        "revision": "0afe5c947f9c7e61c86e123ac99f870d72464c1a",
+        "notes": "Volume compact/expanded interaction and status-bar action inspiration; independently implemented for Android 17 controllers."
+      },
+      "pixel_launcher_enhanced": {
+        "repository": "Mahmud0808/PixelLauncherEnhanced",
+        "revision": "a0e8e98cd338739aac82ec3bf7b044ee51ba1bdb",
+        "notes": "Inspected Xposed gestures and glass, including per-corner radii and wallpaper zoom fix. Native empty-home double-tap and glass adapters are original Apache-2.0 code, not an Xposed port."
+      }
+    }
   },
   "heckeros": {
     "version": "1.0",

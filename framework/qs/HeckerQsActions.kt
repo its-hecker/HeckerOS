@@ -29,6 +29,7 @@ class HeckerQsActions @Inject constructor(
 ) : CoreStartable {
     override fun start() {
         current = this
+        HeckerStatusBarPopup.start(context)
         migrate()
         context.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(c: Context, intent: Intent) { migrate() }
@@ -54,7 +55,8 @@ class HeckerQsActions @Inject constructor(
 
     companion object {
         @Volatile private var current: HeckerQsActions? = null
-        fun settings(action: String) { current?.open(Intent(action)) }
+        @JvmStatic fun boost() { current?.let { HeckerStatusBarPopup.boost(it.context) } }
+        @JvmStatic fun settings(action: String) { current?.open(Intent(action)) }
         fun controls() {
             val owner = current ?: return
             val samsung = owner.context.packageManager.getLaunchIntentForPackage("com.samsung.android.oneconnect")

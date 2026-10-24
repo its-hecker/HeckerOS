@@ -59,3 +59,7 @@ java -cp "$suite_test_output" com.android.server.hecker.GameTelemetryTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     framework/themes/RetiredThemeSelection.java tests/RetiredThemeSelectionTest.java
 java -cp "$suite_test_output" RetiredThemeSelectionTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/memory/HeckerMemoryRules.java framework/launcher/HeckerHomeDoubleTap.java tests/InteractionPolicyTest.java
+java -cp "$suite_test_output" InteractionPolicyTest

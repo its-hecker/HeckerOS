@@ -19,4 +19,25 @@
     <string name="hecker_qs_device_control">设备控制</string>
     <string name="hecker_qs_play">播放</string>
     <string name="hecker_qs_pause">暂停</string>
+    <string name="hecker_status_popup_title">状态栏操作</string>
+    <string name="hecker_popup_clock">日期和时间</string>
+    <string name="hecker_popup_wifi">Wi-Fi</string>
+    <string name="hecker_popup_bluetooth">Bluetooth</string>
+    <string name="hecker_popup_mobile">移动数据</string>
+    <string name="hecker_popup_battery">电池</string>
+    <string name="hecker_popup_settings">设置</string>
+    <string name="hecker_memory_boost">内存加速</string>
+    <string name="hecker_memory_done">已清理 %1$d 个后台应用和 %2$d 个进程</string>
+    <string name="hecker_memory_none">没有可清理的后台进程</string>
+    <string name="hecker_memory_failed">内存加速不可用</string>
+    <string name="hecker_volume_media">媒体</string>
+    <string name="hecker_volume_brightness">亮度</string>
+    <string name="hecker_volume_ringer">声音 / 振动 / 静音</string>
+    <string name="hecker_volume_expand">展开音量控制</string>
+    <string name="hecker_volume_collapse">收起音量控制</string>
+    <string name="hecker_volume_settings">声音设置</string>
+    <string name="hecker_volume_captions">切换实时字幕</string>
+    <string name="hecker_volume_sound">声音</string>
+    <string name="hecker_volume_vibrate">振动</string>
+    <string name="hecker_volume_mute">静音</string>
 </resources>

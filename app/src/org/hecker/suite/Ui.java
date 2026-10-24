@@ -33,6 +33,14 @@ final class Ui {
     }
 
     static void scroll(Activity activity, LinearLayout page) {
+        ScrollView scroll = new ScrollView(activity);
+        scroll.setFillViewport(true);
+        scroll.setClipToPadding(false);
+        scroll.addView(page);
+        content(activity, scroll);
+    }
+
+    static void content(Activity activity, View body) {
         // A measured toolbar and scroll body are siblings. An overlay ActionBar
         // cannot cover the first setting, even with edge-to-edge or large fonts.
         activity.getWindow().setDecorFitsSystemWindows(false);
@@ -52,11 +60,7 @@ final class Ui {
         title.setAccessibilityHeading(true);
         toolbar.addView(title, new LinearLayout.LayoutParams(0, -2, 1));
         root.addView(toolbar);
-        ScrollView scroll = new ScrollView(activity);
-        scroll.setFillViewport(true);
-        scroll.setClipToPadding(false);
-        scroll.addView(page);
-        root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        root.addView(body, new LinearLayout.LayoutParams(-1, 0, 1));
         root.setOnApplyWindowInsetsListener((view, insets) -> {
             android.graphics.Insets bars = insets.getInsets(
                     android.view.WindowInsets.Type.systemBars()

@@ -18,6 +18,9 @@ from compile_sdk import fetch
 
 ROOT = Path(__file__).resolve().parents[1]
 JAVA = {
+    'com/android/systemui/hecker/HeckerStatusBarPopup.java': '''package com.android.systemui.hecker;
+public final class HeckerStatusBarPopup { public static void start(android.content.Context c) {} public static void boost(android.content.Context c) {} }''',
+
     'android/util/PathParser.java': '''package android.util;
 public class PathParser {
  public static android.graphics.Path createPathFromPathData(String data) { return null; }

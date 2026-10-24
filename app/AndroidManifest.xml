@@ -84,6 +84,8 @@
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
         </service>
+        <activity android:name=".MemoryBoostActivity" android:exported="false" />
+        <activity android:name=".PixelLauncherSettingsActivity" android:exported="false" />
         <activity android:name=".SandboxActivity" android:exported="false" />
         <activity android:name=".HeadphonesActivity" android:exported="false" />
     </application>

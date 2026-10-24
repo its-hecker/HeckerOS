@@ -63,6 +63,8 @@ jobs:
         run: python3 tools/check_headphone_companion.py --sdk-cache generated/sdk
       - name: Compile Quick Settings Kotlin and Java with locked Compose dependencies
         run: python3 tools/check_quick_settings.py --sdk-cache generated/sdk
+      - name: Compile native memory, launcher, volume and status-bar interaction adapters
+        run: python3 tools/check_interaction_features.py --sdk-cache generated/sdk
       - name: Compile native About Phone and verify HeckerOS release identity
         run: python3 tools/check_about_phone.py --sdk-cache generated/sdk
       - name: Merge the native and standalone Motion Sense manifests with Android 17's merger

@@ -46,7 +46,8 @@
   ],
   "frameworks/base/packages/SystemUI/res/values/hecker_strings.xml": [
     "9f0cc01563b91a8b5f56ba385a4d0d287a199598",
-    "134715be21814cc5e6726f0fa1e2e88a6fbf737a"
+    "134715be21814cc5e6726f0fa1e2e88a6fbf737a",
+    "3f932e3c57f01689f1c4c105d71af68df0ad1116"
   ],
   "packages/apps/Settings/src/com/android/settings/hecker/HeckerBrandPreference.java": [
     "6f5ddd26068e7b517bc83b72189993087b28fc86"
@@ -139,7 +140,8 @@
     "d305f4c5bea66831588683b5e5622c40a4fceb20"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsActions.kt": [
-    "f24bd2d7d77a57affc18d8944ad1af045f1d76ad"
+    "f24bd2d7d77a57affc18d8944ad1af045f1d76ad",
+    "f9922202306d54f47f5063becc6bca845788dac8"
   ],
   "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_bluetooth.xml": [
     "1e62f74248882595a9cdf304ca6d659d5d2b370e"
@@ -157,6 +159,7 @@
     "74c24cebc2ca7542343b1d03eb90f66e9fc6119d"
   ],
   "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_strings.xml": [
-    "d086944d48156bce7c4bbcf46e806f1eba761b25"
+    "d086944d48156bce7c4bbcf46e806f1eba761b25",
+    "450cd45078a425f50db219059adbc2fefcc6d9e8"
   ]
 }

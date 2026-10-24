@@ -90,5 +90,16 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAppLockPrompt.java": "framework/applock/HeckerAppLockPrompt.java",
   "frameworks/base/services/core/java/com/android/server/theme/RetiredThemeSelection.java": "framework/themes/RetiredThemeSelection.java",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerOsloOverlayHost.java": "framework/glow/HeckerOsloOverlayHost.java",
-  "frameworks/base/packages/SystemUI/src/org/hecker/earbuds/HeckerEarbudsView.java": "framework/earbuds/HeckerEarbudsView.java"
+  "frameworks/base/packages/SystemUI/src/org/hecker/earbuds/HeckerEarbudsView.java": "framework/earbuds/HeckerEarbudsView.java",
+  "frameworks/base/core/java/com/android/internal/hecker/HeckerMemoryRules.java": "framework/memory/HeckerMemoryRules.java",
+  "frameworks/base/core/java/android/os/IHeckerMemoryService.aidl": "framework/memory/IHeckerMemoryService.aidl",
+  "frameworks/base/services/core/java/com/android/server/am/HeckerMemoryPolicy.java": "framework/memory/HeckerMemoryPolicy.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerStatusBarPopup.java": "framework/statusbar/HeckerStatusBarPopup.java",
+  "frameworks/base/core/java/android/os/IHeckerLauncherService.aidl": "framework/launcher/IHeckerLauncherService.aidl",
+  "frameworks/base/core/java/com/android/internal/hecker/HeckerHomeDoubleTap.java": "framework/launcher/HeckerHomeDoubleTap.java",
+  "frameworks/base/core/java/com/android/internal/hecker/HeckerLauncherEnhancements.java": "framework/launcher/HeckerLauncherEnhancements.java",
+  "frameworks/base/services/core/java/com/android/server/hecker/HeckerLauncherService.java": "framework/launcher/HeckerLauncherService.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerVolumeSlider.java": "framework/volume/HeckerVolumeSlider.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerVolumeDialog.java": "framework/volume/HeckerVolumeDialog.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerBrightnessControl.java": "framework/volume/HeckerBrightnessControl.java"
 }

@@ -11,6 +11,11 @@ public final class StatusBarSettingsActivity extends Activity {
         Ui.hero(this, page, R.raw.suite_status, R.string.status_styles_summary);
         Ui.actionCard(this,page,R.string.theme_wifi,R.string.wifi_theme_summary,v->SuitePages.theme(this,1));
         Ui.actionCard(this,page,R.string.theme_battery,R.string.battery_theme_summary,v->SuitePages.theme(this,3));
+        android.widget.Switch popup=new android.widget.Switch(this);
+        popup.setText(R.string.status_popup_title);popup.setTextColor(getColor(R.color.hecker_foreground));
+        popup.setChecked(android.provider.Settings.Secure.getInt(getContentResolver(),"hecker_status_popup",1)!=0);
+        popup.setOnCheckedChangeListener((v,checked)->android.provider.Settings.Secure.putInt(getContentResolver(),"hecker_status_popup",checked?1:0));
+        page.addView(popup);page.addView(Ui.text(this,getString(R.string.status_popup_summary),13,false));
         Ui.scroll(this,page);
     }
     @Override public boolean onOptionsItemSelected(MenuItem item) {
