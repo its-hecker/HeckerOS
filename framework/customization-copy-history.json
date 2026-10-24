@@ -129,5 +129,8 @@
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsScene.kt": [
     "8f4bca91cc5e8d5cc0e34f9400270cf0c4cb0ac1"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAppLockPrompt.java": [
+    "d305f4c5bea66831588683b5e5622c40a4fceb20"
   ]
 }
