@@ -46,6 +46,26 @@ class CustomizationPortTests(unittest.TestCase):
             before=self.snapshot(folder)
             with self.assertRaises(ValueError):customization_plan(folder,replace_guarded)
             self.assertEqual(before,self.snapshot(folder))
+
+    def test_gaming_context_is_unique_after_fresh_and_previously_prepared_upgrades(self):
+        relative = 'system/sepolicy/private/service_contexts'
+        pair = json.loads((ROOT/'framework/customization-patches.json').read_text())[relative][0]
+        for initial in [pair['old'], *pair['previous']]:
+            with self.subTest(previous=initial), tempfile.TemporaryDirectory() as temporary:
+                folder = Path(temporary)
+                self.stage(folder)
+                path = folder/relative
+                path.write_text(initial + '\n# unrelated policy comment\n')
+                self.write(customization_plan(folder, replace_guarded))
+                merged = path.read_text() + '\n' + (ROOT/'rom/sepolicy/private/service_contexts').read_text()
+                records = [line.split() for line in merged.splitlines()
+                           if line.strip() and not line.lstrip().startswith('#')]
+                game = [record for record in records if record[0] == 'hecker_game']
+                self.assertEqual(game, [['hecker_game', 'u:object_r:hecker_game_service:s0']])
+                for name in ('hecker_memory', 'hecker_launcher'):
+                    self.assertEqual(sum(record[0] == name for record in records), 1)
+                self.assertIn('# unrelated policy comment', path.read_text())
+                self.assertEqual({}, customization_plan(folder, replace_guarded))
     def test_foreign_copy_is_preserved(self):
         with tempfile.TemporaryDirectory() as temporary:
             folder=Path(temporary);self.stage(folder)

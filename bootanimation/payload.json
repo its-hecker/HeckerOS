@@ -1,12 +1,40 @@
 {
-  "sha256": "ab8c995569692f320aff6f4deb6f3ddd3c17deb6c0429b072132101240435986",
-  "size": 21002403,
+  "source_filename": "bootanimation_B_terminal_boot.zip",
+  "sha256": "932d8c0d98f76e06e6b6397c402f232e01d5898f90964f18a22dcdf0ee8c91ec",
+  "size": 14584625,
   "resolution": [
     720,
     1200
   ],
   "fps": 30,
-  "intro_frames": 120,
+  "intro_frames": 150,
   "loop_frames": 60,
-  "source_sha256": "7b3c1e78db241b33563011994763c627f890cc343fb482c68115e9cbbbc0274f"
+  "parts": [
+    {
+      "type": "c",
+      "repeat": 1,
+      "pause": 0,
+      "path": "part0",
+      "frames": 150
+    },
+    {
+      "type": "p",
+      "repeat": 0,
+      "pause": 0,
+      "path": "part1",
+      "frames": 60
+    }
+  ],
+  "chunks": [
+    {
+      "file": "source/terminal-boot.zip.000",
+      "size": 8388606,
+      "sha256": "96e5f2fe2e0cdad671d1213d5893dff8f800d76112e5220cfa45fdb0b844e29a"
+    },
+    {
+      "file": "source/terminal-boot.zip.001",
+      "size": 6196019,
+      "sha256": "d41afe98c1ac28b3a726c2b752c97cd29e77058613944d4ede05d012313106ab"
+    }
+  ]
 }

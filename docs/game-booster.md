@@ -46,6 +46,19 @@ isolation and sufficient charger power are hardware-dependent.
 
 ## Verification
 
+The gaming Binder name `hecker_game` has one dedicated label,
+`u:object_r:hecker_game_service:s0`, in the Suite's system_ext service contexts.
+The platform service adapter registers `hecker_memory` and `hecker_launcher`;
+it must not add a second gaming label using `activity_service`.
+
+Preparation upgrades both the previous three-service platform block and a block
+where the obsolete gaming line was removed manually. The native integration check
+combines platform and Suite context declarations, rejects duplicate gaming labels,
+and exercises all three Java service registrations with the pinned AOSP fuzzer
+checker. The standalone `tools/service_contexts.py` remains available for inspecting
+and repairing a prepared checkout, including linked platform source and recovery
+context caches.
+
 - Suite Java compilation and Android resource linking with the locked SDK.
 - Native gaming Java and the real generated AIDL interface.
 - CPU/GPU/RAM parsing, counter reset and unavailable-reading regressions.

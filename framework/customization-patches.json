@@ -604,7 +604,11 @@
   "system/sepolicy/private/service_contexts": [
     {
       "old": "activity                                  u:object_r:activity_service:s0",
-      "new": "activity                                  u:object_r:activity_service:s0\nhecker_memory                             u:object_r:activity_service:s0\nhecker_launcher                           u:object_r:activity_service:s0\nhecker_game                               u:object_r:activity_service:s0"
+      "new": "activity                                  u:object_r:activity_service:s0\n# HeckerOS platform services; gaming uses its dedicated system_ext service label.\nhecker_memory                             u:object_r:activity_service:s0\nhecker_launcher                           u:object_r:activity_service:s0",
+      "previous": [
+        "activity                                  u:object_r:activity_service:s0\nhecker_memory                             u:object_r:activity_service:s0\nhecker_launcher                           u:object_r:activity_service:s0\nhecker_game                               u:object_r:activity_service:s0",
+        "activity                                  u:object_r:activity_service:s0\nhecker_memory                             u:object_r:activity_service:s0\nhecker_launcher                           u:object_r:activity_service:s0"
+      ]
     }
   ],
   "system/sepolicy/build/soong/service_fuzzer_bindings.go": [

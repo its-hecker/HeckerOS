@@ -20,6 +20,20 @@ STATUS_VIEW = ('frameworks/base/packages/SystemUI/src/com/android/systemui/'
                'statusbar/phone/PhoneStatusBarView.java')
 
 
+def context_declarations(path):
+    declarations = []
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        # Exercise both release-flag branches without requiring generated M4.
+        if line == "')" or re.fullmatch(r'is_flag_enabled\(RELEASE_[A-Z0-9_]+,\s*`', line):
+            continue
+        assert re.fullmatch(r'\S+\s+u:object_r:[A-Za-z0-9_]+:s0', line), line
+        declarations.append(line)
+    return declarations
+
+
 def check_service_bindings(folder):
     policy = folder / 'system/sepolicy'
     source = (policy / 'build/soong/service_fuzzer_bindings.go').read_text()
@@ -35,26 +49,22 @@ def check_service_bindings(folder):
         assert name not in bindings, 'Duplicate service binding: ' + name
         bindings[name] = [] if value == 'EXCEPTION_NO_FUZZER' else json.loads(
             '[' + value[len('[]string{'):-1].strip().rstrip(',') + ']')
-    declarations = []
-    for line in (policy / 'private/service_contexts').read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith('#'):
-            continue
-        # Exercise the union of release-flag branches without requiring Soong's
-        # generated M4 definitions. Reject unfamiliar syntax instead of skipping it.
-        if line == "')" or re.fullmatch(r'is_flag_enabled\(RELEASE_[A-Z0-9_]+,\s*`', line):
-            continue
-        assert re.fullmatch(r'\S+\s+u:object_r:[A-Za-z0-9_]+:s0', line), line
-        declarations.append(line)
-    services = [line.split()[0] for line in declarations]
+    declarations = context_declarations(policy / 'private/service_contexts')
+    system_ext = context_declarations(ROOT / 'rom/sepolicy/private/service_contexts')
+    services = [line.split()[0] for line in declarations + system_ext]
     required = ('hecker_memory', 'hecker_launcher', 'hecker_game')
     for name in required:
         assert services.count(name) == 1, 'Missing or duplicate service context: ' + name
+    game = [line for line in system_ext if line.split()[0] == 'hecker_game']
+    assert len(game) == 1 and game[0].split()[1] == 'u:object_r:hecker_game_service:s0', \
+        'Gaming must retain its dedicated system_ext label'
     with tempfile.TemporaryDirectory(prefix='hecker-service-bindings-') as temporary:
         registry = Path(temporary) / 'bindings.json'
         registry.write_text(json.dumps(bindings))
         contexts = Path(temporary) / 'service_contexts'
-        contexts.write_text('\n'.join(declarations) + '\n')
+        # Exercise the three new Java services with the real checker, including
+        # gaming's system_ext declaration. Other Suite services are outside this probe.
+        contexts.write_text('\n'.join(declarations + game) + '\n')
         command = [sys.executable, str(policy / 'tools/fuzzer_bindings_check.py'),
                    '-s', str(contexts), '-b', str(registry)]
         subprocess.run(command, check=True)
@@ -65,7 +75,7 @@ def check_service_bindings(folder):
             registry.write_text(json.dumps({k: v for k, v in bindings.items() if k != name}))
             missing = subprocess.run(command, capture_output=True, text=True)
             assert missing.returncode != 0 and "Service '" + name + "'" in missing.stderr, name
-    print('Native fuzzer-binding checker: all three Java services registered; missing entries rejected: PASS')
+    print('Merged gaming label is unique; native fuzzer checker accepts all three Java registrations: PASS')
 
 
 def check_statusbar_dispatch(folder, cache):
