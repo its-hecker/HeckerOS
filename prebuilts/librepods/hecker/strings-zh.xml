@@ -1,0 +1,20 @@
+<resources>
+    <string name="hecker_librepods_app_name">LibrePods · HeckerOS</string>
+    <string name="hecker_headphones_title">耳机</string>
+    <string name="hecker_headphones_connected">蓝牙已连接</string>
+    <string name="hecker_headphones_none">连接蓝牙耳机以查看详情。</string>
+    <string name="hecker_headphones_left">左耳</string>
+    <string name="hecker_headphones_right">右耳</string>
+    <string name="hecker_headphones_case">充电盒</string>
+    <string name="hecker_headphones_overall">Android 电量读数：%1$d%%</string>
+    <string name="hecker_headphones_reading">正在读取耳机详情…</string>
+    <string name="hecker_headphones_read_unavailable">厂商详情不可用。上方显示 Android 提供的读数。</string>
+    <string name="hecker_headphones_firmware_left">左耳固件：%1$s</string>
+    <string name="hecker_headphones_firmware_right">右耳固件：%1$s</string>
+    <string name="hecker_headphones_charging_left">左耳正在充电</string>
+    <string name="hecker_headphones_charging_right">右耳正在充电</string>
+    <string name="hecker_headphones_refresh">刷新详情</string>
+    <string name="hecker_headphones_reported_only">破折号表示设备尚未报告该值。</string>
+    <string name="hecker_headphones_r50i_readings" formatted="false">R50i 每级电量相差 20%，不报告充电盒电量。</string>
+    <string name="hecker_headphones_bluetooth">蓝牙设置</string>
+</resources>

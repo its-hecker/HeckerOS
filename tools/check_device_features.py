@@ -116,6 +116,7 @@ def main():
             target = out / 'facades' / name
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)
         sources = sorted((ROOT / 'framework/headphones').glob('*.java'))
+        sources += sorted((ROOT / 'framework/earbuds').glob('*.java'))
         sources += sorted((ROOT / 'framework/glow').glob('*.java'))
         sources += sorted((ROOT / 'framework/sandbox').glob('*.java'))
         sources += sorted((ROOT / 'framework/faceisland').glob('*.java'))

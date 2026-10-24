@@ -89,5 +89,6 @@
   "frameworks/base/services/core/java/com/android/server/hecker/GameTelemetry.java": "framework/gaming/GameTelemetry.java",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAppLockPrompt.java": "framework/applock/HeckerAppLockPrompt.java",
   "frameworks/base/services/core/java/com/android/server/theme/RetiredThemeSelection.java": "framework/themes/RetiredThemeSelection.java",
-  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerOsloOverlayHost.java": "framework/glow/HeckerOsloOverlayHost.java"
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerOsloOverlayHost.java": "framework/glow/HeckerOsloOverlayHost.java",
+  "frameworks/base/packages/SystemUI/src/org/hecker/earbuds/HeckerEarbudsView.java": "framework/earbuds/HeckerEarbudsView.java"
 }

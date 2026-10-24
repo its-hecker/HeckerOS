@@ -73,8 +73,9 @@ public final class HeckerOsloOverlayHost {
             this.original = original;
             this.keyguard = keyguard;
             Context context = original.getContext();
-            windows = context.getSystemService(WindowManager.class);
-            container = new FrameLayout(context);
+            Context overlayContext = context.createWindowContext(GLOW_WINDOW_TYPE, null);
+            windows = overlayContext.getSystemService(WindowManager.class);
+            container = new FrameLayout(overlayContext);
             container.setClipChildren(false);
             container.setClipToPadding(false);
             // Oslo's addViews inserts its shader and feedback at index one.
@@ -100,8 +101,13 @@ public final class HeckerOsloOverlayHost {
                 params.setFitInsetsTypes(0);
                 params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
                 params.setTitle("HeckerOsloGestureFeedback");
-                try { windows.addView(container, params); detached = true; }
-                catch (RuntimeException unavailable) {
+                try {
+                    // This trusted SystemUI surface must not block Android's
+                    // obscured-touch protection for applications beneath it.
+                    WindowManager.LayoutParams.class.getMethod("setTrustedOverlay").invoke(params);
+                    windows.addView(container, params); detached = true;
+                }
+                catch (ReflectiveOperationException | RuntimeException unavailable) {
                     Log.w("HeckerOsloGlow", "Standalone gesture surface unavailable", unavailable);
                     original.addView(container, new ViewGroup.LayoutParams(-1, -1));
                 }

@@ -249,8 +249,8 @@
     <string name="headphones_summary">适用于 AirPods、Soundcore 及其他耳机的连接弹窗</string>
     <string name="headphones_description">设备解锁时显示连接卡片。电量信息取决于耳机实际提供的数据；不支持的读数将显示为不可用。</string>
     <string name="headphones_popup">显示连接弹窗</string>
-    <string name="headphones_airpods">AirPods 控制</string>
-    <string name="headphones_airpods_summary">设置 LibrePods，以获取更多 AirPods 电量信息及支持的控制功能。</string>
+    <string name="headphones_airpods">耳机与 AirPods</string>
+    <string name="headphones_airpods_summary">查看已连接的耳机、Soundcore R50i 详情和 AirPods 控制。</string>
     <string name="headphones_airpods_unavailable">此版本暂不提供 LibrePods。</string>
     <string name="face_island_title">面容解锁灵动岛</string>
     <string name="face_island_summary">在锁定屏幕顶部显示胶囊动画，提示面容识别及验证成功。</string>

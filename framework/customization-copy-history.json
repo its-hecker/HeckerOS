@@ -140,5 +140,17 @@
   ],
   "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_bluetooth.xml": [
     "1e62f74248882595a9cdf304ca6d659d5d2b370e"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerHeadphonePopup.java": [
+    "3c3b676a8670aad6e9f845c8c134fe5f55153885"
+  ],
+  "frameworks/base/packages/SystemUI/res/values/hecker_headphones.xml": [
+    "72bc7a36aaca7a8bad98898a05cbb17fd10f5867"
+  ],
+  "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_headphones.xml": [
+    "6f85e3b8f2aa2772a38e3a2e2be8ce99692087dd"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerOsloOverlayHost.java": [
+    "74c24cebc2ca7542343b1d03eb90f66e9fc6119d"
   ]
 }

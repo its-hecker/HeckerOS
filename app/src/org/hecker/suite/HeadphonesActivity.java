@@ -27,7 +27,7 @@ public final class HeadphonesActivity extends Activity {
         card.addView(enabled); page.addView(card);
         Ui.actionCard(this, page, R.string.headphones_airpods, R.string.headphones_airpods_summary,
                 view -> {
-                    Intent intent = getPackageManager().getLaunchIntentForPackage("me.kavishdevar.librepods");
+                    Intent intent = getPackageManager().getLaunchIntentForPackage("org.hecker.librepods");
                     try {
                         if (intent == null) throw new ActivityNotFoundException();
                         startActivity(intent);

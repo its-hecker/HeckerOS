@@ -162,38 +162,50 @@ public final class HeckerHeadphonePopup {
         visibleDevice = device;
         LinearLayout panel = new LinearLayout(context);
         panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setPadding(dp(24), dp(24), dp(24), dp(18));
+        panel.setPadding(dp(24), dp(16), dp(24), dp(18));
         GradientDrawable background = new GradientDrawable();
-        background.setColor(0xFF101C28);
-        background.setCornerRadius(dp(30));
-        background.setStroke(dp(1), 0xFF304863);
+        background.setColors(new int[]{0xFF1C3144, 0xFF0B1725});
+        background.setOrientation(GradientDrawable.Orientation.TL_BR);
+        background.setCornerRadius(dp(36));
+        background.setStroke(dp(1), 0xFF415D75);
         panel.setBackground(background);
-        LinearLayout row = new LinearLayout(context);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        ImageView icon = new ImageView(context);
-        icon.setImageResource(R.drawable.hecker_headphones_art);
-        icon.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        row.addView(icon, new LinearLayout.LayoutParams(dp(76), dp(76)));
-        LinearLayout labels = new LinearLayout(context);
-        labels.setOrientation(LinearLayout.VERTICAL);
-        labels.setPadding(dp(18), 0, 0, 0);
-        labels.addView(text(name, 20, 0xFFE5EDFF));
-        labels.addView(text(context.getString(R.string.hecker_headphones_connected), 14, 0xFFB2C1D8));
-        row.addView(labels, new LinearLayout.LayoutParams(0, -2, 1));
-        panel.addView(row);
+        TextView title = text(name, 23, 0xFFF2F7FF);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        title.setMaxLines(2); title.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        title.setGravity(Gravity.CENTER);
+        panel.addView(title, new LinearLayout.LayoutParams(-1, -2));
+        TextView state = text(context.getString(R.string.hecker_headphones_connected), 13, 0xFF91EAD4);
+        state.setGravity(Gravity.CENTER); state.setPadding(0, dp(6), 0, 0);
+        panel.addView(state, new LinearLayout.LayoutParams(-1, -2));
+        if (device != null) {
+            org.hecker.earbuds.HeckerEarbudsView artwork = new org.hecker.earbuds.HeckerEarbudsView(context);
+            artwork.setDeviceName(name);
+            panel.addView(artwork, new LinearLayout.LayoutParams(-1, dp(220)));
+        } else {
+            ImageView artwork = new ImageView(context);
+            artwork.setImageResource(R.drawable.hecker_headphones_art);
+            artwork.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+            panel.addView(artwork, new LinearLayout.LayoutParams(-1, dp(110)));
+        }
         battery = text("", 16, 0xFFAAC9FF);
-        battery.setPadding(0, dp(14), 0, dp(10));
+        battery.setGravity(Gravity.CENTER);
+        battery.setPadding(0, 0, 0, dp(14));
         panel.addView(battery);
         TextView settings = text(context.getString(device == null
                 ? R.string.hecker_headphones_sound_settings : R.string.hecker_headphones_settings),
                 14, 0xFFAAC9FF);
-        settings.setGravity(Gravity.END);
+        settings.setGravity(Gravity.CENTER);
+        GradientDrawable button = new GradientDrawable();
+        button.setColor(0xFF294B66); button.setCornerRadius(dp(24)); settings.setBackground(button);
         settings.setMinHeight(dp(48));
         settings.setOnClickListener(view -> {
             dismiss();
-            context.startActivityAsUser(new Intent(device == null
-                    ? Settings.ACTION_SOUND_SETTINGS : Settings.ACTION_BLUETOOTH_SETTINGS)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), UserHandle.of(visibleUser));
+            Intent details = device == null ? null : context.getPackageManager()
+                    .getLaunchIntentForPackage("org.hecker.librepods");
+            if (details == null) details = new Intent(device == null
+                    ? Settings.ACTION_SOUND_SETTINGS : Settings.ACTION_BLUETOOTH_SETTINGS);
+            if (device != null) details.putExtra("hecker_device_address", device.getAddress());
+            context.startActivityAsUser(details.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), UserHandle.of(visibleUser));
         });
         panel.addView(settings);
         dialog = new SystemUIDialog(context);
@@ -217,7 +229,11 @@ public final class HeckerHeadphonePopup {
             dialog.show();
             if (window != null) window.setLayout(
                     Math.min(context.getResources().getDisplayMetrics().widthPixels - dp(32), dp(440)), -2);
-            expires = SystemClock.elapsedRealtime() + 6500;
+            if (android.animation.ValueAnimator.areAnimatorsEnabled()) {
+                panel.setAlpha(0); panel.setTranslationY(dp(28));
+                panel.animate().alpha(1).translationY(0).setDuration(300).start();
+            }
+            expires = SystemClock.elapsedRealtime() + 9000;
             updateBattery(); handler.postDelayed(refresh, 500);
         } catch (RuntimeException unavailable) {
             Log.w(TAG, "Could not display connection card", unavailable);

@@ -13,6 +13,7 @@ class OsloGlowTests(unittest.TestCase):
         files = {
             'android/content/Context.java': '''package android.content;
 public class Context { public Object service; public String getPackageName(){return "com.google.oslo";}
+ public Context createWindowContext(int type,Object options){return this;}
  public <T> T getSystemService(Class<T> type){return type.cast(service);} }''',
             'android/graphics/PixelFormat.java': 'package android.graphics; public class PixelFormat { public static final int TRANSLUCENT=-3; }',
             'android/os/Looper.java': 'package android.os; public class Looper {static final Looper MAIN=new Looper(); public static Looper getMainLooper(){return MAIN;} public static Looper myLooper(){return MAIN;}}',
@@ -33,6 +34,7 @@ public class ViewGroup extends View {public final List<View> children=new ArrayL
             'android/view/WindowManager.java': '''package android.view;
 public interface WindowManager {void addView(View view,LayoutParams p);void removeViewImmediate(View view);
  class LayoutParams {public static final int FLAG_NOT_FOCUSABLE=8,FLAG_NOT_TOUCHABLE=16,FLAG_LAYOUT_IN_SCREEN=256,LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS=3;
+ public boolean trusted;public void setTrustedOverlay(){trusted=true;}
  public int gravity,layoutInDisplayCutoutMode,type,flags; public LayoutParams(int w,int h,int type,int flags,int format){this.type=type;this.flags=flags;}
  public void setFitInsetsTypes(int t){} public void setTitle(String t){} } }''',
             'com/android/systemui/plugins/OverlayPlugin.java': '''package com.android.systemui.plugins;
@@ -59,7 +61,7 @@ public class GlowTest {
  View host=HeckerOsloOverlayHost.rootFor(plugin,context,root,lock);check(host!=root&&host.getParent()==root);check(((ViewGroup)host).children.size()==1);
  int[] forwarded={0};var callback=HeckerOsloOverlayHost.callbackFor(plugin,()->forwarded[0]++);
  lock.show(false);check(windows.current==null);plugin.held=true;callback.onHoldStatusBarOpenChange();
- check(windows.current==host&&windows.last.type==2041);check((windows.last.flags&24)==24);check(root.children.isEmpty());
+ check(windows.current==host&&windows.last.type==2041&&windows.last.trusted);check((windows.last.flags&24)==24);check(root.children.isEmpty());
  callback.onHoldStatusBarOpenChange();check(windows.adds==1);lock.show(true);check(windows.current==null&&host.getParent()==root);
  lock.show(false);check(windows.adds==2);plugin.held=false;callback.onHoldStatusBarOpenChange();check(windows.current==null&&host.getParent()==root);
  windows.fail=true;plugin.held=true;callback.onHoldStatusBarOpenChange();check(windows.current==null&&host.getParent()==root);
