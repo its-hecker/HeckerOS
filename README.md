@@ -30,13 +30,11 @@ platform customization forks use `heckeros-17`.
   with a circular real-task FPS gauge, battery telemetry, red accents, game/app
   tabs, capture controls and native floating app shortcuts. Performance profiles
   are exposed only when the Android game service supports the active game.
-- Pixel Launcher and Infinity-X-derived **Hecker Launcher**, including native double
-  tap to sleep, Lottie artwork and launcher selection. Changing the Recents
-  provider requires the explicit reboot shown by Suite.
+- Pixel Launcher as the sole HOME/Recents provider, with the retired custom launcher excluded.
 - Opt-in synchronized lock-screen lyrics adapted from Infinity-X. The settings
   page discloses the LRCLIB artist/title lookup before it is enabled.
-- A native offline picker for 75 Lunaris theme styles and 91 checksum-pinned
-  resource APKs, with Android 17 status icon, battery and charging adapters.
+- Offline pickers for 21 pinned Wi-Fi and battery styles under Status Bar,
+  plus an original cyan/violet energy-orbit charging animation.
 - Offline random Lottie greeting, one About/donation/contact page, the existing
   Google Camera APK set, and the approved small caracal boot animation.
 
@@ -67,24 +65,18 @@ that previously included it, preserve its locally adapted files before syncing:
 git -C .repo/local_manifests pull --ff-only
 python3 .repo/local_manifests/tools/retire_launcher.py
 python3 .repo/local_manifests/tools/retire_omnijaws.py
-repo sync -c -j2 --fail-fast --no-clone-bundle --no-tags --force-sync vendor/hecker/floral/suite packages/apps/Launcher3 packages/apps/Settings
+repo sync -c -j2 --fail-fast --no-clone-bundle --no-tags vendor/hecker/floral/suite packages/apps/Settings kernel/google/msm-4.14
 HECKER_BUILD_JOBS=8 bash .repo/local_manifests/build.sh
 ```
 
-Run this from the existing Android source root. The retirement helper moves the
-old checkouts and launcher edits under `out/retired-projects/`. Infinity-X is
-pinned from its official Gitea source, and its optional automation listener
-handles role-access rejection without preventing HOME from starting. The build helper uses `installclean`
-only if a removed app is still staged. Launcher weather uses the independent
-Google feed when available. ServerHive builds retain the provider's existing RBE
-environment and should run in the initialized Byobu build session.
+Run this from the existing Android source root. The retirement helpers preserve
+old checkouts and local edits under `out/retired-projects/`. The build helper
+uses `installclean` when retired app files are still staged. Pixel Launcher is
+the only shipped HOME/Recents provider. ServerHive builds retain the provider's
+RBE environment and should run in the initialized Byobu build session.
 
-The launcher's Suite page stages your choice until its **Restart phone** action.
-That action changes HOME and the Recents overlay together, with the overlay at
-highest priority. If applying the overlay or restarting fails, it restores the
-previous HOME and overlay. Choosing a launcher keeps the current home and
-gestures active until that restart. Switching through Android's generic default
-home picker does not select a new Recents provider.
+See [Suite polish and upgrade checks](docs/suite-polish.md) for the current
+feature branch, canonical settings locations and device verification list.
 
 The script prepares and verifies the plugins, GCam and theme payloads, applies
 guarded source adapters, then selects `hecker_coral-hecker_suite-userdebug` and

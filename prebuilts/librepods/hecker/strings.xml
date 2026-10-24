@@ -1,0 +1,20 @@
+<resources>
+    <string name="hecker_librepods_app_name">LibrePods · HeckerOS</string>
+    <string name="hecker_headphones_title">Headphones</string>
+    <string name="hecker_headphones_connected">Bluetooth connected</string>
+    <string name="hecker_headphones_none">Connect your Bluetooth headphones to see their details.</string>
+    <string name="hecker_headphones_left">Left</string>
+    <string name="hecker_headphones_right">Right</string>
+    <string name="hecker_headphones_case">Case</string>
+    <string name="hecker_headphones_overall">Android battery reading: %1$d%%</string>
+    <string name="hecker_headphones_reading">Reading earbud details…</string>
+    <string name="hecker_headphones_read_unavailable">Vendor details unavailable. Standard Android readings are shown above.</string>
+    <string name="hecker_headphones_firmware_left">Left firmware: %1$s</string>
+    <string name="hecker_headphones_firmware_right">Right firmware: %1$s</string>
+    <string name="hecker_headphones_charging_left">Left earbud charging</string>
+    <string name="hecker_headphones_charging_right">Right earbud charging</string>
+    <string name="hecker_headphones_refresh">Refresh details</string>
+    <string name="hecker_headphones_reported_only">A dash means the device has not reported that value.</string>
+    <string name="hecker_headphones_r50i_readings" formatted="false">R50i reports earbud charge in 20% steps. Case battery is not reported.</string>
+    <string name="hecker_headphones_bluetooth">Bluetooth settings</string>
+</resources>

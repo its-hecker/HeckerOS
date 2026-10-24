@@ -42,10 +42,17 @@ class LauncherMigrationTests(unittest.TestCase):
         self.assertFalse(self.source.exists())
         self.assertIsNone(retire(self.rom))
 
-    def test_already_migrated_checkout_is_untouched(self):
+    def test_infinity_checkout_is_also_retired(self):
         self.git('remote', 'set-url', 'floral-github', 'https://gitea.com/projectInfinity-x/packages_apps_Launcher3')
+        destination = retire(self.rom)
+        self.assertEqual((destination / 'Android.bp').read_text(), 'original\n')
+        self.assertFalse(self.source.exists())
+
+    def test_stock_aosp_libraries_are_retained(self):
+        self.git('remote', 'set-url', 'floral-github',
+                 'https://android.googlesource.com/platform/packages/apps/Launcher3')
         self.assertIsNone(retire(self.rom))
-        self.assertEqual((self.source / 'Android.bp').read_text(), 'original\n')
+        self.assertEqual('original\n', (self.source / 'Android.bp').read_text())
 
     def test_unfamiliar_repository_is_preserved(self):
         self.git('remote', 'set-url', 'floral-github', 'https://example.invalid/custom-launcher')

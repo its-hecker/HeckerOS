@@ -42,11 +42,9 @@
             android:excludeFromRecents="true" android:noHistory="true" />
         <activity android:name=".LockScreenSettingsActivity" android:exported="false" android:label="@string/lock_screen_title" />
         <activity android:name=".StatusBarSettingsActivity" android:exported="false" android:label="@string/status_bar_title" />
-        <activity android:name=".AnimationSettingsActivity" android:exported="false" android:label="@string/animations_title" />
         <activity android:name=".ThemePackActivity" android:exported="false" android:label="@string/themes_title" />
+        <activity android:name=".CaptureSettingsActivity" android:exported="false" android:label="@string/capture_title" />
         <activity android:name=".QuickSettingsActivity" android:exported="false" android:label="@string/qs_title" />
-        <activity android:name=".LauncherSettingsActivity" android:exported="false"
-            android:label="@string/launcher_title" />
         <activity android:name=".LyricsSettingsActivity" android:exported="false"
             android:label="@string/lyrics_title" />
         <activity android:name=".AppLockActivity" android:exported="false"
@@ -86,6 +84,8 @@
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
         </service>
+        <activity android:name=".MemoryBoostActivity" android:exported="false" />
+        <activity android:name=".PixelLauncherSettingsActivity" android:exported="false" />
         <activity android:name=".SandboxActivity" android:exported="false" />
         <activity android:name=".HeadphonesActivity" android:exported="false" />
     </application>

@@ -1,7 +1,7 @@
 {
   "settings": {
     "repository": "its-hecker/heckeros_packages_apps_Settings",
-    "revision": "0c2c5aed4fd8e4a9507cfc26fa7a38f36f28dcba",
+    "revision": "e6fe59aea717e5f206de5c9a4e9c4da336738875",
     "files": {
       "Android.bp": "7734560e9290e57348a9da9626045091388829dc909ca1bea49a91ec827e2f41",
       "AndroidManifest.xml": "73f27add49dce3e9f93738fc5cd963d3b0cf42bec0836cc987b92c248130d12c",
@@ -29,14 +29,17 @@
       "src/com/android/settings/biometrics/face/FacePoseEnrollmentState.java": "457bfab56bde33bff1f8213c88dca33966dd07866eaccb06041dcd4b6a615d5e",
       "src/com/android/settings/biometrics/face/FacePoseGridView.java": "db180ebb8e494439bae427f8f03314879b12cb8e2b35c91819a4f5774bb7fe78",
       "src/com/android/settings/biometrics/face/PixelFaceAnimationLifecycle.java": "f3dac03146d72f7580104b7df8445b7b784a594a93b75851f9eca0336b80d917",
-      "src/com/android/settings/hecker/HeckerIntegrityActivity.java": "b58a86dbf0d5c1a8cd92156a17a703ff99d3e243c7346d589a06ec5b425729e4",
+      "src/com/android/settings/hecker/HeckerIntegrityActivity.java": "bdf92e4c73a3e07d9863d4df26fdb5039603b1d5a69c51bce43dc0d0ec80b458",
       "src/com/android/settings/hecker/PifProfile.java": "e4132e74e93e7937efc35d330d274b7520a6baa75afafcf56a23dc8a652031c9",
       "src/com/android/settings/hecker/PixelBetaProfileFetcher.java": "5100f5185b147185279a21ef98092c7a2b73cd66988b87e86ab4a48f3bedd37f",
       "src/com/google/android/settings/biometrics/face/anim/FaceEnrollAnimationMultiAngleDrawable.java": "7e69811a92b9e649b6d26b8fa67e9dcbe034865da45f9c3d2b7264e672cbe1d4",
       "tools/hecker/tests/FacePoseEnrollmentStateTest.java": "8b22394bd04f0719649b61807dd3e97b47ab0a2980cbe1dba0f46b514c63f4bc",
       "tools/hecker/tests/PifProfileTest.java": "6d620f65605fe7fd39eebd2831fd480c368388ec17609a10eb6f08746a1f2721",
       "src/com/android/settings/biometrics/face/FacePoseGridGeometry.java": "76dfc0dbf9a27431e4a6017c31d2ea1e378c9992e04e5b35cb6be537dedd9afc",
-      "tools/hecker/tests/FacePoseGridGeometryTest.java": "94598e1b7742ea70f4a6ae375a14be8122458990b641da88d54d2aa96fd44e3e"
+      "tools/hecker/tests/FacePoseGridGeometryTest.java": "94598e1b7742ea70f4a6ae375a14be8122458990b641da88d54d2aa96fd44e3e",
+      "res/raw/hecker_integrity.json": "405a7370fe3dc721c874a17b1edb052f97692491ff498256bfccc9eaeca29bae",
+      "res/values/hecker_integrity_design.xml": "17ec510f02ef038fce161953d8ab5088958722eb7a96eac249734374d4524bc9",
+      "res/values-zh-rCN/hecker_integrity_design.xml": "ffc78a0cea836038e919cde50f7416f3508f860101aa667d19956873e2a2fa02"
     }
   },
   "framework": {

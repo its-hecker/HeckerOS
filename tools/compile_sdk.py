@@ -83,6 +83,15 @@ def main():
         environment["LD_LIBRARY_PATH"] = str(cache / "lib64")
         run(cache / "aidl", "--lang=java", "--out=" + str(output / "aidl-generated"),
             "-I", output / "aidl", probe, env=environment)
+        for name in ("Bundle", "ParcelFileDescriptor"):
+            parcelable = output / "aidl/android/os" / (name + ".aidl")
+            parcelable.parent.mkdir(parents=True, exist_ok=True)
+            parcelable.write_text("package android.os; parcelable " + name + ";\n")
+        for folder, name in (("memory", "IHeckerMemoryService"), ("launcher", "IHeckerLauncherService")):
+            source = output / "aidl/android/os" / (name + ".aidl")
+            source.write_text((ROOT / "framework" / folder / (name + ".aidl")).read_text())
+            run(cache / "aidl", "--lang=java", "--out=" + str(output / "feature-aidl"),
+                "-I", output / "aidl", source, env=environment)
         generated = (output / "aidl-generated/suite/probe/IAccessProbe.java").read_text()
         assert "android.Manifest.permission.LOCK_APPS" in generated
         assert "android.Manifest.permission.HECKER_SUITE_APP_LOCK" in generated
@@ -112,7 +121,9 @@ def main():
             "-d", output / "classes", output / "generated/org/hecker/suite/R.java",
             *sorted((ROOT / "tests/platform-api-stubs").rglob("*.java")),
             *sorted((ROOT / "app/src").rglob("*.java")),
-            ROOT / "framework/sandbox/HeckerSandboxRules.java")
+            ROOT / "framework/sandbox/HeckerSandboxRules.java",
+            ROOT / "framework/memory/HeckerMemoryRules.java",
+            *sorted((output / "feature-aidl").rglob("*.java")))
         # Compile exactly the Settings UI module without backend classes on its
         # classpath, so a feature Activity reference cannot silently join its UID.
         (output / "settings-ui-classes").mkdir()

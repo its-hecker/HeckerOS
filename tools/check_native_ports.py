@@ -18,6 +18,7 @@ from customization_port import customization_plan
 from launcher_port import launcher_plan
 from prepare import replace_guarded
 from privapp_permissions import check_privapp_permissions
+from check_pin_bouncer import PIN_INPUTS, check_pin_bouncer
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -306,6 +307,53 @@ def check_launcher_navbar_uris(folder, sdk):
     print('Both taskbar navigation-size URI declarations compile against the Android SDK')
 
 
+def check_secure_capture(folder):
+    """Execute the actual prepared WMS method, including secure-surface refreshes."""
+    wms = (folder / 'frameworks/base/services/core/java/com/android/server/wm/WindowManagerService.java').read_text()
+    begin = wms.index('        void updateDisableSecureWindows() {')
+    end = wms.index('        void updateMagnifyIme()', begin)
+    method = wms[begin:end]
+    assert 'mCurrentUserId = newUserId;\n            mSettingsObserver.updateDisableSecureWindows();' in wms
+    probe = r'''import java.util.Map;
+import java.util.HashMap;
+class CaptureUserProbe {
+ static class Settings {
+  static class SettingNotFoundException extends Exception {}
+  static class Secure {
+   static String DISABLE_SECURE_WINDOWS="disable_secure_windows";
+   static Map<Integer,Integer> values = new HashMap<>();
+   static int getIntForUser(Object resolver,String key,int user) throws SettingNotFoundException {
+    if (!values.containsKey(user)) throw new SettingNotFoundException();
+    return values.get(user);
+   }
+  }
+ }
+ static class Context { Object getContentResolver(){return this;} }
+ static class Root { int refreshes; void refreshSecureSurfaceState(){refreshes++;} }
+ final Context mContext=new Context(); final Object mGlobalLock=new Object(); final Root mRoot=new Root();
+ boolean mDisableSecureWindows=false; int mCurrentUserId;
+''' + method + r'''
+ static void check(boolean value) { if(!value)throw new AssertionError(); }
+ public static void main(String[] args) {
+  CaptureUserProbe w=new CaptureUserProbe();
+  w.updateDisableSecureWindows(); check(!w.mDisableSecureWindows && w.mRoot.refreshes==0);
+  Settings.Secure.values.put(0,1); w.updateDisableSecureWindows(); check(w.mDisableSecureWindows && w.mRoot.refreshes==1);
+  w.updateDisableSecureWindows(); check(w.mRoot.refreshes==1);
+  w.mCurrentUserId=10; w.updateDisableSecureWindows(); check(!w.mDisableSecureWindows && w.mRoot.refreshes==2);
+  Settings.Secure.values.put(10,1); w.updateDisableSecureWindows(); check(w.mDisableSecureWindows && w.mRoot.refreshes==3);
+  w.mCurrentUserId=0; Settings.Secure.values.put(0,0); w.updateDisableSecureWindows();
+  check(!w.mDisableSecureWindows && Settings.Secure.values.get(10)==1 && w.mRoot.refreshes==4);
+ }
+}
+'''
+    with tempfile.TemporaryDirectory(prefix='hecker-capture-user-') as directory:
+        source = Path(directory) / 'CaptureUserProbe.java'
+        source.write_text(probe)
+        subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-d',directory,str(source)], check=True)
+        subprocess.run(['java','-cp',directory,'CaptureUserProbe'], check=True)
+    print('Actual WindowManager secure-capture setting: default off, per-user changes, switch isolation and live surface refresh PASS')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cache', type=Path, default=ROOT / 'out/native-source-cache')
@@ -313,11 +361,11 @@ def main():
     parser.add_argument('--launcher-source', type=Path,
                         help='Read the pinned commit directly from an existing launcher Git checkout')
     parser.add_argument('--sdk-cache', type=Path,
-                        help='Also compile the prepared taskbar navigation URI declarations with the locked SDK')
+                        help='Also compile native declarations and exercise PIN entry with locked compilers')
+    parser.add_argument('--kotlin-cache', type=Path, default=ROOT / 'generated/compose-check',
+                        help='Locked Kotlin dependencies for the PIN bouncer regression check')
     args = parser.parse_args()
     sources = json.loads((ROOT / 'integration/source-revisions.json').read_text())['pixelos_inputs']
-    launcher = json.loads((ROOT / 'launcher/ORIGIN.json').read_text())
-    sources['packages/apps/Launcher3'] = launcher
     git_sources = {}
     def git_source(origin):
         revision = origin['revision']
@@ -340,12 +388,14 @@ def main():
         git_sources[revision] = folder
         return folder
     paths = set(json.loads((ROOT / 'framework/customization-patches.json').read_text()))
+    paths.update(PIN_INPUTS)
+    paths.add('frameworks/base/core/java/android/view/WindowManager.java')
+    paths.update('packages/apps/Launcher3/' + name for name in ('Android.bp', 'aconfig/Android.bp'))
     paths.add('frameworks/base/core/java/android/content/res/Resources.java')
     paths.add('frameworks/base/core/res/AndroidManifest.xml')
     paths.add('frameworks/base/packages/SystemUI/shared/src/com/android/systemui/shared/plugins/PackageConfig.kt')
     paths.add('frameworks/base/packages/SystemUI/customization/src/com/android/systemui/shared/clocks/ClockRegistry.kt')
     paths.add('frameworks/base/services/core/java/com/android/server/om/OverlayManagerService.java')
-    paths.update('packages/apps/Launcher3/' + p for p in json.loads((ROOT / 'launcher/patches.json').read_text()))
     def cached_source(relative):
         project = max((p for p in sources if relative.startswith(p + '/')), key=len)
         # A pin update must never reuse content fetched for an older revision.
@@ -393,7 +443,7 @@ def main():
         before = snapshot(folder)
         required = check_privapp_permissions(folder / 'frameworks/base/core/res/AndroidManifest.xml', ROOT)
         print(f'Suite allowlist covers {len(required)} privileged permissions in the pinned Android framework')
-        plans = (customization_plan, launcher_plan)
+        plans = (customization_plan,)
         count = 0
         for plan in plans:
             changes = plan(folder, replace_guarded)
@@ -403,13 +453,18 @@ def main():
         check_theme_broadcast(folder)
         check_bootanimation_owner(folder)
         check_bootanimation_selection(folder)
-        check_recents_transaction(folder)
-        check_launcher_weather(folder)
-        check_launcher_weather_module(folder)
-        check_launcher_resource_scope(folder)
+        check_secure_capture(folder)
+        window_types = (folder / 'frameworks/base/core/java/android/view/WindowManager.java').read_text()
+        assert re.search(r'TYPE_STATUS_BAR_ADDITIONAL\s*=\s*FIRST_SYSTEM_WINDOW\s*\+\s*41\s*;', window_types)
+        assert 'public void setTrustedOverlay()' in window_types
+        for relative, module in [('Android.bp', 'launcher-aosp-tapl'),
+                                 ('aconfig/Android.bp', 'com_android_launcher3_flags_lib')]:
+            source = (folder / 'packages/apps/Launcher3' / relative).read_text()
+            assert len(re.findall(r'\bname:\s*"' + module + '"', source)) == 1, module
+        print('Stock Launcher3 SystemUI flag and TAPL build modules retained: PASS')
         if args.sdk_cache:
             check_clock_plugins(folder, args.sdk_cache.resolve())
-            check_launcher_navbar_uris(folder, args.sdk_cache.resolve())
+            check_pin_bouncer(folder, args.kotlin_cache.resolve())
         for plan in reversed(plans):
             write(plan(folder, replace_guarded, True))
         assert before == snapshot(folder), 'Revert changed upstream content'

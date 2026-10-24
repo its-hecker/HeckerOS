@@ -2,94 +2,24 @@
 # Avoid installing two packages with the same Android package identity.
 PRODUCT_PACKAGES := $(filter-out AquariumSignalOverlay AuroraSignalOverlay AuroraWiFiOverlay BarsSignalOverlay BarsWiFiOverlay BatteryStyleOneUI7Overlay BatteryStyleOrigamiOverlay BatteryStyleSmileyOverlay BatteryStyleiOS15Overlay BatteryStyleiOS16Overlay ButterflySignalOverlay CircleSignalOverlay DaunSignalOverlay DecSignalOverlay DeepSignalOverlay DoraSignalOverlay DoraWiFiOverlay EqualSignalOverlay FaintUISignalOverlay FaintUIWiFiOverlay FanSignalOverlay ForlornSignalOverlay ForlornWiFiOverlay GradiconSignalOverlay GradiconWiFiOverlay HuaweiSignalOverlay IconPackAcherusAndroidOverlay IconPackAcherusSystemUIOverlay IconPackAuroraAndroidOverlay IconPackAuroraSystemUIOverlay IconPackCircularAndroidOverlay IconPackCircularSystemUIOverlay IconPackFilledAndroidOverlay IconPackFilledSystemUIOverlay IconPackGradiconAndroidOverlay IconPackGradiconSystemUIOverlay IconPackKaiAndroidOverlay IconPackKaiSystemUIOverlay IconPackLornAndroidOverlay IconPackLornSystemUIOverlay IconPackNostalgicAndroidOverlay IconPackNostalgicSystemUIOverlay IconPackOOSAndroidOverlay IconPackOOSSystemUIOverlay IconPackOutlineAndroidOverlay IconPackOutlineSystemUIOverlay IconPackPUIAndroidOverlay IconPackPUISystemUIOverlay IconPackPlumpyAndroidOverlay IconPackPlumpySystemUIOverlay IconPackRoundedAndroidOverlay IconPackRoundedSystemUIOverlay IconPackSamAndroidOverlay IconPackSamSystemUIOverlay IconPackVictorAndroidOverlay IconPackVictorSystemUIOverlay IconPackXperiaAndroidOverlay IconPackXperiaSystemUIOverlay InsideSignalOverlay InsideWiFiOverlay IosSignalOverlay MiniSignalOverlay MotoChargingAnimationOverlay NothingChargingAnimationOverlay NothingDotSignalOverlay NothingDotWiFiOverlay OdinSignalOverlay PillsSignalOverlay PlumpySignalOverlay PlumpyWiFiOverlay RelSignalOverlay RomanSignalOverlay RoundSignalOverlay RoundWiFiOverlay ScrollSignalOverlay SeaSignalOverlay SneakySignalOverlay SneakyWiFiOverlay StackSignalOverlay StrokeSignalOverlay StrokeWiFiOverlay WannuiSignalOverlay WavySignalOverlay WavyWiFiOverlay WeedWiFiOverlay WindowsSignalOverlay WingSignalOverlay XperiaSignalOverlay XperiaWiFiOverlay ZigZagSignalOverlay ZigZagWiFiOverlay,$(PRODUCT_PACKAGES))
 PRODUCT_PACKAGES += \
-    HeckerThemeAquariumSignalOverlay \
-    HeckerThemeAuroraSignalOverlay \
     HeckerThemeAuroraWiFiOverlay \
-    HeckerThemeBarsSignalOverlay \
     HeckerThemeBarsWiFiOverlay \
     HeckerThemeBatteryStyleOneUI7Overlay \
     HeckerThemeBatteryStyleOrigamiOverlay \
     HeckerThemeBatteryStyleSmileyOverlay \
     HeckerThemeBatteryStyleiOS15Overlay \
     HeckerThemeBatteryStyleiOS16Overlay \
-    HeckerThemeButterflySignalOverlay \
-    HeckerThemeCircleSignalOverlay \
-    HeckerThemeDaunSignalOverlay \
-    HeckerThemeDecSignalOverlay \
-    HeckerThemeDeepSignalOverlay \
-    HeckerThemeDoraSignalOverlay \
     HeckerThemeDoraWiFiOverlay \
-    HeckerThemeEqualSignalOverlay \
-    HeckerThemeFaintUISignalOverlay \
     HeckerThemeFaintUIWiFiOverlay \
-    HeckerThemeFanSignalOverlay \
-    HeckerThemeForlornSignalOverlay \
     HeckerThemeForlornWiFiOverlay \
-    HeckerThemeGradiconSignalOverlay \
     HeckerThemeGradiconWiFiOverlay \
-    HeckerThemeHuaweiSignalOverlay \
-    HeckerThemeIconPackAcherusAndroidOverlay \
-    HeckerThemeIconPackAcherusSystemUIOverlay \
-    HeckerThemeIconPackAuroraAndroidOverlay \
-    HeckerThemeIconPackAuroraSystemUIOverlay \
-    HeckerThemeIconPackCircularAndroidOverlay \
-    HeckerThemeIconPackCircularSystemUIOverlay \
-    HeckerThemeIconPackFilledAndroidOverlay \
-    HeckerThemeIconPackFilledSystemUIOverlay \
-    HeckerThemeIconPackGradiconAndroidOverlay \
-    HeckerThemeIconPackGradiconSystemUIOverlay \
-    HeckerThemeIconPackKaiAndroidOverlay \
-    HeckerThemeIconPackKaiSystemUIOverlay \
-    HeckerThemeIconPackLornAndroidOverlay \
-    HeckerThemeIconPackLornSystemUIOverlay \
-    HeckerThemeIconPackNostalgicAndroidOverlay \
-    HeckerThemeIconPackNostalgicSystemUIOverlay \
-    HeckerThemeIconPackOOSAndroidOverlay \
-    HeckerThemeIconPackOOSSystemUIOverlay \
-    HeckerThemeIconPackOutlineAndroidOverlay \
-    HeckerThemeIconPackOutlineSystemUIOverlay \
-    HeckerThemeIconPackPUIAndroidOverlay \
-    HeckerThemeIconPackPUISystemUIOverlay \
-    HeckerThemeIconPackPlumpyAndroidOverlay \
-    HeckerThemeIconPackPlumpySystemUIOverlay \
-    HeckerThemeIconPackRoundedAndroidOverlay \
-    HeckerThemeIconPackRoundedSystemUIOverlay \
-    HeckerThemeIconPackSamAndroidOverlay \
-    HeckerThemeIconPackSamSystemUIOverlay \
-    HeckerThemeIconPackVictorAndroidOverlay \
-    HeckerThemeIconPackVictorSystemUIOverlay \
-    HeckerThemeIconPackXperiaAndroidOverlay \
-    HeckerThemeIconPackXperiaSystemUIOverlay \
-    HeckerThemeInsideSignalOverlay \
     HeckerThemeInsideWiFiOverlay \
-    HeckerThemeIosSignalOverlay \
-    HeckerThemeMiniSignalOverlay \
-    HeckerThemeMotoChargingAnimationOverlay \
-    HeckerThemeNothingChargingAnimationOverlay \
-    HeckerThemeNothingDotSignalOverlay \
     HeckerThemeNothingDotWiFiOverlay \
-    HeckerThemeOdinSignalOverlay \
-    HeckerThemePillsSignalOverlay \
-    HeckerThemePlumpySignalOverlay \
     HeckerThemePlumpyWiFiOverlay \
-    HeckerThemeRelSignalOverlay \
-    HeckerThemeRomanSignalOverlay \
-    HeckerThemeRoundSignalOverlay \
     HeckerThemeRoundWiFiOverlay \
-    HeckerThemeScrollSignalOverlay \
-    HeckerThemeSeaSignalOverlay \
-    HeckerThemeSneakySignalOverlay \
     HeckerThemeSneakyWiFiOverlay \
-    HeckerThemeStackSignalOverlay \
-    HeckerThemeStrokeSignalOverlay \
     HeckerThemeStrokeWiFiOverlay \
-    HeckerThemeWannuiSignalOverlay \
-    HeckerThemeWavySignalOverlay \
     HeckerThemeWavyWiFiOverlay \
     HeckerThemeWeedWiFiOverlay \
-    HeckerThemeWindowsSignalOverlay \
-    HeckerThemeWingSignalOverlay \
-    HeckerThemeXperiaSignalOverlay \
     HeckerThemeXperiaWiFiOverlay \
-    HeckerThemeZigZagSignalOverlay \
     HeckerThemeZigZagWiFiOverlay

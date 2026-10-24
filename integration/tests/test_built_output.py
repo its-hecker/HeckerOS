@@ -7,6 +7,7 @@ import json
 import sys
 import tempfile
 import unittest
+import zipfile
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
@@ -187,15 +188,25 @@ class BuiltOutputTests(unittest.TestCase):
             installed_feature.write_bytes(feature.read_bytes())
             check_suite(root, output)
 
-    def test_librepods_requires_original_bytes_and_both_permission_files(self):
+    def test_librepods_accepts_rom_signing_but_requires_source_payload_and_permissions(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             output = root / "output"
             source = root / "vendor/hecker/floral/suite/prebuilts/librepods"
             source.mkdir(parents=True)
-            data = b"original signed APK fixture"
-            (source / "source.json").write_text(json.dumps({
-                "size": len(data), "sha256": hashlib.sha256(data).hexdigest()}))
+            (source / "prebuilt").mkdir()
+            built = source / "prebuilt/HeckerLibrePods.apk"
+            entries = {"AndroidManifest.xml": b"org.hecker.librepods manifest",
+                       "classes.dex": b"headphone routing and codec",
+                       "lib/arm64-v8a/libbluetooth_socket.so": b"AirPods JNI",
+                       "resources.arsc": b"animated companion resources"}
+            with zipfile.ZipFile(built, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                for name, content in entries.items(): archive.writestr(name, content)
+            data = built.read_bytes()
+            identity = {"source_commit": "a" * 40, "package": "org.hecker.librepods"}
+            (source / "source.json").write_text(json.dumps(identity))
+            record = dict(identity, size=len(data), sha256=hashlib.sha256(data).hexdigest())
+            (source / "prebuilt/build.json").write_text(json.dumps(record))
             with self.assertRaisesRegex(ValueError, "LibrePods APK"):
                 check_librepods(root, output)
             apk = output / "system_ext/priv-app/HeckerLibrePods/HeckerLibrePods.apk"
@@ -203,7 +214,10 @@ class BuiltOutputTests(unittest.TestCase):
             apk.write_bytes(b"wrong APK bytes")
             with self.assertRaisesRegex(ValueError, "LibrePods APK"):
                 check_librepods(root, output)
-            apk.write_bytes(data)
+            with zipfile.ZipFile(apk, "w", compression=zipfile.ZIP_STORED) as archive:
+                for name, content in entries.items(): archive.writestr(name, content)
+                archive.writestr("META-INF/PLATFORM.SF", b"ROM signature")
+            self.assertNotEqual(data, apk.read_bytes())
             for folder, name in (("permissions", "privapp-permissions-librepods.xml"),
                                  ("default-permissions", "default-permissions-librepods.xml")):
                 (source / name).write_text('<permissions />')
@@ -213,7 +227,22 @@ class BuiltOutputTests(unittest.TestCase):
                 installed.parent.mkdir(parents=True, exist_ok=True)
                 installed.write_bytes((source / name).read_bytes())
             check_librepods(root, output)
-            apk.write_bytes(b"X" + data[1:])
+            with zipfile.ZipFile(apk, "w") as archive:
+                for name, content in entries.items():
+                    archive.writestr(name, b"stale code" if name == "classes.dex" else content)
+            with self.assertRaisesRegex(ValueError, "LibrePods APK"):
+                check_librepods(root, output)
+            apk.write_bytes(data)
+            for key, value in (("source_commit", "b" * 40), ("package", "me.kavishdevar.librepods"),
+                               ("sha256", "0" * 64)):
+                with self.subTest(key=key):
+                    (source / "prebuilt/build.json").write_text(json.dumps(dict(record, **{key: value})))
+                    with self.assertRaisesRegex(ValueError, "source-build record"):
+                        check_librepods(root, output)
+            (source / "prebuilt/build.json").write_text(json.dumps(record))
+            with zipfile.ZipFile(apk, "w") as archive:
+                for name, content in entries.items():
+                    if name != "lib/arm64-v8a/libbluetooth_socket.so": archive.writestr(name, content)
             with self.assertRaisesRegex(ValueError, "LibrePods APK"):
                 check_librepods(root, output)
 

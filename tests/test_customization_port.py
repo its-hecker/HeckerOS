@@ -110,3 +110,23 @@ class CustomizationPortTests(unittest.TestCase):
             before=self.snapshot(folder)
             with self.assertRaises(ValueError):customization_plan(folder,replace_guarded)
             self.assertEqual(before,self.snapshot(folder))
+
+    def test_published_memory_policy_upgrades_without_a_clean_checkout(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder=Path(temporary);self.stage(folder)
+            self.write(customization_plan(folder,replace_guarded))
+            relative='frameworks/base/services/core/java/com/android/server/am/HeckerMemoryPolicy.java'
+            path=folder/relative
+            current=path.read_text()
+            # The first published adapter used an inaccessible PSC getter.
+            previous=current.replace('.getProcState()', '.getCurProcState()')
+            self.assertNotEqual(previous,current)
+            path.write_text(previous)
+            changes=customization_plan(folder,replace_guarded)
+            self.assertEqual({path},set(changes))
+            self.write(changes)
+            self.assertEqual(current,path.read_text())
+            self.assertEqual({},customization_plan(folder,replace_guarded))
+            path.write_text(previous+'\n// local maintainer edit\n')
+            with self.assertRaises(ValueError):customization_plan(folder,replace_guarded)
+            self.assertEqual(previous+'\n// local maintainer edit\n',path.read_text())

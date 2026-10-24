@@ -15,7 +15,7 @@ public final class HeadphonesActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         LinearLayout page = Ui.page(this, R.string.headphones_title);
-        page.addView(Ui.text(this, getString(R.string.headphones_description), 15, false));
+        Ui.hero(this, page, R.raw.suite_headphones, R.string.headphones_description);
         LinearLayout card = Ui.card(this);
         Switch enabled = new Switch(this);
         enabled.setText(R.string.headphones_popup);
@@ -27,7 +27,7 @@ public final class HeadphonesActivity extends Activity {
         card.addView(enabled); page.addView(card);
         Ui.actionCard(this, page, R.string.headphones_airpods, R.string.headphones_airpods_summary,
                 view -> {
-                    Intent intent = getPackageManager().getLaunchIntentForPackage("me.kavishdevar.librepods");
+                    Intent intent = getPackageManager().getLaunchIntentForPackage("org.hecker.librepods");
                     try {
                         if (intent == null) throw new ActivityNotFoundException();
                         startActivity(intent);

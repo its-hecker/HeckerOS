@@ -10,6 +10,7 @@ public final class LockScreenSettingsActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         LinearLayout page=Ui.page(this,R.string.lock_screen_title);
+        Ui.hero(this, page, R.raw.suite_lock, R.string.lock_screen_summary);
         LinearLayout faceCard = Ui.card(this);
         android.widget.Switch faceIsland = new android.widget.Switch(this);
         faceIsland.setText(R.string.face_island_title);
@@ -24,8 +25,19 @@ public final class LockScreenSettingsActivity extends Activity {
         page.addView(faceCard);
         Ui.actionCard(this,page,R.string.lyrics_title,R.string.lyrics_summary,v->startActivity(new Intent(this,LyricsSettingsActivity.class)));
         Ui.actionCard(this,page,R.string.lockscreen_wallpaper_title,R.string.lockscreen_wallpaper_summary,v->SuitePages.wallpaper(this));
-        Ui.actionCard(this,page,R.string.theme_charging,R.string.charging_theme_summary,v->SuitePages.theme(this,4));
-        Ui.actionCard(this,page,R.string.lockscreen_display_title,R.string.lockscreen_display_summary,v->SuitePages.settings(this,Settings.ACTION_DISPLAY_SETTINGS));
+        LinearLayout charge = Ui.card(this);
+        SuiteAnimation art = new SuiteAnimation(this, charge, 112);
+        art.show(R.raw.suite_charge, true);
+        android.widget.Switch charging = new android.widget.Switch(this);
+        charging.setText(R.string.charging_energy_title);
+        charging.setTextColor(getColor(R.color.hecker_foreground));
+        charging.setMinHeight(Ui.dp(this, 56));
+        charging.setChecked(Settings.Secure.getInt(getContentResolver(), "hecker_charging_animation", 1) != 0);
+        charging.setOnCheckedChangeListener((button, checked) -> Settings.Secure.putInt(
+                getContentResolver(), "hecker_charging_animation", checked ? 1 : 0));
+        charge.addView(charging);
+        charge.addView(Ui.text(this, getString(R.string.charging_energy_summary), 14, false));
+        page.addView(charge);
         Ui.scroll(this,page);
     }
     @Override public boolean onOptionsItemSelected(MenuItem item) {

@@ -1,0 +1,2 @@
+# Host-only caches: exclude downloaded SDK/NDK, Gradle outputs and upstream
+# source trees from Android's recursive module discovery.

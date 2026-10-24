@@ -29,12 +29,13 @@ public final class SuiteRouterActivity extends Activity {
             case "LyricsSettingsActivity": return LyricsSettingsActivity.class;
             case "StatusBarSettingsActivity": return StatusBarSettingsActivity.class;
             case "ThemePackActivity": return ThemePackActivity.class;
-            case "AnimationSettingsActivity": return AnimationSettingsActivity.class;
+            case "MemoryBoostActivity": return MemoryBoostActivity.class;
+            case "PixelLauncherSettingsActivity": return PixelLauncherSettingsActivity.class;
             case "SandboxActivity": return SandboxActivity.class;
             case "HeadphonesActivity": return HeadphonesActivity.class;
+            case "CaptureSettingsActivity": return CaptureSettingsActivity.class;
             case "AppLockActivity": return AppLockActivity.class;
             case "GamingActivity": return GamingActivity.class;
-            case "LauncherSettingsActivity": return LauncherSettingsActivity.class;
             case "InfraredCameraActivity": return InfraredCameraActivity.class;
             default: return null;
         }

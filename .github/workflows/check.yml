@@ -9,6 +9,26 @@ concurrency:
   group: hecker-source-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  librepods:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Build the GPL LibrePods variant with Soundcore and generic headphones
+        run: python3 tools/prepare_librepods.py --sdk-cache "$ANDROID_HOME"
+      - name: Verify source recipe and APK cache
+        run: python3 tools/prepare_librepods.py --offline
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hecker-librepods
+          path: |
+            prebuilts/librepods/prebuilt/HeckerLibrePods.apk
+            prebuilts/librepods/prebuilt/build.json
+          if-no-files-found: error
   public-metadata:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
@@ -39,8 +59,12 @@ jobs:
         run: python3 tools/check_launcher.py --sdk-cache generated/sdk
       - name: Compile headphone, sandbox and face-island native adapter Java and resources
         run: python3 tools/check_device_features.py --sdk-cache generated/sdk
+      - name: Compile the connected-headphone page and Bluetooth reader
+        run: python3 tools/check_headphone_companion.py --sdk-cache generated/sdk
       - name: Compile Quick Settings Kotlin and Java with locked Compose dependencies
         run: python3 tools/check_quick_settings.py --sdk-cache generated/sdk
+      - name: Compile native memory, launcher, volume and status-bar interaction adapters
+        run: python3 tools/check_interaction_features.py --sdk-cache generated/sdk
       - name: Compile native About Phone and verify HeckerOS release identity
         run: python3 tools/check_about_phone.py --sdk-cache generated/sdk
       - name: Merge the native and standalone Motion Sense manifests with Android 17's merger

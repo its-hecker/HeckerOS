@@ -338,8 +338,7 @@ def plan(rom, revert=False):
     elif not helper.exists():
         changes[helper] = expected
     changes.update(motion_plan(rom, revert))
-    changes.update(launcher_plan(rom, replace_guarded, revert))
-    changes.update(customization_plan(rom, replace_guarded, revert))
+    changes.update(customization_plan(rom, replace_guarded, revert, pending_changes=changes))
     changes.update(recovery_plan(rom, revert))
     return changes
 
@@ -348,7 +347,9 @@ def apply(rom, mode):
     changes = plan(rom, mode == "revert")
     if mode == "verify":
         if changes:
-            raise ValueError("Suite source integration is missing; run tools/prepare.py --apply")
+            paths = "\n  ".join(str(path.relative_to(rom)) for path in sorted(changes))
+            raise ValueError("Suite source integration is missing; run tools/prepare.py --apply"
+                             + "\nPending paths:\n  " + paths)
         print("Hecker Suite App Lock access and settings navigation: already applied and verified")
         return
     if mode == "check":

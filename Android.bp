@@ -14,7 +14,10 @@ android_app {
     name: "HeckerSuite",
     manifest: "app/AndroidManifest.xml",
     srcs: ["app/src/**/*.java"],
-    exclude_srcs: ["app/src/org/hecker/suite/SuiteActivity.java"],
+    exclude_srcs: ["app/src/org/hecker/suite/SuiteActivity.java",
+        "app/src/org/hecker/suite/LauncherController.java",
+        "app/src/org/hecker/suite/LauncherSettingsActivity.java",
+        "app/src/org/hecker/suite/AnimationSettingsActivity.java"],
     resource_dirs: ["app/res"],
     asset_dirs: ["app/assets"],
     platform_apis: true,
@@ -70,16 +73,6 @@ aconfig_values {
 aconfig_value_set {
     name: "hecker_suite_aconfig_value_set",
     values: ["hecker_suite_security_flags", "hecker_suite_systemui_flags"],
-}
-
-// Disabled by default: Pixel Launcher remains the initial Recents provider.
-// Suite enables this signed overlay only when its owner selects Hecker's Launcher.
-runtime_resource_overlay {
-    name: "HeckerLauncherRecentsOverlay",
-    manifest: "launcher/recents/AndroidManifest.xml",
-    resource_dirs: ["launcher/recents/res"],
-    certificate: "platform",
-    product_specific: true,
 }
 
 prebuilt_media {

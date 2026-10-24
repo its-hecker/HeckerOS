@@ -8,6 +8,9 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 suite_test_output="$(mktemp -d)"
 trap 'rm -rf -- "$suite_test_output"' EXIT
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    prebuilts/librepods/hecker/SoundcoreR50iCodec.java tests/SoundcoreR50iTest.java
+java -cp "$suite_test_output" SoundcoreR50iTest
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     app/src/org/hecker/suite/RawFrameDecoder.java tests/RawFrameDecoderTest.java
 java -cp "$suite_test_output" org.hecker.suite.RawFrameDecoderTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
@@ -52,3 +55,11 @@ java -cp "$suite_test_output" com.android.systemui.hecker.ThemeIconNamesTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     framework/gaming/GameTelemetry.java tests/GameTelemetryTest.java
 java -cp "$suite_test_output" com.android.server.hecker.GameTelemetryTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/themes/RetiredThemeSelection.java tests/RetiredThemeSelectionTest.java
+java -cp "$suite_test_output" RetiredThemeSelectionTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/memory/HeckerMemoryRules.java framework/launcher/HeckerHomeDoubleTap.java tests/InteractionPolicyTest.java
+java -cp "$suite_test_output" InteractionPolicyTest
