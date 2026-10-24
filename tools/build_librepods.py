@@ -113,7 +113,11 @@ def build(offline=False,sdk_cache=None):
             with tarfile.open(archive) as source:source.extractall(extracted,filter='data')
             patch_source(extracted);shutil.move(str(extracted),str(work))
     env['ANDROID_HOME']=str(sdk);env['ANDROID_SDK_ROOT']=str(sdk);env['GRADLE_USER_HOME']=str(ROOT/'out/librepods-gradle')
-    subprocess.run(['bash','./gradlew','--no-daemon','--console=plain','--max-workers=4',':app:assembleFossRelease'],cwd=work/'android',env=env,check=True)
+    # Upstream omits org.gradle.jvmargs: Gradle's 512 MiB default exhausts the
+    # heap while merging its artwork and optimizing the Compose release APK.
+    subprocess.run(['bash','./gradlew','--no-daemon','--console=plain','--max-workers=2',
+                    '-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError',
+                    ':app:assembleFossRelease'],cwd=work/'android',env=env,check=True)
     outputs=list((work/'android/app/build/outputs/apk/foss/release').glob('*.apk'))
     if len(outputs)!=1:raise ValueError('Expected one LibrePods APK')
     with zipfile.ZipFile(outputs[0]) as apk:

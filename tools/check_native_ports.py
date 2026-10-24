@@ -456,6 +456,7 @@ def main():
         check_secure_capture(folder)
         window_types = (folder / 'frameworks/base/core/java/android/view/WindowManager.java').read_text()
         assert re.search(r'TYPE_STATUS_BAR_ADDITIONAL\s*=\s*FIRST_SYSTEM_WINDOW\s*\+\s*41\s*;', window_types)
+        assert 'public void setTrustedOverlay()' in window_types
         for relative, module in [('Android.bp', 'launcher-aosp-tapl'),
                                  ('aconfig/Android.bp', 'com_android_launcher3_flags_lib')]:
             source = (folder / 'packages/apps/Launcher3' / relative).read_text()

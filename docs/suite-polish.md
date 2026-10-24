@@ -20,6 +20,14 @@ compilation and Coral hardware validation are still required.
   to One UI and Hecker layouts. Wide layouts retain their single native footer pair;
   small layouts use the single pair in the header. Security and active-app information
   remains available in the native footer.
+- SmartThings opens the Samsung app when installed, otherwise Android's device
+  controls/provider setup, with Bluetooth settings as a fallback. Bluetooth uses
+  an open vector path with padding so its upper-right stroke is not clipped.
+- Bluetooth connection cards animate the case opening and earbuds rising. Their
+  details action opens the source-built LibrePods variant, whose non-Apple device
+  page supports Android battery metadata and real R50i status/firmware reads.
+  AirPods retain upstream controls. See `prebuilts/librepods/README.md` for protocol
+  scope and source/build information.
 - The native locked-app biometric prompt gains an orbit around the real app icon,
   a short entrance, error feedback and a success check. The trusted biometric
   prompt, credential fallback, cancellation and target-launch callbacks remain native.
@@ -71,6 +79,11 @@ preserves tracked and untracked files and refuses unfamiliar repositories or
 symlinks. The build helper also invokes it before Soong preparation and clears
 staged retired apps only when found. Pixel Launcher remains supplied by the
 existing GApps product. No custom launcher or Recents overlay is installed.
+Stock AOSP Launcher3 **source** remains pinned and synced because Android's
+SystemUI flag library and TAPL test dependencies require its build modules. Its
+launcher APKs are filtered out of the product. After updating the local manifest,
+sync both `vendor/hecker/floral/suite` and `packages/apps/Launcher3`; this repairs
+the missing `launcher-aosp-tapl` and `com_android_launcher3_flags_lib` Soong errors.
 
 ## Validation
 
@@ -79,6 +92,9 @@ the device is unlocked and the native plugin requests feedback. On the lockscree
 and AOD it stays in its native shade host. Plugin callbacks, gesture eligibility,
 colors and minimizer behavior remain native. A lifecycle regression covers host
 changes, duplicate callbacks, unavailable windows and disconnect cleanup.
+The additional window has its own matching window context, uses Android's
+trusted-overlay flag and takes no touch input; window failures retain the native
+host. Soli rendering and gestures on HOME/apps still require a Coral hardware test.
 
 The face feedback pill centers its icon and measured label as one group and
 centers the text baseline using font metrics, including larger font sizes.
@@ -92,6 +108,10 @@ The PIN regression compiles prepared guard/confirm-flow bodies with the actual
 input state and base bouncer lifecycle. It covers unavailable lengths, repeated
 boot state, metadata refresh, user isolation, wrong PINs and active lockouts using
 fake platform storage and credential verification.
+The R50i codec regression checks packet fragmentation, length/checksum validation,
+model separation, absent data and bounded buffering. The companion page and
+Bluetooth reader are compiled against Android resources; CI also builds and
+optimizes the complete arm64 LibrePods FOSS release and verifies its recipe cache.
 
 On Coral, verify every page at normal/large font sizes, in both themes and after
 rotation; drag both QS sliders; interrupt/reverse collapse gestures; open a locked
@@ -101,3 +121,7 @@ HOME/Recents after a dirty upgrade and reboot. A complete ROM build, on-device
 visual comparison and these hardware checks have not been performed in this task.
 Also verify correct and wrong PIN entry before the first unlock after reboot,
 with auto-confirm both enabled and disabled.
+Pair R50i, verify connection artwork, real left/right readings and firmware,
+disconnect during a read, reopen LibrePods and test the AirPods route. Confirm
+the glow appears on HOME/apps as well as lockscreen/AOD, and check centered
+scanning/unlocked labels at the selected font size.

@@ -10,7 +10,8 @@ import urllib.request
 import xml.etree.ElementTree as ET
 import zipfile
 
-PACKAGES=('platforms;android-37.0','build-tools;37.0.0','ndk;30.0.14904198','cmake;3.22.1')
+# AGP 9.2.1 uses build-tools 36.0.0 with compileSdk 37.
+PACKAGES=('platforms;android-37.0','build-tools;36.0.0','ndk;30.0.14904198','cmake;3.22.1')
 
 def prepare_sdk(destination):
     sdk=Path(destination).resolve()
