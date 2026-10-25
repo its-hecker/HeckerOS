@@ -22,6 +22,11 @@ replace authentication, shortcuts, media, notifications, or other keyguard secur
    AOD hardware instead of waking the full lockscreen.
 2. SystemUI requests a normal, proximity-checked doze pulse. A pending animation starts when
    the native display is actually refreshable, rather than expiring while the panel is off.
+   A transition or another pending pulse defers the request with a bounded retry rather
+   than dropping it. A timeout-bounded partial wake lock bridges this queue until native
+   doze accepts it; acceptance, suppression, unplug, wake and user switching release it.
+   Proximity/power suppression cancels the intro. Generation tokens prevent a late
+   callback from a previous plug from cancelling a newer connection.
 3. The selected animation plays once for 2.2 seconds. It then becomes static Detailed or Minimal
    information. Off returns to the regular AOD after the intro.
 4. Unplug, a power-button wake, user switch, or disabling the feature cancels the intro. Sticky
@@ -61,6 +66,9 @@ pending pulse expiry, reduced motion, percentage precision and current/voltage c
 `tools/check_ambient_charging.py` compiles and executes the actual prepared Android power and
 ambient policy methods for user switching, supported/unsupported hardware, inversion, plug,
 unplug, ordinary Always-on, and animation-only behavior. It runs in the native adapter check.
+It also executes the prepared DozeTriggers pulse bridge for transition/busy retries,
+existing pulses, native suppression and stale replug callbacks. `AmbientPulsePolicy`
+tests the timeout and cancellation independently of the renderer.
 The complete Suite/resources and Kotlin/Compose adapters are compiled with locked dependencies.
 
 A full Android 17 Soong build and Pixel 4 XL tests are still required. Verify a charger plug from

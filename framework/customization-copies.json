@@ -104,5 +104,6 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/AmbientChargingPolicy.java": "framework/ambient/AmbientChargingPolicy.java",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientCharging.kt": "framework/ambient/HeckerAmbientCharging.kt",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientRenderer.kt": "framework/ambient/HeckerAmbientRenderer.kt",
-  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientContent.kt": "framework/ambient/HeckerAmbientContent.kt"
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientContent.kt": "framework/ambient/HeckerAmbientContent.kt",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/AmbientPulsePolicy.java": "framework/ambient/AmbientPulsePolicy.java"
 }

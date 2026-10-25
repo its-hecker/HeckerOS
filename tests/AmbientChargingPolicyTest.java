@@ -1,5 +1,6 @@
 /* Copyright (C) 2026 HeckerOS. SPDX-License-Identifier: Apache-2.0 */
 import com.android.systemui.hecker.AmbientChargingPolicy;
+import com.android.systemui.hecker.AmbientPulsePolicy;
 
 public final class AmbientChargingPolicyTest {
     private static void check(boolean condition, String message) {
@@ -7,6 +8,18 @@ public final class AmbientChargingPolicyTest {
     }
     public static void main(String[] args) {
         AmbientChargingPolicy p = new AmbientChargingPolicy();
+        AmbientPulsePolicy pulse = new AmbientPulsePolicy();
+        long first = pulse.begin(1000);
+        check(pulse.pending(first, 1100), "Transition retry retains the pulse");
+        check(!pulse.pending(first, 11001), "No unbounded retries in a pocket or finished dream");
+        long second = pulse.begin(12000);
+        check(!pulse.owns(first) && pulse.pending(second, 12001), "Old suppression cannot cancel a replug");
+        pulse.accepted(first);
+        check(pulse.pending(second, 12002), "Stale acceptance cannot consume a new request");
+        pulse.accepted(second);
+        check(!pulse.pending(second, 12003) && pulse.owns(second), "Accepted request stops retry; async proximity still owns its token");
+        pulse.cancel();
+        check(!pulse.owns(second), "Wake/unplug/user switch invalidates asynchronous callbacks");
         check(AmbientChargingPolicy.route(true,true,false), "AOD has its own enabled route");
         check(!AmbientChargingPolicy.route(true,false,true), "AOD route overrides ambient during AOD");
         check(AmbientChargingPolicy.route(false,false,true), "Brief ambient checks work with AOD off");

@@ -15,9 +15,11 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -69,9 +71,12 @@ final class GamingOverlay {
         WindowManager.LayoutParams p = new WindowManager.LayoutParams(width, height,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | (focusable ? 0 : WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE), PixelFormat.TRANSLUCENT);
         p.setTitle("Hecker Game Space");
-        p.gravity = (left() ? Gravity.LEFT : Gravity.RIGHT) | Gravity.CENTER_VERTICAL;
+        p.gravity = Gravity.LEFT | Gravity.TOP;
+        p.setFitInsetsTypes(0);
+        p.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         return p;
     }
     void show() { show(true); }
@@ -110,8 +115,90 @@ final class GamingOverlay {
         target.post(() -> { if (open && content == target) target.scrollTo(0, scroll); });
     }
     private String sizeKey(String dimension) {
+        return positionKey("panel", dimension);
+    }
+    private String positionKey(String surface, String dimension) {
         Rect screen=wm.getCurrentWindowMetrics().getBounds();
-        return "panel_"+dimension+(screen.width()>screen.height()?"_landscape":"_portrait");
+        return surface+"_"+dimension+(screen.width()>screen.height()?"_landscape":"_portrait");
+    }
+    private GamingWindowBounds placement(String surface, WindowManager.LayoutParams p) {
+        WindowMetrics metrics=wm.getCurrentWindowMetrics();
+        Rect screen=metrics.getBounds();
+        Insets bars=metrics.getWindowInsets().getInsetsIgnoringVisibility(
+                WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout());
+        int margin=dp("handle".equals(surface)?2:"panel".equals(surface)?8:6);
+        int verticalMargin="panel".equals(surface)?dp(4):margin;
+        return new GamingWindowBounds(bars.left+margin,bars.top+verticalMargin,
+                screen.width()-bars.right-margin,screen.height()-bars.bottom-verticalMargin,p.width,p.height);
+    }
+    private void restorePosition(String surface, WindowManager.LayoutParams p, float x, float y) {
+        GamingWindowBounds bounds=placement(surface,p);
+        // Migrate the old HUD position only; other surfaces have independent orientation defaults.
+        float legacyX="hud".equals(surface)?GamingPrefs.get(c).getFloat("hud_x",x):x;
+        float legacyY="hud".equals(surface)?GamingPrefs.get(c).getFloat("hud_y",y):y;
+        p.x=bounds.fromX(GamingPrefs.get(c).getFloat(positionKey(surface,"x"),legacyX));
+        p.y=bounds.fromY(GamingPrefs.get(c).getFloat(positionKey(surface,"y"),legacyY));
+    }
+    private void savePosition(String surface, WindowManager.LayoutParams p) {
+        GamingWindowBounds bounds=placement(surface,p);
+        GamingPrefs.get(c).edit().putFloat(positionKey(surface,"x"),bounds.fractionX(p.x))
+                .putFloat(positionKey(surface,"y"),bounds.fractionY(p.y)).apply();
+    }
+    private void move(String surface, View window, WindowManager.LayoutParams p, int x, int y) {
+        if(!window.isAttachedToWindow())return;
+        GamingWindowBounds bounds=placement(surface,p);
+        p.x=bounds.x(x);p.y=bounds.y(y);wm.updateViewLayout(window,p);
+    }
+    /** Only a dedicated grip consumes drag gestures; panel controls keep their own touch streams. */
+    private void draggable(View grip, View window, WindowManager.LayoutParams p, String surface, boolean edge) {
+        final int slop=ViewConfiguration.get(c).getScaledTouchSlop();
+        grip.setOnTouchListener(new View.OnTouchListener(){
+            float x,y;int px,py;boolean moved,active;
+            public boolean onTouch(View view,MotionEvent event){
+                if(!window.isAttachedToWindow()){active=false;return true;}
+                switch(event.getActionMasked()){
+                    case MotionEvent.ACTION_DOWN:
+                        x=event.getRawX();y=event.getRawY();px=p.x;py=p.y;moved=false;active=true;return true;
+                    case MotionEvent.ACTION_POINTER_DOWN:
+                    case MotionEvent.ACTION_CANCEL:
+                        if(active)move(surface,window,p,px,py);
+                        active=false;return true;
+                    case MotionEvent.ACTION_MOVE:
+                        if(!active)return true;
+                        float dx=event.getRawX()-x,dy=event.getRawY()-y;
+                        if(edge&&!moved&&(left()?dx:-dx)>dp(12)&&Math.abs(dx)>Math.abs(dy)){
+                            active=false;openPanel();return true;
+                        }
+                        moved|=edge?(Math.abs(dy)>slop&&Math.abs(dy)>=Math.abs(dx)):Math.hypot(dx,dy)>slop;
+                        if(moved)move(surface,window,p,px+(edge?0:Math.round(dx)),py+Math.round(dy));
+                        return true;
+                    case MotionEvent.ACTION_UP:
+                        if(active){if(moved)savePosition(surface,p);
+                            else if(Math.hypot(event.getRawX()-x,event.getRawY()-y)<=slop)view.performClick();}
+                        active=false;return true;
+                    default:return true;
+                }
+            }
+        });
+        grip.setAccessibilityDelegate(new View.AccessibilityDelegate(){
+            @Override public void onInitializeAccessibilityNodeInfo(View host,AccessibilityNodeInfo info){
+                super.onInitializeAccessibilityNodeInfo(host,info);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_DOWN);
+                if(!edge){info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_LEFT);
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_RIGHT);}
+            }
+            @Override public boolean performAccessibilityAction(View host,int action,android.os.Bundle arguments){
+                if(!window.isAttachedToWindow())return false;
+                int dx=0,dy=0,step=dp(24);
+                if(action==AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP.getId())dy=-step;
+                else if(action==AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_DOWN.getId())dy=step;
+                else if(!edge&&action==AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_LEFT.getId())dx=-step;
+                else if(!edge&&action==AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_RIGHT.getId())dx=step;
+                else return super.performAccessibilityAction(host,action,arguments);
+                move(surface,window,p,p.x+dx,p.y+dy);savePosition(surface,p);return true;
+            }
+        });
     }
     private GamingPanelLayout panelSize(int width, int height) {
         WindowMetrics metrics=wm.getCurrentWindowMetrics(); Rect screen=metrics.getBounds();
@@ -124,30 +211,21 @@ final class GamingOverlay {
         if (!open || panel == null || panelParams == null) return;
         GamingPanelLayout bounds=panelSize(width,height);
         panelParams.width=dp(bounds.width);panelParams.height=dp(bounds.height);
-        wm.updateViewLayout(panel,panelParams);
-        if(save)GamingPrefs.get(c).edit().putInt(sizeKey("width"),bounds.width).putInt(sizeKey("height"),bounds.height).apply();
+        move("panel",panel,panelParams,panelParams.x,panelParams.y);
+        if(save){GamingPrefs.get(c).edit().putInt(sizeKey("width"),bounds.width).putInt(sizeKey("height"),bounds.height).apply();
+            savePosition("panel",panelParams);}
     }
     private void buildHandle() {
         FrameLayout v = new FrameLayout(c);
         v.setBackground(GamingBoosterUi.glass(c, 0xd90b101b, 16));
         GamingUi.Icon icon = new GamingUi.Icon(c, "gamepad", Color.WHITE);
         v.addView(icon, new FrameLayout.LayoutParams(dp(18), dp(18), Gravity.CENTER));
-        v.setContentDescription(c.getString(R.string.gaming_open_dashboard));
+        v.setContentDescription(c.getString(R.string.gaming_handle_move));
         v.setFocusable(true); v.setOnClickListener(w -> openPanel());
-        v.setOnTouchListener(new View.OnTouchListener() {
-            float down;
-            public boolean onTouch(View view, MotionEvent e) {
-                if (e.getActionMasked() == MotionEvent.ACTION_DOWN) { down = e.getRawX(); return true; }
-                if (e.getActionMasked() == MotionEvent.ACTION_MOVE) {
-                    float inward = left() ? e.getRawX()-down : down-e.getRawX();
-                    if (inward > dp(12)) openPanel();
-                    return true;
-                }
-                if (e.getActionMasked() == MotionEvent.ACTION_UP) { view.performClick(); return true; }
-                return true;
-            }
-        });
         WindowManager.LayoutParams p = params(dp(28), dp(56), false);
+        restorePosition("handle",p,left()?0f:1f,.5f);
+        GamingWindowBounds edgeBounds=placement("handle",p);p.x=left()?edgeBounds.minX:edgeBounds.maxX;
+        draggable(v,v,p,"handle",true);
         wm.addView(v, p); handle = v;
     }
     private void buildHud() {
@@ -156,47 +234,16 @@ final class GamingOverlay {
         WindowMetrics metrics=wm.getCurrentWindowMetrics();
         Rect screen=metrics.getBounds();
         Insets insets=metrics.getWindowInsets().getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout());
-        final int minX=insets.left+dp(6),minY=insets.top+dp(6),width=Math.min(dp(170),Math.max(1,screen.width()-insets.left-insets.right-dp(12)));
-        final int rangeX=Math.max(0,screen.width()-insets.right-dp(6)-width-minX),rangeY=Math.max(0,screen.height()-insets.bottom-dp(6)-dp(40)-minY);
-        hudParams = params(width, dp(40), false); hudParams.gravity = Gravity.LEFT | Gravity.TOP;
-        hudParams.x=minX+Math.round(GamingPrefs.get(c).getFloat("hud_x",1f)*rangeX);
-        hudParams.y=minY+Math.round(GamingPrefs.get(c).getFloat("hud_y",0f)*rangeY);
+        final int width=Math.min(dp(170),Math.max(1,screen.width()-insets.left-insets.right-dp(12)));
+        hudParams = params(width, dp(40), false);
+        restorePosition("hud",hudParams,1f,0f);
         hud.setOnClickListener(v -> openPanel());
-        hud.setOnTouchListener(new View.OnTouchListener() {
-            float x, y; int px, py; boolean moved;
-            public boolean onTouch(View view, MotionEvent e) {
-                if (e.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                    x=e.getRawX(); y=e.getRawY(); px=hudParams.x; py=hudParams.y; moved=false; return true;
-                }
-                if (e.getActionMasked() == MotionEvent.ACTION_MOVE ) {
-                    if (Math.abs(e.getRawX()-x)+Math.abs(e.getRawY()-y)>dp(8)) moved=true;
-                    if (moved) {
-                        hudParams.x=Math.max(minX,Math.min(minX+rangeX,px+(int)(e.getRawX()-x)));
-                        hudParams.y=Math.max(minY,Math.min(minY+rangeY,py+(int)(e.getRawY()-y)));
-                        wm.updateViewLayout(view, hudParams);
-                    }
-                    return true;
-                }
-                if (e.getActionMasked() == MotionEvent.ACTION_UP) {
-                    if (!moved) view.performClick();
-                    else GamingPrefs.get(c).edit()
-                            .putFloat("hud_x", (hudParams.x-minX)/(float)Math.max(1,rangeX))
-                            .putFloat("hud_y", (hudParams.y-minY)/(float)Math.max(1,rangeY)).apply();
-                    return true;
-                }
-                return true;
-            }
-        });
+        draggable(hud,hud,hudParams,"hud",false);
         wm.addView(hud, hudParams); update(fps, temperature, battery, wifi);
     }
     void openPanel() {
         if (!visible || open || captureHidden) return;
         open=true; picker=null;
-        WindowMetrics metrics = wm.getCurrentWindowMetrics();
-        Rect screen = metrics.getBounds();
-        Insets bars = metrics.getWindowInsets().getInsetsIgnoringVisibility(
-                WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
-        float density = c.getResources().getDisplayMetrics().density;
         GamingPanelLayout bounds = panelSize(GamingPrefs.get(c).getInt(sizeKey("width"),0),
                 GamingPrefs.get(c).getInt(sizeKey("height"),0));
         LinearLayout shell = new LinearLayout(c) {
@@ -216,11 +263,17 @@ final class GamingOverlay {
         shell.setBackground(GamingBoosterUi.glass(c,0xc90b101b,20));
         shell.setPadding(dp(10),dp(10),dp(10),dp(8));
         shell.setElevation(dp(10)); shell.setFocusableInTouchMode(true);
+        WindowManager.LayoutParams p=params(dp(bounds.width),dp(bounds.height),true);
+        restorePosition("panel",p,left()?0f:1f,.5f);
+        TextView drag=GamingUi.text(c,"•••",16,GamingBoosterUi.MUTED,false);
+        drag.setGravity(Gravity.CENTER);drag.setFocusable(true);
+        drag.setContentDescription(c.getString(R.string.gaming_dashboard_move));
+        drag.setOnClickListener(v->drag.announceForAccessibility(c.getString(R.string.gaming_dashboard_move)));
+        draggable(drag,shell,p,"panel",false);
+        shell.addView(drag,new LinearLayout.LayoutParams(-1,dp(28)));
         content=new ScrollView(c); content.setFillViewport(false); content.setVerticalScrollBarEnabled(false); content.setHorizontalScrollBarEnabled(false);
         shell.addView(content,new LinearLayout.LayoutParams(-1,0,1));
         showPage(); buildDock(shell); buildResizeGrip(shell);
-        WindowManager.LayoutParams p=params(dp(bounds.width),dp(bounds.height),true);
-        p.x=dp(8)+(left()?bars.left:bars.right);p.y=(bars.top-bars.bottom)/2;
         try {
             wm.addView(shell, p); panel=shell; panelParams=p; shell.requestFocus();
             if (handle != null) handle.setVisibility(View.GONE);

@@ -1,5 +1,8 @@
 # Device feedback follow-up
 
+- Expanded GameDashboard movement now has its own top grip, separate from the existing bottom resize grip. Dashboard, edge-handle and stats-pill placement is bounded and orientation-specific; cancellation, inward-swipe opening and accessible directional movement are covered by regressions.
+- Screen-off charging requests retry across doze transitions and pending pulses with a bounded CPU wake lock. Native proximity/power suppression cancels the request, and old asynchronous callbacks cannot cancel a new plug event.
+- Oslo glow retains one attached surface, restores native shade holds only while locked, seeds the current doze/pulse state on attachment and refreshes GL on native doze display/tick callbacks. Coral AOD rendering still needs a flashed test.
 - Quick QS no longer composes a player or reserves its space. The expanded Hecker/One UI dashboards retain their own players; lockscreen playback keeps its separate host.
 - The custom lockscreen clock sits 24 dp lower in the small layout and 32 dp lower in the large layout, with matching measured space.
 - Clock Studio controls a built-in first-page home header. The native grid reserves its measured height, and dense layouts hide the clock instead of covering icons. Five palettes, minute/return/tap message rotation and a native below-dock search pill add colour and purpose. Previous widgets remain compatible and can be removed normally.

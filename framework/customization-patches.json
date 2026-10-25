@@ -599,9 +599,10 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/CentralSurfacesImpl.java": [
     {
       "old": "                                () -> plugin.setup(\n                                        mNotificationShadeWindowController.getWindowRootView(),\n                                        getNavigationBarView(),\n                                        new Callback(plugin), mDozeParameters));",
-      "new": "                                () -> {\n                                    android.view.View heckerRoot = com.android.systemui.hecker.HeckerOsloOverlayHost.rootFor(\n                                            plugin, pluginContext, mNotificationShadeWindowController.getWindowRootView(),\n                                            mKeyguardStateController);\n                                    com.android.systemui.hecker.HeckerOsloOverlayHost.whenAttached(plugin, heckerRoot,\n                                            () -> plugin.setup(heckerRoot, getNavigationBarView(),\n                                                    com.android.systemui.hecker.HeckerOsloOverlayHost.callbackFor(plugin,\n                                                            new Callback(plugin)), mDozeParameters));\n                                });",
+      "new": "                                () -> {\n                                    android.view.View heckerRoot = com.android.systemui.hecker.HeckerOsloOverlayHost.rootFor(\n                                            plugin, pluginContext, mNotificationShadeWindowController.getWindowRootView(),\n                                            mKeyguardStateController, mStatusBarStateController);\n                                    com.android.systemui.hecker.HeckerOsloOverlayHost.whenAttached(plugin, heckerRoot,\n                                            () -> plugin.setup(heckerRoot, getNavigationBarView(),\n                                                    com.android.systemui.hecker.HeckerOsloOverlayHost.callbackFor(plugin,\n                                                            new Callback(plugin)), mDozeParameters));\n                                });",
       "previous": [
-        "                                () -> plugin.setup(\n                                        com.android.systemui.hecker.HeckerOsloOverlayHost.rootFor(plugin, pluginContext,\n                                                mNotificationShadeWindowController.getWindowRootView(), mKeyguardStateController),\n                                        getNavigationBarView(),\n                                        com.android.systemui.hecker.HeckerOsloOverlayHost.callbackFor(plugin,\n                                                new Callback(plugin)), mDozeParameters));"
+        "                                () -> plugin.setup(\n                                        com.android.systemui.hecker.HeckerOsloOverlayHost.rootFor(plugin, pluginContext,\n                                                mNotificationShadeWindowController.getWindowRootView(), mKeyguardStateController),\n                                        getNavigationBarView(),\n                                        com.android.systemui.hecker.HeckerOsloOverlayHost.callbackFor(plugin,\n                                                new Callback(plugin)), mDozeParameters));",
+        "                                () -> {\n                                    android.view.View heckerRoot = com.android.systemui.hecker.HeckerOsloOverlayHost.rootFor(\n                                            plugin, pluginContext, mNotificationShadeWindowController.getWindowRootView(),\n                                            mKeyguardStateController);\n                                    com.android.systemui.hecker.HeckerOsloOverlayHost.whenAttached(plugin, heckerRoot,\n                                            () -> plugin.setup(heckerRoot, getNavigationBarView(),\n                                                    com.android.systemui.hecker.HeckerOsloOverlayHost.callbackFor(plugin,\n                                                            new Callback(plugin)), mDozeParameters));\n                                });"
       ]
     },
     {
@@ -855,9 +856,10 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/doze/DozeTriggers.java": [
     {
       "old": "        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());",
-      "new": "        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());\n        com.android.systemui.hecker.HeckerAmbientCharging.attachDoze(mContext,\n                () -> {\n                    if (!mMachine.isExecutingTransition()) {\n                        requestPulse(DozeLog.PULSE_REASON_INTENT, false, null);\n                    }\n                },\n                () -> {\n                    if (!mMachine.isExecutingTransition()\n                            && mMachine.getState() == State.DOZE_AOD\n                            && !(mConfig.alwaysOnEnabled(mUserTracker.getUserId()))) {\n                        mMachine.requestState(State.DOZE);\n                    }\n                });",
+      "new": "        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());\n        com.android.systemui.hecker.HeckerAmbientCharging.attachDoze(mContext,\n                this::requestHeckerChargingPulse,\n                () -> {\n                    if (!mMachine.isExecutingTransition()\n                            && mMachine.getState() == State.DOZE_AOD\n                            && !(mConfig.alwaysOnEnabled(mUserTracker.getUserId()))) {\n                        mMachine.requestState(State.DOZE);\n                    }\n                });",
       "previous": [
-        "        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());\n        com.android.systemui.hecker.HeckerAmbientCharging.attachDoze(mContext,\n                () -> {\n                    if (!mMachine.isExecutingTransition()) {\n                        requestPulse(DozeLog.PULSE_REASON_INTENT, false, null);\n                    }\n                },\n                () -> {\n                    if (!mMachine.isExecutingTransition()\n                            && mMachine.getState() == State.DOZE_AOD\n                            && !(mConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                                || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                                    && mConfig.alwaysOnAvailableForUser(mUserTracker.getUserId())))) {\n                        mMachine.requestState(State.DOZE);\n                    }\n                });"
+        "        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());\n        com.android.systemui.hecker.HeckerAmbientCharging.attachDoze(mContext,\n                () -> {\n                    if (!mMachine.isExecutingTransition()) {\n                        requestPulse(DozeLog.PULSE_REASON_INTENT, false, null);\n                    }\n                },\n                () -> {\n                    if (!mMachine.isExecutingTransition()\n                            && mMachine.getState() == State.DOZE_AOD\n                            && !(mConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                                || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                                    && mConfig.alwaysOnAvailableForUser(mUserTracker.getUserId())))) {\n                        mMachine.requestState(State.DOZE);\n                    }\n                });",
+        "        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());\n        com.android.systemui.hecker.HeckerAmbientCharging.attachDoze(mContext,\n                () -> {\n                    if (!mMachine.isExecutingTransition()) {\n                        requestPulse(DozeLog.PULSE_REASON_INTENT, false, null);\n                    }\n                },\n                () -> {\n                    if (!mMachine.isExecutingTransition()\n                            && mMachine.getState() == State.DOZE_AOD\n                            && !(mConfig.alwaysOnEnabled(mUserTracker.getUserId()))) {\n                        mMachine.requestState(State.DOZE);\n                    }\n                });"
       ]
     },
     {
@@ -866,7 +868,14 @@
     },
     {
       "old": "        mDozeSensors.onScreenState(state);",
-      "new": "        mDozeSensors.onScreenState(state);\n        com.android.systemui.hecker.HeckerAmbientCharging.onScreenState(state);"
+      "new": "        mDozeSensors.onScreenState(state);\n        com.android.systemui.hecker.HeckerAmbientCharging.onScreenState(state);\n        com.android.systemui.hecker.HeckerOsloOverlayHost.onDozeScreenState(state);",
+      "previous": [
+        "        mDozeSensors.onScreenState(state);\n        com.android.systemui.hecker.HeckerAmbientCharging.onScreenState(state);"
+      ]
+    },
+    {
+      "old": "    private void requestPulse(final int reason, boolean performedProxCheck,",
+      "new": "    private void requestHeckerChargingPulse() {\n        final long token = com.android.systemui.hecker.HeckerAmbientCharging.pulseGeneration();\n        if (mMachine.isExecutingTransition()) {\n            com.android.systemui.hecker.HeckerAmbientCharging.retryPulse();\n            return;\n        }\n        final State state = mMachine.getState();\n        if (state == State.INITIALIZED || state == State.UNINITIALIZED\n                || state == State.DOZE_REQUEST_PULSE || state == State.DOZE_PULSE_DONE\n                || mDozeHost.isPulsePending()) {\n            com.android.systemui.hecker.HeckerAmbientCharging.retryPulse();\n            return;\n        }\n        if (state == State.DOZE_PULSING || state == State.DOZE_PULSING_BRIGHT) {\n            mDozeHost.extendPulse(DozeLog.PULSE_REASON_INTENT);\n            com.android.systemui.hecker.HeckerAmbientCharging.pulseAccepted(token);\n            return;\n        }\n        // Let native proximity, power saving, provisioning and pulse eligibility decide.\n        requestPulse(DozeLog.PULSE_REASON_INTENT, false,\n                () -> com.android.systemui.hecker.HeckerAmbientCharging.pulseSuppressed(token));\n        com.android.systemui.hecker.HeckerAmbientCharging.pulseAccepted(token);\n    }\n\n    private void requestPulse(final int reason, boolean performedProxCheck,"
     }
   ],
   "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/keyguard/ui/composable/elements/LockscreenUpperRegionElementProvider.kt": [
@@ -960,6 +969,24 @@
     {
       "old": "            } else if (mPowerPluggedIn || mEnableBatteryDefender) {\n                newIndication = computePowerIndication();",
       "new": "            } else if (!mEnableBatteryDefender\n                    && com.android.systemui.hecker.HeckerAmbientCharging.ownsChargingIndication()) {\n                // Keep higher-priority messages and battery-defender warnings native.\n                // Only the ordinary AOD charging/percentage line is replaced by the custom scene.\n                mWakeLock.setAcquired(false);\n                mIndicationArea.setVisibility(GONE);\n                return;\n            } else if (mPowerPluggedIn || mEnableBatteryDefender) {\n                newIndication = computePowerIndication();"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/doze/DozeUi.java": [
+    {
+      "old": "                    mHost.dozeTimeTick();",
+      "new": "                    heckerDozeTimeTick();"
+    },
+    {
+      "old": "mHandler.postDelayed(mWakeLock.wrap(mHost::dozeTimeTick), 500);",
+      "new": "mHandler.postDelayed(mWakeLock.wrap(this::heckerDozeTimeTick), 500);"
+    },
+    {
+      "old": "mHandler.post(mWakeLock.wrap(mHost::dozeTimeTick));",
+      "new": "mHandler.post(mWakeLock.wrap(this::heckerDozeTimeTick));"
+    },
+    {
+      "old": "    @AnyThread\n    private void onTimeTick() {",
+      "new": "    private void heckerDozeTimeTick() {\n        mHost.dozeTimeTick();\n        com.android.systemui.hecker.HeckerOsloOverlayHost.dozeTimeTick();\n    }\n\n    @AnyThread\n    private void onTimeTick() {"
     }
   ]
 }

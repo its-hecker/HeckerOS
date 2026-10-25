@@ -15,6 +15,17 @@ class OsloGlowTests(unittest.TestCase):
 public class Context { public Object service; public String getPackageName(){return "com.google.oslo";}
  public Context createWindowContext(int type,Object options){return this;}
  public <T> T getSystemService(Class<T> type){return type.cast(service);} }''',
+            'android/view/Display.java': 'package android.view;public class Display {public static final int STATE_UNKNOWN=0,STATE_OFF=1,STATE_ON=2,STATE_DOZE=3,STATE_DOZE_SUSPEND=4;}',
+            'android/opengl/GLSurfaceView.java': 'package android.opengl;public class GLSurfaceView extends android.view.View {public int renders;public GLSurfaceView(android.content.Context c){super(c);}public void requestRender(){renders++;}}',
+            'com/android/systemui/plugins/statusbar/StatusBarStateController.java': r'''package com.android.systemui.plugins.statusbar;
+public interface StatusBarStateController {boolean isDozing();boolean isPulsing();void addCallback(StateListener l);void removeCallback(StateListener l);
+interface StateListener {default void onDozingChanged(boolean v){} default void onPulsingChanged(boolean v){}}}''',
+            'com/google/oslo/ui/FakeGlow.java': r'''package com.google.oslo.ui;
+public class FakeGlow extends android.view.View implements com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener {
+ public boolean dozing,pulsing;public int dozeCalls,pulseCalls;
+ public FakeGlow(android.content.Context c){super(c);}
+ public void onDozingChanged(boolean v){dozing=v;dozeCalls++;}public void onPulsingChanged(boolean v){pulsing=v;pulseCalls++;}}
+''',
             'android/graphics/PixelFormat.java': 'package android.graphics; public class PixelFormat { public static final int TRANSLUCENT=-3; }',
             'android/os/Looper.java': 'package android.os; public class Looper {static final Looper MAIN=new Looper(); public static Looper getMainLooper(){return MAIN;} public static Looper myLooper(){return MAIN;}}',
             'android/os/Handler.java': 'package android.os; public class Handler {public Handler(Looper l){} public void post(Runnable r){r.run();} public void removeCallbacksAndMessages(Object o){}}',
@@ -23,6 +34,7 @@ public class Context { public Object service; public String getPackageName(){ret
             'android/view/View.java': '''package android.view; import android.content.Context;
 public class View { public Object parent; final Context context; public View(Context c){context=c;}
  public Context getContext(){return context;} public Object getParent(){return parent;}
+ public static final int VISIBLE=0;public int getVisibility(){return VISIBLE;}
  public boolean attached;public boolean isAttachedToWindow(){return attached;}
  public interface OnAttachStateChangeListener{void onViewAttachedToWindow(View v);void onViewDetachedFromWindow(View v);}
  public final java.util.List<OnAttachStateChangeListener> listeners=new java.util.ArrayList<>();
@@ -34,8 +46,11 @@ public class View { public Object parent; final Context context; public View(Con
 public class ViewGroup extends View {public final List<View> children=new ArrayList<>(); public ViewGroup(Context c){super(c);}
  public static class LayoutParams{public LayoutParams(int w,int h){}}
  public void addView(View v){addView(v,new LayoutParams(-1,-1));}
- public void addView(View v,LayoutParams p){if(v.parent!=null)throw new AssertionError("two parents");children.add(v);v.parent=this;}
- public void removeView(View v){children.remove(v);v.parent=null;}
+ public void addView(View v,LayoutParams p){if(v.parent!=null)throw new AssertionError("two parents");children.add(v);v.parent=this;if(attached)v.attach();onViewAdded(v);}
+ public void removeView(View v){children.remove(v);v.parent=null;onViewRemoved(v);}
+ public int getChildCount(){return children.size();}public View getChildAt(int i){return children.get(i);}
+ public void onViewAdded(View v){}public void onViewRemoved(View v){}
+ @Override public void attach(){super.attach();for(View v:children)v.attach();}
  public void setClipChildren(boolean b){} public void setClipToPadding(boolean b){} }''',
             'android/widget/FrameLayout.java': 'package android.widget; public class FrameLayout extends android.view.ViewGroup {public FrameLayout(android.content.Context c){super(c);}}',
             'android/view/WindowManager.java': '''package android.view;
@@ -55,6 +70,7 @@ import com.android.systemui.hecker.HeckerOsloOverlayHost;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.plugins.OverlayPlugin;
 import com.google.oslo.OsloOverlay;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 public class GlowTest {
  static void check(boolean ok){if(!ok)throw new AssertionError();}
  static class Windows implements WindowManager {int adds,removes;boolean fail;View current;LayoutParams last;
@@ -63,28 +79,39 @@ public class GlowTest {
  static class Lock implements KeyguardStateController {boolean showing=true;Set<Callback> callbacks=new HashSet<>();
  public boolean isShowing(){return showing;}public void addCallback(Callback c){callbacks.add(c);}public void removeCallback(Callback c){callbacks.remove(c);}
  void show(boolean b){showing=b;for(var c:new ArrayList<>(callbacks))c.onKeyguardShowingChanged();}}
+ static class Status implements StatusBarStateController {boolean dozing=true,pulsing;Set<StateListener> callbacks=new HashSet<>();
+ public boolean isDozing(){return dozing;}public boolean isPulsing(){return pulsing;}
+ public void addCallback(StateListener c){callbacks.add(c);}public void removeCallback(StateListener c){callbacks.remove(c);}}
  public static void main(String[] args){
- Context context=new Context();Windows windows=new Windows();context.service=windows;Lock lock=new Lock();ViewGroup root=new ViewGroup(context);OsloOverlay plugin=new OsloOverlay();
- View host=HeckerOsloOverlayHost.rootFor(plugin,context,root,lock);
+ Context context=new Context();Windows windows=new Windows();context.service=windows;Lock lock=new Lock();Status status=new Status();ViewGroup root=new ViewGroup(context);OsloOverlay plugin=new OsloOverlay();
+ View host=HeckerOsloOverlayHost.rootFor(plugin,context,root,lock,status);
  check(host!=root&&windows.current==host&&root.children.isEmpty());
  check(((ViewGroup)host).children.size()==1);
  int[] setup={0};HeckerOsloOverlayHost.whenAttached(plugin,host,()->{check(host.isAttachedToWindow());setup[0]++;});
  check(setup[0]==0);host.attach();check(setup[0]==1&&host.listeners.isEmpty());
  int[] forwarded={0};var callback=HeckerOsloOverlayHost.callbackFor(plugin,()->forwarded[0]++);
  plugin.held=true;callback.onHoldStatusBarOpenChange();
- check(!HeckerOsloOverlayHost.holdsNativeShade(plugin));
+ check(HeckerOsloOverlayHost.holdsNativeShade(plugin));
  check(windows.last.type==2041&&windows.last.trusted&&(windows.last.flags&24)==24);
- for(int i=0;i<10;i++){lock.show(i%2==0);plugin.held=i%3==0;callback.onHoldStatusBarOpenChange();check(host.isAttachedToWindow()&&windows.current==host);}
+ com.google.oslo.ui.FakeGlow feedback=new com.google.oslo.ui.FakeGlow(context);
+ android.opengl.GLSurfaceView shader=new android.opengl.GLSurfaceView(context);
+ ((ViewGroup)host).addView(shader);((ViewGroup)host).addView(feedback);
+ check(feedback.dozing&&!feedback.pulsing&&feedback.dozeCalls==1&&feedback.pulseCalls==1);
+ int frames=shader.renders;HeckerOsloOverlayHost.onDozeScreenState(Display.STATE_OFF);HeckerOsloOverlayHost.dozeTimeTick();check(shader.renders==frames);
+ HeckerOsloOverlayHost.onDozeScreenState(Display.STATE_ON);check(shader.renders>frames);frames=shader.renders;
+ HeckerOsloOverlayHost.onDozeScreenState(Display.STATE_DOZE);HeckerOsloOverlayHost.dozeTimeTick();check(shader.renders>frames);
+ check(feedback.dozeCalls==1&&feedback.pulseCalls==1); // Ticks redraw, without replaying animation state.
+ for(int i=0;i<10;i++){lock.show(i%2==0);plugin.held=i%3==0;callback.onHoldStatusBarOpenChange();check(host.isAttachedToWindow()&&windows.current==host);check(HeckerOsloOverlayHost.holdsNativeShade(plugin)==(lock.showing&&plugin.held));}
  check(windows.adds==1&&windows.removes==0);
- HeckerOsloOverlayHost.disconnect(plugin);check(windows.current==null&&lock.callbacks.isEmpty());
+ HeckerOsloOverlayHost.disconnect(plugin);check(windows.current==null&&lock.callbacks.isEmpty()&&status.callbacks.isEmpty());
  int before=forwarded[0];callback.onHoldStatusBarOpenChange();check(forwarded[0]==before);
- View pending=HeckerOsloOverlayHost.rootFor(plugin,context,root,lock);
+ View pending=HeckerOsloOverlayHost.rootFor(plugin,context,root,lock,status);
  HeckerOsloOverlayHost.whenAttached(plugin,pending,()->{throw new AssertionError("setup after disconnect");});
  HeckerOsloOverlayHost.disconnect(plugin);pending.attach();check(pending.listeners.isEmpty());
- windows.fail=true;check(HeckerOsloOverlayHost.rootFor(plugin,context,root,lock)==root);
- OverlayPlugin other=()->true;check(HeckerOsloOverlayHost.rootFor(other,context,root,lock)==root);
+ windows.fail=true;check(HeckerOsloOverlayHost.rootFor(plugin,context,root,lock,status)==root);
+ OverlayPlugin other=()->true;check(HeckerOsloOverlayHost.rootFor(other,context,root,lock,status)==root);
  HeckerOsloOverlayHost.disconnect(plugin);check(windows.adds==windows.removes);
- System.out.println("Native Oslo glow: setup waits for attachment; no reparent during callbacks; pending setup cancelled; no shade hold; failure fallback and disconnect cleanup PASS");
+ System.out.println("Native Oslo glow: setup waits for attachment; no reparent during callbacks; initial doze seed, native pulse/tick GL redraw, locked-only shade hold; pending setup cancelled; failure fallback and disconnect cleanup PASS");
  }}''',
         }
         with tempfile.TemporaryDirectory() as temporary:

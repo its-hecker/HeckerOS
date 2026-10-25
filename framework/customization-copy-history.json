@@ -176,7 +176,8 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerOsloOverlayHost.java": [
     "74c24cebc2ca7542343b1d03eb90f66e9fc6119d",
     "ca0f0041a99b820f3b491a7ed9b5029848ac6338",
-    "d3f9b261aa1182594bf009eb6dc0564f15e6309c"
+    "d3f9b261aa1182594bf009eb6dc0564f15e6309c",
+    "311d7bacc5fc8f08be2d237113d6ce63b4d6e57d"
   ],
   "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_strings.xml": [
     "d086944d48156bce7c4bbcf46e806f1eba761b25",
@@ -206,7 +207,8 @@
     "ba37d75fc0e6db1614fb35bc1e1aee90be2da9e0"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientCharging.kt": [
-    "b94244db9ced9df2edf311577d1a6d98e0c299d4"
+    "b94244db9ced9df2edf311577d1a6d98e0c299d4",
+    "471e37400ca417497d126f216bd906ed8ea03fed"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientRenderer.kt": [
     "cadd7d01e1b32d0c6fcba75ad3f0826151a84e49"

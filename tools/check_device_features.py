@@ -15,6 +15,12 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 # Declarations reviewed against frameworks/base@7367a79dcb02c6388ab80b1cdf9ed7d223f8fcea.
 FACADES = {
+    'com/android/systemui/plugins/statusbar/StatusBarStateController.java': r'''package com.android.systemui.plugins.statusbar;
+public interface StatusBarStateController {
+ boolean isDozing(); boolean isPulsing();
+ void addCallback(StateListener listener); void removeCallback(StateListener listener);
+ interface StateListener {default void onDozingChanged(boolean dozing) {} default void onPulsingChanged(boolean pulsing) {}}
+}''',
     'com/android/systemui/plugins/OverlayPlugin.java': '''package com.android.systemui.plugins;
 public interface OverlayPlugin {
  boolean holdStatusBarOpen();

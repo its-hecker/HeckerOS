@@ -27,6 +27,9 @@ java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     app/src/org/hecker/suite/GamingPanelLayout.java tests/GamingPanelLayoutTest.java
 java -cp "$suite_test_output" org.hecker.suite.GamingPanelLayoutTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    app/src/org/hecker/suite/GamingWindowBounds.java tests/GamingWindowBoundsTest.java
+java -cp "$suite_test_output" org.hecker.suite.GamingWindowBoundsTest
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     app/src/org/hecker/suite/NativeIconPackSelection.java tests/NativeIconPackSelectionTest.java
 java -cp "$suite_test_output" org.hecker.suite.NativeIconPackSelectionTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
@@ -78,5 +81,5 @@ java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     netlab/common/org/hecker/netlab/NetLabIdentity.java tests/NetLabIdentityTest.java
 java -cp "$suite_test_output" NetLabIdentityTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
-    framework/ambient/AmbientChargingPolicy.java tests/AmbientChargingPolicyTest.java
+    framework/ambient/AmbientChargingPolicy.java framework/ambient/AmbientPulsePolicy.java tests/AmbientChargingPolicyTest.java
 java -cp "$suite_test_output" AmbientChargingPolicyTest

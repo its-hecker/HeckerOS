@@ -7,6 +7,14 @@ and an editable six-app dock. The collapsed overlay is a movable 170 × 40 dp
 FPS / CPU % / GPU % / RAM % pill. The panel tracks the reference's approximate
 43% landscape width, with safe-area limits and scrolling on short displays.
 
+The expanded dashboard has a dedicated top drag grip. It moves the complete window;
+the bottom grip still resizes it. Sliders and scrolling retain their own gestures.
+The collapsed edge handle can move vertically, while an inward swipe opens the panel.
+Dashboard, handle and stats-pill positions are clamped to the cutout/navigation safe
+area and saved separately for portrait and landscape. Resizing reclamps placement;
+cancelled or multi-touch drags restore the starting position. Directional accessibility
+actions move the grips without touch dragging. Existing saved HUD placement migrates.
+
 Brightness and media volume use the same 44 dp, thumb-free white glass tracks
 as `HeckerGlassTrack` in the One UI Quick Settings implementation. Accessibility
 range actions and keyboard adjustments remain available. The dock launches actual

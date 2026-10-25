@@ -87,11 +87,14 @@ the missing `launcher-aosp-tapl` and `com_android_launcher3_flags_lib` Soong err
 
 ## Validation
 
-Motion Sense's original Oslo glow moves to a non-touchable SystemUI window while
-the device is unlocked and the native plugin requests feedback. On the lockscreen
-and AOD it stays in its native shade host. Plugin callbacks, gesture eligibility,
-colors and minimizer behavior remain native. A lifecycle regression covers host
-changes, duplicate callbacks, unavailable windows and disconnect cleanup.
+Motion Sense's original Oslo glow uses one attached, trusted, non-touchable SystemUI
+window throughout the plugin lifetime. It does not reparent during gesture callbacks.
+The native shade hold is retained while keyguard is showing and released when unlocked.
+Late-attached Oslo views receive the current dozing/pulsing state, which the native
+callback registration does not replay. Native doze display transitions and minute ticks
+request a fresh GL frame without adding a persistent render timer. Gesture eligibility,
+colors and minimizer behavior remain native. Host regression checks cover initial AOD
+state, pulse/tick redraw, locked-only shade holds, failed windows and disconnect cleanup.
 The additional window has its own matching window context, uses Android's
 trusted-overlay flag and takes no touch input; window failures retain the native
 host. Soli rendering and gestures on HOME/apps still require a Coral hardware test.

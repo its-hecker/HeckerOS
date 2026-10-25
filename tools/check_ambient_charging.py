@@ -196,6 +196,61 @@ public class NativeChargingTest {
  }
 }''',
     }
+    # Compile and execute the actual prepared transition/pulse bridge, not a second implementation.
+    triggers = (base / 'packages/SystemUI/src/com/android/systemui/doze/DozeTriggers.java').read_text()
+    bridge = method(triggers, '    private void requestHeckerChargingPulse()')
+    sources['com/android/systemui/hecker/AmbientPulsePolicy.java'] = (
+        Path(__file__).resolve().parents[1] / 'framework/ambient/AmbientPulsePolicy.java').read_text()
+    stub = sources['com/android/systemui/hecker/HeckerAmbientCharging.java']
+    stub = stub.replace(' public static boolean plugged=', r''' public static final AmbientPulsePolicy pulse = new AmbientPulsePolicy();
+ public static int retries, accepts, suppressed;
+ public static long pulseGeneration() { return pulse.generation(); }
+ public static void retryPulse() { retries++; }
+ public static void pulseAccepted(long token) { if(pulse.owns(token)){pulse.accepted(token);accepts++;} }
+ public static void pulseSuppressed(long token) { if(pulse.owns(token)){pulse.cancel();suppressed++;} }
+ public static boolean plugged=''')
+    sources['com/android/systemui/hecker/HeckerAmbientCharging.java'] = stub
+    sources['NativePulseBridgeTest.java'] = r'''import com.android.systemui.hecker.HeckerAmbientCharging;
+public class NativePulseBridgeTest {
+ enum State {UNINITIALIZED,INITIALIZED,DOZE,DOZE_AOD,DOZE_AOD_DOCKED,DOZE_AOD_MINMODE,
+ DOZE_AOD_PAUSED,DOZE_AOD_PAUSING,DOZE_REQUEST_PULSE,DOZE_PULSE_DONE,DOZE_PULSING,
+ DOZE_PULSING_BRIGHT,DOZE_PULSING_WITHOUT_UI,DOZE_PULSING_AUTH_UI,FINISH}
+ static class DozeLog {static final int PULSE_REASON_INTENT=1;}
+ static class Machine {boolean transitioning;State state=State.DOZE;
+ boolean isExecutingTransition(){return transitioning;}State getState(){return state;}}
+ static class Host {boolean pending;int extensions;boolean isPulsePending(){return pending;}
+ void extendPulse(int reason){extensions++;}}
+ final Machine mMachine=new Machine(); final Host mDozeHost=new Host();
+ int requests;Runnable suppression;
+ void requestPulse(int reason,boolean performedProxCheck,Runnable onSuppressed){
+  check(!performedProxCheck&&reason==DozeLog.PULSE_REASON_INTENT&&onSuppressed!=null);
+  requests++;suppression=onSuppressed;
+  if(mMachine.state==State.FINISH||mMachine.state==State.DOZE_AOD_PAUSED)onSuppressed.run();
+ }
+ static void check(boolean value){if(!value)throw new AssertionError();}
+''' + bridge + r'''
+ public static void main(String[] args){
+ NativePulseBridgeTest p=new NativePulseBridgeTest();
+ HeckerAmbientCharging.pulse.begin(0);p.mMachine.transitioning=true;p.requestHeckerChargingPulse();
+ check(HeckerAmbientCharging.retries==1&&p.requests==0);
+ p.mMachine.transitioning=false;p.requestHeckerChargingPulse();
+ check(p.requests==1&&HeckerAmbientCharging.accepts==1);
+ Runnable old=p.suppression;long next=HeckerAmbientCharging.pulse.begin(100);
+ old.run();check(HeckerAmbientCharging.pulse.owns(next)&&HeckerAmbientCharging.suppressed==0);
+ p.mDozeHost.pending=true;p.requestHeckerChargingPulse();check(HeckerAmbientCharging.retries==2&&p.requests==1);
+ p.mDozeHost.pending=false;p.mMachine.state=State.DOZE_PULSING;p.requestHeckerChargingPulse();
+ check(p.mDozeHost.extensions==1&&p.requests==1);
+ HeckerAmbientCharging.pulse.begin(200);p.mMachine.state=State.DOZE;p.requestHeckerChargingPulse();
+ p.suppression.run();check(HeckerAmbientCharging.suppressed==1);
+ HeckerAmbientCharging.pulse.begin(300);p.mMachine.state=State.FINISH;p.requestHeckerChargingPulse();
+ check(HeckerAmbientCharging.suppressed==2);
+ for(State transientState:new State[]{State.UNINITIALIZED,State.INITIALIZED,State.DOZE_REQUEST_PULSE,State.DOZE_PULSE_DONE}){
+  int before=p.requests;HeckerAmbientCharging.pulse.begin(400);p.mMachine.state=transientState;
+  p.requestHeckerChargingPulse();check(p.requests==before);
+ }
+ System.out.println("Prepared pulse bridge: transition/busy retries, existing pulse, native proximity suppression and stale replug callbacks PASS");
+ }
+}'''
     with tempfile.TemporaryDirectory(prefix='hecker-ambient-native-') as temp:
         output = Path(temp)
         for relative, text in sources.items():
@@ -205,3 +260,4 @@ public class NativeChargingTest {
         subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-d',str(output/'classes'),
                         *map(str, sorted(output.rglob('*.java')))], check=True)
         subprocess.run(['java','-cp',str(output/'classes'),'NativeChargingTest'], check=True)
+        subprocess.run(['java','-cp',str(output/'classes'),'NativePulseBridgeTest'], check=True)

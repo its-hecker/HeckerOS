@@ -48,6 +48,9 @@ object HeckerAmbientCharging {
     private val main = Handler(Looper.getMainLooper())
     private val io = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val session = AmbientChargingPolicy()
+    private val pulsePolicy = AmbientPulsePolicy()
+    private var pulseRetry: Runnable? = null
+    private var pulseWakeLock: PowerManager.WakeLock? = null
     private var app: Context? = null
     private var pulse: Runnable? = null
     private var reconcile: Runnable? = null
@@ -74,8 +77,8 @@ object HeckerAmbientCharging {
             override fun onReceive(context: Context, intent: Intent) {
                 when (intent.action) {
                     Intent.ACTION_BATTERY_CHANGED -> battery(intent)
-                    Intent.ACTION_SCREEN_ON -> if (interactive(c)) cancelIntro()
-                    Intent.ACTION_USER_SWITCHED -> { cancelIntro(); readSettings(); reconcileDoze() }
+                    Intent.ACTION_SCREEN_ON -> if (interactive(c)) { cancelPulse(); cancelIntro() }
+                    Intent.ACTION_USER_SWITCHED -> { cancelPulse(); cancelIntro(); readSettings(); reconcileDoze() }
                 }
             }
         }, filter, null, main, Context.RECEIVER_EXPORTED)
@@ -97,6 +100,7 @@ object HeckerAmbientCharging {
             style = value(STYLE, 1).coerceIn(0, 2), customClock = value(CLOCK, 0) != 0,
             animation = value(ANIMATION, 1) != 0, art = value(ART, 0).coerceIn(0, 2))
         mutable.value = next
+        if (!next.ambient || (!next.animation && next.style == 0)) cancelPulse()
         if (!next.ambient || !next.animation) cancelIntro()
         if (next.ambient && next.plugged && !interactive(c) &&
                 (!previous.ambient || previous.style == 0 && next.style > 0)) requestPulse()
@@ -108,6 +112,7 @@ object HeckerAmbientCharging {
         val current = mutable.value
         val animate = current.ambient && current.animation && ValueAnimator.areAnimatorsEnabled()
         val edge = session.battery(plugged, interactive(c), animate, now)
+        if (!plugged || interactive(c)) cancelPulse()
         val voltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0)
         val temperature = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE)
         mutable.value = current.copy(plugged = plugged,
@@ -152,12 +157,59 @@ object HeckerAmbientCharging {
     @JvmStatic fun attachDoze(context: Context, request: Runnable, update: Runnable) {
         start(context); pulse = request; reconcile = update
         reconcileDoze()
-        if (session.pending()) requestPulse()
+        if (pulsePolicy.pending(pulsePolicy.generation(), SystemClock.elapsedRealtime())) schedulePulse(0)
     }
     @JvmStatic fun detachDoze() {
-        pulse = null; reconcile = null; displayState = Display.STATE_UNKNOWN; cancelIntro()
+        pulse = null; reconcile = null; displayState = Display.STATE_UNKNOWN; cancelPulse(); cancelIntro()
     }
-    private fun requestPulse() { main.post { pulse?.run() } }
+    private fun cancelPulse() {
+        pulsePolicy.cancel()
+        pulseRetry?.let { main.removeCallbacks(it) }; pulseRetry = null
+        releasePulseWakeLock()
+    }
+    private fun releasePulseWakeLock() {
+        pulseWakeLock?.let { if (it.isHeld) it.release() }; pulseWakeLock = null
+    }
+    private fun requestPulse() {
+        cancelPulse()
+        val c = app ?: return
+        // A Handler delay alone cannot retry after the CPU suspends during screen-off.
+        // Native doze owns the wake lock after acceptance; this only bridges the short queue.
+        pulseWakeLock = c.getSystemService(PowerManager::class.java)?.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK, "HeckerAmbientCharging:pulse")?.apply {
+            setReferenceCounted(false); acquire(AmbientPulsePolicy.TIMEOUT_MILLIS + 250)
+        }
+        pulsePolicy.begin(SystemClock.elapsedRealtime()); schedulePulse(0)
+    }
+    private fun schedulePulse(delay: Long) {
+        pulseRetry?.let { main.removeCallbacks(it) }
+        val token = pulsePolicy.generation()
+        val retry = Runnable {
+            pulseRetry = null
+            if (!pulsePolicy.pending(token, SystemClock.elapsedRealtime())) {
+                if (pulsePolicy.owns(token)) { cancelPulse(); if (session.pending()) cancelIntro() }
+                return@Runnable
+            }
+            val c = app ?: return@Runnable
+            if (!mutable.value.plugged || !mutable.value.ambient || interactive(c)) {
+                cancelPulse(); cancelIntro(); return@Runnable
+            }
+            // Doze attachment can follow the battery broadcast. Keep the request until attachment.
+            pulse?.run()
+        }
+        pulseRetry = retry; main.postDelayed(retry, delay)
+    }
+    @JvmStatic fun pulseGeneration(): Long = pulsePolicy.generation()
+    @JvmStatic fun retryPulse() { schedulePulse(100) }
+    @JvmStatic fun pulseAccepted(token: Long) {
+        if (!pulsePolicy.owns(token)) return
+        pulsePolicy.accepted(token)
+        pulseRetry?.let { main.removeCallbacks(it) }; pulseRetry = null
+        releasePulseWakeLock()
+    }
+    @JvmStatic fun pulseSuppressed(token: Long) {
+        if (pulsePolicy.owns(token)) { cancelPulse(); cancelIntro() }
+    }
     private fun reconcileDoze() { main.post { reconcile?.run() } }
     @JvmStatic fun onScreenState(displayState: Int) {
         this.displayState = displayState
