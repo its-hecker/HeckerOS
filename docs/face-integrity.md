@@ -19,11 +19,11 @@ pinned Android 17 framework, not a claim about a tested Axion Android 17 release
 Exact source, dates and adaptations are recorded in the framework fork's
 core/java/android/security/pif/HECKEROS-ORIGIN.json.
 
-Open Settings > Hecker's Suite > Play Integrity. Fetch a Google beta profile or
-import a JSON/prop profile, then restart the phone. The page can also disable the
-profile. A stale hardcoded fingerprint is not enabled by default. Fetching reads
-public Google metadata and at most the first 4 KB of an OTA; it does not download
-or install the OTA. Profile writes use privileged native Settings. The framework
+Open Settings > Hecker's Suite > Spoofing hub. The Evolution X Android 17 screen
+adaptation, Canary metadata fetch, keybox management and four-mode target list
+are documented in [spoofing-hub.md](spoofing-hub.md). It replaces the former
+Play Integrity page and Google beta/partial-OTA fetch workflow. Profile writes
+use privileged native Settings. The framework
 reads public build metadata from the hecker_pif_config Global setting and applies
 it only to the attestation process and Play Store. Native property virtualization,
 optional provider/signature hooks run only in the attestation process. Photos
@@ -39,10 +39,11 @@ framework revision `2017624b588861735445868ca809260bf2499f58`:
   are not exposed by the game editor.
 * TrickyStore targets accept JSON arrays of `package`/`mode` objects, or one
   package per line. No suffix selects AUTO; `?` selects LEAF_HACK; `!` selects
-  GENERATE. Targets are explicitly selected and limited to the primary user.
-* Keybox import accepts XML or base64 XML. No private attestation keys are bundled
-  or downloaded. The parser validates key/certificate pairing and rejects XML
-  entities and oversized input. Import your own keybox and choose its target apps.
+  GENERATE; `-` selects SKIP. Targets are explicitly selected and limited to the primary user.
+* Keybox import accepts XML or base64 XML. No private attestation keys are bundled.
+  The hub also offers an explicit fetch from Evolution X's public source.
+  The parser validates key/certificate pairing and rejects XML entities and
+  oversized input. Certificate status is separate from a Play Integrity verdict.
 * Optional patch dates accept a JSON object with `system`, `vendor`, `boot` or
   `all`, or text such as `all=2026-10-05`. These are attestation values, not an
   installed Android security update. Each configuration can be removed separately.

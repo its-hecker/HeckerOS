@@ -75,6 +75,8 @@ jobs:
         run: python3 tools/check_platform_features.py --sdk-cache generated/sdk
       - name: Check Android 17 keystore integration and private spoofing configuration
         run: python3 tools/check_spoofing.py
+      - name: Check Spoofing hub imports, Canary metadata and certificate diagnostics
+        run: python3 tools/check_spoofing_hub.py
       - name: Verify pinned upstream sources without requiring platform forks
         run: python3 tools/freeze_upstream.py --check
       - name: Verify coral integration and recovery tools

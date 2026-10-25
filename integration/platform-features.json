@@ -1,10 +1,10 @@
 {
   "settings": {
     "repository": "its-hecker/heckeros_packages_apps_Settings",
-    "revision": "e6fe59aea717e5f206de5c9a4e9c4da336738875",
+    "revision": "a03bc7da780240570db7dc075bdb0f500a930f1d",
     "files": {
       "Android.bp": "7734560e9290e57348a9da9626045091388829dc909ca1bea49a91ec827e2f41",
-      "AndroidManifest.xml": "73f27add49dce3e9f93738fc5cd963d3b0cf42bec0836cc987b92c248130d12c",
+      "AndroidManifest.xml": "bfb85ed90bcc7d9f36ec4066fa65175ffc5c30c429a4a4a74951418b92d2d731",
       "libs/pixel-face-ui/NOTICE": "fe1e7fc9a8acae869c235871efe45d6663c101813120d119d379380a6b82ec85",
       "libs/pixel-face-ui/ORIGIN.json": "923f13b0e4950eec4f5360a913e6c1f514201123d491c5cc0ba784859a78d4b8",
       "libs/pixel-face-ui/README.md": "d5fbaea6ad46b8e471edb5085cd848e8d09c0c8000868433fc4b694c768e2df4",
@@ -29,7 +29,7 @@
       "src/com/android/settings/biometrics/face/FacePoseEnrollmentState.java": "457bfab56bde33bff1f8213c88dca33966dd07866eaccb06041dcd4b6a615d5e",
       "src/com/android/settings/biometrics/face/FacePoseGridView.java": "db180ebb8e494439bae427f8f03314879b12cb8e2b35c91819a4f5774bb7fe78",
       "src/com/android/settings/biometrics/face/PixelFaceAnimationLifecycle.java": "f3dac03146d72f7580104b7df8445b7b784a594a93b75851f9eca0336b80d917",
-      "src/com/android/settings/hecker/HeckerIntegrityActivity.java": "bdf92e4c73a3e07d9863d4df26fdb5039603b1d5a69c51bce43dc0d0ec80b458",
+      "src/com/android/settings/hecker/HeckerIntegrityActivity.java": "3732b02db9eb5c08a26bb8db7393db692141955f83cf284f3e956033b63ed59e",
       "src/com/android/settings/hecker/PifProfile.java": "e4132e74e93e7937efc35d330d274b7520a6baa75afafcf56a23dc8a652031c9",
       "src/com/android/settings/hecker/PixelBetaProfileFetcher.java": "5100f5185b147185279a21ef98092c7a2b73cd66988b87e86ab4a48f3bedd37f",
       "src/com/google/android/settings/biometrics/face/anim/FaceEnrollAnimationMultiAngleDrawable.java": "7e69811a92b9e649b6d26b8fa67e9dcbe034865da45f9c3d2b7264e672cbe1d4",
@@ -39,35 +39,47 @@
       "tools/hecker/tests/FacePoseGridGeometryTest.java": "94598e1b7742ea70f4a6ae375a14be8122458990b641da88d54d2aa96fd44e3e",
       "res/raw/hecker_integrity.json": "405a7370fe3dc721c874a17b1edb052f97692491ff498256bfccc9eaeca29bae",
       "res/values/hecker_integrity_design.xml": "17ec510f02ef038fce161953d8ab5088958722eb7a96eac249734374d4524bc9",
-      "res/values-zh-rCN/hecker_integrity_design.xml": "ffc78a0cea836038e919cde50f7416f3508f860101aa667d19956873e2a2fa02"
+      "res/values-zh-rCN/hecker_integrity_design.xml": "ffc78a0cea836038e919cde50f7416f3508f860101aa667d19956873e2a2fa02",
+      "src/com/android/settings/hecker/SpoofingMaintenance.java": "eff866a8bd26f8815a778977805cbe8792867a7498f594f56e505771103bebf4",
+      "src/com/android/settings/hecker/HeckerSpoofingHubActivity.java": "8fd198deaceef0877c69ca855b4af5b9783c2430043e62650eaddfccd91a9aa4",
+      "src/com/android/settings/hecker/KeyboxStatus.java": "cf950c84ff27c3fe7b90f9602035079d674ec343b871d7b4ec92cfba8fa647f6",
+      "src/com/android/settings/hecker/SpoofingData.java": "3aaa47dd582ab7cad2a272a258fc3d81070439e01a8eaba538c90c02d2f75ec9",
+      "src/com/android/settings/hecker/PixelCanaryProfileFetcher.java": "a4fa9e53059afdb651ad8a90bcc8604a3985e6aadc790c82bd6f505030796c51",
+      "src/com/android/settings/hecker/SpoofingUi.java": "4e8a67a83582e8f2c6661d5c915adbfcabbabee88b4a30785ebe8f36273b7620",
+      "src/com/android/settings/hecker/SpoofingTargets.java": "51028370ab659b2b9f0868a1bc630a345fea2ead064075d8f72811d631ae2f48",
+      "src/com/android/settings/hecker/SpoofingHttp.java": "3cbef12a064daea74765906f4aca1da6719b0ec3cbb9e9e3b517c878e068fa39",
+      "res/drawable/hecker_hub_back.xml": "ff0a6f19a38f48654550a1dfe33a5312262134d1de1a8becf3d59085711ce069",
+      "res/values/hecker_spoofing_hub.xml": "1bab5127fa28eb799e412d95d1ea35075481aefa1a8d68d302540c9e52cbff42",
+      "res/values-zh-rCN/hecker_spoofing_hub.xml": "86b70ba6464f2cd175c7057e2128fb3ebf968b8bf1e85904e3c7910acc01127c",
+      "res/raw/hecker_spoofing_hub.json": "20c5cf22a8f369f759dccd0dbc63e5f8444a28423f1c192c53a28ab1a076ad10"
     }
   },
   "framework": {
     "repository": "its-hecker/heckeros_frameworks_base",
-    "revision": "7367a79dcb02c6388ab80b1cdf9ed7d223f8fcea",
+    "revision": "3fcdacb667bb3e0a944b61453ca970a88c5b1087",
     "files": {
-      "core/java/android/app/ActivityThread.java": "3977c0293fd44550cf289740db8f88bfeb58681943808ac25eb2435515292a2f",
+      "core/java/android/app/ActivityThread.java": "a80cae396ca01fe1347f5718401504fed4b291224f2cae7a6844c159a4803e72",
       "core/java/android/app/IActivityManager.aidl": "28ea763ad5aa2fe6344d89dd4207e70d31f0f999dca19d0e44962ec827a7da17",
       "core/java/android/security/gameprops/GamePropsSpoofService.java": "34e539c45af207fcd33398cb93f8e70a1ae6525a13cfd05372c971b6ae53a4ab",
       "core/java/android/security/pif/HECKEROS-ORIGIN.json": "dc24625e0bb357879ca38cfc4237d7e167de45dda1169b95e7e07b1e85be5f73",
       "core/java/android/security/pif/PlayIntegritySpoofService.java": "c9c4788189e0d8d5c63e46b1ef4587585e2c794245d47158c271152407f0eb18",
-      "core/java/android/security/spoof/HeckerSpoofConfig.java": "3a46a2d10e646bd24c3c161e4e485243a8d9019f43622f12121839db346a35e8",
+      "core/java/android/security/spoof/HeckerSpoofConfig.java": "a33f35e5a1b9ddb23b1319a82be6218afc7cca6ebaacf44477d8ef7ce74c7370",
       "core/java/android/security/trickystore/AttestationUtils.java": "9eede4dc3fe265b5311b103840c42529672d68907df706f5a71d508a107027ea",
       "core/java/android/security/trickystore/CertificateGenerator.java": "4ba4580376e608e39042fa4b72d4aa23249f6b4a20ba3585698c6d116234e50e",
       "core/java/android/security/trickystore/CertificateHacker.java": "309f2265de97683eac2edede3484553826dbd662dc9c3a297c1abd6735734ddf",
       "core/java/android/security/trickystore/KeyBoxManager.java": "ba45ab1d7269ffd35c6e682c1fdef89692d1efba7a632adc5229a2bc76257036",
-      "core/java/android/security/trickystore/TrickyStoreService.java": "078a35e6f0d5a3f3a1e76400258c5a7e9a765489397984182443ed4dbe28db87",
-      "core/java/com/android/internal/util/PropImitationHooks.java": "559cfd8c3d64519f03443d0509d18bbdafb8dd1c287d8375b9cc73ee6f461c87",
+      "core/java/android/security/trickystore/TrickyStoreService.java": "ef042d3eb26642933bffe6e0d59c33cbf7eaa3a2f1f65738d884cacedc20d1d9",
+      "core/java/com/android/internal/util/PropImitationHooks.java": "cde62b0a4103341206313b29713a052a5b357d52e51a7452a7249d251c949646",
       "core/jni/android_os_SystemProperties.cpp": "a71f1e41e91d27039fb9311f38808233b9c48623c738aadd995038e60da59751",
       "keystore/java/android/security/KeyStore2.java": "2132836bf67dce846a4e066d016b0cd70e290ff399b7964cc6e03dfe0d46c7a1",
       "keystore/java/android/security/KeyStoreSecurityLevel.java": "93cf60b078e580d07c05d4a462ed3e667f84440a0188442766e8f3fe5a21e0ea",
       "keystore/java/android/security/keystore2/AndroidKeyStoreKeyPairGeneratorSpi.java": "463523873c78f8f857e8dfe198e2d2f6484a93319a6a69214ce6c168c2c4710b",
       "keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java": "7a441b865bb90efbd678a6dd95a16fd4115d0596c915f570e82e0c185857eb11",
       "services/core/java/com/android/server/am/ActivityManagerService.java": "bba83766011390b1186c9b950a591f16d9ad7ad8353d3ce0229a2990a2041996",
-      "services/core/java/com/android/server/spoof/HeckerSpoofConfigStore.java": "b54e9a48844ecdc121e581742016501ffaf3eec893bdfd7ed0b2d59d02081a89",
+      "services/core/java/com/android/server/spoof/HeckerSpoofConfigStore.java": "314690b083518af0f1bb9f7497d29625f454e9c46a8067b37f3d67952a8550e0",
       "tests/hecker/NativeVirtualizationTest.cpp": "8d8685aa6648fb1cd7fa4bc34b3a10da75017e293db1f8b089038e5f93893c6b",
       "tests/hecker/PlayIntegrityScopeTest.java": "1838bd6b38997b5dbda1bd5f5fc225b465f14e66dce6ecaa7ae0ae8e7894a7b3",
-      "tests/hecker/SpoofingConfigTest.java": "db5f1ab15829928724b66e864205107372b06c235a00ed06527f0e5c01a1d6d4"
+      "tests/hecker/SpoofingConfigTest.java": "df133fc1ebe57f421b256c74e1e271e83b71769caf589c007204d17c7886b3df"
     }
   },
   "settings_java": [
@@ -80,6 +92,14 @@
     "com/android/settings/biometrics/face/FaceEnrollRingView.java",
     "com/android/settings/biometrics/face/FacePoseEnrollmentState.java",
     "com/google/android/settings/biometrics/face/anim/FaceEnrollAnimationMultiAngleDrawable.java",
-    "com/android/settings/biometrics/face/FacePoseGridGeometry.java"
+    "com/android/settings/biometrics/face/FacePoseGridGeometry.java",
+    "com/android/settings/hecker/SpoofingMaintenance.java",
+    "com/android/settings/hecker/HeckerSpoofingHubActivity.java",
+    "com/android/settings/hecker/KeyboxStatus.java",
+    "com/android/settings/hecker/SpoofingData.java",
+    "com/android/settings/hecker/PixelCanaryProfileFetcher.java",
+    "com/android/settings/hecker/SpoofingUi.java",
+    "com/android/settings/hecker/SpoofingTargets.java",
+    "com/android/settings/hecker/SpoofingHttp.java"
   ]
 }

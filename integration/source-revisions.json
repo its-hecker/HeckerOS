@@ -92,7 +92,7 @@
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
       "branch": "heckeros-17",
-      "revision": "7367a79dcb02c6388ab80b1cdf9ed7d223f8fcea",
+      "revision": "3fcdacb667bb3e0a944b61453ca970a88c5b1087",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -213,7 +213,7 @@
     "packages/apps/Settings": {
       "repository": "its-hecker/heckeros_packages_apps_Settings",
       "branch": "feat/suite-polish",
-      "revision": "e6fe59aea717e5f206de5c9a4e9c4da336738875",
+      "revision": "a03bc7da780240570db7dc075bdb0f500a930f1d",
       "files": [
         "src/com/android/settings/homepage/",
         "src/com/android/settings/DisplaySettings.java",
@@ -260,6 +260,18 @@
         "repository": "https://android.googlesource.com/platform/packages/apps/Launcher3",
         "revision": "c612e6ece389f21c40f8cb9cd9a4b44239f00009",
         "notes": "Native HOME-only Hecker Launcher module. Pixel remains the Recents/Quickstep provider."
+      },
+      "evolution_x_spoofing_hub": {
+        "branch": "cnb",
+        "verified_at": "2026-10-25",
+        "android": 17,
+        "projects": {
+          "Evolution-X/packages_apps_Evolver": "84b7ff421f5ce2c0dcdc3f573597f5d4d658f9ba",
+          "Evolution-X/frameworks_base": "6e9da54c4d0e71acca90091106c846919395410c",
+          "Evolution-X/vendor_evolution": "9c828eb1afbaa240df18b2cadde7e29bec8c8c03"
+        },
+        "notes": "Native Java/View adaptation of the hub, PIF and TrickyStore screens and public metadata workflow; retained HeckerOS UID-scoped system-only storage; original vector Lottie. See docs/spoofing-hub.md.",
+        "validation": "Locked SDK/resources and synthetic host certificate tests; full Soong/ROM and device validation required."
       }
     }
   },

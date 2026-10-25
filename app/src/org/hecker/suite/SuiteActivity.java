@@ -71,7 +71,7 @@ public final class SuiteActivity extends Activity {
                 tile(R.string.capture_title,R.string.capture_summary,R.drawable.ic_qs,v->open("CaptureSettingsActivity")));
         addRow(tile(R.string.launcher_title,R.string.launcher_summary,R.drawable.ic_launcher_enhanced,v->open("LauncherSettingsActivity")),
                 tile(R.string.netlab_title,R.string.netlab_summary,R.drawable.ic_netlab,v->open("NetworkLabActivity")));
-        content.addView(tile(R.string.integrity_title,R.string.integrity_summary,R.drawable.ic_sandbox,v->openIntegrity()));
+        content.addView(tile(R.string.spoofing_title,R.string.spoofing_summary,R.drawable.ic_spoofing,v->openSpoofing()));
         LinearLayout footer=Ui.card(this); footer.addView(Ui.text(this,"HeckerOS",17,true));
         footer.addView(Ui.text(this,getString(R.string.suite_footer),12,false));content.addView(footer);
     }
@@ -101,8 +101,8 @@ public final class SuiteActivity extends Activity {
             Toast.makeText(this, R.string.native_page_unavailable, Toast.LENGTH_LONG).show();
         }
     }
-    private void openIntegrity(){
-        try{startActivity(new Intent().setClassName("com.android.settings","com.android.settings.hecker.HeckerIntegrityActivity"));}
+    private void openSpoofing(){
+        try{startActivity(new Intent().setClassName("com.android.settings","com.android.settings.hecker.HeckerSpoofingHubActivity"));}
         catch(ActivityNotFoundException|SecurityException unavailable){Toast.makeText(this,R.string.native_page_unavailable,Toast.LENGTH_LONG).show();}
     }
     private void openFace(){settings("android.settings.FACE_SETTINGS");}

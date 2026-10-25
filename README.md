@@ -121,6 +121,7 @@ python3 tools/check_about_phone.py --sdk-cache generated/sdk
 python3 tools/check_motion_manifest.py
 python3 tools/check_native_ports.py
 python3 tools/check_spoofing.py
+python3 tools/check_spoofing_hub.py
 python3 tools/freeze_upstream.py --check
 python3 integration/tools/validate.py
 python3 -m unittest discover -s integration/tests -p 'test_*.py'
@@ -137,6 +138,8 @@ Build source policy (21 October 2026)
 
 Native Settings includes the original Pixel pose-grid renderer and Axion-derived
 PIF, game profile, keybox import and TrickyStore controls adapted to Android 17.
+The current [Spoofing hub](docs/spoofing-hub.md) uses Evolution X Android 17
+screens, Canary metadata discovery and an original Lottie animation.
 Photos retains the PixelOS implementation. Settings, frameworks/base,
 vendor/custom and vendor/lineage use owned `heckeros-17` branches. The other 87
 projects remain upstream and are pinned. Our customizations are retained without

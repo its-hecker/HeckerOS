@@ -54,6 +54,8 @@ def main():
         assert '.getInstance().shouldSpoof(processName)) return;' in props
         assert 'sPixelOneProps.forEach((PropImitationHooks::setPropValue))' in props
         assert 'TrickyStoreService.getInstance().hasKeyboxes()) return;' in props
+        assert '"hecker_pif_enabled", 1) != 0' in props
+        assert props.count('if (!sPifEnabled) return;') == 2
         thread = (framework/'core/java/android/app/ActivityThread.java').read_text()
         assert 'GamePropsSpoofService.getInstance()' in thread
         assert thread.index('GamePropsSpoofService.getInstance()') < thread.index('app = data.info.makeApplicationInner')

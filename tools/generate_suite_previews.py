@@ -79,6 +79,7 @@ def generate():
     ring=[{'ty':'el','d':1,'s':fixed([122,122]),'p':fixed([0,0])},{'ty':'st','c':fixed(cyan),'o':fixed(55),'w':fixed(3),'lc':2,'lj':2}]
     write('charge',[group(ring),bolt],[layer(2,dots,rotate=True)])
     generate_netlab()
+    generate_spoofing()
 
 def generate_netlab():
     s=[group(rect(0,0,292,182,navy,26))]
@@ -104,4 +105,22 @@ def generate_netlab():
               for i,point in enumerate(route[:-1])]+[{'t':120,'s':route[-1]}]
         packet=group(circle(0,0,7,color));packet['it'][-1]['p']={'a':1,'k':keys};s.append(packet)
     write('netlab',s)
+
+def generate_spoofing():
+    # Original fingerprint scan, private key and two grouped hub cards.
+    shapes=[group(rect(0,0,166,176,navy,28)),group(rect(0,61,138,20,[.13,.25,.36,1],10)),group(rect(0,87,138,20,[.13,.25,.36,1],10))]
+    for y in (61,87):
+        shapes += [group(circle(-52,y,10,cyan)),group(rect(-9,y,55,4,white,2)),group(rect(50,y,19,9,violet,5))]
+    for points in [
+        [[-52,-16],[-52,-33],[-42,-54],[-21,-68],[4,-72],[29,-63],[48,-44],[54,-21]],
+        [[-40,-5],[-40,-27],[-30,-45],[-12,-54],[10,-54],[31,-38],[38,-17],[38,0],[31,16]],
+        [[-25,7],[-25,-18],[-19,-32],[-3,-39],[14,-33],[23,-17],[23,2],[16,23]],
+        [[-9,28],[-5,10],[-5,-13],[3,-19],[9,-13],[9,4],[4,22]],
+        [[-43,18],[-43,2]],[[-28,28],[-25,12]],[[40,12],[31,30]]]:
+        shapes += [group(line(points,cyan,3))]
+    shapes += [group(circle(62,-52,14,violet)),group(circle(62,-52,5,navy)),group(line([[62,-45],[62,-24],[71,-24],[71,-31]],violet,5))]
+    scan=group(rect(0,-19,100,3,white,1))
+    scan['it'][-1]['p']={'a':1,'k':[{'t':0,'s':[0,-42],'e':[0,45],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},{'t':60,'s':[0,45],'e':[0,-42],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},{'t':120,'s':[0,-42]}]}
+    write('spoofing',shapes+[scan])
+
 if __name__=='__main__':generate()

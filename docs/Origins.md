@@ -36,6 +36,11 @@ renderer and framework fork carry their own source/byte provenance. The 87
 remaining upstream platform revisions are locked in
 `integration/upstream-platform-lock.json`; copying them into new forks is optional.
 
+The replacement Spoofing hub adapts Evolution X's Android 17 `cnb` screens and
+public Canary/certificate metadata workflow. Exact Evolver/framework/vendor
+revisions, retained crDroid/Evolution X credits and HeckerOS storage differences
+are in `docs/spoofing-hub.md`. Its vector Lottie is original HeckerOS artwork.
+
 Generated Settings artwork and its prompt/mode are documented in
 `settings/README.md`. The approved boot storyboard is implemented by generated
 registered caracal keyframes plus separately rendered ring/typography; see
