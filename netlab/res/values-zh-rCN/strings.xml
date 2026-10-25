@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="netlab_controller_title">Hecker 网络实验室控制器</string>
+    <string name="netlab_active_rules">网络实验室：%1$d 个热点限制</string>
+    <string name="netlab_restore_notification">点按以恢复网络实验室设置的所有热点限制。</string>
+    <string name="netlab_restore_all">全部恢复</string>
+</resources>

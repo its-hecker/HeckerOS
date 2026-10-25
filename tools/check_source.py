@@ -30,13 +30,17 @@ def main():
         "android.permission.SYSTEM_ALERT_WINDOW", "android.permission.KILL_BACKGROUND_PROCESSES",
         "android.permission.KILL_ALL_BACKGROUND_PROCESSES", "android.permission.FORCE_STOP_PACKAGES", "android.permission.CONTROL_DISPLAY_BRIGHTNESS",
         "android.permission.MODIFY_AUDIO_SETTINGS", "android.permission.MANAGE_GAME_MODE", "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.INTERNET", "android.permission.ACCESS_LOCAL_NETWORK", "org.hecker.netlab.permission.CONTROL",
         "android.permission.ACCESS_NOTIFICATION_POLICY", "android.permission.READ_FRAME_BUFFER",
         "android.permission.POST_NOTIFICATIONS", "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_SPECIAL_USE", "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
         "android.permission.RECEIVE_BOOT_COMPLETED", "android.permission.MANAGE_ROLE_HOLDERS",
         "android.permission.CHANGE_OVERLAY_PACKAGES", "android.permission.REBOOT",
         "android.permission.WRITE_SECURE_SETTINGS"}
-    assert not any("INTERNET" in p or "TEST_LOCK_APPS" in p for p in permissions)
+    assert not any("TEST_LOCK_APPS" in p for p in permissions)
+    # LAN discovery needs sockets; hotspot administration remains in a separate UID.
+    assert not {"android.permission.NETWORK_SETTINGS", "android.permission.TETHER_PRIVILEGED",
+                "android.permission.NETWORK_STACK"} & permissions
     app = manifest.find("application")
     assert app.get(A + "allowBackup") == "false"
     exported = [node.get(A + "name") for node in app.findall("activity")
@@ -52,7 +56,7 @@ def main():
     assert native.find("uses-permission").get(A + "name") == permission.get(A + "name")
     assert not manifest.findall(".//category[@" + A + "name='android.intent.category.LAUNCHER']")
     services = {node.get(A + "name"): node for node in app.findall("service")}
-    tiles = {".SuiteTileService", ".MotionSenseTileService", ".FaceUnlockTileService", ".MemoryBoostTileService"}
+    tiles = {".SuiteTileService", ".MotionSenseTileService", ".FaceUnlockTileService", ".MemoryBoostTileService", ".NetworkLabTileService"}
     assert set(services) == {".GamingService", ".GamingRecordingService"} | tiles
     for name, node in services.items():
         assert node.get(A + "exported") == ("true" if name in tiles else "false")
@@ -81,6 +85,8 @@ def main():
         assert 'name: "' + name + '"' in flag and "state: ENABLED" in flag
         assert "permission: READ_ONLY" in flag
     print("Suite resources, Lottie, gaming service/capture boundaries, freeform feature and permissions: PASS")
+    from check_netlab import check as check_netlab
+    check_netlab(ROOT)
 
 
 if __name__ == "__main__": main()

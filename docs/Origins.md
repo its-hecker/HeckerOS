@@ -21,7 +21,8 @@ handling. Their Lunaris framework source is recorded in `themes/ORIGIN.json`.
 
 Infinity-X lock-screen lyric source and the source changes are recorded in
 `framework/lyrics-origin.json`. Network lookup is opt-in and executes in SystemUI;
-Suite has no Internet permission. This integration does not import an entire
+Suite's NetLab discovery now requests Internet/local-network socket access;
+lyric lookup remains in SystemUI. This integration does not import an entire
 unrelated ROM framework or its dynamic bar.
 
 Motion Sense and 3D FaceID plugins are pinned in `integration/floral.xml`.
@@ -54,3 +55,9 @@ LibrePods is a separate, original-signed GPL-3.0-or-later app; its exact release
 corresponding source and APK hash are in `prebuilts/librepods/source.json`.
 Recovery's five caracal images reuse the approved Hecker mascot and match the
 pinned PixelOS recovery's resource format; see `recovery/README.md`.
+
+HeckerNetLab UI, original network-hub Lottie, controller, policy and discovery code
+are original Apache-2.0 sources. The supplied modified NetCut APK was inspected
+statically for metadata and feature-flow inspiration only; none of its code,
+native libraries, artwork or executable assets are redistributed. See
+`docs/network-lab.md` and the reproducible APK audit metadata.

@@ -22,6 +22,9 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.MANAGE_GAME_MODE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+    <uses-permission android:name="org.hecker.netlab.permission.CONTROL" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -90,6 +93,12 @@
             <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
         </service>
         <activity android:name=".MemoryBoostActivity" android:exported="false" />
+        <activity android:name=".NetworkLabActivity" android:exported="false" android:label="@string/netlab_title" />
+        <service android:name=".NetworkLabTileService" android:exported="true"
+            android:label="@string/netlab_title" android:icon="@drawable/ic_netlab"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+        </service>
         <activity android:name=".LauncherSettingsActivity" android:exported="false" />
         <activity android:name=".SandboxActivity" android:exported="false" />
         <activity android:name=".HeadphonesActivity" android:exported="false" />

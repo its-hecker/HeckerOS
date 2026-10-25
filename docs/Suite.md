@@ -295,3 +295,12 @@ Recents with the advertised reboot, exercise both orientations and font sizes,
 open/close the edge handle, verify that FPS belongs to the game, change supported
 performance modes and test capture, Focus, touch lock and floating shortcuts.
 Host/source compilation does not replace a complete ROM build or these checks.
+
+## Network Lab
+
+Hecker Suite → Network Lab includes local discovery, native phone-hotspot controls,
+Jail/restore, trusted labels, optional history, passive observations, a local traffic
+chart and its own Lottie. The NetLab QS tile opens the page. The separate controller
+requires actual HAL support; external-router controls and speed enforcement remain
+unavailable. See [network-lab.md](network-lab.md) for privilege boundaries, source
+validation and the required phone acceptance tests.

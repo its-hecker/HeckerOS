@@ -71,11 +71,8 @@ public final class SuiteActivity extends Activity {
                 tile(R.string.capture_title,R.string.capture_summary,R.drawable.ic_qs,v->open("CaptureSettingsActivity")));
         addRow(tile(R.string.memory_title,R.string.memory_summary,R.drawable.ic_memory,v->open("MemoryBoostActivity")),
                 tile(R.string.launcher_title,R.string.launcher_summary,R.drawable.ic_launcher_enhanced,v->open("LauncherSettingsActivity")));
-        LinearLayout integrity=Ui.card(this);
-        integrity.addView(Ui.text(this,getString(R.string.integrity_title),17,true));
-        integrity.addView(Ui.text(this,getString(R.string.integrity_summary),12,false));
-        integrity.setFocusable(true);integrity.setClickable(true);
-        integrity.setOnClickListener(v->openIntegrity());content.addView(integrity);
+        addRow(tile(R.string.netlab_title,R.string.netlab_summary,R.drawable.ic_netlab,v->open("NetworkLabActivity")),
+                tile(R.string.integrity_title,R.string.integrity_summary,R.drawable.ic_sandbox,v->openIntegrity()));
         LinearLayout footer=Ui.card(this); footer.addView(Ui.text(this,"HeckerOS",17,true));
         footer.addView(Ui.text(this,getString(R.string.suite_footer),12,false));content.addView(footer);
     }

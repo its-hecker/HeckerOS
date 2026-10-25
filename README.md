@@ -31,6 +31,10 @@ platform customization forks use `heckeros-17`.
   tabs, capture controls and native floating app shortcuts. Performance profiles
   are exposed only when the Android game service supports the active game.
 - AOSP Android 17-based Hecker Launcher with native home customization, alongside Pixel Launcher as the single Recents/Quickstep provider.
+- Native Network Lab: bounded LAN discovery, capability-gated phone-hotspot Jail/restore,
+  passive diagnostics, local traffic and an original network-hub Lottie. The separate
+  controller uses no end-user root; speed enforcement and router adapters are not
+  implemented. See [NetLab behavior, limits and phone tests](docs/network-lab.md).
 - Opt-in synchronized lock-screen lyrics adapted from Infinity-X. The settings
   page discloses the LRCLIB artist/title lookup before it is enabled.
 - Offline pickers for 21 pinned Wi-Fi and battery styles under Status Bar,

@@ -30,6 +30,7 @@ public final class SuiteRouterActivity extends Activity {
             case "StatusBarSettingsActivity": return StatusBarSettingsActivity.class;
             case "ThemePackActivity": return ThemePackActivity.class;
             case "MemoryBoostActivity": return MemoryBoostActivity.class;
+            case "NetworkLabActivity": return NetworkLabActivity.class;
             case "LauncherSettingsActivity": return LauncherSettingsActivity.class;
             case "SandboxActivity": return SandboxActivity.class;
             case "HeadphonesActivity": return HeadphonesActivity.class;

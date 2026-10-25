@@ -28,6 +28,15 @@ def check_suite(rom, output):
     original = rom / "vendor/hecker/floral/suite" / relative
     if not installed.is_file() or installed.read_bytes() != original.read_bytes():
         raise ValueError("Built system_ext image is missing the Suite freeform-window feature")
+    controller = output / "system_ext/priv-app/HeckerNetLabController/HeckerNetLabController.apk"
+    if not controller.is_file() or controller.stat().st_size == 0:
+        raise ValueError("Built system_ext image is missing HeckerNetLabController.apk")
+    for name, folder in (("privapp-permissions-hecker-netlab.xml", "permissions"),
+                         ("default-permissions-hecker-netlab.xml", "default-permissions")):
+        original = rom / "vendor/hecker/floral/suite/configs" / name
+        installed = output / "system_ext/etc" / folder / name
+        if not original.is_file() or not installed.is_file() or installed.read_bytes() != original.read_bytes():
+            raise ValueError("Built system_ext image is missing the exact NetLab permission file: " + name)
 
 
 def check_motion_sense(output):

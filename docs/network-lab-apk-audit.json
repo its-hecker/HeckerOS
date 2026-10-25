@@ -1,0 +1,67 @@
+{
+  "input_sha256": "983c77b9b5577ed64df03ea78bafbd5712dcf33ea00fe698b8860ef09ff39c41",
+  "execution": "none",
+  "code_redistributed": false,
+  "package": "com.lrcai.ravens",
+  "version": "1.7.7",
+  "version_code": "177",
+  "minimum_sdk": "14",
+  "target_sdk": "27",
+  "requested_permissions": [
+    "android.permission.ACCESS_COARSE_LOCATION",
+    "android.permission.ACCESS_FINE_LOCATION",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.ACCESS_WIFI_STATE",
+    "android.permission.BLUETOOTH",
+    "android.permission.BLUETOOTH_ADMIN",
+    "android.permission.CAMERA",
+    "android.permission.CHANGE_WIFI_MULTICAST_STATE",
+    "android.permission.CHANGE_WIFI_STATE",
+    "android.permission.CONNECTIVITY_CHANGE",
+    "android.permission.FLASHLIGHT",
+    "android.permission.INTERNET",
+    "android.permission.READ_EXTERNAL_STORAGE",
+    "android.permission.READ_LOGS",
+    "android.permission.READ_SETTINGS",
+    "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+    "android.permission.SYSTEM_ALERT_WINDOW",
+    "android.permission.USE_FINGERPRINT",
+    "android.permission.VIBRATE",
+    "android.permission.WAKE_LOCK",
+    "android.permission.WRITE_SETTINGS",
+    "com.android.vending.BILLING",
+    "net.dinglisch.android.tasker.PERMISSION_RUN_TASKS"
+  ],
+  "native_libraries": [
+    {
+      "path": "lib/armeabi-v7a/libappcloner.so",
+      "bytes": 26376
+    },
+    {
+      "path": "lib/armeabi-v7a/libsandhook-native.so",
+      "bytes": 440296
+    },
+    {
+      "path": "lib/armeabi-v7a/libsandhook.so",
+      "bytes": 231456
+    },
+    {
+      "path": "lib/armeabi-v7a/librealm-jni.so",
+      "bytes": 1852944
+    }
+  ],
+  "abis": [
+    "armeabi-v7a"
+  ],
+  "feature_evidence": {
+    "jail_ui": true,
+    "offline_schedule_ui": true,
+    "speed_controls": true,
+    "netlock_command": true,
+    "defender_command": true,
+    "driver_socket_threads": true,
+    "app_cloner_instrumentation": true,
+    "opaque_native_asset": true
+  },
+  "limits": "Metadata and symbol evidence only; no runtime behavior, security or license verdict."
+}

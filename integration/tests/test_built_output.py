@@ -186,6 +186,23 @@ class BuiltOutputTests(unittest.TestCase):
             feature.write_text('<permissions><feature name="android.software.freeform_window_management" /></permissions>')
             installed_feature = output / "system_ext/etc/permissions/hecker-suite-freeform.xml"
             installed_feature.write_bytes(feature.read_bytes())
+            with self.assertRaisesRegex(ValueError, "HeckerNetLabController.apk"):
+                check_suite(root, output)
+            controller = output / "system_ext/priv-app/HeckerNetLabController/HeckerNetLabController.apk"
+            controller.parent.mkdir(parents=True)
+            controller.write_bytes(b"netlab controller fixture")
+            for name, folder in (("privapp-permissions-hecker-netlab.xml", "permissions"),
+                                 ("default-permissions-hecker-netlab.xml", "default-permissions")):
+                with self.assertRaisesRegex(ValueError, "NetLab permission"):
+                    check_suite(root, output)
+                original_netlab = original.parent / name
+                original_netlab.write_text("<permissions />")
+                installed_netlab = output / "system_ext/etc" / folder / name
+                installed_netlab.parent.mkdir(parents=True, exist_ok=True)
+                installed_netlab.write_text("<wrong />")
+                with self.assertRaisesRegex(ValueError, "NetLab permission"):
+                    check_suite(root, output)
+                installed_netlab.write_bytes(original_netlab.read_bytes())
             check_suite(root, output)
 
     def test_librepods_accepts_rom_signing_but_requires_source_payload_and_permissions(self):

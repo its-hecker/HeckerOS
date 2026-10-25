@@ -92,6 +92,11 @@ def main():
             source.write_text((ROOT / "framework" / folder / (name + ".aidl")).read_text())
             run(cache / "aidl", "--lang=java", "--out=" + str(output / "feature-aidl"),
                 "-I", output / "aidl", source, env=environment)
+        network_aidl = output / "aidl/org/hecker/netlab/INetLabService.aidl"
+        network_aidl.parent.mkdir(parents=True, exist_ok=True)
+        network_aidl.write_text((ROOT / "netlab/aidl/org/hecker/netlab/INetLabService.aidl").read_text())
+        run(cache / "aidl", "--lang=java", "--out=" + str(output / "netlab-aidl"),
+            "-I", output / "aidl", network_aidl, env=environment)
         generated = (output / "aidl-generated/suite/probe/IAccessProbe.java").read_text()
         assert "android.Manifest.permission.LOCK_APPS" in generated
         assert "android.Manifest.permission.HECKER_SUITE_APP_LOCK" in generated
@@ -123,7 +128,18 @@ def main():
             *sorted((ROOT / "app/src").rglob("*.java")),
             ROOT / "framework/sandbox/HeckerSandboxRules.java",
             ROOT / "framework/memory/HeckerMemoryRules.java",
+            *sorted((ROOT / "netlab/common").rglob("*.java")),
+            *sorted((output / "netlab-aidl").rglob("*.java")),
             *sorted((output / "feature-aidl").rglob("*.java")))
+        run(aapt, "compile", "--dir", ROOT / "netlab/res", "-o", output / "netlab-resources.zip")
+        run(aapt, "link", "-I", cache / "android.jar", "--manifest", ROOT / "netlab/AndroidManifest.xml",
+            "--java", output / "netlab-resources", "-o", output / "netlab.apk", output / "netlab-resources.zip")
+        run("java", "-m", "jdk.compiler/com.sun.tools.javac.Main", "-cp", classpath,
+            "-d", output / "netlab-classes", output / "netlab-resources/org/hecker/netlab/R.java",
+            *sorted((ROOT / "netlab/common").rglob("*.java")),
+            *sorted((ROOT / "netlab/src").rglob("*.java")),
+            *sorted((output / "netlab-aidl").rglob("*.java")))
+        print("NetLab separate controller, public/system networking declarations and real AIDL: PASS")
         # Compile exactly the Settings UI module without backend classes on its
         # classpath, so a feature Activity reference cannot silently join its UID.
         (output / "settings-ui-classes").mkdir()

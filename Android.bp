@@ -23,11 +23,51 @@ android_app {
     certificate: "platform",
     privileged: true,
     system_ext_specific: true,
-    static_libs: ["lottie"],
+    static_libs: ["lottie", "HeckerNetLabApi"],
+    libs: ["framework-wifi"],
     required: ["HeckerSuitePrivappPermissions", "HeckerSuiteFreeformFeature", "HeckerGameInit"],
     optimize: {
         proguard_flags_files: ["app/proguard.flags"],
     },
+}
+
+// Keep hotspot permissions out of Settings and the presentation package.
+java_library {
+    name: "HeckerNetLabApi",
+    srcs: ["netlab/aidl/**/*.aidl", "netlab/common/**/*.java"],
+    sdk_version: "system_current",
+    aidl: { local_include_dirs: ["netlab/aidl"] },
+    installable: false,
+}
+
+android_app {
+    name: "HeckerNetLabController",
+    manifest: "netlab/AndroidManifest.xml",
+    srcs: ["netlab/src/**/*.java"],
+    resource_dirs: ["netlab/res"],
+    static_libs: ["HeckerNetLabApi"],
+    libs: ["framework-wifi", "framework-connectivity-t"],
+    platform_apis: true,
+    certificate: "platform",
+    privileged: true,
+    system_ext_specific: true,
+    required: ["HeckerNetLabPermissions", "HeckerNetLabDefaultPermissions"],
+}
+
+prebuilt_etc {
+    name: "HeckerNetLabPermissions",
+    src: "configs/privapp-permissions-hecker-netlab.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}
+
+prebuilt_etc {
+    name: "HeckerNetLabDefaultPermissions",
+    src: "configs/default-permissions-hecker-netlab.xml",
+    filename_from_src: true,
+    sub_dir: "default-permissions",
+    system_ext_specific: true,
 }
 
 // UI is linked into the native Settings APK. Privileged feature services retain

@@ -78,4 +78,30 @@ def generate():
     dots=[group(circle(0,-65,9,cyan)),group(circle(65,0,7,violet)),group(circle(0,65,9,violet)),group(circle(-65,0,7,cyan))]
     ring=[{'ty':'el','d':1,'s':fixed([122,122]),'p':fixed([0,0])},{'ty':'st','c':fixed(cyan),'o':fixed(55),'w':fixed(3),'lc':2,'lj':2}]
     write('charge',[group(ring),bolt],[layer(2,dots,rotate=True)])
+    generate_netlab()
+
+def generate_netlab():
+    s=[group(rect(0,0,292,182,navy,26))]
+    # A real network-hub silhouette: laptop, phone, hotspot/router, tablet and shield.
+    for points in [[[-94,-29],[-94,4],[-44,4]],[[44,4],[94,4],[94,-21]],
+                   [[-19,27],[-19,57],[-76,57]],[[22,27],[22,62],[78,62]]]:
+        s.append(group(line(points,[.22,.38,.56,1],3)))
+    s += [group(rect(-94,-52,57,38,[.16,.27,.40,1],7)),group(rect(-94,-54,45,25,cyan,4)),
+          group(line([[-128,-30],[-60,-30]],white,4)),
+          group(rect(94,-52,34,60,[.16,.27,.40,1],9)),group(rect(94,-54,24,43,violet,5)),
+          group(rect(94,-26,8,2,white,1)),
+          group(rect(-101,59,48,60,[.16,.27,.40,1],9)),group(rect(-101,56,36,42,violet,4)),
+          group(circle(-101,83,4,white)),group(rect(0,7,87,43,[.17,.32,.47,1],12)),
+          group(line([[-27,-13],[-27,-29]],cyan,4)),group(line([[27,-13],[27,-29]],cyan,4))]
+    for x,c in [(-20,cyan),(-5,white),(10,violet),(25,cyan)]:s.append(group(circle(x,10,5,c)))
+    s += [group(line([[79,43],[96,37],[113,43],[110,65],[96,79],[82,65],[79,43]],cyan,3)),
+          group(line([[87,58],[94,65],[105,51]],white,4))]
+    for x,h in [(-36,8),(-27,15),(-18,11),(-9,22)]:s.append(group(rect(x,-51-h/2,5,h,cyan,2)))
+    for points,color in [([[-94,-28],[-94,4],[-44,4]],cyan),([[44,4],[94,4],[94,-21]],violet),
+                         ([[-19,27],[-19,57],[-76,57]],cyan),([[22,27],[22,62],[78,62]],violet)]:
+        route=[points[0],points[1],points[2],points[1],points[0]]
+        keys=[{'t':i*30,'s':point,'e':route[i+1],'o':{'x':[0],'y':[0]},'i':{'x':[1],'y':[1]}}
+              for i,point in enumerate(route[:-1])]+[{'t':120,'s':route[-1]}]
+        packet=group(circle(0,0,7,color));packet['it'][-1]['p']={'a':1,'k':keys};s.append(packet)
+    write('netlab',s)
 if __name__=='__main__':generate()
