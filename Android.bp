@@ -24,7 +24,6 @@ android_app {
     privileged: true,
     system_ext_specific: true,
     static_libs: ["lottie", "HeckerNetLabApi"],
-    libs: ["framework-wifi"],
     required: ["HeckerSuitePrivappPermissions", "HeckerSuiteFreeformFeature", "HeckerGameInit"],
     optimize: {
         proguard_flags_files: ["app/proguard.flags"],
@@ -46,7 +45,13 @@ android_app {
     srcs: ["netlab/src/**/*.java"],
     resource_dirs: ["netlab/res"],
     static_libs: ["HeckerNetLabApi"],
-    libs: ["framework-wifi", "framework-connectivity-t"],
+    // Platform apps must select explicit java_sdk_library API artifacts.
+    // Hotspot callbacks are System APIs; tethering lives in framework-tethering.
+    libs: [
+        "framework-wifi.stubs.system",
+        "framework-tethering.stubs.system",
+        "framework-connectivity.stubs.system",
+    ],
     platform_apis: true,
     certificate: "platform",
     privileged: true,

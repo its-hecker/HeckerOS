@@ -41,6 +41,8 @@ Wi-Fi's configuration API has no cross-application compare-and-swap or ownership
 
 The product includes `HeckerNetLabController`; the Suite depends on its AIDL/common library. No new external source checkout, kernel patch or downloaded legacy APK is required. The controller and its two permission XMLs are mandatory post-build output checks. The companion local manifest mirrors the updated `integration/tools/check_built_output.py` and its regression fixture with the Suite source pin.
 
+The controller links the explicit `framework-wifi.stubs.system`, `framework-tethering.stubs.system` and `framework-connectivity.stubs.system` API artifacts. A platform-API app cannot depend on the bare networking `java_sdk_library` names; their implementation libraries also restrict visibility. `TetheringManager` and `TetheredClient` belong to `framework-tethering`, not `framework-connectivity-t`. Suite's presentation code has no Wi-Fi library dependency. This corrects the 25 October Soong graph failure recorded in `error_log_its_hecker_coral_20261025-095336.txt`.
+
 ```bash
 bash tests/run_host_tests.sh
 python3 tools/compile_sdk.py --cache /path/to/locked/sdk/cache

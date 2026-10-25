@@ -3,12 +3,24 @@
 """Audit NetLab's real resource, UID and privilege boundaries before a ROM build."""
 from pathlib import Path
 import json
+import re
 import xml.etree.ElementTree as ET
 
 A='{http://schemas.android.com/apk/res/android}'
 
 def check(root):
     root=Path(root)
+    # java_sdk_library forbids a bare dependency from platform_apis clients.
+    # .impl is visibility-restricted in the Android 17 networking modules.
+    blueprint=(root/'Android.bp').read_text()
+    sdk_libraries={'framework-wifi','framework-connectivity','framework-connectivity-t','framework-tethering'}
+    for module in re.findall(r'(?ms)^android_app\s*\{.*?^\}',blueprint):
+        for library in re.findall(r'"(framework-[^"\n]+)"',module):
+            if library.split('.')[0] in sdk_libraries:
+                assert library.endswith('.stubs.system'), 'Use explicit networking System API stubs: '+library
+    controller=next(module for module in re.findall(r'(?ms)^android_app\s*\{.*?^\}',blueprint)
+                    if 'name: "HeckerNetLabController"' in module)
+    assert '"framework-tethering.stubs.system"' in controller, 'TetheringManager is supplied by framework-tethering'
     backend=ET.parse(root/'netlab/AndroidManifest.xml').getroot()
     assert backend.get('package')=='org.hecker.netlab' and A+'sharedUserId' not in backend.attrib
     permission=backend.find('permission')
