@@ -3,14 +3,19 @@
     <string name="custom_clock_title">Custom lockscreen clock</string>
     <string name="custom_clock_summary">Replace the default clock and date with the geometric digital clock. Turn off to restore your Wallpaper &amp; style clock. Lyrics keep their own space below.</string>
     <string name="ambient_charging_title">Charging on ambient display</string>
-    <string name="ambient_charging_summary">When the screen is off, show the charging animation and information on AOD. Charging keeps ambient display available until unplugged, without changing your Always show time setting.</string>
+    <string name="always_on_title">Always-on display</string>
+    <string name="always_on_summary">Keep the ambient clock visible while the phone is idle. Turn off to use brief tap, lift and Motion Sense checks instead.</string>
+    <string name="ambient_charging_summary">Show charging styles during brief tap, lift and Motion Sense checks when Always-on display is off. Plugging in requests one normal ambient pulse; it does not keep AOD on.</string>
     <string name="charging_animation_title">Charging animation</string>
     <string name="charging_animation_summary">Play once when a charger is connected, then show the selected charging information. Respects reduced animation and pocket detection.</string>
     <string name="charging_animation_style">Charging animation style</string>
     <string name="charging_plasma_title">Multicolour plasma ring</string>
-    <string name="aod_charging_info_title">AOD charging information</string>
+    <string name="aod_charging_info_title">Ambient charging information</string>
     <string name="aod_charging_info_off">Off</string>
     <string name="aod_charging_info_detailed">Detailed · clock, meter and live readings</string>
     <string name="aod_charging_info_minimal">Minimal · dim percentage and charging label</string>
     <string name="aod_charging_info_summary">Detailed shows a magenta charging meter, temperature, voltage, time estimate and battery-side power. Minimal uses dim text on black. Both reserve space for lyrics and move with AOD burn-in protection. Unavailable readings show a dash; the percentage reflects device-reported precision.</string>
+    <string name="aod_charging_title">Charging styles on AOD</string>
+    <string name="aod_charging_summary">Show the selected charging style while Always-on display is enabled. Takes precedence over the ambient-display switch during AOD.</string>
+    <string name="charging_gauge_title">Gauge fill · speedometer</string>
 </resources>

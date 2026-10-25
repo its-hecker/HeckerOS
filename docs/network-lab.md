@@ -9,7 +9,7 @@ This is a source implementation targeting coral. A full ROM/SELinux build and te
 | Feature | Source behavior and actual limit |
 | --- | --- |
 | Devices | Native hotspot clients from Wi-Fi callbacks, DHCP addresses from TetheringManager, and an explicit LAN scan. Search, online/trusted filters, details and multiselect are available. |
-| LAN discovery | Requests Android 17 local-network access. One TCP/80 reachability probe per target, bound to the selected Wi-Fi Network, with eight workers and 350 ms per connection. Only on-link RFC1918 IPv4 prefixes /16–/30 are accepted. A larger segment is capped to the phone's /24 window, at most 255 peer addresses. No public sweep, DNS lookup, packet capture or background scan. |
+| LAN discovery | Requests Android 17 local-network access. One TCP/80 reachability probe per target, bound to the selected Wi-Fi Network, with eight workers and 350 ms per connection. Only on-link RFC1918 IPv4 prefixes /16–/30 are accepted. A larger segment is capped to the phone's /24 window, at most 255 peer addresses. No public sweep, packet capture or background scan. A bounded 3.5-second mDNS session on the same Network can collect advertised names/models and discover peers silent on TCP/80. |
 | Discovery accuracy | Refused TCP connections count as a responding address. Filtered/silent hosts may be absent; an IP is not a stable physical-device identity. Results age out of the active count after 30 seconds. IPv6-only LAN discovery is unavailable; native tethering may still report IPv6 client addresses. |
 | Jail / pause | Primary-user Suite can request the separate controller to add a currently connected phone-hotspot client to its native block list. Requires the real HAL client-force-disconnect capability. This disconnects Wi-Fi association, including local access; it is not an internet-only firewall. |
 | Status | `applying` means native configuration was accepted but disconnect has not been confirmed. `enforced` requires block-list readback and a disconnected-client observation. An unconfirmed disconnect is rolled back after 15 seconds. Neither state substitutes for a hardware traffic test. |
@@ -20,7 +20,7 @@ This is a source implementation targeting coral. A full ROM/SELinux build and te
 | Defender | Passive default-gateway/route change observations. A read-only attempt to observe the gateway neighbour from `/proc/net/arp` may be denied by Android; that case explicitly says ARP visibility/protection is unavailable. Changes are informational/unverified, never an assertion that an attacker was detected. No ARP manipulation. |
 | Traffic | Live receive/transmit deltas and an on-screen chart for this phone's Wi-Fi interface. Counter resets and unavailable counters do not become fabricated rates. No peer-wide traffic accounting is claimed. |
 | Profiles | A bulk timed pause of current managed clients. It does not deny future hotspot arrivals. |
-| Speed limiter | Download/upload numeric values, slider and Low/Balanced/Unlimited presets can be saved. Apply is disabled: **there is no validated per-device shaping backend in this version**. No rate-cap success is reported. |
+| Saved speed presets | Download/upload numeric values, slider and Low/Balanced/Unlimited presets can be saved. Apply is disabled: **there is no validated per-device shaping backend in this version**. No rate-cap success is reported. |
 | Router integration / NetLock / recurring schedules | **Unavailable in this version.** No router credentials are requested or stored. A router adapter, continuous allow-only lockdown, quotas and recurring schedules remain future work. |
 
 ## Privilege and lifecycle boundaries
@@ -77,3 +77,17 @@ The supplied modified NetCut APK was inspected statically, never installed or ru
 - [AOSP Soft AP capability and allow/block-list requirements](https://source.android.com/docs/core/connect/wifi-softap)
 - [AOSP SoftApConfiguration](https://android.googlesource.com/platform/packages/modules/Wifi/+/refs/heads/main/framework/java/android/net/wifi/SoftApConfiguration.java)
 - [AOSP SoftApManager native client handling](https://android.googlesource.com/platform/packages/modules/Wifi/+/refs/heads/main/service/java/com/android/server/wifi/SoftApManager.java)
+
+## Device review follow-up
+
+Hotspot DHCP hostnames and network-scoped mDNS advertisements can identify a name, model and
+likely OS. The display labels these as peer-supplied hints; a shared SMB service alone never
+proves Windows, and Apple/Cast service types do not prove iOS/Android. Readable neighbor entries
+provide MAC addresses, with an explicit unavailable state when Android or MAC privacy hides them.
+No OUI-only guess is presented as a phone model. Discoveries/resolutions stop with the scan.
+
+Actions use full-width buttons with natural text height. Tabs and filter chips scroll with
+spacing rather than being squeezed into fixed weighted cells. LAN details no longer offer a
+speed-control action. Saved speed presets have a separate label and still cannot apply a limit.
+Root on a Wi-Fi client does not put other clients’ traffic through this phone: router/AP QoS
+or a supported phone-hotspot packet path is required for reliable peer rate limiting.

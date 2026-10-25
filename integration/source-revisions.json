@@ -92,7 +92,7 @@
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
       "branch": "heckeros-17",
-      "revision": "3fcdacb667bb3e0a944b61453ca970a88c5b1087",
+      "revision": "aa9ff27ba80d5a2c57a2f1ab5b9106e639a92226",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -213,7 +213,7 @@
     "packages/apps/Settings": {
       "repository": "its-hecker/heckeros_packages_apps_Settings",
       "branch": "feat/suite-polish",
-      "revision": "a03bc7da780240570db7dc075bdb0f500a930f1d",
+      "revision": "35d49a66f2f197a244015809ba0cb8340d9faae0",
       "files": [
         "src/com/android/settings/homepage/",
         "src/com/android/settings/DisplaySettings.java",

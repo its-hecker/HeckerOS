@@ -116,12 +116,12 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean,
     if (!state.customClock) return false
     val clock = clockText(context)
     val renderer = remember(context) { HeckerAmbientRenderer(context) }
-    Canvas(modifier.fillMaxWidth().height(if(small) 112.dp else 152.dp)
+    Canvas(modifier.fillMaxWidth().height(if(small) 136.dp else 184.dp)
         .semantics { contentDescription = clock.first + " " + clock.second }) {
         drawIntoCanvas { canvas ->
             val c = canvas.nativeCanvas
             c.save(); c.scale(density,density)
-            renderer.clock(c,clock.first,clock.second,size.width/density,if(small) 12f else 20f,
+            renderer.clock(c,clock.first,clock.second,size.width/density,if(small) 36f else 52f,
                 if(small) 52f else 72f)
             c.restore()
         }

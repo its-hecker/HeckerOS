@@ -1,16 +1,12 @@
 # Hecker Launcher Studio
 
-Hecker Launcher's home settings now open an illustrated Studio. The native
-Launcher3 settings page remains available through **More launcher settings**.
-The Hecker Suite launcher page opens the same Studio through the existing
-Launcher3 settings activity.
+Hecker Launcher’s home settings open an illustrated Studio. The Hecker Suite launcher page opens the same Studio through the existing Launcher3 settings activity. Clock Studio appears once on the main page; the unused extra-settings button is removed.
 
 ## Clock Studio
 
-Add **Hecker Clock Studio** from the launcher widget picker, or choose **Add clock
-to home screen** in Studio. Widgets support horizontal and vertical resizing and
-native reconfiguration. A new widget uses the current Studio selection; every
-placed widget retains its own selection when reconfigured.
+Choose a style and palette in **Hecker Clock Studio**, then apply it to the built-in first-page
+home clock. It needs no widget placement. Existing clock widgets remain compatible, support
+horizontal/vertical resizing and retain their individual style selections when reconfigured.
 
 | Reference | Style | Behavior |
 | --- | --- | --- |
@@ -40,7 +36,7 @@ There is one weather subscription shared by the visible Glass clocks.
 
 Continuous animation is a local Hecker Launcher widget-host extension. Another
 launcher can display the standard time fallback, not the local animated renderer.
-These widgets do not modify lock-screen or AOD clocks.
+The built-in home clock does not modify lock-screen or AOD clocks. Existing clock widgets remain compatible.
 
 ## Glass Studio
 
@@ -136,3 +132,17 @@ On a test build, verify:
 5. Notification posting, count changes, dismissal and access revoked/granted.
 6. App Lock authentication, hide/unhide, and search/shortcut launching from
    accessible profiles, including the fallback native search.
+
+## Home integration and colour
+
+Clock Studio now controls a launcher-owned header on the first workspace page. It is measured
+outside the movable app/widget cells, so adding it needs no widget placement or database rewrite.
+Its height is reserved before measuring the existing grid. On a dense grid with insufficient space
+it hides instead of covering icons; reduce grid rows to make room. The feature has its own switch.
+Previously placed clock widgets remain supported and can be removed normally.
+
+Aurora, Sunrise, Lagoon, Orchid and Classic palettes share the live preview and home renderer.
+Messages rotate each minute and on returning home; tap the built-in clock for another message and
+hold it for Studio. Screen-off pauses animations and sampling. A native local-search pill fills the
+hotseat’s existing below-dock search slot. Clock Studio has one entry on the main Studio page;
+Appearance contains Glass and Icon Studio. The broken extra-settings link has been removed.

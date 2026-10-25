@@ -51,7 +51,7 @@
     <string name="netlab_observed">Responded during the last scan</string>
     <string name="netlab_last_scan">Last scan · connection not verified now</string>
     <string name="netlab_hotspot_details">This device belongs to the phone hotspot inventory. Pause blocks its Wi-Fi association, including local access, rather than only internet traffic.</string>
-    <string name="netlab_lan_details">This is a responding address on the connected Wi-Fi network. NetLab has observation access, not router administration. Peer pause and rate limiting are unavailable.</string>
+    <string name="netlab_lan_details">This device responded on your connected Wi-Fi network. Use your router’s controls to block or limit its connection. NetLab can pause clients connected to this phone’s hotspot when supported.</string>
     <string name="netlab_rename_trust">Name and trust</string>
     <string name="netlab_identity_warning">Trust is a label, not authentication. Randomized MACs and reused IP addresses can represent a different device after reconnection.</string>
     <string name="netlab_pause">Pause hotspot access</string>
@@ -126,4 +126,16 @@
     <string name="netlab_device_changed">The client or rule changed. Refresh the list before trying again.</string>
     <string name="netlab_operation_failed">The controller could not verify this operation. Inspect the current Jail state and use Emergency restore if needed.</string>
     <string name="netlab_open_dashboard">Open dashboard</string>
+    <string name="netlab_saved_rate_presets">Saved speed presets</string>
+    <string name="netlab_type_android">Likely Android</string>
+    <string name="netlab_type_ios">Likely iPhone / iPad</string>
+    <string name="netlab_type_mac">Likely Mac</string>
+    <string name="netlab_type_windows">Likely Windows PC</string>
+    <string name="netlab_type_linux">Likely Linux</string>
+    <string name="netlab_type_apple">Apple device · OS not shared</string>
+    <string name="netlab_type_media">Cast device · OS not shared</string>
+    <string name="netlab_type_unknown">Device type not shared</string>
+    <string name="netlab_not_shared">Not shared by this network</string>
+    <string name="netlab_mac">MAC address: %1$s</string>
+    <string name="netlab_identity_explanation">Names and models come from local service advertisements or hotspot DHCP. Device types are hints, not verified identities. Private MAC addresses and silent devices may hide these details.</string>
 </resources>

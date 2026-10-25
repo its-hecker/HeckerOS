@@ -31,7 +31,7 @@ platform customization forks use `heckeros-17`.
   tabs, capture controls and native floating app shortcuts. Performance profiles
   are exposed only when the Android game service supports the active game.
 - AOSP Android 17-based Hecker Launcher with [Hecker Launcher Studio](docs/launcher-studio.md):
-  ten clock widgets (including animated Thermal, Stacked and Caracal), Glass Studio,
+  ten built-in home clocks (including animated Thermal, Stacked and Caracal), colour palettes and a below-dock search bar, Glass Studio,
   separate home/drawer layout and icon controls, local app/shortcut search, native
   App Lock shortcuts and notification-count badges. Includes swipe-down Quick QS
   and double-tap sleep, alongside Pixel Launcher as the single Recents provider.

@@ -1,7 +1,7 @@
 # Ambient charging and the custom lockscreen clock
 
 Hecker Suite → Lock screen contains the geometric digital clock switch, ambient charging switch,
-two finite charging animations (energy orbit and multicolour plasma), and three information
+three finite charging animations (energy orbit, multicolour plasma and gauge fill), and three information
 choices: Off, Detailed, and Minimal.
 
 The detailed AOD follows the supplied reference: a thin geometric clock and date, an open magenta
@@ -28,11 +28,16 @@ replace authentication, shortcuts, media, notifications, or other keyguard secur
    battery broadcasts, booting while plugged in, and ordinary telemetry updates do not replay it.
    A pocket-suppressed intro expires rather than appearing hours later.
 
-Charging-only AOD is available while plugged in without rewriting `doze_always_on`. Unplug
-returns to the user's ordinary Always-on policy. Inversion, hardware availability, proximity,
-power-saving suppression and native pulse timing remain under Android's existing doze policy.
-Interactive charging retains the native trusted charging window. Neither presentation launches
-an activity, takes an indefinite wake lock, or uses an application overlay to imitate AOD.
+Always-on display keeps its own native switch. Charging styles have separate AOD and brief-ambient
+switches. While Always-on is enabled, the AOD charging switch takes precedence; with Always-on off,
+the ambient switch controls tap, lift, reach and plug pulses. Neither charging-style switch forces
+persistent AOD. The hardware's ordinary default is used when no explicit AOD preference is stored.
+Inversion, proximity, power saving and pulse duration remain under native doze policy.
+
+Gauge fill animates the detailed magenta meter into its actual battery level without a black
+transition. Energy and plasma crossfade into the static information. These finite transitions do
+not schedule repeating pulses. A small AOD positional shift belongs to native burn-in protection;
+a repeating full-screen brightness flash is not an intentional effect of this renderer.
 
 ## Live data and power
 
@@ -41,7 +46,7 @@ Current and time-to-full are queried off the UI thread through BatteryManager. P
 absolute battery current in microamps times battery voltage in millivolts, converted to watts;
 it is not advertised adapter output. Missing data displays a dash. Integer-only battery hardware
 displays `.00` in the detailed field; the UI does not invent hundredth-of-a-percent progress.
-The label reports real charging/full/paused state and does not claim proprietary FlashCharge.
+During plug negotiation the label says Charger connected. Positive battery current or the charging status confirms Charging; full and confirmed paused states retain their own labels. The label reports charging/full/paused state and does not claim proprietary FlashCharge.
 
 Only the short intro requests animation frames. The persistent gauge has no rotating ring or
 particle loop. Minimal mode has no clock timer and uses low-luminance text on black. Native AOD

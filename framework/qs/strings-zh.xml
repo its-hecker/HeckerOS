@@ -54,4 +54,5 @@
     <string name="hecker_charge_voltage">电压</string>
     <string name="hecker_charge_estimate">预计时间</string>
     <string name="hecker_charge_minutes">%1$d 分钟</string>
+    <string name="hecker_charge_connected">已连接充电器</string>
 </resources>

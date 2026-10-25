@@ -75,5 +75,8 @@ java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     netlab/common/org/hecker/netlab/*.java tests/NetLabPolicyTest.java
 java -cp "$suite_test_output" NetLabPolicyTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    netlab/common/org/hecker/netlab/NetLabIdentity.java tests/NetLabIdentityTest.java
+java -cp "$suite_test_output" NetLabIdentityTest
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     framework/ambient/AmbientChargingPolicy.java tests/AmbientChargingPolicyTest.java
 java -cp "$suite_test_output" AmbientChargingPolicyTest

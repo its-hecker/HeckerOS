@@ -62,7 +62,7 @@ public final class HeckerLauncherGlass {
             String name=v.getClass().getName(),id="";
             try{if(v.getId()!=View.NO_ID)id=v.getResources().getResourceEntryName(v.getId());}catch(RuntimeException ignored){}
             String target="hecker_glass_preview".equals(v.getTag())?"preview":name.endsWith(".Hotseat")?"dock":name.endsWith(".folder.Folder")?"folders"
-                    :name.endsWith(".qsb.OseWidgetView")||id.equals("qsb_container")||id.equals("search_container_workspace")||id.equals("search_container_all_apps")?"search"
+                    :name.endsWith(".hecker.HeckerDockBar")||name.endsWith(".qsb.OseWidgetView")||id.equals("qsb_container")||id.equals("search_container_workspace")||id.equals("search_container_all_apps")?"search"
                     :v instanceof android.appwidget.AppWidgetHostView?"widgets":null;
             if(v instanceof android.appwidget.AppWidgetHostView && ((android.appwidget.AppWidgetHostView)v).getAppWidgetInfo()!=null
                     && ((android.appwidget.AppWidgetHostView)v).getAppWidgetInfo().provider.equals(new ComponentName(app,HeckerClockWidget.class))

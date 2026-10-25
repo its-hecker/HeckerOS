@@ -64,6 +64,15 @@
   <string name="hs_clock_caracal">M · Caracal · animated</string>
   <string name="hs_clock_animation">Animate clocks and Caracal</string>
   <string name="hs_clock_messages">Rotating messages</string>
+  <string name="hs_clock_home">Built-in home clock</string>
+  <string name="hs_clock_home_summary">A permanent clock above the first home page. Tap for a new message; hold to open Clock Studio. No widget placement is needed. Reduce the home grid rows if there is not enough room.</string>
+  <string name="hs_clock_applied">Home clock updated</string>
+  <string name="hs_clock_palette">Clock colours</string>
+  <string name="hs_aurora">Aurora · mint and lilac</string>
+  <string name="hs_sunrise">Sunrise · peach and gold</string>
+  <string name="hs_lagoon">Lagoon · aqua and blue</string>
+  <string name="hs_orchid">Orchid · pink and violet</string>
+  <string name="hs_classic">Classic · soft ivory</string>
   <string name="hs_clock_metrics">Battery temperature, battery level and RAM use live device readings. CPU load appears only when system counters are available. Clock animations pause when hidden and follow Android’s animation setting.</string>
   <string name="hs_apply_clock">Apply clock</string>
   <string name="hs_add_clock">Add clock to home screen</string>
@@ -125,6 +134,14 @@
     <item>Stay curious. Stay Hecker.</item>
     <item>Create your own pace.</item>
     <item>Small steps. New possibilities.</item>
+    <item>Your next idea starts here.</item>
+    <item>Less rush. More wonder.</item>
+    <item>Leave a little room for magic.</item>
+    <item>Keep a spark in your pocket.</item>
+    <item>Make space for something good.</item>
+    <item>Today has a few surprises left.</item>
+    <item>Take a breath. Find your flow.</item>
+    <item>The little things count, too.</item>
   </string-array>
   <style name="HeckerStudioTheme" parent="android:style/Theme.Material.NoActionBar">
     <item name="android:fontFamily">sans</item>

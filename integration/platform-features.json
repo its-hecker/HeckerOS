@@ -1,7 +1,7 @@
 {
   "settings": {
     "repository": "its-hecker/heckeros_packages_apps_Settings",
-    "revision": "a03bc7da780240570db7dc075bdb0f500a930f1d",
+    "revision": "35d49a66f2f197a244015809ba0cb8340d9faae0",
     "files": {
       "Android.bp": "7734560e9290e57348a9da9626045091388829dc909ca1bea49a91ec827e2f41",
       "AndroidManifest.xml": "bfb85ed90bcc7d9f36ec4066fa65175ffc5c30c429a4a4a74951418b92d2d731",
@@ -40,35 +40,35 @@
       "res/raw/hecker_integrity.json": "405a7370fe3dc721c874a17b1edb052f97692491ff498256bfccc9eaeca29bae",
       "res/values/hecker_integrity_design.xml": "17ec510f02ef038fce161953d8ab5088958722eb7a96eac249734374d4524bc9",
       "res/values-zh-rCN/hecker_integrity_design.xml": "ffc78a0cea836038e919cde50f7416f3508f860101aa667d19956873e2a2fa02",
-      "src/com/android/settings/hecker/SpoofingMaintenance.java": "eff866a8bd26f8815a778977805cbe8792867a7498f594f56e505771103bebf4",
-      "src/com/android/settings/hecker/HeckerSpoofingHubActivity.java": "8fd198deaceef0877c69ca855b4af5b9783c2430043e62650eaddfccd91a9aa4",
-      "src/com/android/settings/hecker/KeyboxStatus.java": "cf950c84ff27c3fe7b90f9602035079d674ec343b871d7b4ec92cfba8fa647f6",
+      "src/com/android/settings/hecker/SpoofingMaintenance.java": "26dc0837ca772cc31351586b6c0dfe6b69b27ea07a05d609988b99d531056556",
+      "src/com/android/settings/hecker/HeckerSpoofingHubActivity.java": "c9fb9983e223bd6252b6c491dcd1d5e0728edb91a2cfa114aa747e6e6a911670",
+      "src/com/android/settings/hecker/KeyboxStatus.java": "4949bee2898bacddfb6f52345bd96e2908350b30ed14108ab0db47f2c6236cc7",
       "src/com/android/settings/hecker/SpoofingData.java": "3aaa47dd582ab7cad2a272a258fc3d81070439e01a8eaba538c90c02d2f75ec9",
       "src/com/android/settings/hecker/PixelCanaryProfileFetcher.java": "a4fa9e53059afdb651ad8a90bcc8604a3985e6aadc790c82bd6f505030796c51",
       "src/com/android/settings/hecker/SpoofingUi.java": "4e8a67a83582e8f2c6661d5c915adbfcabbabee88b4a30785ebe8f36273b7620",
       "src/com/android/settings/hecker/SpoofingTargets.java": "51028370ab659b2b9f0868a1bc630a345fea2ead064075d8f72811d631ae2f48",
       "src/com/android/settings/hecker/SpoofingHttp.java": "3cbef12a064daea74765906f4aca1da6719b0ec3cbb9e9e3b517c878e068fa39",
       "res/drawable/hecker_hub_back.xml": "ff0a6f19a38f48654550a1dfe33a5312262134d1de1a8becf3d59085711ce069",
-      "res/values/hecker_spoofing_hub.xml": "1bab5127fa28eb799e412d95d1ea35075481aefa1a8d68d302540c9e52cbff42",
-      "res/values-zh-rCN/hecker_spoofing_hub.xml": "86b70ba6464f2cd175c7057e2128fb3ebf968b8bf1e85904e3c7910acc01127c",
+      "res/values/hecker_spoofing_hub.xml": "7c1cdfc5f846d94611af0da2696f28b8e8c0b574eb2fbf4d295b589b614a3d60",
+      "res/values-zh-rCN/hecker_spoofing_hub.xml": "1d79d191843aa60804dba1c2e9e5bb798def0d847c1a6ec533610c55ce350471",
       "res/raw/hecker_spoofing_hub.json": "20c5cf22a8f369f759dccd0dbc63e5f8444a28423f1c192c53a28ab1a076ad10"
     }
   },
   "framework": {
     "repository": "its-hecker/heckeros_frameworks_base",
-    "revision": "3fcdacb667bb3e0a944b61453ca970a88c5b1087",
+    "revision": "aa9ff27ba80d5a2c57a2f1ab5b9106e639a92226",
     "files": {
       "core/java/android/app/ActivityThread.java": "a80cae396ca01fe1347f5718401504fed4b291224f2cae7a6844c159a4803e72",
       "core/java/android/app/IActivityManager.aidl": "28ea763ad5aa2fe6344d89dd4207e70d31f0f999dca19d0e44962ec827a7da17",
       "core/java/android/security/gameprops/GamePropsSpoofService.java": "34e539c45af207fcd33398cb93f8e70a1ae6525a13cfd05372c971b6ae53a4ab",
-      "core/java/android/security/pif/HECKEROS-ORIGIN.json": "dc24625e0bb357879ca38cfc4237d7e167de45dda1169b95e7e07b1e85be5f73",
-      "core/java/android/security/pif/PlayIntegritySpoofService.java": "c9c4788189e0d8d5c63e46b1ef4587585e2c794245d47158c271152407f0eb18",
+      "core/java/android/security/pif/HECKEROS-ORIGIN.json": "093ddb7ddb9689b027e0546d1601b64d9815c854ee3a3bae0b5a903de8e7ba81",
+      "core/java/android/security/pif/PlayIntegritySpoofService.java": "af7fd7ac1de41aaa36963447cdf15dab639ce3b9d4eed881f4f5c22ef84eb3a8",
       "core/java/android/security/spoof/HeckerSpoofConfig.java": "a33f35e5a1b9ddb23b1319a82be6218afc7cca6ebaacf44477d8ef7ce74c7370",
-      "core/java/android/security/trickystore/AttestationUtils.java": "9eede4dc3fe265b5311b103840c42529672d68907df706f5a71d508a107027ea",
-      "core/java/android/security/trickystore/CertificateGenerator.java": "4ba4580376e608e39042fa4b72d4aa23249f6b4a20ba3585698c6d116234e50e",
-      "core/java/android/security/trickystore/CertificateHacker.java": "309f2265de97683eac2edede3484553826dbd662dc9c3a297c1abd6735734ddf",
-      "core/java/android/security/trickystore/KeyBoxManager.java": "ba45ab1d7269ffd35c6e682c1fdef89692d1efba7a632adc5229a2bc76257036",
-      "core/java/android/security/trickystore/TrickyStoreService.java": "ef042d3eb26642933bffe6e0d59c33cbf7eaa3a2f1f65738d884cacedc20d1d9",
+      "core/java/android/security/trickystore/AttestationUtils.java": "6c3af06f51ca3e3df7cad1b0d2d19a9b8f64b8d3f75bb60763b0d442467c7662",
+      "core/java/android/security/trickystore/CertificateGenerator.java": "8500bbac0e75340bb6ffb8cf5c9b3bcf1a14104ef808496667e786516fff7203",
+      "core/java/android/security/trickystore/CertificateHacker.java": "87f97be4c769a1ce0387de3f71ce12303643d403b911a21b12a0fe5694541cfd",
+      "core/java/android/security/trickystore/KeyBoxManager.java": "14c1443066ba0a4e4e0c46453d4a48f2b27b1ebb5cc1d62be61ad626792347a7",
+      "core/java/android/security/trickystore/TrickyStoreService.java": "26da87cffe6a93830470697fd5ae2a8f975539fefc5110f23663d07318827726",
       "core/java/com/android/internal/util/PropImitationHooks.java": "cde62b0a4103341206313b29713a052a5b357d52e51a7452a7249d251c949646",
       "core/jni/android_os_SystemProperties.cpp": "a71f1e41e91d27039fb9311f38808233b9c48623c738aadd995038e60da59751",
       "keystore/java/android/security/KeyStore2.java": "2132836bf67dce846a4e066d016b0cd70e290ff399b7964cc6e03dfe0d46c7a1",
@@ -79,7 +79,7 @@
       "services/core/java/com/android/server/spoof/HeckerSpoofConfigStore.java": "314690b083518af0f1bb9f7497d29625f454e9c46a8067b37f3d67952a8550e0",
       "tests/hecker/NativeVirtualizationTest.cpp": "8d8685aa6648fb1cd7fa4bc34b3a10da75017e293db1f8b089038e5f93893c6b",
       "tests/hecker/PlayIntegrityScopeTest.java": "1838bd6b38997b5dbda1bd5f5fc225b465f14e66dce6ecaa7ae0ae8e7894a7b3",
-      "tests/hecker/SpoofingConfigTest.java": "df133fc1ebe57f421b256c74e1e271e83b71769caf589c007204d17c7886b3df"
+      "tests/hecker/SpoofingConfigTest.java": "40e240cb4a78634eed4b1c15a7d0ffca2952d6a8ab595c0b83c243aecd4d2ea1"
     }
   },
   "settings_java": [

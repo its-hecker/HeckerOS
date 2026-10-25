@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 /** Native doze presentation state. No activity, screen-on flag or application overlay is used. */
 object HeckerAmbientCharging {
     const val ROUTE = "hecker_charging_on_ambient"
+    const val AOD_ROUTE = "hecker_charging_on_aod"
     const val STYLE = "hecker_aod_charging_style"
     const val CLOCK = "hecker_custom_lockscreen_clock"
     const val ANIMATION = "hecker_charging_animation"
@@ -40,6 +41,7 @@ object HeckerAmbientCharging {
         val temperature: Float = Float.NaN, val voltage: Float = Float.NaN,
         val watts: Double = Double.NaN, val remaining: Long = -1,
         val introStart: Long = -1, val introPending: Boolean = false,
+        val current: Int = Int.MIN_VALUE, val connectedAt: Long = -1,
     )
     private val mutable = MutableStateFlow(State())
     val state: StateFlow<State> = mutable
@@ -61,7 +63,7 @@ object HeckerAmbientCharging {
         val observer = object : ContentObserver(main) {
             override fun onChange(selfChange: Boolean) { readSettings(); reconcileDoze() }
         }
-        for (key in arrayOf(ROUTE, STYLE, CLOCK, ANIMATION, ART)) {
+        for (key in arrayOf(ROUTE, AOD_ROUTE, "doze_always_on", STYLE, CLOCK, ANIMATION, ART)) {
             c.contentResolver.registerContentObserver(Settings.Secure.getUriFor(key), false,
                 observer, UserHandle.USER_ALL)
         }
@@ -87,9 +89,13 @@ object HeckerAmbientCharging {
         fun value(key: String, default: Int) = Settings.Secure.getIntForUser(c.contentResolver,
             key, default, UserHandle.USER_CURRENT)
         val previous = mutable.value
-        val next = previous.copy(ambient = value(ROUTE, 1) != 0,
+        val defaultId = c.resources.getIdentifier("config_dozeAlwaysOnEnabled", "bool", "android")
+        val defaultAod = if (defaultId != 0 && c.resources.getBoolean(defaultId)) 1 else 0
+        val route = AmbientChargingPolicy.route(value("doze_always_on", defaultAod) != 0,
+            value(AOD_ROUTE, 1) != 0, value(ROUTE, 1) != 0)
+        val next = previous.copy(ambient = route,
             style = value(STYLE, 1).coerceIn(0, 2), customClock = value(CLOCK, 0) != 0,
-            animation = value(ANIMATION, 1) != 0, art = value(ART, 0).coerceIn(0, 1))
+            animation = value(ANIMATION, 1) != 0, art = value(ART, 0).coerceIn(0, 2))
         mutable.value = next
         if (!next.ambient || !next.animation) cancelIntro()
         if (next.ambient && next.plugged && !interactive(c) &&
@@ -105,6 +111,7 @@ object HeckerAmbientCharging {
         val voltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0)
         val temperature = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE)
         mutable.value = current.copy(plugged = plugged,
+            connectedAt = if (!plugged) -1 else if (!current.plugged) now else current.connectedAt,
             level = AmbientChargingPolicy.percent(intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1),
                 intent.getIntExtra(BatteryManager.EXTRA_SCALE, 0)),
             status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_UNKNOWN),
@@ -119,13 +126,13 @@ object HeckerAmbientCharging {
             val telemetry = withContext(Dispatchers.IO) {
                 try {
                     val manager = c.getSystemService(BatteryManager::class.java)
-                    Pair(AmbientChargingPolicy.watts(manager?.getIntProperty(
-                        BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) ?: Int.MIN_VALUE, voltage),
-                        manager?.computeChargeTimeRemaining() ?: -1L)
-                } catch (_: RuntimeException) { Pair(Double.NaN, -1L) }
+                    val amps = manager?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) ?: Int.MIN_VALUE
+                    Triple(AmbientChargingPolicy.watts(amps, voltage), manager?.computeChargeTimeRemaining() ?: -1L, amps)
+                } catch (_: RuntimeException) { Triple(Double.NaN, -1L, Int.MIN_VALUE) }
             }
             mutable.value = mutable.value.copy(watts = if (plugged) telemetry.first else Double.NaN,
-                remaining = if (plugged) telemetry.second else -1)
+                remaining = if (plugged) telemetry.second else -1,
+                current = if (plugged) telemetry.third else Int.MIN_VALUE)
         }
         reconcileDoze()
         if (edge && current.ambient && (current.animation || current.style > 0)) {

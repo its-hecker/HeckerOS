@@ -3,7 +3,7 @@
     <string name="custom_clock_title">自定义锁屏时钟</string>
     <string name="custom_clock_summary">使用几何数字时钟替换默认时钟和日期。关闭后恢复壁纸和样式中的时钟。歌词在下方保留独立空间。</string>
     <string name="ambient_charging_title">息屏充电显示</string>
-    <string name="ambient_charging_summary">屏幕关闭时在息屏显示中播放充电动画并显示信息。连接充电器期间保持息屏显示可用，不更改始终显示时间的设置。</string>
+    <string name="ambient_charging_summary">在轻触、抬起和 Motion Sense 的短暂息屏显示中显示充电样式。不会自动开启持续 AOD。</string>
     <string name="charging_animation_title">充电动画</string>
     <string name="charging_animation_summary">连接充电器时播放一次，然后显示所选充电信息。遵循减少动画和口袋检测设置。</string>
     <string name="charging_animation_style">充电动画样式</string>
@@ -13,4 +13,9 @@
     <string name="aod_charging_info_detailed">详细 · 时钟、电量表和实时读数</string>
     <string name="aod_charging_info_minimal">简约 · 低亮度电量百分比和充电状态</string>
     <string name="aod_charging_info_summary">详细模式显示洋红色电量表、温度、电压、预计时间和电池侧功率。简约模式在黑色背景上使用低亮度文字。两种模式均为歌词保留空间，并遵循息屏防烧屏位移。不可用的读数显示横线，电量精度取决于设备上报的数据。</string>
+    <string name="always_on_title">始终显示息屏时钟</string>
+    <string name="always_on_summary">待机时持续显示时钟。关闭后使用轻触、抬起和 Motion Sense 的短暂息屏显示。</string>
+    <string name="aod_charging_title">AOD 充电样式</string>
+    <string name="aod_charging_summary">启用始终显示时，优先使用此开关控制充电样式。</string>
+    <string name="charging_gauge_title">仪表填充 · 速度表</string>
 </resources>

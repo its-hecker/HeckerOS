@@ -135,6 +135,11 @@ public class NativeChargingTest {
   check(p.shouldWakeUpWhenPluggedOrUnpluggedLocked(false,0,false),"Interactive behavior preserved");
   p.wakefulness=WAKEFULNESS_ASLEEP; p.setting("hecker_charging_on_ambient",0);
   check(p.shouldWakeUpWhenPluggedOrUnpluggedLocked(false,0,false),"Ambient routing can be disabled");
+  p.setting("doze_always_on",1); p.setting("hecker_charging_on_aod",0);
+  check(p.shouldWakeUpWhenPluggedOrUnpluggedLocked(false,0,false),"AOD charging route can be disabled independently");
+  p.setting("hecker_charging_on_aod",1);
+  check(!p.shouldWakeUpWhenPluggedOrUnpluggedLocked(false,0,false),"AOD charging route takes precedence over ambient-off");
+  p.setting("doze_always_on",0);
   p.setting("hecker_charging_on_ambient",1); p.setting("hecker_aod_charging_style",0); p.setting("hecker_charging_animation",0);
   check(p.shouldWakeUpWhenPluggedOrUnpluggedLocked(false,0,false),"All charging features off keeps native behavior");
   p.setting("hecker_charging_animation",1);
@@ -151,7 +156,7 @@ public class NativeChargingTest {
   MachineCase machine=new MachineCase(); Context c=machine.context;
   AmbientDisplayConfiguration a=machine.mAmbientDisplayConfig;
   check(!a.alwaysOnEnabled(0),"Core always-on setting is not rewritten by charging");
-  check(machine.aod(),"Native doze resolves to charging AOD with ordinary always-on off");
+  check(!machine.aod(),"Charging does not enable persistent AOD when always-on is off");
   check(a.enabled(0),"Feature makes native doze available even with all gestures off");
   com.android.systemui.hecker.HeckerAmbientCharging.plugged=false;
   check(!machine.aod(),"Unplug ends charging-only AOD");

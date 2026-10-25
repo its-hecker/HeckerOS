@@ -755,10 +755,15 @@
   "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/shade/ui/composable/ShadeScene.kt": [
     {
       "old": "                                    Media(\n                                        viewModelFactory = viewModel.mediaViewModelFactory,\n                                        presentationStyle =\n                                            if (mediaInRow) {\n                                                MediaPresentationStyle.Compressed\n                                            } else {\n                                                MediaPresentationStyle.Default\n                                            },\n                                        behavior = ShadeSceneContentViewModel.qqsMediaUiBehavior,\n                                        onDismissed = viewModel::onMediaSwipeToDismiss,\n                                        location = Media.Location.SHADE,\n                                    )",
-      "new": "                                    com.android.systemui.hecker.HeckerMediaCard(hideWhenInactive = true, nativeFallback = {\n                                    Media(\n                                        viewModelFactory = viewModel.mediaViewModelFactory,\n                                        presentationStyle =\n                                            if (mediaInRow) {\n                                                MediaPresentationStyle.Compressed\n                                            } else {\n                                                MediaPresentationStyle.Compressed\n                                            },\n                                        behavior = ShadeSceneContentViewModel.qqsMediaUiBehavior,\n                                        onDismissed = viewModel::onMediaSwipeToDismiss,\n                                        location = Media.Location.SHADE,\n                                    )\n                                    })",
+      "new": "                                    // Playback is owned by the expanded Hecker / One UI dashboard.",
       "previous": [
-        "                                    com.android.systemui.hecker.HeckerMediaCard(hideWhenInactive = true)"
+        "                                    com.android.systemui.hecker.HeckerMediaCard(hideWhenInactive = true)",
+        "                                    com.android.systemui.hecker.HeckerMediaCard(hideWhenInactive = true, nativeFallback = {\n                                    Media(\n                                        viewModelFactory = viewModel.mediaViewModelFactory,\n                                        presentationStyle =\n                                            if (mediaInRow) {\n                                                MediaPresentationStyle.Compressed\n                                            } else {\n                                                MediaPresentationStyle.Compressed\n                                            },\n                                        behavior = ShadeSceneContentViewModel.qqsMediaUiBehavior,\n                                        onDismissed = viewModel::onMediaSwipeToDismiss,\n                                        location = Media.Location.SHADE,\n                                    )\n                                    })"
       ]
+    },
+    {
+      "old": "    if (mediaInRow) {\n        Row(\n            modifier = modifierAnimated,\n            horizontalArrangement = spacedBy(dimensionResource(R.dimen.qs_tile_margin_vertical)),\n            verticalAlignment = Alignment.CenterVertically,\n        ) {\n            Box(modifier = Modifier.weight(1f)) { tiles() }\n            Box(modifier = Modifier.weight(1f)) { media() }\n        }\n    } else {\n        Column(modifier = modifierAnimated, verticalArrangement = spacedBy(16.dp)) {\n            tiles()\n            media()\n        }\n    }",
+      "new": "    Box(modifier = modifierAnimated) { tiles() }"
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardStatusBarViewController.java": [
@@ -788,45 +793,72 @@
   "frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java": [
     {
       "old": "    private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(\n            boolean wasPowered, int oldPlugType, boolean dockedOnWirelessCharger) {\n",
-      "new": "    private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(\n            boolean wasPowered, int oldPlugType, boolean dockedOnWirelessCharger) {\n        // Native ambient charging owns screen-off plug events on AOD-capable devices.\n        // Preserve interactive use, unsupported hardware and accessibility inversion behavior.\n        if (!wasPowered && mIsPowered\n                && (getGlobalWakefulnessLocked() == WAKEFULNESS_ASLEEP\n                        || getGlobalWakefulnessLocked() == WAKEFULNESS_DOZING)\n                && Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_charging_on_ambient\", 1, mUserId) != 0\n                && (Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_aod_charging_style\", 1, mUserId) != 0\n                    || Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_charging_animation\", 1, mUserId) != 0)\n                && new android.hardware.display.AmbientDisplayConfiguration(mContext)\n                        .alwaysOnAvailableForUser(mUserId)) {\n            return false;\n        }\n"
+      "new": "    private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(\n            boolean wasPowered, int oldPlugType, boolean dockedOnWirelessCharger) {\n        // Native ambient charging owns screen-off plug events on AOD-capable devices.\n        // Preserve interactive use, unsupported hardware and accessibility inversion behavior.\n        if (!wasPowered && mIsPowered\n                && (getGlobalWakefulnessLocked() == WAKEFULNESS_ASLEEP\n                        || getGlobalWakefulnessLocked() == WAKEFULNESS_DOZING)\n                && Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        (new android.hardware.display.AmbientDisplayConfiguration(mContext).alwaysOnEnabled(mUserId)\n                                ? \"hecker_charging_on_aod\" : \"hecker_charging_on_ambient\"), 1, mUserId) != 0\n                && (Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_aod_charging_style\", 1, mUserId) != 0\n                    || Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_charging_animation\", 1, mUserId) != 0)\n                && new android.hardware.display.AmbientDisplayConfiguration(mContext)\n                        .alwaysOnAvailableForUser(mUserId)) {\n            return false;\n        }\n",
+      "previous": [
+        "    private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(\n            boolean wasPowered, int oldPlugType, boolean dockedOnWirelessCharger) {\n        // Native ambient charging owns screen-off plug events on AOD-capable devices.\n        // Preserve interactive use, unsupported hardware and accessibility inversion behavior.\n        if (!wasPowered && mIsPowered\n                && (getGlobalWakefulnessLocked() == WAKEFULNESS_ASLEEP\n                        || getGlobalWakefulnessLocked() == WAKEFULNESS_DOZING)\n                && Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_charging_on_ambient\", 1, mUserId) != 0\n                && (Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_aod_charging_style\", 1, mUserId) != 0\n                    || Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_charging_animation\", 1, mUserId) != 0)\n                && new android.hardware.display.AmbientDisplayConfiguration(mContext)\n                        .alwaysOnAvailableForUser(mUserId)) {\n            return false;\n        }\n"
+      ]
     }
   ],
   "frameworks/base/core/java/android/hardware/display/AmbientDisplayConfiguration.java": [
     {
       "old": "        return pulseOnNotificationEnabled(user)",
-      "new": "        boolean heckerCharging = boolSetting(\"hecker_charging_on_ambient\", user, 1)\n                && (Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_aod_charging_style\", 1, user) > 0\n                    || boolSetting(\"hecker_charging_animation\", user, 1))\n                && alwaysOnAvailableForUser(user);\n        return heckerCharging || pulseOnNotificationEnabled(user)"
+      "new": "        boolean heckerCharging = boolSetting(alwaysOnEnabled(user) ? \"hecker_charging_on_aod\"\n                : \"hecker_charging_on_ambient\", user, 1)\n                && (Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_aod_charging_style\", 1, user) > 0\n                    || boolSetting(\"hecker_charging_animation\", user, 1))\n                && alwaysOnAvailableForUser(user);\n        return heckerCharging || pulseOnNotificationEnabled(user)",
+      "previous": [
+        "        boolean heckerCharging = boolSetting(\"hecker_charging_on_ambient\", user, 1)\n                && (Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_aod_charging_style\", 1, user) > 0\n                    || boolSetting(\"hecker_charging_animation\", user, 1))\n                && alwaysOnAvailableForUser(user);\n        return heckerCharging || pulseOnNotificationEnabled(user)"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/DozeParameters.java": [
     {
       "old": "                Settings.Secure.DOZE_ALWAYS_ON,\n                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);",
-      "new": "                Settings.Secure.DOZE_ALWAYS_ON,\n                \"hecker_charging_on_ambient\",\n                \"hecker_aod_charging_style\",\n                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);"
+      "new": "                Settings.Secure.DOZE_ALWAYS_ON,\n                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);",
+      "previous": [
+        "                Settings.Secure.DOZE_ALWAYS_ON,\n                \"hecker_charging_on_ambient\",\n                \"hecker_aod_charging_style\",\n                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);"
+      ]
     },
     {
       "old": "                public void onPowerSaveChanged(boolean isPowerSave) {\n                    dispatchAlwaysOnEvent();\n                }",
-      "new": "                public void onPowerSaveChanged(boolean isPowerSave) {\n                    dispatchAlwaysOnEvent();\n                }\n                private Boolean heckerPlugged;\n                @Override\n                public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {\n                    if (heckerPlugged != null && heckerPlugged == pluggedIn) return;\n                    heckerPlugged = pluggedIn;\n                    onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, null);\n                }"
+      "new": "                public void onPowerSaveChanged(boolean isPowerSave) {\n                    dispatchAlwaysOnEvent();\n                }",
+      "previous": [
+        "                public void onPowerSaveChanged(boolean isPowerSave) {\n                    dispatchAlwaysOnEvent();\n                }\n                private Boolean heckerPlugged;\n                @Override\n                public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {\n                    if (heckerPlugged != null && heckerPlugged == pluggedIn) return;\n                    heckerPlugged = pluggedIn;\n                    onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, null);\n                }"
+      ]
     },
     {
       "old": "        if (key.equals(Settings.Secure.DOZE_ALWAYS_ON)) {",
-      "new": "        if (key.equals(Settings.Secure.DOZE_ALWAYS_ON)\n                || key.equals(\"hecker_charging_on_ambient\") || key.equals(\"hecker_aod_charging_style\")) {"
+      "new": "        if (key.equals(Settings.Secure.DOZE_ALWAYS_ON)) {",
+      "previous": [
+        "        if (key.equals(Settings.Secure.DOZE_ALWAYS_ON)\n                || key.equals(\"hecker_charging_on_ambient\") || key.equals(\"hecker_aod_charging_style\")) {"
+      ]
     },
     {
       "old": "        mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(mUserTracker.getUserId());",
-      "new": "        mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(mUserTracker.getUserId())\n                || (mBatteryController.isPluggedIn()\n                    && Settings.Secure.getIntForUser(mHeckerChargingSettings, \"hecker_charging_on_ambient\", 1,\n                            mUserTracker.getUserId()) != 0\n                    && Settings.Secure.getIntForUser(mHeckerChargingSettings, \"hecker_aod_charging_style\", 1,\n                            mUserTracker.getUserId()) > 0\n                    && mAmbientDisplayConfiguration.alwaysOnAvailableForUser(mUserTracker.getUserId()));"
+      "new": "        mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(mUserTracker.getUserId());",
+      "previous": [
+        "        mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(mUserTracker.getUserId())\n                || (mBatteryController.isPluggedIn()\n                    && Settings.Secure.getIntForUser(mHeckerChargingSettings, \"hecker_charging_on_ambient\", 1,\n                            mUserTracker.getUserId()) != 0\n                    && Settings.Secure.getIntForUser(mHeckerChargingSettings, \"hecker_aod_charging_style\", 1,\n                            mUserTracker.getUserId()) > 0\n                    && mAmbientDisplayConfiguration.alwaysOnAvailableForUser(mUserTracker.getUserId()));"
+      ]
     },
     {
       "old": "    private boolean mDozeAlwaysOn;",
-      "new": "    private boolean mDozeAlwaysOn;\n    private final android.content.ContentResolver mHeckerChargingSettings;"
+      "new": "    private boolean mDozeAlwaysOn;",
+      "previous": [
+        "    private boolean mDozeAlwaysOn;\n    private final android.content.ContentResolver mHeckerChargingSettings;"
+      ]
     },
     {
       "old": "        mTransitionInteractor = transitionInteractor;\n        mSecureSettings = secureSettings;",
-      "new": "        mTransitionInteractor = transitionInteractor;\n        mSecureSettings = secureSettings;\n        mHeckerChargingSettings = context.getContentResolver();"
+      "new": "        mTransitionInteractor = transitionInteractor;\n        mSecureSettings = secureSettings;",
+      "previous": [
+        "        mTransitionInteractor = transitionInteractor;\n        mSecureSettings = secureSettings;\n        mHeckerChargingSettings = context.getContentResolver();"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/doze/DozeTriggers.java": [
     {
       "old": "        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());",
-      "new": "        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());\n        com.android.systemui.hecker.HeckerAmbientCharging.attachDoze(mContext,\n                () -> {\n                    if (!mMachine.isExecutingTransition()) {\n                        requestPulse(DozeLog.PULSE_REASON_INTENT, false, null);\n                    }\n                },\n                () -> {\n                    if (!mMachine.isExecutingTransition()\n                            && mMachine.getState() == State.DOZE_AOD\n                            && !(mConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                                || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                                    && mConfig.alwaysOnAvailableForUser(mUserTracker.getUserId())))) {\n                        mMachine.requestState(State.DOZE);\n                    }\n                });"
+      "new": "        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());\n        com.android.systemui.hecker.HeckerAmbientCharging.attachDoze(mContext,\n                () -> {\n                    if (!mMachine.isExecutingTransition()) {\n                        requestPulse(DozeLog.PULSE_REASON_INTENT, false, null);\n                    }\n                },\n                () -> {\n                    if (!mMachine.isExecutingTransition()\n                            && mMachine.getState() == State.DOZE_AOD\n                            && !(mConfig.alwaysOnEnabled(mUserTracker.getUserId()))) {\n                        mMachine.requestState(State.DOZE);\n                    }\n                });",
+      "previous": [
+        "        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());\n        com.android.systemui.hecker.HeckerAmbientCharging.attachDoze(mContext,\n                () -> {\n                    if (!mMachine.isExecutingTransition()) {\n                        requestPulse(DozeLog.PULSE_REASON_INTENT, false, null);\n                    }\n                },\n                () -> {\n                    if (!mMachine.isExecutingTransition()\n                            && mMachine.getState() == State.DOZE_AOD\n                            && !(mConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                                || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                                    && mConfig.alwaysOnAvailableForUser(mUserTracker.getUserId())))) {\n                        mMachine.requestState(State.DOZE);\n                    }\n                });"
+      ]
     },
     {
       "old": "        mUserTracker.removeCallback(mUserChangedCallback);",
@@ -894,17 +926,26 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/doze/DozeMachine.java": [
     {
       "old": "                } else if (mAmbientDisplayConfig.alwaysOnEnabled(mUserTracker.getUserId())) {",
-      "new": "                } else if (mAmbientDisplayConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                        || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                            && mAmbientDisplayConfig.alwaysOnAvailableForUser(mUserTracker.getUserId()))) {"
+      "new": "                } else if (mAmbientDisplayConfig.alwaysOnEnabled(mUserTracker.getUserId())) {",
+      "previous": [
+        "                } else if (mAmbientDisplayConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                        || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                            && mAmbientDisplayConfig.alwaysOnAvailableForUser(mUserTracker.getUserId()))) {"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/doze/DozeSuppressor.java": [
     {
       "old": "                    && mConfig.alwaysOnEnabled(mUserTracker.getUserId())) {",
-      "new": "                    && (mConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                    || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                        && mConfig.alwaysOnAvailableForUser(mUserTracker.getUserId())))) {"
+      "new": "                    && mConfig.alwaysOnEnabled(mUserTracker.getUserId())) {",
+      "previous": [
+        "                    && (mConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                    || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                        && mConfig.alwaysOnAvailableForUser(mUserTracker.getUserId())))) {"
+      ]
     },
     {
       "old": "            if (mConfig.alwaysOnEnabled(mUserTracker.getUserId()) && !suppressed) {",
-      "new": "            if ((mConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                    || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                        && mConfig.alwaysOnAvailableForUser(mUserTracker.getUserId()))) && !suppressed) {"
+      "new": "            if (mConfig.alwaysOnEnabled(mUserTracker.getUserId()) && !suppressed) {",
+      "previous": [
+        "            if ((mConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                    || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                        && mConfig.alwaysOnAvailableForUser(mUserTracker.getUserId()))) && !suppressed) {"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/KeyguardIndicationController.java": [

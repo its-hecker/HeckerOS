@@ -40,5 +40,15 @@ public final class AmbientChargingPolicy {
         double value = Math.abs((double) currentMicroamps) * voltageMillivolts / 1_000_000_000d;
         return value <= 200 ? value : Double.NaN;
     }
+    public static boolean route(boolean alwaysOn, boolean aod, boolean ambient) {
+        return alwaysOn ? aod : ambient;
+    }
+    /** UNKNOWN/plug negotiation is connected, not a claim that charging is paused. */
+    public static int chargingState(int status, int current, long connectedAt, long now) {
+        if (status == 5) return 2; // BATTERY_STATUS_FULL
+        if (status == 2 || current != Integer.MIN_VALUE && current > 0) return 1;
+        if ((status == 3 || status == 4) && connectedAt >= 0 && now - connectedAt >= 5000) return 3;
+        return 0;
+    }
     public AmbientChargingPolicy() {}
 }

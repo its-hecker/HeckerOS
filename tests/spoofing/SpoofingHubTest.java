@@ -127,6 +127,10 @@ public final class SpoofingHubTest {
         rejected(()->KeyboxStatus.xml("<"+"x".repeat(256*1024)),"keybox bytes bounded");
         check(KeyboxStatus.check("",false).state==KeyboxStatus.State.MISSING,"absent keybox reported");
         check(KeyboxStatus.check("<bad/>",false).state==KeyboxStatus.State.INVALID,"invalid XML rejected");
+        check(KeyboxStatus.installable(new KeyboxStatus(KeyboxStatus.State.UNKNOWN,0,0,1)),"trusted chain with unavailable revocation follows Evolution X fetch policy");
+        for(KeyboxStatus.State state:List.of(KeyboxStatus.State.REVOKED,KeyboxStatus.State.SUSPENDED,
+                KeyboxStatus.State.INVALID,KeyboxStatus.State.UNTRUSTED,KeyboxStatus.State.EXPIRED,KeyboxStatus.State.NOT_YET_VALID))
+            check(!KeyboxStatus.installable(new KeyboxStatus(state,0,0,1)),"invalid replacement refused: "+state);
         System.out.println(checks+" Spoofing hub import, discovery, network and certificate checks: PASS");
     }
 }

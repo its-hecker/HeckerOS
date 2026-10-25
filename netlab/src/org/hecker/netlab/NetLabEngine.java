@@ -25,6 +25,7 @@ final class NetLabEngine implements NetLabPolicy.Backend, NetLabPolicy.Journal {
     private final AtomicFile file;
     private final LinkedHashSet<String> connected = new LinkedHashSet<>();
     private final Map<String, List<String>> addresses = new HashMap<>();
+    private final Map<String, String> hostnames = new HashMap<>();
     private final Map<String, Set<String>> perAp = new HashMap<>();
     private final ArrayDeque<Bundle> events = new ArrayDeque<>();
     private NetLabPolicy policy;
@@ -110,11 +111,14 @@ final class NetLabEngine implements NetLabPolicy.Backend, NetLabPolicy.Journal {
             if (tether != null && !tetherRegistered) {
             tether.registerTetheringEventCallback(command -> worker.post(command), new TetheringManager.TetheringEventCallback() {
                 @Override public void onClientsChanged(Collection<TetheredClient> clients) {
-                    addresses.clear();
+                    addresses.clear(); hostnames.clear();
                     for (TetheredClient client : clients) if (client.getTetheringType() == TetheringManager.TETHERING_WIFI) {
                         ArrayList<String> ips = new ArrayList<>();
-                        for (TetheredClient.AddressInfo address : client.getAddresses())
+                        for (TetheredClient.AddressInfo address : client.getAddresses()) {
                             ips.add(address.getAddress().getAddress().getHostAddress());
+                            String name = NetLabIdentity.clean(address.getHostname());
+                            if (!name.isEmpty()) hostnames.put(client.getMacAddress().toString(), name);
+                        }
                         addresses.put(client.getMacAddress().toString(), ips);
                     }
                 }
@@ -138,7 +142,7 @@ final class NetLabEngine implements NetLabPolicy.Backend, NetLabPolicy.Journal {
     }
     private void setHotspot(int state) {
         hotspot = state == WifiManager.WIFI_AP_STATE_ENABLED;
-        if (!hotspot) { connected.clear(); perAp.clear(); addresses.clear(); }
+        if (!hotspot) { connected.clear(); perAp.clear(); addresses.clear(); hostnames.clear(); }
         maintain();
     }
     void signal(boolean restore) { worker.post(() -> { nextAlarmAt = 0; if (restore) restoreAll(); else maintain(); }); }
@@ -241,6 +245,9 @@ final class NetLabEngine implements NetLabPolicy.Backend, NetLabPolicy.Journal {
             Bundle device = new Bundle(); device.putString("id", "hotspot:" + mac); device.putString("mac", mac);
             device.putBoolean("online", connected.contains(mac)); device.putBoolean("managed", true);
             device.putStringArrayList("addresses", new ArrayList<>(addresses.getOrDefault(mac, Collections.emptyList())));
+            String hostname = hostnames.getOrDefault(mac, "");
+            device.putString("name", hostname); device.putString("os", NetLabIdentity.kind(hostname, "", ""));
+            if (!hostname.isEmpty()) device.putString("identity_source", "dhcp");
             NetLabPolicy.Rule rule = rules.get(mac);
             device.putString("state", rule == null ? "available" : rule.state);
             device.putLong("until", rule == null ? 0 : rule.untilWall); devices.add(device);

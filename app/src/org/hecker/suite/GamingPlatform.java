@@ -106,14 +106,11 @@ final class GamingPlatform {
         catch (ReflectiveOperationException e) { return false; }
     }
     static boolean supportsPopup(Context c, Intent launch) {
-        if (!c.getPackageManager().hasSystemFeature("android.software.freeform_window_management")) return false;
-        try {
-            ActivityInfo info = c.getPackageManager().getActivityInfo(launch.getComponent(), 0);
-            int mode = ActivityInfo.class.getField("resizeMode").getInt(info);
-            return (boolean) ActivityInfo.class.getMethod("isResizeableMode", int.class).invoke(null, mode);
-        } catch (ReflectiveOperationException | PackageManager.NameNotFoundException | NullPointerException e) {
-            return false;
-        }
+        // Android's task policy also supports compatibility resizing. A manifest-only
+        // resizeMode check incorrectly rejects those apps and launcher aliases.
+        return launch != null && launch.resolveActivity(c.getPackageManager()) != null
+                && (c.getPackageManager().hasSystemFeature("android.software.freeform_window_management")
+                    || Settings.Global.getInt(c.getContentResolver(), "enable_freeform_support", 0) != 0);
     }
     static void popup(Context c, Intent launch) throws ReflectiveOperationException {
         if (!supportsPopup(c, launch)) throw new IllegalArgumentException("This app does not support floating windows");
@@ -125,10 +122,14 @@ final class GamingPlatform {
         int top = screen.top + (screen.height() - height) / 2;
         ActivityOptions options = ActivityOptions.makeBasic();
         ActivityOptions.class.getMethod("setLaunchWindowingMode", int.class).invoke(options, 5);
-        ActivityOptions.class.getMethod("setTaskAlwaysOnTop", boolean.class).invoke(options, true);
+        // Always-on-top is optional; an unavailable decoration must not cancel a valid launch.
+        try { ActivityOptions.class.getMethod("setTaskAlwaysOnTop", boolean.class).invoke(options, true); }
+        catch (NoSuchMethodException unavailable) { }
+        options.setLaunchDisplayId(0);
         options.setLaunchBounds(new Rect(left, top, left + width, top + height));
         // NEW_TASK keeps the shortcut out of the game's activity stack. No embedded ActivityView.
-        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // A reused fullscreen task can ignore freeform bounds. Give the shortcut its own task.
+        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         c.startActivity(launch, options.toBundle());
     }
     static void brightness(Context c, float value) throws ReflectiveOperationException {

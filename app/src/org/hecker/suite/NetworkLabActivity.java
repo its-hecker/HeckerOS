@@ -47,17 +47,17 @@ public final class NetworkLabActivity extends Activity {
     @Override public void onCreate(Bundle saved){
         super.onCreate(saved);preferences=new NetLabPreferences(this);tab=saved==null?0:Math.max(0,Math.min(5,saved.getInt("tab")));
         LinearLayout page=Ui.page(this,R.string.netlab_title);
-        LinearLayout hero=Ui.card(this);animation=new SuiteAnimation(this,hero);animation.show(R.raw.suite_netlab,true);
+        LinearLayout hero=Ui.card(this);animation=new SuiteAnimation(this,hero,112);animation.show(R.raw.suite_netlab,true);
         hero.addView(Ui.text(this,"HeckerNetLab",24,true));hero.addView(Ui.text(this,getString(R.string.netlab_intro),14,false));
         badge=Ui.text(this,"",16,true);hero.addView(badge);counters=Ui.text(this,"",13,false);hero.addView(counters);
         report=Ui.text(this,"",13,false);report.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);hero.addView(report);page.addView(hero);
-        LinearLayout actions=new LinearLayout(this);
+        LinearLayout actions=Ui.actions(this);
         Button scan=button(R.string.netlab_scan,v->scan());Button restore=button(R.string.netlab_restore_all,v->confirmRestore());
-        actions.addView(scan,new LinearLayout.LayoutParams(0,-2,1));actions.addView(restore,new LinearLayout.LayoutParams(0,-2,1));page.addView(actions);
+        actions.addView(scan);actions.addView(restore);page.addView(actions);
         scanStatus=Ui.text(this,getString(R.string.netlab_scan_idle),12,false);scanStatus.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);page.addView(scanStatus);
-        HorizontalScrollView tabs=new HorizontalScrollView(this);tabs.setHorizontalScrollBarEnabled(false);
-        LinearLayout row=new LinearLayout(this);int[] titles={R.string.netlab_devices,R.string.netlab_jail,R.string.netlab_defender,R.string.netlab_traffic,R.string.netlab_profiles,R.string.netlab_diagnostics};
-        for(int i=0;i<titles.length;i++){final int target=i;Button b=button(titles[i],v->{tab=target;renderTab();});tabButtons.add(b);row.addView(b);}tabs.addView(row);page.addView(tabs);
+        int[] titles={R.string.netlab_devices,R.string.netlab_jail,R.string.netlab_defender,R.string.netlab_traffic,R.string.netlab_profiles,R.string.netlab_diagnostics};
+        for(int i=0;i<titles.length;i++){final int target=i;Button b=button(titles[i],v->{tab=target;renderTab();});tabButtons.add(b);}
+        page.addView(Ui.chips(this,tabButtons.toArray(new Button[0])));
         content=new LinearLayout(this);content.setOrientation(LinearLayout.VERTICAL);content.setPadding(0,Ui.dp(this,12),0,0);page.addView(content);Ui.scroll(this,page);
         updateHeader();renderTab();
     }
@@ -121,11 +121,11 @@ public final class NetworkLabActivity extends Activity {
             if(tab==0){EditText search=new EditText(this);search.setSingleLine(true);search.setHint(R.string.netlab_search);search.setTextColor(getColor(R.color.hecker_foreground));search.setHintTextColor(getColor(R.color.hecker_secondary));search.setText(query);
                 search.addTextChangedListener(new TextWatcher(){public void beforeTextChanged(CharSequence s,int a,int c,int f){}public void afterTextChanged(Editable e){}
                     public void onTextChanged(CharSequence s,int a,int b,int c){query=s.toString();limit=50;lastList="";renderDevices();}});content.addView(search);
-                LinearLayout filters=new LinearLayout(this);int[] names={R.string.netlab_all,R.string.netlab_online,R.string.netlab_trusted};
-                for(int i=0;i<names.length;i++){final int f=i;Button b=button(names[i],v->{filter=f;renderTab();});b.setSelected(filter==i);filters.addView(b,new LinearLayout.LayoutParams(0,-2,1));}content.addView(filters);
+                List<Button> filters=new ArrayList<>();int[] names={R.string.netlab_all,R.string.netlab_online,R.string.netlab_trusted};
+                for(int i=0;i<names.length;i++){final int f=i;Button b=button(names[i],v->{filter=f;renderTab();});b.setSelected(filter==i);filters.add(b);}content.addView(Ui.chips(this,filters.toArray(new Button[0])));
             }else content.addView(Ui.text(this,getString(R.string.netlab_jail_summary),14,false));
-            LinearLayout bulk=new LinearLayout(this);bulk.addView(button(R.string.netlab_pause_selected,v->chooseDuration(selectedDevices(false))),new LinearLayout.LayoutParams(0,-2,1));
-            bulk.addView(button(R.string.netlab_restore_selected,v->perform("restore",selectedDevices(true),0)),new LinearLayout.LayoutParams(0,-2,1));content.addView(bulk);
+            LinearLayout bulk=Ui.actions(this);Button pause=button(R.string.netlab_pause_selected,v->chooseDuration(selectedDevices(false)));pause.setEnabled(state.getBoolean("can_pause"));bulk.addView(pause);
+            bulk.addView(button(R.string.netlab_restore_selected,v->perform("restore",selectedDevices(true),0)));content.addView(bulk);
             list=new LinearLayout(this);list.setOrientation(LinearLayout.VERTICAL);content.addView(list);renderDevices();return;
         }
         if(tab==2){LinearLayout card=Ui.card(this);text(card,R.string.netlab_defender,R.string.netlab_defender_summary);
@@ -137,7 +137,7 @@ public final class NetworkLabActivity extends Activity {
             rates=Ui.text(this,"",16,true);card.addView(rates);graph=new NetLabTrafficView(this);card.addView(graph,new LinearLayout.LayoutParams(-1,Ui.dp(this,160)));content.addView(card);updateTraffic();return;}
         if(tab==4){LinearLayout card=Ui.card(this);text(card,R.string.netlab_profiles,R.string.netlab_profiles_summary);
             card.addView(button(R.string.netlab_pause_current,v->{List<Bundle> clients=new ArrayList<>();for(Bundle d:devices)if(d.getBoolean("managed")&&d.getBoolean("online")&&!jailed(d))clients.add(d);chooseDuration(clients);}));
-            card.addView(button(R.string.netlab_speed_limiter,v->limiter()));
+            card.addView(button(R.string.netlab_saved_rate_presets,v->limiter()));
             card.addView(Ui.text(this,getString(R.string.netlab_lockdown_unavailable),13,false));
             Switch history=new Switch(this);history.setText(R.string.netlab_history);history.setTextColor(getColor(R.color.hecker_foreground));history.setChecked(preferences.history());
             history.setOnCheckedChangeListener((v,value)->{preferences.history(value);mergeDevices();updateHeader();});card.addView(history);
@@ -175,25 +175,41 @@ public final class NetworkLabActivity extends Activity {
             TextView nameView=Ui.text(this,name,17,true);title.addView(nameView,new LinearLayout.LayoutParams(0,-2,1));card.addView(title);
             card.addView(Ui.text(this,(d.getBoolean("managed")?getString(R.string.netlab_phone_hotspot):getString(R.string.netlab_monitor_only))+" · "+status(d),12,false));
             if(!addresses(d).isEmpty())card.addView(Ui.text(this,addresses(d),13,false));
+            card.addView(Ui.text(this,identity(d),13,false));
             if(d.getLong("until")>0)card.addView(Ui.text(this,getString(R.string.netlab_until,android.text.format.DateFormat.getTimeFormat(this).format(new Date(d.getLong("until")))),12,false));
             nameView.setOnClickListener(v->details(d));Button action=button(jailed(d)?R.string.netlab_restore:R.string.netlab_details,v->{if(jailed(d))perform("restore",Collections.singletonList(d),0);else details(d);});action.setEnabled(!acting);card.addView(action);list.addView(card);
         }
         if(total==0)list.addView(Ui.text(this,getString(tab==1?R.string.netlab_no_jailed:R.string.netlab_no_devices),14,false));
         if(total>limit){list.addView(Ui.text(this,getString(R.string.netlab_page_count,limit,total),12,false));list.addView(button(R.string.netlab_show_more,v->{limit+=50;lastList="";renderDevices();}));}
     }
-    private String label(Bundle device){String fallback=device.getBoolean("managed")?device.getString("mac",getString(R.string.netlab_unknown)):addresses(device);return preferences.label(device.getString("id"),fallback);}
+    private String label(Bundle device){String fallback=device.getString("name", "");if(fallback.isEmpty())fallback=device.getBoolean("managed")?device.getString("mac",getString(R.string.netlab_unknown)):addresses(device);return preferences.label(device.getString("id"),fallback);}
     private String addresses(Bundle device){ArrayList<String> values=device.getStringArrayList("addresses");return values==null?"":android.text.TextUtils.join(" · ",values);}
     private String status(Bundle d){switch(d.getString("state","available")){case "applying":return getString(R.string.netlab_applying);case "enforced":return getString(R.string.netlab_enforced);
         case "restoring":return getString(R.string.netlab_restoring);case "failed":return getString(R.string.netlab_failed);case "history":return getString(R.string.netlab_last_seen);
         case "observed":return getString(R.string.netlab_observed);case "last_scan":return getString(R.string.netlab_last_scan);
         default:return getString(d.getBoolean("online")?R.string.netlab_online:R.string.netlab_offline);}}
+    private String identity(Bundle device){
+        int label;
+        switch(device.getString("os","unknown")){
+            case "android":label=R.string.netlab_type_android;break;
+            case "ios":label=R.string.netlab_type_ios;break;
+            case "macos":label=R.string.netlab_type_mac;break;
+            case "windows":label=R.string.netlab_type_windows;break;
+            case "linux":label=R.string.netlab_type_linux;break;
+            case "apple":label=R.string.netlab_type_apple;break;
+            case "media":label=R.string.netlab_type_media;break;
+            default:label=R.string.netlab_type_unknown;
+        }
+        String model=device.getString("model","");
+        return getString(label)+(model.isEmpty()?"":" · "+model);
+    }
     private void details(Bundle d){String body=(d.getBoolean("managed")?getString(R.string.netlab_hotspot_details):getString(R.string.netlab_lan_details))
-                +"\n\n"+addresses(d)+(d.getString("mac","").isEmpty()?"":"\n"+d.getString("mac"))+"\n"+status(d);
+                +"\n\n"+addresses(d)+"\n"+identity(d)+"\n"+getString(R.string.netlab_mac,d.getString("mac","").isEmpty()?getString(R.string.netlab_not_shared):d.getString("mac"))+"\n"+getString(R.string.netlab_identity_explanation)+"\n\n"+status(d);
         AlertDialog.Builder dialog=new AlertDialog.Builder(this).setTitle(label(d)).setMessage(body).setNegativeButton(android.R.string.cancel,null)
                 .setNeutralButton(R.string.netlab_rename_trust,(v,w)->rename(d));
         if(jailed(d))dialog.setPositiveButton(R.string.netlab_restore,(v,w)->perform("restore",Collections.singletonList(d),0));
         else if(d.getBoolean("managed")&&d.getBoolean("online")&&state.getBoolean("can_pause"))dialog.setPositiveButton(R.string.netlab_pause,(v,w)->chooseDuration(Collections.singletonList(d)));
-        else dialog.setPositiveButton(R.string.netlab_speed_limiter,(v,w)->limiter());dialog.show();
+        else dialog.setPositiveButton(android.R.string.ok,null);dialog.show();
     }
     private void rename(Bundle d){LinearLayout page=Ui.page(this,R.string.netlab_rename_trust);EditText name=new EditText(this);name.setSingleLine(true);name.setText(label(d));name.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64)});page.addView(name);
         CheckBox trust=new CheckBox(this);trust.setText(R.string.netlab_trusted);trust.setChecked(preferences.trusted(d.getString("id")));page.addView(trust);page.addView(Ui.text(this,getString(R.string.netlab_identity_warning),13,false));
@@ -232,20 +248,20 @@ public final class NetworkLabActivity extends Activity {
         if(checkSelfPermission(LOCAL_PERMISSION)!=PackageManager.PERMISSION_GRANTED){requestPermissions(new String[]{LOCAL_PERMISSION},437);return;}
         NetLabDiscovery.Link current=link;if(current==null){toast(R.string.netlab_no_wifi);return;}
         if(current.targets().isEmpty()){scanStatus.setText(R.string.netlab_scan_scope_unavailable);return;}
-        final int token=++generation;scanning=true;scanStatus.setText(getString(R.string.netlab_scanning,current.targets().size()));scanner=new NetLabDiscovery();
+        final int token=++generation;scanning=true;scanStatus.setText(getString(R.string.netlab_scanning,current.targets().size()));scanner=new NetLabDiscovery(this,current);
         scanner.scan(current,(found,probed,cancelled)->main.post(()->{if(!started||generation!=token)return;scanning=false;scanner=null;
             if(cancelled){scanStatus.setText(R.string.netlab_scan_cancelled);return;}lan.clear();lan.addAll(found);mergeDevices();updateHeader();lastList="";renderDevices();scanStatus.setText(getString(R.string.netlab_scan_finished,found.size(),probed));}));
     }
     @Override public void onRequestPermissionsResult(int request,String[] names,int[] grants){super.onRequestPermissionsResult(request,names,grants);if(request==437){if(grants.length>0&&grants[0]==PackageManager.PERMISSION_GRANTED)scan();else scanStatus.setText(R.string.netlab_permission_needed);}}
     private void updateTraffic(){if(graph==null||rates==null)return;rates.setText(link==null?getString(R.string.netlab_no_wifi):previousRx<0||previousTx<0?getString(R.string.netlab_traffic_unavailable):!rateReady?getString(R.string.netlab_traffic_waiting):getString(R.string.netlab_rates,android.text.format.Formatter.formatFileSize(this,rxRate),android.text.format.Formatter.formatFileSize(this,txRate)));
         if(link!=null&&rateReady)graph.sample(rxRate,txRate);}
-    private void limiter(){LinearLayout page=Ui.page(this,R.string.netlab_speed_limiter);page.addView(Ui.text(this,getString(R.string.netlab_limiter_unavailable),14,false));
+    private void limiter(){LinearLayout page=Ui.page(this,R.string.netlab_saved_rate_presets);page.addView(Ui.text(this,getString(R.string.netlab_limiter_unavailable),14,false));
         EditText down=number(page,R.string.netlab_download,preferences.download()),up=number(page,R.string.netlab_upload,preferences.upload());
         page.addView(Ui.text(this,getString(R.string.netlab_limit_units),12,false));SeekBar slider=new SeekBar(this);slider.setMax(100);slider.setProgress(Math.min(100,preferences.download()/1000));page.addView(slider);
         slider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}public void onProgressChanged(SeekBar b,int p,boolean user){if(user)down.setText(String.valueOf(p*1000));}});
-        LinearLayout presets=new LinearLayout(this);int[] titles={R.string.netlab_low,R.string.netlab_balanced,R.string.netlab_unlimited};int[] values={128,2048,0};for(int i=0;i<titles.length;i++){final int rate=values[i];presets.addView(button(titles[i],v->{down.setText(String.valueOf(rate));up.setText(String.valueOf(rate==0?0:Math.max(64,rate/4)));slider.setProgress(rate/1000);}),new LinearLayout.LayoutParams(0,-2,1));}page.addView(presets);
+        LinearLayout presets=Ui.actions(this);int[] titles={R.string.netlab_low,R.string.netlab_balanced,R.string.netlab_unlimited};int[] values={128,2048,0};for(int i=0;i<titles.length;i++){final int rate=values[i];presets.addView(button(titles[i],v->{down.setText(String.valueOf(rate));up.setText(String.valueOf(rate==0?0:Math.max(64,rate/4)));slider.setProgress(rate/1000);}));}page.addView(presets);
         Button apply=button(R.string.netlab_apply_limit,v->{});apply.setEnabled(false);page.addView(apply);
-        ScrollView scroll=new ScrollView(this);scroll.addView(page);AlertDialog dialog=new AlertDialog.Builder(this).setTitle(R.string.netlab_speed_limiter).setView(scroll).setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.netlab_save_preset,null).create();
+        ScrollView scroll=new ScrollView(this);scroll.addView(page);AlertDialog dialog=new AlertDialog.Builder(this).setTitle(R.string.netlab_saved_rate_presets).setView(scroll).setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.netlab_save_preset,null).create();
         dialog.setOnShowListener(d->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{try{int a=Integer.parseInt(down.getText().toString()),b=Integer.parseInt(up.getText().toString());if(a<0||b<0||a>1_024_000||b>1_024_000)throw new NumberFormatException();preferences.preset(a,b);dialog.dismiss();toast(R.string.netlab_preset_saved);}catch(NumberFormatException invalid){down.setError(getString(R.string.netlab_limit_error));}}));dialog.show();
     }
     private EditText number(LinearLayout page,int title,int value){page.addView(Ui.text(this,getString(title),14,true));EditText field=new EditText(this);field.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);field.setText(String.valueOf(value));page.addView(field);return field;}

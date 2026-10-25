@@ -75,6 +75,38 @@ static class R {
 ''' + resources + '\n}\n}\n'
 
 
+def home_clock_probe(source):
+    """Compile the actual CellLayout measurement/layout hooks, including View overrides."""
+    hooks = '\n'.join(method(source, anchor) for anchor in (
+        'public void enableHeckerHomeClock()', 'public int getPaddingTop()',
+        'protected void onMeasure(int widthMeasureSpec', 'protected void onLayout(boolean changed'))
+    return '''import android.content.Context;
+import android.graphics.*;
+import android.graphics.drawable.*;
+import android.view.*;
+class HomeClockProbe extends ViewGroup {
+private com.android.launcher3.hecker.HeckerHomeClock mHeckerClock;
+private int mHeckerClockSpace;
+int mCountX=5,mCountY=5,mCellWidth,mCellHeight,mFixedCellWidth=-1,mFixedCellHeight=-1;
+int mFixedWidth=-1,mFixedHeight=-1;
+boolean mHasOnLayoutBeenCalled;
+Point mBorderSpace=new Point();
+Rect mTempRect=new Rect();
+Drawable mBackground=new ColorDrawable();
+class Cells extends View {
+Cells(Context c){super(c);}
+void setCellDimensions(int w,int h,int x,int y,Point gap){}
+}
+final Cells mShortcutsAndWidgets;
+HomeClockProbe(Context c){super(c);mShortcutsAndWidgets=new Cells(c);}
+int getUnusedHorizontalSpace(){return 0;}
+static class DeviceProfile {
+static int calculateCellWidth(int space,int gap,int count){return (space-gap*(count-1))/count;}
+static int calculateCellHeight(int space,int gap,int count){return (space-gap*(count-1))/count;}
+}
+''' + hooks + '\n}\n'
+
+
 def check(launcher, sdk, helper_classes):
     resources = ET.parse(ROOT / 'aosp-launcher/res/values/studio.xml').getroot()
     names = {node.get('name') for node in resources}
@@ -109,6 +141,8 @@ def check(launcher, sdk, helper_classes):
     apps = (launcher / 'src/com/android/launcher3/allapps/AllAppsStore.java').read_text()
     get_apps = method(apps, 'public AppInfo[] getApps()')
     stubs = {
+        'HomeClockProbe.java': home_clock_probe(
+            (launcher / 'src/com/android/launcher3/CellLayout.java').read_text()),
         'BubbleSizeProbe.java': bubble_constructor_probe(
             (launcher / 'src/com/android/launcher3/BubbleTextView.java').read_text()),
         'com/android/launcher3/views/ActivityContext.java': '''package com.android.launcher3.views;
@@ -155,4 +189,4 @@ com.android.launcher3.views.ActivityContext mActivityContext;
         subprocess.run(['java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp',
                         str(sdk / 'android.jar') + ':' + str(helper_classes), '-d', str(folder / 'classes'),
                         *map(str, folder.rglob('*.java'))], check=True)
-    print('Studio resources/widget metadata, native final-field icon-size constructor, shortcut factories/stream types and app-label filtering compile: PASS')
+    print('Studio resources/widget metadata, native home-header measurement/layout and final-field icon sizing, shortcut factories/stream types and app-label filtering compile: PASS')

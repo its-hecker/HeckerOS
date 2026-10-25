@@ -26,7 +26,7 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
     private float battery = -1, temperature = Float.NaN, cpu = Float.NaN;
     private long usedRam, totalRam;
     private float phase;
-    private boolean attached, running, sampling;
+    private boolean attached, running, sampling, screenAwake = true;
     private int generation;
     private ValueAnimator animator;
     private final Runnable tick = new Runnable() { public void run() {
@@ -36,12 +36,14 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
     }};
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override public void onReceive(Context c, Intent intent) {
+            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) screenAwake = false;
+            if (Intent.ACTION_SCREEN_ON.equals(intent.getAction()) || Intent.ACTION_USER_PRESENT.equals(intent.getAction())) screenAwake = true;
             if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
                 battery = StudioPolicy.battery(intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1), intent.getIntExtra(BatteryManager.EXTRA_SCALE, 0));
                 int t = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Integer.MIN_VALUE);
                 temperature = t == Integer.MIN_VALUE ? Float.NaN : t / 10f;
             }
-            refresh();
+            syncVisibility(); refresh();
         }
     };
 
@@ -53,31 +55,34 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
         return StudioPolicy.clock(HeckerStudio.value(getContext(), widgetId < 0 ? "clock_style" : "clock_widget_" + widgetId,
                 HeckerStudio.value(getContext(), "clock_style", "signature")));
     }
-    public void setStyle(String value) { style = StudioPolicy.clock(value); restartMotion(); invalidate(); }
+    public void setStyle(String value) { style = StudioPolicy.clock(value); messageSlot = -1; restartMotion(); refresh(); invalidate(); }
     public String style() { return style; }
     @Override protected void onAttachedToWindow() {
         super.onAttachedToWindow(); attached = true;
+        PowerManager power = getContext().getSystemService(PowerManager.class);
+        screenAwake = power == null || power.isInteractive();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction(Intent.ACTION_TIME_CHANGED); filter.addAction(Intent.ACTION_TIMEZONE_CHANGED); filter.addAction(Intent.ACTION_LOCALE_CHANGED);
+        filter.addAction(Intent.ACTION_SCREEN_ON); filter.addAction(Intent.ACTION_SCREEN_OFF); filter.addAction(Intent.ACTION_USER_PRESENT);
+        getContext().registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
         HeckerStudio.prefs(getContext()).registerOnSharedPreferenceChangeListener(this); syncVisibility();
     }
     @Override protected void onDetachedFromWindow() {
-        attached = false; stop(); HeckerStudio.prefs(getContext()).unregisterOnSharedPreferenceChangeListener(this);
+        attached = false; stop(); getContext().unregisterReceiver(receiver);
+        HeckerStudio.prefs(getContext()).unregisterOnSharedPreferenceChangeListener(this);
         super.onDetachedFromWindow();
     }
     @Override public void onVisibilityAggregated(boolean visible) { super.onVisibilityAggregated(visible); syncVisibility(); }
     @Override protected void onWindowVisibilityChanged(int visibility) { super.onWindowVisibilityChanged(visibility); syncVisibility(); }
     private void syncVisibility() {
         if (main == null) return;
-        boolean visible = attached && isShown() && getWindowVisibility() == VISIBLE;
+        boolean visible = attached && screenAwake && isShown() && getWindowVisibility() == VISIBLE;
         if (visible == running) return;
         if (!visible) { stop(); return; }
-        running = true;
-        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        filter.addAction(Intent.ACTION_TIME_CHANGED); filter.addAction(Intent.ACTION_TIMEZONE_CHANGED); filter.addAction(Intent.ACTION_LOCALE_CHANGED);
-        getContext().registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        running = true; messageSlot = -1;
         restartMotion(); main.post(tick);
     }
     private void stop() {
-        if (running) getContext().unregisterReceiver(receiver);
         running = false; generation++; sampling = false; main.removeCallbacks(tick);
         if (animator != null) { animator.cancel(); animator = null; }
         HeckerClockWeather.stop(this);
@@ -97,15 +102,9 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
     private void refresh() {
         if (!running) return;
         displayTime = time(); displayDate = date();
-        long slot = System.currentTimeMillis() / (15 * 60 * 1000);
+        long slot = System.currentTimeMillis() / 60000;
         if (slot != messageSlot) {
-            String[] messages = getResources().getStringArray(HeckerStudio.res(getContext(), "array", "hs_clock_messages"));
-            String previous = message;
-            if (messages.length > 0) {
-                int choice = random.nextInt(messages.length);
-                if (messages.length > 1 && messages[choice].equals(previous)) choice = (choice + 1) % messages.length;
-                message = messages[choice];
-            }
+            cycleMessage();
             messageSlot = slot;
         }
         setContentDescription(time() + ", " + date() + (battery >= 0 ? ", " + HeckerStudio.text(getContext(), "battery") + " " + percent(battery) : "") + ". " + message);
@@ -133,6 +132,21 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
             });
         });
     }
+    public void cycleMessage() {
+        String[] messages = getResources().getStringArray(HeckerStudio.res(getContext(), "array", "hs_clock_messages"));
+        if (messages.length > 0) {
+            int choice = random.nextInt(messages.length);
+            if (messages.length > 1 && messages[choice].equals(message)) choice = (choice + 1) % messages.length;
+            message = messages[choice];
+        }
+        setContentDescription(time() + ", " + date() + ". " + message); invalidate();
+    }
+    private int[] palette() {
+        int[][] colors = {{0xffb4f8d9,0xff8edbed,0xffc5acff}, {0xffffd59c,0xffffaaa4,0xffffcc74},
+                {0xff99eced,0xffa7c5ff,0xff88b8ff}, {0xfff4bcdf,0xffc8b1ff,0xffffa4ce},
+                {0xfff5f2e8,0xffb8f3cc,0xffb397f0}};
+        return colors[HeckerStudio.number(getContext(), "clock_palette", 0, 0, colors.length-1)];
+    }
     private String time() { return DateFormat.getTimeFormat(getContext()).format(new Date()); }
     private String date() { return DateFormat.format(DateFormat.getBestDateTimePattern(Locale.getDefault(), "EEEddMMM"), new Date()).toString(); }
     private String percent(float value) { return value < 0 || !Float.isFinite(value) ? "—" : NumberFormat.getPercentInstance().format(value); }
@@ -144,6 +158,10 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
     private void text(Canvas c, String text, float x, float y, float size, int color, boolean bold, Paint.Align align) {
         paint.setStyle(Paint.Style.FILL); paint.setShader(null); paint.setColor(color); paint.setTextSize(size); paint.setTextAlign(align);
         paint.setTypeface(Typeface.create(style.equals("mono") ? "monospace" : "sans-serif", bold ? Typeface.BOLD : Typeface.NORMAL));
+        if (size >= 48 && HeckerStudio.number(getContext(), "clock_palette", 0, 0, 4) != 4) {
+            int[] colors = palette();
+            paint.setShader(new LinearGradient(20, y-size, 360, y, colors[0], colors[2], Shader.TileMode.CLAMP));
+        }
         c.drawText(text, x, y, paint);
     }
     @Override protected void onDraw(Canvas canvas) {
@@ -152,10 +170,11 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
         float scale = Math.min(getWidth() / 380f, getHeight() / logicalHeight);
         if (scale <= 0) return;
         int save = canvas.save(); canvas.translate((getWidth() - 380 * scale) / 2, (getHeight() - logicalHeight * scale) / 2); canvas.scale(scale, scale);
-        final int ivory = 0xfff5f2e8, muted = 0xffb9c3c9, mint = 0xffb8f3cc, accent = 0xffb397f0;
+        int[] colors = palette();
+        final int ivory = colors[0], muted = 0xffcad7e4, mint = colors[1], accent = colors[2];
         String time = displayTime.isEmpty() ? time() : displayTime, date = displayDate.isEmpty() ? date() : displayDate;
         if (style.equals("glass")) {
-            paint.setShader(new LinearGradient(10, 0, 360, 140, new int[]{0x9994a9b8, 0x50324250, 0x88687988}, null, Shader.TileMode.CLAMP));
+            paint.setShader(new LinearGradient(10, 0, 360, 140, new int[]{0x8869cfc3, 0x66394367, 0x887c74ca}, null, Shader.TileMode.CLAMP));
             canvas.drawRoundRect(12, 4, 368, 142, 24, 24, paint); paint.setShader(null);
             line(canvas, 12, 4, 368, 4, 0x70ffffff, 1);
             fitTime(canvas, time, 190, 83, 72, ivory, true, 330);
@@ -211,7 +230,7 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
             }
         }
         if (!style.equals("caracal") && HeckerStudio.enabled(getContext(), "clock_messages", true))
-            text(canvas, message, 190, logicalHeight - 6, 14, muted, false, Paint.Align.CENTER);
+            text(canvas, message, 190, logicalHeight - 6, 14, accent, false, Paint.Align.CENTER);
         canvas.restoreToCount(save);
     }
     private float fitTime(Canvas c, String value, float x, float y, float size, int color, boolean bold, float width) {

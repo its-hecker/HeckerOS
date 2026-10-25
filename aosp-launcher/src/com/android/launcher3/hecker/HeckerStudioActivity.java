@@ -61,7 +61,6 @@ public final class HeckerStudioActivity extends Activity {
         category("clock", "clock_summary"); category("home", "home_summary");
         category("appearance", "appearance_summary"); category("privacy", "privacy_summary");
         button("universal_search", v -> HeckerStudio.open(this, "search"));
-        button("native_settings", v -> startActivity(new Intent().setClassName(getPackageName(), "com.android.launcher3.settings.SettingsActivity").putExtra("hecker_native_settings", true)));
     }
     private void category(String key, String summary) {
         LinearLayout row = new LinearLayout(this); row.setGravity(Gravity.CENTER_VERTICAL); int d = HeckerStudio.dp(this, 16);
@@ -82,7 +81,7 @@ public final class HeckerStudioActivity extends Activity {
         button("universal_search", v -> HeckerStudio.open(this, "search"));
     }
     private void appearance() {
-        button("clock", v -> HeckerStudio.open(this, "clock")); button("glass", v -> HeckerStudio.open(this, "glass")); button("icons", v -> HeckerStudio.open(this, "icons"));
+        button("glass", v -> HeckerStudio.open(this, "glass")); button("icons", v -> HeckerStudio.open(this, "icons"));
     }
     private void glass() {
         HeckerGlassPreview preview = new HeckerGlassPreview(this); page.addView(preview, new LinearLayout.LayoutParams(-1, HeckerStudio.dp(this, 160)));
@@ -128,16 +127,21 @@ public final class HeckerStudioActivity extends Activity {
             }
         });
         page.addView(clock, new LinearLayout.LayoutParams(-1, HeckerStudio.dp(this, 240)));
+        if (!pickingWidget) {
+            toggle("clock_home", true);
+            page.addView(HeckerStudio.label(this, t("clock_home_summary"), 14));
+        }
+        choice("clock_palette", new String[]{t("aurora"), t("sunrise"), t("lagoon"), t("orchid"), t("classic")},
+                selectedPalette -> HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX + "clock_palette", selectedPalette).apply());
         toggle("clock_animation", true); toggle("clock_messages", true);
         page.addView(HeckerStudio.label(this, t("clock_metrics"), 13));
-        button(pickingWidget ? "apply_clock" : "add_clock", v -> {
+        button("apply_clock", v -> {
             if (pickingWidget) {
                 new HeckerClockWidget().onUpdate(this, AppWidgetManager.getInstance(this), new int[]{widgetId});
                 setResult(RESULT_OK, new Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)); finish();
             } else {
-                AppWidgetManager manager = AppWidgetManager.getInstance(this);
-                if (!manager.isRequestPinAppWidgetSupported() || !manager.requestPinAppWidget(new ComponentName(this, HeckerClockWidget.class), null, null))
-                    Toast.makeText(this, t("widget_picker_hint"), Toast.LENGTH_LONG).show();
+                HeckerStudio.prefs(this).edit().putBoolean(HeckerStudio.PREFIX + "clock_home", true).apply();
+                Toast.makeText(this, t("clock_applied"), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -220,7 +224,15 @@ public final class HeckerStudioActivity extends Activity {
         });
     }
     private Button button(String key, View.OnClickListener clicked) {
-        Button b = new Button(this); b.setText(t(key)); b.setAllCaps(false); b.setOnClickListener(clicked); page.addView(b, new LinearLayout.LayoutParams(-1, -2)); return b;
+        Button b = new Button(this); b.setText(t(key)); b.setAllCaps(false); b.setTextSize(16);
+        b.setTextColor(0xffe9f4ff); b.setMinWidth(0); b.setMinimumWidth(0); b.setMinHeight(HeckerStudio.dp(this, 56));
+        b.setGravity(Gravity.START | Gravity.CENTER_VERTICAL); b.setMaxLines(3); b.setStateListAnimator(null);
+        int pad = HeckerStudio.dp(this, 18); b.setPadding(pad, HeckerStudio.dp(this, 14), pad, HeckerStudio.dp(this, 14));
+        b.setBackground(new android.graphics.drawable.RippleDrawable(android.content.res.ColorStateList.valueOf(0x407db6ed),
+                HeckerStudio.panel(0xff203140, HeckerStudio.dp(this, 18), 0xff3c5267), null));
+        b.setOnClickListener(clicked);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2); params.bottomMargin = HeckerStudio.dp(this, 12);
+        page.addView(b, params); return b;
     }
     private void toggle(String key, boolean fallback) { toggle(key, fallback, true); }
     private void toggle(String key, boolean fallback, boolean studio) {

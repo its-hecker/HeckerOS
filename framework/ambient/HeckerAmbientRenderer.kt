@@ -70,10 +70,12 @@ class HeckerAmbientRenderer(private val context: Context) {
         c.restore()
         text(c, date, width / 2, top + 64f * scale + 21f, 11f, color)
     }
-    fun status(s: HeckerAmbientCharging.State): String = context.getString(when(s.status) {
-        BatteryManager.BATTERY_STATUS_FULL -> R.string.hecker_charge_full
-        BatteryManager.BATTERY_STATUS_CHARGING -> R.string.hecker_charge_charging
-        else -> R.string.hecker_charge_paused
+    fun status(s: HeckerAmbientCharging.State): String = context.getString(when(
+        AmbientChargingPolicy.chargingState(s.status, s.current, s.connectedAt, android.os.SystemClock.elapsedRealtime())) {
+        2 -> R.string.hecker_charge_full
+        1 -> R.string.hecker_charge_charging
+        3 -> R.string.hecker_charge_paused
+        else -> R.string.hecker_charge_connected
     })
     private fun percent(s: HeckerAmbientCharging.State, decimals: Boolean): String =
         if (!s.level.isFinite()) "—" else String.format(Locale.getDefault(),
@@ -96,7 +98,13 @@ class HeckerAmbientRenderer(private val context: Context) {
         val centerY = if (minimal || s.style == 0) height * .48f else
             min(height - radius - 100f, max(160f, height * .51f))
         if (!minimal && s.style != 0) clock(c, time, date, width, max(12f, height * .065f))
-        if (intro != null) {
+        if (intro != null && (s.art != 2 || minimal || s.style == 0)) {
+            // Crossfade into the stationary scene instead of fading through black.
+            if (intro > .7f && s.style != 0) {
+                c.saveLayerAlpha(0f,0f,width,height,((intro-.7f)/.3f*255).toInt().coerceIn(0,255))
+                charging(c,s,time,date,width,height,null)
+                c.restore()
+            }
             intro(c, s.art, s.level, status(s), centerX, centerY, radius, intro)
             return
         }
@@ -110,8 +118,9 @@ class HeckerAmbientRenderer(private val context: Context) {
         paint.strokeCap = Paint.Cap.ROUND; paint.strokeWidth = 4f; paint.color = 0xff171920.toInt()
         c.drawArc(centerX-radius, centerY-radius, centerX+radius, centerY+radius, 135f, 270f, false, paint)
         paint.color = 0xffdf1254.toInt()
+        val fill = if (intro != null && s.art == 2) 1f-(1f-intro).pow(3) else 1f
         if (s.level.isFinite()) c.drawArc(centerX-radius, centerY-radius, centerX+radius,
-            centerY+radius, 135f, 270f * s.level / 100f, false, paint)
+            centerY+radius, 135f, 270f * s.level / 100f * fill, false, paint)
         text(c, percent(s, true), centerX, centerY + 9f, 29f, white, true)
         text(c, status(s).uppercase(Locale.getDefault()), centerX, centerY + 28f, 9f, secondary)
         val rowTop = centerY + radius + 13f
@@ -147,6 +156,16 @@ class HeckerAmbientRenderer(private val context: Context) {
         text(c, value, left + 19f + span / 2f, y, 12f, color, true)
     }
     fun intro(c: Canvas, art: Int, level: Float, label: String, x: Float, y: Float, r: Float, phase: Float) {
+        if (art == 2) {
+            paint.reset(); paint.isAntiAlias=true; paint.style=Paint.Style.STROKE
+            paint.strokeWidth=4f; paint.strokeCap=Paint.Cap.ROUND; paint.color=0xff171920.toInt()
+            c.drawArc(x-r,y-r,x+r,y+r,135f,270f,false,paint)
+            paint.color=0xffdf1254.toInt()
+            if(level.isFinite())c.drawArc(x-r,y-r,x+r,y+r,135f,270f*level/100f*(1f-(1f-phase).pow(3)),false,paint)
+            text(c,if(level.isFinite())String.format(Locale.getDefault(),"%.0f%%",level) else "—",x,y+9f,29f,white,true)
+            text(c,label,x,y+30f,11f,secondary)
+            return
+        }
         val opacity = min(1f, min(phase * 9f, (1f-phase) * 7f)).coerceIn(0f,1f)
         c.saveLayerAlpha(x-r*1.5f,y-r*1.5f,x+r*1.5f,y+r*1.5f,(opacity*255).toInt())
         paint.reset(); paint.isAntiAlias = true; paint.style = Paint.Style.STROKE

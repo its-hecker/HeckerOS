@@ -40,6 +40,10 @@
     {
       "old": "            ItemInfo dragObject, DragPreviewProvider previewProvider, DragOptions dragOptions) {\n        float iconScale = 1f;",
       "new": "            ItemInfo dragObject, DragPreviewProvider previewProvider, DragOptions dragOptions) {\n        if (com.android.launcher3.hecker.HeckerStudio.blockMove(getContext())) return null;\n        float iconScale = 1f;"
+    },
+    {
+      "old": "        newScreen.setCellLayoutContainer(this);",
+      "new": "        newScreen.setCellLayoutContainer(this);\n        if (screenId == FIRST_SCREEN_ID) newScreen.enableHeckerHomeClock();"
     }
   ],
   "res/xml/launcher_preferences.xml": [
@@ -182,6 +186,30 @@
     {
       "old": "            DragOptions dragOptions) {\n        if (info.container >= 0) {",
       "new": "            DragOptions dragOptions) {\n        if (com.android.launcher3.hecker.HeckerStudio.blockMove(v.getContext())) return;\n        if (info.container >= 0) {"
+    }
+  ],
+  "src/com/android/launcher3/CellLayout.java": [
+    {
+      "old": "    protected final ShortcutAndWidgetContainer mShortcutsAndWidgets;",
+      "new": "    protected final ShortcutAndWidgetContainer mShortcutsAndWidgets;\n    private com.android.launcher3.hecker.HeckerHomeClock mHeckerClock;\n    private int mHeckerClockSpace;\n\n    public void enableHeckerHomeClock() {\n        if (mHeckerClock != null) return;\n        mHeckerClock = new com.android.launcher3.hecker.HeckerHomeClock(getContext());\n        addView(mHeckerClock);\n    }\n\n    @Override public int getPaddingTop() { return super.getPaddingTop() + mHeckerClockSpace; }"
+    },
+    {
+      "old": "        int childWidthSize = widthSize - (getPaddingLeft() + getPaddingRight());",
+      "new": "        mHeckerClockSpace = mHeckerClock == null ? 0 : mHeckerClock.reservedHeight(\n                heightSize - super.getPaddingTop() - getPaddingBottom(), mCountY, mBorderSpace.y);\n        if (mHeckerClock != null) {\n            mHeckerClock.setVisibility(mHeckerClockSpace > 0 ? VISIBLE : GONE);\n            mHeckerClock.measure(MeasureSpec.makeMeasureSpec(\n                    widthSize - getPaddingLeft() - getPaddingRight(), MeasureSpec.EXACTLY),\n                    MeasureSpec.makeMeasureSpec(mHeckerClockSpace, MeasureSpec.EXACTLY));\n        }\n        int childWidthSize = widthSize - (getPaddingLeft() + getPaddingRight());"
+    },
+    {
+      "old": "        if (mFixedCellWidth < 0 || mFixedCellHeight < 0) {\n            int cw = DeviceProfile.calculateCellWidth(childWidthSize, mBorderSpace.x,\n                    mCountX);\n            int ch = DeviceProfile.calculateCellHeight(childHeightSize, mBorderSpace.y,\n                    mCountY);",
+      "new": "        if (mFixedCellWidth < 0 || mFixedCellHeight < 0 || mHeckerClock != null) {\n            int cw = mHeckerClock != null && mFixedCellWidth >= 0 ? mFixedCellWidth : DeviceProfile.calculateCellWidth(\n                    childWidthSize, mBorderSpace.x, mCountX);\n            int ch = mHeckerClock != null && mHeckerClockSpace == 0 && mFixedCellHeight >= 0 ? mFixedCellHeight\n                    : DeviceProfile.calculateCellHeight(childHeightSize, mBorderSpace.y, mCountY);"
+    },
+    {
+      "old": "        mShortcutsAndWidgets.layout(left, top, right, bottom);",
+      "new": "        mShortcutsAndWidgets.layout(left, top, right, bottom);\n        if (mHeckerClock != null && mHeckerClockSpace > 0) {\n            mHeckerClock.layout(left, super.getPaddingTop(), right, getPaddingTop());\n        }"
+    }
+  ],
+  "src/com/android/launcher3/qsb/QsbWidgetFactory.kt": [
+    {
+      "old": "        return LayoutInflater.from(container.context)\n            .inflate(R.layout.qsb_container_hotseat, container, false)",
+      "new": "        return com.android.launcher3.hecker.HeckerDockBar(container.context)"
     }
   ]
 }

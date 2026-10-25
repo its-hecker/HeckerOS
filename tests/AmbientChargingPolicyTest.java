@@ -7,6 +7,15 @@ public final class AmbientChargingPolicyTest {
     }
     public static void main(String[] args) {
         AmbientChargingPolicy p = new AmbientChargingPolicy();
+        check(AmbientChargingPolicy.route(true,true,false), "AOD has its own enabled route");
+        check(!AmbientChargingPolicy.route(true,false,true), "AOD route overrides ambient during AOD");
+        check(AmbientChargingPolicy.route(false,false,true), "Brief ambient checks work with AOD off");
+        check(!AmbientChargingPolicy.route(false,true,false), "AOD switch does not enable ambient checks");
+        check(AmbientChargingPolicy.chargingState(4,Integer.MIN_VALUE,1000,1200)==0, "Plug negotiation is not paused");
+        check(AmbientChargingPolicy.chargingState(4,400000,1000,9000)==1, "Positive battery current confirms charging");
+        check(AmbientChargingPolicy.chargingState(4,-200000,1000,9000)==3, "Confirmed noncharging remains visible");
+        check(AmbientChargingPolicy.chargingState(1,Integer.MIN_VALUE,1000,9000)==0, "Unknown status remains connected");
+        check(AmbientChargingPolicy.chargingState(5,0,1000,9000)==2, "Full status takes precedence");
         check(!p.battery(true, false, true, 0), "Boot/sticky charging replay must not pulse");
         check(!p.pending(), "Sticky battery must not animate");
         p.battery(false, false, true, 10);

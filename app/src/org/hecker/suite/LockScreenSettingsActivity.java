@@ -34,15 +34,21 @@ public final class LockScreenSettingsActivity extends Activity {
                 "hecker_custom_lockscreen_clock", 0);
         page.addView(clock);
         LinearLayout charge = Ui.card(this);
+        int defaultAodId=getResources().getIdentifier("config_dozeAlwaysOnEnabled","bool","android");
+        toggle(charge, R.string.always_on_title, R.string.always_on_summary,
+                Settings.Secure.DOZE_ALWAYS_ON, defaultAodId!=0&&getResources().getBoolean(defaultAodId)?1:0);
         SuiteAnimation art = new SuiteAnimation(this, charge, 112);
         art.show(R.raw.suite_charge, true);
+        toggle(charge, R.string.aod_charging_title, R.string.aod_charging_summary,
+                "hecker_charging_on_aod", 1);
         toggle(charge, R.string.ambient_charging_title, R.string.ambient_charging_summary,
                 "hecker_charging_on_ambient", 1);
         toggle(charge, R.string.charging_animation_title, R.string.charging_animation_summary,
                 "hecker_charging_animation", 1);
         charge.addView(Ui.text(this, getString(R.string.charging_animation_style), 18, true));
         choices(charge, "hecker_charging_animation_style", 0,
-                new int[]{R.string.charging_energy_title, R.string.charging_plasma_title});
+                new int[]{R.string.charging_energy_title, R.string.charging_plasma_title,
+                        R.string.charging_gauge_title});
         charge.addView(Ui.text(this, getString(R.string.aod_charging_info_title), 18, true));
         choices(charge, "hecker_aod_charging_style", 1,
                 new int[]{R.string.aod_charging_info_off, R.string.aod_charging_info_detailed,

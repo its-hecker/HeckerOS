@@ -103,6 +103,12 @@ final class Ui {
         Button button = new Button(activity);
         button.setAllCaps(false);
         button.setTextSize(14);
+        button.setMinWidth(0);
+        button.setMinimumWidth(0);
+        button.setGravity(android.view.Gravity.CENTER);
+        button.setMaxLines(3);
+        button.setBreakStrategy(android.text.Layout.BREAK_STRATEGY_HIGH_QUALITY);
+        button.setStateListAnimator(null);
         button.setMinHeight(dp(activity, 48));
         button.setMinimumHeight(dp(activity, 48));
         button.setPadding(dp(activity, 16), dp(activity, 10),
@@ -122,7 +128,34 @@ final class Ui {
                 activity.getColor(R.color.hecker_secondary),
                 activity.getColor(R.color.hecker_on_accent),
                 activity.getColor(R.color.hecker_foreground) }));
+        LinearLayout.LayoutParams size = new LinearLayout.LayoutParams(-1, -2);
+        size.bottomMargin = dp(activity, 10);
+        button.setLayoutParams(size);
         return button;
+    }
+
+    /** Full-width actions grow with translated text and accessibility font sizes. */
+    static LinearLayout actions(Activity activity, Button... buttons) {
+        LinearLayout group = new LinearLayout(activity);
+        group.setOrientation(LinearLayout.VERTICAL);
+        for (Button button : buttons) group.addView(button);
+        return group;
+    }
+
+    /** Chips keep their natural width; scrolling never squeezes their labels. */
+    static android.widget.HorizontalScrollView chips(Activity activity, Button... buttons) {
+        android.widget.HorizontalScrollView scroll = new android.widget.HorizontalScrollView(activity);
+        scroll.setHorizontalScrollBarEnabled(false);
+        LinearLayout row = new LinearLayout(activity);
+        for (Button button : buttons) {
+            button.setSingleLine(true);
+            LinearLayout.LayoutParams size = new LinearLayout.LayoutParams(-2, -2);
+            size.setMarginEnd(dp(activity, 8));
+            size.bottomMargin = dp(activity, 8);
+            row.addView(button, size);
+        }
+        scroll.addView(row);
+        return scroll;
     }
 
     static LinearLayout card(Activity activity) {

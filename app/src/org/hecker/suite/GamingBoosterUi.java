@@ -37,14 +37,31 @@ final class GamingBoosterUi {
     }
     static final class LoadBar extends View {
         private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);private final String label;private final int mode;private int value=-1;
+        private float displayed; private android.animation.ValueAnimator animation;
         LoadBar(Context c,String label,int mode){super(c);this.label=label;this.mode=mode;}
-        void value(int v){value=v;setContentDescription(label+" "+(v<0?"—":v+"%"));invalidate();}
+        void value(int v){
+            if(v==value)return;
+            value=v;setContentDescription(label+" "+(v<0?"—":v+"%"));
+            if(animation!=null)animation.cancel();
+            if(v<0||!isShown()||!android.animation.ValueAnimator.areAnimatorsEnabled()){
+                displayed=Math.max(0,v);invalidate();return;
+            }
+            animation=android.animation.ValueAnimator.ofFloat(displayed,v);animation.setDuration(220);
+            animation.addUpdateListener(a->{displayed=(float)a.getAnimatedValue();invalidate();});animation.start();
+        }
+        @Override protected void onDetachedFromWindow(){if(animation!=null)animation.cancel();super.onDetachedFromWindow();}
         @Override protected void onDraw(Canvas c){
             float w=getWidth(),s=getResources().getDisplayMetrics().scaledDensity;
             p.setStyle(Paint.Style.FILL);p.setColor(MUTED);p.setTextSize(9*s);p.setTextAlign(Paint.Align.CENTER);c.drawText(label,w/2,10*s,p);
             float x=w/2-dp(getContext(),5),y=dp(getContext(),20),segment=dp(getContext(),9);
-            for(int i=0;i<3;i++){p.setColor(value>=0&&value>(2-i)*100/3?accent(mode):0xff353b45);c.drawRoundRect(x,y+i*segment,x+dp(getContext(),11),y+i*segment+segment-dp(getContext(),1),dp(getContext(),1),dp(getContext(),1),p);}
+            for(int i=0;i<3;i++){
+                float lit=value<0?0:Math.max(0,Math.min(1,(displayed-(2-i)*100/3f)/(100/3f)));
+                p.setColor(blend(0xff353b45,accent(mode),lit));
+                c.drawRoundRect(x,y+i*segment,x+dp(getContext(),11),y+i*segment+segment-dp(getContext(),1),dp(getContext(),1),dp(getContext(),1),p);
+            }
         }
+        private int blend(int from,int to,float f){return Color.rgb((int)(Color.red(from)+(Color.red(to)-Color.red(from))*f),
+                (int)(Color.green(from)+(Color.green(to)-Color.green(from))*f),(int)(Color.blue(from)+(Color.blue(to)-Color.blue(from))*f));}
     }
     static final class MetricPill extends LinearLayout {
         private final TextView[] values=new TextView[4];

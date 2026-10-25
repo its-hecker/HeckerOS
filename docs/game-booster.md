@@ -11,7 +11,7 @@ Brightness and media volume use the same 44 dp, thumb-free white glass tracks
 as `HeckerGlassTrack` in the One UI Quick Settings implementation. Accessibility
 range actions and keyboard adjustments remain available. The dock launches actual
 Android freeform tasks and retains the game session while a supported popup is
-visible. Apps that disallow freeform resizing report that limitation.
+visible. Android decides compatibility resizing; a manifest-only resize check no longer rejects apps or aliases in advance. Shortcuts request a separate freeform task with bounds, and optional always-on-top support cannot block the launch when absent.
 
 The panel includes game Focus/DND, screenshot, recording, navigation blocking,
 edge blocking, auto-brightness blocking, assistant blocking, floating stats,
@@ -88,3 +88,8 @@ If the manifest branch already exists locally, use `git switch
 feat/game-booster-reference` and `git pull --ff-only` in `.repo/local_manifests`
 instead of creating another tracking branch. Sync both the Suite and kernel;
 Suite-only sync does not install the new charging control.
+
+The panel uses a larger initial height and leaves 8 dp of vertical margin at its maximum. A
+previous full-height selection follows the new limit. Both portrait and compact landscape panels
+include live CPU/GPU segment meters; transitions interpolate real samples and respect reduced
+motion. These are not simulated utilization animations.

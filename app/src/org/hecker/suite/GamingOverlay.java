@@ -285,12 +285,16 @@ final class GamingOverlay {
     }
     private void buildCompactTools(LinearLayout main) {
         LinearLayout metrics = GamingUi.row(c);
+        cpuBar = new GamingBoosterUi.LoadBar(c, "CPU", actions.gameMode());
+        metrics.addView(cpuBar, new LinearLayout.LayoutParams(dp(24), dp(55)));
         LinearLayout frames = metric("FPS", fps, 20); fpsText = (TextView) frames.getChildAt(1);
         metrics.addView(frames, new LinearLayout.LayoutParams(0, dp(44), 1));
         ImageView game = new ImageView(c); game.setImageDrawable(actions.gameIcon()); game.setContentDescription(actions.gameLabel());
         metrics.addView(game, new LinearLayout.LayoutParams(dp(32), dp(32)));
         LinearLayout memory = metric("RAM", number(ram), 20); ramText = (TextView) memory.getChildAt(1);
-        metrics.addView(memory, new LinearLayout.LayoutParams(0, dp(44), 1)); main.addView(metrics);
+        metrics.addView(memory, new LinearLayout.LayoutParams(0, dp(44), 1));
+        gpuBar = new GamingBoosterUi.LoadBar(c, "GPU", actions.gameMode());
+        metrics.addView(gpuBar, new LinearLayout.LayoutParams(dp(24), dp(55))); main.addView(metrics);
         LinearLayout modes = GamingUi.row(c);
         mode(modes, R.string.gaming_performance, 2); mode(modes, R.string.gaming_balanced, 1); mode(modes, R.string.gaming_battery_saver, 3);
         main.addView(modes, new LinearLayout.LayoutParams(-1, dp(44)));

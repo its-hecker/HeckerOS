@@ -23,7 +23,7 @@ This is a Java/native View adaptation of those screens to HeckerOS Settings,
 with the crDroid/Evolution X Apache-2.0 attributions preserved. It retains the
 existing HeckerOS Android 17 Axion-derived process and keystore integration;
 Evolver's complete Compose app and framework are not substituted into the ROM.
-Exact owned file hashes and build revisions are in
+The five certificate/TrickyStore classes now incorporate Evolution X’s Android 17 backend updates from the same immutable framework revision, rechecked unchanged at current `cnb` head `c4d3eeb6aba62768dfb11c26711728b99daa42dd` on 26 October. HeckerOS retains its working Android 17 lightweight signer, private importer and UID boundaries. Exact owned file hashes and build revisions are in
 `integration/platform-features.json` and `integration/source-revisions.json`.
 
 ## Controls and persistence
@@ -51,10 +51,7 @@ The explicit restart control force-stops Play services and Play Store without
 clearing data. They restart when needed.
 
 Keyboxes are not bundled. An explicit Fetch action reads Evolution X's public
-keybox repository. Fetch verifies certificate chains, trusted Google roots,
-validity dates and a live Google revocation response before the existing atomic
-native importer validates key/certificate pairing. Network or validation errors
-keep the previous keybox. XML entities, oversized files and empty imports are
+keybox repository. Fetch verifies certificate chains, trusted Google roots and validity dates, and checks Google’s live revocation response before the atomic native importer validates key/certificate pairing. Like Evolution X, manual fetch may save a trusted chain when live revocation is unavailable; its status stays Unknown and the UI explicitly says it is unverified. Revoked, suspended, expired, not-yet-valid, untrusted and malformed chains are rejected with the actual reason. Public trust anchors can fall back to a previously fetched cache. Failed downloads keep the previous keybox; successful fetch restarts Google services so process caches reload. XML entities, oversized files and empty imports are
 rejected. An unavailable revocation response is **not verified**, never Valid.
 The displayed certificate status is not a Play Integrity verdict. The Canary
 refresh estimate is labelled as an estimate derived from the patch month.
