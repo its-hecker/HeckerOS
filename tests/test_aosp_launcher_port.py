@@ -55,6 +55,27 @@ class AospLauncherPortTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Preserving unfamiliar'):
                 aosp_launcher_plan(rom, replace_guarded)
 
+    def test_published_module_and_manifest_upgrade_without_duplicate_home(self):
+        with tempfile.TemporaryDirectory() as directory:
+            rom = Path(directory)
+            self.stage(rom)
+            pairs = json.loads((ROOT / 'aosp-launcher/patches.json').read_text())
+            # The exact formerly published HOME module, before the retained weather dependency.
+            (rom / SOURCE / 'Android.bp').write_text(pairs['Android.bp'][0]['previous'][-1])
+            manifest = rom / SOURCE / 'AndroidManifest.xml'
+            generated = rom / SOURCE / 'generated/hecker-launcher/AndroidManifest.xml'
+            generated.parent.mkdir(parents=True, exist_ok=True)
+            generated.write_text(manifest.read_text().replace('android:debuggable="true"', 'android:debuggable="false"').replace(
+                '    <application', '    <uses-permission android:name="android.permission.DEVICE_POWER" />\n'
+                '    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />\n'
+                '    <uses-permission android:name="android.permission.READ_WALLPAPER_INTERNAL" />\n    <application'))
+            self.apply(aosp_launcher_plan(rom, replace_guarded))
+            blueprint = (rom / SOURCE / 'Android.bp').read_text()
+            self.assertEqual(blueprint.count('name: "HeckerLauncher"'), 1)
+            self.assertEqual(blueprint.count('"HeckerLauncherGoogleWeather"'), 1)
+            self.assertEqual(generated.read_text().count('android:name="com.android.launcher3.hecker.HeckerClockWidget"'), 1)
+            self.assertFalse(aosp_launcher_plan(rom, replace_guarded))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -16,6 +16,10 @@ public final class SuiteRouterActivity extends Activity {
             if (target == ThemePackActivity.class) {
                 intent.putExtra("category", getIntent().getIntExtra("category", -1));
             }
+            if (target == AppLockActivity.class) {
+                intent.putExtra("org.hecker.suite.APP_PACKAGE",
+                        getIntent().getStringExtra("org.hecker.suite.APP_PACKAGE"));
+            }
             startActivity(intent);
         }
         finish();

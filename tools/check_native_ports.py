@@ -488,6 +488,8 @@ def main():
                 fixture.parent.mkdir(parents=True,exist_ok=True)
                 fixture.write_text('package com.android.launcher3;public class LauncherFiles{public static final String SHARED_PREFERENCES_KEY="com.android.launcher3.prefs";}')
                 subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',str(args.sdk_cache/'android.jar'),'-d',str(output/'classes'),str(fixture),*map(str,sorted((ROOT/'aosp-launcher/src').rglob('*.java')))],check=True)
+                from check_launcher_studio import check as check_launcher_studio
+                check_launcher_studio(launcher, args.sdk_cache.resolve(), output/'classes')
                 resources=launcher/'generated/hecker-launcher/res'
                 subprocess.run([str(args.sdk_cache/'aapt2'),'compile','--dir',str(resources),'-o',str(output/'res.zip')],check=True)
                 probe=output/'AndroidManifest.xml';probe.write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.android.launcher3"><application/></manifest>')

@@ -10,5 +10,8 @@
   ],
   "generated/hecker-launcher/res/values-zh-rCN/strings.xml": [
     "efef38e44d9b62c70e67925f6bd3ed35c9006bf8"
+  ],
+  "src/com/android/launcher3/hecker/HeckerLauncherGlass.java": [
+    "84e86f9b117b6aadb7f3d3582d3f28679cc99a7d"
   ]
 }

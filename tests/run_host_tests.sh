@@ -67,6 +67,9 @@ java -cp "$suite_test_output" InteractionPolicyTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     aosp-launcher/src/com/android/launcher3/hecker/HeckerHomeSwipe.java tests/HeckerHomeSwipeTest.java
 java -cp "$suite_test_output" HeckerHomeSwipeTest
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    aosp-launcher/src/com/android/launcher3/hecker/StudioPolicy.java tests/StudioPolicyTest.java
+java -cp "$suite_test_output" StudioPolicyTest
 
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     netlab/common/org/hecker/netlab/*.java tests/NetLabPolicyTest.java

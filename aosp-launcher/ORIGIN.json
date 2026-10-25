@@ -11,6 +11,13 @@
     "Hecker Launcher name, caracal icon and settings translations",
     "Empty-workspace swipe down opens native notification shade / Quick QS",
     "Native dock, folder, search and widget-container frosted/liquid glass with bounded background wallpaper processing",
-    "Per-container controls and independent corner radii"
+    "Per-container controls and independent corner radii",
+    "Hecker Clock Studio: ten resizable native clocks, rotating messages, animated Thermal/Stacked/Caracal and live device telemetry",
+    "Native authenticated Suite App Lock shortcut, independent launcher hiding, user/profile-scoped icon and label overrides",
+    "Glass Studio opacity, RGB tint, frosting strength, border, presets and shared-renderer live preview",
+    "Local apps and dynamic/manifest/pinned shortcut search via LauncherApps",
+    "Independent home/drawer grids, spacing, dock count and native drag/resize layout lock",
+    "Public appfilter icon packs, per-app icon picker, separate home/drawer label controls and native notification-count pills",
+    "Original animated vector category illustrations for Home screen, Appearance and Privacy"
   ]
 }

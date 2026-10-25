@@ -59,6 +59,9 @@ public final class AppLockActivity extends Activity {
         search = new EditText(this);
         search.setHint(R.string.search_apps);
         search.setSingleLine(true);
+        // The signature-only launcher shortcut focuses this app after authentication.
+        String requestedPackage = getIntent().getStringExtra("org.hecker.suite.APP_PACKAGE");
+        if (requestedPackage != null && requestedPackage.length() <= 255) search.setText(requestedPackage);
         search.setEnabled(false);
         page.addView(search);
         list = new LinearLayout(this);
