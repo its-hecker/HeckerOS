@@ -23,6 +23,58 @@ def method(source, anchor):
     return source[start:end]
 
 
+def bubble_constructor_probe(source):
+    """Compile the real constructor's display branches and final-field assignment together.
+
+    Helper-only compilation cannot catch reassignment of Launcher3's final mIconSize.
+    Keep the native declaration and the entire sizing section, including any statements
+    after TypedArray.recycle(), so that the previously published failure is rejected.
+    """
+    declaration = re.search(r'^\s*private final int mIconSize;', source, re.M)
+    assert declaration is not None, 'Retain Launcher3 final icon-size field'
+    constructor = method(source, 'public BubbleTextView(Context context, AttributeSet attrs, int defStyle)')
+    sizing = constructor[constructor.index('        mDisplay = a.getInteger('):
+                         constructor.index('        mRunningAppIndicatorHeight =')]
+    constants = '\n'.join(re.findall(r'public static final int DISPLAY_[A-Z_]+\s*=\s*\d+;', source))
+    resource_ids = {}
+    for group, name in re.findall(r'R\.(styleable|dimen)\.([A-Za-z_0-9]+)', sizing):
+        resource_ids.setdefault(group, set()).add(name)
+    resources = '\n'.join('static class ' + group + '{' + ';'.join(
+        'static final int ' + name + '=' + str(i + 1) for i, name in enumerate(sorted(names)))
+        + ';}' for group, names in resource_ids.items())
+    return '''import android.content.Context;
+import android.content.res.TypedArray;
+import android.util.TypedValue;
+import android.widget.TextView;
+class BubbleSizeProbe extends TextView {
+''' + declaration.group() + '\n' + constants + '''
+int mDisplay;
+final DeviceProfile mDeviceProfile = new DeviceProfile();
+BubbleSizeProbe(Context context, TypedArray a) {
+super(context);
+''' + sizing + '''
+}
+void setCenterVertically(boolean value) {}
+static class DeviceProfile {
+Profile getWorkspaceProfile(){return new Profile();}
+Profile getAllAppsProfile(){return new Profile();}
+Profile getFolderProfile(){return new Profile();}
+Profile getTaskbarProfile(){return new Profile();}
+}
+static class Profile {
+int getIconTextSizePx(){return 13;}
+int getIconDrawablePaddingPx(){return 4;}
+int getIconSizePx(){return 48;}
+boolean getIconCenterVertically(){return true;}
+int getChildTextSizePx(){return 13;}
+int getChildDrawablePaddingPx(){return 4;}
+int getChildIconSizePx(){return 48;}
+boolean isTransientTaskbar(){return false;}
+}
+static class R {
+''' + resources + '\n}\n}\n'
+
+
 def check(launcher, sdk, helper_classes):
     resources = ET.parse(ROOT / 'aosp-launcher/res/values/studio.xml').getroot()
     names = {node.get('name') for node in resources}
@@ -57,6 +109,8 @@ def check(launcher, sdk, helper_classes):
     apps = (launcher / 'src/com/android/launcher3/allapps/AllAppsStore.java').read_text()
     get_apps = method(apps, 'public AppInfo[] getApps()')
     stubs = {
+        'BubbleSizeProbe.java': bubble_constructor_probe(
+            (launcher / 'src/com/android/launcher3/BubbleTextView.java').read_text()),
         'com/android/launcher3/views/ActivityContext.java': '''package com.android.launcher3.views;
 public interface ActivityContext { android.content.Context asContext(); }''',
         'com/android/launcher3/model/data/ItemInfo.java': '''package com.android.launcher3.model.data;
@@ -101,4 +155,4 @@ com.android.launcher3.views.ActivityContext mActivityContext;
         subprocess.run(['java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp',
                         str(sdk / 'android.jar') + ':' + str(helper_classes), '-d', str(folder / 'classes'),
                         *map(str, folder.rglob('*.java'))], check=True)
-    print('Studio resources/widget metadata, exact native shortcut factories/stream types and app-label filtering compile: PASS')
+    print('Studio resources/widget metadata, native final-field icon-size constructor, shortcut factories/stream types and app-label filtering compile: PASS')

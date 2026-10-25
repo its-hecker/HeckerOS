@@ -78,8 +78,11 @@
       "new": "    protected int mDisplay;\n    private android.content.ComponentName mHeckerComponent;\n    private android.os.UserHandle mHeckerUser = android.os.Process.myUserHandle();"
     },
     {
-      "old": "        a.recycle();",
-      "new": "        a.recycle();\n        mIconSize = Math.max(1, Math.round(mIconSize\n                * com.android.launcher3.hecker.HeckerStudio.number(context, \"icon_size\", 100, 65, 125) / 100f));"
+      "old": "        mIconSize = a.getDimensionPixelSize(R.styleable.BubbleTextView_iconSizeOverride,\n                defaultIconSize);\n        a.recycle();",
+      "new": "        mIconSize = Math.max(1, Math.round(a.getDimensionPixelSize(\n                R.styleable.BubbleTextView_iconSizeOverride, defaultIconSize)\n                * com.android.launcher3.hecker.HeckerStudio.number(context, \"icon_size\", 100, 65, 125) / 100f));\n        a.recycle();",
+      "previous": [
+        "        mIconSize = a.getDimensionPixelSize(R.styleable.BubbleTextView_iconSizeOverride,\n                defaultIconSize);\n        a.recycle();\n        mIconSize = Math.max(1, Math.round(mIconSize\n                * com.android.launcher3.hecker.HeckerStudio.number(context, \"icon_size\", 100, 65, 125) / 100f));"
+      ]
     },
     {
       "old": "    public void applyIconAndLabel(ItemInfoWithIcon info) {\n        FastBitmapDrawable oldIcon = mIcon;",

@@ -76,6 +76,26 @@ class AospLauncherPortTests(unittest.TestCase):
             self.assertEqual(generated.read_text().count('android:name="com.android.launcher3.hecker.HeckerClockWidget"'), 1)
             self.assertFalse(aosp_launcher_plan(rom, replace_guarded))
 
+    def test_published_icon_size_hook_upgrades_without_final_field_reassignment(self):
+        with tempfile.TemporaryDirectory() as directory:
+            rom = Path(directory)
+            self.stage(rom)
+            relative = 'src/com/android/launcher3/BubbleTextView.java'
+            pairs = json.loads((ROOT / 'aosp-launcher/patches.json').read_text())[relative]
+            pair = next(p for p in pairs if 'mIconSize = a.getDimensionPixelSize' in p['old'])
+            path = rom / SOURCE / relative
+            path.write_text(path.read_text().replace(pair['old'], pair['previous'][0])
+                            + '\n// retained local note\n')
+            self.apply(aosp_launcher_plan(rom, replace_guarded))
+            self.assertIn(pair['new'], path.read_text())
+            self.assertNotIn(pair['previous'][0], path.read_text())
+            self.assertEqual(path.read_text().count('mIconSize ='), 1)
+            self.assertIn('retained local note', path.read_text())
+            self.assertFalse(aosp_launcher_plan(rom, replace_guarded))
+            self.apply(aosp_launcher_plan(rom, replace_guarded, True))
+            self.assertIn(pair['old'], path.read_text())
+            self.assertNotIn(pair['previous'][0], path.read_text())
+
 
 if __name__ == '__main__':
     unittest.main()
