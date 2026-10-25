@@ -42,6 +42,9 @@ object HeckerChargingAnimation {
     @JvmStatic fun cancel() { active.keys.toList().forEach { remove(it) } }
 
     private class ChargingView(context: Context, val level: Int) : View(context) {
+        private val renderer = HeckerAmbientRenderer(context)
+        private val art = Settings.Secure.getIntForUser(context.contentResolver,
+            "hecker_charging_animation_style", 0, UserHandle.USER_CURRENT)
         private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         private var fraction = 0f
         private var animator: ValueAnimator? = null
@@ -59,6 +62,15 @@ object HeckerChargingAnimation {
         override fun onDraw(canvas: Canvas) {
             val radius = min(width, height) * .22f
             if (radius <= 0f) return
+            if (art == 1) {
+                val density = resources.displayMetrics.density
+                canvas.save(); canvas.scale(density, density)
+                renderer.intro(canvas, 1, level.toFloat(),
+                    context.getString(com.android.systemui.res.R.string.hecker_charge_charging),
+                    width / (2f * density), height / (2f * density), radius / density, fraction)
+                canvas.restore()
+                return
+            }
             val opacity = min(1f, min(fraction * 7f, (1f - fraction) * 6f)).coerceIn(0f, 1f)
             val cx = width / 2f; val cy = height / 2f
             canvas.save(); canvas.translate(cx, cy)

@@ -251,6 +251,7 @@ def main():
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)
         java_sources = list((out / 'java').rglob('*.java')) + [p for p in (ROOT / 'framework/qs').glob('*.java') if p.name != 'HeckerSystemUiControl.java']
         java_sources += sorted((ROOT / 'framework/lyrics').glob('*.java'))
+        java_sources += sorted((ROOT / 'framework/ambient').glob('*.java'))
         java_sources += [ROOT / 'framework/themes/ThemeIconNames.java', ROOT / 'framework/applock/HeckerAppLockPrompt.java']
         run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', sdk / 'android-system.jar',
             '-d', out / 'classes', *java_sources)
@@ -261,6 +262,7 @@ def main():
             '-Xplugin=' + str(cache / 'kotlin-compose-compiler-plugin-embeddable.jar'),
             '-d', out / 'classes-kotlin', *sorted((out / 'kotlin').glob('*.kt')),
             *sorted((ROOT / 'framework/qs').glob('*.kt')),
+            *sorted((ROOT / 'framework/ambient').glob('*.kt')),
             ROOT / 'framework/lyrics/HeckerLockscreenLyrics.kt',
             ROOT / 'framework/themes/HeckerThemeAssets.kt',
             ROOT / 'framework/themes/HeckerConnectivityIcons.kt',

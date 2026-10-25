@@ -100,5 +100,9 @@
   "frameworks/base/packages/SystemUI/res/drawable/hecker_caracal_mark.xml": "framework/qs/icons/hecker_caracal_mark.xml",
   "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_headphones.xml": "framework/qs/icons/hecker_qs_headphones.xml",
   "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_waveform.xml": "framework/qs/icons/hecker_qs_waveform.xml",
-  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerSystemUiControl.java": "framework/qs/HeckerSystemUiControl.java"
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerSystemUiControl.java": "framework/qs/HeckerSystemUiControl.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/AmbientChargingPolicy.java": "framework/ambient/AmbientChargingPolicy.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientCharging.kt": "framework/ambient/HeckerAmbientCharging.kt",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientRenderer.kt": "framework/ambient/HeckerAmbientRenderer.kt",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientContent.kt": "framework/ambient/HeckerAmbientContent.kt"
 }

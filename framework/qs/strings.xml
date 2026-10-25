@@ -48,4 +48,11 @@
     <string name="hecker_media_seek">Track position</string>
     <string name="hecker_lockscreen_motto">Stay curious.</string>
     <string name="hecker_qs_focus">Focus</string>
+    <string name="hecker_charge_charging">Charging</string>
+    <string name="hecker_charge_paused">Charging paused</string>
+    <string name="hecker_charge_full">Fully charged</string>
+    <string name="hecker_charge_temp">Temp</string>
+    <string name="hecker_charge_voltage">Voltage</string>
+    <string name="hecker_charge_estimate">Estimate</string>
+    <string name="hecker_charge_minutes">%1$d min</string>
 </resources>

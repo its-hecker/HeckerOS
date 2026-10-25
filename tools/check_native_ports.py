@@ -20,6 +20,7 @@ from prepare import replace_guarded
 from privapp_permissions import check_privapp_permissions
 from check_pin_bouncer import PIN_INPUTS, check_pin_bouncer
 from check_game_mode_info import check_game_mode_info
+from check_ambient_charging import check_ambient_charging
 from check_interaction_integration import INPUTS as INTERACTION_INPUTS, check_service_bindings, check_statusbar_dispatch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -461,6 +462,7 @@ def main():
         check_bootanimation_selection(folder)
         check_secure_capture(folder)
         check_game_mode_info(folder)
+        check_ambient_charging(folder)
         check_service_bindings(folder)
         window_types = (folder / 'frameworks/base/core/java/android/view/WindowManager.java').read_text()
         assert re.search(r'TYPE_STATUS_BAR_ADDITIONAL\s*=\s*FIRST_SYSTEM_WINDOW\s*\+\s*41\s*;', window_types)

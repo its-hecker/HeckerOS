@@ -196,7 +196,10 @@
     },
     {
       "old": "    fun startRipple() {",
-      "new": "    fun startRipple() {\n        if (com.android.systemui.hecker.HeckerChargingAnimation.show(\n                context, windowManager, windowLayoutParams, heckerBatteryLevel)) return"
+      "new": "    fun startRipple() {\n        if (com.android.systemui.hecker.HeckerAmbientCharging.suppressRipple(context)) return\n        if (com.android.systemui.hecker.HeckerChargingAnimation.show(\n                context, windowManager, windowLayoutParams, heckerBatteryLevel)) return",
+      "previous": [
+        "    fun startRipple() {\n        if (com.android.systemui.hecker.HeckerChargingAnimation.show(\n                context, windowManager, windowLayoutParams, heckerBatteryLevel)) return"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/battery/BatteryMeterView.java": [
@@ -357,7 +360,10 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/SystemUIService.java": [
     {
       "old": "        ((SystemUIApplication) getApplication()).startSystemUserServicesIfNeeded();",
-      "new": "        ((SystemUIApplication) getApplication()).startSystemUserServicesIfNeeded();\n        com.android.systemui.hecker.HeckerHeadphonePopup.start(this);"
+      "new": "        ((SystemUIApplication) getApplication()).startSystemUserServicesIfNeeded();\n        com.android.systemui.hecker.HeckerHeadphonePopup.start(this);\n        com.android.systemui.hecker.HeckerAmbientCharging.start(this);",
+      "previous": [
+        "        ((SystemUIApplication) getApplication()).startSystemUserServicesIfNeeded();\n        com.android.systemui.hecker.HeckerHeadphonePopup.start(this);"
+      ]
     }
   ],
   "frameworks/base/services/core/java/com/android/server/am/ProcessList.java": [
@@ -777,6 +783,142 @@
     {
       "old": "/sys/devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pm8150b@2:google,bms/power_supply/charger charge_disable 0660 system system",
       "new": "/sys/devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pm8150b@2:google,bms/power_supply/charger charge_disable 0660 system system\n/sys/class/power_supply/charger game_charge_disable 0660 system system\n/sys/devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pm8150b@2:google,bms/power_supply/charger game_charge_disable 0660 system system"
+    }
+  ],
+  "frameworks/base/services/core/java/com/android/server/power/PowerManagerService.java": [
+    {
+      "old": "    private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(\n            boolean wasPowered, int oldPlugType, boolean dockedOnWirelessCharger) {\n",
+      "new": "    private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(\n            boolean wasPowered, int oldPlugType, boolean dockedOnWirelessCharger) {\n        // Native ambient charging owns screen-off plug events on AOD-capable devices.\n        // Preserve interactive use, unsupported hardware and accessibility inversion behavior.\n        if (!wasPowered && mIsPowered\n                && (getGlobalWakefulnessLocked() == WAKEFULNESS_ASLEEP\n                        || getGlobalWakefulnessLocked() == WAKEFULNESS_DOZING)\n                && Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_charging_on_ambient\", 1, mUserId) != 0\n                && (Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_aod_charging_style\", 1, mUserId) != 0\n                    || Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_charging_animation\", 1, mUserId) != 0)\n                && new android.hardware.display.AmbientDisplayConfiguration(mContext)\n                        .alwaysOnAvailableForUser(mUserId)) {\n            return false;\n        }\n"
+    }
+  ],
+  "frameworks/base/core/java/android/hardware/display/AmbientDisplayConfiguration.java": [
+    {
+      "old": "        return pulseOnNotificationEnabled(user)",
+      "new": "        boolean heckerCharging = boolSetting(\"hecker_charging_on_ambient\", user, 1)\n                && (Settings.Secure.getIntForUser(mContext.getContentResolver(),\n                        \"hecker_aod_charging_style\", 1, user) > 0\n                    || boolSetting(\"hecker_charging_animation\", user, 1))\n                && alwaysOnAvailableForUser(user);\n        return heckerCharging || pulseOnNotificationEnabled(user)"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/DozeParameters.java": [
+    {
+      "old": "                Settings.Secure.DOZE_ALWAYS_ON,\n                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);",
+      "new": "                Settings.Secure.DOZE_ALWAYS_ON,\n                \"hecker_charging_on_ambient\",\n                \"hecker_aod_charging_style\",\n                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);"
+    },
+    {
+      "old": "                public void onPowerSaveChanged(boolean isPowerSave) {\n                    dispatchAlwaysOnEvent();\n                }",
+      "new": "                public void onPowerSaveChanged(boolean isPowerSave) {\n                    dispatchAlwaysOnEvent();\n                }\n                private Boolean heckerPlugged;\n                @Override\n                public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {\n                    if (heckerPlugged != null && heckerPlugged == pluggedIn) return;\n                    heckerPlugged = pluggedIn;\n                    onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, null);\n                }"
+    },
+    {
+      "old": "        if (key.equals(Settings.Secure.DOZE_ALWAYS_ON)) {",
+      "new": "        if (key.equals(Settings.Secure.DOZE_ALWAYS_ON)\n                || key.equals(\"hecker_charging_on_ambient\") || key.equals(\"hecker_aod_charging_style\")) {"
+    },
+    {
+      "old": "        mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(mUserTracker.getUserId());",
+      "new": "        mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(mUserTracker.getUserId())\n                || (mBatteryController.isPluggedIn()\n                    && Settings.Secure.getIntForUser(mHeckerChargingSettings, \"hecker_charging_on_ambient\", 1,\n                            mUserTracker.getUserId()) != 0\n                    && Settings.Secure.getIntForUser(mHeckerChargingSettings, \"hecker_aod_charging_style\", 1,\n                            mUserTracker.getUserId()) > 0\n                    && mAmbientDisplayConfiguration.alwaysOnAvailableForUser(mUserTracker.getUserId()));"
+    },
+    {
+      "old": "    private boolean mDozeAlwaysOn;",
+      "new": "    private boolean mDozeAlwaysOn;\n    private final android.content.ContentResolver mHeckerChargingSettings;"
+    },
+    {
+      "old": "        mTransitionInteractor = transitionInteractor;\n        mSecureSettings = secureSettings;",
+      "new": "        mTransitionInteractor = transitionInteractor;\n        mSecureSettings = secureSettings;\n        mHeckerChargingSettings = context.getContentResolver();"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/doze/DozeTriggers.java": [
+    {
+      "old": "        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());",
+      "new": "        mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());\n        com.android.systemui.hecker.HeckerAmbientCharging.attachDoze(mContext,\n                () -> {\n                    if (!mMachine.isExecutingTransition()) {\n                        requestPulse(DozeLog.PULSE_REASON_INTENT, false, null);\n                    }\n                },\n                () -> {\n                    if (!mMachine.isExecutingTransition()\n                            && mMachine.getState() == State.DOZE_AOD\n                            && !(mConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                                || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                                    && mConfig.alwaysOnAvailableForUser(mUserTracker.getUserId())))) {\n                        mMachine.requestState(State.DOZE);\n                    }\n                });"
+    },
+    {
+      "old": "        mUserTracker.removeCallback(mUserChangedCallback);",
+      "new": "        mUserTracker.removeCallback(mUserChangedCallback);\n        com.android.systemui.hecker.HeckerAmbientCharging.detachDoze();"
+    },
+    {
+      "old": "        mDozeSensors.onScreenState(state);",
+      "new": "        mDozeSensors.onScreenState(state);\n        com.android.systemui.hecker.HeckerAmbientCharging.onScreenState(state);"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/keyguard/ui/composable/elements/LockscreenUpperRegionElementProvider.kt": [
+    {
+      "old": "    private val viewModelFactory: LockscreenUpperRegionViewModel.Factory,",
+      "new": "    private val viewModelFactory: LockscreenUpperRegionViewModel.Factory,\n    private val heckerStatusBarState: com.android.systemui.plugins.statusbar.StatusBarStateController,"
+    },
+    {
+      "old": "            val viewModel = rememberViewModel(\"LockscreenUpperRegion\") { viewModelFactory.create() }",
+      "new": "            if (com.android.systemui.hecker.HeckerAmbientUpperRegion(\n                    this@LockscreenUpperRegionElementProvider.context,\n                    heckerStatusBarState, Modifier.burnInAware(isClock = false).nonAuthUI())) return\n            val viewModel = rememberViewModel(\"LockscreenUpperRegion\") { viewModelFactory.create() }"
+    },
+    {
+      "old": "        protected fun TransitionBuilder.configureClockCenteringTransition() {",
+      "new": "        @Composable\n        protected fun LockscreenScope<ContentScope>.HeckerClockRegion(small: Boolean) {\n            val androidContext = this@LockscreenUpperRegionElementProvider.context\n            if (com.android.systemui.hecker.HeckerCustomClockEnabled(androidContext)) {\n                MovableElement(if (small) Clock.Small else Clock.Large,\n                        Modifier.burnInAware(isClock = false).nonAuthUI()) {\n                    content {\n                        com.android.systemui.hecker.HeckerCustomLockscreenClock(androidContext, small)\n                    }\n                }\n            } else {\n                LockscreenElement(if (small) Region.Clock.Small else Region.Clock.Large)\n            }\n        }\n\n        protected fun TransitionBuilder.configureClockCenteringTransition() {"
+    },
+    {
+      "old": "                    Column {\n                        LockscreenElement(Region.Clock.Small)\n                        MediaCarousel(Modifier.align(Alignment.Start))\n",
+      "new": "                    Column {\n                        HeckerClockRegion(true)\n                        MediaCarousel(Modifier.align(Alignment.Start))\n"
+    },
+    {
+      "old": "            TwoColumn(modifier) {\n                StartColumn {\n                    LockscreenElement(Region.Clock.Small)\n                    MediaCarousel(Modifier.align(Alignment.Start))\n                    Notifications(aodAlignment = Alignment.TopStart)\n",
+      "new": "            TwoColumn(modifier) {\n                StartColumn {\n                    HeckerClockRegion(true)\n                    MediaCarousel(Modifier.align(Alignment.Start))\n                    Notifications(aodAlignment = Alignment.TopStart)\n"
+    },
+    {
+      "old": "            TwoColumn(modifier) {\n                StartColumn {\n                    LockscreenElement(Region.Clock.Small)\n                    MediaCarousel(Modifier.align(Alignment.Start))\n                }\n",
+      "new": "            TwoColumn(modifier) {\n                StartColumn {\n                    HeckerClockRegion(true)\n                    MediaCarousel(Modifier.align(Alignment.Start))\n                }\n"
+    },
+    {
+      "old": "            TwoColumn(modifier) {\n                StartColumn { LockscreenElement(Region.Clock.Small) }\n                EndColumn {\n",
+      "new": "            TwoColumn(modifier) {\n                StartColumn { HeckerClockRegion(true) }\n                EndColumn {\n"
+    },
+    {
+      "old": "            ) {\n                scene(NarrowScenes.LargeClock) { LockscreenElement(Region.Clock.Large) }\n                scene(NarrowScenes.SmallClock) {\n",
+      "new": "            ) {\n                scene(NarrowScenes.LargeClock) { HeckerClockRegion(false) }\n                scene(NarrowScenes.SmallClock) {\n"
+    },
+    {
+      "old": "            ) {\n                LockscreenElement(Region.Clock.Large)\n                AODNotifications(Modifier.align(notifAlignment))\n",
+      "new": "            ) {\n                HeckerClockRegion(false)\n                AODNotifications(Modifier.align(notifAlignment))\n"
+    },
+    {
+      "old": "                }\n                EndColumn(useLargeClockPadding = true) { LockscreenElement(Region.Clock.Large) }\n            }\n",
+      "new": "                }\n                EndColumn(useLargeClockPadding = true) { HeckerClockRegion(false) }\n            }\n"
+    },
+    {
+      "old": "            TwoColumn(modifier) {\n                StartColumn(useLargeClockPadding = true) { LockscreenElement(Region.Clock.Large) }\n                EndColumn { Notifications(aodAlignment = Alignment.TopEnd) }\n",
+      "new": "            TwoColumn(modifier) {\n                StartColumn(useLargeClockPadding = true) { HeckerClockRegion(false) }\n                EndColumn { Notifications(aodAlignment = Alignment.TopEnd) }\n"
+    },
+    {
+      "old": "            TwoColumn(modifier) {\n                StartColumn(useLargeClockPadding = true) { LockscreenElement(Region.Clock.Large) }\n                EndColumn {\n",
+      "new": "            TwoColumn(modifier) {\n                StartColumn(useLargeClockPadding = true) { HeckerClockRegion(false) }\n                EndColumn {\n"
+    },
+    {
+      "old": "            // Since Smartspace cards are guaranteed to be shared between the small and large clock",
+      "new": "            // The custom clock replaces the complete date/Smartspace region.\n            // Its movable clock element still participates in the native fade transitions.\n            if (com.android.systemui.hecker.HeckerAmbientCharging.state.value.customClock) {\n                if (!viewModel.shouldSkipTransition) {\n                    timestampRange(endMillis = 133) { exit() }\n                    timestampRange(startMillis = 133, endMillis = 300) { enter() }\n                }\n                return\n            }\n\n            // Since Smartspace cards are guaranteed to be shared between the small and large clock"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/doze/DozeMachine.java": [
+    {
+      "old": "                } else if (mAmbientDisplayConfig.alwaysOnEnabled(mUserTracker.getUserId())) {",
+      "new": "                } else if (mAmbientDisplayConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                        || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                            && mAmbientDisplayConfig.alwaysOnAvailableForUser(mUserTracker.getUserId()))) {"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/doze/DozeSuppressor.java": [
+    {
+      "old": "                    && mConfig.alwaysOnEnabled(mUserTracker.getUserId())) {",
+      "new": "                    && (mConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                    || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                        && mConfig.alwaysOnAvailableForUser(mUserTracker.getUserId())))) {"
+    },
+    {
+      "old": "            if (mConfig.alwaysOnEnabled(mUserTracker.getUserId()) && !suppressed) {",
+      "new": "            if ((mConfig.alwaysOnEnabled(mUserTracker.getUserId())\n                    || (com.android.systemui.hecker.HeckerAmbientCharging.isChargingAmbient()\n                        && mConfig.alwaysOnAvailableForUser(mUserTracker.getUserId()))) && !suppressed) {"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/KeyguardIndicationController.java": [
+    {
+      "old": "        mInited = true;\n\n        mDockManager.addAlignmentStateListener(",
+      "new": "        mInited = true;\n        com.android.systemui.hecker.HeckerAmbientCharging.attachIndication(mContext, () -> {\n            if (mIndicationArea != null) updateDeviceEntryIndication(false);\n        });\n\n        mDockManager.addAlignmentStateListener("
+    },
+    {
+      "old": "    public void destroy() {\n        mHandler.removeCallbacksAndMessages(null);",
+      "new": "    public void destroy() {\n        com.android.systemui.hecker.HeckerAmbientCharging.detachIndication();\n        mHandler.removeCallbacksAndMessages(null);"
+    },
+    {
+      "old": "            } else if (mPowerPluggedIn || mEnableBatteryDefender) {\n                newIndication = computePowerIndication();",
+      "new": "            } else if (!mEnableBatteryDefender\n                    && com.android.systemui.hecker.HeckerAmbientCharging.ownsChargingIndication()) {\n                // Keep higher-priority messages and battery-defender warnings native.\n                // Only the ordinary AOD charging/percentage line is replaced by the custom scene.\n                mWakeLock.setAcquired(false);\n                mIndicationArea.setVisibility(GONE);\n                return;\n            } else if (mPowerPluggedIn || mEnableBatteryDefender) {\n                newIndication = computePowerIndication();"
     }
   ]
 }

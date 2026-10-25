@@ -47,4 +47,11 @@
     <string name="hecker_media_seek">播放进度</string>
     <string name="hecker_lockscreen_motto">保持好奇。</string>
     <string name="hecker_qs_focus">专注</string>
+    <string name="hecker_charge_charging">充电中</string>
+    <string name="hecker_charge_paused">充电已暂停</string>
+    <string name="hecker_charge_full">已充满</string>
+    <string name="hecker_charge_temp">温度</string>
+    <string name="hecker_charge_voltage">电压</string>
+    <string name="hecker_charge_estimate">预计时间</string>
+    <string name="hecker_charge_minutes">%1$d 分钟</string>
 </resources>

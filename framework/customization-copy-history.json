@@ -35,7 +35,8 @@
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerChargingAnimation.kt": [
     "dd677705deee6dc099e9cb2e18f4004fbed80dbd",
-    "be434d10157b93e42349afc38133e9d5c591134b"
+    "be434d10157b93e42349afc38133e9d5c591134b",
+    "77695e72a64cec31489397f91f74624e27bc62bd"
   ],
   "frameworks/base/core/java/android/content/res/IThemeEngineCallback.aidl": [
     "301ff86b863b56de083ae6b59ed3fb1809703aba"
@@ -53,7 +54,8 @@
     "9f0cc01563b91a8b5f56ba385a4d0d287a199598",
     "134715be21814cc5e6726f0fa1e2e88a6fbf737a",
     "3f932e3c57f01689f1c4c105d71af68df0ad1116",
-    "b8c068150ce24a56a275df451d271bd4cf22634f"
+    "b8c068150ce24a56a275df451d271bd4cf22634f",
+    "8e16d8ab00d6a9d6596babbf6aa9d3f1e0980204"
   ],
   "packages/apps/Settings/src/com/android/settings/hecker/HeckerBrandPreference.java": [
     "6f5ddd26068e7b517bc83b72189993087b28fc86"
@@ -178,7 +180,8 @@
   "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_strings.xml": [
     "d086944d48156bce7c4bbcf46e806f1eba761b25",
     "450cd45078a425f50db219059adbc2fefcc6d9e8",
-    "a934e28c584934d82c0638ee48121106f6c33188"
+    "a934e28c584934d82c0638ee48121106f6c33188",
+    "db130ab2c0f99ea9f82b197e1a3f60461b1829b9"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsMedia.java": [
     "305001f4caeae8be8b9c99e895e0f97843daf364"
