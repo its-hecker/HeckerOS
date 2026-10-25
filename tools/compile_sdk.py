@@ -87,11 +87,6 @@ def main():
             parcelable = output / "aidl/android/os" / (name + ".aidl")
             parcelable.parent.mkdir(parents=True, exist_ok=True)
             parcelable.write_text("package android.os; parcelable " + name + ";\n")
-        for folder, name in (("memory", "IHeckerMemoryService"),):
-            source = output / "aidl/android/os" / (name + ".aidl")
-            source.write_text((ROOT / "framework" / folder / (name + ".aidl")).read_text())
-            run(cache / "aidl", "--lang=java", "--out=" + str(output / "feature-aidl"),
-                "-I", output / "aidl", source, env=environment)
         network_aidl = output / "aidl/org/hecker/netlab/INetLabService.aidl"
         network_aidl.parent.mkdir(parents=True, exist_ok=True)
         network_aidl.write_text((ROOT / "netlab/aidl/org/hecker/netlab/INetLabService.aidl").read_text())
@@ -127,7 +122,6 @@ def main():
             *sorted((ROOT / "tests/platform-api-stubs").rglob("*.java")),
             *sorted((ROOT / "app/src").rglob("*.java")),
             ROOT / "framework/sandbox/HeckerSandboxRules.java",
-            ROOT / "framework/memory/HeckerMemoryRules.java",
             *sorted((ROOT / "netlab/common").rglob("*.java")),
             *sorted((output / "netlab-aidl").rglob("*.java")),
             *sorted((output / "feature-aidl").rglob("*.java")))

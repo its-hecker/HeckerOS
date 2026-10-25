@@ -98,7 +98,8 @@ fun HeckerTileGrid(
         return
     }
     if (compact) {
-        HeckerReferenceCompact(tiles, listening, modifier)
+        if (heckerCustomizedLayout()) HeckerGlassCompact(tiles, listening, modifier)
+        else HeckerReferenceCompact(tiles, listening, modifier)
         return
     }
     TileListener(tiles, listening)

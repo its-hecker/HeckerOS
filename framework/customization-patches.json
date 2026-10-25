@@ -379,7 +379,10 @@
     },
     {
       "old": "    boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,\n            int zygotePolicyFlags, boolean disableHiddenApiChecks, boolean disableTestApiChecks,\n            String abiOverride) {",
-      "new": "    boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,\n            int zygotePolicyFlags, boolean disableHiddenApiChecks, boolean disableTestApiChecks,\n            String abiOverride) {\n        if (!app.isPendingStart() && HeckerMemoryPolicy.blockStart(app.info, hostingRecord)) return false;\n        HeckerMemoryPolicy.onProcessStarting(app);"
+      "new": "    boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,\n            int zygotePolicyFlags, boolean disableHiddenApiChecks, boolean disableTestApiChecks,\n            String abiOverride) {",
+      "previous": [
+        "    boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,\n            int zygotePolicyFlags, boolean disableHiddenApiChecks, boolean disableTestApiChecks,\n            String abiOverride) {\n        if (!app.isPendingStart() && HeckerMemoryPolicy.blockStart(app.info, hostingRecord)) return false;\n        HeckerMemoryPolicy.onProcessStarting(app);"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/dagger/SystemUIModule.java": [
@@ -607,13 +610,19 @@
   "frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java": [
     {
       "old": "            mProcessList.onSystemReady();",
-      "new": "            mProcessList.onSystemReady();\n            HeckerMemoryPolicy.start(this);"
+      "new": "            mProcessList.onSystemReady();",
+      "previous": [
+        "            mProcessList.onSystemReady();\n            HeckerMemoryPolicy.start(this);"
+      ]
     }
   ],
   "frameworks/base/services/core/java/com/android/server/wm/ActivityTaskSupervisor.java": [
     {
       "old": "        // Find any running services associated with this app and stop if needed.",
-      "new": "        if (removeFromRecents) {\n            com.android.server.am.HeckerMemoryPolicy.onTaskRemoved(task.mUserId, component.getPackageName());\n        }\n\n        // Find any running services associated with this app and stop if needed."
+      "new": "        // Find any running services associated with this app and stop if needed.",
+      "previous": [
+        "        if (removeFromRecents) {\n            com.android.server.am.HeckerMemoryPolicy.onTaskRemoved(task.mUserId, component.getPackageName());\n        }\n\n        // Find any running services associated with this app and stop if needed."
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarView.java": [
@@ -684,20 +693,22 @@
   "system/sepolicy/private/service_contexts": [
     {
       "old": "activity                                  u:object_r:activity_service:s0",
-      "new": "activity                                  u:object_r:activity_service:s0\n# HeckerOS platform services; gaming uses its dedicated system_ext service label.\nhecker_memory                             u:object_r:activity_service:s0",
+      "new": "activity                                  u:object_r:activity_service:s0",
       "previous": [
         "activity                                  u:object_r:activity_service:s0\n# HeckerOS platform services; gaming uses its dedicated system_ext service label.\nhecker_memory                             u:object_r:activity_service:s0\nhecker_launcher                           u:object_r:activity_service:s0",
         "activity                                  u:object_r:activity_service:s0\nhecker_memory                             u:object_r:activity_service:s0\nhecker_launcher                           u:object_r:activity_service:s0\nhecker_game                               u:object_r:activity_service:s0",
-        "activity                                  u:object_r:activity_service:s0\nhecker_memory                             u:object_r:activity_service:s0\nhecker_launcher                           u:object_r:activity_service:s0"
+        "activity                                  u:object_r:activity_service:s0\nhecker_memory                             u:object_r:activity_service:s0\nhecker_launcher                           u:object_r:activity_service:s0",
+        "activity                                  u:object_r:activity_service:s0\n# HeckerOS platform services; gaming uses its dedicated system_ext service label.\nhecker_memory                             u:object_r:activity_service:s0"
       ]
     }
   ],
   "system/sepolicy/build/soong/service_fuzzer_bindings.go": [
     {
       "old": "var (\n\tServiceFuzzerBindings = map[string][]string{",
-      "new": "var (\n\tServiceFuzzerBindings = map[string][]string{\n\t\t// Java Binder services use the documented exception (b/287102710).\n\t\t\"hecker_memory\":   EXCEPTION_NO_FUZZER,\n\t\t\"hecker_game\":     EXCEPTION_NO_FUZZER,",
+      "new": "var (\n\tServiceFuzzerBindings = map[string][]string{\n\t\t// Java Binder services use the documented exception (b/287102710).\n\t\t\"hecker_game\":     EXCEPTION_NO_FUZZER,",
       "previous": [
-        "var (\n\tServiceFuzzerBindings = map[string][]string{\n\t\t// Java Binder services use the documented exception (b/287102710).\n\t\t\"hecker_memory\":   EXCEPTION_NO_FUZZER,\n\t\t\"hecker_launcher\": EXCEPTION_NO_FUZZER,\n\t\t\"hecker_game\":     EXCEPTION_NO_FUZZER,"
+        "var (\n\tServiceFuzzerBindings = map[string][]string{\n\t\t// Java Binder services use the documented exception (b/287102710).\n\t\t\"hecker_memory\":   EXCEPTION_NO_FUZZER,\n\t\t\"hecker_launcher\": EXCEPTION_NO_FUZZER,\n\t\t\"hecker_game\":     EXCEPTION_NO_FUZZER,",
+        "var (\n\tServiceFuzzerBindings = map[string][]string{\n\t\t// Java Binder services use the documented exception (b/287102710).\n\t\t\"hecker_memory\":   EXCEPTION_NO_FUZZER,\n\t\t\"hecker_game\":     EXCEPTION_NO_FUZZER,"
       ]
     }
   ],

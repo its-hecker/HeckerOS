@@ -1,5 +1,7 @@
 # 25 October device review
 
+> This is the earlier review record. The [later phone follow-up](device-followup-2026-10-25.md) removes Memory Boost and adds the QS/media, GameSpace and native launcher changes.
+
 This change is based on Suite commit `586695c646b5d2eafec7b5f4321eb31cc85dfc67` and the Pixel 4 XL review/log recording `25_10-04-36-35_811`. The reported build booted. The changes below still require a new ROM build and phone regression.
 
 | Review item | Source change |

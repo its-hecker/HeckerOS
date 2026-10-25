@@ -48,6 +48,16 @@ public final class GamingService extends Service implements GamingOverlay.Action
     private ActivityManager am;private WindowManager wm;private GamingOverlay overlay;
     private int gameTask=-1,fpsTask=-1,catalogGeneration;
     private String gamePackage;
+    private int modeGeneration,currentMode=1;
+    private boolean modePending;
+    private final boolean[] supportedModes=new boolean[4];
+    private boolean rebuildOverlay;
+    private final Runnable refreshOverlay=this::refreshOverlay;
+    private void refreshOverlay(){
+        if(destroyed||!active)return;
+        if(rebuildOverlay){rebuildOverlay=false;overlay.restyle();}else overlay.refresh();
+        syncFps();focusState(GamingPrefs.get(this).getBoolean("focus",false));sampleSession();updateStatus();
+    }
     private boolean active,brightnessChanged,stateRegistered,packagesRegistered,destroyed;
     private GamingTaskObserver taskObserver;
     private float fps=Float.NaN,sessionBrightness=Float.NaN;
@@ -132,7 +142,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
                 boolean changed=gameTask!=selected.id;
                 if(changed){stopFps();popups.clear();sessionGeneration++;worker.execute(session::end);}
                 boolean restyle=changed&&active;gameTask=selected.id;gamePackage=selected.pkg;activate();if(restyle)overlay.restyle();
-                if(changed)getSystemService(NotificationManager.class).notify(31,notification());
+                if(changed){if(restyle)loadModes();getSystemService(NotificationManager.class).notify(31,notification());}
             }else{pause();if(!previousVisible){gameTask=-1;gamePackage=null;popups.clear();}}
         }catch(RuntimeException e){Log.w("HeckerGaming","Task observation failed",e);pause();}
         long delay=observation.nextDelay(SystemClock.elapsedRealtime(),active,recordGrace);
@@ -147,11 +157,12 @@ public final class GamingService extends Service implements GamingOverlay.Action
         });
     }
     private void activate(){
-        if(!active){overlay.show();active=true;getSystemService(NotificationManager.class).notify(31,notification());}
+        if(!active){overlay.show();active=true;loadModes();getSystemService(NotificationManager.class).notify(31,notification());}
         focusState(GamingPrefs.get(this).getBoolean("focus",false));syncFps();sampleSession();updateStatus();
     }
     private void pause(){
         boolean wasActive=active;active=false;
+        if(wasActive){modeGeneration++;modePending=false;}
         if(wasActive){sessionGeneration++;bypass=-1;worker.execute(session::end);}
         if(overlay!=null)overlay.hide();stopFps();focusState(false);
         if(brightnessChanged){try{GamingPlatform.brightness(this,Float.NaN);}catch(ReflectiveOperationException|RuntimeException ignored){}brightnessChanged=false;sessionBrightness=Float.NaN;}
@@ -195,8 +206,8 @@ public final class GamingService extends Service implements GamingOverlay.Action
             prefs.edit().putBoolean("focus_applied",wanted).apply();
         }catch(SecurityException e){Log.w("HeckerGaming","Focus access was revoked",e);}
     }
-    @Override public void panelChanged(boolean open){syncFps();}
-    @Override public boolean modeSupported(int mode){return GamingPlatform.modeSupported(this,gamePackage,mode);}
+    @Override public void panelChanged(boolean open){syncFps();if(open&&active&&!modePending)loadModes();}
+    @Override public boolean modeSupported(int mode){return !modePending&&mode>=1&&mode<=3&&supportedModes[mode];}
     @Override public int bypassState(){return bypass;}
     @Override public void toggle(String key){
         if(!Set.of("block_navigation","block_edge","block_assistant","block_brightness","bypass","fps").contains(key))return;
@@ -206,12 +217,29 @@ public final class GamingService extends Service implements GamingOverlay.Action
     @Override public android.graphics.drawable.Drawable gameIcon(){
         try{return getPackageManager().getApplicationIcon(gamePackage);}catch(android.content.pm.PackageManager.NameNotFoundException|RuntimeException e){return getDrawable(R.drawable.ic_gaming);}
     }
-    @Override public boolean performanceSupported(){return GamingPlatform.performanceSupported(this,gamePackage);}
-    @Override public int gameMode(){return GamingPlatform.gameMode(this,gamePackage);}
+    @Override public boolean performanceSupported(){return modeSupported(2);}
+    @Override public int gameMode(){return currentMode;}
+    private void loadModes(){
+        int request=++modeGeneration;String pkg=gamePackage;modePending=true;
+        worker.execute(()->{
+            int actual=GamingPlatform.gameMode(this,pkg);
+            boolean[] supported=new boolean[4];for(int i=1;i<=3;i++)supported[i]=GamingPlatform.modeSupported(this,pkg,i);
+            main.post(()->{if(destroyed||!active||request!=modeGeneration)return;
+                modePending=false;currentMode=actual;System.arraycopy(supported,0,supportedModes,0,4);overlay.refresh();});
+        });
+    }
     @Override public void gameMode(int mode){
-        if(!active||gamePackage==null)return;
-        if(!GamingPlatform.gameMode(this,gamePackage,mode))toast(getString(R.string.gaming_mode_unavailable));
-        overlay.restyle();updateStatus();
+        if(!active||gamePackage==null||!modeSupported(mode)||mode==currentMode)return;
+        int request=++modeGeneration;String pkg=gamePackage;modePending=true;overlay.refresh();
+        // GameManager may reconfigure/relaunch a game; never wait for its Binder calls on the UI thread.
+        worker.execute(()->{
+            boolean success=GamingPlatform.gameMode(this,pkg,mode);
+            int actual=GamingPlatform.gameMode(this,pkg);
+            main.post(()->{if(destroyed||request!=modeGeneration)return;
+                modePending=false;currentMode=actual;
+                if(!success)toast(getString(R.string.gaming_mode_unavailable));
+                if(active)overlay.refresh();updateStatus();});
+        });
     }
     @Override public String gameLabel(){return gamePackage==null?getString(R.string.gaming_title):GamingCatalog.label(this,gamePackage);}
     @Override public void gameSpace(){startActivity(new Intent(this,GamingActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));}
@@ -260,10 +288,13 @@ public final class GamingService extends Service implements GamingOverlay.Action
     @Override public int brightnessLevel(){return Float.isFinite(sessionBrightness)?Math.round(sessionBrightness*255):Settings.System.getInt(getContentResolver(),Settings.System.SCREEN_BRIGHTNESS,128);}
     @Override public void brightness(float brightness){try{GamingPlatform.brightness(this,brightness);brightnessChanged=true;sessionBrightness=brightness;}catch(ReflectiveOperationException|RuntimeException e){toast(getString(R.string.gaming_unavailable));}}
     @Override public void onSharedPreferenceChanged(SharedPreferences prefs,String key){
-        if(destroyed||key.startsWith("hud_")||key.equals("focus_applied"))return;
+        if(destroyed||key==null||key.startsWith("hud_")||key.startsWith("panel_")||key.startsWith("profile_")||key.equals("focus_applied"))return;
         if(key.equals("enabled")&&!GamingPrefs.enabled(this)){stopSelf();return;}
         if(key.equals("added")||key.equals("excluded")||key.equals("automatic"))loadCatalog();
-        else if(active){overlay.restyle();syncFps();focusState(prefs.getBoolean("focus",false));sampleSession();updateStatus();}
+        else if(active){
+            rebuildOverlay|=key.equals("left")||key.equals("fps");
+            main.removeCallbacks(refreshOverlay);main.post(refreshOverlay);
+        }
     }
     @Override public void onConfigurationChanged(Configuration config){super.onConfigurationChanged(config);if(active){overlay.restyle();updateStatus();}}
     @Override public void onTaskRemoved(Intent i){if(GamingPrefs.enabled(this))super.onTaskRemoved(i);else stopSelf();}

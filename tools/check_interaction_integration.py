@@ -52,7 +52,8 @@ def check_service_bindings(folder):
     declarations = context_declarations(policy / 'private/service_contexts')
     system_ext = context_declarations(ROOT / 'rom/sepolicy/private/service_contexts')
     services = [line.split()[0] for line in declarations + system_ext]
-    required = ('hecker_memory', 'hecker_game')
+    required = ('hecker_game',)
+    assert 'hecker_memory' not in services and 'hecker_memory' not in bindings
     for name in required:
         assert services.count(name) == 1, 'Missing or duplicate service context: ' + name
     game = [line for line in system_ext if line.split()[0] == 'hecker_game']
@@ -75,7 +76,7 @@ def check_service_bindings(folder):
             registry.write_text(json.dumps({k: v for k, v in bindings.items() if k != name}))
             missing = subprocess.run(command, capture_output=True, text=True)
             assert missing.returncode != 0 and "Service '" + name + "'" in missing.stderr, name
-    print('Merged gaming label is unique; native fuzzer checker accepts both Java registrations: PASS')
+    print('Merged gaming label is unique; native fuzzer checker accepts the gaming Java registration: PASS')
 
 
 def check_statusbar_dispatch(folder, cache):

@@ -27,6 +27,9 @@ public final class HeckerQsTileOrderTest {
         check((existing + "," + dolby).equals(HeckerQsTileOrder.withDolby(existing + ",")), "trailing delimiter");
         check(!HeckerQsTileOrder.isDolby("custom(other/.DolbyTileService)"), "unrelated tile is retained");
         check(!HeckerQsTileOrder.isDolby(null), "missing component is not Dolby");
+        check(existing.equals(HeckerQsTileOrder.withoutMemoryBoost(existing)), "unrelated selection unchanged");
+        check(existing.equals(HeckerQsTileOrder.withoutMemoryBoost("custom(org.hecker.suite/.MemoryBoostTileService),"+existing+",custom(org.hecker.suite/org.hecker.suite.MemoryBoostTileService)")), "both retired tile forms removed");
+        check(HeckerQsTileOrder.withoutMemoryBoost(null)==null, "fresh default remains unset");
         System.out.println("QS reference migration and custom selection preservation: PASS");
     }
     private static void check(boolean value, String message) {

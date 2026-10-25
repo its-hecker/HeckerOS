@@ -1,5 +1,44 @@
 <resources>
-    <string name="derived_app_name">Hecker Launcher</string>
-    <string name="hecker_double_tap_title">Double tap to sleep</string>
-    <string name="hecker_double_tap_summary">Double tap empty space on the home screen to turn off the display</string>
+  <string name="derived_app_name">Hecker Launcher</string>
+  <string name="hecker_double_tap_title">Double tap to sleep</string>
+  <string name="hecker_double_tap_summary">Double tap empty space on the home screen to turn off the display</string>
+  <string name="hecker_swipe_title">Swipe down for Quick Settings</string>
+  <string name="hecker_swipe_summary">Swipe down on empty home screen space to open the notification shade and quick controls</string>
+  <string name="hecker_glass_title">Glass appearance</string>
+  <string name="hecker_glass_style">Glass style</string>
+  <string name="hecker_glass_dock">Dock</string>
+  <string name="hecker_glass_folders">Folders</string>
+  <string name="hecker_glass_search">Search bar</string>
+  <string name="hecker_glass_widgets">Widget containers</string>
+  <string name="hecker_glass_corner">Corner radius</string>
+  <string-array name="hecker_glass_styles">
+    <item>Off</item>
+    <item>Frosted glass</item>
+    <item>Liquid glass</item>
+  </string-array>
+  <string-array name="hecker_glass_values" translatable="false">
+    <item>0</item>
+    <item>1</item>
+    <item>2</item>
+  </string-array>
+  <string-array name="hecker_glass_corner_values" translatable="false">
+    <item>0</item>
+    <item>16</item>
+    <item>24</item>
+    <item>28</item>
+    <item>36</item>
+    <item>48</item>
+  </string-array>
+  <string-array name="hecker_glass_corners" translatable="false">
+    <item>0 dp</item>
+    <item>16 dp</item>
+    <item>24 dp</item>
+    <item>28 dp</item>
+    <item>36 dp</item>
+    <item>48 dp</item>
+  </string-array>
+    <string name="hecker_glass_corner_tl">Top left corner</string>
+    <string name="hecker_glass_corner_tr">Top right corner</string>
+    <string name="hecker_glass_corner_br">Bottom right corner</string>
+    <string name="hecker_glass_corner_bl">Bottom left corner</string>
 </resources>

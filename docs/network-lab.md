@@ -2,7 +2,7 @@
 
 Hecker Suite → **Network Lab** opens a native Android 17 dashboard with an original offline network-hub Lottie. The optional Network Lab QS tile opens it after unlock; it never changes connectivity by itself. English and Simplified Chinese strings are included.
 
-This is a source implementation targeting coral. A full ROM/SELinux build and tests on the phone have **not** been performed. Nothing from this feature has been pushed to GitHub. The base source tree matches the previously published Suite commit `25f828c3c9cd7c9c84d3d43f71ec3a6e26d13fe2`.
+This is a source implementation targeting coral. A full ROM/SELinux build and tests on the phone have **not** been performed. Publication was approved on 25 October 2026. The base source tree matches the previously published Suite commit `25f828c3c9cd7c9c84d3d43f71ec3a6e26d13fe2`.
 
 ## Implemented behavior
 
@@ -39,7 +39,7 @@ Wi-Fi's configuration API has no cross-application compare-and-swap or ownership
 
 ## Build and verification
 
-The product includes `HeckerNetLabController`; the Suite depends on its AIDL/common library. No new external source checkout, kernel patch or downloaded legacy APK is required. The controller and its two permission XMLs are mandatory post-build output checks. The companion local manifest must copy the updated `integration/tools/check_built_output.py` and its regression fixture when this feature is eventually published.
+The product includes `HeckerNetLabController`; the Suite depends on its AIDL/common library. No new external source checkout, kernel patch or downloaded legacy APK is required. The controller and its two permission XMLs are mandatory post-build output checks. The companion local manifest mirrors the updated `integration/tools/check_built_output.py` and its regression fixture with the Suite source pin.
 
 ```bash
 bash tests/run_host_tests.sh

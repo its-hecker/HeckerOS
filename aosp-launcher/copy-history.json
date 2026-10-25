@@ -1,0 +1,14 @@
+{
+  "src/com/android/launcher3/hecker/HeckerWorkspaceGestures.java": [
+    "691a1d7fdb130e47236c340b885e2df064bacf62"
+  ],
+  "generated/hecker-launcher/res/values/strings.xml": [
+    "a6ed14c93f6aff66751a044c7e6bca4b211294e3"
+  ],
+  "generated/hecker-launcher/res/drawable/ic_launcher_home.xml": [
+    "51e421ee088a77b841f7e6e5d1bf875278115d65"
+  ],
+  "generated/hecker-launcher/res/values-zh-rCN/strings.xml": [
+    "efef38e44d9b62c70e67925f6bd3ed35c9006bf8"
+  ]
+}

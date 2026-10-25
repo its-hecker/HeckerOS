@@ -30,7 +30,7 @@ platform customization forks use `heckeros-17`.
   with a circular real-task FPS gauge, battery telemetry, red accents, game/app
   tabs, capture controls and native floating app shortcuts. Performance profiles
   are exposed only when the Android game service supports the active game.
-- AOSP Android 17-based Hecker Launcher with native home customization, alongside Pixel Launcher as the single Recents/Quickstep provider.
+- AOSP Android 17-based Hecker Launcher with swipe-down quick QS, double-tap sleep, per-container frosted/liquid glass and independent corner controls, alongside Pixel Launcher as the single Recents/Quickstep provider.
 - Native Network Lab: bounded LAN discovery, capability-gated phone-hotspot Jail/restore,
   passive diagnostics, local traffic and an original network-hub Lottie. The separate
   controller uses no end-user root; speed enforcement and router adapters are not

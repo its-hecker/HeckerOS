@@ -65,7 +65,7 @@ jobs:
         run: python3 tools/check_headphone_companion.py --sdk-cache generated/sdk
       - name: Compile Quick Settings Kotlin and Java with locked Compose dependencies
         run: python3 tools/check_quick_settings.py --sdk-cache generated/sdk
-      - name: Compile native memory, launcher, volume and status-bar interaction adapters
+      - name: Compile the System UI restart control receiver
         run: python3 tools/check_interaction_features.py --sdk-cache generated/sdk
       - name: Compile native About Phone and verify HeckerOS release identity
         run: python3 tools/check_about_phone.py --sdk-cache generated/sdk

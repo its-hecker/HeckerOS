@@ -21,6 +21,18 @@ import androidx.compose.ui.unit.sp
 import com.android.systemui.qs.panels.ui.compose.TileListener
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 
+/** Hecker's compact connectivity module keeps its coloured, glass dashboard identity. */
+@Composable
+fun HeckerGlassCompact(tiles: List<TileViewModel>, listening: () -> Boolean, modifier: Modifier) {
+    TileListener(tiles, listening)
+    GlassModule(modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically) {
+            tiles.take(6).forEach { ReferenceTile(it, 44, colored = true) }
+        }
+    }
+}
+
 /** Glass control centre, using the native editor's tiles and native brightness policy. */
 @Composable
 fun HeckerGlassQuickSettings(tiles: List<TileViewModel>, listening: () -> Boolean,

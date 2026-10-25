@@ -1,0 +1,5 @@
+<resources>
+  <string name="gaming_dashboard_width">面板宽度</string>
+  <string name="gaming_dashboard_height">面板高度</string>
+  <string name="gaming_dashboard_resize">调整面板大小。拖动调整，或点按打开宽度与高度设置。</string>
+</resources>

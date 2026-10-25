@@ -29,15 +29,12 @@ public final class HeckerBatteryDrawable extends Drawable {
         oneUi = "com.android.systemui.battery.oneui7".equals(pkg);
         levelColors = android.provider.Settings.Secure.getIntForUser(context.getContentResolver(), "hecker_battery_colors", 1, android.os.UserHandle.USER_CURRENT) != 0;
         this.res = res; this.pkg = pkg;
-        width = oneUi ? 32 : integer("config_batterymeterWidth", 12); height = oneUi ? 16 : integer("config_batterymeterHeight", 20);
+        width = integer("config_batterymeterWidth", 12); height = integer("config_batterymeterHeight", 20);
         if (width < 1 || width > 128 || height < 1 || height > 128) throw new IllegalArgumentException();
         perimeter = path("config_batterymeterPerimeterPath"); mask = path("config_batterymeterFillMask");
         bolt = path("config_batterymeterBoltPath"); saver = path("config_batterymeterPowersavePath");
-        horizontal = oneUi || bool("config_batterymeterHorizontalFill", width > height);
-        if (oneUi) {
-            perimeter.reset(); perimeter.addRoundRect(0, 0, 32, 16, 5, 5, Path.Direction.CW);
-            mask.reset(); mask.addRoundRect(1.5f, 1.5f, 30.5f, 14.5f, 3.5f, 3.5f, Path.Direction.CW);
-        }
+        // Preserve each theme's original silhouette, including One UI's paths.
+        horizontal = bool("config_batterymeterHorizontalFill", width > height);
     }
     public static HeckerBatteryDrawable create(Context context) {
         try {

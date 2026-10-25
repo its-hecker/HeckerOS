@@ -20,6 +20,7 @@ import android.provider.Settings
 import android.service.quicksettings.Tile
 import android.widget.ImageView
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -36,6 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.*
@@ -116,7 +119,7 @@ fun HeckerReferenceQuickSettings(
             }
         }
         ReferenceVolume()
-        HeckerMediaCard()
+        ReferenceMedia()
         ReferenceShortcuts(tiles)
     }
 }
@@ -172,6 +175,41 @@ fun HeckerAutoBrightnessButton() {
 @Composable
 private fun GlassPanel(content: @Composable ColumnScope.() -> Unit) {
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(34.dp)).background(Glass), content = content)
+}
+
+/** Original full One UI row. Only the artwork is new; the richer player belongs to QQS/keyguard. */
+@Composable
+private fun ReferenceMedia() {
+    val context = LocalContext.current
+    var snapshot by remember { mutableStateOf<HeckerQsMedia.Snapshot?>(null) }
+    val media = remember(context) { HeckerQsMedia(context) { snapshot = it } }
+    DisposableEffect(media) { media.start(); onDispose { media.stop() } }
+    val state = snapshot
+    GlassPanel {
+        Row(Modifier.fillMaxWidth().heightIn(min = 70.dp).padding(horizontal = 18.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            state?.artwork?.let { artwork ->
+                Image(artwork.asImageBitmap(), null, contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(36.dp).clip(RoundedCornerShape(9.dp)))
+            }
+            Row(Modifier.weight(1f).clip(RoundedCornerShape(24.dp)).clickable { media.playPause() }
+                .semantics {
+                    contentDescription = context.getString(if (state?.playing == true) R.string.hecker_qs_pause else R.string.hecker_qs_play)
+                    role = Role.Button
+                }.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                ReferenceIcon(if (state?.playing == true) R.drawable.hecker_qs_pause else R.drawable.hecker_qs_play, 22)
+                Text(state?.title ?: context.getString(R.string.hecker_qs_play_last), color = Color.White,
+                    fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            Box(Modifier.heightIn(min = 40.dp).clip(RoundedCornerShape(24.dp)).background(Disc)
+                .semantics { role = Role.Button }.clickable { media.output() }
+                .padding(horizontal = 14.dp, vertical = 10.dp)) {
+                Text(context.getString(R.string.hecker_qs_media_output), color = Color.White, fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold)
+            }
+        }
+    }
 }
 
 @Composable

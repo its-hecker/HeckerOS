@@ -20,6 +20,16 @@ public final class HeckerQsTileOrder {
         for (String spec : current.split(",")) if (isDolby(spec)) return current;
         return current + (current.endsWith(",") ? "" : ",") + DOLBY;
     }
+    public static String withoutMemoryBoost(String current) {
+        if (current == null) return null;
+        java.util.ArrayList<String> retained = new java.util.ArrayList<>();
+        for (String spec : current.split(",")) {
+            String tile = spec.trim();
+            if (!tile.equals("custom(org.hecker.suite/.MemoryBoostTileService)")
+                    && !tile.equals("custom(org.hecker.suite/org.hecker.suite.MemoryBoostTileService)")) retained.add(spec);
+        }
+        return String.join(",", retained);
+    }
     public static String migrate(String current) {
         LinkedHashSet<String> ordered = new LinkedHashSet<>();
         for (String spec : REFERENCE) ordered.add(spec);

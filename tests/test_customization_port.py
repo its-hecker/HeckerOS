@@ -62,8 +62,7 @@ class CustomizationPortTests(unittest.TestCase):
                            if line.strip() and not line.lstrip().startswith('#')]
                 game = [record for record in records if record[0] == 'hecker_game']
                 self.assertEqual(game, [['hecker_game', 'u:object_r:hecker_game_service:s0']])
-                for name in ('hecker_memory',):
-                    self.assertEqual(sum(record[0] == name for record in records), 1)
+                self.assertNotIn('hecker_memory', [record[0] for record in records])
                 self.assertIn('# unrelated policy comment', path.read_text())
                 self.assertEqual({}, customization_plan(folder, replace_guarded))
     def test_foreign_copy_is_preserved(self):
@@ -137,16 +136,15 @@ class CustomizationPortTests(unittest.TestCase):
             self.write(customization_plan(folder,replace_guarded))
             relative='frameworks/base/services/core/java/com/android/server/am/HeckerMemoryPolicy.java'
             path=folder/relative
-            current=path.read_text()
+            self.assertFalse(path.exists())
             # Exercise the actual reviewed published bytes, rather than synthesizing
             # a getter change on a newer implementation that was never published.
             previous=(ROOT/'tests/fixtures/memory-policy-586695c.snapshot').read_text()
-            self.assertNotEqual(previous,current)
-            path.write_text(previous)
+            path.parent.mkdir(parents=True,exist_ok=True);path.write_text(previous)
             changes=customization_plan(folder,replace_guarded)
             self.assertEqual({path},set(changes))
             self.write(changes)
-            self.assertEqual(current,path.read_text())
+            self.assertFalse(path.exists())
             self.assertEqual({},customization_plan(folder,replace_guarded))
             path.write_text(previous+'\n// local maintainer edit\n')
             with self.assertRaises(ValueError):customization_plan(folder,replace_guarded)

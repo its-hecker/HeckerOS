@@ -40,6 +40,8 @@ public final class GamingActivity extends Activity implements SharedPreferences.
     private String selectedGame;
     private int generation;
     private boolean pendingEnable,visible;
+    private final android.os.Handler main=new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable refresh=()->{if(visible&&!isFinishing()&&!isDestroyed())render();};
 
     @Override public void onCreate(Bundle state){
         super.onCreate(state); if(state!=null){tab=state.getString("tab","games");pendingEnable=state.getBoolean("pending_enable",false);pendingGame=state.getString("pending_game");}
@@ -60,10 +62,12 @@ public final class GamingActivity extends Activity implements SharedPreferences.
     @Override protected void onPause(){visible=false;super.onPause();}
     @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putString("tab",tab);out.putBoolean("pending_enable",pendingEnable);out.putString("pending_game",pendingGame);out.putString("selected_game",selectedGame);}
     @Override protected void onDestroy(){
-        generation++;GamingPrefs.get(this).unregisterOnSharedPreferenceChangeListener(this);worker.shutdownNow();super.onDestroy();
+        generation++;main.removeCallbacksAndMessages(null);GamingPrefs.get(this).unregisterOnSharedPreferenceChangeListener(this);worker.shutdownNow();super.onDestroy();
     }
     @Override public void onSharedPreferenceChanged(SharedPreferences prefs,String key){
-        if(visible && !isFinishing() && !isDestroyed() && !key.startsWith("session_") && !key.startsWith("hud_") && !key.equals("focus_applied"))render();
+        if(key!=null&&visible&&!key.startsWith("session_")&&!key.startsWith("hud_")&&!key.startsWith("panel_")&&!key.equals("focus_applied")){
+            main.removeCallbacks(refresh);main.post(refresh);
+        }
     }
     private TextView title(int string){return GamingUi.text(this,getString(string),22,GamingUi.TEXT,true);}
     private void render(){

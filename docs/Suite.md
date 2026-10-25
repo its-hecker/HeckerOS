@@ -1,6 +1,6 @@
 # Hecker Suite behavior and device validation
 
-> Current behavior is documented in [the 25 October device review](device-review-2026-10-25.md). The older volume panel, status-bar popup, Pixel enhancement and launcher-switch descriptions below are historical.
+> Current follow-up behavior is documented in [the 25 October follow-up](device-followup-2026-10-25.md) and [earlier device review](device-review-2026-10-25.md). Memory Boost is removed. The older volume panel, status-bar popup, Pixel enhancement and launcher-switch descriptions below are historical.
 
 HeckerOS Android 17 targets coral first. The approved Settings design, two-column Suite cards, offline random Lottie greeting and central About page accompany the native App Lock, Motion Sense, Gaming and infrared camera pages. Suite also provides native Quick Settings controls, launcher selection, opt-in synchronized lyrics and the offline Lunaris theme picker.
 

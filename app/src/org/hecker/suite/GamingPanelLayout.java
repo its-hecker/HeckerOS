@@ -13,4 +13,11 @@ final class GamingPanelLayout {
         return new GamingPanelLayout(Math.min(landscape ? Math.min(304, Math.round(safeWidth * .36f)) : 328, availableWidth),
                 Math.min(landscape ? 352 : 472, availableHeight));
     }
+
+    static GamingPanelLayout resize(int safeWidth, int safeHeight, int width, int height) {
+        int maxWidth = Math.max(1, safeWidth - 16), maxHeight = Math.max(1, safeHeight - 20);
+        GamingPanelLayout initial = fit(safeWidth, safeHeight);
+        return new GamingPanelLayout(Math.max(Math.min(220, maxWidth), Math.min(maxWidth, width > 0 ? width : initial.width)),
+                Math.max(Math.min(240, maxHeight), Math.min(maxHeight, height > 0 ? height : initial.height)));
+    }
 }

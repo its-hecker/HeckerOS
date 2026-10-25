@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Compile native memory/launcher/volume/status-bar adapters and actual Binder interfaces.
+"""Compile the retained System UI restart receiver after Memory Boost retirement.
 
 Hidden declarations are facades reviewed against the immutable Android 17 inputs.
 This is not a services/SystemUI Soong build or a phone test.
@@ -113,9 +113,6 @@ def main():
         out=Path(temp);aidl=out/'aidl/android/os';aidl.mkdir(parents=True)
         for name in ['Bundle','ParcelFileDescriptor']:(aidl/(name+'.aidl')).write_text('package android.os; parcelable '+name+';')
         env=os.environ.copy();env['LD_LIBRARY_PATH']=str(sdk/'lib64')
-        for folder,name in [('memory','IHeckerMemoryService')]:
-            source=aidl/(name+'.aidl');source.write_text((ROOT/'framework'/folder/(name+'.aidl')).read_text())
-            run(sdk/'aidl','--lang=java','--out='+str(out/'generated'),'-I',out/'aidl',source,env=env)
         for name,source in FACADES.items():
             p=out/'facades'/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(source)
         for folder,name in [('values','strings.xml'),('values-zh-rCN','strings-zh.xml')]:
@@ -124,9 +121,9 @@ def main():
         run(sdk/'aapt2','compile','--dir',out/'res','-o',out/'res.zip')
         run(sdk/'aapt2','link','-I',sdk/'android.jar','--manifest',manifest,'--java',out/'generated','-o',out/'res.apk',out/'res.zip')
         interfaces=[native('packages/SystemUI/plugin/src/com/android/systemui/plugins/'+name+'.java') for name in ['VolumeDialog','VolumeDialogController']]
-        owned=[p for p in (ROOT/'framework/memory').glob('*.java')] + [ROOT/'framework/qs/HeckerSystemUiControl.java']
+        owned=[ROOT/'framework/qs/HeckerSystemUiControl.java']
         run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',sdk/'android-system.jar','-d',out/'classes',
             *sorted((out/'facades').rglob('*.java')),*sorted((out/'generated').rglob('*.java')),*interfaces,*owned)
-    print('Native memory policy, System UI control receiver and generated Binder APIs: PASS')
+    print('System UI restart receiver (Memory Boost retired): PASS')
     print('Full services/SystemUI Soong compilation and Coral testing remain required.')
 if __name__=='__main__':main()

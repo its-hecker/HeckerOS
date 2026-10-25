@@ -1,0 +1,5 @@
+<resources>
+  <string name="gaming_dashboard_width">Dashboard width</string>
+  <string name="gaming_dashboard_height">Dashboard height</string>
+  <string name="gaming_dashboard_resize">Resize dashboard. Drag to resize, or tap for width and height controls.</string>
+</resources>

@@ -61,8 +61,12 @@ java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
 java -cp "$suite_test_output" RetiredThemeSelectionTest
 
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
-    framework/memory/HeckerMemoryRules.java framework/launcher/HeckerHomeDoubleTap.java tests/InteractionPolicyTest.java
+    framework/launcher/HeckerHomeDoubleTap.java tests/InteractionPolicyTest.java
 java -cp "$suite_test_output" InteractionPolicyTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    aosp-launcher/src/com/android/launcher3/hecker/HeckerHomeSwipe.java tests/HeckerHomeSwipeTest.java
+java -cp "$suite_test_output" HeckerHomeSwipeTest
 
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     netlab/common/org/hecker/netlab/*.java tests/NetLabPolicyTest.java

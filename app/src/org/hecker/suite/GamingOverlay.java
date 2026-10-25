@@ -22,6 +22,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import java.util.List;
 
@@ -49,6 +50,7 @@ final class GamingOverlay {
     private GamingBoosterUi.GlassSlider volumeSlider,brightnessSlider;
     private int cpu=-1, gpu=-1, ram=-1, page;
     private WindowManager.LayoutParams hudParams;
+    private WindowManager.LayoutParams panelParams;
     private String fps = "—", temperature = "—", battery = "—", wifi = "—";
     private boolean visible, open, captureHidden;
     private List<GamingCatalog.App> picker;
@@ -97,6 +99,33 @@ final class GamingOverlay {
             if (wasOpen && oldPicker != null) showShortcutPicker(oldPicker);
             else if (content!=null) content.post(()->{if(content!=null)content.scrollTo(0,oldScroll);});
         }
+    }
+    /** Ordinary state changes must not remove the focused overlay window. */
+    void refresh() {
+        if (!open || content == null) return;
+        if (picker != null) { showShortcutPicker(picker); return; }
+        ScrollView target = content;
+        int scroll = target.getScrollY();
+        showPage();
+        target.post(() -> { if (open && content == target) target.scrollTo(0, scroll); });
+    }
+    private String sizeKey(String dimension) {
+        Rect screen=wm.getCurrentWindowMetrics().getBounds();
+        return "panel_"+dimension+(screen.width()>screen.height()?"_landscape":"_portrait");
+    }
+    private GamingPanelLayout panelSize(int width, int height) {
+        WindowMetrics metrics=wm.getCurrentWindowMetrics(); Rect screen=metrics.getBounds();
+        Insets bars=metrics.getWindowInsets().getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout());
+        float density=c.getResources().getDisplayMetrics().density;
+        return GamingPanelLayout.resize((int)((screen.width()-bars.left-bars.right)/density),
+                (int)((screen.height()-bars.top-bars.bottom)/density),width,height);
+    }
+    private void resize(int width, int height, boolean save) {
+        if (!open || panel == null || panelParams == null) return;
+        GamingPanelLayout bounds=panelSize(width,height);
+        panelParams.width=dp(bounds.width);panelParams.height=dp(bounds.height);
+        wm.updateViewLayout(panel,panelParams);
+        if(save)GamingPrefs.get(c).edit().putInt(sizeKey("width"),bounds.width).putInt(sizeKey("height"),bounds.height).apply();
     }
     private void buildHandle() {
         FrameLayout v = new FrameLayout(c);
@@ -168,9 +197,8 @@ final class GamingOverlay {
         Insets bars = metrics.getWindowInsets().getInsetsIgnoringVisibility(
                 WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
         float density = c.getResources().getDisplayMetrics().density;
-        GamingPanelLayout bounds = GamingPanelLayout.fit(
-                (int)((screen.width()-bars.left-bars.right)/density),
-                (int)((screen.height()-bars.top-bars.bottom)/density));
+        GamingPanelLayout bounds = panelSize(GamingPrefs.get(c).getInt(sizeKey("width"),0),
+                GamingPrefs.get(c).getInt(sizeKey("height"),0));
         LinearLayout shell = new LinearLayout(c) {
             @Override public boolean dispatchTouchEvent(MotionEvent event) {
                 if (event.getActionMasked() == MotionEvent.ACTION_OUTSIDE) { closePanel(); return true; }
@@ -190,21 +218,25 @@ final class GamingOverlay {
         shell.setElevation(dp(10)); shell.setFocusableInTouchMode(true);
         content=new ScrollView(c); content.setFillViewport(false); content.setVerticalScrollBarEnabled(false); content.setHorizontalScrollBarEnabled(false);
         shell.addView(content,new LinearLayout.LayoutParams(-1,0,1));
-        showPage(); buildDock(shell);
+        showPage(); buildDock(shell); buildResizeGrip(shell);
         WindowManager.LayoutParams p=params(dp(bounds.width),dp(bounds.height),true);
         p.x=dp(8)+(left()?bars.left:bars.right);p.y=(bars.top-bars.bottom)/2;
         try {
-            wm.addView(shell, p); panel=shell; shell.requestFocus();
+            wm.addView(shell, p); panel=shell; panelParams=p; shell.requestFocus();
             if (handle != null) handle.setVisibility(View.GONE);
             if (hud != null) hud.setVisibility(View.GONE);
             actions.panelChanged(true);
         } catch (RuntimeException e) { open=false; throw e; }
     }
     private void showPage() {
+        ScrollView target=content;
+        if (!open || target == null) return;
         clearTelemetry();
         LinearLayout main=GamingUi.column(c);
         if(page==1)buildSettings(main);else if(page==2)buildMonitor(main);else buildTools(main);
-        content.removeAllViews();content.addView(main);content.scrollTo(0,0);
+        // A delayed click may refer to a page from the previous game/window.
+        if (!open || content != target) return;
+        target.removeAllViews();target.addView(main);target.scrollTo(0,0);
         update(fps,temperature,battery,wifi);
     }
     private View iconButton(String icon, int title, Runnable action) {
@@ -212,7 +244,7 @@ final class GamingOverlay {
         v.addView(new GamingUi.Icon(c, icon, GamingUi.MUTED),
                 new FrameLayout.LayoutParams(dp(18), dp(18), Gravity.CENTER));
         v.setContentDescription(c.getString(title)); v.setFocusable(true);
-        v.setOnClickListener(w -> action.run()); return v;
+        v.setOnClickListener(w -> { if (open && w.isAttachedToWindow()) action.run(); }); return v;
     }
     private void buildTools(LinearLayout main) {
         Rect bounds = wm.getCurrentWindowMetrics().getBounds();
@@ -302,7 +334,7 @@ final class GamingOverlay {
         boolean selected=actions.gameMode()==mode,supported=actions.modeSupported(mode);
         TextView v=GamingUi.text(c,c.getString(label),12,selected?Color.WHITE:GamingBoosterUi.MUTED,false);
         v.setGravity(Gravity.CENTER);v.setSingleLine();v.setTextScaleX(.92f);v.setFocusable(true);v.setSelected(selected);
-        v.setBackground(GamingBoosterUi.mode(c,mode,selected));v.setAlpha(supported?1f:.46f);v.setOnClickListener(w->actions.gameMode(mode));
+        v.setBackground(GamingBoosterUi.mode(c,mode,selected));v.setEnabled(supported);v.setAlpha(supported?1f:.46f);v.setOnClickListener(w->{if(open&&w.isAttachedToWindow())actions.gameMode(mode);});
         LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(selected?34:27),selected?1.2f:1f);p.setMargins(dp(3),0,dp(3),0);row.addView(v,p);
     }
     private TextView tile(LinearLayout row,int label,boolean selected,Runnable action){
@@ -332,6 +364,8 @@ final class GamingOverlay {
     }
     private void buildSettings(LinearLayout main){
         title(main,R.string.gaming_booster_settings);
+        sizeControl(main,R.string.gaming_dashboard_width,true);
+        sizeControl(main,R.string.gaming_dashboard_height,false);
         LinearLayout charging=GamingUi.column(c);charging.setPadding(dp(16),dp(16),dp(16),dp(16));charging.setBackground(GamingBoosterUi.glass(c,0xa6000000,20));
         charging.addView(GamingUi.text(c,c.getString(R.string.gaming_bypass),14,Color.WHITE,false));GamingUi.gap(charging,10);
         int state=actions.bypassState();bypassText=GamingUi.text(c,c.getString(bypassMessage(state)),12,GamingBoosterUi.MUTED,false);charging.addView(bypassText);GamingUi.gap(charging,12);
@@ -339,6 +373,49 @@ final class GamingOverlay {
         tile(options,R.string.gaming_bypass_off,!pref("bypass"),()->{if(pref("bypass"))actions.toggle("bypass");});
         TextView on=tile(options,R.string.gaming_bypass_on,pref("bypass"),()->{if(!pref("bypass"))actions.toggle("bypass");});on.setEnabled(state>=0&&state!=5);on.setAlpha(state<0||state==5?.4f:1f);charging.addView(options);main.addView(charging);
         GamingUi.gap(main,12);main.addView(GamingUi.button(c,c.getString(R.string.gaming_open_library),false,()->{closePanel();actions.gameSpace();}));
+    }
+    private void sizeControl(LinearLayout main,int label,boolean width){
+        main.addView(GamingUi.text(c,c.getString(label),12,GamingBoosterUi.MUTED,false));
+        GamingPanelLayout max=panelSize(Integer.MAX_VALUE,Integer.MAX_VALUE);
+        GamingPanelLayout saved=panelSize(GamingPrefs.get(c).getInt(sizeKey("width"),0),GamingPrefs.get(c).getInt(sizeKey("height"),0));
+        int limit=width?max.width:max.height,minimum=Math.min(width?220:240,limit);
+        SeekBar bar=new SeekBar(c);bar.setContentDescription(c.getString(label));bar.setMin(minimum);bar.setMax(limit);
+        bar.setProgress(width?saved.width:saved.height);
+        bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            boolean tracking;
+            public void onStartTrackingTouch(SeekBar b){tracking=true;}
+            public void onProgressChanged(SeekBar b,int value,boolean user){
+                if(user&&panelParams!=null)resize(width?value:Math.round(panelParams.width/c.getResources().getDisplayMetrics().density),
+                        width?Math.round(panelParams.height/c.getResources().getDisplayMetrics().density):value,!tracking);
+            }
+            public void onStopTrackingTouch(SeekBar b){tracking=false;if(panelParams!=null)resize(Math.round(panelParams.width/c.getResources().getDisplayMetrics().density),Math.round(panelParams.height/c.getResources().getDisplayMetrics().density),true);}
+        });
+        main.addView(bar,new LinearLayout.LayoutParams(-1,dp(48)));
+    }
+    private void buildResizeGrip(LinearLayout shell){
+        TextView grip=GamingUi.text(c,"↔  ↕",16,GamingBoosterUi.MUTED,false);
+        grip.setGravity(Gravity.CENTER);grip.setFocusable(true);grip.setContentDescription(c.getString(R.string.gaming_dashboard_resize));
+        grip.setOnClickListener(v->{if(open){page=1;showPage();}});
+        grip.setOnTouchListener(new View.OnTouchListener(){
+            float x,y;int width,height;boolean moved;
+            public boolean onTouch(View view,MotionEvent e){
+                if(!open||panelParams==null)return false;
+                float density=c.getResources().getDisplayMetrics().density;
+                if(e.getActionMasked()==MotionEvent.ACTION_DOWN){x=e.getRawX();y=e.getRawY();width=panelParams.width;height=panelParams.height;moved=false;return true;}
+                if(e.getActionMasked()==MotionEvent.ACTION_MOVE){
+                    moved|=Math.hypot(e.getRawX()-x,e.getRawY()-y)>dp(8);
+                    if(moved)resize(Math.round((width+(left()?1:-1)*(e.getRawX()-x))/density),Math.round((height+2*(e.getRawY()-y))/density),false);
+                    return true;
+                }
+                if(e.getActionMasked()==MotionEvent.ACTION_UP){
+                    if(moved)resize(Math.round(panelParams.width/density),Math.round(panelParams.height/density),true);else view.performClick();
+                    return true;
+                }
+                if(e.getActionMasked()==MotionEvent.ACTION_CANCEL){resize(Math.round(width/density),Math.round(height/density),false);return true;}
+                return true;
+            }
+        });
+        shell.addView(grip,new LinearLayout.LayoutParams(-1,dp(48)));
     }
     private void buildMonitor(LinearLayout main){
         title(main,R.string.gaming_system_monitor);systemText=GamingUi.text(c,"",14,Color.WHITE,false);systemText.setPadding(dp(12),dp(12),dp(12),dp(12));main.addView(systemText);
@@ -365,7 +442,7 @@ final class GamingOverlay {
     private void clearTelemetry(){volumeSlider=null;brightnessSlider=null;fpsText=null;ramText=null;cpuBar=null;gpuBar=null;chart=null;recordText=null;systemText=null;bypassText=null;}
     void closePanel() {
         boolean wasOpen=open; open=false; picker=null;
-        remove(panel); panel=null; content=null; clearTelemetry();
+        remove(panel); panel=null; panelParams=null; content=null; clearTelemetry();
         if (handle != null) handle.setVisibility(visible && !captureHidden ? View.VISIBLE : View.GONE);
         if (hud != null) hud.setVisibility(visible && !captureHidden ? View.VISIBLE : View.GONE);
         if (wasOpen) actions.panelChanged(false);

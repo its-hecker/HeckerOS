@@ -8,13 +8,31 @@
   "src/com/android/launcher3/Workspace.java": [
     {
       "old": "    public boolean onTouchEvent(MotionEvent ev) {\n        if (isTrackpadMultiFingerSwipe(ev)) {\n            return false;\n        }\n        return super.onTouchEvent(ev);\n    }",
-      "new": "    public boolean onTouchEvent(MotionEvent ev) {\n        if (isTrackpadMultiFingerSwipe(ev)) {\n            return false;\n        }\n        if (com.android.launcher3.hecker.HeckerWorkspaceGestures.touch(this, ev,\n                !workspaceInModalState() && !isSwitchingState())) return true;\n        return super.onTouchEvent(ev);\n    }"
+      "new": "    public boolean onTouchEvent(MotionEvent ev) {\n        if (isTrackpadMultiFingerSwipe(ev)) {\n            return false;\n        }\n        boolean heckerHandled = com.android.launcher3.hecker.HeckerWorkspaceGestures.touch(this, ev,\n                mLauncher.isInState(NORMAL) && !workspaceInModalState() && !isSwitchingState());\n        return super.onTouchEvent(ev) || heckerHandled;\n    }",
+      "previous": [
+        "    public boolean onTouchEvent(MotionEvent ev) {\n        if (isTrackpadMultiFingerSwipe(ev)) {\n            return false;\n        }\n        if (com.android.launcher3.hecker.HeckerWorkspaceGestures.touch(this, ev,\n                !workspaceInModalState() && !isSwitchingState())) return true;\n        return super.onTouchEvent(ev);\n    }"
+      ]
+    },
+    {
+      "old": "        super.onAttachedToWindow();\n        mWallpaperOffset.setWindowToken(getWindowToken());",
+      "new": "        super.onAttachedToWindow();\n        com.android.launcher3.hecker.HeckerLauncherGlass.attach(this);\n        mWallpaperOffset.setWindowToken(getWindowToken());"
+    },
+    {
+      "old": "        super.onDetachedFromWindow();\n        mWallpaperOffset.setWindowToken(null);",
+      "new": "        com.android.launcher3.hecker.HeckerLauncherGlass.detach(this);\n        super.onDetachedFromWindow();\n        mWallpaperOffset.setWindowToken(null);"
+    },
+    {
+      "old": "        mWallpaperOffset.syncWithScroll();\n    }",
+      "new": "        mWallpaperOffset.syncWithScroll();\n        com.android.launcher3.hecker.HeckerLauncherGlass.offset(this, mWallpaperOffset.wallpaperOffsetForScroll(getScrollX()));\n    }"
     }
   ],
   "res/xml/launcher_preferences.xml": [
     {
       "old": "</androidx.preference.PreferenceScreen>",
-      "new": "    <SwitchPreference\n        android:key=\"hecker_double_tap_sleep\"\n        android:title=\"@string/hecker_double_tap_title\"\n        android:summary=\"@string/hecker_double_tap_summary\"\n        android:defaultValue=\"true\"\n        android:persistent=\"true\" />\n\n</androidx.preference.PreferenceScreen>"
+      "new": "    <SwitchPreference\n        android:key=\"hecker_double_tap_sleep\"\n        android:title=\"@string/hecker_double_tap_title\"\n        android:summary=\"@string/hecker_double_tap_summary\"\n        android:defaultValue=\"true\"\n        android:persistent=\"true\" />\n\n    <SwitchPreference android:key=\"hecker_swipe_down\" android:title=\"@string/hecker_swipe_title\" android:summary=\"@string/hecker_swipe_summary\" android:defaultValue=\"true\" />\n    <PreferenceCategory android:title=\"@string/hecker_glass_title\">\n        <ListPreference android:key=\"hecker_glass\" android:title=\"@string/hecker_glass_style\" android:entries=\"@array/hecker_glass_styles\" android:entryValues=\"@array/hecker_glass_values\" android:defaultValue=\"1\" android:summary=\"%s\" />\n        <SwitchPreference android:key=\"hecker_glass_dock\" android:title=\"@string/hecker_glass_dock\" android:defaultValue=\"true\" />\n        <SwitchPreference android:key=\"hecker_glass_folders\" android:title=\"@string/hecker_glass_folders\" android:defaultValue=\"true\" />\n        <SwitchPreference android:key=\"hecker_glass_search\" android:title=\"@string/hecker_glass_search\" android:defaultValue=\"true\" />\n        <SwitchPreference android:key=\"hecker_glass_widgets\" android:title=\"@string/hecker_glass_widgets\" android:defaultValue=\"true\" />\n        <ListPreference android:key=\"hecker_glass_corner_tl\" android:title=\"@string/hecker_glass_corner_tl\" android:entries=\"@array/hecker_glass_corners\" android:entryValues=\"@array/hecker_glass_corner_values\" android:defaultValue=\"28\" android:summary=\"%s\" />\n        <ListPreference android:key=\"hecker_glass_corner_tr\" android:title=\"@string/hecker_glass_corner_tr\" android:entries=\"@array/hecker_glass_corners\" android:entryValues=\"@array/hecker_glass_corner_values\" android:defaultValue=\"28\" android:summary=\"%s\" />\n        <ListPreference android:key=\"hecker_glass_corner_br\" android:title=\"@string/hecker_glass_corner_br\" android:entries=\"@array/hecker_glass_corners\" android:entryValues=\"@array/hecker_glass_corner_values\" android:defaultValue=\"28\" android:summary=\"%s\" />\n        <ListPreference android:key=\"hecker_glass_corner_bl\" android:title=\"@string/hecker_glass_corner_bl\" android:entries=\"@array/hecker_glass_corners\" android:entryValues=\"@array/hecker_glass_corner_values\" android:defaultValue=\"28\" android:summary=\"%s\" />\n    </PreferenceCategory>\n</androidx.preference.PreferenceScreen>",
+      "previous": [
+        "    <SwitchPreference\n        android:key=\"hecker_double_tap_sleep\"\n        android:title=\"@string/hecker_double_tap_title\"\n        android:summary=\"@string/hecker_double_tap_summary\"\n        android:defaultValue=\"true\"\n        android:persistent=\"true\" />\n\n</androidx.preference.PreferenceScreen>"
+      ]
     }
   ]
 }

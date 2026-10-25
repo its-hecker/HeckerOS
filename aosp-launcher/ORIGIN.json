@@ -8,6 +8,9 @@
   "features": [
     "Native Launcher3 workspace, widgets, folders, app drawer and settings",
     "Empty-workspace double-tap to sleep",
-    "Hecker Launcher name, caracal icon and settings translations"
+    "Hecker Launcher name, caracal icon and settings translations",
+    "Empty-workspace swipe down opens native notification shade / Quick QS",
+    "Native dock, folder, search and widget-container frosted/liquid glass with bounded background wallpaper processing",
+    "Per-container controls and independent corner radii"
   ]
 }

@@ -395,7 +395,7 @@ def main():
     paths.update(PIN_INPUTS)
     paths.update(INTERACTION_INPUTS)
     paths.add('frameworks/base/core/java/android/view/WindowManager.java')
-    paths.update('packages/apps/Launcher3/' + name for name in ('Android.bp', 'aconfig/Android.bp', 'AndroidManifest.xml', 'src/com/android/launcher3/LauncherFiles.java'))
+    paths.update('packages/apps/Launcher3/' + name for name in ('Android.bp', 'aconfig/Android.bp', 'AndroidManifest.xml', 'src/com/android/launcher3/LauncherFiles.java','src/com/android/launcher3/settings/SettingsActivity.java'))
     paths.update('packages/apps/Launcher3/' + name for name in json.loads((ROOT/'aosp-launcher/patches.json').read_text()))
     paths.add('frameworks/base/core/java/android/content/res/Resources.java')
     paths.add('frameworks/base/core/res/AndroidManifest.xml')
@@ -472,9 +472,11 @@ def main():
         launcher=folder/'packages/apps/Launcher3'
         manifest=(launcher/'generated/hecker-launcher/AndroidManifest.xml').read_text()
         assert 'android.permission.DEVICE_POWER' in manifest and 'TouchInteractionService' not in manifest
+        assert 'android.permission.EXPAND_STATUS_BAR' in manifest and 'android.permission.READ_WALLPAPER_INTERNAL' in manifest
         assert 'android:debuggable="true"' not in manifest
         assert 'SHARED_PREFERENCES_KEY = "com.android.launcher3.prefs"' in (launcher/'src/com/android/launcher3/LauncherFiles.java').read_text()
         assert 'HeckerWorkspaceGestures.touch(this, ev,' in (launcher/'src/com/android/launcher3/Workspace.java').read_text()
+        assert 'getPreferenceManager().setSharedPreferencesName(LauncherFiles.SHARED_PREFERENCES_KEY)' in (launcher/'src/com/android/launcher3/settings/SettingsActivity.java').read_text()
         assert 'hecker_double_tap_sleep' in (launcher/'res/xml/launcher_preferences.xml').read_text()
         assert (ROOT/'aosp-launcher/res/drawable/ic_launcher_home.xml').read_bytes()==(launcher/'generated/hecker-launcher/res/drawable/ic_launcher_home.xml').read_bytes()
         if args.sdk_cache:
@@ -483,7 +485,11 @@ def main():
                 fixture=output/'src/com/android/launcher3/LauncherFiles.java'
                 fixture.parent.mkdir(parents=True,exist_ok=True)
                 fixture.write_text('package com.android.launcher3;public class LauncherFiles{public static final String SHARED_PREFERENCES_KEY="com.android.launcher3.prefs";}')
-                subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',str(args.sdk_cache/'android.jar'),'-d',str(output/'classes'),str(fixture),str(ROOT/'aosp-launcher/src/com/android/launcher3/hecker/HeckerWorkspaceGestures.java')],check=True)
+                subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',str(args.sdk_cache/'android.jar'),'-d',str(output/'classes'),str(fixture),*map(str,sorted((ROOT/'aosp-launcher/src').rglob('*.java')))],check=True)
+                resources=launcher/'generated/hecker-launcher/res'
+                subprocess.run([str(args.sdk_cache/'aapt2'),'compile','--dir',str(resources),'-o',str(output/'res.zip')],check=True)
+                probe=output/'AndroidManifest.xml';probe.write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.android.launcher3"><application/></manifest>')
+                subprocess.run([str(args.sdk_cache/'aapt2'),'link','-I',str(args.sdk_cache/'android.jar'),'--manifest',str(probe),'-o',str(output/'launcher-res.apk'),str(output/'res.zip')],check=True)
         print('AOSP Hecker Launcher HOME module, branding, preference/gesture wiring, permission, retained flag/TAPL libraries and unchanged Pixel Recents: PASS')
         if args.sdk_cache:
             check_clock_plugins(folder, args.sdk_cache.resolve())

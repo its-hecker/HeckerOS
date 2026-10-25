@@ -39,6 +39,9 @@ class HeckerQsActions @Inject constructor(
     private fun migrate() {
         val user = ActivityManager.getCurrentUser()
         val resolver = context.contentResolver
+        val tiles = Settings.Secure.getStringForUser(resolver, "sysui_qs_tiles", user)
+        val retained = HeckerQsTileOrder.withoutMemoryBoost(tiles)
+        if (tiles != retained) Settings.Secure.putStringForUser(resolver, "sysui_qs_tiles", retained, user)
         // The fixed One UI slot shares Lunaris's real QSTile instance. Ensure
         // it is selected once for existing users as well as fresh installations.
         if (Settings.Secure.getIntForUser(resolver, "hecker_qs_dolby_migrated", 0, user) == 0) {
@@ -65,7 +68,6 @@ class HeckerQsActions @Inject constructor(
 
     companion object {
         @Volatile private var current: HeckerQsActions? = null
-        @JvmStatic fun boost() { current?.let { HeckerSystemUiControl.boost(it.context) } }
         @JvmStatic fun settings(action: String) { current?.open(Intent(action)) }
         fun dolby() {
             val owner = current ?: return
