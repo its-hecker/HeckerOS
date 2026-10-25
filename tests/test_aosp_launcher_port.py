@@ -61,7 +61,7 @@ class AospLauncherPortTests(unittest.TestCase):
             self.stage(rom)
             pairs = json.loads((ROOT / 'aosp-launcher/patches.json').read_text())
             # The exact formerly published HOME module, before the retained weather dependency.
-            (rom / SOURCE / 'Android.bp').write_text(pairs['Android.bp'][0]['previous'][-1])
+            (rom / SOURCE / 'Android.bp').write_text(pairs['Android.bp'][0]['previous'][0])
             manifest = rom / SOURCE / 'AndroidManifest.xml'
             generated = rom / SOURCE / 'generated/hecker-launcher/AndroidManifest.xml'
             generated.parent.mkdir(parents=True, exist_ok=True)

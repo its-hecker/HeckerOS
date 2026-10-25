@@ -17,7 +17,7 @@ from compile_sdk import fetch
 from customization_port import customization_plan
 from aosp_launcher_port import aosp_launcher_plan
 from prepare import replace_guarded
-from privapp_permissions import check_privapp_permissions
+from privapp_permissions import check_feature_privapp_permissions
 from check_pin_bouncer import PIN_INPUTS, check_pin_bouncer
 from check_game_mode_info import check_game_mode_info
 from check_ambient_charging import check_ambient_charging
@@ -448,8 +448,9 @@ def main():
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(cached_source(relative), target)
         before = snapshot(folder)
-        required = check_privapp_permissions(folder / 'frameworks/base/core/res/AndroidManifest.xml', ROOT)
-        print(f'Suite allowlist covers {len(required)} privileged permissions in the pinned Android framework')
+        required = check_feature_privapp_permissions(folder / 'frameworks/base/core/res/AndroidManifest.xml', ROOT)
+        print('Suite, NetLab and Launcher additions have system_ext allowlist decisions for '
+              + str(sum(map(len, required.values()))) + ' privileged permission requests in the pinned framework')
         plans = (customization_plan, aosp_launcher_plan)
         count = 0
         for plan in plans:
@@ -473,6 +474,7 @@ def main():
             assert len(re.findall(r'\bname:\s*"' + module + '"', source)) == 1, module
         launcher=folder/'packages/apps/Launcher3'
         manifest=(launcher/'generated/hecker-launcher/AndroidManifest.xml').read_text()
+        assert '"HeckerLauncherPermissions"' in (launcher/'Android.bp').read_text()
         assert 'android.permission.DEVICE_POWER' in manifest and 'TouchInteractionService' not in manifest
         assert 'android.permission.EXPAND_STATUS_BAR' in manifest and 'android.permission.READ_WALLPAPER_INTERNAL' in manifest
         assert 'android:debuggable="true"' not in manifest

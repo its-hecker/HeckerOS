@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 from aosp_launcher_port import aosp_launcher_plan
 from customization_port import customization_plan
 from recovery_port import recovery_plan
-from privapp_permissions import check_privapp_permissions
+from privapp_permissions import check_feature_privapp_permissions
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -312,7 +312,7 @@ def motion_plan(rom, revert=False):
 def plan(rom, revert=False):
     base = rom / FRAMEWORK
     if not revert:
-        check_privapp_permissions(base / "core/res/AndroidManifest.xml", ROOT)
+        check_feature_privapp_permissions(base / "core/res/AndroidManifest.xml", ROOT)
         for relative, markers in CAPABILITIES.items():
             content = (base / relative).read_text()
             if not all(marker in content for marker in markers):

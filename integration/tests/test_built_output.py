@@ -203,6 +203,25 @@ class BuiltOutputTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "NetLab permission"):
                     check_suite(root, output)
                 installed_netlab.write_bytes(original_netlab.read_bytes())
+            with self.assertRaisesRegex(ValueError, "HeckerLauncher.apk"):
+                check_suite(root, output)
+            launcher = output / "system_ext/priv-app/HeckerLauncher/HeckerLauncher.apk"
+            launcher.parent.mkdir(parents=True)
+            launcher.write_bytes(b"launcher fixture")
+            with self.assertRaisesRegex(ValueError, "Launcher permission"):
+                check_suite(root, output)
+            launcher_source = original.parent / "privapp-permissions-hecker-launcher.xml"
+            launcher_source.write_text("<permissions />")
+            misplaced = output / "product/etc/permissions/privapp-permissions-hecker-launcher.xml"
+            misplaced.parent.mkdir(parents=True)
+            misplaced.write_bytes(launcher_source.read_bytes())
+            with self.assertRaisesRegex(ValueError, "Launcher permission"):
+                check_suite(root, output)
+            launcher_allowlist = output / "system_ext/etc/permissions/privapp-permissions-hecker-launcher.xml"
+            launcher_allowlist.write_text("<wrong />")
+            with self.assertRaisesRegex(ValueError, "Launcher permission"):
+                check_suite(root, output)
+            launcher_allowlist.write_bytes(launcher_source.read_bytes())
             check_suite(root, output)
 
     def test_librepods_accepts_rom_signing_but_requires_source_payload_and_permissions(self):

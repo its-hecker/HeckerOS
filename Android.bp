@@ -60,6 +60,14 @@ android_app {
 }
 
 prebuilt_etc {
+    name: "HeckerLauncherPermissions",
+    src: "configs/privapp-permissions-hecker-launcher.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}
+
+prebuilt_etc {
     name: "HeckerNetLabPermissions",
     src: "configs/privapp-permissions-hecker-netlab.xml",
     filename_from_src: true,

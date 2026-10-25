@@ -42,7 +42,8 @@ def check(root):
     allow=ET.parse(root/'configs/privapp-permissions-hecker-netlab.xml').getroot()
     assert allow.find('privapp-permissions').get('package')=='org.hecker.netlab'
     assert {p.get('name') for p in allow.findall('.//permission')}=={
-        'android.permission.NETWORK_SETTINGS','android.permission.TETHER_PRIVILEGED'}
+        'android.permission.NETWORK_SETTINGS','android.permission.TETHER_PRIVILEGED',
+        'android.permission.SCHEDULE_EXACT_ALARM'}
     defaults=ET.parse(root/'configs/default-permissions-hecker-netlab.xml').getroot()
     assert defaults.tag=='exceptions' and len(defaults.findall('exception'))==1
     exception=defaults.find('exception')

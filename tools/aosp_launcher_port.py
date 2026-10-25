@@ -6,6 +6,16 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 SOURCE=Path('packages/apps/Launcher3')
+EXTRA_PERMISSIONS=(
+    'android.permission.DEVICE_POWER',
+    'android.permission.EXPAND_STATUS_BAR',
+    'android.permission.READ_WALLPAPER_INTERNAL',
+    'org.hecker.suite.permission.OPEN_FEATURE',
+)
+
+def add_permissions(manifest,permissions):
+    block=''.join('    <uses-permission android:name="'+name+'" />\n' for name in permissions)
+    return manifest.replace('    <application',block+'    <application',1)
 
 def aosp_launcher_plan(rom, replace, revert=False):
     source=rom/SOURCE
@@ -23,12 +33,10 @@ def aosp_launcher_plan(rom, replace, revert=False):
             target=replace(target,pair['old'],pair['new'],str(path),revert)
         if current!=target:changes[path]=target
     manifest=source/'AndroidManifest.xml'
-    expected=manifest.read_text().replace('android:debuggable="true"','android:debuggable="false"')
-    expected=expected.replace('    <application','    <uses-permission android:name="android.permission.DEVICE_POWER" />\n    <application',1)
-    previous_manifest=expected
-    expected=expected.replace('    <application','    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />\n    <uses-permission android:name="android.permission.READ_WALLPAPER_INTERNAL" />\n    <application',1)
-    glass_manifest=expected
-    expected=expected.replace('    <application','    <uses-permission android:name="org.hecker.suite.permission.OPEN_FEATURE" />\n    <application',1)
+    native=manifest.read_text().replace('android:debuggable="true"','android:debuggable="false"')
+    previous_manifest=add_permissions(native,EXTRA_PERMISSIONS[:1])
+    glass_manifest=add_permissions(native,EXTRA_PERMISSIONS[:3])
+    expected=add_permissions(native,EXTRA_PERMISSIONS)
     # Only the HOME variant exposes Studio and the local clock widget. Stock Launcher3 keeps its manifest.
     studio_components='''
         <activity android:name="com.android.launcher3.hecker.HeckerStudioActivity"

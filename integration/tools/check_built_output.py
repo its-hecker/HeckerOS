@@ -37,6 +37,14 @@ def check_suite(rom, output):
         installed = output / "system_ext/etc" / folder / name
         if not original.is_file() or not installed.is_file() or installed.read_bytes() != original.read_bytes():
             raise ValueError("Built system_ext image is missing the exact NetLab permission file: " + name)
+    launcher = output / "system_ext/priv-app/HeckerLauncher/HeckerLauncher.apk"
+    if not launcher.is_file() or launcher.stat().st_size == 0:
+        raise ValueError("Built system_ext image is missing HeckerLauncher.apk")
+    name = "privapp-permissions-hecker-launcher.xml"
+    original = rom / "vendor/hecker/floral/suite/configs" / name
+    installed = output / "system_ext/etc/permissions" / name
+    if not original.is_file() or not installed.is_file() or installed.read_bytes() != original.read_bytes():
+        raise ValueError("Built system_ext image is missing the exact Launcher permission allowlist")
 
 
 def check_motion_sense(output):
