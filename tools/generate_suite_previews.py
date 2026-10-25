@@ -15,7 +15,10 @@ def line(points,c,width=5):return [{'ty':'sh','ks':fixed({'i':[[0,0]]*len(points
 def group(shapes):return {'ty':'gr','it':shapes+[{'ty':'tr','p':fixed([0,0]),'a':fixed([0,0]),'s':fixed([100,100]),'r':fixed(0),'o':fixed(100)}]}
 def layer(n,shapes,rotate=False,pulse=False):return {'ddd':0,'ind':n,'ty':4,'nm':'Hecker vector '+str(n),'sr':1,'ks':{'o':fixed(100),'r':{'a':1,'k':[{'t':0,'s':[0],'e':[360],'o':{'x':[0],'y':[0]},'i':{'x':[1],'y':[1]}},{'t':120,'s':[360]}]} if rotate else fixed(0),'p':fixed([160,100,0]),'a':fixed([0,0,0]),'s':{'a':1,'k':[{'t':0,'s':[96,96,100],'e':[104,104,100],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},{'t':60,'s':[104,104,100],'e':[96,96,100],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},{'t':120,'s':[96,96,100]}]} if pulse else fixed([100,100,100])},'ao':0,'shapes':shapes,'ip':0,'op':120,'st':0,'bm':0}
 def write(name,shapes,extra=()):
-    d={'v':'5.7.4','fr':30,'ip':0,'op':120,'w':320,'h':200,'nm':'Hecker '+name,'ddd':0,'assets':[],'layers':[layer(1,shapes,pulse=True),*extra]}
+    # Lottie paints shape groups in reverse array order. Author back-to-front,
+    # then reverse once so opaque cards cannot cover their own controls.
+    layers=[layer(1,list(reversed(shapes)),pulse=True),*extra]
+    d={'v':'5.7.4','fr':30,'ip':0,'op':120,'w':320,'h':200,'nm':'Hecker '+name,'ddd':0,'assets':[],'layers':layers}
     (ROOT/'app/res/raw'/('suite_'+name+'.json')).write_text(json.dumps(d,separators=(',',':'))+'\n')
 def generate():
     for kind in ('oneui','hecker'):
@@ -33,8 +36,29 @@ def generate():
             s += [group(circle(-49,8,24,white)),group(circle(-17,8,24,cyan)),group(rect(-34,40,57,23,violet,11))]
             for x in (-48,-16,16,48):s += [group(circle(x,69,18,white))]
         write('qs_'+kind,s)
-    game = [group(rect(0,8,128,76,navy,28)),group(line([[-42,8],[-16,8]],cyan,7)),group(line([[-29,-5],[-29,21]],cyan,7)),group(circle(31,-2,12,violet)),group(circle(46,16,12,cyan)),group(circle(0,35,6,white))]
-    write('gaming',game,[layer(2,[group(circle(66,-52,7,cyan)),group(circle(-66,52,7,violet))],rotate=True)])
+    game = [group(rect(0,0,252,166,navy,22)),group(rect(-53,-57,108,25,[.13,.25,.36,1],12))]
+    # FPS pill, live-looking chart, quick actions and two matching sliders.
+    for points in [[[-94,-51],[-94,-64],[-85,-64]],[[-94,-58],[-87,-58]],
+                   [[-79,-51],[-79,-64],[-70,-64],[-70,-57],[-79,-57]],
+                   [[-55,-64],[-63,-64],[-63,-58],[-55,-58],[-55,-51],[-63,-51]]]:
+        game += [group(line(points,white,2))]
+    game += [group(rect(-25,-57,17,10,cyan,3)),group(rect(70,-57,63,9,violet,4))]
+    game += [group(rect(-25,-10,174,50,[.05,.10,.17,1],12)),group(line([[-99,3],[-77,-6],[-60,-2],[-42,-18],[-20,-9],[0,-25],[20,-14],[47,-23]],cyan,3))]
+    for x,c in [(-89,cyan),(-47,violet),(-5,white),(37,cyan)]:game += [group(rect(x,43,29,27,c,9))]
+    for x,c in [(84,cyan),(108,violet)]:
+        game += [group(rect(x,15,14,88,[.15,.23,.33,1],7)),group(rect(x,34,14,50,c,7))]
+    # Recognizable game controller attached to the dashboard, instead of bubbles.
+    game += [group(rect(-8,77,92,35,[.19,.28,.42,1],15)),group(line([[-39,77],[-19,77]],white,4)),group(line([[-29,67],[-29,87]],white,4)),group(circle(17,72,7,violet)),group(circle(28,82,7,cyan))]
+    scanning=group(rect(-24,-10,3,34,white,1));scanning['it'][-1]['p']={'a':1,'k':[{'t':0,'s':[-65,0],'e':[65,0],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},{'t':60,'s':[65,0],'e':[-65,0],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},{'t':120,'s':[-65,0]}]}
+    write('gaming',game+[scanning])
+    lyrics=[group(rect(0,0,118,178,navy,24)),group(rect(0,-65,31,6,white,3)),group(rect(0,-25,57,51,violet,12)),group(line([[-8,-13],[-8,-37],[13,-41],[13,-18]],white,4)),group(circle(-13,-12,11,white)),group(circle(8,-17,11,white))]
+    for y,w,c in [(18,74,white),(36,88,cyan),(54,68,white),(70,41,violet)]:lyrics += [group(rect(0,y,w,5,c,3))]
+    highlight=group(rect(0,36,92,14,cyan,5));highlight['it'][1]['o']=motion(8,28)
+    write('lyrics',lyrics+[highlight])
+    scanner=[group(rect(0,0,146,152,navy,34)),group(line([[-41,-43],[0,-61],[41,-43],[37,20],[0,55],[-37,20],[-41,-43]],cyan,4)),group(circle(0,-4,40,violet)),group(circle(0,-4,20,navy)),group(circle(0,-4,7,white))]
+    beam=group(rect(0,-4,58,3,white,1));beam['it'][-1]['p']={'a':1,'k':[{'t':0,'s':[0,-32],'e':[0,34],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},{'t':60,'s':[0,34],'e':[0,-32],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},{'t':120,'s':[0,-32]}]}
+    write('applock',scanner+[beam],[layer(2,[group(circle(86,-42,7,cyan)),group(circle(-86,42,7,violet))],rotate=True)])
+
     lock=[group(rect(0,10,80,64,navy,20)),group(line([[-21,-12],[-21,-37],[0,-49],[21,-37],[21,-12]],cyan,7)),group(circle(0,8,12,violet)),group(rect(0,20,5,19,violet,3))]
     write('lock',lock,[layer(2,[group(circle(68,-48,7,cyan)),group(circle(-68,48,7,violet))],rotate=True)])
     status=[]

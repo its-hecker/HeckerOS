@@ -52,7 +52,7 @@ def check_service_bindings(folder):
     declarations = context_declarations(policy / 'private/service_contexts')
     system_ext = context_declarations(ROOT / 'rom/sepolicy/private/service_contexts')
     services = [line.split()[0] for line in declarations + system_ext]
-    required = ('hecker_memory', 'hecker_launcher', 'hecker_game')
+    required = ('hecker_memory', 'hecker_game')
     for name in required:
         assert services.count(name) == 1, 'Missing or duplicate service context: ' + name
     game = [line for line in system_ext if line.split()[0] == 'hecker_game']
@@ -75,7 +75,7 @@ def check_service_bindings(folder):
             registry.write_text(json.dumps({k: v for k, v in bindings.items() if k != name}))
             missing = subprocess.run(command, capture_output=True, text=True)
             assert missing.returncode != 0 and "Service '" + name + "'" in missing.stderr, name
-    print('Merged gaming label is unique; native fuzzer checker accepts all three Java registrations: PASS')
+    print('Merged gaming label is unique; native fuzzer checker accepts both Java registrations: PASS')
 
 
 def check_statusbar_dispatch(folder, cache):
@@ -123,14 +123,14 @@ public class DispatchProbe {
   view.mIsStatusBarInteractiveSupplier=()->false;
   check(dispatch(view) && HeckerStatusBarPopup.calls==0 && view.nativeCalls==0);
   view.mIsStatusBarInteractiveSupplier=null;
-  check(!dispatch(view) && HeckerStatusBarPopup.calls==1 && view.nativeCalls==1);
+  check(!dispatch(view) && HeckerStatusBarPopup.calls==0 && view.nativeCalls==1);
   view.mIsStatusBarInteractiveSupplier=()->true;
   HeckerStatusBarPopup.consume=true;
-  check(dispatch(view) && HeckerStatusBarPopup.calls==2 && view.nativeCalls==1);
+  check(!dispatch(view) && HeckerStatusBarPopup.calls==0 && view.nativeCalls==2);
   HeckerStatusBarPopup.consume=false; view.nativeResult=true;
-  check(dispatch(view) && HeckerStatusBarPopup.calls==3 && view.nativeCalls==2);
+  check(dispatch(view) && HeckerStatusBarPopup.calls==0 && view.nativeCalls==3);
   view.nativeResult=false;
-  check(!dispatch(view) && HeckerStatusBarPopup.calls==4 && view.nativeCalls==3);
+  check(!dispatch(view) && HeckerStatusBarPopup.calls==0 && view.nativeCalls==4);
  }
 }''',
         }
@@ -150,4 +150,4 @@ public class DispatchProbe {
                                str(out / 'DispatchProbe.java')], check=True)
         subprocess.run(['java', '-cp', classpath,
                         'com.android.systemui.statusbar.phone.DispatchProbe'], check=True)
-    print('Native status-bar dispatch and Kotlin caller compile; interactivity, popup and normal touch paths: PASS')
+    print('Native status-bar dispatch and Kotlin caller compile; interactivity and native touch dispatch without popup interception: PASS')

@@ -1,5 +1,7 @@
 # Native interaction features
 
+> Current behavior is documented in [the 25 October device review](device-review-2026-10-25.md). The older volume panel, status-bar popup, Pixel enhancement and launcher-switch descriptions below are historical.
+
 This checkpoint extends `feat/suite-polish`, retaining Pixel Launcher as the only
 shipped HOME/Recents provider and keeping the tracked `out/.find-ignore` NDK-cache
 build fix. Rebuild the ROM after syncing the pinned Suite revision.

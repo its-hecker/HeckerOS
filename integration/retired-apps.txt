@@ -1,4 +1,3 @@
-HeckerLauncher
 HeckerLauncherRecentsOverlay
 Launcher3
 Launcher3QuickStep

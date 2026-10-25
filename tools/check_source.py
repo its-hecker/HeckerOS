@@ -52,7 +52,7 @@ def main():
     assert native.find("uses-permission").get(A + "name") == permission.get(A + "name")
     assert not manifest.findall(".//category[@" + A + "name='android.intent.category.LAUNCHER']")
     services = {node.get(A + "name"): node for node in app.findall("service")}
-    tiles = {".SuiteTileService", ".MotionSenseTileService", ".FaceUnlockTileService"}
+    tiles = {".SuiteTileService", ".MotionSenseTileService", ".FaceUnlockTileService", ".MemoryBoostTileService"}
     assert set(services) == {".GamingService", ".GamingRecordingService"} | tiles
     for name, node in services.items():
         assert node.get(A + "exported") == ("true" if name in tiles else "false")

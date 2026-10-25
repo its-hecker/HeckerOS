@@ -28,6 +28,7 @@ public final class HeckerMemoryPolicy {
     private final Context context;
     private final Handler worker;
     private volatile Map<Integer,Entry> entries=Collections.emptyMap();
+    private volatile Set<Integer> loadedUsers=Collections.emptySet();
     // Access only while holding both AMS locks; weak keys do not retain dead processes.
     private final Map<ProcessRecord,Integer> originalAdj=new WeakHashMap<>();
     private static final class Entry {
@@ -53,39 +54,54 @@ public final class HeckerMemoryPolicy {
         IntentFilter packages=new IntentFilter(Intent.ACTION_PACKAGE_ADDED);packages.addAction(Intent.ACTION_PACKAGE_REMOVED);
         packages.addAction(Intent.ACTION_PACKAGE_CHANGED);packages.addDataScheme("package");
         owner.context.registerReceiver(new BroadcastReceiver(){@Override public void onReceive(Context c,Intent i){owner.worker.post(owner::reload);}},packages,Context.RECEIVER_NOT_EXPORTED);
-        owner.context.getSystemService(android.app.role.RoleManager.class).addOnRoleHoldersChangedListenerAsUser(
-                command -> owner.worker.post(command), (role,user) -> owner.worker.post(owner::reload), UserHandle.ALL);
         owner.worker.post(owner::reload);
+        try {
+            android.app.role.RoleManager roles=owner.context.getSystemService(android.app.role.RoleManager.class);
+            if(roles!=null)roles.addOnRoleHoldersChangedListenerAsUser(
+                    command -> owner.worker.post(command), (role,user) -> owner.worker.post(owner::reload), UserHandle.ALL);
+        } catch(RuntimeException unavailable) { Slog.w(TAG,"Role listener unavailable; policies refresh before each request",unavailable); }
     }
     private void reload(){
-        Map<Integer,Entry> updated=new HashMap<>();PackageManager pm=context.getPackageManager();
-        try{
-            for(UserHandle handle:context.getSystemService(UserManager.class).getUserHandles(true)){
-                int user=handle.getIdentifier();Context userContext=context.createContextAsUser(handle,0);
+        Map<Integer,Entry> updated=new HashMap<>();Set<Integer> ready=new HashSet<>();
+        List<UserHandle> users;
+        try { users=context.getSystemService(UserManager.class).getUserHandles(true); }
+        catch(RuntimeException unavailable) { users=Collections.singletonList(UserHandle.of(ActivityManager.getCurrentUser())); }
+        for(UserHandle handle:users){
+            int user=handle.getIdentifier();
+            try {
+                Context userContext=context.createContextAsUser(handle,0);
                 PackageManager userPm=userContext.getPackageManager();
                 String raw=Settings.Secure.getStringForUser(context.getContentResolver(),HeckerMemoryRules.SETTING,user);
-                JSONObject rules=raw==null||raw.length()>128*1024?new JSONObject():new JSONObject(raw);
+                JSONObject rules=new JSONObject();
+                if(raw!=null&&raw.length()<=128*1024)try{rules=new JSONObject(raw);}
+                catch(org.json.JSONException bad){Slog.w(TAG,"Invalid saved rules; using Android defaults for user "+user,bad);}
                 Set<String> protectedApps=new HashSet<>();
-                Intent home=new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
-                ResolveInfo resolved=userPm.resolveActivity(home,PackageManager.MATCH_DEFAULT_ONLY);
+                ResolveInfo resolved=userPm.resolveActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME),PackageManager.MATCH_DEFAULT_ONLY);
                 if(resolved!=null&&resolved.activityInfo!=null)protectedApps.add(resolved.activityInfo.packageName);
                 String ime=Settings.Secure.getStringForUser(context.getContentResolver(),Settings.Secure.DEFAULT_INPUT_METHOD,user);
                 ComponentName input=ime==null?null:ComponentName.unflattenFromString(ime);
                 if(input!=null)protectedApps.add(input.getPackageName());
                 android.app.role.RoleManager roles=userContext.getSystemService(android.app.role.RoleManager.class);
+                if(roles==null)throw new IllegalStateException("Role service unavailable");
                 for(String role:new String[]{android.app.role.RoleManager.ROLE_DIALER,android.app.role.RoleManager.ROLE_SMS,
                         android.app.role.RoleManager.ROLE_ASSISTANT,android.app.role.RoleManager.ROLE_EMERGENCY})
                     if(roles.isRoleAvailable(role))protectedApps.addAll(roles.getRoleHolders(role));
+                Map<Integer,Entry> userEntries=new HashMap<>();
                 for(ApplicationInfo app:userPm.getInstalledApplications(0)){
                     if(!UserHandle.isApp(app.uid)||(app.flags&ApplicationInfo.FLAG_PERSISTENT)!=0
                             ||HeckerMemoryRules.protectedPackage(app.packageName)||protectedApps.contains(app.packageName))continue;
-                    String[] shared=pm.getPackagesForUid(app.uid);
+                    // Package visibility and UID lookups must use the same Android user.
+                    String[] shared=userPm.getPackagesForUid(app.uid);
                     if(shared==null||shared.length!=1||!app.packageName.equals(shared[0]))continue;
-                    updated.put(app.uid,new Entry(app,HeckerMemoryRules.validated(rules.optInt(app.packageName))));
+                    userEntries.put(app.uid,new Entry(app,HeckerMemoryRules.validated(rules.optInt(app.packageName))));
                 }
+                updated.putAll(userEntries);ready.add(user);
+            } catch(RuntimeException unavailable) {
+                // An unavailable/locked profile must not erase the foreground user's list.
+                Slog.w(TAG,"App policy unavailable for user "+user,unavailable);
             }
-        }catch(Exception unavailable){Slog.w(TAG,"Unable to reload app policy; retaining normal Android behavior",unavailable);updated.clear();}
-        entries=Collections.unmodifiableMap(updated);
+        }
+        entries=Collections.unmodifiableMap(updated);loadedUsers=Collections.unmodifiableSet(ready);
         synchronized(am.mGlobalLock){synchronized(am.mProcLock){
             for(ProcessRecord process:am.mProcessList.getLruProcessesLOSP())applyResident(process);
             am.updateOomAdjLocked(OOM_ADJ_REASON_RESTRICTION_CHANGE);
@@ -94,6 +110,7 @@ public final class HeckerMemoryPolicy {
         if(updated.values().stream().anyMatch(e->(e.flags&HeckerMemoryRules.BLOCK_BACKGROUND)!=0&&HeckerMemoryRules.clean(e.flags)))
             worker.postDelayed(background,15_000);
     }
+
     private Entry entry(ApplicationInfo info){
         Entry e=info==null?null:entries.get(info.uid);
         return e!=null&&e.app.packageName.equals(info.packageName)?e:null;
@@ -185,8 +202,23 @@ public final class HeckerMemoryPolicy {
     }
     private final IHeckerMemoryService.Stub binder=new IHeckerMemoryService.Stub(){
         @Override public String[] manageablePackages(){
-            enforce(true);int user=UserHandle.getUserId(Binder.getCallingUid());
-            return entries.values().stream().filter(e->UserHandle.getUserId(e.app.uid)==user).map(e->e.app.packageName).toArray(String[]::new);
+            Bundle status=state();
+            if(!status.getBoolean("available"))throw new IllegalStateException("Memory service unavailable");
+            return status.getStringArray("packages");
+        }
+        @Override public Bundle state(){
+            enforce(true);final int user=UserHandle.getUserId(Binder.getCallingUid());
+            long identity=Binder.clearCallingIdentity();
+            try{
+                FutureTask<Bundle> task=new FutureTask<>(()->{
+                    reload();Bundle result=new Bundle();
+                    result.putBoolean("available",loadedUsers.contains(user)&&user==ActivityManager.getCurrentUser());
+                    result.putStringArray("packages",entries.values().stream()
+                            .filter(e->UserHandle.getUserId(e.app.uid)==user).map(e->e.app.packageName).toArray(String[]::new));
+                    return result;
+                });worker.post(task);return task.get(4,TimeUnit.SECONDS);
+            }catch(Exception unavailable){Slog.w(TAG,"App policy query failed",unavailable);return new Bundle();}
+            finally{Binder.restoreCallingIdentity(identity);}
         }
         @Override public Bundle boost(){
             enforce(false);int user=ActivityManager.getCurrentUser();
@@ -194,6 +226,8 @@ public final class HeckerMemoryPolicy {
             try{
                 FutureTask<Bundle> task=new FutureTask<>(()->{
                     if(user!=ActivityManager.getCurrentUser())return new Bundle();
+                    reload();
+                    if(!loadedUsers.contains(user))return new Bundle();
                     return clean(user,null,CACHED_APP_MIN_ADJ);
                 });worker.post(task);
                 return task.get(4,TimeUnit.SECONDS);

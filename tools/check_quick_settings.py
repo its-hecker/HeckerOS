@@ -18,8 +18,8 @@ from compile_sdk import fetch
 
 ROOT = Path(__file__).resolve().parents[1]
 JAVA = {
-    'com/android/systemui/hecker/HeckerStatusBarPopup.java': '''package com.android.systemui.hecker;
-public final class HeckerStatusBarPopup { public static void start(android.content.Context c) {} public static void boost(android.content.Context c) {} }''',
+    'com/android/systemui/hecker/HeckerSystemUiControl.java': '''package com.android.systemui.hecker;
+public final class HeckerSystemUiControl { public static void start(android.content.Context c) {} public static void boost(android.content.Context c) {} }''',
 
     'android/util/PathParser.java': '''package android.util;
 public class PathParser {
@@ -249,7 +249,7 @@ def main():
         for name, content in {**KOTLIN, 'ReferenceRoute.kt': scene_probe()}.items():
             target = out / 'kotlin' / name
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)
-        java_sources = list((out / 'java').rglob('*.java')) + list((ROOT / 'framework/qs').glob('*.java'))
+        java_sources = list((out / 'java').rglob('*.java')) + [p for p in (ROOT / 'framework/qs').glob('*.java') if p.name != 'HeckerSystemUiControl.java']
         java_sources += sorted((ROOT / 'framework/lyrics').glob('*.java'))
         java_sources += [ROOT / 'framework/themes/ThemeIconNames.java', ROOT / 'framework/applock/HeckerAppLockPrompt.java']
         run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', sdk / 'android-system.jar',

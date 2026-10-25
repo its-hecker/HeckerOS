@@ -1,0 +1,5 @@
+<resources>
+    <string name="derived_app_name">Hecker Launcher</string>
+    <string name="hecker_double_tap_title">Double tap to sleep</string>
+    <string name="hecker_double_tap_summary">Double tap empty space on the home screen to turn off the display</string>
+</resources>

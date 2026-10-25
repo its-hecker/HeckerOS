@@ -5,3 +5,4 @@ ro.heckeros.maintainer   u:object_r:build_prop:s0 exact string
 ro.heckeros.device       u:object_r:build_prop:s0 exact string
 ro.heckeros.build_type   u:object_r:build_prop:s0 exact string
 ro.heckeros.dev_usb_adb  u:object_r:build_prop:s0 exact bool
+sys.hecker.game_charge_access u:object_r:hecker_game_control_prop:s0 exact string

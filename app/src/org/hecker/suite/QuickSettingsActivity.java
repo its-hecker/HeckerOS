@@ -34,11 +34,6 @@ public final class QuickSettingsActivity extends Activity {
             card.setOnClickListener(v -> select(layout));
             page.addView(card);
         }
-        android.widget.Switch volume=new android.widget.Switch(this);
-        volume.setText(R.string.volume_style_title);volume.setTextColor(getColor(R.color.hecker_foreground));
-        volume.setChecked(android.provider.Settings.Secure.getInt(getContentResolver(),"hecker_oneui_volume",1)!=0);
-        volume.setOnCheckedChangeListener((v,checked)->android.provider.Settings.Secure.putInt(getContentResolver(),"hecker_oneui_volume",checked?1:0));
-        page.addView(volume);page.addView(Ui.text(this,getString(R.string.volume_style_summary),13,false));
         Ui.scroll(this, page);
     }
     private void select(int layout) {

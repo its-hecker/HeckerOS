@@ -70,7 +70,7 @@ public final class SuiteActivity extends Activity {
         addRow(tile(R.string.ir_title,R.string.ir_summary,R.drawable.ic_face_unlock,v->open("InfraredCameraActivity")),
                 tile(R.string.capture_title,R.string.capture_summary,R.drawable.ic_qs,v->open("CaptureSettingsActivity")));
         addRow(tile(R.string.memory_title,R.string.memory_summary,R.drawable.ic_memory,v->open("MemoryBoostActivity")),
-                tile(R.string.pixel_launcher_title,R.string.pixel_launcher_summary,R.drawable.ic_launcher_enhanced,v->open("PixelLauncherSettingsActivity")));
+                tile(R.string.launcher_title,R.string.launcher_summary,R.drawable.ic_launcher_enhanced,v->open("LauncherSettingsActivity")));
         LinearLayout integrity=Ui.card(this);
         integrity.addView(Ui.text(this,getString(R.string.integrity_title),17,true));
         integrity.addView(Ui.text(this,getString(R.string.integrity_summary),12,false));

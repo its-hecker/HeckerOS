@@ -1,0 +1,5 @@
+<resources>
+    <string name="derived_app_name">Hecker 桌面</string>
+    <string name="hecker_double_tap_title">双击息屏</string>
+    <string name="hecker_double_tap_summary">双击主屏幕空白处关闭屏幕</string>
+</resources>

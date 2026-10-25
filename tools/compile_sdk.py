@@ -87,7 +87,7 @@ def main():
             parcelable = output / "aidl/android/os" / (name + ".aidl")
             parcelable.parent.mkdir(parents=True, exist_ok=True)
             parcelable.write_text("package android.os; parcelable " + name + ";\n")
-        for folder, name in (("memory", "IHeckerMemoryService"), ("launcher", "IHeckerLauncherService")):
+        for folder, name in (("memory", "IHeckerMemoryService"),):
             source = output / "aidl/android/os" / (name + ".aidl")
             source.write_text((ROOT / "framework" / folder / (name + ".aidl")).read_text())
             run(cache / "aidl", "--lang=java", "--out=" + str(output / "feature-aidl"),

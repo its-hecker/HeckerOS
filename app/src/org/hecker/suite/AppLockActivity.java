@@ -100,7 +100,7 @@ public final class AppLockActivity extends Activity {
 
     private void authenticate() {
         final int request = ++generation;
-        animation.show(R.raw.suite_scan, true);
+        animation.show(R.raw.suite_applock, true);
         summary.setText(R.string.authenticate_subtitle);
         cancellation = new CancellationSignal();
         new BiometricPrompt.Builder(this)

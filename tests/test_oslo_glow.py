@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class OsloGlowTests(unittest.TestCase):
-    def test_native_glow_moves_between_shade_and_non_touchable_window_without_leaks(self):
+    def test_native_glow_keeps_one_attached_window_through_gesture_callbacks(self):
         files = {
             'android/content/Context.java': '''package android.content;
 public class Context { public Object service; public String getPackageName(){return "com.google.oslo";}
@@ -22,7 +22,14 @@ public class Context { public Object service; public String getPackageName(){ret
             'android/view/Gravity.java': 'package android.view; public class Gravity {public static final int TOP=48;}',
             'android/view/View.java': '''package android.view; import android.content.Context;
 public class View { public Object parent; final Context context; public View(Context c){context=c;}
- public Context getContext(){return context;} public Object getParent(){return parent;} }''',
+ public Context getContext(){return context;} public Object getParent(){return parent;}
+ public boolean attached;public boolean isAttachedToWindow(){return attached;}
+ public interface OnAttachStateChangeListener{void onViewAttachedToWindow(View v);void onViewDetachedFromWindow(View v);}
+ public final java.util.List<OnAttachStateChangeListener> listeners=new java.util.ArrayList<>();
+ public void addOnAttachStateChangeListener(OnAttachStateChangeListener l){listeners.add(l);}
+ public void removeOnAttachStateChangeListener(OnAttachStateChangeListener l){listeners.remove(l);}
+ public void attach(){attached=true;for(var l:new java.util.ArrayList<>(listeners))l.onViewAttachedToWindow(this);}
+ }''',
             'android/view/ViewGroup.java': '''package android.view; import android.content.Context; import java.util.*;
 public class ViewGroup extends View {public final List<View> children=new ArrayList<>(); public ViewGroup(Context c){super(c);}
  public static class LayoutParams{public LayoutParams(int w,int h){}}
@@ -52,26 +59,32 @@ public class GlowTest {
  static void check(boolean ok){if(!ok)throw new AssertionError();}
  static class Windows implements WindowManager {int adds,removes;boolean fail;View current;LayoutParams last;
  public void addView(View v,LayoutParams p){if(fail){fail=false;throw new IllegalStateException("unavailable");}check(current==null&&v.parent==null);adds++;current=v;last=p;v.parent=new Object();}
- public void removeViewImmediate(View v){check(current==v);removes++;current=null;v.parent=null;} }
+ public void removeViewImmediate(View v){check(current==v);removes++;current=null;v.parent=null;v.attached=false;} }
  static class Lock implements KeyguardStateController {boolean showing=true;Set<Callback> callbacks=new HashSet<>();
  public boolean isShowing(){return showing;}public void addCallback(Callback c){callbacks.add(c);}public void removeCallback(Callback c){callbacks.remove(c);}
  void show(boolean b){showing=b;for(var c:new ArrayList<>(callbacks))c.onKeyguardShowingChanged();}}
  public static void main(String[] args){
  Context context=new Context();Windows windows=new Windows();context.service=windows;Lock lock=new Lock();ViewGroup root=new ViewGroup(context);OsloOverlay plugin=new OsloOverlay();
- View host=HeckerOsloOverlayHost.rootFor(plugin,context,root,lock);check(host!=root&&host.getParent()==root);check(((ViewGroup)host).children.size()==1);
+ View host=HeckerOsloOverlayHost.rootFor(plugin,context,root,lock);
+ check(host!=root&&windows.current==host&&root.children.isEmpty());
+ check(((ViewGroup)host).children.size()==1);
+ int[] setup={0};HeckerOsloOverlayHost.whenAttached(plugin,host,()->{check(host.isAttachedToWindow());setup[0]++;});
+ check(setup[0]==0);host.attach();check(setup[0]==1&&host.listeners.isEmpty());
  int[] forwarded={0};var callback=HeckerOsloOverlayHost.callbackFor(plugin,()->forwarded[0]++);
- lock.show(false);check(windows.current==null);plugin.held=true;callback.onHoldStatusBarOpenChange();
+ plugin.held=true;callback.onHoldStatusBarOpenChange();
  check(!HeckerOsloOverlayHost.holdsNativeShade(plugin));
- check(windows.current==host&&windows.last.type==2041&&windows.last.trusted);check((windows.last.flags&24)==24);check(root.children.isEmpty());
- callback.onHoldStatusBarOpenChange();check(windows.adds==1);lock.show(true);check(windows.current==null&&host.getParent()==root);
- check(HeckerOsloOverlayHost.holdsNativeShade(plugin));
- lock.show(false);check(windows.adds==2);plugin.held=false;callback.onHoldStatusBarOpenChange();check(windows.current==null&&host.getParent()==root);
- windows.fail=true;plugin.held=true;callback.onHoldStatusBarOpenChange();check(windows.current==null&&host.getParent()==root);
- callback.onHoldStatusBarOpenChange();check(windows.current==host);int before=forwarded[0];HeckerOsloOverlayHost.disconnect(plugin);
- check(windows.current==null&&root.children.isEmpty()&&lock.callbacks.isEmpty());callback.onHoldStatusBarOpenChange();check(forwarded[0]==before);
+ check(windows.last.type==2041&&windows.last.trusted&&(windows.last.flags&24)==24);
+ for(int i=0;i<10;i++){lock.show(i%2==0);plugin.held=i%3==0;callback.onHoldStatusBarOpenChange();check(host.isAttachedToWindow()&&windows.current==host);}
+ check(windows.adds==1&&windows.removes==0);
+ HeckerOsloOverlayHost.disconnect(plugin);check(windows.current==null&&lock.callbacks.isEmpty());
+ int before=forwarded[0];callback.onHoldStatusBarOpenChange();check(forwarded[0]==before);
+ View pending=HeckerOsloOverlayHost.rootFor(plugin,context,root,lock);
+ HeckerOsloOverlayHost.whenAttached(plugin,pending,()->{throw new AssertionError("setup after disconnect");});
+ HeckerOsloOverlayHost.disconnect(plugin);pending.attach();check(pending.listeners.isEmpty());
+ windows.fail=true;check(HeckerOsloOverlayHost.rootFor(plugin,context,root,lock)==root);
  OverlayPlugin other=()->true;check(HeckerOsloOverlayHost.rootFor(other,context,root,lock)==root);
  HeckerOsloOverlayHost.disconnect(plugin);check(windows.adds==windows.removes);
- System.out.println("Native Oslo glow: locked/AOD host, unlocked non-touchable window, repeated callbacks, failure fallback and disconnect cleanup PASS");
+ System.out.println("Native Oslo glow: setup waits for attachment; no reparent during callbacks; pending setup cancelled; no shade hold; failure fallback and disconnect cleanup PASS");
  }}''',
         }
         with tempfile.TemporaryDirectory() as temporary:

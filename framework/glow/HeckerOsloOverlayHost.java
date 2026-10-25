@@ -16,10 +16,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-/** Keeps Oslo's actual glow visible when the scene shade root is hidden on HOME/apps. */
+/** Oslo owns one attached, non-interactive surface for its entire plugin lifetime. */
 public final class HeckerOsloOverlayHost {
-    // @hide WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL in Android 17.
-    // Its value is checked against the pinned framework by check_native_ports.
     private static final int GLOW_WINDOW_TYPE = 2041;
     private static final Map<OverlayPlugin, Host> HOSTS = new IdentityHashMap<>();
 
@@ -30,31 +28,44 @@ public final class HeckerOsloOverlayHost {
                 || !(root instanceof ViewGroup)) return root;
         disconnect(plugin);
         try {
-            Host host = new Host(plugin, (ViewGroup) root, keyguard);
+            Host host = new Host(root.getContext());
             HOSTS.put(plugin, host);
             return host.container;
-        } catch (RuntimeException unavailable) {
-            Log.w("HeckerOsloGlow", "Gesture host unavailable; retaining native host", unavailable);
+        } catch (ReflectiveOperationException | RuntimeException unavailable) {
+            Log.w("HeckerOsloGlow", "Gesture surface unavailable; retaining native host", unavailable);
             return root;
         }
+    }
+
+    /** GlowFeedbackView reads its ViewRootImpl during setup and setVisibility. */
+    public static void whenAttached(OverlayPlugin plugin, View root, Runnable setup) {
+        Host host = HOSTS.get(plugin);
+        Runnable ready = () -> {
+            if (root.isAttachedToWindow() && (host == null || !host.destroyed)) setup.run();
+        };
+        if (root.isAttachedToWindow()) { ready.run(); return; }
+        View.OnAttachStateChangeListener listener = new View.OnAttachStateChangeListener() {
+            public void onViewAttachedToWindow(View view) {
+                view.removeOnAttachStateChangeListener(this);
+                if (host != null) host.pending = null;
+                ready.run();
+            }
+            public void onViewDetachedFromWindow(View view) { }
+        };
+        if (host != null) host.pending = listener;
+        root.addOnAttachStateChangeListener(listener);
     }
 
     public static OverlayPlugin.Callback callbackFor(OverlayPlugin plugin, OverlayPlugin.Callback callback) {
         Host host = HOSTS.get(plugin);
         if (host == null) return callback;
-        host.nativeCallback = callback;
-        return () -> {
-            if (host.destroyed) return;
-            host.refresh();
-            // The native callback queries holdsNativeShade(), so an unlocked
-            // feedback surface cannot expand the notification/keyguard window.
-            callback.onHoldStatusBarOpenChange();
-        };
+        // Never detach/reparent from the animation-start callback. The following
+        // native setVisibility immediately registers luma sampling on this root.
+        return () -> { if (!host.destroyed) callback.onHoldStatusBarOpenChange(); };
     }
 
     public static boolean holdsNativeShade(OverlayPlugin plugin) {
-        Host host = HOSTS.get(plugin);
-        return plugin.holdStatusBarOpen() && (host == null || host.keyguard.isShowing());
+        return !HOSTS.containsKey(plugin) && plugin.holdStatusBarOpen();
     }
 
     public static void disconnect(OverlayPlugin plugin) {
@@ -63,85 +74,43 @@ public final class HeckerOsloOverlayHost {
     }
 
     private static final class Host {
-        final OverlayPlugin plugin;
-        final ViewGroup original;
         final FrameLayout container;
         final WindowManager windows;
-        final KeyguardStateController keyguard;
         final Handler handler = new Handler(Looper.getMainLooper());
-        boolean detached;
+        View.OnAttachStateChangeListener pending;
         volatile boolean destroyed;
-        OverlayPlugin.Callback nativeCallback;
-        final KeyguardStateController.Callback callback = new KeyguardStateController.Callback() {
-            @Override public void onKeyguardShowingChanged() {
-                refresh();
-                // Release a hold acquired on the lock screen as soon as it unlocks.
-                if (nativeCallback != null) nativeCallback.onHoldStatusBarOpenChange();
-            }
-        };
 
-        Host(OverlayPlugin plugin, ViewGroup original, KeyguardStateController keyguard) {
-            this.plugin = plugin;
-            this.original = original;
-            this.keyguard = keyguard;
-            Context context = original.getContext();
+        Host(Context context) throws ReflectiveOperationException {
             Context overlayContext = context.createWindowContext(GLOW_WINDOW_TYPE, null);
             windows = overlayContext.getSystemService(WindowManager.class);
+            if (windows == null) throw new IllegalStateException("No window manager");
             container = new FrameLayout(overlayContext);
             container.setClipChildren(false);
             container.setClipToPadding(false);
-            // Oslo's addViews inserts its shader and feedback at index one.
-            container.addView(new View(context));
-            original.addView(container, new ViewGroup.LayoutParams(-1, -1));
-            keyguard.addCallback(callback);
-        }
-
-        void refresh() {
-            if (Looper.myLooper() != Looper.getMainLooper()) { handler.post(this::refresh); return; }
-            if (destroyed) return;
-            boolean separate = !keyguard.isShowing() && plugin.holdStatusBarOpen();
-            if (separate == detached || windows == null) return;
-            if (separate) {
-                original.removeView(container);
-                WindowManager.LayoutParams params = new WindowManager.LayoutParams(-1, -1,
-                        GLOW_WINDOW_TYPE,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                        PixelFormat.TRANSLUCENT);
-                params.gravity = Gravity.TOP;
-                params.setFitInsetsTypes(0);
-                params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-                params.setTitle("HeckerOsloGestureFeedback");
-                try {
-                    // This trusted SystemUI surface must not block Android's
-                    // obscured-touch protection for applications beneath it.
-                    WindowManager.LayoutParams.class.getMethod("setTrustedOverlay").invoke(params);
-                    windows.addView(container, params); detached = true;
-                }
-                catch (ReflectiveOperationException | RuntimeException unavailable) {
-                    Log.w("HeckerOsloGlow", "Standalone gesture surface unavailable", unavailable);
-                    original.addView(container, new ViewGroup.LayoutParams(-1, -1));
-                }
-            } else {
-                removeWindow();
-                original.addView(container, new ViewGroup.LayoutParams(-1, -1));
-            }
-        }
-
-        void removeWindow() {
-            if (!detached) return;
-            try { windows.removeViewImmediate(container); }
-            catch (IllegalArgumentException alreadyRemoved) { }
-            detached = false;
+            // The plugin inserts its own shader/feedback children at index one.
+            container.addView(new View(overlayContext));
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams(-1, -1,
+                    GLOW_WINDOW_TYPE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                            | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                            | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                    PixelFormat.TRANSLUCENT);
+            params.gravity = Gravity.TOP;
+            params.setFitInsetsTypes(0);
+            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+            params.setTitle("HeckerOsloGestureFeedback");
+            WindowManager.LayoutParams.class.getMethod("setTrustedOverlay").invoke(params);
+            windows.addView(container, params);
         }
 
         void destroy() {
             destroyed = true;
-            handler.removeCallbacksAndMessages(null);
-            keyguard.removeCallback(callback);
-            removeWindow();
-            if (container.getParent() instanceof ViewGroup) ((ViewGroup) container.getParent()).removeView(container);
+            if (pending != null) container.removeOnAttachStateChangeListener(pending);
+            pending = null;
+            // Drain already queued Oslo animation messages before releasing its root.
+            handler.post(() -> {
+                try { windows.removeViewImmediate(container); }
+                catch (IllegalArgumentException alreadyRemoved) { }
+            });
         }
     }
 }

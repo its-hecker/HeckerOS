@@ -27,7 +27,7 @@ def retire(rom):
         return subprocess.check_output(["git", "-C", str(source), *args], stderr=subprocess.PIPE)
     urls = git("config", "--get-regexp", r"^remote\..*\.url$").decode()
     if "android.googlesource.com/platform/packages/apps/Launcher3" in urls:
-        print("Retaining AOSP Launcher3 build libraries; Pixel Launcher remains the shipped HOME.")
+        print("Retaining AOSP Launcher3 for Hecker Launcher; Pixel Launcher remains the Recents provider.")
         return None
     if OLD not in urls and NEW not in urls.lower():
         raise ValueError("Preserving an unfamiliar launcher repository; review its source before migrating")

@@ -13,3 +13,9 @@ on boot
 on property:sys.boot_completed=1
     chown system system /sys/class/power_supply/charger/game_charge_disable
     chmod 0660 /sys/class/power_supply/charger/game_charge_disable
+
+# system_server requests only these fixed DAC permissions; no arbitrary path/value.
+on property:sys.hecker.game_charge_access=1
+    chown system system /sys/class/power_supply/charger/game_charge_disable
+    chmod 0660 /sys/class/power_supply/charger/game_charge_disable
+    setprop sys.hecker.game_charge_access 0

@@ -62,7 +62,7 @@ class CustomizationPortTests(unittest.TestCase):
                            if line.strip() and not line.lstrip().startswith('#')]
                 game = [record for record in records if record[0] == 'hecker_game']
                 self.assertEqual(game, [['hecker_game', 'u:object_r:hecker_game_service:s0']])
-                for name in ('hecker_memory', 'hecker_launcher'):
+                for name in ('hecker_memory',):
                     self.assertEqual(sum(record[0] == name for record in records), 1)
                 self.assertIn('# unrelated policy comment', path.read_text())
                 self.assertEqual({}, customization_plan(folder, replace_guarded))
@@ -110,7 +110,7 @@ class CustomizationPortTests(unittest.TestCase):
             self.write(customization_plan(folder,replace_guarded))
             path=folder/SYSTEM_SERVER
             pairs=json.loads((ROOT/'framework/customization-patches.json').read_text())[SYSTEM_SERVER]
-            path.write_text(path.read_text().replace(pairs[1]['new'],pairs[1]['previous'][-1]))
+            path.write_text(path.read_text().replace(pairs[1]['new'],next(value for value in pairs[1]['previous'] if 'StartHeckerGameService' not in value)))
             changes=customization_plan(folder,replace_guarded)
             self.assertEqual({path},set(changes));self.write(changes)
             self.assertEqual(1,path.read_text().count('startService(com.android.server.hecker.HeckerGameService.class)'))
@@ -138,8 +138,9 @@ class CustomizationPortTests(unittest.TestCase):
             relative='frameworks/base/services/core/java/com/android/server/am/HeckerMemoryPolicy.java'
             path=folder/relative
             current=path.read_text()
-            # The first published adapter used an inaccessible PSC getter.
-            previous=current.replace('.getProcState()', '.getCurProcState()')
+            # Exercise the actual reviewed published bytes, rather than synthesizing
+            # a getter change on a newer implementation that was never published.
+            previous=(ROOT/'tests/fixtures/memory-policy-586695c.snapshot').read_text()
             self.assertNotEqual(previous,current)
             path.write_text(previous)
             changes=customization_plan(folder,replace_guarded)
@@ -150,3 +151,19 @@ class CustomizationPortTests(unittest.TestCase):
             path.write_text(previous+'\n// local maintainer edit\n')
             with self.assertRaises(ValueError):customization_plan(folder,replace_guarded)
             self.assertEqual(previous+'\n// local maintainer edit\n',path.read_text())
+
+    def test_prefix_upgrade_removes_old_fade_tail_in_both_qs_paths(self):
+        patches=json.loads((ROOT/'framework/customization-patches.json').read_text())
+        for relative,pairs in patches.items():
+            if not relative.endswith(('FromShadeToQuickSettingsTransition.kt','FromQuickQuickSettingsToQuickSettings.kt')):continue
+            pair=pairs[0]
+            for previous in pair['previous']:
+                with self.subTest(path=relative,previous=previous), tempfile.TemporaryDirectory() as temporary:
+                    folder=Path(temporary);self.stage(folder)
+                    path=folder/relative
+                    other='\n'.join(x['old'] for x in pairs[1:])
+                    path.write_text(previous+'\n'+other)
+                    self.write(customization_plan(folder,replace_guarded))
+                    result=path.read_text()
+                    self.assertEqual(result.count('fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader)'),1)
+                    self.assertEqual({},customization_plan(folder,replace_guarded))

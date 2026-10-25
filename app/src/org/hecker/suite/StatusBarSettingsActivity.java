@@ -34,11 +34,15 @@ public final class StatusBarSettingsActivity extends Activity {
             public void onStopTrackingTouch(android.widget.SeekBar bar) {}
         });
         battery.addView(scale); page.addView(battery);
-        android.widget.Switch popup=new android.widget.Switch(this);
-        popup.setText(R.string.status_popup_title);popup.setTextColor(getColor(R.color.hecker_foreground));
-        popup.setChecked(android.provider.Settings.Secure.getInt(getContentResolver(),"hecker_status_popup",1)!=0);
-        popup.setOnCheckedChangeListener((v,checked)->android.provider.Settings.Secure.putInt(getContentResolver(),"hecker_status_popup",checked?1:0));
-        page.addView(popup);page.addView(Ui.text(this,getString(R.string.status_popup_summary),13,false));
+        Ui.actionCard(this, page, R.string.sysui_restart_title, R.string.sysui_restart_summary,
+                v -> new android.app.AlertDialog.Builder(this)
+                        .setTitle(R.string.sysui_restart_title)
+                        .setMessage(R.string.sysui_restart_confirm)
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setPositiveButton(R.string.sysui_restart_title, (dialog, which) ->
+                                sendBroadcast(new android.content.Intent("org.hecker.suite.RESTART_SYSTEMUI")
+                                        .setPackage("com.android.systemui")))
+                        .show());
         Ui.scroll(this,page);
     }
     @Override public boolean onOptionsItemSelected(MenuItem item) {

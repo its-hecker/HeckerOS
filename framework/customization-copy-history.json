@@ -144,13 +144,15 @@
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAppLockPrompt.java": [
     "d305f4c5bea66831588683b5e5622c40a4fceb20",
-    "5b8aeda3e162095793fd55b8f3bdce62e6d589c0"
+    "5b8aeda3e162095793fd55b8f3bdce62e6d589c0",
+    "7689e35ce945577d8f45b9c811f5ec7c5c3d4aa0"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsActions.kt": [
     "f24bd2d7d77a57affc18d8944ad1af045f1d76ad",
     "f9922202306d54f47f5063becc6bca845788dac8",
     "d5d47d363c5e035a9b40e4b35b2e73d0ba2a310f",
-    "1c0d49c1bbba994ea49625b15a4e2c707e1f50b5"
+    "1c0d49c1bbba994ea49625b15a4e2c707e1f50b5",
+    "f31ee21bdf49cdf6c1255af54b1a4f648a3e177d"
   ],
   "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_bluetooth.xml": [
     "1e62f74248882595a9cdf304ca6d659d5d2b370e"
@@ -166,10 +168,12 @@
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerOsloOverlayHost.java": [
     "74c24cebc2ca7542343b1d03eb90f66e9fc6119d",
-    "ca0f0041a99b820f3b491a7ed9b5029848ac6338"
+    "ca0f0041a99b820f3b491a7ed9b5029848ac6338",
+    "d3f9b261aa1182594bf009eb6dc0564f15e6309c"
   ],
   "frameworks/base/services/core/java/com/android/server/am/HeckerMemoryPolicy.java": [
-    "1edde411f5a743f23e1b59c084f62f5848fc3ab2"
+    "1edde411f5a743f23e1b59c084f62f5848fc3ab2",
+    "d227b01c6f2184cda032d30c91d5673a2515f02d"
   ],
   "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_strings.xml": [
     "d086944d48156bce7c4bbcf46e806f1eba761b25",
@@ -180,9 +184,13 @@
     "305001f4caeae8be8b9c99e895e0f97843daf364"
   ],
   "frameworks/base/services/core/java/com/android/server/hecker/HeckerGameService.java": [
-    "4ac29633cb0d964407cdd5122e3af935b80f06b1"
+    "4ac29633cb0d964407cdd5122e3af935b80f06b1",
+    "8d3936fc633f77a76b79558202f8555d8965acbc"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsTileOrder.java": [
     "7ea4d759f6ae2e93e69f68e4ed3c84cc0455f0bb"
+  ],
+  "frameworks/base/core/java/android/os/IHeckerMemoryService.aidl": [
+    "bcc20e11b2e2716d2c916ba748e910e47cca20a8"
   ]
 }

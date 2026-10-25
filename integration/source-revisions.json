@@ -247,12 +247,19 @@
       "risingos": {
         "repository": "RisingOS-Revived/android_frameworks_base",
         "revision": "0afe5c947f9c7e61c86e123ac99f870d72464c1a",
-        "notes": "Volume compact/expanded interaction and status-bar action inspiration; independently implemented for Android 17 controllers."
+        "notes": "Volume compact/expanded interaction and status-bar action inspiration; independently implemented for Android 17 controllers.",
+        "status": "retired after the 25 October device review; retained here as provenance only"
       },
       "pixel_launcher_enhanced": {
         "repository": "Mahmud0808/PixelLauncherEnhanced",
         "revision": "a0e8e98cd338739aac82ec3bf7b044ee51ba1bdb",
-        "notes": "Inspected Xposed gestures and glass, including per-corner radii and wallpaper zoom fix. Native empty-home double-tap and glass adapters are original Apache-2.0 code, not an Xposed port."
+        "notes": "Inspected Xposed gestures and glass, including per-corner radii and wallpaper zoom fix. Native empty-home double-tap and glass adapters are original Apache-2.0 code, not an Xposed port.",
+        "status": "retired after the 25 October device review; retained here as provenance only"
+      },
+      "aosp_launcher3": {
+        "repository": "https://android.googlesource.com/platform/packages/apps/Launcher3",
+        "revision": "c612e6ece389f21c40f8cb9cd9a4b44239f00009",
+        "notes": "Native HOME-only Hecker Launcher module. Pixel remains the Recents/Quickstep provider."
       }
     }
   },

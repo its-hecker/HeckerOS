@@ -9,7 +9,7 @@ import re
 import shutil
 import sys
 import xml.etree.ElementTree as ET
-from launcher_port import launcher_plan
+from aosp_launcher_port import aosp_launcher_plan
 from customization_port import customization_plan
 from recovery_port import recovery_plan
 from privapp_permissions import check_privapp_permissions
@@ -339,6 +339,7 @@ def plan(rom, revert=False):
         changes[helper] = expected
     changes.update(motion_plan(rom, revert))
     changes.update(customization_plan(rom, replace_guarded, revert, pending_changes=changes))
+    changes.update(aosp_launcher_plan(rom, replace_guarded, revert))
     changes.update(recovery_plan(rom, revert))
     return changes
 

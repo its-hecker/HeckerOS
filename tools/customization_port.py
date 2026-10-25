@@ -34,9 +34,16 @@ def customization_plan(rom, replace, revert=False, *, pending_changes=None):
             # Upgrade only explicitly reviewed earlier adapters. A prepared
             # checkout must not require reverting every unrelated native port.
             if not revert:
-                for previous in pair.get("previous", []):
-                    if previous in target and pair["new"] not in target:
-                        target = replace(target, previous, pair["new"], str(path))
+                # A short historical adapter can be a prefix of a longer one.
+                # Replacing it first leaves the old tail in the file (including
+                # a second scene alpha transformation). Prefer the complete form.
+                for previous in sorted(pair.get("previous", []), key=len, reverse=True):
+                    if previous in target and (pair["new"] not in target
+                            or len(previous) > len(pair["new"])):
+                        if target.count(previous) != 1:
+                            raise ValueError("Duplicate historical adapter: " + str(path))
+                        target = target.replace(previous, pair["new"], 1)
+                        break
             target = replace(target, pair["old"], pair["new"], str(path), revert)
         if not revert and relative == SYSTEM_SERVER:
             verify_theme_service_startup(target)
@@ -55,4 +62,14 @@ def customization_plan(rom, replace, revert=False, *, pending_changes=None):
         if revert:
             if path.exists(): changes[path] = None
         elif not path.exists() or path.read_bytes() != expected: changes[path] = expected
+    retired_file = ROOT / "framework/customization-retired-copies.json"
+    if retired_file.exists():
+        for relative, identities in json.loads(retired_file.read_text()).items():
+            path = rom / relative
+            if not path.exists(): continue
+            current = path.read_bytes()
+            identity = hashlib.sha1(b"blob " + str(len(current)).encode() + b"\0" + current).hexdigest()
+            if identity not in identities:
+                raise ValueError("Preserving an unfamiliar retired adapter: " + str(path))
+            changes[path] = None
     return changes

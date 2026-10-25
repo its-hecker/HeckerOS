@@ -33,6 +33,9 @@ public final class HeckerAppLockPrompt {
             public void onViewAttachedToWindow(View v) { ring.start(); }
             public void onViewDetachedFromWindow(View v) { ring.stop(); }
         };
+        // Native Face ID's smiley is purely decorative. Keep its authentication
+        // callbacks/accessibility, and draw our scanner above the hidden image.
+        sensor.setImageAlpha(0);
         ACTIVE.put(sensor, ring); sensor.setForeground(ring);
         sensor.addOnAttachStateChangeListener(ring.listener);
         if (sensor.isAttachedToWindow()) ring.start();
@@ -73,7 +76,7 @@ public final class HeckerAppLockPrompt {
             if (!isVisible()) return;
             if (!ValueAnimator.areAnimatorsEnabled() || animator != null || status == 1) { invalidateSelf(); return; }
             animator = ValueAnimator.ofFloat(0f, 1f);
-            animator.setDuration(1400); animator.setRepeatCount(ValueAnimator.INFINITE);
+            animator.setDuration(2200); animator.setRepeatCount(ValueAnimator.INFINITE);
             animator.addUpdateListener(a -> { phase = (Float) a.getAnimatedValue(); invalidateSelf(); });
             animator.start();
         }
@@ -88,19 +91,35 @@ public final class HeckerAppLockPrompt {
             Rect b = getBounds(); float size = Math.min(b.width(), b.height());
             if (size <= 0) return;
             float x=b.exactCenterX(), y=b.exactCenterY(), radius=size*.46f;
-            paint.setAlpha(opacity); paint.setStyle(Paint.Style.FILL); paint.setColor(0xff14273d);
-            if (icon != null) c.drawCircle(x,y,radius,paint);
+            paint.setStyle(Paint.Style.FILL); paint.setColor(0xff0b1728); paint.setAlpha(opacity);
+            c.drawCircle(x,y,radius,paint);
             paint.setStyle(Paint.Style.STROKE); paint.setStrokeCap(Paint.Cap.ROUND); paint.setStrokeWidth(size*.045f);
             paint.setColor(status==1?0xff60e5ae:status==2?0xffff8e9c:0xff55d9ff);
+            paint.setAlpha(opacity);
             float a=phase*360f;
-            c.drawArc(x-radius,y-radius,x+radius,y+radius,status==1?-90:a,status==1?360:225,false,paint);
+            for(int i=0;i<4;i++)c.drawArc(x-radius,y-radius,x+radius,y+radius,
+                    status==1?i*90f-90:a+i*90f, status==1?80:54,false,paint);
             if(status==1) {
                 Path check=new Path();check.moveTo(x-size*.16f,y);check.lineTo(x-size*.03f,y+size*.12f);check.lineTo(x+size*.19f,y-size*.12f);
                 c.drawPath(check,paint);
             } else {
-                paint.setColor(0xffb19aff); paint.setStrokeWidth(size*.02f);
-                c.drawArc(x-radius*.83f,y-radius*.83f,x+radius*.83f,y+radius*.83f,-a,100,false,paint);
+                paint.setColor(status==2?0xffff8e9c:0xffb19aff); paint.setAlpha(opacity); paint.setStrokeWidth(size*.018f);
+                c.drawArc(x-radius*.79f,y-radius*.79f,x+radius*.79f,y+radius*.79f,-a,140,false,paint);
+                c.drawArc(x-radius*.79f,y-radius*.79f,x+radius*.79f,y+radius*.79f,-a+180,140,false,paint);
                 if(icon!=null){int inset=Math.round(size*.24f);icon.setBounds(b.left+inset,b.top+inset,b.right-inset,b.bottom-inset);icon.setAlpha(opacity);icon.draw(c);}
+                else {
+                    // Angular shield, iris aperture, and a moving scan line.
+                    Path shield=new Path();shield.moveTo(x,y-size*.25f);shield.lineTo(x+size*.23f,y-size*.15f);
+                    shield.lineTo(x+size*.18f,y+size*.12f);shield.lineTo(x,y+size*.27f);
+                    shield.lineTo(x-size*.18f,y+size*.12f);shield.lineTo(x-size*.23f,y-size*.15f);shield.close();
+                    paint.setColor(status==2?0xffff8e9c:0xff55d9ff);paint.setAlpha(opacity);paint.setStrokeWidth(size*.025f);c.drawPath(shield,paint);
+                    c.drawCircle(x,y,size*.095f,paint);
+                    paint.setStyle(Paint.Style.FILL);c.drawCircle(x,y,size*.028f,paint);paint.setStyle(Paint.Style.STROKE);
+                    float scan=y+size*.17f*(float)Math.sin(phase*2*Math.PI);
+                    paint.setAlpha(opacity/2);c.drawLine(x-size*.15f,scan,x+size*.15f,scan,paint);
+                    if(status==2){paint.setAlpha(opacity);c.drawLine(x-size*.055f,y-size*.055f,x+size*.055f,y+size*.055f,paint);
+                        c.drawLine(x-size*.055f,y+size*.055f,x+size*.055f,y-size*.055f,paint);}
+                }
             }
         }
         @Override public void setAlpha(int a) { opacity=a; invalidateSelf(); }

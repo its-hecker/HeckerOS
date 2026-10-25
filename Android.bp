@@ -16,7 +16,6 @@ android_app {
     srcs: ["app/src/**/*.java"],
     exclude_srcs: ["app/src/org/hecker/suite/SuiteActivity.java",
         "app/src/org/hecker/suite/LauncherController.java",
-        "app/src/org/hecker/suite/LauncherSettingsActivity.java",
         "app/src/org/hecker/suite/AnimationSettingsActivity.java"],
     resource_dirs: ["app/res"],
     asset_dirs: ["app/assets"],

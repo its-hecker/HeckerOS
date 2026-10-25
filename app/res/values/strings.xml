@@ -43,4 +43,11 @@
     <string name="back">Back</string>
     <string name="integrity_title">Play Integrity</string>
     <string name="integrity_summary">Manage the Google Play compatibility profile</string>
+    <string name="sysui_restart_title">Restart System UI</string>
+    <string name="sysui_restart_summary">Apply battery size and reload the status bar. The screen briefly returns to the lock screen.</string>
+    <string name="sysui_restart_confirm">Restart System UI now? Your current app stays open.</string>
+    <string name="hecker_launcher_native_summary">Built from Android 17 Launcher3 with widgets, folders, the app drawer and Hecker home gestures.</string>
+    <string name="hecker_launcher_native_settings">Home screen settings, notification dots and double tap to sleep</string>
+    <string name="launcher_native_home_summary">Choose Hecker Launcher, Pixel Launcher or another installed home app</string>
+    <string name="launcher_pixel_retained">Pixel Launcher stays installed and handles Recents and system gestures.</string>
 </resources>

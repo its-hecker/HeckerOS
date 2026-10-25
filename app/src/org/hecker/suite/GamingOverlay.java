@@ -188,7 +188,7 @@ final class GamingOverlay {
         shell.setBackground(GamingBoosterUi.glass(c,0xc90b101b,20));
         shell.setPadding(dp(10),dp(10),dp(10),dp(8));
         shell.setElevation(dp(10)); shell.setFocusableInTouchMode(true);
-        content=new ScrollView(c); content.setFillViewport(false); content.setVerticalScrollBarEnabled(true); content.setScrollbarFadingEnabled(false); content.setVerticalFadingEdgeEnabled(true); content.setFadingEdgeLength(dp(16));
+        content=new ScrollView(c); content.setFillViewport(false); content.setVerticalScrollBarEnabled(false); content.setHorizontalScrollBarEnabled(false);
         shell.addView(content,new LinearLayout.LayoutParams(-1,0,1));
         showPage(); buildDock(shell);
         WindowManager.LayoutParams p=params(dp(bounds.width),dp(bounds.height),true);

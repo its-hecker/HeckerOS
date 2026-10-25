@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="launcher_title">Launcher</string>
-    <string name="launcher_summary">Hecker Launcher or Pixel Launcher. Make home your own.</string>
+    <string name="launcher_summary">Hecker Launcher customization and default home app</string>
     <string name="hecker_launcher">Hecker Launcher</string>
     <string name="pixel_launcher">Pixel Launcher</string>
     <string name="launcher_intro">Your home screen, your way. Based on Infinity-X Launcher for Android 17.</string>

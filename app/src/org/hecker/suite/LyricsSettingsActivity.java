@@ -14,9 +14,9 @@ public final class LyricsSettingsActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         LinearLayout page = Ui.page(this, R.string.lyrics_title);
+        Ui.hero(this, page, R.raw.suite_lyrics, R.string.lyrics_description);
         LinearLayout card = Ui.card(this);
         card.addView(Ui.text(this, getString(R.string.lyrics_title), 25, true));
-        card.addView(Ui.text(this, getString(R.string.lyrics_description), 16, false));
         Switch enabled = new Switch(this);
         enabled.setText(R.string.lyrics_enable);
         enabled.setTextColor(getColor(R.color.hecker_foreground));

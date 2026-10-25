@@ -6,6 +6,6 @@
     <string name="gaming_hero_title">Your next level.</string>
     <string name="gaming_hero_summary">Your games, your space. Tune the session and stay in flow.</string>
     <string name="gaming_profile_fallback" formatted="false">ROM profiles use up to 90 FPS at native resolution for Performance, or 30 FPS with 80% render scale for Battery saver when allowed. Games may impose lower limits.</string>
-    <string name="gaming_bypass_permission">Charging control found; access is unavailable. Reboot after updating the ROM.</string>
+    <string name="gaming_bypass_permission">Charging control found. Restoring access; try again in a few seconds.</string>
     <string name="gaming_bypass_missing">Charging pause needs the HeckerOS Coral kernel.</string>
 </resources>

@@ -94,14 +94,6 @@
   "frameworks/base/core/java/com/android/internal/hecker/HeckerMemoryRules.java": "framework/memory/HeckerMemoryRules.java",
   "frameworks/base/core/java/android/os/IHeckerMemoryService.aidl": "framework/memory/IHeckerMemoryService.aidl",
   "frameworks/base/services/core/java/com/android/server/am/HeckerMemoryPolicy.java": "framework/memory/HeckerMemoryPolicy.java",
-  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerStatusBarPopup.java": "framework/statusbar/HeckerStatusBarPopup.java",
-  "frameworks/base/core/java/android/os/IHeckerLauncherService.aidl": "framework/launcher/IHeckerLauncherService.aidl",
-  "frameworks/base/core/java/com/android/internal/hecker/HeckerHomeDoubleTap.java": "framework/launcher/HeckerHomeDoubleTap.java",
-  "frameworks/base/core/java/com/android/internal/hecker/HeckerLauncherEnhancements.java": "framework/launcher/HeckerLauncherEnhancements.java",
-  "frameworks/base/services/core/java/com/android/server/hecker/HeckerLauncherService.java": "framework/launcher/HeckerLauncherService.java",
-  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerVolumeSlider.java": "framework/volume/HeckerVolumeSlider.java",
-  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerVolumeDialog.java": "framework/volume/HeckerVolumeDialog.java",
-  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerBrightnessControl.java": "framework/volume/HeckerBrightnessControl.java",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMediaCard.kt": "framework/qs/HeckerMediaCard.kt",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerGlassQuickSettings.kt": "framework/qs/HeckerGlassQuickSettings.kt",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerKeyguardBrand.java": "framework/qs/HeckerKeyguardBrand.java",
@@ -110,5 +102,6 @@
   "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_dolby.xml": "framework/qs/icons/hecker_qs_dolby.xml",
   "frameworks/base/packages/SystemUI/res/drawable/hecker_caracal_mark.xml": "framework/qs/icons/hecker_caracal_mark.xml",
   "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_headphones.xml": "framework/qs/icons/hecker_qs_headphones.xml",
-  "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_waveform.xml": "framework/qs/icons/hecker_qs_waveform.xml"
+  "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_waveform.xml": "framework/qs/icons/hecker_qs_waveform.xml",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerSystemUiControl.java": "framework/qs/HeckerSystemUiControl.java"
 }

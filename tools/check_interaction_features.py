@@ -68,7 +68,7 @@ FACADES.update({
 # Keep the broader SystemUI Settings facade; game-only Settings omits all UI APIs.
 FACADES['android/provider/Settings.java']=JAVA['android/provider/Settings.java'].replace(' public static final String ACTION_CAST_SETTINGS="",',
 ' public static final String ACTION_DATE_SETTINGS="",ACTION_WIFI_SETTINGS="",ACTION_DATA_USAGE_SETTINGS="",ACTION_SETTINGS="",ACTION_SOUND_SETTINGS="", ACTION_CAST_SETTINGS="",').replace(' public static final class Secure {',' public static final class Secure { public static final String DEFAULT_INPUT_METHOD="default_input_method";')
-FACADES.pop('com/android/systemui/hecker/HeckerStatusBarPopup.java',None)
+FACADES.pop('com/android/systemui/hecker/HeckerSystemUiControl.java',None)
 
 def process_record_internal_facade(source):
     # Preserve the actual superclass package and method access. A package-private
@@ -113,7 +113,7 @@ def main():
         out=Path(temp);aidl=out/'aidl/android/os';aidl.mkdir(parents=True)
         for name in ['Bundle','ParcelFileDescriptor']:(aidl/(name+'.aidl')).write_text('package android.os; parcelable '+name+';')
         env=os.environ.copy();env['LD_LIBRARY_PATH']=str(sdk/'lib64')
-        for folder,name in [('memory','IHeckerMemoryService'),('launcher','IHeckerLauncherService')]:
+        for folder,name in [('memory','IHeckerMemoryService')]:
             source=aidl/(name+'.aidl');source.write_text((ROOT/'framework'/folder/(name+'.aidl')).read_text())
             run(sdk/'aidl','--lang=java','--out='+str(out/'generated'),'-I',out/'aidl',source,env=env)
         for name,source in FACADES.items():
@@ -124,9 +124,9 @@ def main():
         run(sdk/'aapt2','compile','--dir',out/'res','-o',out/'res.zip')
         run(sdk/'aapt2','link','-I',sdk/'android.jar','--manifest',manifest,'--java',out/'generated','-o',out/'res.apk',out/'res.zip')
         interfaces=[native('packages/SystemUI/plugin/src/com/android/systemui/plugins/'+name+'.java') for name in ['VolumeDialog','VolumeDialogController']]
-        owned=[p for folder in ['memory','launcher','volume','statusbar'] for p in (ROOT/'framework'/folder).glob('*.java')]
+        owned=[p for p in (ROOT/'framework/memory').glob('*.java')] + [ROOT/'framework/qs/HeckerSystemUiControl.java']
         run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',sdk/'android-system.jar','-d',out/'classes',
             *sorted((out/'facades').rglob('*.java')),*sorted((out/'generated').rglob('*.java')),*interfaces,*owned)
-    print('Native interaction adapters, real volume plugin interfaces and generated Binder APIs: PASS')
-    print('Full services/SystemUI Soong compilation, Pixel view compatibility and Coral testing remain required.')
+    print('Native memory policy, System UI control receiver and generated Binder APIs: PASS')
+    print('Full services/SystemUI Soong compilation and Coral testing remain required.')
 if __name__=='__main__':main()

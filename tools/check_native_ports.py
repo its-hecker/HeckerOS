@@ -15,10 +15,11 @@ import xml.etree.ElementTree as ET
 from check_launcher import COMPILER
 from compile_sdk import fetch
 from customization_port import customization_plan
-from launcher_port import launcher_plan
+from aosp_launcher_port import aosp_launcher_plan
 from prepare import replace_guarded
 from privapp_permissions import check_privapp_permissions
 from check_pin_bouncer import PIN_INPUTS, check_pin_bouncer
+from check_game_mode_info import check_game_mode_info
 from check_interaction_integration import INPUTS as INTERACTION_INPUTS, check_service_bindings, check_statusbar_dispatch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -366,7 +367,9 @@ def main():
     parser.add_argument('--kotlin-cache', type=Path, default=ROOT / 'generated/compose-check',
                         help='Locked Kotlin dependencies for the PIN bouncer regression check')
     args = parser.parse_args()
-    sources = json.loads((ROOT / 'integration/source-revisions.json').read_text())['pixelos_inputs']
+    revisions = json.loads((ROOT / 'integration/source-revisions.json').read_text())
+    sources = dict(revisions['pixelos_inputs'])
+    sources['device/google/coral'] = revisions['hardware_sources']['device']
     git_sources = {}
     def git_source(origin):
         revision = origin['revision']
@@ -392,7 +395,8 @@ def main():
     paths.update(PIN_INPUTS)
     paths.update(INTERACTION_INPUTS)
     paths.add('frameworks/base/core/java/android/view/WindowManager.java')
-    paths.update('packages/apps/Launcher3/' + name for name in ('Android.bp', 'aconfig/Android.bp'))
+    paths.update('packages/apps/Launcher3/' + name for name in ('Android.bp', 'aconfig/Android.bp', 'AndroidManifest.xml', 'src/com/android/launcher3/LauncherFiles.java'))
+    paths.update('packages/apps/Launcher3/' + name for name in json.loads((ROOT/'aosp-launcher/patches.json').read_text()))
     paths.add('frameworks/base/core/java/android/content/res/Resources.java')
     paths.add('frameworks/base/core/res/AndroidManifest.xml')
     paths.add('frameworks/base/packages/SystemUI/shared/src/com/android/systemui/shared/plugins/PackageConfig.kt')
@@ -445,7 +449,7 @@ def main():
         before = snapshot(folder)
         required = check_privapp_permissions(folder / 'frameworks/base/core/res/AndroidManifest.xml', ROOT)
         print(f'Suite allowlist covers {len(required)} privileged permissions in the pinned Android framework')
-        plans = (customization_plan,)
+        plans = (customization_plan, aosp_launcher_plan)
         count = 0
         for plan in plans:
             changes = plan(folder, replace_guarded)
@@ -456,6 +460,7 @@ def main():
         check_bootanimation_owner(folder)
         check_bootanimation_selection(folder)
         check_secure_capture(folder)
+        check_game_mode_info(folder)
         check_service_bindings(folder)
         window_types = (folder / 'frameworks/base/core/java/android/view/WindowManager.java').read_text()
         assert re.search(r'TYPE_STATUS_BAR_ADDITIONAL\s*=\s*FIRST_SYSTEM_WINDOW\s*\+\s*41\s*;', window_types)
@@ -464,7 +469,22 @@ def main():
                                  ('aconfig/Android.bp', 'com_android_launcher3_flags_lib')]:
             source = (folder / 'packages/apps/Launcher3' / relative).read_text()
             assert len(re.findall(r'\bname:\s*"' + module + '"', source)) == 1, module
-        print('Stock Launcher3 SystemUI flag and TAPL build modules retained: PASS')
+        launcher=folder/'packages/apps/Launcher3'
+        manifest=(launcher/'generated/hecker-launcher/AndroidManifest.xml').read_text()
+        assert 'android.permission.DEVICE_POWER' in manifest and 'TouchInteractionService' not in manifest
+        assert 'android:debuggable="true"' not in manifest
+        assert 'SHARED_PREFERENCES_KEY = "com.android.launcher3.prefs"' in (launcher/'src/com/android/launcher3/LauncherFiles.java').read_text()
+        assert 'HeckerWorkspaceGestures.touch(this, ev,' in (launcher/'src/com/android/launcher3/Workspace.java').read_text()
+        assert 'hecker_double_tap_sleep' in (launcher/'res/xml/launcher_preferences.xml').read_text()
+        assert (ROOT/'aosp-launcher/res/drawable/ic_launcher_home.xml').read_bytes()==(launcher/'generated/hecker-launcher/res/drawable/ic_launcher_home.xml').read_bytes()
+        if args.sdk_cache:
+            with tempfile.TemporaryDirectory(prefix='hecker-aosp-launcher-') as launcher_check:
+                output=Path(launcher_check)
+                fixture=output/'src/com/android/launcher3/LauncherFiles.java'
+                fixture.parent.mkdir(parents=True,exist_ok=True)
+                fixture.write_text('package com.android.launcher3;public class LauncherFiles{public static final String SHARED_PREFERENCES_KEY="com.android.launcher3.prefs";}')
+                subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',str(args.sdk_cache/'android.jar'),'-d',str(output/'classes'),str(fixture),str(ROOT/'aosp-launcher/src/com/android/launcher3/hecker/HeckerWorkspaceGestures.java')],check=True)
+        print('AOSP Hecker Launcher HOME module, branding, preference/gesture wiring, permission, retained flag/TAPL libraries and unchanged Pixel Recents: PASS')
         if args.sdk_cache:
             check_clock_plugins(folder, args.sdk_cache.resolve())
             check_pin_bouncer(folder, args.kotlin_cache.resolve())

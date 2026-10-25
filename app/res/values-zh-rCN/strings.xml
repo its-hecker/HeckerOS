@@ -132,7 +132,6 @@
     <string name="lyrics_source">改编自 Project Infinity X。歌词可用性取决于 LRCLIB 及音乐应用提供的信息。纯音乐或没有匹配同步歌词的歌曲将不显示歌词。</string>
     <string name="lyrics_unavailable">此版本暂时无法更新此设置。</string>
     <string name="launcher_title">启动器</string>
-    <string name="launcher_summary">选择 Hecker 启动器或 Pixel Launcher，打造自己的主屏幕。</string>
     <string name="hecker_launcher">Hecker 启动器</string>
     <string name="pixel_launcher">Pixel Launcher</string>
     <string name="launcher_intro">你的主屏幕，由你做主。基于适用于 Android 17 的 Infinity-X Launcher。</string>
@@ -264,4 +263,12 @@
     <string name="gaming_open_library">打开游戏空间</string>
     <string name="gaming_launch_game">启动游戏</string>
     <string name="gaming_red">绯红</string>
+    <string name="sysui_restart_title">重启系统界面</string>
+    <string name="sysui_restart_summary">应用电池尺寸并重新加载状态栏，屏幕会短暂返回锁屏。</string>
+    <string name="sysui_restart_confirm">现在重启系统界面？当前应用会保持打开。</string>
+    <string name="launcher_summary">Hecker 桌面自定义与默认主屏幕</string>
+    <string name="hecker_launcher_native_summary">基于 Android 17 Launcher3，支持小组件、文件夹、应用抽屉和 Hecker 桌面手势。</string>
+    <string name="hecker_launcher_native_settings">主屏幕设置、通知圆点和双击息屏</string>
+    <string name="launcher_native_home_summary">选择 Hecker 桌面、Pixel 桌面或其他已安装的桌面</string>
+    <string name="launcher_pixel_retained">保留 Pixel 桌面，由其提供最近任务和系统手势。</string>
 </resources>

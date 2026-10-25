@@ -28,7 +28,7 @@ public final class MemoryBoostActivity extends Activity {
     private final Apps adapter = new Apps();
     private JSONObject rules = new JSONObject();
     private String query = "";
-    private boolean system;
+    private boolean system, serviceReady;
     private Button boost;
     private static final class Entry {
         final ApplicationInfo app; final String label;
@@ -60,9 +60,17 @@ public final class MemoryBoostActivity extends Activity {
             PackageManager pm = getPackageManager();
             for (ApplicationInfo app : pm.getInstalledApplications(0)) found.add(new Entry(app, app.loadLabel(pm).toString()));
             found.sort(Comparator.comparing(e -> e.label, String.CASE_INSENSITIVE_ORDER));
-            try { IHeckerMemoryService service = service(); if (service != null) Collections.addAll(allowed, service.manageablePackages()); }
-            catch (android.os.RemoteException | RuntimeException ignored) {}
-            runOnUiThread(() -> { if (isDestroyed()) return; installed.addAll(found); manageable.addAll(allowed); loadRules(); filter(); });
+            boolean ready=false;
+            try {
+                IHeckerMemoryService service = service();
+                Bundle status=service==null?null:service.state();
+                ready=status!=null&&status.getBoolean("available");
+                if(ready&&status.getStringArray("packages")!=null)Collections.addAll(allowed,status.getStringArray("packages"));
+            } catch (android.os.RemoteException | RuntimeException failure) { android.util.Log.w("HeckerMemory", "App policy query failed", failure); }
+            final boolean available=ready;
+            runOnUiThread(() -> { if (isDestroyed()) return; serviceReady=available;boost.setEnabled(available);
+                installed.addAll(found);manageable.addAll(allowed);loadRules();filter();
+                if(!available)Toast.makeText(this,R.string.memory_failed,Toast.LENGTH_LONG).show(); });
         });
     }
     private IHeckerMemoryService service() { return IHeckerMemoryService.Stub.asInterface(ServiceManager.getService("hecker_memory")); }
@@ -80,6 +88,7 @@ public final class MemoryBoostActivity extends Activity {
         adapter.notifyDataSetChanged();
     }
     private void options(Entry e) {
+        if(!serviceReady){Toast.makeText(this,R.string.memory_failed,Toast.LENGTH_LONG).show();return;}
         if (!manageable.contains(e.app.packageName)) { Toast.makeText(this, R.string.memory_protected, Toast.LENGTH_LONG).show(); return; }
         int mask = HeckerMemoryRules.validated(rules.optInt(e.app.packageName));
         int[] titles = {R.string.memory_start, R.string.memory_background, R.string.memory_clean_task, R.string.memory_resident};
@@ -135,7 +144,7 @@ public final class MemoryBoostActivity extends Activity {
             LinearLayout labels=new LinearLayout(MemoryBoostActivity.this);labels.setOrientation(LinearLayout.VERTICAL);
             labels.setPadding(Ui.dp(MemoryBoostActivity.this,12),0,0,0);
             labels.addView(Ui.text(MemoryBoostActivity.this,e.label,16,true));
-            labels.addView(Ui.text(MemoryBoostActivity.this,getString(!manageable.contains(e.app.packageName)?R.string.memory_protected
+            labels.addView(Ui.text(MemoryBoostActivity.this,getString(!serviceReady?R.string.memory_failed:!manageable.contains(e.app.packageName)?R.string.memory_protected
                     :rules.optInt(e.app.packageName)==0?R.string.memory_default:R.string.memory_active),12,false));
             row.addView(labels,new LinearLayout.LayoutParams(0,-2,1));return row;
         }

@@ -29,7 +29,7 @@ class HeckerQsActions @Inject constructor(
 ) : CoreStartable {
     override fun start() {
         current = this
-        HeckerStatusBarPopup.start(context)
+        HeckerSystemUiControl.start(context)
         migrate()
         context.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(c: Context, intent: Intent) { migrate() }
@@ -65,7 +65,7 @@ class HeckerQsActions @Inject constructor(
 
     companion object {
         @Volatile private var current: HeckerQsActions? = null
-        @JvmStatic fun boost() { current?.let { HeckerStatusBarPopup.boost(it.context) } }
+        @JvmStatic fun boost() { current?.let { HeckerSystemUiControl.boost(it.context) } }
         @JvmStatic fun settings(action: String) { current?.open(Intent(action)) }
         fun dolby() {
             val owner = current ?: return

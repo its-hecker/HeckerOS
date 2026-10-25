@@ -29,7 +29,7 @@ public final class HeckerGameService extends SystemService {
     private IBinder.DeathRecipient death;
     private int user=-1,brightnessMode=-1,appliedFlags;
     private boolean charging,gameFocused;
-    private long deadline;
+    private long deadline,lastAccessRepair=-10000;
     private final IBinder statusToken=new Binder();
     private int statusUser=-1;
     private final Runnable expiry=()->{synchronized(lock){if(owner!=null&&SystemClock.elapsedRealtime()>=deadline)restore();}};
@@ -91,7 +91,18 @@ public final class HeckerGameService extends SystemService {
     }
     private int bypass(int flags){
         File node=new File(CHARGE);if(!node.exists())return -1;
-        if(!node.canRead()||!node.canWrite())return 5;
+        if(!node.canRead()||!node.canWrite()){
+            long now=SystemClock.elapsedRealtime();
+            if(now-lastAccessRepair>=10000){
+                lastAccessRepair=now;
+                try { SystemProperties.set("sys.hecker.game_charge_access","1"); }
+                catch(RuntimeException unavailable){android.util.Slog.w("HeckerGame","Charging access repair unavailable",unavailable);}
+                try { android.util.Slog.w("HeckerGame","Charging access unavailable: "+node.getCanonicalPath()
+                        +" read="+node.canRead()+" write="+node.canWrite()); }
+                catch(IOException ignored){}
+            }
+            return 5;
+        }
         Intent battery=getContext().registerReceiver(null,new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         int state=0;
         if((flags&BYPASS)!=0){

@@ -1,0 +1,13 @@
+{
+  "repository": "https://android.googlesource.com/platform/packages/apps/Launcher3",
+  "revision": "c612e6ece389f21c40f8cb9cd9a4b44239f00009",
+  "license": "Apache-2.0",
+  "module": "HeckerLauncher",
+  "package": "com.android.launcher3",
+  "recents_provider": "com.google.android.apps.nexuslauncher",
+  "features": [
+    "Native Launcher3 workspace, widgets, folders, app drawer and settings",
+    "Empty-workspace double-tap to sleep",
+    "Hecker Launcher name, caracal icon and settings translations"
+  ]
+}

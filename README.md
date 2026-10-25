@@ -30,7 +30,7 @@ platform customization forks use `heckeros-17`.
   with a circular real-task FPS gauge, battery telemetry, red accents, game/app
   tabs, capture controls and native floating app shortcuts. Performance profiles
   are exposed only when the Android game service supports the active game.
-- Pixel Launcher as the sole HOME/Recents provider, with the retired custom launcher excluded.
+- AOSP Android 17-based Hecker Launcher with native home customization, alongside Pixel Launcher as the single Recents/Quickstep provider.
 - Opt-in synchronized lock-screen lyrics adapted from Infinity-X. The settings
   page discloses the LRCLIB artist/title lookup before it is enabled.
 - Offline pickers for 21 pinned Wi-Fi and battery styles under Status Bar,
@@ -65,14 +65,15 @@ that previously included it, preserve its locally adapted files before syncing:
 git -C .repo/local_manifests pull --ff-only
 python3 .repo/local_manifests/tools/retire_launcher.py
 python3 .repo/local_manifests/tools/retire_omnijaws.py
-repo sync -c -j2 --fail-fast --no-clone-bundle --no-tags vendor/hecker/floral/suite packages/apps/Settings kernel/google/msm-4.14
+repo sync -c -j2 --fail-fast --no-clone-bundle --no-tags vendor/hecker/floral/suite packages/apps/Launcher3 packages/apps/Settings kernel/google/msm-4.14
 HECKER_BUILD_JOBS=8 bash .repo/local_manifests/build.sh
 ```
 
 Run this from the existing Android source root. The retirement helpers preserve
 old checkouts and local edits under `out/retired-projects/`. The build helper
 uses `installclean` when retired app files are still staged. Pixel Launcher is
-the only shipped HOME/Recents provider. ServerHive builds retain the provider's
+installed alongside the AOSP Hecker Launcher HOME app and remains the sole
+Recents/Quickstep provider. ServerHive builds retain the provider's
 RBE environment and should run in the initialized Byobu build session.
 
 See [Suite polish and upgrade checks](docs/suite-polish.md) for the current

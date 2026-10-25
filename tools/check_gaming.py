@@ -9,6 +9,8 @@ import argparse, os, subprocess, tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 FACADES={
+'android/os/SystemProperties.java':'package android.os;public class SystemProperties{public static void set(String name,String value){}}',
+'android/util/Slog.java':'package android.util;public class Slog{public static int w(String t,String m){return 0;}public static int w(String t,String m,Throwable e){return 0;}}',
 'android/app/TaskInfo.java':'''package android.app;
 public class TaskInfo {public int taskId,displayId,userId;public boolean isFocused;public boolean isVisible(){return false;}}''',
 'android/provider/Settings.java':'''package android.provider;
