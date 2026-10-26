@@ -69,6 +69,10 @@
     {
       "old": "        mIsResponsiveGrid = inv.workspaceSpecsId != INVALID_RESOURCE_HANDLE",
       "new": "        mIsResponsiveGrid = !com.android.launcher3.hecker.HeckerStudio.customGridMetrics(info.context)\n                && inv.workspaceSpecsId != INVALID_RESOURCE_HANDLE"
+    },
+    {
+      "old": "        int qsbHeight = res.getDimensionPixelSize(R.dimen.qsb_widget_height);",
+      "new": "        int qsbHeight = com.android.launcher3.hecker.HeckerDockBar.profileHeight(context,\n                res.getDimensionPixelSize(R.dimen.qsb_widget_height), isVerticalBarLayout());"
     }
   ],
   "src/com/android/launcher3/settings/SettingsActivity.java": [
@@ -230,7 +234,10 @@
     },
     {
       "old": "        Rect padding = grid.getHotseatLayoutPadding(getContext());\n        setPadding(padding.left, padding.top + topOverlap, padding.right, padding.bottom);",
-      "new": "        Rect padding = grid.getHotseatLayoutPadding(getContext());\n        int heckerExtra = com.android.launcher3.hecker.HeckerDockBar.extraHeight(\n                mQsb, grid.getHotseatProfile().isQsbInline() ? 0 : grid.getHotseatProfile().getQsbHeight(),\n                grid.isVerticalBarLayout());\n        if (!grid.isVerticalBarLayout()) lp.height += heckerExtra;\n        setPadding(padding.left, padding.top + topOverlap, padding.right, padding.bottom + heckerExtra);"
+      "new": "        Rect padding = grid.getHotseatLayoutPadding(getContext());\n        int heckerExtra = com.android.launcher3.hecker.HeckerDockBar.extraHeight(\n                mQsb, padding.bottom, grid.getQsbOffsetY(), mHeckerNavigationInset,\n                grid.isVerticalBarLayout());\n        if (!grid.isVerticalBarLayout()) lp.height += heckerExtra;\n        setPadding(padding.left, padding.top + topOverlap, padding.right, padding.bottom + heckerExtra);",
+      "previous": [
+        "        Rect padding = grid.getHotseatLayoutPadding(getContext());\n        int heckerExtra = com.android.launcher3.hecker.HeckerDockBar.extraHeight(\n                mQsb, grid.getHotseatProfile().isQsbInline() ? 0 : grid.getHotseatProfile().getQsbHeight(),\n                grid.isVerticalBarLayout());\n        if (!grid.isVerticalBarLayout()) lp.height += heckerExtra;\n        setPadding(padding.left, padding.top + topOverlap, padding.right, padding.bottom + heckerExtra);"
+      ]
     },
     {
       "old": "        mQsb.measure(\n                makeMeasureSpec(dp.getHotseatProfile().getQsbWidth(), MeasureSpec.EXACTLY),\n                makeMeasureSpec(dp.getHotseatProfile().getQsbHeight(), MeasureSpec.EXACTLY)\n        );",

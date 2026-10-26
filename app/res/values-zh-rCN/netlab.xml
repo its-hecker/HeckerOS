@@ -174,9 +174,10 @@
     <string name="netlab_lan_root_error">Root 或原始数据包权限被拒绝，或缺少辅助程序。请检查 KernelSU 对 Hecker 网络实验室控制器的授权。SELinux 保持强制模式。</string>
     <string name="netlab_lan_peer_changed">设备无法访问或 MAC 地址已改变。请重新扫描后再启动。</string>
     <string name="netlab_lan_network_error">所选私有 IPv4 Wi-Fi 路由不可用或已改变。请解决 VPN 或网络共享冲突后重新扫描当前连接。</string>
-    <string name="netlab_lan_forwarding_error">内核转发已启用，可能绕过速率限制。请先停止热点或网络共享。网络实验室不会更改全局转发设置。</string>
+    <string name="netlab_lan_forwarding_error">无法安装设备专用转发保护，或该保护在会话中发生变化。请检查网络实验室的 Root 授权是否允许使用 iptables。现有路由、热点规则和全局转发设置均保持不变。</string>
     <string name="netlab_lan_notification_error">请启用控制器通知，以便随时使用停止并恢复。</string>
     <string name="netlab_lan_busy">Root 操作正在运行。请先停止，再启动其他操作。</string>
     <string name="netlab_lan_repair_error">原 Wi-Fi 连接已丢失，无法向其发送 ARP 恢复报文。受影响的设备可能需要重新连接或等待缓存过期。</string>
     <string name="netlab_lan_action_error">Root 操作未完成。请检查连接、重新扫描，或使用停止并恢复。</string>
+    <string name="netlab_lan_cleanup_error">网络实验室无法确认已移除设备专用转发保护。请重新连接受影响的设备；如果其 IPv4 流量仍被阻止，请重启本手机以清除临时规则。</string>
 </resources>

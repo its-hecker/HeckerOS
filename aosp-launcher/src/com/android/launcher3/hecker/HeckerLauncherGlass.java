@@ -160,7 +160,7 @@ public final class HeckerLauncherGlass {
             }catch(RuntimeException unsupported){paint.setShader(null);}
             canvas.drawPath(path,paint);paint.setShader(null);paint.setColor(tint);paint.setAlpha(opacity/2);canvas.drawPath(path,paint);
             int border=owner.option("border",1,0,4);
-            if(border>0){paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(density*border);paint.setColor(night?0x85ffffff:0x851c3848);canvas.drawPath(path,paint);paint.setStyle(Paint.Style.FILL);}
+            if(border>0){paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(density*border);paint.setColor(view instanceof HeckerDockBar ? (night?0x30ffffff:0x301c3848) : night?0x85ffffff:0x851c3848);canvas.drawPath(path,paint);paint.setStyle(Paint.Style.FILL);}
         }
         @Override public void setAlpha(int value){alpha=value;invalidateSelf();}
         @Override public void setColorFilter(ColorFilter filter){paint.setColorFilter(filter);}

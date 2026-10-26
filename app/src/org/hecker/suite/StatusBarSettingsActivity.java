@@ -19,6 +19,23 @@ public final class StatusBarSettingsActivity extends Activity {
         colors.setChecked(android.provider.Settings.Secure.getInt(getContentResolver(), "hecker_battery_colors", 1) != 0);
         colors.setOnCheckedChangeListener((view, checked) -> android.provider.Settings.Secure.putInt(getContentResolver(), "hecker_battery_colors", checked ? 1 : 0));
         battery.addView(colors);
+        toggle(battery, R.string.battery_charging_animation, "hecker_battery_charging_animation");
+        toggle(battery, R.string.battery_bolt_title, "hecker_battery_bolt");
+        battery.addView(Ui.text(this, getString(R.string.battery_bolt_style), 14, false));
+        android.widget.Spinner boltStyle = new android.widget.Spinner(this);
+        boltStyle.setContentDescription(getString(R.string.battery_bolt_style));
+        boltStyle.setAdapter(new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+                new String[]{getString(R.string.battery_bolt_classic), getString(R.string.battery_bolt_split), getString(R.string.battery_bolt_spark)}));
+        boltStyle.setSelection(Math.max(0, Math.min(2, android.provider.Settings.Secure.getInt(
+                getContentResolver(), "hecker_battery_bolt_style", 0))));
+        boltStyle.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+            public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
+                if (android.provider.Settings.Secure.getInt(getContentResolver(), "hecker_battery_bolt_style", 0) != position)
+                    android.provider.Settings.Secure.putInt(getContentResolver(), "hecker_battery_bolt_style", position);
+            }
+        });
+        battery.addView(boltStyle);
         android.widget.TextView size = Ui.text(this, "", 14, false);
         int current = Math.max(80, Math.min(140, android.provider.Settings.Secure.getInt(getContentResolver(), "hecker_battery_scale", 100)));
         size.setText(getString(R.string.battery_size_value, current)); battery.addView(size);
@@ -44,6 +61,15 @@ public final class StatusBarSettingsActivity extends Activity {
                                         .setPackage("com.android.systemui")))
                         .show());
         Ui.scroll(this,page);
+    }
+    private void toggle(LinearLayout parent, int title, String key) {
+        android.widget.Switch toggle = new android.widget.Switch(this);
+        toggle.setText(title); toggle.setTextColor(getColor(R.color.hecker_foreground));
+        toggle.setMinHeight(Ui.dp(this, 48));
+        toggle.setChecked(android.provider.Settings.Secure.getInt(getContentResolver(), key, 1) != 0);
+        toggle.setOnCheckedChangeListener((view, enabled) ->
+                android.provider.Settings.Secure.putInt(getContentResolver(), key, enabled ? 1 : 0));
+        parent.addView(toggle);
     }
     @Override public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId()==android.R.id.home){finish();return true;}return super.onOptionsItemSelected(item);

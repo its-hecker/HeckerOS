@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="battery_charging_animation">Animate One UI battery while charging</string>
+    <string name="battery_bolt_title">Show charging bolt to the right of One UI battery</string>
+    <string name="battery_bolt_style">Charging bolt style</string>
+    <string name="battery_bolt_classic">Classic ⚡</string>
+    <string name="battery_bolt_split">Split</string>
+    <string name="battery_bolt_spark">Spark</string>
+</resources>

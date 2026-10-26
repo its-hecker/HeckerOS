@@ -1,7 +1,7 @@
 {
   "settings": {
     "repository": "its-hecker/heckeros_packages_apps_Settings",
-    "revision": "e97dc8bb729e6a8da69333b63b5dc6c95f500ec1",
+    "revision": "3831282d93ecda4d52a6894077482fe01ecea903",
     "files": {
       "Android.bp": "7734560e9290e57348a9da9626045091388829dc909ca1bea49a91ec827e2f41",
       "AndroidManifest.xml": "bfb85ed90bcc7d9f36ec4066fa65175ffc5c30c429a4a4a74951418b92d2d731",
@@ -41,8 +41,8 @@
       "res/values/hecker_integrity_design.xml": "17ec510f02ef038fce161953d8ab5088958722eb7a96eac249734374d4524bc9",
       "res/values-zh-rCN/hecker_integrity_design.xml": "ffc78a0cea836038e919cde50f7416f3508f860101aa667d19956873e2a2fa02",
       "src/com/android/settings/hecker/SpoofingMaintenance.java": "26dc0837ca772cc31351586b6c0dfe6b69b27ea07a05d609988b99d531056556",
-      "src/com/android/settings/hecker/HeckerSpoofingHubActivity.java": "fa9af8a1dc38516775817da12834f15435f7f2f88c3cc099de58966245e94268",
-      "src/com/android/settings/hecker/KeyboxStatus.java": "cf020a5cf77734f4059735179b89b29c47411db682f5b52dd447187c05b09917",
+      "src/com/android/settings/hecker/HeckerSpoofingHubActivity.java": "96272ae3e60f9157e2f3acafa1f4fb006887bdcdb5a39c80d1ccdb362e21c9e7",
+      "src/com/android/settings/hecker/KeyboxStatus.java": "83e91e60641d31f208f5f4f9fa0ba7777e2528e958d63cb1247e363af3cf4ba1",
       "src/com/android/settings/hecker/SpoofingData.java": "3aaa47dd582ab7cad2a272a258fc3d81070439e01a8eaba538c90c02d2f75ec9",
       "src/com/android/settings/hecker/PixelCanaryProfileFetcher.java": "a4fa9e53059afdb651ad8a90bcc8604a3985e6aadc790c82bd6f505030796c51",
       "src/com/android/settings/hecker/SpoofingUi.java": "4e8a67a83582e8f2c6661d5c915adbfcabbabee88b4a30785ebe8f36273b7620",

@@ -23,6 +23,12 @@ public final class HeckerDockBar extends LinearLayout
     public static boolean available(Context context) {
         return HeckerStudio.res(context, "string", "hs_dock_search") != 0;
     }
+    public static int profileHeight(Context context, int nativeHeight, boolean vertical) {
+        // Feed the slot into Launcher3 before it sizes the workspace, so lifting
+        // the dock also leaves room above it for the last home-screen icon row.
+        return available(context) && !vertical && HeckerStudio.enabled(context, "dock_search", true)
+                ? Math.max(nativeHeight, HeckerStudio.dp(context, 60)) : nativeHeight;
+    }
     public static View create(ViewGroup container) {
         Context context = container.getContext();
         if (available(context)) return new HeckerDockBar(context);
@@ -33,14 +39,14 @@ public final class HeckerDockBar extends LinearLayout
         super(context); setGravity(Gravity.CENTER_VERTICAL);
         int pad = HeckerStudio.dp(context, 18); setPadding(pad, 0, pad, 0);
         GradientDrawable glass = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
-                new int[]{0xf0254d60, 0xf028334e, 0xf044315f});
+                new int[]{0xc22b3b47, 0xc32e3646, 0xc5363549});
         glass.setCornerRadius(HeckerStudio.dp(context, 28));
-        colourWash = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,
-                new int[]{0x3046a9b8, 0x001a2340, 0x305d37b5});
+        colourWash = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                new int[]{0x183f8088, 0x102f6874, 0x082f465f, 0x105d587c, 0x18796a97});
         colourWash.setCornerRadius(HeckerStudio.dp(context, 28));
         setWillNotDraw(false);
-        glass.setStroke(HeckerStudio.dp(context, 1), 0x9097dfe8);
-        setBackground(new RippleDrawable(ColorStateList.valueOf(0x408dbdff), glass, null));
+        glass.setStroke(HeckerStudio.dp(context, 1), 0x38cfdee8);
+        setBackground(new RippleDrawable(ColorStateList.valueOf(0x248dbdff), glass, null));
         ImageView mark = new ImageView(context);
         mark.setImageResource(HeckerStudio.res(context, "drawable", "hs_search_mark"));
         mark.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -52,7 +58,7 @@ public final class HeckerDockBar extends LinearLayout
         addView(label, new LayoutParams(0, -2, 1));
         ImageView detail = new ImageView(context);
         detail.setImageResource(android.R.drawable.ic_menu_search);
-        detail.setImageTintList(ColorStateList.valueOf(0xffd5bcff));
+        detail.setImageTintList(ColorStateList.valueOf(0xffced2e5));
         detail.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         addView(detail, new LayoutParams(HeckerStudio.dp(context, 23), HeckerStudio.dp(context, 23)));
         setFocusable(true); setContentDescription(HeckerStudio.text(context, "search_hint"));
@@ -84,16 +90,19 @@ public final class HeckerDockBar extends LinearLayout
             setVisibility(requestedVisibility); requestLayout();
         }
     }
-    public static int extraHeight(View bar, int nativeHeight, boolean vertical) {
+    public static int extraHeight(View bar, int nativeBottomPadding, int nativeOffset,
+            int navigationInset, boolean vertical) {
         return bar instanceof HeckerDockBar && !vertical
                 && HeckerStudio.enabled(bar.getContext(), "dock_search", true)
-                ? Math.max(0, HeckerStudio.dp(bar.getContext(), 48) - nativeHeight) : 0;
+                ? DockSearchLayout.extraHeight(nativeBottomPadding,
+                        bottomOffset(bar, nativeOffset, navigationInset),
+                        HeckerStudio.dp(bar.getContext(), 48), HeckerStudio.dp(bar.getContext(), 12)) : 0;
     }
     public static void measure(View bar, int width, int height, int availableWidth) {
         if (bar instanceof HeckerDockBar) {
             int safeWidth = Math.max(1, availableWidth - HeckerStudio.dp(bar.getContext(), 32));
             width = width > 0 ? Math.min(width, safeWidth) : safeWidth;
-            height = Math.max(height, HeckerStudio.dp(bar.getContext(), 48));
+            height = HeckerStudio.dp(bar.getContext(), 48);
         }
         bar.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));

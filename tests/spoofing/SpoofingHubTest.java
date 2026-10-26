@@ -121,8 +121,10 @@ public final class SpoofingHubTest {
             check(KeyboxStatus.evaluate(chains,anchors,clean,NOW).state==KeyboxStatus.State.VALID,algorithm+" trusted live certificate check");
             check(KeyboxStatus.evaluate(chains,anchors,null,NOW).state==KeyboxStatus.State.UNKNOWN,"offline never claims validity");
             check(KeyboxStatus.evaluate(chains,anchors,"{}",NOW).state==KeyboxStatus.State.UNKNOWN,"malformed revocation never claims validity");
+            check(KeyboxStatus.evaluate(chains,anchors,"<html>upstream unavailable</html>",NOW).state==KeyboxStatus.State.UNKNOWN,"revocation parse failure is not an invalid certificate chain");
             check(KeyboxStatus.evaluate(chains,anchors,"{\"entries\":{\"2a\":{\"status\":\"REVOKED\"}}}",NOW).state==KeyboxStatus.State.REVOKED,"revoked leaf");
             check(KeyboxStatus.evaluate(chains,anchors,"{\"entries\":{\"101\":{\"status\":\"SUSPENDED\"}}}",NOW).state==KeyboxStatus.State.SUSPENDED,"suspended chain certificate");
+            check(KeyboxStatus.evaluate(chains,anchors,"{\"entries\":{\"2a\":{\"status\":\"UNKNOWN\"},\"101\":{\"status\":\"REVOKED\"}}}",NOW).state==KeyboxStatus.State.REVOKED,"unknown entry cannot conceal a revoked chain member");
             check(KeyboxStatus.evaluate(chains,null,clean,NOW).state==KeyboxStatus.State.UNTRUSTED,"unknown root refused");
             check(KeyboxStatus.evaluate(List.of(List.of(root,leaf)),anchors,clean,NOW).state==KeyboxStatus.State.INVALID,"invalid chain order refused");
             X509Certificate soon=cert(leafKeys,rootKeys,"CN=Test leaf","CN=Test root",43,NOW+DAY);
@@ -131,6 +133,16 @@ public final class SpoofingHubTest {
             String xml="<AndroidAttestation><Key><CertificateChain><Certificate>"+pem(leaf)
                     +"</Certificate><Certificate>"+pem(root)+"</Certificate></CertificateChain></Key></AndroidAttestation>";
             check(KeyboxStatus.chains(KeyboxStatus.xml(xml)).get(0).size()==2,"certificate XML parsed");
+            String indented=xml.replace(pem(leaf),pem(leaf).replace("\n","\r\n    "));
+            check(KeyboxStatus.evaluate(KeyboxStatus.chains(indented),anchors,clean,NOW).state==KeyboxStatus.State.VALID,"indented CRLF PEM is normalized to DER");
+            KeyPair intermediateKeys=keys(algorithm);
+            X509Certificate intermediate=cert(intermediateKeys,rootKeys,"CN=Intermediate","CN=Test root",300,NOW+60*DAY);
+            X509Certificate nestedLeaf=cert(leafKeys,intermediateKeys,"CN=Nested leaf","CN=Intermediate",301,NOW+30*DAY);
+            check(KeyboxStatus.evaluate(List.of(List.of(nestedLeaf,intermediate)),anchors,clean,NOW).state==KeyboxStatus.State.VALID,"omitted public root must verify against independently obtained anchor");
+            check(KeyboxStatus.evaluate(List.of(List.of(nestedLeaf,intermediate)),null,clean,NOW).state==KeyboxStatus.State.UNTRUSTED,"omitted root is not accepted without an independent trust anchor");
+            X509Certificate forged=cert(leafKeys,leafKeys,"CN=Wrong signer","CN=Test root",302,NOW+30*DAY);
+            KeyboxStatus invalid=KeyboxStatus.evaluate(List.of(List.of(forged,root)),anchors,clean,NOW);
+            check(invalid.state==KeyboxStatus.State.INVALID&&invalid.detail.contains("Certificate 1 in chain 1"),"signature rejection reports the failing certificate without key data");
             check(KeyboxStatus.xml("\uFEFF"+xml).equals(xml),"BOM-prefixed XML normalized");
             String factory=System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
             try {

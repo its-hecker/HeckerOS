@@ -1,32 +1,9 @@
-# One UI battery charging ripple
+# One UI battery charging animation and bolts
 
-The selected One UI battery style (`com.android.systemui.battery.oneui7`) now
-animates its green fill with a gentle liquid edge while the battery is charging.
-The edge stays centered on the actual percentage; it does not repeatedly pretend
-that the battery has reached 100%. The existing overlay silhouette, dimensions,
-fill direction, color option, size control and percentage remain in use.
-Percentage contrast follows the same animated fill path.
+The One UI battery style keeps its original theme silhouette, fill direction and percentage. A liquid edge follows the true level and a soft shimmer runs inside the fill. The shimmer remains visible at 100% while the native view still reports charging/plugged in. It does not animate a false increase in percentage.
 
-The native drawable reuses its paths and bounds and requests at most one frame
-every 33 ms, with a 2.4-second wave at the normal system animation speed. An
-ImageView hosted in the existing Compose battery slot supplies drawable callbacks
-and window/display lifecycle signals. It stops on unplug, 100%, power saver,
-hidden/detached views, display off/doze and disabled system animations. The
-duration-scale listener is registered only while attached and also handles
-re-enabling animations. Other battery themes retain their static fill.
+The legacy BatteryMeterView previously installed the custom drawable without starting it. Both that status-bar path and the Compose/ImageView path now start and stop it with attachment, visibility, window visibility, screen state and system animation duration. The legacy path unregisters its duration-scale listener on detach and stops old drawables on theme changes or native unknown/defender fallback. Animation stops on unplug, power saver, hidden/detached views, display off/doze, disabled animations, or the appearance switch.
 
-Host regression compiles the production drawable and exercises both fill
-directions at empty, low, middle and full levels, phase progression, bounded
-frame scheduling, percentage contrast, original-mask preservation, unplug,
-visibility, detachment, power saver and duration scaling. The existing battery
-geometry regression still checks overlay resource identity and dimensions. CI's
-Quick Settings compiler covers the Compose/ImageView bridge against locked
-Android and Compose dependencies. These checks do not replace a full SystemUI
-Soong build or a visual test on Coral.
+Hecker Suite → Status bar → Battery appearance provides the One UI animation switch, a separate right-side bolt switch, and Classic, Split and Spark bolt shapes. Enabled bolts have a reserved slot so plugging/unplugging does not shift other status icons. Disabling the bolt removes its slot and the internal One UI bolt; the percentage remains readable. The original battery body dimensions remain in use. Secure-setting observers update these options live.
 
-On the next build, select the One UI battery under Hecker Suite → Status bar,
-then check wired/wireless charging, unplug/replug, 100%, power saver, another
-battery theme, light/dark status bars, battery size and percentage options,
-fullscreen apps, lockscreen, screen off/AOD and disabling/re-enabling system
-animations. Confirm the ripple is smooth and that no screen-off frame loop
-remains.
+The drawable requests at most one frame every 33 ms, uses a 2.4-second period at normal system speed, and reuses paths, matrices and paint. Host regressions exercise the production drawable and the actual inserted legacy adapter, including charging at 100%, reduced-motion disable/re-enable, unplug, screen/doze, visibility, theme replacement, fallback and detach. The locked Android/Compose compiler checks the Compose bridge and actual drawable. Full SystemUI/ROM compilation and Coral visual testing remain required.

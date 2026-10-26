@@ -14,7 +14,8 @@
   ],
   "src/com/android/launcher3/hecker/HeckerLauncherGlass.java": [
     "84e86f9b117b6aadb7f3d3582d3f28679cc99a7d",
-    "0612cdf6695a5b557e2936a0ea8099a82193a819"
+    "0612cdf6695a5b557e2936a0ea8099a82193a819",
+    "f580f30188bff0a2662c8a3fd0b63cdc8b1c0e45"
   ],
   "src/com/android/launcher3/hecker/HeckerStudioActivity.java": [
     "4e1f752e60dee1876b4b25a86b4e3fa5ccf0eb93",
@@ -28,6 +29,7 @@
     "72d15ee58bef398d767d148b7aab06bce7bb7acf"
   ],
   "src/com/android/launcher3/hecker/HeckerDockBar.java": [
-    "986161c90f2b9e87232d3a49f6592a126249c6b4"
+    "986161c90f2b9e87232d3a49f6592a126249c6b4",
+    "353838905cb4518694c67879c82d57fa4b70e066"
   ]
 }

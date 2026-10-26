@@ -174,9 +174,10 @@
     <string name="netlab_lan_root_error">Root or raw-packet access was denied, or the helper is missing. Check the KernelSU grant for Hecker NetLab controller. SELinux stays enforcing.</string>
     <string name="netlab_lan_peer_changed">A peer is unreachable or its MAC changed. Scan again before starting.</string>
     <string name="netlab_lan_network_error">The selected private IPv4 Wi-Fi route is unavailable or changed. Stop VPN/tethering conflicts and scan the current connection again.</string>
-    <string name="netlab_lan_forwarding_error">Kernel forwarding is already enabled and could bypass the caps. Stop hotspot/tethering first. NetLab does not change global forwarding settings.</string>
+    <string name="netlab_lan_forwarding_error">The per-device forwarding guard could not be installed or changed during the session. Check that the NetLab root grant permits iptables. Existing routing, hotspot rules and global forwarding settings are kept.</string>
     <string name="netlab_lan_notification_error">Enable controller notifications so Stop and restore remains accessible.</string>
     <string name="netlab_lan_busy">A root operation is running. Stop it before starting another.</string>
     <string name="netlab_lan_repair_error">The original Wi-Fi link was lost. ARP repairs could not be sent there; affected devices may need to reconnect or wait for their cache to expire.</string>
     <string name="netlab_lan_action_error">The root operation did not complete. Check the connection, scan again, or use Stop and restore.</string>
+    <string name="netlab_lan_cleanup_error">NetLab could not confirm removal of its per-device forwarding guard. Reconnect the affected devices. If their IPv4 traffic is still blocked, reboot this phone to clear the temporary rules.</string>
 </resources>

@@ -35,6 +35,7 @@ def check():
 ''')
         helper_flags = flags + ['-include', str(netlink)]
         core = str(root / 'netlab/native/lan_core.cpp')
+        guard = str(root / 'netlab/native/forwarding_guard.cpp')
         binary = out / 'core-test'
         subprocess.run(flags + ['-fsanitize=address,undefined', '-fno-omit-frame-pointer', core,
             str(root / 'tests/NetLabLanCoreTest.cpp'), '-o', str(binary)], check=True)
@@ -45,12 +46,15 @@ def check():
         environment['UBSAN_OPTIONS'] = 'halt_on_error=1:print_stacktrace=1'
         subprocess.run([str(binary)], check=True, env=environment)
         helper = out / 'hecker-netlab-lan'
-        subprocess.run(helper_flags + [core, str(root / 'netlab/native/lan_main.cpp'), '-o', str(helper)], check=True)
+        subprocess.run(helper_flags + [core, guard, str(root / 'netlab/native/lan_main.cpp'), '-o', str(helper)], check=True)
+        guard_test = out / 'forwarding-guard-test'
+        subprocess.run(flags + [guard, str(root / 'tests/NetLabForwardingGuardTest.cpp'), '-o', str(guard_test)], check=True)
+        subprocess.run([str(guard_test)], check=True, timeout=30)
         route_test = out / 'route-parser-test'
         wrappers = ['socket', 'sendto', 'recv', 'poll', '__recv_chk', '__poll_chk',
             'close', 'clock_gettime']
         subprocess.run(helper_flags + ['-fsanitize=address,undefined', '-fno-omit-frame-pointer',
-            core, str(root / 'tests/NetLabRouteParserTest.cpp'),
+            core, guard, str(root / 'tests/NetLabRouteParserTest.cpp'),
             *['-Wl,--wrap=' + name for name in wrappers], '-o', str(route_test)], check=True)
         subprocess.run([str(route_test)], check=True, env=environment, timeout=10)
         # Every input below exits before interface/raw-socket access, even as UID 0.
@@ -67,7 +71,7 @@ def check():
         shim = out / 'uid.cpp'
         shim.write_text('#include <unistd.h>\nextern "C" uid_t __wrap_geteuid() { return 65534; }\n')
         unprivileged = out / 'unprivileged-helper'
-        subprocess.run(helper_flags + [core, str(root / 'netlab/native/lan_main.cpp'), str(shim),
+        subprocess.run(helper_flags + [core, guard, str(root / 'netlab/native/lan_main.cpp'), str(shim),
             '-Wl,--wrap=geteuid', '-o', str(unprivileged)], check=True)
         result = subprocess.run([str(unprivileged)], input=b'INFO\n', capture_output=True, timeout=3)
         assert result.stdout == b'ERROR root_required\n', result.stdout

@@ -6,7 +6,6 @@ import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -28,11 +27,13 @@ public final class HeckerOsloOverlayHost {
     private static final int GLOW_WINDOW_TYPE = 2041;
     private static final Map<OverlayPlugin, Host> HOSTS = new IdentityHashMap<>();
     private static int displayState = Display.STATE_UNKNOWN;
-    private static IntSupplier pulseRequester;
-
-    /** Native DozeTriggers returns 0=suppressed, 1=accepted, 2=transient transition. */
-    public static void attachDoze(IntSupplier requester) { pulseRequester = requester; }
-    public static void detachDoze() { pulseRequester = null; }
+    // Compatibility for previously prepared DozeTriggers adapters. Motion Sense
+    // feedback no longer asks for ambient pulses or AOD refreshes.
+    public static void attachDoze(IntSupplier requester) { }
+    public static void detachDoze() {
+        displayState = Display.STATE_UNKNOWN;
+        for (Host host : HOSTS.values()) host.handler.post(host::refreshFrame);
+    }
 
     public static View rootFor(OverlayPlugin plugin, Context pluginContext, View root,
             KeyguardStateController keyguard, StatusBarStateController status) {
@@ -80,21 +81,17 @@ public final class HeckerOsloOverlayHost {
 
     public static boolean holdsNativeShade(OverlayPlugin plugin) {
         Host host = HOSTS.get(plugin);
-        return plugin.holdStatusBarOpen() && (host == null || host.keyguard.isShowing());
+        return plugin.holdStatusBarOpen() && (host == null
+                || host.keyguard.isShowing() && !host.ambient());
     }
 
-    /** Redraw the existing GL surface after a pulse resumes native display refresh. */
+    /** Hide feedback on ambient/off; refresh it again when the normal display returns. */
     public static void onDozeScreenState(int state) {
         displayState = state;
-        if (state == Display.STATE_ON || state == Display.STATE_DOZE) {
-            for (Host host : HOSTS.values()) host.handler.post(host::refreshFrame);
-        }
-    }
-
-    /** Follow the native AOD minute/burn-in tick without adding an animation timer. */
-    public static void dozeTimeTick() {
         for (Host host : HOSTS.values()) host.handler.post(host::refreshFrame);
     }
+
+    public static void dozeTimeTick() { }
 
     public static void disconnect(OverlayPlugin plugin) {
         Host host = HOSTS.remove(plugin);
@@ -108,8 +105,6 @@ public final class HeckerOsloOverlayHost {
         final StatusBarStateController status;
         final Handler handler = new Handler(Looper.getMainLooper());
         final Set<View> seeded = Collections.newSetFromMap(new IdentityHashMap<>());
-        final Map<View, Runnable> pulseBindings = new IdentityHashMap<>();
-        long lastPulse = -2000;
         final KeyguardStateController.Callback keyguardCallback = new KeyguardStateController.Callback() {
             @Override public void onKeyguardShowingChanged() {
                 // Keep the original lockscreen/AOD hold, without holding the unlocked shade open.
@@ -126,6 +121,7 @@ public final class HeckerOsloOverlayHost {
         OverlayPlugin.Callback nativeCallback;
         View.OnAttachStateChangeListener pending;
         volatile boolean destroyed;
+        boolean wasAmbient;
 
         Host(Context context, KeyguardStateController keyguard, StatusBarStateController status)
                 throws ReflectiveOperationException {
@@ -142,8 +138,6 @@ public final class HeckerOsloOverlayHost {
                 }
                 @Override public void onViewRemoved(View child) {
                     seeded.remove(child);
-                    Runnable unbind = pulseBindings.remove(child);
-                    if (unbind != null) unbind.run();
                     super.onViewRemoved(child);
                 }
             };
@@ -164,6 +158,7 @@ public final class HeckerOsloOverlayHost {
             windows.addView(container, params);
             keyguard.addCallback(keyguardCallback);
             status.addCallback(dozeCallback);
+            refreshFrame();
         }
 
         void seedState(View child) {
@@ -171,7 +166,6 @@ public final class HeckerOsloOverlayHost {
                     || !child.getClass().getName().startsWith("com.google.oslo.ui.")
                     || !(child instanceof StatusBarStateController.StateListener)) return;
             seeded.add(child);
-            pulseBindings.put(child, OsloFeedbackPulse.bind(child, this::requestGesturePulse));
             StatusBarStateController.StateListener listener = (StatusBarStateController.StateListener) child;
             // Pulsing first prevents a late-attached view from briefly entering the wrong AOD mode.
             listener.onPulsingChanged(status.isPulsing());
@@ -179,29 +173,19 @@ public final class HeckerOsloOverlayHost {
             refreshFrame();
         }
 
-        void requestGesturePulse() {
-            long now = SystemClock.elapsedRealtime();
-            IntSupplier requester = pulseRequester;
-            if (destroyed || requester == null || !keyguard.isShowing() || !status.isDozing()
-                    || status.isPulsing() || now - lastPulse < 2000) return;
-            lastPulse = now;
-            tryGesturePulse(requester, 0);
+        boolean ambient() {
+            return status.isDozing() || displayState == Display.STATE_OFF
+                    || displayState == Display.STATE_DOZE || displayState == Display.STATE_DOZE_SUSPEND;
         }
-
-        void tryGesturePulse(IntSupplier requester, int attempt) {
-            if (destroyed || pulseRequester != requester || !keyguard.isShowing()
-                    || !status.isDozing() || status.isPulsing()) return;
-            try {
-                if (requester.getAsInt() == 2 && attempt < 4) {
-                    handler.postDelayed(() -> tryGesturePulse(requester, attempt + 1), 200);
-                }
-            } catch (RuntimeException unavailable) {
-                Log.w("HeckerOsloGlow", "Native gesture pulse unavailable", unavailable);
-            }
-        }
-
         void refreshFrame() {
-            if (destroyed || !container.isAttachedToWindow() || displayState == Display.STATE_OFF) return;
+            if (destroyed) return;
+            boolean ambient = ambient();
+            container.setVisibility(ambient ? View.INVISIBLE : View.VISIBLE);
+            if (wasAmbient != ambient) {
+                wasAmbient = ambient;
+                if (nativeCallback != null) nativeCallback.onHoldStatusBarOpenChange();
+            }
+            if (ambient || !container.isAttachedToWindow()) return;
             for (int i = 0; i < container.getChildCount(); i++) {
                 View child = container.getChildAt(i);
                 if (child instanceof GLSurfaceView && child.getVisibility() == View.VISIBLE) {
@@ -214,8 +198,6 @@ public final class HeckerOsloOverlayHost {
             destroyed = true;
             keyguard.removeCallback(keyguardCallback);
             status.removeCallback(dozeCallback);
-            for (Runnable unbind : pulseBindings.values()) unbind.run();
-            pulseBindings.clear();
             seeded.clear(); nativeCallback = null;
             if (pending != null) container.removeOnAttachStateChangeListener(pending);
             pending = null;

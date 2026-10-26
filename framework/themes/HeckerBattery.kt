@@ -69,6 +69,7 @@ private class ChargingBatteryView(context: Context) : ImageView(context) {
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        visibleToUser = isShown && windowVisibility == VISIBLE
         screenOn = display?.state == Display.STATE_ON
         ValueAnimator.registerDurationScaleChangeListener(motionListener)
         syncAnimation()

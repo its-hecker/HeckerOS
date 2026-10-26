@@ -112,3 +112,9 @@ retain the previous keybox and identify the reason without exposing key data.
 The UI shows the full failure in a dialog instead of a truncated toast. Public
 fetch retains certificate-chain and revocation validation; a revoked or malformed
 public keybox is not made valid by this change.
+
+## Downloaded-certificate follow-up
+
+Downloaded PEM certificate bodies now decode to DER before reaching Android's certificate provider, including indented/CRLF XML text. Certificate-chain verification is separate from parsing the live revocation response: an unavailable or malformed response yields Unknown after a trusted chain passes, instead of incorrectly reporting an invalid certificate chain. A provider chain that omits its public root must verify its final issuer/signature against an independently retrieved Google anchor. Unknown entries cannot conceal a revoked or suspended chain member. Actual malformed certificates, signatures, validity dates and unknown roots remain rejected. Fetch failures identify the failing validation stage/certificate without exposing XML, keys or certificate payloads; failed replacements preserve the saved keybox. Manual import behavior is retained.
+
+A live certificate-only check is diagnostic, not evidence of an on-device fetch or any Play Integrity verdict. Synthetic EC/RSA tests cover PEM normalization, omitted roots, forged signatures, unknown/malformed revocation data and revoked-member precedence.

@@ -44,7 +44,7 @@ public class GlowFeedbackView extends com.google.oslo.ui.FakeGlow {
             'android/view/View.java': '''package android.view; import android.content.Context;
 public class View { public Object parent; final Context context; public View(Context c){context=c;}
  public Context getContext(){return context;} public Object getParent(){return parent;}
- public static final int VISIBLE=0;public int getVisibility(){return VISIBLE;}
+ public static final int VISIBLE=0,INVISIBLE=4;public int visibility=VISIBLE;public int getVisibility(){return visibility;}public void setVisibility(int value){visibility=value;}
  public static final java.util.ArrayDeque<Runnable> posted=new java.util.ArrayDeque<>();public boolean post(Runnable r){posted.add(r);return true;}public static void drain(){while(!posted.isEmpty())posted.remove().run();}
  public boolean attached;public boolean isAttachedToWindow(){return attached;}
  public interface OnAttachStateChangeListener{void onViewAttachedToWindow(View v);void onViewDetachedFromWindow(View v);}
@@ -102,26 +102,24 @@ public class GlowTest {
  check(setup[0]==0);host.attach();check(setup[0]==1&&host.listeners.isEmpty());
  int[] forwarded={0};var callback=HeckerOsloOverlayHost.callbackFor(plugin,()->forwarded[0]++);
  plugin.held=true;callback.onHoldStatusBarOpenChange();
- check(HeckerOsloOverlayHost.holdsNativeShade(plugin));
+ check(!HeckerOsloOverlayHost.holdsNativeShade(plugin));
  check(windows.last.type==2041&&windows.last.trusted&&(windows.last.flags&24)==24);
  com.google.oslo.ui.glow.GlowFeedbackView feedback=new com.google.oslo.ui.glow.GlowFeedbackView(context);
  android.opengl.GLSurfaceView shader=new android.opengl.GLSurfaceView(context);
  ((ViewGroup)host).addView(shader);((ViewGroup)host).addView(feedback);
  check(feedback.dozing&&!feedback.pulsing&&feedback.dozeCalls==1&&feedback.pulseCalls==1);
  int[] pulses={0};HeckerOsloOverlayHost.attachDoze(()->{pulses[0]++;return 1;});
- feedback.animate(5);View.drain();check(pulses[0]==1&&feedback.starts==1);
- feedback.animate(5);View.drain();check(pulses[0]==1); // Debounce repeated callbacks.
- android.os.SystemClock.now+=3000;feedback.animate(14);View.drain();check(pulses[0]==1); // AOD fades never repulse.
- status.pulsing=true;feedback.animate(3);View.drain();check(pulses[0]==1);status.pulsing=false;
- lock.show(false);feedback.animate(3);View.drain();check(pulses[0]==1);lock.show(true);
- HeckerOsloOverlayHost.attachDoze(()->{pulses[0]++;return pulses[0]<4?2:1;});
- feedback.animate(3);View.drain();android.os.Handler.drain();check(pulses[0]==4);
- android.os.SystemClock.now+=3000;HeckerOsloOverlayHost.attachDoze(()->{pulses[0]++;return 0;});
- feedback.animate(5);View.drain();android.os.Handler.drain();check(pulses[0]==5); // Suppression isn't retried.
- int frames=shader.renders;HeckerOsloOverlayHost.onDozeScreenState(Display.STATE_OFF);HeckerOsloOverlayHost.dozeTimeTick();check(shader.renders==frames);
- HeckerOsloOverlayHost.onDozeScreenState(Display.STATE_ON);check(shader.renders>frames);frames=shader.renders;
- HeckerOsloOverlayHost.onDozeScreenState(Display.STATE_DOZE);HeckerOsloOverlayHost.dozeTimeTick();check(shader.renders>frames);
- check(feedback.dozeCalls==1&&feedback.pulseCalls==1); // Ticks redraw, without replaying animation state.
+ for(int kind:new int[]{3,5,14}){feedback.animate(kind);View.drain();android.os.Handler.drain();}
+ check(pulses[0]==0&&feedback.starts==3&&host.getVisibility()==View.INVISIBLE);
+ int frames=shader.renders;
+ for(int display:new int[]{Display.STATE_OFF,Display.STATE_DOZE,Display.STATE_DOZE_SUSPEND,Display.STATE_ON}){
+  HeckerOsloOverlayHost.onDozeScreenState(display);HeckerOsloOverlayHost.dozeTimeTick();check(shader.renders==frames);
+ }
+ status.dozing=false;for(var c:new ArrayList<>(status.callbacks))c.onDozingChanged(false);
+ check(host.getVisibility()==View.VISIBLE&&shader.renders>frames);frames=shader.renders;
+ HeckerOsloOverlayHost.onDozeScreenState(Display.STATE_OFF);check(host.getVisibility()==View.INVISIBLE&&shader.renders==frames);
+ HeckerOsloOverlayHost.onDozeScreenState(Display.STATE_ON);check(host.getVisibility()==View.VISIBLE&&shader.renders>frames);
+ check(feedback.dozeCalls==1&&feedback.pulseCalls==1);
  for(int i=0;i<10;i++){lock.show(i%2==0);plugin.held=i%3==0;callback.onHoldStatusBarOpenChange();check(host.isAttachedToWindow()&&windows.current==host);check(HeckerOsloOverlayHost.holdsNativeShade(plugin)==(lock.showing&&plugin.held));}
  check(windows.adds==1&&windows.removes==0);
  int beforeDisconnect=pulses[0];
@@ -134,7 +132,7 @@ public class GlowTest {
  windows.fail=true;check(HeckerOsloOverlayHost.rootFor(plugin,context,root,lock,status)==root);
  OverlayPlugin other=()->true;check(HeckerOsloOverlayHost.rootFor(other,context,root,lock,status)==root);
  HeckerOsloOverlayHost.disconnect(plugin);check(windows.adds==windows.removes);
- System.out.println("Native Oslo glow: setup waits for attachment; no reparent during callbacks; initial doze seed, native pulse/tick GL redraw, locked-only shade hold; pending setup cancelled; failure fallback and disconnect cleanup PASS");
+ System.out.println("Native Oslo glow: setup waits for attachment; no reparent during callbacks; initial doze seed, no ambient pulse or redraw, screen-on GL redraw, locked-only shade hold; pending setup cancelled; failure fallback and disconnect cleanup PASS");
  }}''',
         }
         with tempfile.TemporaryDirectory() as temporary:

@@ -15,9 +15,14 @@ class BatteryGeometryTest(unittest.TestCase):
         constructor = constructor.replace('HeckerBatteryDrawable(', 'BatteryProbe(')
         constructor = constructor.replace('android.provider.Settings.Secure', 'Secure').replace('android.os.UserHandle.USER_CURRENT', '-2')
         program = '''public class BatteryProbe {
- final boolean oneUi,levelColors,horizontal;final Resources res;final String pkg;final int width,height;final Path perimeter,mask,bolt,saver;
+ final boolean oneUi,levelColors,horizontal,chargingAnimation,externalBolt;final Path chargingBolt;final Resources res;final String pkg;final int width,height;final Path perimeter,mask,bolt,saver;
  static class Context {Object getContentResolver(){return null;}}
  static class Secure {static int getIntForUser(Object resolver,String name,int fallback,int user){return 1;}}
+ static class PathParser {static Path createPathFromPathData(String path){return new Path();}}
+ static class Paint {void setShader(Object shader){}}
+ final Paint shimmerPaint=new Paint();
+ static class Shader {enum TileMode {CLAMP}}
+ static class LinearGradient {LinearGradient(float a,float b,float c,float d,int[] colours,float[] positions,Shader.TileMode mode){}}
  static class Path {boolean original=true;enum Direction {CW}void reset(){original=false;}void addRoundRect(float a,float b,float c,float d,float e,float f,Direction direction){original=false;}}
  static class Resources {int width,height;boolean horizontal;java.util.Map<String,Path> paths=new java.util.HashMap<>();Resources(int w,int h,boolean horizontal){width=w;height=h;this.horizontal=horizontal;}}
  int integer(String name,int fallback){return name.endsWith("Width")?res.width:res.height;}

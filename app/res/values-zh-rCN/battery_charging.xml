@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="battery_charging_animation">充电时为 One UI 电池播放动画</string>
+    <string name="battery_bolt_title">在 One UI 电池右侧显示充电闪电</string>
+    <string name="battery_bolt_style">充电闪电样式</string>
+    <string name="battery_bolt_classic">经典 ⚡</string>
+    <string name="battery_bolt_split">分段</string>
+    <string name="battery_bolt_spark">火花</string>
+</resources>

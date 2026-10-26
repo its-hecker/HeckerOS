@@ -9,6 +9,9 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.LinearGradient;
+import android.graphics.Matrix;
+import android.graphics.Shader;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
@@ -23,12 +26,16 @@ public final class HeckerBatteryDrawable extends Drawable implements Animatable,
     private final Resources res;
     private final String pkg;
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint shimmerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Matrix shimmerMatrix = new Matrix();
     private final Path perimeter, mask, bolt, saver;
     private final Path fillPath = new Path();
     private final RectF fillBounds = new RectF();
     private final int width, height;
     private final boolean horizontal, oneUi;
     private final boolean levelColors;
+    private final boolean chargingAnimation, externalBolt;
+    private final Path chargingBolt;
     private int level = 100, tint = Color.WHITE;
     private boolean charging, powerSave, percent;
     private boolean running;
@@ -38,6 +45,14 @@ public final class HeckerBatteryDrawable extends Drawable implements Animatable,
     private HeckerBatteryDrawable(Context context, Resources res, String pkg) {
         oneUi = "com.android.systemui.battery.oneui7".equals(pkg);
         levelColors = android.provider.Settings.Secure.getIntForUser(context.getContentResolver(), "hecker_battery_colors", 1, android.os.UserHandle.USER_CURRENT) != 0;
+        chargingAnimation = setting(context, "hecker_battery_charging_animation", 1) != 0;
+        externalBolt = oneUi && setting(context, "hecker_battery_bolt", 1) != 0;
+        int boltStyle = Math.max(0, Math.min(2, setting(context, "hecker_battery_bolt_style", 0)));
+        chargingBolt = PathParser.createPathFromPathData(new String[]{
+                "M6,0 L0,11 L4,11 L2,20 L10,7 L6,7 Z",
+                "M6,0 L0,9 L4,9 L5,6 L10,6 Z M5,10 L0,14 L4,14 L2,20 L10,10 Z",
+                "M7,0 L1,10 L5,10 L3,20 L10,7 L6,7 Z M1,1 L0,4 L2,3 Z M9,16 L8,19 L10,18 Z"
+        }[boltStyle]);
         this.res = res; this.pkg = pkg;
         width = integer("config_batterymeterWidth", 12); height = integer("config_batterymeterHeight", 20);
         if (width < 1 || width > 128 || height < 1 || height > 128) throw new IllegalArgumentException();
@@ -45,6 +60,12 @@ public final class HeckerBatteryDrawable extends Drawable implements Animatable,
         bolt = path("config_batterymeterBoltPath"); saver = path("config_batterymeterPowersavePath");
         // Preserve each theme's original silhouette, including One UI's paths.
         horizontal = bool("config_batterymeterHorizontalFill", width > height);
+        shimmerPaint.setShader(new LinearGradient(-width, 0, 0, 0,
+                new int[]{0x00ffffff, 0x60ffffff, 0x00ffffff}, null, Shader.TileMode.CLAMP));
+    }
+    private static int setting(Context context, String key, int fallback) {
+        return android.provider.Settings.Secure.getIntForUser(context.getContentResolver(), key,
+                fallback, android.os.UserHandle.USER_CURRENT);
     }
     public static HeckerBatteryDrawable create(Context context) {
         try {
@@ -64,11 +85,12 @@ public final class HeckerBatteryDrawable extends Drawable implements Animatable,
         if (!canAnimate()) stop();
     }
     private boolean canAnimate() {
-        return oneUi && charging && !powerSave && level > 0 && level < 100
+        return oneUi && chargingAnimation && charging && !powerSave && level > 0
                 && ValueAnimator.areAnimatorsEnabled();
     }
     @Override public void start() {
-        if (running || !isVisible() || getCallback() == null || !canAnimate()) return;
+        if (!isVisible() || getCallback() == null || !canAnimate()) { stop(); return; }
+        if (running) return;
         running = true;
         lastFrameTime = SystemClock.uptimeMillis();
         invalidateSelf();
@@ -134,12 +156,12 @@ public final class HeckerBatteryDrawable extends Drawable implements Animatable,
         return Math.max(80, Math.min(140, android.provider.Settings.Secure.getIntForUser(
                 context.getContentResolver(), "hecker_battery_scale", 100, android.os.UserHandle.USER_CURRENT))) / 100f;
     }
-    @Override public int getIntrinsicWidth() { return width; }
+    @Override public int getIntrinsicWidth() { return width + (externalBolt ? Math.max(6, Math.round(height * .65f)) + 2 : 0); }
     @Override public int getIntrinsicHeight() { return height; }
     @Override public void draw(Canvas canvas) {
         int save = canvas.save();
         canvas.translate(getBounds().left, getBounds().top);
-        canvas.scale(getBounds().width() / (float) width, getBounds().height() / (float) height);
+        canvas.scale(getBounds().width() / (float) getIntrinsicWidth(), getBounds().height() / (float) height);
         paint.setStyle(Paint.Style.FILL); paint.setColor(tint); paint.setAlpha(65); canvas.drawPath(perimeter, paint);
         final int fillColor = charging ? (oneUi && levelColors ? 0xff64e4bd : color("config_batterymeterChargingFillColor", tint))
                 : powerSave ? 0xffffcc66 : level <= 15 ? 0xffff6175
@@ -148,11 +170,17 @@ public final class HeckerBatteryDrawable extends Drawable implements Animatable,
         int fill = canvas.save(); canvas.clipPath(mask); canvas.clipPath(fillPath);
         paint.setAlpha(255);
         paint.setColor(fillColor);
-        canvas.drawPath(mask, paint); canvas.restoreToCount(fill);
+        canvas.drawPath(mask, paint);
+        if (running) {
+            shimmerMatrix.setTranslate(width * 2f * wavePhase, 0);
+            shimmerPaint.getShader().setLocalMatrix(shimmerMatrix);
+            canvas.drawPath(mask, shimmerPaint);
+        }
+        canvas.restoreToCount(fill);
         paint.setColor(tint); paint.setAlpha(255);
-        if ((charging || bool("config_batterymeterGlyphFollowFrame", false)) && !(percent && bool("config_themedBatteryPercentWhileCharging", false))) canvas.drawPath(bolt, paint);
+        if (!oneUi && (charging || bool("config_batterymeterGlyphFollowFrame", false)) && !(percent && bool("config_themedBatteryPercentWhileCharging", false))) canvas.drawPath(bolt, paint);
         else if (powerSave) canvas.drawPath(saver, paint);
-        if (percent && (!charging || bool("config_themedBatteryPercentWhileCharging", false))) {
+        if (percent && (!charging || oneUi || bool("config_themedBatteryPercentWhileCharging", false))) {
             paint.setTextAlign(Paint.Align.CENTER); paint.setFakeBoldText(true); paint.setTextSize(height * .62f);
             Paint.FontMetrics metrics = paint.getFontMetrics();
             float baseline = height / 2f - (metrics.ascent + metrics.descent) / 2f;
@@ -166,6 +194,15 @@ public final class HeckerBatteryDrawable extends Drawable implements Animatable,
             canvas.drawText(label, width / 2f, baseline, paint);
             canvas.restoreToCount(textFill);
             paint.setFakeBoldText(false);
+        }
+        if (externalBolt && charging) {
+            int glyph = canvas.save();
+            float glyphHeight = height * .9f;
+            canvas.translate(width + 2, (height - glyphHeight) / 2f);
+            canvas.scale((getIntrinsicWidth() - width - 2) / 10f, glyphHeight / 20f);
+            paint.setColor(tint); paint.setAlpha(255);
+            canvas.drawPath(chargingBolt, paint);
+            canvas.restoreToCount(glyph);
         }
         canvas.restoreToCount(save);
     }

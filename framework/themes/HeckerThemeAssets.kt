@@ -43,7 +43,8 @@ object HeckerThemeAssets {
             object : ContentObserver(Handler(Looper.getMainLooper())) {
                 override fun onChange(selfChange: Boolean) { reload(app) }
             }, UserHandle.USER_ALL)
-        for (key in listOf("hecker_battery_colors", "hecker_battery_scale")) {
+        for (key in listOf("hecker_battery_colors", "hecker_battery_scale",
+                "hecker_battery_charging_animation", "hecker_battery_bolt", "hecker_battery_bolt_style")) {
             app.contentResolver.registerContentObserver(Settings.Secure.getUriFor(key), false,
                 object : ContentObserver(Handler(Looper.getMainLooper())) {
                     override fun onChange(selfChange: Boolean) { reload(app) }

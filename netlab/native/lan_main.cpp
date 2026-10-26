@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-// Fixed stdin protocol. No daemon, shell execution, saved packets or global firewall changes.
+// Fixed stdin protocol. Per-session firewall guard; no shell or global forwarding changes.
 #include "lan_core.h"
+#include "forwarding_guard.h"
 #include <algorithm>
 #include <cerrno>
 #include <csignal>
@@ -111,7 +112,7 @@ bool routeMatches(unsigned index, uint32_t gateway) {
     }
     return false;
 }
-Mac interfaceMac(const Link& link, bool relay) {
+Mac interfaceMac(const Link& link, bool /*relay*/) {
     Fd fd(socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0)); need(fd.value >= 0, "interface_unavailable");
     ifreq info{}; std::memcpy(info.ifr_name, link.iface.c_str(), link.iface.size());
     need(ioctl(fd.value, SIOCGIFFLAGS, &info) == 0 && (info.ifr_flags & IFF_UP)
@@ -124,13 +125,6 @@ Mac interfaceMac(const Link& link, bool relay) {
     Mac hardware{}; std::copy_n(reinterpret_cast<uint8_t*>(info.ifr_hwaddr.sa_data), 6, hardware.begin());
     need(unicast(hardware), "invalid_mac");
     need(routeMatches(if_nametoindex(link.iface.c_str()), link.gateway), "route_changed");
-    if (relay) {
-        // A kernel router could forward around our userspace policy. Never change its sysctls.
-        for (const auto& name : {std::string("all"), link.iface}) {
-            std::ifstream flag("/proc/sys/net/ipv4/conf/" + name + "/forwarding"); int enabled = -1;
-            need(bool(flag >> enabled) && enabled == 0, "kernel_forwarding_enabled");
-        }
-    }
     return hardware;
 }
 class Wire {
@@ -218,7 +212,7 @@ bool gatewayStillMatches(Wire& wire, const Link& link) {
     }
     return false;
 }
-void run(Session& session, Link& link, Wire& wire, Input& input) {
+void run(Session& session, Link& link, Wire& wire, Input& input, ForwardingGuard& guard) {
     std::string reason = "stopped"; uint64_t announceAt = 0, checkAt = 0, statsAt = 0, repairAt = 0;
     std::map<uint32_t, uint64_t> repairs;
     bool sameLink = true;
@@ -228,6 +222,7 @@ void run(Session& session, Link& link, Wire& wire, Input& input) {
             uint64_t now = clockMs();
             if (now >= checkAt) {
                 need(interfaceMac(link, true) == link.ownMac, "link_changed"); checkAt = now + 2000;
+                need(guard.intact(), "forwarding_guard_lost");
             }
             now = clockMs();
             if (session.expired(now)) break;
@@ -286,6 +281,7 @@ void run(Session& session, Link& link, Wire& wire, Input& input) {
         for (const auto& packet : session.drain(now)) session.sent(packet, wire.send(packet.frame));
         pollfd descriptor{wire.descriptor(), POLLIN, 0}; poll(&descriptor, 1, 5);
     }
+    if (!guard.clear()) reason = "forwarding_guard_cleanup_failed";
     stats(session); output("END " + reason + (sameLink ? "" : "_repair_unavailable"));
 }
 }
@@ -331,6 +327,9 @@ int main() {
             need(found.count(p.first) && found.at(p.first) == p.second, "peer_unreachable_or_changed");
             session.add(p.first, p.second, mode(w[6]), number(w[7], kMaxRate), number(w[8], kMaxRate), clockMs());
         }
-        run(session, link, wire, input); return 0;
+        ForwardingGuard guard(link.iface, "HKNETLAB_" + std::to_string(getpid()));
+        std::vector<std::string> guarded; for (const auto& p : selected) guarded.push_back(ipText(p.first));
+        guard.install(guarded); guard.supervise(number(w[5], 3600));
+        run(session, link, wire, input, guard); return 0;
     } catch (const std::exception& error) { output(std::string("ERROR ") + error.what()); return 1; }
 }
