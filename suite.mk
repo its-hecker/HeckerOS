@@ -5,5 +5,5 @@ PRODUCT_PACKAGES := $(filter-out HeckerLauncher HeckerLauncherRecentsOverlay Lau
 PRODUCT_PACKAGES += HeckerSuite HeckerLauncher HeckerNetLabController
 PRODUCT_RELEASE_CONFIG_MAPS += $(HECKER_SUITE_PATH)/release/release_config_map.textproto
 
-# The HeckerOS coral product owns feature inheritance and native Android 17 flags.
-# Lunch: hecker_coral-hecker_suite-userdebug
+# Both HeckerOS Floral products own feature inheritance and native Android 17 flags.
+# Lunch: hecker_<coral|flame>-hecker_suite-userdebug

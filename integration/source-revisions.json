@@ -1,5 +1,5 @@
 {
-  "checked_on": "2026-10-26",
+  "checked_on": "2026-10-27",
   "pixelos_manifest": {
     "repository": "PixelOS-AOSP/android_manifest",
     "branch": "seventeen",
@@ -286,7 +286,8 @@
     "version": "1.0",
     "android": 17,
     "devices": [
-      "coral"
+      "coral",
+      "flame"
     ],
     "boot_animation": "Approved caracal intro, glasses removal and wink; seamless ring loop",
     "validation": "Source and host checks only; full ROM builds and phone validation required"
@@ -317,5 +318,20 @@
     "updates": "Upstream changes require explicit pin updates, review and another build. No automatic merges or phone updates.",
     "bulk_migration_required": false,
     "upstream_lock": "integration/upstream-platform-lock.json"
+  },
+  "device_variants": {
+    "flame": {
+      "device_path": "device/google/coral",
+      "device_branch": "flame",
+      "vendor_repository": "its-hecker/HeckerOs-Flame-vendor",
+      "vendor_path": "vendor/google/flame",
+      "manifest_repository": "its-hecker/HeckerOs-Flame-localmanifest",
+      "product": "hecker_flame-hecker_suite-userdebug",
+      "base_vendor_repository": "Nahida-Prjkt/proprietary_vendor_google_flame",
+      "base_vendor_revision": "a57f01d5642a55250e48b244f51be9322659eeed",
+      "features": "Same shared sources and product inheritance as Coral; full Flame build and phone validation pending",
+      "device_revision": "e00918e713e8561a8f931d5377c97c5af8d55068",
+      "vendor_revision": "ed43a21e890e8581873566f0b7a03839b3d56b0f"
+    }
   }
 }

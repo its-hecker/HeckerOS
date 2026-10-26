@@ -15,6 +15,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 from prepare import prepare
+from floral_target import DEVICE, VENDOR
 from validate import ROOT, FACE_REPLACEMENTS, camera_prebuilt, init_installers, manifest, require, replaced_vendor_installers
 from camera_install import SOURCE as CAMERA_SOURCE, SERVICE as CAMERA_SERVICE
 from check_qcom_namespaces import check as check_namespaces, namespace_links
@@ -61,7 +62,7 @@ def check_product_make(rom):
         "PRODUCT_NO_CAMERA := true",
         "PRODUCT_PACKAGES := KeepMe android.hardware.biometrics.face@1.0-service.google OsloFeedback",
         "PRODUCT_COPY_FILES := keep:vendor/etc/keep",
-        "include vendor/google/coral/coral-vendor.mk",
+        f"include {VENDOR}/{DEVICE}-vendor.mk",
         "include vendor/lineage/config/common_mobile_full.mk",
         "include vendor/hecker/floral/suite/prebuilts/google-camera/camera.mk",
         "include " + motion + "/motionsense.mk",
@@ -109,11 +110,11 @@ def check_product_make(rom):
     owners = init_installers(rom, copies)
     camera_destination = "vendor/etc/init/" + CAMERA_SERVICE + ".rc"
     require(owners.get(camera_destination) == {
-            "Soong:vendor/google/coral/proprietary/vendor/etc/init/" + CAMERA_SERVICE + ".rc"},
+            "Soong:" + VENDOR + "/proprietary/vendor/etc/init/" + CAMERA_SERVICE + ".rc"},
             "The selected camera prebuilt must own the sole init script installer")
     # Restore the actual Make entry from the failed build: the source binary's
     # no_full_install flag must not hide this duplicate from the audit.
-    duplicate = ("vendor/google/coral/proprietary/vendor/etc/init/" + CAMERA_SERVICE +
+    duplicate = ((VENDOR + "/proprietary/vendor/etc/init/") + CAMERA_SERVICE +
                  ".rc:" + camera_destination)
     try:
         init_installers(rom, copies + [duplicate])
@@ -199,7 +200,7 @@ def check_suite_motion_navigation(rom):
 def check_face_library_ownership(rom):
     face = rom / "vendor/hecker/floral/faceid"
     bp = (face / "Android.bp").read_text()
-    base = (rom / "vendor/google/coral/Android.bp").read_text()
+    base = (rom / (VENDOR + "/Android.bp")).read_text()
     for module, original in FACE_REPLACEMENTS.items():
         block = re.search(r'(?ms)^cc_prebuilt_(?:binary|library_shared)\s*\{\s*name:\s*"' +
                           re.escape(module) + r'",.*?^\}', bp)
@@ -224,7 +225,7 @@ def check_native_installs(rom):
     # Make's product/override filtering. Check destinations, not module names.
     destinations = {}
     selected = {CAMERA_SERVICE: "vendor/bin/hw/" + CAMERA_SERVICE,
-                CAMERA_SERVICE + "-coral": "vendor/bin/hw/" + CAMERA_SERVICE,
+                CAMERA_SERVICE + "-" + DEVICE: "vendor/bin/hw/" + CAMERA_SERVICE,
                 "hardware_camera_vintf": "vendor/etc/vintf/manifest/" + CAMERA_SERVICE + ".xml",
                 CAMERA_SERVICE + ".xml": "vendor/etc/vintf/manifest/" + CAMERA_SERVICE + ".xml"}
     for alias, original in FACE_REPLACEMENTS.items():
@@ -235,7 +236,7 @@ def check_native_installs(rom):
                         "Foundation": "libstagefright_foundation-v33"}.items():
         selected["FloralFaceIDV33" + alias] = selected[name] = "vendor/lib64/" + name + ".so"
     seen = set()
-    for relative in ("vendor/google/coral/Android.bp", CAMERA_SOURCE,
+    for relative in ((VENDOR + "/Android.bp"), CAMERA_SOURCE,
                      "vendor/hecker/floral/faceid/Android.bp", "hardware/lineage/compat/Android.bp"):
         text = (rom / relative).read_text()
         for block in re.findall(r'(?ms)^[A-Za-z_]\w*\s*\{.*?^\}', text):
@@ -254,7 +255,7 @@ def check_native_installs(rom):
             "Native installation fixture is missing a provider")
     require(len(destinations) == 13, "Unexpected native install destination count")
     # A product override alone must not pass this regression check.
-    vendor = rom / "vendor/google/coral/Android.bp"
+    vendor = rom / (VENDOR + "/Android.bp")
     original = vendor.read_bytes()
     try:
         for name in FACE_REPLACEMENTS.values():
@@ -361,14 +362,14 @@ def test(rom, fetch=True):
     lock = json.loads((ROOT / "source-revisions.json").read_text())
     if fetch:
         projects = {p.get("path"): p for p in ET.parse(ROOT / "floral.xml").getroot().findall("project")}
-        for path in ["device/google/coral", "vendor/google/coral", "vendor/hecker/floral/motionsense",
+        for path in ["device/google/coral", VENDOR, "vendor/hecker/floral/motionsense",
                      "vendor/hecker/floral/faceid", "vendor/hecker/floral/suite"]:
             project = projects[path]
-            sparse = ["Android.bp", "coral-vendor.mk",
+            sparse = ["Android.bp", DEVICE + "-vendor.mk",
                       "proprietary/vendor/etc/init/android.hardware.camera.provider@2.7-service-google.rc",
                       "proprietary/vendor/etc/vintf/manifest/android.hardware.camera.provider@2.7-service-google.xml",
                       "proprietary/vendor/firmware/faceauth_config.yaml",
-                      "proprietary/vendor/firmware/faceauth_v1.mdt"] if path == "vendor/google/coral" else None
+                      "proprietary/vendor/firmware/faceauth_v1.mdt"] if path == VENDOR else None
             checkout(rom, path, project.get("name"), project.get("revision"), sparse)
         dolby = projects["vendor/lunaris/dolby"]
         checkout(rom, "vendor/lunaris/dolby", dolby.get("name"), dolby.get("revision"),

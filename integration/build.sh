@@ -3,9 +3,14 @@
 # Run from the Android source root, after repo sync.
 # Android's envsetup does not support nounset, so do not enable set -u here.
 set -eo pipefail
+export HECKER_DEVICE="${HECKER_DEVICE:-coral}"
+case "$HECKER_DEVICE" in
+    coral|flame) ;;
+    *) echo "HECKER_DEVICE must be coral or flame." >&2; exit 1 ;;
+esac
 case "${HECKER_BUILD_VARIANT:-userdebug}" in
     userdebug|eng) ;;
-    *) echo "The validated Coral configuration requires a userdebug or eng build." >&2; exit 1 ;;
+    *) echo "The Floral configuration requires a userdebug or eng build." >&2; exit 1 ;;
 esac
 if [[ ! -d .repo ]]; then
     echo "Run this script from the HeckerOS Android source root containing .repo." >&2
@@ -28,12 +33,13 @@ fi
 floral_setup_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 python3 "$floral_setup_dir/tools/retire_launcher.py"
 python3 "$floral_setup_dir/tools/check_qcom_namespaces.py"
-git -C vendor/google/coral lfs pull
+python3 "$floral_setup_dir/tools/validate.py"
+git -C "vendor/google/$HECKER_DEVICE" lfs pull
 python3 "$floral_setup_dir/tools/prepare.py" "$@"
 python3 "$floral_setup_dir/tools/validate.py" --rom-root "$PWD"
 source build/envsetup.sh
 # Select the native App Lock and Compose QS flags for HeckerOS.
-lunch "hecker_coral-hecker_suite-${HECKER_BUILD_VARIANT:-userdebug}"
+lunch "hecker_${HECKER_DEVICE}-hecker_suite-${HECKER_BUILD_VARIANT:-userdebug}"
 floral_product_out="$(get_build_var PRODUCT_OUT)"
 floral_stale_app=false
 mapfile -t floral_retired_apps < "$floral_setup_dir/retired-apps.txt"

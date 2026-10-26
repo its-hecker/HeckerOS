@@ -11,6 +11,7 @@ import zipfile
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+from floral_target import VENDOR
 from check_built_output import check, check_bootanimation, check_development_adb, check_motion_sense, check_suite, check_librepods, SERVICE
 
 
@@ -34,7 +35,7 @@ class BuiltOutputTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             output = root / "output"
-            source = root / "vendor/google/coral/proprietary/vendor/etc/init" / (SERVICE + ".rc")
+            source = root / (VENDOR + "/proprietary/vendor/etc/init") / (SERVICE + ".rc")
             source.parent.mkdir(parents=True)
             source.write_text("service camera /vendor/bin/hw/" + SERVICE + "\n")
             with self.assertRaisesRegex(ValueError, "init script"):

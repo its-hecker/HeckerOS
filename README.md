@@ -1,9 +1,13 @@
 # HeckerOS · Android 17
 
-Hecker's custom PixelOS-based ROM for the Google Pixel 4 XL (**coral**).
-The first integration targets coral only. Pixel 4/flame support will follow after
-coral testing. Integration and hardware repositories use `main`; the owned
-platform customization forks use `heckeros-17`.
+Hecker's custom PixelOS-based ROM for the Google Pixel 4 XL (**coral**) and
+Google Pixel 4 (**flame**). Both products inherit the same feature sources. The
+current integration branch is `feat/suite-polish`; the hardware tree uses `main`
+for Coral and `flame` for Flame. Full Flame build and hardware validation are pending.
+
+For Flame, use the [dedicated local manifest](https://github.com/its-hecker/HeckerOs-Flame-localmanifest)
+and [Flame build notes](docs/flame-bringup.md). Its shared hardware checkout remains
+at `device/google/coral`, with its own vendor at `vendor/google/flame`.
 
 ## Included source
 

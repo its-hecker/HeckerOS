@@ -11,6 +11,7 @@ import sys
 import zipfile
 
 from camera_install import SERVICE
+from floral_target import DEVICE, VENDOR
 from google_camera import verify_installed
 
 
@@ -146,12 +147,12 @@ def check_removed_weather(output):
 def check(rom, output):
     check_removed_weather(output)
     filename = SERVICE + ".rc"
-    original = rom / "vendor/google/coral/proprietary/vendor/etc/init" / filename
+    original = rom / VENDOR / "proprietary/vendor/etc/init" / filename
     installed = output / "vendor/etc/init" / filename
     if not installed.is_file() or installed.read_bytes() != original.read_bytes():
-        raise ValueError("Built vendor image is missing Coral's exact camera provider init script")
+        raise ValueError(f"Built vendor image is missing {DEVICE.title()}'s exact camera provider init script")
     if not (output / "vendor/bin/hw" / SERVICE).is_file():
-        raise ValueError("Built vendor image is missing the Coral camera provider binary")
+        raise ValueError(f"Built vendor image is missing the {DEVICE.title()} camera provider binary")
     if not (output / "vendor/etc/vintf/manifest" / (SERVICE + ".xml")).is_file():
         raise ValueError("Built vendor image is missing the camera VINTF declaration")
     verify_installed(rom, output)
@@ -169,7 +170,7 @@ def check(rom, output):
 if __name__ == "__main__":
     root = Path.cwd()
     try:
-        check(root, root / (sys.argv[1] if len(sys.argv) > 1 else "out/target/product/coral"))
+        check(root, root / (sys.argv[1] if len(sys.argv) > 1 else "out/target/product/" + DEVICE))
     except (OSError, ValueError) as error:
         print("PixelOS built output:", error, file=sys.stderr)
         sys.exit(1)
