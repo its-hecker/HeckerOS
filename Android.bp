@@ -63,6 +63,8 @@ cc_binary {
     name: "hecker-netlab-lan",
     srcs: ["netlab/native/lan_core.cpp", "netlab/native/lan_main.cpp"],
     cpp_std: "c++17",
+    // Protocol errors unwind RAII descriptors and the session cleanup path.
+    cppflags: ["-fexceptions"],
     cflags: ["-Wall", "-Wextra", "-Werror"],
     system_ext_specific: true,
 }

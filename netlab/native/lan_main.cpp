@@ -91,7 +91,11 @@ bool routeMatches(unsigned index, uint32_t gateway) {
         pollfd p{fd.value, POLLIN, 0}; if (poll(&p, 1, 50) <= 0) continue;
         alignas(nlmsghdr) char buffer[32768];
         int length = recv(fd.value, buffer, sizeof(buffer), 0); if (length <= 0) continue;
-        for (auto* h = reinterpret_cast<nlmsghdr*>(buffer); NLMSG_OK(h, length); h = NLMSG_NEXT(h, length)) {
+        // NLMSG_NEXT can leave a negative count for an unpadded final record.
+        // Guard that before the unsigned comparison required by Bionic's macro.
+        for (auto* h = reinterpret_cast<nlmsghdr*>(buffer);
+                length >= 0 && NLMSG_OK(h, static_cast<unsigned>(length));
+                h = NLMSG_NEXT(h, length)) {
             if (h->nlmsg_seq != 731) continue;
             if (h->nlmsg_type == NLMSG_DONE || h->nlmsg_type == NLMSG_ERROR) return false;
             if (h->nlmsg_type != RTM_NEWROUTE || h->nlmsg_len < NLMSG_LENGTH(sizeof(rtmsg))) continue;

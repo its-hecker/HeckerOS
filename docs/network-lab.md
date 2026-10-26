@@ -50,6 +50,20 @@ Hotspot mutations remain serialized with an AtomicFile ownership journal in devi
 
 ## Build and verification
 
+The native module opts into C++ exceptions with a module-local `-fexceptions`:
+validation failures unwind its RAII descriptors and existing session cleanup.
+Other Android modules keep their normal exception settings. The route reader
+checks its signed remaining-byte count before passing an unsigned length to
+Bionic's `NLMSG_OK`, including an unpadded final record.
+
+The native host checker starts with Android-style `-fno-exceptions -fno-rtti`,
+then reads the module's actual `cppflags` override from `Android.bp`. It also
+uses Bionic's `NLMSG_OK` macro on the host to catch the signedness error that
+glibc headers hide. The production route-reader regression wraps every socket,
+receive, send, poll, close and clock call; it covers truncated/malformed records,
+negative remaining counts, sequence filtering and Android policy-table routes
+without network I/O. Both address and undefined-behavior sanitizers are enabled.
+
 `HeckerNetLabController` requires the source-built C++17 `hecker-netlab-lan` module, installed in `system_ext/bin`. Post-build checks require its executable output, the controller APK and exact permission XMLs. The companion manifest mirrors the integration checker and regression fixture along with the Suite source pin. No downloaded legacy binary, external checkout or kernel patch is added.
 
 The controller continues to link explicit Wi-Fi/tethering/connectivity system API stubs. SDK verification compiles the real generated AIDL plus Suite/controller Java, both resource sets and the independent Settings UI. The host suite includes the real native relay core under AddressSanitizer/UndefinedBehaviorSanitizer, bounded actual-helper preflight tests, and strict Java protocol tests. The host environment cannot perform LeakSanitizer process walks, so only that exit-time leak walk is disabled; address and undefined-behavior checks remain active. Tests never send ARP packets to a live network.
