@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="netlab_ref_brand" translatable="false">NetLab</string>
+    <string name="netlab_ref_popup" translatable="false">NetLab\nWe are Hecker</string>
+    <string name="netlab_ref_exit">EXIT</string>
+    <string name="netlab_ref_cut">CUT</string>
+    <string name="netlab_ref_option">OPTION</string>
+    <string name="netlab_ref_users">Network Users: %1$d</string>
+    <string name="netlab_ref_monitor">MONITOR</string>
+    <string name="netlab_ref_refresh">Refresh network status</string>
+    <string name="netlab_ref_clear_search">Clear search and filters</string>
+    <string name="netlab_ref_back_options">Back to options</string>
+    <string name="netlab_ref_untitled">Untitled</string>
+    <string name="netlab_ref_ip">IP: %1$s</string>
+    <string name="netlab_ref_mac">MAC: [%1$s]</string>
+    <string name="netlab_ref_trusted">Trusted: %1$s</string>
+    <string name="netlab_ref_control">Control: %1$s</string>
+    <string name="netlab_ref_timer">Timer: %1$s</string>
+    <string name="netlab_ref_brands">brands: %1$s</string>
+    <string name="netlab_ref_yes">Yes</string>
+    <string name="netlab_ref_no">No</string>
+    <string name="netlab_ref_timer_device">Timer and controls for %1$s</string>
+    <string name="netlab_ref_copy_device">Copy IP and MAC for %1$s</string>
+    <string name="netlab_ref_expand_device">Expand speed controls for %1$s</string>
+</resources>

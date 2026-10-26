@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="netlab_ref_exit">退出</string>
+    <string name="netlab_ref_cut">控制</string>
+    <string name="netlab_ref_option">选项</string>
+    <string name="netlab_ref_users">网络用户：%1$d</string>
+    <string name="netlab_ref_monitor">监控</string>
+    <string name="netlab_ref_refresh">刷新网络状态</string>
+    <string name="netlab_ref_clear_search">清除搜索和筛选</string>
+    <string name="netlab_ref_back_options">返回选项</string>
+    <string name="netlab_ref_untitled">未命名</string>
+    <string name="netlab_ref_ip">IP：%1$s</string>
+    <string name="netlab_ref_mac">MAC：[%1$s]</string>
+    <string name="netlab_ref_trusted">信任：%1$s</string>
+    <string name="netlab_ref_control">控制：%1$s</string>
+    <string name="netlab_ref_timer">计时：%1$s</string>
+    <string name="netlab_ref_brands">品牌：%1$s</string>
+    <string name="netlab_ref_yes">是</string>
+    <string name="netlab_ref_no">否</string>
+    <string name="netlab_ref_timer_device">%1$s 的计时和控制</string>
+    <string name="netlab_ref_copy_device">复制 %1$s 的 IP 和 MAC</string>
+    <string name="netlab_ref_expand_device">展开 %1$s 的限速控制</string>
+</resources>

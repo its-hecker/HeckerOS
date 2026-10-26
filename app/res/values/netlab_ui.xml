@@ -11,13 +11,13 @@
     <string name="netlab_ui_scan_hint">Scan to find devices. Root access enables Wi-Fi controls.</string>
     <string name="netlab_ui_stop_scan">Stop scan</string>
     <string name="netlab_ui_scanning">Scanning…</string>
-    <string name="netlab_ui_scan_complete">Scan complete. Tap Manage beside a device.</string>
+    <string name="netlab_ui_scan_complete">Scan complete. Tap a device for controls.</string>
     <string name="netlab_ui_controls_active">Device controls are active</string>
     <string name="netlab_ui_session_active">Wi-Fi control session is active</string>
     <string name="netlab_ui_multiple">Control multiple devices</string>
     <string name="netlab_ui_network_info">Network information</string>
     <string name="netlab_ui_options">Options</string>
-    <string name="netlab_ui_options_summary">Manage saved names, trust labels and device history. Set speed limits from a device’s Manage menu.</string>
+    <string name="netlab_ui_options_summary">Search, filter, manage saved names and history, or inspect the network. Tap a device name to expand its speed controls.</string>
     <string name="netlab_ui_advanced">Advanced root controls</string>
     <string name="netlab_ui_back_devices">Back to devices</string>
     <string name="netlab_ui_filter">Filter devices</string>

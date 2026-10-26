@@ -11,13 +11,13 @@
     <string name="netlab_ui_scan_hint">扫描以查找设备。Root 权限可启用 Wi-Fi 控制。</string>
     <string name="netlab_ui_stop_scan">停止扫描</string>
     <string name="netlab_ui_scanning">正在扫描…</string>
-    <string name="netlab_ui_scan_complete">扫描完成。点按设备旁的“管理”。</string>
+    <string name="netlab_ui_scan_complete">扫描完成。点按设备即可控制。</string>
     <string name="netlab_ui_controls_active">设备控制已启用</string>
     <string name="netlab_ui_session_active">Wi-Fi 控制会话正在运行</string>
     <string name="netlab_ui_multiple">控制多台设备</string>
     <string name="netlab_ui_network_info">网络信息</string>
     <string name="netlab_ui_options">选项</string>
-    <string name="netlab_ui_options_summary">管理保存的名称、信任标记和设备历史。在设备的“管理”菜单中设置限速。</string>
+    <string name="netlab_ui_options_summary">搜索、筛选、管理保存的名称和历史，或检查网络。点按设备名称可展开限速控制。</string>
     <string name="netlab_ui_advanced">高级 Root 控制</string>
     <string name="netlab_ui_back_devices">返回设备列表</string>
     <string name="netlab_ui_filter">筛选设备</string>
