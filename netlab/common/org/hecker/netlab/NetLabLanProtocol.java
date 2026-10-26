@@ -44,6 +44,8 @@ public final class NetLabLanProtocol {
             case "STARTED": case "STOPPING": valid = w.length == 1; break;
             case "LINK": if (w.length == 3) { mac(w[1]); mac(w[2]); valid = true; } break;
             case "PEER": if (w.length == 3) { ipv4(w[1]); mac(w[2]); valid = true; } break;
+            case "VERIFY":
+                if (w.length == 4) { ipv4(w[1]); mac(w[2]); if (!w[3].equals("missing")) mac(w[3]); valid = true; } break;
             case "RESTORED": if (w.length == 2) { ipv4(w[1]); valid = true; } break;
             case "STAT":
                 if (w.length == 9 && (w[2].equals("BLOCK") || w[2].equals("LIMIT") || w[2].equals("PASS"))) {

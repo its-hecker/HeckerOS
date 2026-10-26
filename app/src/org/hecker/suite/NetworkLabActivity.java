@@ -691,6 +691,15 @@ public final class NetworkLabActivity extends Activity {
     }
     private String rootError(String code){
         String message=rootErrorMessage(code);
+        if(Arrays.asList("peer_unreachable","peer_mac_changed").contains(code)){
+            ArrayList<Bundle> failures=rootState().getParcelableArrayList("verification",Bundle.class);
+            if(failures!=null){
+                for(int i=0;i<Math.min(3,failures.size());i++){Bundle failure=failures.get(i);String observed=failure.getString("observed","");
+                    message+="\n"+(observed.equals("missing")?getString(R.string.netlab_lan_verify_missing,failure.getString("address"),failure.getString("expected"))
+                            :getString(R.string.netlab_lan_verify_changed,failure.getString("address"),failure.getString("expected"),observed));}
+                if(failures.size()>3)message+="\n"+getString(R.string.netlab_lan_verify_more,failures.size()-3);
+            }
+        }
         return code!=null&&code.matches("[a-z0-9_]{1,80}")?getString(R.string.netlab_slider_failure_code,message,code):message;
     }
     private String rootErrorMessage(String code){
@@ -699,7 +708,10 @@ public final class NetworkLabActivity extends Activity {
             case "not_active":case "session_timeout":case "controller_lost":return getString(R.string.netlab_slider_not_active);
             case "invalid_peer":case "duplicate_peer_mac":case "not_owned":return getString(R.string.netlab_slider_peer_conflict);
             case "root_required":case "root_or_helper_unavailable":case "raw_socket_denied":case "packet_filter_denied":return getString(R.string.netlab_lan_root_error);
-            case "scan_required":case "peer_unreachable_or_changed":case "neighbor_changed":return getString(R.string.netlab_lan_peer_changed);
+            case "scan_required":return getString(R.string.netlab_lan_scan_first);
+            case "peer_unreachable":return getString(R.string.netlab_lan_peer_unreachable);
+            case "peer_mac_changed":return getString(R.string.netlab_lan_peer_mac_changed);
+            case "peer_unreachable_or_changed":case "neighbor_changed":return getString(R.string.netlab_lan_peer_changed);
             case "wifi_unavailable":case "ipv4_unavailable":case "invalid_link":case "invalid_gateway":case "link_changed":case "route_changed":case "vpn_active":return getString(R.string.netlab_lan_network_error);
             case "kernel_forwarding_enabled":case "forwarding_guard_unavailable":case "forwarding_guard_lost":return getString(R.string.netlab_lan_forwarding_error);
             case "forwarding_guard_cleanup_failed":return getString(R.string.netlab_lan_cleanup_error);

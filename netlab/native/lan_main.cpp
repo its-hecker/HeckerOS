@@ -166,30 +166,64 @@ public:
     }
     void announce(const std::vector<Bytes>& frames) { for (const auto& frame : frames) send(frame); }
 };
-std::map<uint32_t, Mac> discover(Wire& wire, const Link& link, const std::vector<uint32_t>& targets, Input& input, bool print) {
-    std::map<uint32_t, Mac> found; size_t cursor = 0; uint64_t next = 0, finish = 0;
-    while (!interrupted) {
-        uint64_t now = clockMs();
-        if (input.eof) throw std::runtime_error("controller_lost");
-        if (now >= next && cursor < targets.size()) {
-            need(wire.send(arp(link.ownMac, link.own, {}, targets[cursor++], true)), "send_failed");
-            next = now + 40; if (cursor == targets.size()) finish = now + 1200;
-        }
-        if (targets.empty() || (finish && now >= finish)) break;
-        pollfd descriptors[]{{STDIN_FILENO, POLLIN, 0}, {wire.descriptor(), POLLIN, 0}};
-        poll(descriptors, 2, 20);
-        if (descriptors[0].revents) { auto commands = input.read(); if (!commands.empty()) throw std::runtime_error("cancelled"); }
-        for (int i = 0; i < 128; ++i) {
-            auto frame = wire.receive(); if (frame.empty()) break;
-            uint32_t address; Mac hardware;
-            if (!arpSender(frame, address, hardware) || hardware == link.ownMac
-                    || std::find(targets.begin(), targets.end(), address) == targets.end()) continue;
-            if (found.count(address) && found.at(address) != hardware) throw std::runtime_error("neighbor_changed");
-            if (!found.count(address) && print) output("PEER " + ipText(address) + " " + macText(hardware));
-            found[address] = hardware;
+std::map<uint32_t, Mac> discover(Wire& wire, const Link& link, const std::vector<uint32_t>& targets,
+        Input& input, bool print, unsigned attempts = 1, const std::map<uint32_t, Mac>& pinned = {}) {
+    std::map<uint32_t, Mac> found;
+    // A single lost broadcast (or a sleeping Wi-Fi peer) must not fail preflight.
+    // Retry only missing addresses; alternate broadcast with a directed request
+    // to the scanned MAC. Both probes advertise this phone's genuine IP/MAC.
+    for (unsigned attempt = 0; attempt < attempts && !interrupted; ++attempt) {
+        std::vector<uint32_t> pending;
+        for (uint32_t address : targets) if (!found.count(address)) pending.push_back(address);
+        if (pending.empty()) break;
+        size_t cursor = 0; uint64_t next = 0, finish = 0;
+        while (!interrupted) {
+            uint64_t now = clockMs();
+            need(!input.eof, "controller_lost");
+            if (now >= next && cursor < pending.size()) {
+                uint32_t address = pending[cursor++];
+                auto frame = arp(link.ownMac, link.own, {}, address, true);
+                auto known = pinned.find(address);
+                if ((attempt & 1) && known != pinned.end()) {
+                    std::copy(known->second.begin(), known->second.end(), frame.begin());
+                    std::copy(known->second.begin(), known->second.end(), frame.begin() + 32);
+                }
+                need(wire.send(frame), "send_failed");
+                next = now + 40; if (cursor == pending.size()) finish = now + 1200;
+            }
+            if (finish && now >= finish) break;
+            pollfd descriptors[]{{STDIN_FILENO, POLLIN, 0}, {wire.descriptor(), POLLIN, 0}};
+            poll(descriptors, 2, 20);
+            if (descriptors[0].revents) {
+                auto commands = input.read();
+                need(!input.eof, "controller_lost");
+                if (!commands.empty()) throw std::runtime_error("cancelled");
+            }
+            for (int i = 0; i < 128; ++i) {
+                auto frame = wire.receive(); if (frame.empty()) break;
+                uint32_t address; Mac hardware;
+                if (!arpSender(frame, address, hardware) || hardware == link.ownMac
+                        || std::find(targets.begin(), targets.end(), address) == targets.end()) continue;
+                auto known = pinned.find(address);
+                if (known != pinned.end() && known->second != hardware) {
+                    output("VERIFY " + ipText(address) + " " + macText(known->second) + " " + macText(hardware));
+                    throw std::runtime_error("peer_mac_changed");
+                }
+                if (found.count(address) && found.at(address) != hardware) throw std::runtime_error("neighbor_changed");
+                if (!found.count(address) && print) output("PEER " + ipText(address) + " " + macText(hardware));
+                found[address] = hardware;
+            }
         }
     }
     need(!interrupted, "cancelled"); return found;
+}
+void verifyPeers(Wire& wire, const Link& link, const std::vector<std::pair<uint32_t, Mac>>& selected, Input& input) {
+    std::vector<uint32_t> addresses; std::map<uint32_t, Mac> pinned;
+    for (const auto& p : selected) { addresses.push_back(p.first); pinned.emplace(p); }
+    auto found = discover(wire, link, addresses, input, false, 4, pinned);
+    for (const auto& p : selected) if (!found.count(p.first))
+        output("VERIFY " + ipText(p.first) + " " + macText(p.second) + " missing");
+    need(found.size() == pinned.size(), "peer_unreachable");
 }
 void peerStats(const Peer& p) {
         output("STAT " + ipText(p.address) + " " + modeText(p.mode) + " " + std::to_string(p.up) + " " + std::to_string(p.down)
@@ -198,14 +232,17 @@ void peerStats(const Peer& p) {
 }
 void stats(const Session& session) { for (const auto& entry : session.peers()) peerStats(entry.second); }
 bool gatewayStillMatches(Wire& wire, const Link& link) {
-    if (!wire.send(arp(link.ownMac, link.own, {}, link.gateway, true))) return false;
-    uint64_t end = clockMs() + 400;
-    while (clockMs() < end) {
-        pollfd descriptor{wire.descriptor(), POLLIN, 0}; poll(&descriptor, 1, 10);
-        for (int i = 0; i < 128; ++i) {
-            auto frame = wire.receive(); if (frame.empty()) break;
-            uint32_t address; Mac hardware;
-            if (arpSender(frame, address, hardware) && address == link.gateway) return hardware == link.gatewayMac;
+    // Also used during signal cleanup: a pending stop must not suppress repairs.
+    for (unsigned attempt = 0; attempt < 3; ++attempt) {
+        if (!wire.send(arp(link.ownMac, link.own, {}, link.gateway, true))) return false;
+        uint64_t end = clockMs() + 400;
+        while (clockMs() < end) {
+            pollfd descriptor{wire.descriptor(), POLLIN, 0}; poll(&descriptor, 1, 10);
+            for (int i = 0; i < 128; ++i) {
+                auto frame = wire.receive(); if (frame.empty()) break;
+                uint32_t address; Mac hardware;
+                if (arpSender(frame, address, hardware) && address == link.gateway) return hardware == link.gatewayMac;
+            }
         }
     }
     return false;
@@ -324,19 +361,17 @@ int main() {
                 selected.emplace_back(address, mac(p[2]));
             }
         } else need(lines.size() == 1, "invalid_command");
-        auto gateway = discover(wire, link, {link.gateway}, input, false);
+        auto gateway = discover(wire, link, {link.gateway}, input, false, 3);
         need(gateway.count(link.gateway), "gateway_unreachable"); link.gatewayMac = gateway.at(link.gateway);
         output("LINK " + macText(link.ownMac) + " " + macText(link.gatewayMac));
         if (!start) {
             discover(wire, link, scanTargets(link), input, true); output("END scanned"); return 0;
         }
-        std::vector<uint32_t> addresses; for (const auto& p : selected) addresses.push_back(p.first);
-        auto found = discover(wire, link, addresses, input, false);
+        verifyPeers(wire, link, selected, input);
         need(interfaceMac(link, true) == link.ownMac, "link_changed");
         need(gatewayStillMatches(wire, link), "neighbor_changed");
         Session session(link, clockMs(), number(w[5], 3600));
         for (const auto& p : selected) {
-            need(found.count(p.first) && found.at(p.first) == p.second, "peer_unreachable_or_changed");
             session.add(p.first, p.second, mode(w[6]), number(w[7], kMaxRate), number(w[8], kMaxRate), clockMs());
         }
         ForwardingGuard guard(link.iface, "HKNETLAB_" + std::to_string(getpid()));

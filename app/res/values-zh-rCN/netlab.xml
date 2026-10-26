@@ -180,4 +180,9 @@
     <string name="netlab_lan_repair_error">原 Wi-Fi 连接已丢失，无法向其发送 ARP 恢复报文。受影响的设备可能需要重新连接或等待缓存过期。</string>
     <string name="netlab_lan_action_error">Root 操作未完成。请检查连接、重新扫描，或使用停止并恢复。</string>
     <string name="netlab_lan_cleanup_error">网络实验室无法确认已移除设备专用转发保护。请重新连接受影响的设备；如果其 IPv4 流量仍被阻止，请重启本手机以清除临时规则。</string>
+    <string name="netlab_lan_peer_unreachable">所选设备未响应多次 Wi-Fi 检查。请保持设备唤醒并重新扫描。若仍无法访问，请检查路由器的客户端隔离设置。</string>
+    <string name="netlab_lan_peer_mac_changed">所选设备的 MAC 地址已更改。请重新扫描 Wi-Fi 后再开始。</string>
+    <string name="netlab_lan_verify_missing">%1$s 未响应（预期 MAC 为 %2$s）。</string>
+    <string name="netlab_lan_verify_changed">%1$s：预期 MAC 为 %2$s，收到 %3$s。</string>
+    <string name="netlab_lan_verify_more">另有 %1$d 台设备未通过验证。</string>
 </resources>

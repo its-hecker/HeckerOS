@@ -19,6 +19,7 @@ final class NetLabLanSession {
     private ScheduledFuture<?> ticker;
     private final Map<String, Bundle> peers = new LinkedHashMap<>();
     private final Map<String, NetLabTrafficEvidence> evidence = new HashMap<>();
+    private final Map<String, Bundle> verification = new LinkedHashMap<>();
     private final NotificationManager notifications;
     private java.lang.Process child;
     private BufferedWriter input;
@@ -76,6 +77,9 @@ final class NetLabLanSession {
         b.putString("scope", scope); b.putString("gateway_mac", gatewayMac);
         b.putString("action", action);
         b.putInt("helper_exit",helperExit);b.putString("last_end",lastEnd);
+        ArrayList<Bundle> failures = new ArrayList<>();
+        for (Bundle failure : verification.values()) failures.add(new Bundle(failure));
+        b.putParcelableArrayList("verification", failures);
         ArrayList<Bundle> devices = new ArrayList<>();
         for (Bundle peer : peers.values()) {
             Bundle d = new Bundle(peer);
@@ -116,6 +120,7 @@ final class NetLabLanSession {
                 command += "COMMIT\n";
             } else if (!operation.equals("INFO")) command += "\n";
         } catch (IllegalArgumentException | SecurityException failure) { return failure.getMessage(); }
+        verification.clear();
         if (operation.equals("SCAN")) { peers.clear(); evidence.clear(); gatewayMac = ""; }
         if (operation.equals("START")) {
             evidence.clear();
@@ -230,6 +235,17 @@ final class NetLabLanSession {
             case "PEER":
                 if (!action.equals("SCAN") || peers.size() >= 255) throw new IllegalArgumentException("invalid_helper_output");
                 peers.put(w[1], peer(w[1], w[2])); break;
+            case "VERIFY":
+                Bundle checked = peers.get(w[1]);
+                if (!action.equals("START") || active || checked == null
+                        || !w[2].equals(checked.getString("mac")) || w[2].equals(w[3]))
+                    throw new IllegalArgumentException("invalid_helper_output");
+                Bundle failure = new Bundle(); failure.putString("address", w[1]);
+                failure.putString("expected", w[2]); failure.putString("observed", w[3]);
+                verification.put(w[1], failure);
+                checked.putBoolean("online", false);
+                android.util.Log.w("HeckerNetLab", "Peer verification result="
+                        + (w[3].equals("missing") ? "missing" : "mac_changed")); break;
             case "STARTED":
                 if (!action.equals("START")) throw new IllegalArgumentException("invalid_helper_output");
                 active = true; status = "active_unverified";

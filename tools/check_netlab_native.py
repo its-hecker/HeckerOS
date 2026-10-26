@@ -57,6 +57,14 @@ def check():
             core, guard, str(root / 'tests/NetLabRouteParserTest.cpp'),
             *['-Wl,--wrap=' + name for name in wrappers], '-o', str(route_test)], check=True)
         subprocess.run([str(route_test)], check=True, env=environment, timeout=10)
+        peer_test = out / 'peer-discovery-test'
+        peer_wrappers = ['socket', 'if_nametoindex', 'bind', 'setsockopt', 'sendto',
+            'recvfrom', 'poll', 'read', 'write', 'close', 'clock_gettime',
+            '__poll_chk', '__read_chk', '__recvfrom_chk']
+        subprocess.run(helper_flags + ['-fsanitize=address,undefined', '-fno-omit-frame-pointer',
+            core, guard, str(root / 'tests/NetLabPeerDiscoveryTest.cpp'),
+            *['-Wl,--wrap=' + name for name in peer_wrappers], '-o', str(peer_test)], check=True)
+        subprocess.run([str(peer_test)], check=True, env=environment, timeout=10)
         # Every input below exits before interface/raw-socket access, even as UID 0.
         cases = [(b'INFO\n', b'READY 1\n'), (b'not_a_command\n', b'ERROR invalid_command\n'),
             (b'SCAN eth0 192.168.10.2 24 192.168.10.1\n', b'ERROR invalid_link\n'),
