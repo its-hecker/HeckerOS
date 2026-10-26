@@ -18,7 +18,7 @@ final class NetLabDiscovery implements AutoCloseable {
     static final class Link {
         final Network network; final LinkProperties properties; final String scope;
         Link(Network network,LinkProperties properties){this.network=network;this.properties=properties;scope=network.getNetworkHandle()+":"+properties.getInterfaceName();}
-        String gateway(){for(RouteInfo route:properties.getRoutes())if(route.isDefaultRoute()&&route.hasGateway())return route.getGateway().getHostAddress();return "";}
+        String gateway(){for(RouteInfo route:properties.getRoutes())if(route.isDefaultRoute()&&route.hasGateway()&&route.getGateway() instanceof Inet4Address)return route.getGateway().getHostAddress();return "";}
         List<String> targets(){for(LinkAddress address:properties.getLinkAddresses())if(address.getAddress() instanceof Inet4Address)
             return NetLabAddressPlan.targets(address.getAddress().getAddress(),address.getPrefixLength());return Collections.emptyList();}
     }
