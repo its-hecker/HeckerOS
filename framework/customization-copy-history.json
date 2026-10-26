@@ -20,12 +20,14 @@
     "1a69fc6d854a883a9c5d71d2e9ee139b90bdd828"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerBattery.kt": [
-    "006348861f13e89e4a0c1be873e91c8f8e8d50fc"
+    "006348861f13e89e4a0c1be873e91c8f8e8d50fc",
+    "268fe7364abc7f4094c71654be94cc8d35bb1852"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerBatteryDrawable.java": [
     "896bb6fead26af0fe224d311886fe736f11d2d03",
     "2c67840f2a4ea6d338ae9d754426190a8864550b",
-    "38b52500e4794c63cf9ca3b70ff1cb08822e4b84"
+    "38b52500e4794c63cf9ca3b70ff1cb08822e4b84",
+    "0421aefd6b7a433c689847b630d248cc798fdb01"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerThemeAssets.kt": [
     "3c28bc60f5b84e5ad9625291968218c65467a780",
