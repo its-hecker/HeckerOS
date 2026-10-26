@@ -3,7 +3,7 @@ package org.hecker.netlab;
 
 import java.util.Locale;
 
-/** Peer-supplied hints, never an authoritative OS fingerprint or a guessed MAC vendor. */
+/** Peer-supplied hints, never an authoritative OS fingerprint. IEEE vendors are resolved separately. */
 public final class NetLabIdentity {
     public static String clean(String value) {
         if (value == null) return "";
@@ -21,6 +21,22 @@ public final class NetLabIdentity {
         if (type.startsWith("_airplay") || type.startsWith("_companion-link")) return "apple";
         if (type.startsWith("_googlecast")) return "media";
         return "unknown";
+    }
+    public static String brand(String name,String model,String manufacturer){
+        String supplied=clean(manufacturer);if(!supplied.isEmpty())return supplied;
+        String text=(clean(model)+" "+clean(name)).toLowerCase(Locale.ROOT);
+        if(text.matches(".*\\b(iphone|ipad|ipod|macbook|imac|macmini|macpro|appletv|homepod).*"))return "Apple";
+        if(text.matches(".*\\b(pixel[ -]?[0-9]|chromecast|google[ -]home).*"))return "Google";
+        if(text.contains("samsung")||text.matches(".*\\bsm-[a-z0-9]+.*"))return "Samsung";
+        if(text.contains("oneplus"))return "OnePlus";
+        if(text.contains("nothing phone"))return "Nothing";
+        if(text.contains("xiaomi")||text.contains("redmi")||text.contains("poco "))return "Xiaomi";
+        if(text.contains("huawei"))return "Huawei";
+        if(text.contains("motorola"))return "Motorola";
+        if(text.contains("realme"))return "Realme";
+        if(text.contains("oppo"))return "OPPO";
+        if(text.contains("vivo")||text.contains("iqoo"))return "vivo";
+        return "";
     }
     private NetLabIdentity() {}
 }

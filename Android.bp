@@ -10,8 +10,15 @@ license {
     license_text: ["LICENSE"],
 }
 
+license {
+    name: "hecker_netlab_registry_license",
+    license_kinds: ["SPDX-license-identifier-BSD-2-Clause"],
+    license_text: ["app/assets/netlab/NOTICE.txt"],
+}
+
 android_app {
     name: "HeckerSuite",
+    licenses: ["hecker_suite_license", "hecker_netlab_registry_license"],
     manifest: "app/AndroidManifest.xml",
     srcs: ["app/src/**/*.java"],
     exclude_srcs: ["app/src/org/hecker/suite/SuiteActivity.java",

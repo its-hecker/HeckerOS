@@ -47,6 +47,7 @@ final class NetLabNames implements AutoCloseable {
                             String name = NetLabIdentity.clean(value.getServiceName());
                             String model = attribute(value, "model", "md", "ty");
                             String kind = NetLabIdentity.kind(name, model, value.getServiceType());
+                            String brand=NetLabIdentity.brand(name,model,attribute(value,"manufacturer","mfr","vendor"));
                             for (InetAddress address : value.getHostAddresses()) {
                                 if (address.isLoopbackAddress() || address.isAnyLocalAddress()) continue;
                                 String ip = address.getHostAddress();
@@ -54,6 +55,7 @@ final class NetLabNames implements AutoCloseable {
                                 synchronized (entry) {
                                     // Keep stronger evidence from another advertised service.
                                     if (!model.isEmpty()) entry.putString("model", model);
+                                    if(!brand.isEmpty()){entry.putString("brand",brand);entry.putString("brand_source","advertised");}
                                     if (!name.isEmpty() && !value.getServiceType().startsWith("_adb-")) entry.putString("name", name);
                                     if (!kind.equals("unknown") && (entry.getString("os", "unknown").equals("unknown")
                                             || !kind.equals("apple") && !kind.equals("media"))) entry.putString("os", kind);

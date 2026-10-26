@@ -18,6 +18,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -27,6 +28,7 @@ final class NetLabStyle {
     static final int BLACK=0xff000000, PANEL=0xff191919, BODY=0xff101010;
     static final int WHITE=0xfffafafa, MUTED=0xffb3b3b3, ORANGE=0xffff7900;
     static final int WIFI=0, TIMER=1, COPY=2, LOCK=3, REFRESH=4, SEARCH=5, CUT=6, DEVICE=7, ANDROID=8;
+    static final int APPLE=9, WINDOWS=10, LINUX=11, MEDIA=12, ROUTER=13, UNKNOWN=14;
     private NetLabStyle() {}
 
     static GradientDrawable shape(Activity a,int color,int radius) {
@@ -62,7 +64,9 @@ final class NetLabStyle {
     }
     static ImageButton icon(Activity a,int type,CharSequence description,View.OnClickListener action) {
         ImageButton button=new ImageButton(a);button.setImageDrawable(new Icon(type));
-        button.setPadding(Ui.dp(a,12),Ui.dp(a,12),Ui.dp(a,12),Ui.dp(a,12));
+        // ImageButton's default CENTER keeps a 24 px drawable tiny on high-density phones.
+        button.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        button.setPadding(Ui.dp(a,8),Ui.dp(a,8),Ui.dp(a,8),Ui.dp(a,8));
         button.setBackground(new RippleDrawable(ColorStateList.valueOf(0x33ffffff),null,shape(a,WHITE,24)));
         button.setContentDescription(description);button.setTooltipText(description);button.setOnClickListener(action);
         button.setLayoutParams(new LinearLayout.LayoutParams(Ui.dp(a,48),Ui.dp(a,48)));return button;
@@ -78,6 +82,36 @@ final class NetLabStyle {
         GradientDrawable thumb=shape(a,WHITE,2);thumb.setSize(Ui.dp(a,3),Ui.dp(a,20));speed.setThumb(thumb);
         speed.setThumbOffset(0);speed.setPadding(Ui.dp(a,4),Ui.dp(a,14),Ui.dp(a,4),Ui.dp(a,14));
         speed.setLayoutParams(new LinearLayout.LayoutParams(0,Ui.dp(a,48),1));return speed;
+    }
+
+    static Drawable brandMark(String vendor){
+        String name=vendor.toLowerCase(java.util.Locale.ROOT),mark="";
+        if(name.contains("xiaomi"))mark="MI";
+        else if(name.contains("samsung"))mark="S";
+        else if(name.contains("google"))mark="G";
+        else if(name.contains("oneplus"))mark="1+";
+        else if(name.contains("nothing"))mark="N";
+        else if(name.contains("huawei"))mark="H";
+        else if(name.contains("motorola"))mark="M";
+        else if(name.contains("oppo"))mark="OP";
+        else if(name.contains("vivo"))mark="v";
+        else if(name.contains("realme"))mark="R";
+        else if(name.contains("microsoft"))mark="MS";
+        if(mark.isEmpty())return new Icon(UNKNOWN);
+        final String label=mark;
+        return new Drawable(){
+            final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
+            public void draw(Canvas c){
+                paint.setColor(WHITE);paint.setTypeface(Typeface.create(Typeface.DEFAULT,Typeface.BOLD));paint.setTextAlign(Paint.Align.CENTER);
+                paint.setTextSize(getBounds().height()*(label.length()>1?.65f:.8f));Paint.FontMetrics font=paint.getFontMetrics();
+                c.drawText(label,getBounds().exactCenterX(),getBounds().exactCenterY()-(font.ascent+font.descent)/2,paint);
+            }
+            public void setAlpha(int value){paint.setAlpha(value);invalidateSelf();}
+            public void setColorFilter(ColorFilter value){paint.setColorFilter(value);invalidateSelf();}
+            public int getOpacity(){return PixelFormat.TRANSLUCENT;}
+            public int getIntrinsicWidth(){return 24;}
+            public int getIntrinsicHeight(){return 24;}
+        };
     }
 
     static final class Icon extends Drawable {
@@ -115,6 +149,24 @@ final class NetLabStyle {
                     c.drawLine(6,3,3,0,paint);c.drawLine(18,3,21,0,paint);paint.setStyle(Paint.Style.FILL);
                     c.drawArc(1,2,23,24,180,180,true,paint);paint.setColor(PANEL);
                     c.drawCircle(7,9,1.3f,paint);c.drawCircle(17,9,1.3f,paint);break;
+                case APPLE:
+                    paint.setStyle(Paint.Style.FILL);p.moveTo(12,6);p.cubicTo(7,2,2,7,4,13);p.cubicTo(5,18,7,23,10,21);
+                    p.cubicTo(12,20,13,20,15,21);p.cubicTo(18,23,20,18,21,16);p.cubicTo(16,14,16,9,20,7);
+                    p.cubicTo(17,3,14,5,12,6);p.close();c.drawPath(p,paint);c.drawOval(12,0,16,5,paint);break;
+                case WINDOWS:
+                    paint.setStyle(Paint.Style.FILL);c.drawRect(2,3,10.5f,10.5f,paint);c.drawRect(13,2,23,10.5f,paint);
+                    c.drawRect(2,13,10.5f,20.5f,paint);c.drawRect(13,13,23,22,paint);break;
+                case LINUX:
+                    c.drawOval(5,7,19,22,paint);c.drawOval(8,1,16,12,paint);c.drawCircle(10,5,0.5f,paint);c.drawCircle(14,5,0.5f,paint);
+                    p.moveTo(10,8);p.lineTo(12,10);p.lineTo(14,8);c.drawPath(p,paint);c.drawLine(4,23,10,23,paint);c.drawLine(14,23,20,23,paint);break;
+                case MEDIA:
+                    c.drawRoundRect(1,4,23,20,1,1,paint);c.drawLine(7,1,12,4,paint);c.drawLine(17,1,12,4,paint);
+                    p.moveTo(10,8);p.lineTo(16,12);p.lineTo(10,16);p.close();c.drawPath(p,paint);break;
+                case ROUTER:
+                    c.drawRoundRect(1,13,23,22,2,2,paint);c.drawLine(5,13,5,3,paint);c.drawLine(19,13,19,3,paint);
+                    c.drawCircle(6,18,0.5f,paint);c.drawCircle(10,18,0.5f,paint);c.drawCircle(14,18,0.5f,paint);break;
+                case UNKNOWN:
+                    c.drawCircle(12,12,10,paint);c.drawArc(9,5,16,12,190,270,false,paint);c.drawLine(12,12,12,15,paint);c.drawCircle(12,19,.5f,paint);break;
                 default:
                     c.drawRoundRect(3,2,21,18,1,1,paint);c.drawLine(12,18,12,22,paint);c.drawLine(8,22,16,22,paint);
             }

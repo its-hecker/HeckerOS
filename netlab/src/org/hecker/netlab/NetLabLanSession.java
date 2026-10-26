@@ -71,6 +71,7 @@ final class NetLabLanSession {
         Bundle b = new Bundle(); b.putString("status", status); b.putString("error", error);
         b.putBoolean("root", root); b.putBoolean("busy", busy); b.putBoolean("active", active);
         b.putString("scope", scope); b.putString("gateway_mac", gatewayMac);
+        b.putString("action", action);
         ArrayList<Bundle> devices = new ArrayList<>();
         for (Bundle peer : peers.values()) {
             Bundle d = new Bundle(peer);
