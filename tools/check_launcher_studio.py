@@ -107,6 +107,32 @@ static int calculateCellHeight(int space,int gap,int count){return (space-gap*(c
 ''' + hooks + '\n}\n'
 
 
+def hotseat_search_probe(source):
+    hooks = '\n'.join(method(source, anchor) for anchor in (
+        'public void setInsets(Rect insets)', 'protected void onMeasure(int widthMeasureSpec',
+        'protected void onLayout(boolean changed'))
+    return r'''import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Rect;
+import android.view.*;
+import android.widget.FrameLayout;
+class HotseatSearchProbe extends FrameLayout {
+ final View mQsb;int mHeckerNavigationInset;
+ final Activity mActivity=new Activity();
+ HotseatSearchProbe(Context c){super(c);mQsb=new com.android.launcher3.hecker.HeckerDockBar(c);}
+ static class Activity {DeviceProfile getDeviceProfile(){return new DeviceProfile();}}
+ static class DeviceProfile {
+ boolean isVerticalBarLayout(){return false;} boolean isSeascape(){return false;}
+ Profile getHotseatProfile(){return new Profile();} int getQsbOffsetY(){return 0;}
+ Rect getHotseatLayoutPadding(Context c){return new Rect();}
+ }
+ static class Profile {int getBarSizePx(){return 80;}int getQsbWidth(){return 0;}
+ int getQsbHeight(){return 0;}boolean isQsbInline(){return false;}int getBorderSpace(){return 8;}}
+ static class InsettableFrameLayout {static void dispatchInsets(View v,Rect r){}}
+ static class Utilities {static boolean isRtl(Resources r){return false;}}
+''' + hooks + '\n}\n'
+
+
 def check(launcher, sdk, helper_classes):
     resources = ET.parse(ROOT / 'aosp-launcher/res/values/studio.xml').getroot()
     names = {node.get('name') for node in resources}
@@ -141,6 +167,8 @@ def check(launcher, sdk, helper_classes):
     apps = (launcher / 'src/com/android/launcher3/allapps/AllAppsStore.java').read_text()
     get_apps = method(apps, 'public AppInfo[] getApps()')
     stubs = {
+        'HotseatSearchProbe.java': hotseat_search_probe(
+            (launcher / 'src/com/android/launcher3/Hotseat.java').read_text()),
         'HomeClockProbe.java': home_clock_probe(
             (launcher / 'src/com/android/launcher3/CellLayout.java').read_text()),
         'BubbleSizeProbe.java': bubble_constructor_probe(

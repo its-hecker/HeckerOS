@@ -154,4 +154,6 @@
     <item name="android:navigationBarColor">#10161C</item>
     <item name="android:windowSoftInputMode">adjustResize</item>
   </style>
+  <string name="hs_dock_search">Hecker search below dock</string>
+  <string name="hs_dock_search_brand">Hecker Search</string>
 </resources>

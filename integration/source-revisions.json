@@ -1,5 +1,5 @@
 {
-  "checked_on": "2026-10-23",
+  "checked_on": "2026-10-26",
   "pixelos_manifest": {
     "repository": "PixelOS-AOSP/android_manifest",
     "branch": "seventeen",
@@ -92,7 +92,7 @@
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
       "branch": "heckeros-17",
-      "revision": "aa9ff27ba80d5a2c57a2f1ab5b9106e639a92226",
+      "revision": "854e6dbf73ae1cd61095085a9655c8d9136104eb",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -213,7 +213,7 @@
     "packages/apps/Settings": {
       "repository": "its-hecker/heckeros_packages_apps_Settings",
       "branch": "feat/suite-polish",
-      "revision": "35d49a66f2f197a244015809ba0cb8340d9faae0",
+      "revision": "e97dc8bb729e6a8da69333b63b5dc6c95f500ec1",
       "files": [
         "src/com/android/settings/homepage/",
         "src/com/android/settings/DisplaySettings.java",
@@ -272,6 +272,13 @@
         },
         "notes": "Native Java/View adaptation of the hub, PIF and TrickyStore screens and public metadata workflow; retained HeckerOS UID-scoped system-only storage; original vector Lottie. See docs/spoofing-hub.md.",
         "validation": "Locked SDK/resources and synthetic host certificate tests; full Soong/ROM and device validation required."
+      },
+      "evolution_x_pif_backend": {
+        "repository": "Evolution-X/frameworks_base",
+        "branch": "cnb",
+        "revision": "c4d3eeb6aba62768dfb11c26711728b99daa42dd",
+        "verified_at": "2026-10-26",
+        "notes": "Current PIF Java behavior adapted to HeckerOS Settings/process-scoped native property bridge; overlapping PixelOS PIF/keybox call paths removed."
       }
     }
   },

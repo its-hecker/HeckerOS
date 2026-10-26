@@ -24,9 +24,9 @@
   <extend-project name="LineageOS/android_hardware_qcom-caf_common" path="hardware/qcom-caf/common" revision="5e84e6f8fc47530881fa8d95cf533617ff51e820" upstream="refs/heads/lineage-24.0" />
   <extend-project name="its-hecker/heckeros_vendor_custom" path="vendor/custom" revision="302ac1f722258085326e38d45e2742a067316d59" upstream="refs/heads/feat/about-phone-official" />
   <extend-project name="its-hecker/heckeros_vendor_lineage" path="vendor/lineage" revision="0d2ff0b8055eb745d36dfef3600a73f5185a4fff" upstream="refs/heads/heckeros-17" />
-  <extend-project name="its-hecker/heckeros_frameworks_base" path="frameworks/base" revision="3fcdacb667bb3e0a944b61453ca970a88c5b1087" upstream="refs/heads/heckeros-17" />
+  <extend-project name="its-hecker/heckeros_frameworks_base" path="frameworks/base" revision="854e6dbf73ae1cd61095085a9655c8d9136104eb" upstream="refs/heads/heckeros-17" />
   <extend-project name="platform/hardware/google/camera" path="hardware/google/camera" revision="cd15337bd229dd521a860d88bca3e37c3ca845f7" upstream="refs/tags/android-17.0.0_r1" />
   <extend-project name="PixelOS-AOSP/android_system_sepolicy" path="system/sepolicy" revision="99c58a7cc9a44fe33c93808452d018e756d84753" upstream="refs/heads/seventeen" />
   <extend-project name="PixelOS-AOSP/android_system_core" path="system/core" revision="a5313eaec0219b021aaa5e59cc10dd07cfa8504c" upstream="refs/heads/seventeen" />
-  <extend-project name="its-hecker/heckeros_packages_apps_Settings" path="packages/apps/Settings" revision="a03bc7da780240570db7dc075bdb0f500a930f1d" upstream="refs/heads/feat/suite-polish" />
+  <extend-project name="its-hecker/heckeros_packages_apps_Settings" path="packages/apps/Settings" revision="e97dc8bb729e6a8da69333b63b5dc6c95f500ec1" upstream="refs/heads/feat/suite-polish" />
 </manifest>

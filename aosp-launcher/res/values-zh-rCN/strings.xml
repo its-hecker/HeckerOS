@@ -20,4 +20,6 @@
     <string name="hecker_glass_corner_tr">右上圆角</string>
     <string name="hecker_glass_corner_br">右下圆角</string>
     <string name="hecker_glass_corner_bl">左下圆角</string>
+  <string name="hs_dock_search">底部托盘下方的 Hecker 搜索栏</string>
+  <string name="hs_dock_search_brand">Hecker 搜索</string>
 </resources>

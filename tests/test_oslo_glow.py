@@ -26,15 +26,26 @@ public class FakeGlow extends android.view.View implements com.android.systemui.
  public FakeGlow(android.content.Context c){super(c);}
  public void onDozingChanged(boolean v){dozing=v;dozeCalls++;}public void onPulsingChanged(boolean v){pulsing=v;pulseCalls++;}}
 ''',
+            'com/google/oslo/ui/glow/GlowFeedbackView.java': r'''package com.google.oslo.ui.glow;
+public class GlowFeedbackView extends com.google.oslo.ui.FakeGlow {
+ public interface Callback {void onAnimationStart();void onAnimationEnd();}
+ private int mCurrAnim;public int starts;
+ private Callback mCallback=new Callback(){public void onAnimationStart(){starts++;}public void onAnimationEnd(){}};
+ public GlowFeedbackView(android.content.Context c){super(c);}
+ public void setCallback(Callback c){mCallback=c;}
+ public void animate(int kind){mCallback.onAnimationStart();mCurrAnim=kind;}
+}''',
             'android/graphics/PixelFormat.java': 'package android.graphics; public class PixelFormat { public static final int TRANSLUCENT=-3; }',
+            'android/os/SystemClock.java': 'package android.os;public class SystemClock {public static long now=10000;public static long elapsedRealtime(){return now;}}',
             'android/os/Looper.java': 'package android.os; public class Looper {static final Looper MAIN=new Looper(); public static Looper getMainLooper(){return MAIN;} public static Looper myLooper(){return MAIN;}}',
-            'android/os/Handler.java': 'package android.os; public class Handler {public Handler(Looper l){} public void post(Runnable r){r.run();} public void removeCallbacksAndMessages(Object o){}}',
+            'android/os/Handler.java': 'package android.os; public class Handler {public Handler(Looper l){} public void post(Runnable r){r.run();} public static final java.util.ArrayDeque<Runnable> delayed=new java.util.ArrayDeque<>();public void postDelayed(Runnable r,long ms){delayed.add(r);}public static void drain(){while(!delayed.isEmpty())delayed.remove().run();} public void removeCallbacksAndMessages(Object o){}}',
             'android/util/Log.java': 'package android.util; public class Log {public static int w(String t,String m,Throwable e){return 0;}}',
             'android/view/Gravity.java': 'package android.view; public class Gravity {public static final int TOP=48;}',
             'android/view/View.java': '''package android.view; import android.content.Context;
 public class View { public Object parent; final Context context; public View(Context c){context=c;}
  public Context getContext(){return context;} public Object getParent(){return parent;}
  public static final int VISIBLE=0;public int getVisibility(){return VISIBLE;}
+ public static final java.util.ArrayDeque<Runnable> posted=new java.util.ArrayDeque<>();public boolean post(Runnable r){posted.add(r);return true;}public static void drain(){while(!posted.isEmpty())posted.remove().run();}
  public boolean attached;public boolean isAttachedToWindow(){return attached;}
  public interface OnAttachStateChangeListener{void onViewAttachedToWindow(View v);void onViewDetachedFromWindow(View v);}
  public final java.util.List<OnAttachStateChangeListener> listeners=new java.util.ArrayList<>();
@@ -93,17 +104,29 @@ public class GlowTest {
  plugin.held=true;callback.onHoldStatusBarOpenChange();
  check(HeckerOsloOverlayHost.holdsNativeShade(plugin));
  check(windows.last.type==2041&&windows.last.trusted&&(windows.last.flags&24)==24);
- com.google.oslo.ui.FakeGlow feedback=new com.google.oslo.ui.FakeGlow(context);
+ com.google.oslo.ui.glow.GlowFeedbackView feedback=new com.google.oslo.ui.glow.GlowFeedbackView(context);
  android.opengl.GLSurfaceView shader=new android.opengl.GLSurfaceView(context);
  ((ViewGroup)host).addView(shader);((ViewGroup)host).addView(feedback);
  check(feedback.dozing&&!feedback.pulsing&&feedback.dozeCalls==1&&feedback.pulseCalls==1);
+ int[] pulses={0};HeckerOsloOverlayHost.attachDoze(()->{pulses[0]++;return 1;});
+ feedback.animate(5);View.drain();check(pulses[0]==1&&feedback.starts==1);
+ feedback.animate(5);View.drain();check(pulses[0]==1); // Debounce repeated callbacks.
+ android.os.SystemClock.now+=3000;feedback.animate(14);View.drain();check(pulses[0]==1); // AOD fades never repulse.
+ status.pulsing=true;feedback.animate(3);View.drain();check(pulses[0]==1);status.pulsing=false;
+ lock.show(false);feedback.animate(3);View.drain();check(pulses[0]==1);lock.show(true);
+ HeckerOsloOverlayHost.attachDoze(()->{pulses[0]++;return pulses[0]<4?2:1;});
+ feedback.animate(3);View.drain();android.os.Handler.drain();check(pulses[0]==4);
+ android.os.SystemClock.now+=3000;HeckerOsloOverlayHost.attachDoze(()->{pulses[0]++;return 0;});
+ feedback.animate(5);View.drain();android.os.Handler.drain();check(pulses[0]==5); // Suppression isn't retried.
  int frames=shader.renders;HeckerOsloOverlayHost.onDozeScreenState(Display.STATE_OFF);HeckerOsloOverlayHost.dozeTimeTick();check(shader.renders==frames);
  HeckerOsloOverlayHost.onDozeScreenState(Display.STATE_ON);check(shader.renders>frames);frames=shader.renders;
  HeckerOsloOverlayHost.onDozeScreenState(Display.STATE_DOZE);HeckerOsloOverlayHost.dozeTimeTick();check(shader.renders>frames);
  check(feedback.dozeCalls==1&&feedback.pulseCalls==1); // Ticks redraw, without replaying animation state.
  for(int i=0;i<10;i++){lock.show(i%2==0);plugin.held=i%3==0;callback.onHoldStatusBarOpenChange();check(host.isAttachedToWindow()&&windows.current==host);check(HeckerOsloOverlayHost.holdsNativeShade(plugin)==(lock.showing&&plugin.held));}
  check(windows.adds==1&&windows.removes==0);
- HeckerOsloOverlayHost.disconnect(plugin);check(windows.current==null&&lock.callbacks.isEmpty()&&status.callbacks.isEmpty());
+ int beforeDisconnect=pulses[0];
+ HeckerOsloOverlayHost.disconnect(plugin);feedback.animate(5);View.drain();check(pulses[0]==beforeDisconnect);
+ HeckerOsloOverlayHost.detachDoze();check(windows.current==null&&lock.callbacks.isEmpty()&&status.callbacks.isEmpty());
  int before=forwarded[0];callback.onHoldStatusBarOpenChange();check(forwarded[0]==before);
  View pending=HeckerOsloOverlayHost.rootFor(plugin,context,root,lock,status);
  HeckerOsloOverlayHost.whenAttached(plugin,pending,()->{throw new AssertionError("setup after disconnect");});
@@ -123,5 +146,5 @@ public class GlowTest {
                 path.write_text(source)
                 paths.append(str(path))
             subprocess.run(['java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-d', str(root / 'classes'),
-                            *paths, str(ROOT / 'framework/glow/HeckerOsloOverlayHost.java')], check=True)
+                            *paths, *map(str, (ROOT / 'framework/glow').glob('*.java'))], check=True)
             subprocess.run(['java', '-cp', str(root / 'classes'), 'GlowTest'], check=True)

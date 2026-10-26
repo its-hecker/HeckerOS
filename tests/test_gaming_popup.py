@@ -21,7 +21,13 @@ static class Context {
  final PM pm=new PM(); Intent launched; ActivityOptions options;
  PM getPackageManager(){return pm;} Object getContentResolver(){return this;}
  <T> T getSystemService(Class<T> type){return type.cast(new WindowManager());}
- void startActivity(Intent intent,Object bundle){launched=intent;options=(ActivityOptions)bundle;}
+ void startActivity(Intent intent,Object bundle){
+  ActivityOptions requested=(ActivityOptions)bundle;
+  // Android 17 SafeActivityOptions rejects this even for a platform-signed
+  // privileged app with MANAGE_ACTIVITY_TASKS: Suite is not system/SystemUI.
+  if(requested.alwaysOnTop)throw new SecurityException("taskAlwaysOnTop requires system or SystemUI");
+  launched=intent;options=requested;
+ }
 }
 static class Settings {static class Global {static int enabled;
  static int getInt(Object r,String n,int fallback){return enabled;}}}
@@ -39,13 +45,13 @@ static class Rect {
 static class WindowManager { Metrics getCurrentWindowMetrics(){return new Metrics();} }
 static class Metrics { Rect getBounds(){return new Rect(0,0,1000,600);} }
 public static class ActivityOptions {
- int mode,display;Rect bounds;
+ int mode,display;Rect bounds;boolean alwaysOnTop;
  static ActivityOptions makeBasic(){return new ActivityOptions();}
  public void setLaunchWindowingMode(int value){mode=value;}
  void setLaunchDisplayId(int value){display=value;}
  void setLaunchBounds(Rect rect){bounds=rect;}
  Object toBundle(){return this;}
- // Deliberately no optional setTaskAlwaysOnTop method.
+ public void setTaskAlwaysOnTop(boolean value){alwaysOnTop=value;}
 }
 ''' + actual + r'''
 static void check(boolean value){if(!value)throw new AssertionError();}
@@ -53,7 +59,7 @@ public static void main(String[] args) throws Exception {
  Context context=new Context();Intent alias=new Intent();
  // No manifest resizeMode API is exposed: Android owns compatibility policy.
  check(supportsPopup(context,alias));popup(context,alias);
- check(context.launched==alias&&alias.flags==3&&context.options.mode==5);
+ check(context.launched==alias&&alias.flags==3&&context.options.mode==5&&!context.options.alwaysOnTop);
  check(context.options.display==0&&context.options.bounds.width()>0);
  check(context.options.bounds.right<=1000&&context.options.bounds.bottom<=600);
  alias.resolved=false;check(!supportsPopup(context,alias));

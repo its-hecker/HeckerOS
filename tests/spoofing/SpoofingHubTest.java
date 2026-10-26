@@ -71,6 +71,16 @@ public final class SpoofingHubTest {
         rejected(()->SpoofingTargets.parse(many.toString()),"target count bounded");
         rejected(()->SpoofingTargets.parse("x".repeat(256*1024+1)),"target bytes bounded");
 
+        Map<String,String> latestProfile=new java.util.LinkedHashMap<>();
+        latestProfile.put("FINGERPRINT","google/shiba/shiba:17/CP21/123456:user/release-keys");
+        latestProfile.put("spoofVendingFinger","1");latestProfile.put("spoofVendingSdk","35");
+        check(PifProfile.validate(latestProfile).get("spoofVendingSdk").equals("35"),"Evolution X numeric Play Store SDK option");
+        latestProfile.put("spoofVendingFinger","google/husky/husky:17/CP21/123456:user/release-keys");
+        check(PifProfile.validate(latestProfile).get("spoofVendingFinger").contains("husky"),"Evolution X custom Play Store fingerprint");
+        latestProfile.put("spoofVendingSdk","100");rejected(()->PifProfile.validate(latestProfile),"invalid Play Store SDK rejected");
+        latestProfile.put("spoofVendingSdk","0");latestProfile.put("spoofVendingFinger","not a fingerprint");
+        rejected(()->PifProfile.validate(latestProfile),"invalid custom fingerprint rejected");
+
         Map<String,String> devices = PixelCanaryProfileFetcher.parseDevices(
                 "<tr id=\"future_beta\"><td>Pixel 20 <b>Pro</b></td></tr>"
                 +"<tr id='tablet'><td>Pixel Tablet</td></tr><tr id='other'><td>Other phone</td></tr>");
@@ -121,6 +131,15 @@ public final class SpoofingHubTest {
             String xml="<AndroidAttestation><Key><CertificateChain><Certificate>"+pem(leaf)
                     +"</Certificate><Certificate>"+pem(root)+"</Certificate></CertificateChain></Key></AndroidAttestation>";
             check(KeyboxStatus.chains(KeyboxStatus.xml(xml)).get(0).size()==2,"certificate XML parsed");
+            check(KeyboxStatus.xml("\uFEFF"+xml).equals(xml),"BOM-prefixed XML normalized");
+            String factory=System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
+            try {
+                System.setProperty("javax.xml.parsers.DocumentBuilderFactory","org.apache.harmony.xml.parsers.DocumentBuilderFactoryImpl");
+                check(KeyboxStatus.chains(KeyboxStatus.xml(xml)).get(0).size()==2,"Android libcore XML factory parses provider chains");
+            } finally {
+                if(factory==null)System.clearProperty("javax.xml.parsers.DocumentBuilderFactory");
+                else System.setProperty("javax.xml.parsers.DocumentBuilderFactory",factory);
+            }
             check(KeyboxStatus.xml(Base64.getEncoder().encodeToString(xml.getBytes(StandardCharsets.UTF_8))).equals(xml),"base64 keybox import");
         }
         rejected(()->KeyboxStatus.xml("<!DOCTYPE Key [<!ENTITY a SYSTEM 'file:///etc/passwd'>]><Key>&a;</Key>"),"external entity rejected");

@@ -319,22 +319,7 @@ final class GamingOverlay {
         mode(modes,R.string.gaming_performance,2);mode(modes,R.string.gaming_balanced,1);mode(modes,R.string.gaming_battery_saver,3);
         header.addView(modes,new FrameLayout.LayoutParams(-1,dp(45),Gravity.BOTTOM));
         main.addView(header,new LinearLayout.LayoutParams(-1,dp(102)));GamingUi.gap(main,12);
-        actionRow(main,R.string.gaming_game_mode,pref("focus"),actions::focus,R.string.gaming_screenshot,false,actions::screenshot);
-        LinearLayout record=GamingUi.row(c);
-        recordText=tile(record,GamingRecordingService.recording?R.string.gaming_stop_record:R.string.gaming_record,GamingRecordingService.recording,actions::record);
-        tile(record,R.string.gaming_block_navigation,pref("block_navigation"),()->actions.toggle("block_navigation"));main.addView(record);GamingUi.gap(main,8);
-        actionRow(main,R.string.gaming_block_edge,pref("block_edge"),()->actions.toggle("block_edge"),
-                R.string.gaming_block_brightness,pref("block_brightness"),()->actions.toggle("block_brightness"));
-        AudioManager audio=c.getSystemService(AudioManager.class);
-        int brightness=actions.brightnessLevel();
-        slider(main,"sun",R.string.gaming_brightness,0,255,brightness,value->actions.brightness(Math.max(.01f,value/255f)));
-        slider(main,"volume",R.string.gaming_volume,audio.getStreamMinVolume(AudioManager.STREAM_MUSIC),
-                audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC),audio.getStreamVolume(AudioManager.STREAM_MUSIC),
-                value->audio.setStreamVolume(AudioManager.STREAM_MUSIC,value,0));
-        GamingUi.gap(main,6);
-        actionRow(main,R.string.gaming_block_assistant,pref("block_assistant"),()->actions.toggle("block_assistant"),
-                R.string.gaming_floating_menu,GamingPrefs.get(c).getBoolean("fps",true),()->actions.toggle("fps"));
-        actionRow(main,R.string.gaming_system_monitor,false,()->{page=2;showPage();},R.string.gaming_booster_settings,false,()->{page=1;showPage();});
+        buildActionTiles(main);
     }
     private void buildCompactTools(LinearLayout main) {
         LinearLayout metrics = GamingUi.row(c);
@@ -351,34 +336,55 @@ final class GamingOverlay {
         LinearLayout modes = GamingUi.row(c);
         mode(modes, R.string.gaming_performance, 2); mode(modes, R.string.gaming_balanced, 1); mode(modes, R.string.gaming_battery_saver, 3);
         main.addView(modes, new LinearLayout.LayoutParams(-1, dp(44)));
+        buildActionTiles(main);
+    }
+    /** Keep the same three-column order in both orientations. Controls scroll above the dock. */
+    private void buildActionTiles(LinearLayout main) {
         LinearLayout first = GamingUi.row(c);
         tile(first, R.string.gaming_game_mode, pref("focus"), actions::focus);
         tile(first, R.string.gaming_screenshot, false, actions::screenshot);
-        recordText = tile(first, GamingRecordingService.recording ? R.string.gaming_stop_record : R.string.gaming_record, GamingRecordingService.recording, actions::record);
-        tile(first, R.string.gaming_block_navigation, pref("block_navigation"), () -> actions.toggle("block_navigation"));
-        compactRow(main, first);
-        LinearLayout second = GamingUi.row(c);
-        tile(second, R.string.gaming_block_edge, pref("block_edge"), () -> actions.toggle("block_edge"));
-        tile(second, R.string.gaming_block_brightness, pref("block_brightness"), () -> actions.toggle("block_brightness"));
-        tile(second, R.string.gaming_block_assistant, pref("block_assistant"), () -> actions.toggle("block_assistant"));
-        tile(second, R.string.gaming_floating_menu, GamingPrefs.get(c).getBoolean("fps", true), () -> actions.toggle("fps"));
-        compactRow(main, second);
+        recordText = tile(first, GamingRecordingService.recording ? R.string.gaming_stop_record : R.string.gaming_record,
+                GamingRecordingService.recording, actions::record);
+        toolRow(main, first);
+
         AudioManager audio = c.getSystemService(AudioManager.class);
         LinearLayout sliders = GamingUi.row(c);
-        brightnessSlider = new GamingBoosterUi.GlassSlider(c, "sun", c.getString(R.string.gaming_brightness), 0, 255, actions.brightnessLevel(), value -> actions.brightness(Math.max(.01f, value / 255f)));
-        volumeSlider = new GamingBoosterUi.GlassSlider(c, "volume", c.getString(R.string.gaming_volume), audio.getStreamMinVolume(AudioManager.STREAM_MUSIC), audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC), audio.getStreamVolume(AudioManager.STREAM_MUSIC), value -> audio.setStreamVolume(AudioManager.STREAM_MUSIC, value, 0));
+        brightnessSlider = new GamingBoosterUi.GlassSlider(c, "sun", c.getString(R.string.gaming_brightness),
+                0, 255, actions.brightnessLevel(), value -> actions.brightness(Math.max(.01f, value / 255f)));
+        volumeSlider = new GamingBoosterUi.GlassSlider(c, "volume", c.getString(R.string.gaming_volume),
+                audio.getStreamMinVolume(AudioManager.STREAM_MUSIC), audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                audio.getStreamVolume(AudioManager.STREAM_MUSIC), value -> audio.setStreamVolume(AudioManager.STREAM_MUSIC, value, 0));
         for (View slider : new View[] { brightnessSlider, volumeSlider }) {
-            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, dp(44), 1); p.setMargins(dp(3), dp(3), dp(3), dp(3)); sliders.addView(slider, p);
+            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, dp(44), 1);
+            p.setMargins(dp(3), dp(3), dp(3), dp(3)); sliders.addView(slider, p);
         }
-        main.addView(sliders);
+        main.addView(sliders); GamingUi.gap(main, 5);
+
+        LinearLayout second = GamingUi.row(c);
+        tile(second, R.string.gaming_block_navigation, pref("block_navigation"), () -> actions.toggle("block_navigation"));
+        tile(second, R.string.gaming_block_edge, pref("block_edge"), () -> actions.toggle("block_edge"));
+        tile(second, R.string.gaming_block_brightness, pref("block_brightness"), () -> actions.toggle("block_brightness"));
+        toolRow(main, second);
+        LinearLayout third = GamingUi.row(c);
+        tile(third, R.string.gaming_block_assistant, pref("block_assistant"), () -> actions.toggle("block_assistant"));
+        tile(third, R.string.gaming_floating_menu, GamingPrefs.get(c).getBoolean("fps", true), () -> actions.toggle("fps"));
+        tile(third, R.string.gaming_system_monitor, false, () -> { page = 2; showPage(); });
+        toolRow(main, third);
         LinearLayout last = GamingUi.row(c);
-        tile(last, R.string.gaming_system_monitor, false, () -> { page = 2; showPage(); });
         tile(last, R.string.gaming_booster_settings, false, () -> { page = 1; showPage(); });
-        compactRow(main, last);
+        // Empty cells retain the same tile width without stretching the last action.
+        last.addView(new View(c), new LinearLayout.LayoutParams(0, 1, 1));
+        last.addView(new View(c), new LinearLayout.LayoutParams(0, 1, 1));
+        toolRow(main, last);
     }
-    private void compactRow(LinearLayout main, LinearLayout row) {
-        for (int i = 0; i < row.getChildCount(); i++) ((TextView) row.getChildAt(i)).setTextSize(10);
-        main.addView(row); GamingUi.gap(main, 3);
+    private void toolRow(LinearLayout main, LinearLayout row) {
+        for (int i = 0; i < row.getChildCount(); i++) {
+            if (row.getChildAt(i) instanceof TextView) {
+                TextView tile = (TextView) row.getChildAt(i);
+                tile.setTextSize(11); tile.setMinHeight(dp(48));
+            }
+        }
+        main.addView(row); GamingUi.gap(main, 5);
     }
     private boolean pref(String key){return GamingPrefs.get(c).getBoolean(key,false);}
     private String number(int value){return value<0?"—":Integer.toString(value);}

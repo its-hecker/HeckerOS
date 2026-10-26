@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Compile the owned Settings adapters and check Axion PIF against pinned source.
+"""Compile the owned Settings adapters and check Evolution X PIF against pinned source.
 
 This does not build Settings/Android, run biometric enrollment, or obtain a Play verdict.
 """
@@ -170,7 +170,7 @@ extern "C" int __system_property_get(const char*,char*);
         run(out/'native-test')
         assert 'FindClass("android/security/pif/PlayIntegritySpoofService")' in cpp
         assert '"([Ljava/lang/String;[Ljava/lang/String;Z)Z"' in cpp
-    print('Owned Settings UI Java/resource checks and Axion PIF host regressions: PASS')
+    print('Owned Settings UI Java/resource checks and Evolution X PIF host regressions: PASS')
     print('Full Settings/platform build, Pixel 4 enrollment and Play Integrity verdict testing remain required.')
 
 

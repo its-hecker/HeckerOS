@@ -174,7 +174,7 @@ public final class HeckerStudioActivity extends Activity {
         button("hidden_apps", v -> chooseApp(true)); page.addView(HeckerStudio.label(this, t("hide_summary"), 14));
     }
     private void search() {
-        toggle("universal_search", true); toggle("search_shortcuts", true);
+        toggle("dock_search", true); toggle("universal_search", true); toggle("search_shortcuts", true);
         page.addView(HeckerStudio.label(this, t("search_local"), 14)); button("try_search", v -> HeckerStudio.search(this));
     }
     private interface Pick { void accept(String value); }

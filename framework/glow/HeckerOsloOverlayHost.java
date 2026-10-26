@@ -6,6 +6,7 @@ import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -20,12 +21,18 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.IntSupplier;
 
 /** Oslo owns one attached, non-interactive surface for its entire plugin lifetime. */
 public final class HeckerOsloOverlayHost {
     private static final int GLOW_WINDOW_TYPE = 2041;
     private static final Map<OverlayPlugin, Host> HOSTS = new IdentityHashMap<>();
     private static int displayState = Display.STATE_UNKNOWN;
+    private static IntSupplier pulseRequester;
+
+    /** Native DozeTriggers returns 0=suppressed, 1=accepted, 2=transient transition. */
+    public static void attachDoze(IntSupplier requester) { pulseRequester = requester; }
+    public static void detachDoze() { pulseRequester = null; }
 
     public static View rootFor(OverlayPlugin plugin, Context pluginContext, View root,
             KeyguardStateController keyguard, StatusBarStateController status) {
@@ -101,6 +108,8 @@ public final class HeckerOsloOverlayHost {
         final StatusBarStateController status;
         final Handler handler = new Handler(Looper.getMainLooper());
         final Set<View> seeded = Collections.newSetFromMap(new IdentityHashMap<>());
+        final Map<View, Runnable> pulseBindings = new IdentityHashMap<>();
+        long lastPulse = -2000;
         final KeyguardStateController.Callback keyguardCallback = new KeyguardStateController.Callback() {
             @Override public void onKeyguardShowingChanged() {
                 // Keep the original lockscreen/AOD hold, without holding the unlocked shade open.
@@ -133,6 +142,8 @@ public final class HeckerOsloOverlayHost {
                 }
                 @Override public void onViewRemoved(View child) {
                     seeded.remove(child);
+                    Runnable unbind = pulseBindings.remove(child);
+                    if (unbind != null) unbind.run();
                     super.onViewRemoved(child);
                 }
             };
@@ -160,11 +171,33 @@ public final class HeckerOsloOverlayHost {
                     || !child.getClass().getName().startsWith("com.google.oslo.ui.")
                     || !(child instanceof StatusBarStateController.StateListener)) return;
             seeded.add(child);
+            pulseBindings.put(child, OsloFeedbackPulse.bind(child, this::requestGesturePulse));
             StatusBarStateController.StateListener listener = (StatusBarStateController.StateListener) child;
             // Pulsing first prevents a late-attached view from briefly entering the wrong AOD mode.
             listener.onPulsingChanged(status.isPulsing());
             listener.onDozingChanged(status.isDozing());
             refreshFrame();
+        }
+
+        void requestGesturePulse() {
+            long now = SystemClock.elapsedRealtime();
+            IntSupplier requester = pulseRequester;
+            if (destroyed || requester == null || !keyguard.isShowing() || !status.isDozing()
+                    || status.isPulsing() || now - lastPulse < 2000) return;
+            lastPulse = now;
+            tryGesturePulse(requester, 0);
+        }
+
+        void tryGesturePulse(IntSupplier requester, int attempt) {
+            if (destroyed || pulseRequester != requester || !keyguard.isShowing()
+                    || !status.isDozing() || status.isPulsing()) return;
+            try {
+                if (requester.getAsInt() == 2 && attempt < 4) {
+                    handler.postDelayed(() -> tryGesturePulse(requester, attempt + 1), 200);
+                }
+            } catch (RuntimeException unavailable) {
+                Log.w("HeckerOsloGlow", "Native gesture pulse unavailable", unavailable);
+            }
         }
 
         void refreshFrame() {
@@ -181,6 +214,8 @@ public final class HeckerOsloOverlayHost {
             destroyed = true;
             keyguard.removeCallback(keyguardCallback);
             status.removeCallback(dozeCallback);
+            for (Runnable unbind : pulseBindings.values()) unbind.run();
+            pulseBindings.clear();
             seeded.clear(); nativeCallback = null;
             if (pending != null) container.removeOnAttachStateChangeListener(pending);
             pending = null;

@@ -20,8 +20,8 @@ vendor version declares Android 17. Immutable sources for this adaptation:
 | [Evolution-X/vendor_evolution](https://github.com/Evolution-X/vendor_evolution/blob/9c828eb1afbaa240df18b2cadde7e29bec8c8c03/config/version.mk) | `9c828eb1afbaa240df18b2cadde7e29bec8c8c03` | Android version verification |
 
 This is a Java/native View adaptation of those screens to HeckerOS Settings,
-with the crDroid/Evolution X Apache-2.0 attributions preserved. It retains the
-existing HeckerOS Android 17 Axion-derived process and keystore integration;
+with the crDroid/Evolution X Apache-2.0 attributions preserved. It uses the current Evolution X PIF service with
+HeckerOS privileged configuration and the existing scoped native property/keystore integration;
 Evolver's complete Compose app and framework are not substituted into the ROM.
 The five certificate/TrickyStore classes now incorporate Evolution X’s Android 17 backend updates from the same immutable framework revision, rechecked unchanged at current `cnb` head `c4d3eeb6aba62768dfb11c26711728b99daa42dd` on 26 October. HeckerOS retains its working Android 17 lightweight signer, private importer and UID boundaries. Exact owned file hashes and build revisions are in
 `integration/platform-features.json` and `integration/source-revisions.json`.
@@ -45,7 +45,7 @@ does not download an OTA or factory image. Import supports validated JSON and
 property files. Active build fields can be edited; advanced switches preserve
 the native backend's defaults. Reset removes advanced overrides. Delete removes
 the custom profile; the separate master switch disables both the custom PIF
-path and the legacy GMS/Play Store fallback after those processes restart.
+path and the PIF configuration after those processes restart. The overlapping PixelOS certified-profile, certificate-blocking and legacy keybox call paths are removed.
 Photos and unrelated per-app profiles retain their existing behavior.
 The explicit restart control force-stops Play services and Play Store without
 clearing data. They restart when needed.
@@ -93,3 +93,22 @@ A full Soong/ROM build and Coral UI/network/device checks remain required. Test
 light/dark theme, large fonts, rotation/import return, reduced motion, scrolling,
 all target modes, enable/disable with app restarts and actual attestation
 results on the phone. Host certificate checks establish no Google verdict.
+
+## 26 October follow-up
+
+The PIF service now follows Evolution X `cnb` at
+`c4d3eeb6aba62768dfb11c26711728b99daa42dd`, rather than retaining the older
+Axion Java provider wrapper. It supports current Play Store fingerprint-only and
+numeric SDK options and safe static-final field writes. HeckerOS retains its
+existing Settings storage, master switch, process scope, private imports and
+native property bridge. Photos compatibility remains independent. This is an
+adapted integration, not a wholesale replacement of the ROM's framework.
+
+Manual imports have **no keybox repository allowlist**. The importer now handles
+BOM-prefixed XML, MIME-wrapped Base64 and SEC1 EC keys without embedded curve
+parameters. It constructs standard JCA keys for Android's signing provider and
+still proves the private key matches the first certificate. Failed replacements
+retain the previous keybox and identify the reason without exposing key data.
+The UI shows the full failure in a dialog instead of a truncated toast. Public
+fetch retains certificate-chain and revocation validation; a revoked or malformed
+public keybox is not made valid by this change.

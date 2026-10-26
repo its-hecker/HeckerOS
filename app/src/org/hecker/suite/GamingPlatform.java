@@ -122,9 +122,8 @@ final class GamingPlatform {
         int top = screen.top + (screen.height() - height) / 2;
         ActivityOptions options = ActivityOptions.makeBasic();
         ActivityOptions.class.getMethod("setLaunchWindowingMode", int.class).invoke(options, 5);
-        // Always-on-top is optional; an unavailable decoration must not cancel a valid launch.
-        try { ActivityOptions.class.getMethod("setTaskAlwaysOnTop", boolean.class).invoke(options, true); }
-        catch (NoSuchMethodException unavailable) { }
+        // Android 17 SafeActivityOptions reserves always-on-top for system/SystemUI.
+        // Suite has its own UID; that flag rejects the entire otherwise valid freeform launch.
         options.setLaunchDisplayId(0);
         options.setLaunchBounds(new Rect(left, top, left + width, top + height));
         // NEW_TASK keeps the shortcut out of the game's activity stack. No embedded ActivityView.

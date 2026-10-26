@@ -251,6 +251,37 @@ public class NativePulseBridgeTest {
  System.out.println("Prepared pulse bridge: transition/busy retries, existing pulse, native proximity suppression and stale replug callbacks PASS");
  }
 }'''
+    oslo = method(triggers, '    private int requestHeckerOsloPulse()')
+    eligibility = method(triggers, '    private boolean canPulse(').replace('@Nullable ', '')
+    sources['NativeOsloPulseTest.java'] = r'''public class NativeOsloPulseTest {
+ enum State {UNINITIALIZED,INITIALIZED,DOZE,DOZE_AOD,DOZE_AOD_DOCKED,DOZE_AOD_MINMODE,
+ DOZE_AOD_PAUSED,DOZE_AOD_PAUSING,DOZE_REQUEST_PULSE,DOZE_PULSE_DONE,DOZE_PULSING,DOZE_PULSING_BRIGHT,FINISH}
+ static class DozeMachine {static class State {}}
+ static class DozeLog {static final int PULSE_REASON_INTENT=1;}
+ static class Machine {boolean transitioning;State state=State.DOZE;
+ boolean isExecutingTransition(){return transitioning;}State getState(){return state;}}
+ static class Host {boolean pending;int extensions;boolean isPulsePending(){return pending;}
+ void extendPulse(int reason){extensions++;}}
+ final Machine mMachine=new Machine();final Host mDozeHost=new Host();int requests;
+ void requestPulse(int reason,boolean prox,Runnable callback){check(!prox&&callback==null);requests++;}
+ static void check(boolean value){if(!value)throw new AssertionError();}
+''' + oslo + '\n' + eligibility.replace('DozeMachine.State', 'State') + r'''
+ public static void main(String[] args){
+  NativeOsloPulseTest p=new NativeOsloPulseTest();p.mMachine.transitioning=true;
+  check(p.requestHeckerOsloPulse()==2&&p.requests==0);p.mMachine.transitioning=false;
+  for(State state:new State[]{State.DOZE,State.DOZE_AOD,State.DOZE_AOD_DOCKED,State.DOZE_AOD_MINMODE}){
+   p.mMachine.state=state;int before=p.requests;check(p.requestHeckerOsloPulse()==1&&p.requests==before+1);
+  }
+  int before=p.requests;
+  for(State state:new State[]{State.DOZE_AOD_PAUSED,State.DOZE_AOD_PAUSING,State.FINISH}){
+   p.mMachine.state=state;check(p.requestHeckerOsloPulse()==0&&p.requests==before);
+  }
+  p.mMachine.state=State.DOZE_AOD;p.mDozeHost.pending=true;check(p.requestHeckerOsloPulse()==2);
+  p.mDozeHost.pending=false;p.mMachine.state=State.DOZE_PULSING;
+  check(p.requestHeckerOsloPulse()==1&&p.mDozeHost.extensions==1&&p.requests==before);
+  System.out.println("Native Oslo pulse: real doze eligibility, paused/pocket suppression, transient retry and existing-pulse extension PASS");
+ }
+}'''
     with tempfile.TemporaryDirectory(prefix='hecker-ambient-native-') as temp:
         output = Path(temp)
         for relative, text in sources.items():
@@ -261,3 +292,4 @@ public class NativePulseBridgeTest {
                         *map(str, sorted(output.rglob('*.java')))], check=True)
         subprocess.run(['java','-cp',str(output/'classes'),'NativeChargingTest'], check=True)
         subprocess.run(['java','-cp',str(output/'classes'),'NativePulseBridgeTest'], check=True)
+        subprocess.run(['java','-cp',str(output/'classes'),'NativeOsloPulseTest'], check=True)

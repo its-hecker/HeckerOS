@@ -209,7 +209,40 @@
   "src/com/android/launcher3/qsb/QsbWidgetFactory.kt": [
     {
       "old": "        return LayoutInflater.from(container.context)\n            .inflate(R.layout.qsb_container_hotseat, container, false)",
-      "new": "        return com.android.launcher3.hecker.HeckerDockBar(container.context)"
+      "new": "        return com.android.launcher3.hecker.HeckerDockBar.create(container)",
+      "previous": [
+        "        return com.android.launcher3.hecker.HeckerDockBar(container.context)"
+      ]
+    }
+  ],
+  "src/com/android/launcher3/Hotseat.java": [
+    {
+      "old": "    private final View mQsb;",
+      "new": "    private final View mQsb;\n    private int mHeckerNavigationInset;"
+    },
+    {
+      "old": "        mQsb = LauncherComponentProvider.get(context).getQsbWidgetFactory().createView(this);",
+      "new": "        mQsb = com.android.launcher3.hecker.HeckerDockBar.available(context)\n                ? new com.android.launcher3.hecker.HeckerDockBar(context)\n                : LauncherComponentProvider.get(context).getQsbWidgetFactory().createView(this);"
+    },
+    {
+      "old": "        int topOverlap = 0;\n        if (grid.isVerticalBarLayout()) {",
+      "new": "        mHeckerNavigationInset = insets.bottom;\n        int topOverlap = 0;\n        if (grid.isVerticalBarLayout()) {"
+    },
+    {
+      "old": "        Rect padding = grid.getHotseatLayoutPadding(getContext());\n        setPadding(padding.left, padding.top + topOverlap, padding.right, padding.bottom);",
+      "new": "        Rect padding = grid.getHotseatLayoutPadding(getContext());\n        int heckerExtra = com.android.launcher3.hecker.HeckerDockBar.extraHeight(\n                mQsb, grid.getHotseatProfile().isQsbInline() ? 0 : grid.getHotseatProfile().getQsbHeight(),\n                grid.isVerticalBarLayout());\n        if (!grid.isVerticalBarLayout()) lp.height += heckerExtra;\n        setPadding(padding.left, padding.top + topOverlap, padding.right, padding.bottom + heckerExtra);"
+    },
+    {
+      "old": "        mQsb.measure(\n                makeMeasureSpec(dp.getHotseatProfile().getQsbWidth(), MeasureSpec.EXACTLY),\n                makeMeasureSpec(dp.getHotseatProfile().getQsbHeight(), MeasureSpec.EXACTLY)\n        );",
+      "new": "        com.android.launcher3.hecker.HeckerDockBar.measure(mQsb,\n                dp.getHotseatProfile().getQsbWidth(), dp.getHotseatProfile().getQsbHeight(),\n                getMeasuredWidth());"
+    },
+    {
+      "old": "        int bottom = b - t - dp.getQsbOffsetY();\n        int top = bottom - dp.getHotseatProfile().getQsbHeight();",
+      "new": "        int bottom = b - t - com.android.launcher3.hecker.HeckerDockBar.bottomOffset(\n                mQsb, dp.getQsbOffsetY(), mHeckerNavigationInset);\n        int top = bottom - mQsb.getMeasuredHeight();"
+    },
+    {
+      "old": "        if (dp.getHotseatProfile().isQsbInline()) {",
+      "new": "        if (!(mQsb instanceof com.android.launcher3.hecker.HeckerDockBar)\n                && dp.getHotseatProfile().isQsbInline()) {"
     }
   ]
 }
