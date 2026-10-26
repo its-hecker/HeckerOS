@@ -7,6 +7,9 @@ import android.content.*;
 public final class NetLabReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context context, Intent intent) {
         NetLabEngine engine = ((NetLabApplication) context.getApplicationContext()).engine();
-        if (engine != null) engine.signal("org.hecker.netlab.RESTORE".equals(intent.getAction()));
+        if (engine != null) {
+            if ("org.hecker.netlab.LAN_STOP".equals(intent.getAction())) engine.lan().stop();
+            else engine.signal("org.hecker.netlab.RESTORE".equals(intent.getAction()));
+        }
     }
 }

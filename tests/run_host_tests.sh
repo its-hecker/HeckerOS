@@ -5,6 +5,7 @@ suite_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$suite_root"
 python3 tools/check_source.py
 python3 -m unittest discover -s tests -p 'test_*.py'
+python3 tools/check_netlab_native.py
 suite_test_output="$(mktemp -d)"
 trap 'rm -rf -- "$suite_test_output"' EXIT
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
@@ -80,6 +81,9 @@ java -cp "$suite_test_output" NetLabPolicyTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     netlab/common/org/hecker/netlab/NetLabIdentity.java tests/NetLabIdentityTest.java
 java -cp "$suite_test_output" NetLabIdentityTest
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    netlab/common/org/hecker/netlab/NetLabLanProtocol.java tests/NetLabLanProtocolTest.java
+java -cp "$suite_test_output" NetLabLanProtocolTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     framework/ambient/AmbientChargingPolicy.java framework/ambient/AmbientPulsePolicy.java tests/AmbientChargingPolicyTest.java
 java -cp "$suite_test_output" AmbientChargingPolicyTest

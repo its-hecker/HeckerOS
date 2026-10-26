@@ -4,4 +4,7 @@
     <string name="netlab_active_rules">网络实验室：%1$d 个热点限制</string>
     <string name="netlab_restore_notification">点按以恢复网络实验室设置的所有热点限制。</string>
     <string name="netlab_restore_all">全部恢复</string>
+    <string name="netlab_lan_title">网络实验室 · Root IPv4 控制</string>
+    <string name="netlab_lan_active">临时 ARP 会话。点按以停止并恢复。</string>
+    <string name="netlab_lan_stop">停止并恢复</string>
 </resources>

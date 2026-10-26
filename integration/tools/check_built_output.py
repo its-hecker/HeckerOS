@@ -37,6 +37,9 @@ def check_suite(rom, output):
         installed = output / "system_ext/etc" / folder / name
         if not original.is_file() or not installed.is_file() or installed.read_bytes() != original.read_bytes():
             raise ValueError("Built system_ext image is missing the exact NetLab permission file: " + name)
+    helper = output / "system_ext/bin/hecker-netlab-lan"
+    if not helper.is_file() or helper.stat().st_size == 0 or not os.access(helper, os.X_OK):
+        raise ValueError("Built system_ext image is missing executable hecker-netlab-lan")
     launcher = output / "system_ext/priv-app/HeckerLauncher/HeckerLauncher.apk"
     if not launcher.is_file() or launcher.stat().st_size == 0:
         raise ValueError("Built system_ext image is missing HeckerLauncher.apk")

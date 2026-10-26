@@ -36,9 +36,11 @@ platform customization forks use `heckeros-17`.
   App Lock shortcuts and notification-count badges. Includes swipe-down Quick QS
   and double-tap sleep, alongside Pixel Launcher as the single Recents provider.
 - Native Network Lab: bounded LAN discovery, capability-gated phone-hotspot Jail/restore,
-  passive diagnostics, local traffic and an original network-hub Lottie. The separate
-  controller uses no end-user root; speed enforcement and router adapters are not
-  implemented. See [NetLab behavior, limits and phone tests](docs/network-lab.md).
+  passive diagnostics, local traffic and an original network-hub Lottie. Explicit
+  rooted Wi-Fi controls add temporary ARP-based IPv4 pause and per-device upload/download
+  caps, with Stop/restore and a native watchdog. IPv6, direct local traffic and router
+  protections remain outside that backend; phone validation is pending.
+  See [NetLab behavior, limits and phone tests](docs/network-lab.md).
 - Opt-in synchronized lock-screen lyrics adapted from Infinity-X. The settings
   page discloses the LRCLIB artist/title lookup before it is enabled.
 - Offline pickers for 21 pinned Wi-Fi and battery styles under Status Bar,

@@ -203,6 +203,14 @@ class BuiltOutputTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "NetLab permission"):
                     check_suite(root, output)
                 installed_netlab.write_bytes(original_netlab.read_bytes())
+            with self.assertRaisesRegex(ValueError, "hecker-netlab-lan"):
+                check_suite(root, output)
+            helper = output / "system_ext/bin/hecker-netlab-lan"
+            helper.parent.mkdir(parents=True)
+            helper.write_bytes(b"native helper fixture")
+            with self.assertRaisesRegex(ValueError, "hecker-netlab-lan"):
+                check_suite(root, output)
+            helper.chmod(0o755)
             with self.assertRaisesRegex(ValueError, "HeckerLauncher.apk"):
                 check_suite(root, output)
             launcher = output / "system_ext/priv-app/HeckerLauncher/HeckerLauncher.apk"

@@ -30,7 +30,8 @@ def check(root):
     assert permissions=={'android.permission.ACCESS_WIFI_STATE','android.permission.CHANGE_WIFI_STATE',
         'android.permission.ACCESS_NETWORK_STATE','android.permission.NETWORK_SETTINGS',
         'android.permission.TETHER_PRIVILEGED','android.permission.SCHEDULE_EXACT_ALARM',
-        'android.permission.POST_NOTIFICATIONS','android.permission.RECEIVE_BOOT_COMPLETED'}
+        'android.permission.POST_NOTIFICATIONS','android.permission.RECEIVE_BOOT_COMPLETED',
+        'android.permission.WAKE_LOCK'}
     app=backend.find('application')
     assert app.get(A+'allowBackup')=='false' and app.get(A+'directBootAware')=='true'
     assert app.get(A+'persistent')=='true' and app.get(A+'allowClearUserData')=='false'

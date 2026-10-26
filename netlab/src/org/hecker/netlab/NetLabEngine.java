@@ -14,9 +14,10 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import org.json.*;
 
-/** Serial, permission-limited Wi-Fi adapter. No su, packet injection, iptables, or shell commands. */
+/** Serial native hotspot adapter, with a separately scoped, opt-in rooted LAN session. */
 final class NetLabEngine implements NetLabPolicy.Backend, NetLabPolicy.Journal {
     private final Context context;
+    private final NetLabLanSession lan;
     private final WifiManager wifi;
     private final Handler worker;
     private final AlarmManager alarms;
@@ -38,6 +39,7 @@ final class NetLabEngine implements NetLabPolicy.Backend, NetLabPolicy.Journal {
 
     NetLabEngine(Context owner) {
         context = owner.createDeviceProtectedStorageContext();
+        lan = new NetLabLanSession(context);
         wifi = context.getSystemService(WifiManager.class);
         alarms = context.getSystemService(AlarmManager.class);
         notifications = context.getSystemService(NotificationManager.class);
@@ -145,8 +147,10 @@ final class NetLabEngine implements NetLabPolicy.Backend, NetLabPolicy.Journal {
         if (!hotspot) { connected.clear(); perAp.clear(); addresses.clear(); hostnames.clear(); }
         maintain();
     }
-    void signal(boolean restore) { worker.post(() -> { nextAlarmAt = 0; if (restore) restoreAll(); else maintain(); }); }
+    NetLabLanSession lan() { return lan; }
+    void signal(boolean restore) { if (restore) lan.stop(); worker.post(() -> { nextAlarmAt = 0; if (restore) restoreAll(); else maintain(); }); }
     Bundle call(String operation, String mac, long duration) {
+        if (operation.equals("restore_all")) lan.stop();
         FutureTask<Bundle> task = new FutureTask<>(() -> {
             // Observing the dashboard must not postpone its expiry alarm or maintenance task.
             if (operation.equals("state")) { Bundle state = snapshot(); state.putString("result", "ok"); return state; }
@@ -229,7 +233,7 @@ final class NetLabEngine implements NetLabPolicy.Backend, NetLabPolicy.Journal {
         return scheduled;
     }
     private Bundle snapshot() {
-        Bundle state = new Bundle(); state.putBoolean("available", journalHealthy && wifi != null);
+        Bundle state = new Bundle(); state.putBundle("lan", lan.state()); state.putBoolean("available", journalHealthy && wifi != null);
         state.putBoolean("hotspot", hotspot); state.putBoolean("can_pause", active() && canBlock() && journalHealthy && !recovering);
         state.putBoolean("hal_block", forceDisconnect); state.putBoolean("callbacks", callbackReady);
         state.putBoolean("can_time", canSchedule()); state.putBoolean("recovering", recovering);

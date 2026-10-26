@@ -1,47 +1,58 @@
 # HeckerNetLab — implementation and review
 
-Hecker Suite → **Network Lab** opens a native Android 17 dashboard with an original offline network-hub Lottie. The optional Network Lab QS tile opens it after unlock; it never changes connectivity by itself. English and Simplified Chinese strings are included.
+Hecker Suite → **Network Lab** provides native phone-hotspot controls and an explicit **Root Wi-Fi controls** tab for networks the user administers. The rooted backend independently implements NetCut-style ARP-based IPv4 pause and rate caps; it does not incorporate the supplied third-party APK. English and Simplified Chinese resources are included.
 
-This is a source implementation targeting coral. A full ROM/SELinux build and tests on the phone have **not** been performed. Publication was approved on 25 October 2026. The base source tree matches the previously published Suite commit `25f828c3c9cd7c9c84d3d43f71ec3a6e26d13fe2`.
+The source targets coral / Android 17. Host checks and SDK compilation are separate from a complete ROM/Soong build, SELinux validation and tests on the phone. The rooted backend has not been exercised on a live LAN here. The existing dashboard, launcher, ambient and integrity changes are retained.
 
-## Implemented behavior
+## Connected Wi-Fi controls
 
-| Feature | Source behavior and actual limit |
+1. Grant Suite local-network access. Open **Root Wi-Fi controls** and explicitly press **Check root access** or **Scan Wi-Fi with root**. Grant KernelSU access to **Hecker NetLab controller**. Merely opening the dashboard or polling state never invokes `su`.
+2. Root scan resolves the gateway and probes the private IPv4 /24 window containing the phone, within its actual /16–/30 on-link prefix. It sends at most 25 ordinary ARP probes per second, examines at most 255 peer addresses, and stores only IP/MAC observations in memory.
+3. Choose 1–32 scanned devices. Select **Pause IPv4 traffic** or **Limit IPv4 speed**, with independent upload/download caps and a 1–3,600-second duration. Rates are kbps per direction, per device. Zero leaves one direction unlimited; a limit requires at least one nonzero direction.
+4. The helper re-resolves and pins the gateway and every selected IP/MAC before modifying ARP entries. A stale or changed device is rejected. The phone, gateway, network/broadcast addresses, public addresses and off-link targets cannot be selected.
+5. Pause drops selected IPv4 packets addressed to the relay. Limit relays them in both directions with independent token buckets and bounded queues. IPv4 payloads and checksums are preserved; only Ethernet source/destination addresses change. Caps count Ethernet bytes, allow a short packet burst, and can be lower than the requested rate under load. No peer-total traffic accounting is inferred.
+6. **Stop and restore**, individual Restore, Emergency restore and the persistent controller notification stop or release owned controls. The helper sends true ARP mappings repeatedly and briefly relays without caps while caches recover. Restoration is best effort: a lost interface, changed gateway, power loss or SIGKILL can require remote cache expiry/reconnection.
+
+This controls **IPv4 traffic routed through the gateway**. Devices stay associated with Wi-Fi. IPv6 and direct local peer traffic remain outside this backend. AP/client isolation, ARP inspection, static ARP entries, driver restrictions and other network protections can prevent control. A started session is shown as unverified until packets from a selected device actually reach the relay; no universal internet-disconnection claim is made.
+
+The phone must remain connected and awake. A bounded partial wake lock covers the explicit session. Native duration and an eight-second controller-heartbeat watchdog use boot-time monotonic time. EOF, controller loss, SIGTERM, SIGINT and SIGHUP initiate cleanup; no root session is saved or resumed on boot. The UI can close while the notification retains Stop. Active Wi-Fi identity changes or local-network permission revocation stop the session. On a different network the controller sends an abort that suppresses repairs; native cleanup also rechecks interface/address/route and the pinned gateway MAC.
+
+The helper refuses a session if kernel IPv4 forwarding is enabled, because that could forward around the userspace caps. It never changes global forwarding, firewall, routing, offload, SELinux enforcement or KernelSU policy. Unsupported raw sockets/packet filters, a failed transmit or a changed link terminates the request/session rather than reporting a verified cap. VPN conflicts must be resolved before starting.
+
+## Native hotspot and dashboard behavior
+
+| Feature | Behavior and actual limit |
 | --- | --- |
-| Devices | Native hotspot clients from Wi-Fi callbacks, DHCP addresses from TetheringManager, and an explicit LAN scan. Search, online/trusted filters, details and multiselect are available. |
-| LAN discovery | Requests Android 17 local-network access. One TCP/80 reachability probe per target, bound to the selected Wi-Fi Network, with eight workers and 350 ms per connection. Only on-link RFC1918 IPv4 prefixes /16–/30 are accepted. A larger segment is capped to the phone's /24 window, at most 255 peer addresses. No public sweep, packet capture or background scan. A bounded 3.5-second mDNS session on the same Network can collect advertised names/models and discover peers silent on TCP/80. |
-| Discovery accuracy | Refused TCP connections count as a responding address. Filtered/silent hosts may be absent; an IP is not a stable physical-device identity. Results age out of the active count after 30 seconds. IPv6-only LAN discovery is unavailable; native tethering may still report IPv6 client addresses. |
-| Jail / pause | Primary-user Suite can request the separate controller to add a currently connected phone-hotspot client to its native block list. Requires the real HAL client-force-disconnect capability. This disconnects Wi-Fi association, including local access; it is not an internet-only firewall. |
-| Status | `applying` means native configuration was accepted but disconnect has not been confirmed. `enforced` requires block-list readback and a disconnected-client observation. An unconfirmed disconnect is rolled back after 15 seconds. Neither state substitutes for a hardware traffic test. |
-| Unjail / emergency restore | Remove only journaled NetLab MAC entries. Merge changes into a fresh native configuration, retaining unrelated entries and all other hotspot options. A restore-only notification action also works without the Suite UI. External allow-list policies are not overridden. |
-| Duration and recovery | Session, 30-second, 5-minute, 1-hour and custom 1–86,400-second pauses. Timed actions require exact-alarm access and an idle exemption; diagnostics links to native settings if unavailable. Wall and elapsed deadlines are checked. Startup, hotspot shutdown and controller restart restore rules early. Rollback failures keep their ownership record and retry. |
-| Trusted devices / names | Explicit metadata in Suite's private credential-encrypted app storage. Trust is a label, not authentication. A randomized MAC or a reused IP can refer to another device. |
-| History | Opt-in, off by default; at most 128 records for seven days. Clear history retains explicitly chosen names/trust; clearing all metadata removes those too. Hotspot policy ownership is separate and is not erased by a metadata clear. |
-| Defender | Passive default-gateway/route change observations. A read-only attempt to observe the gateway neighbour from `/proc/net/arp` may be denied by Android; that case explicitly says ARP visibility/protection is unavailable. Changes are informational/unverified, never an assertion that an attacker was detected. No ARP manipulation. |
-| Traffic | Live receive/transmit deltas and an on-screen chart for this phone's Wi-Fi interface. Counter resets and unavailable counters do not become fabricated rates. No peer-wide traffic accounting is claimed. |
-| Profiles | A bulk timed pause of current managed clients. It does not deny future hotspot arrivals. |
-| Saved speed presets | Download/upload numeric values, slider and Low/Balanced/Unlimited presets can be saved. Apply is disabled: **there is no validated per-device shaping backend in this version**. No rate-cap success is reported. |
-| Router integration / NetLock / recurring schedules | **Unavailable in this version.** No router credentials are requested or stored. A router adapter, continuous allow-only lockdown, quotas and recurring schedules remain future work. |
+| Phone-hotspot pause | Uses Android Wi-Fi callbacks and the native SoftAP block list. Requires real HAL client-force-disconnect support; disconnects Wi-Fi association, including local access. It does not require end-user root. |
+| Hotspot status | `applying` means configuration accepted; `enforced` also requires block-list readback and a disconnected-client observation. Unconfirmed disconnect rolls back after 15 seconds. |
+| Hotspot restore | Removes only journaled NetLab MACs from a fresh configuration, retaining unrelated entries/options. External allow-list policies are preserved. |
+| Hotspot timers | Session, 30-second, five-minute, one-hour and custom 1–86,400-second actions. Timed hotspot rules require exact alarms and an idle exemption. Startup, hotspot shutdown and controller restart restore early. Failed restoration retains ownership and retries. |
+| Root status | Waiting for selected IPv4 traffic, packets dropped, or packets relayed with caps. Per-session forwarded/dropped counters reflect only this helper. Individual release and full-session restoration remain best effort. |
+| Discovery | Existing network-bound TCP/80 probes and bounded mDNS remain available without root. Root scan adds ARP IP/MAC resolution. Silent and isolated devices may still be absent; results age after 30 seconds. Names, models and OS hints remain unverified peer advertisements/DHCP data. |
+| Saved speed presets | Retained separately; they do not apply native hotspot caps. Connected-Wi-Fi caps are applied through the explicit root tab. Native hotspot shaping remains unavailable. |
+| Defender / traffic | Passive gateway/route observations and this phone Wi-Fi interface counters. Defender itself never starts an ARP session and does not claim attack detection. |
+| Metadata / history | Explicit names/trust are labels, not authentication. History is opt-in, off by default, bounded to 128 records/seven days. Clearing metadata never silently leaves/recreates a root session or erases hotspot ownership. |
+| Router APIs / lockdown | No router credentials, router adapter, IPv6 control, future-client lockdown, quotas or recurring schedules. Root controls affect explicitly selected peers only. |
 
-## Privilege and lifecycle boundaries
+Wi-Fi configuration has no cross-application compare-and-swap ownership token. Another administrator editing the same hotspot MAC concurrently remains ambiguous; test concurrent unrelated changes and configuration preservation on the phone.
 
-Settings retains the existing Suite dashboard module. The feature Activity runs in `org.hecker.suite`; only it requests local-network runtime access and creates discovery sockets. Its new normal `INTERNET` permission is needed for those sockets; the previous no-Internet packaging guard is updated explicitly, not silently removed.
+## Privilege and process boundaries
 
-`HeckerNetLabController` is a **separate platform-signed privileged APK**, package `org.hecker.netlab`, with its own non-root UID. It receives only `NETWORK_SETTINGS` and `TETHER_PRIVILEGED` as new privileged grants. It has no Internet permission, shell-command endpoint, raw packet API, shared system UID, native `su` dependency or permissive SELinux change. It uses Android's existing Wi-Fi/Tethering Binder APIs.
+The presentation runs in `org.hecker.suite`. It owns discovery sockets and requests Android 17 `ACCESS_LOCAL_NETWORK`. `HeckerNetLabController` (`org.hecker.netlab`) remains a separate platform-signed APK with its own non-root UID. Existing minimal Wi-Fi/tethering/exact-alarm grants are retained; only normal `WAKE_LOCK` is added. The controller has no Internet permission, shared system UID, setuid executable, exported control broadcast or generic shell endpoint.
 
-The bound AIDL service exposes state, pause, restore and restore-all only. Every method enforces a signature permission, the exact Suite package, a matching signature, the primary user, and a non-shared UID. Another platform-signed application is insufficient. Secondary users can observe LANs through their own UI permission but cannot operate the device-global hotspot controller.
+Every Binder operation enforces the signature permission, exact non-shared Suite UID/package, matching signature and owner user. New root Check/Scan/Start operations additionally enforce the calling Suite local-network grant. Stop and Restore remain available after that permission is revoked. A different platform-signed package is insufficient.
 
-The persistent controller Application initializes only for user 0. Rule mutations are serialized off Binder/main threads. An AtomicFile ownership journal in private device-encrypted storage is written **before** native configuration changes. On process/reboot recovery, ownership is used to restore early, rather than resurrect restrictions. If the journal is unreadable, new controls and a false “restored all” result are refused; the UI directs the user to native hotspot settings. App-data clearing is disabled for the controller so it cannot discard ownership while leaving block-list entries installed.
+Only an explicit root action launches the fixed command `su -c 'exec /system_ext/bin/hecker-netlab-lan'`. The command contains no user input. A bounded stdin protocol carries validated interface/address/policy records; output is bounded and parsed strictly. Errors and notifications never include payloads or captured content. The native helper requires effective UID 0, validates the current interface itself, and queries IPv4 default routes across all kernel routing tables, including Android policy tables.
 
-Alarm deadlines are not continuously pushed back by dashboard polling. Timed rules fail open when reliable scheduling becomes unavailable. Boot-time service registration is retried with a bounded delay, and rule recovery remains pending until native readback verifies it. Notifications contain counts and a restore action, not device addresses. The controller audit ring is limited to 32 in-memory operation codes/timestamps.
+The helper uses a non-promiscuous AF_PACKET socket bound to the selected Wi-Fi interface. A classic BPF socket filter accepts ARP and only IPv4 Ethernet frames addressed to this phone; outgoing loopback copies are ignored. Only selected, pinned peers/gateway enter the relay. Queues are bounded per direction and scheduled fairly across peers. No packets are saved, TLS intercepted, credentials collected or arbitrary destinations scanned.
 
-Wi-Fi's configuration API has no cross-application compare-and-swap or ownership token. NetLab merges deltas into a fresh configuration, but another administrator simultaneously editing the **same MAC** still has ambiguous ownership. Do not edit the same client policy through multiple interfaces during a test. Test concurrent unrelated changes and configuration preservation on the phone.
+Hotspot mutations remain serialized with an AtomicFile ownership journal in device-encrypted storage, written before configuration changes. Root sessions deliberately use transient ownership and native watchdog cleanup instead of replaying restrictions after a crash/reboot. Each backend has a restore-only notification; Emergency restore stops the root backend even if the hotspot journal is unreadable. Root Binder returns acknowledge queuing, not proof of enforcement; the UI polls progress and measured counters.
 
 ## Build and verification
 
-The product includes `HeckerNetLabController`; the Suite depends on its AIDL/common library. No new external source checkout, kernel patch or downloaded legacy APK is required. The controller and its two permission XMLs are mandatory post-build output checks. The companion local manifest mirrors the updated `integration/tools/check_built_output.py` and its regression fixture with the Suite source pin.
+`HeckerNetLabController` requires the source-built C++17 `hecker-netlab-lan` module, installed in `system_ext/bin`. Post-build checks require its executable output, the controller APK and exact permission XMLs. The companion manifest mirrors the integration checker and regression fixture along with the Suite source pin. No downloaded legacy binary, external checkout or kernel patch is added.
 
-The controller links the explicit `framework-wifi.stubs.system`, `framework-tethering.stubs.system` and `framework-connectivity.stubs.system` API artifacts. A platform-API app cannot depend on the bare networking `java_sdk_library` names; their implementation libraries also restrict visibility. `TetheringManager` and `TetheredClient` belong to `framework-tethering`, not `framework-connectivity-t`. Suite's presentation code has no Wi-Fi library dependency. This corrects the 25 October Soong graph failure recorded in `error_log_its_hecker_coral_20261025-095336.txt`.
+The controller continues to link explicit Wi-Fi/tethering/connectivity system API stubs. SDK verification compiles the real generated AIDL plus Suite/controller Java, both resource sets and the independent Settings UI. The host suite includes the real native relay core under AddressSanitizer/UndefinedBehaviorSanitizer, bounded actual-helper preflight tests, and strict Java protocol tests. The host environment cannot perform LeakSanitizer process walks, so only that exit-time leak walk is disabled; address and undefined-behavior checks remain active. Tests never send ARP packets to a live network.
 
 ```bash
 bash tests/run_host_tests.sh
@@ -51,23 +62,20 @@ python3 integration/tools/validate.py
 python3 -m unittest discover -s integration/tests -p 'test_*.py'
 ```
 
-The SDK check compiles the actual generated NetLab Binder API, both apps' Java/resources and the independent Settings UI module. Production policy tests exercise ownership, caller isolation, external rules, write/journal failures, ambiguous native responses, rollback, expiry, early restart restoration and private bounded discovery. The preview GIF/PNG were rendered from the shipped JSON with rlottie; animation is also subject to Suite's existing reduced-motion/lifecycle behavior.
+Native coverage includes exact poison/repair mappings, unchanged IPv4 payloads, uplink/downlink MAC gating, unselected traffic, malformed frames, queue limits, independent measured cap budgets, fairness across 32 peers, release, duration/heartbeat expiry and strict configuration parsing. Entry-point tests use INFO or invalid link records that exit before raw-socket access. Non-root entry rejection substitutes only `geteuid()` in a separate host test executable; it does not depend on host UID-changing privileges.
 
-Validation on 25 October 2026: **81 existing host tests**, **60 NetLab production policy/access/discovery checks**, **77 integration tests**, the complete app/controller/resource/AIDL compilation, independent Settings compilation, manifest validation, packaging/translation audit and rendered-animation checks passed. These are host/source checks, not a ROM build or a phone result.
-
-The pinned Floral kernel defconfig (`heckeros-floral-kernel@48d6881fb8537f62811209927022e467d37e3a98`) enables `NET_SCHED`, `NET_SCH_HTB`, `NET_SCH_TBF`, `NET_SCH_INGRESS`, `NET_CLS_U32` and `NET_CLS_BPF`, plus IPA/RMNET. It contains no explicit `CONFIG_IFB=y` line. That is an audit of the input defconfig, not the final merged kernel configuration or proof that a tethering packet path can be shaped. The pinned device Wi-Fi overlay (`heckeros-floral-devicetree@8e19009ad632f66473ddcdb10c00595fefdb79b4`) advertises 32 hotspot clients but has no client-force-disconnect capability override. NetLab therefore uses the runtime HAL capability instead of asserting compatibility from these files.
+Validation on 26 October 2026: 101 Python host tests, the complete existing Java host suite, 221 instrumented native core checks, 34 Java protocol checks, actual-helper build/preflight checks, 77 integration tests, the mirrored manifest checks, and complete Java/AIDL/resource SDK compilation passed. These results establish source and simulated packet behavior; they do not establish phone networking compatibility.
 
 ## Required phone acceptance
 
-1. Build with SELinux enforcing. Confirm the separate controller APK, grants and boot recovery; check that no privilege allow-list error occurs. Default operation must not depend on Magisk/KernelSU.
-2. Open Network Lab from Settings and its QS tile in light/dark themes, large text and reduced motion. Confirm the first card stays below the toolbar and animations stop when hidden.
-3. Grant/deny local-network access. Scan the user's own test LAN, change Wi-Fi/VPN during a scan, cancel it, and verify old results never migrate to the new connection. Test a silent host and an IPv6-only/client-isolated network.
-4. Connect two owned test devices to the hotspot. Confirm actual HAL support before enabling controls. Pause one, verify disconnect/reconnection rejection and native block-list state; the second device must remain usable.
-5. Test 30-second/custom expiry while the UI stays open, with the screen off/Doze, after a wall-clock change, after force-killing the UI, and after a controller crash/reboot. Early restore is expected across a controller/hotspot restart. Measure, do not infer deadlines from a slider.
-6. Start with an unrelated native block-list entry and an allow-list policy. Confirm single/bulk/emergency restore leaves them intact. Exercise rejected writes, native service unavailability, hotspot restart and concurrent settings changes. A failed restore must remain visible and retry.
-7. Check the notification's restore-only action, exact-alarm/idle-exemption denial or revocation, primary/secondary-user isolation and calls from an unrelated signed/unsigned test app. Test corrupt journal recovery on a disposable development image; it must never clear the entire native block list.
-8. Verify local traffic against actual interface counters, absence of fabricated peer charts, opt-in history retention/deletion and honest Defender fallback when ARP access is denied.
-9. Confirm speed Apply, unsupported router operations, allow-only lockdown and recurring schedules never report success. Per-device shaping needs a separately tested packet path/offload design before it can become available.
+1. Perform a complete Android 17 Soong/ROM build with SELinux enforcing. Verify installed executable, controller permissions, KernelSU grant/denial and runtime local-network grant/denial. A denied capability must not appear as working control.
+2. On an owned test LAN with two owned peers, root-scan and verify actual IP/MAC resolution. Select one peer, pause IPv4, and measure its IPv4 connectivity while the other remains usable. Association and IPv6 are expected to remain available.
+3. Measure upload and download caps separately with sustained TCP and UDP, unequal rates and an unlimited direction. Check startup bursts, dropped/forwarded counters, queue saturation, throughput/CPU, MTU/GRO/driver behavior and multiple selected peers. Confirm direct local traffic is not described as blocked.
+4. Stop/release one peer and stop the full session using both UI and notification. Observe actual gateway/peer ARP caches and traffic recovery; allow for remote-cache delays. Test duration expiry, screen off/Doze, closing the UI, loss of heartbeat, controller death, native SIGTERM and abrupt process/device loss.
+5. Change Wi-Fi, reuse a subnet on another network, change a peer/gateway MAC, remove IPv4 and revoke local access during a session. Ensure old controls stop and repairs are suppressed on the new network. No automatic resume is expected.
+6. Test client isolation, static ARP/ARP inspection, IPv6 preference, VPN conflict, raw socket/filter denial, transmit failure, kernel forwarding and enabling tethering during control. Status must remain unverified or stop where the path cannot be enforced.
+7. Retest native hotspot capability, unrelated block-list preservation, timers, controller restart recovery, journal write/read failures and secondary/unrelated Binder callers. Root operations must not alter those rules or add new controller privileges.
+8. Review light/dark themes, large text, Chinese resources, runtime permission flow, live statuses, counter labels, history opt-in/deletion and the restore action with the Suite UI closed.
 
 ## Reference APK and primary API references
 
@@ -77,17 +85,5 @@ The supplied modified NetCut APK was inspected statically, never installed or ru
 - [AOSP Soft AP capability and allow/block-list requirements](https://source.android.com/docs/core/connect/wifi-softap)
 - [AOSP SoftApConfiguration](https://android.googlesource.com/platform/packages/modules/Wifi/+/refs/heads/main/framework/java/android/net/wifi/SoftApConfiguration.java)
 - [AOSP SoftApManager native client handling](https://android.googlesource.com/platform/packages/modules/Wifi/+/refs/heads/main/service/java/com/android/server/wifi/SoftApManager.java)
-
-## Device review follow-up
-
-Hotspot DHCP hostnames and network-scoped mDNS advertisements can identify a name, model and
-likely OS. The display labels these as peer-supplied hints; a shared SMB service alone never
-proves Windows, and Apple/Cast service types do not prove iOS/Android. Readable neighbor entries
-provide MAC addresses, with an explicit unavailable state when Android or MAC privacy hides them.
-No OUI-only guess is presented as a phone model. Discoveries/resolutions stop with the scan.
-
-Actions use full-width buttons with natural text height. Tabs and filter chips scroll with
-spacing rather than being squeezed into fixed weighted cells. LAN details no longer offer a
-speed-control action. Saved speed presets have a separate label and still cannot apply a limit.
-Root on a Wi-Fi client does not put other clients’ traffic through this phone: router/AP QoS
-or a supported phone-hotspot packet path is required for reliable peer rate limiting.
+- [Linux packet sockets](https://man7.org/linux/man-pages/man7/packet.7.html)
+- [Linux socket filters](https://docs.kernel.org/networking/filter.html)

@@ -56,7 +56,15 @@ android_app {
     certificate: "platform",
     privileged: true,
     system_ext_specific: true,
-    required: ["HeckerNetLabPermissions", "HeckerNetLabDefaultPermissions"],
+    required: ["HeckerNetLabPermissions", "HeckerNetLabDefaultPermissions", "hecker-netlab-lan"],
+}
+
+cc_binary {
+    name: "hecker-netlab-lan",
+    srcs: ["netlab/native/lan_core.cpp", "netlab/native/lan_main.cpp"],
+    cpp_std: "c++17",
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+    system_ext_specific: true,
 }
 
 prebuilt_etc {
