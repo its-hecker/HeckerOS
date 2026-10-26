@@ -86,6 +86,9 @@ java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     netlab/common/org/hecker/netlab/NetLabGroupPolicy.java tests/NetLabVendorsTest.java tests/NetLabGroupPolicyTest.java
 java -cp "$suite_test_output" NetLabVendorsTest "$suite_root/app/assets/netlab/ieee-vendors.tsv.gz"
 java -cp "$suite_test_output" NetLabGroupPolicyTest
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    netlab/common/org/hecker/netlab/NetLabSliderPolicy.java netlab/common/org/hecker/netlab/NetLabTrafficEvidence.java tests/NetLabSliderPolicyTest.java
+java -cp "$suite_test_output" NetLabSliderPolicyTest
 python3 tools/update_netlab_vendors.py --check
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     netlab/common/org/hecker/netlab/NetLabLanProtocol.java tests/NetLabLanProtocolTest.java

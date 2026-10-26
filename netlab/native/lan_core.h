@@ -64,11 +64,14 @@ class Session {
     Link link_;
     std::map<uint32_t, Peer> peers_;
     uint64_t deadline_, heartbeat_;
-    bool stopping_ = false;
+    uint32_t seconds_;
+    bool stopping_ = false, armed_ = false;
 public:
     Session(Link link, uint64_t now, uint32_t seconds);
+    void beginActive(uint64_t now);
     void add(uint32_t address, const Mac& hardware, Mode policy, uint32_t up, uint32_t down, uint64_t now);
     void update(uint32_t address, Mode policy, uint32_t up, uint32_t down, uint64_t now);
+    uint32_t configure(const std::string& command, uint64_t now);
     std::vector<Bytes> announcements(bool restore, uint32_t only = 0) const;
     void heartbeat(uint64_t now) { heartbeat_ = now; }
     bool expired(uint64_t now) const;

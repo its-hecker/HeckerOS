@@ -25,6 +25,31 @@ static Bytes packet(bool upload, unsigned peer = 3, size_t size = 1014) {
     return f;
 }
 int main() {
+    // Reproduce slow root/firewall preparation: neither duration nor heartbeat starts there.
+    for (uint32_t duration : {1U, 5U, 300U}) {
+        Session prepared(link(), 1000, duration); prepared.add(peerIp(), peerMac(), Mode::Block, 0, 0, 1000);
+        check(prepared.expired(50000)); prepared.beginActive(50000); check(!prepared.expired(50000));
+        check(!prepared.expired(50999)); rejects([&] { prepared.beginActive(51000); });
+        prepared.heartbeat(50000 + duration * 1000ULL - 1);
+        check(prepared.expired(50000 + duration * 1000ULL));
+    }
+    Session live(link(), 0, 300);
+    live.add(peerIp(), peerMac(), Mode::Limit, 128, 256, 0);live.add(peerIp(4), peerMac(4), Mode::Block, 0, 0, 0);
+    live.beginActive(100000);
+    check(live.configure("SET 192.168.10.3 BLOCK 0 0", 100001) == peerIp());
+    live.receive(packet(true), 100001);live.receive(packet(false), 100001);
+    check(live.drain(100001).empty());check(live.peers().at(peerIp()).upload.dropped > 0 && live.peers().at(peerIp()).download.dropped > 0);
+    check(live.configure("SET 192.168.10.3 LIMIT 128 512", 100002) == peerIp());
+    live.receive(packet(true), 100002);live.receive(packet(false), 100002);check(live.drain(100002).size() == 2);
+    check(live.peers().at(peerIp(4)).mode == Mode::Block);
+    for (const auto& bad : {"SET 192.168.10.5 BLOCK 0 0", "SET 192.168.10.1 BLOCK 0 0", "SET 192.168.10.3 PASS 0 0",
+            "SET 192.168.10.3 LIMIT 0 0", "SET 192.168.10.3 BLOCK 1 0", "SET 192.168.10.3 LIMIT 1024001 1",
+            "SET 192.168.10.3 BLOCK 0 0 extra", "SET 0192.168.10.3 BLOCK 0 0", "SET 192.168.10.3 BLOCK 0 0\nSTOP"})
+        rejects([&] { live.configure(bad, 100003); });
+    live.restore(peerIp(), 100004);check(live.active());check(live.announcements(true,peerIp()).size()==2);
+    live.configure("SET 192.168.10.3 BLOCK 0 0", 100005);check(live.announcements(true,peerIp()).empty());
+    check(live.peers().at(peerIp()).mode == Mode::Block);live.heartbeat(399999);live.configure("SET 192.168.10.3 LIMIT 1 2", 399999);
+    check(live.expired(400000)); // Editing a policy never extends the session.
     for (const auto& value : {"0.0.0.0", "10.0.0.1", "172.31.255.254", "192.168.10.2", "255.255.255.255"}) check(ipText(ip(value)) == value);
     for (const auto& value : {"", "127.1", "01.2.3.4", "1.2.3.4.5", "1.2.3.-1", "1.2.3.256", "1.2.3.4\n", "1.2..4", "0x01.2.3.4"}) rejects([&] { ip(value); });
     for (const auto& value : {"00:00:00:00:00:00", "ff:ff:ff:ff:ff:ff", "01:22:33:44:55:66", "02-00-00-00-00-01", "02:0:00:00:00:01", "02:gg:00:00:00:01"}) rejects([&] { mac(value); });

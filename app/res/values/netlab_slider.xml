@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="netlab_slider_pending">Requested — verifying IPv4 traffic</string>
+    <string name="netlab_slider_enabled">Enabled</string>
+    <string name="netlab_slider_ends">Cut IPv4 ← %1$s → Restore</string>
+    <string name="netlab_slider_live_duration">Applies to the existing selected devices. The current session end time stays the same.</string>
+    <string name="netlab_slider_existing_group">These devices are outside the running session. Stop and restore it before starting a new selection.</string>
+    <string name="netlab_slider_start_timeout">The controller timed out while preparing the session. No successful cut was confirmed. Retry with fewer devices and check the controller diagnostics.</string>
+    <string name="netlab_slider_not_active">The session is ending or has finished. Wait for restoration, then try again.</string>
+    <string name="netlab_slider_peer_conflict">The selection contains an invalid or repeated device identity. Scan again and select the intended devices.</string>
+    <string name="netlab_slider_failure_code">%1$s\nController code: %2$s</string>
+</resources>

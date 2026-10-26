@@ -191,14 +191,12 @@ std::map<uint32_t, Mac> discover(Wire& wire, const Link& link, const std::vector
     }
     need(!interrupted, "cancelled"); return found;
 }
-void stats(const Session& session) {
-    for (const auto& entry : session.peers()) {
-        const Peer& p = entry.second;
+void peerStats(const Peer& p) {
         output("STAT " + ipText(p.address) + " " + modeText(p.mode) + " " + std::to_string(p.up) + " " + std::to_string(p.down)
                 + " " + std::to_string(p.upload.forwarded) + " " + std::to_string(p.download.forwarded)
                 + " " + std::to_string(p.upload.dropped) + " " + std::to_string(p.download.dropped));
-    }
 }
+void stats(const Session& session) { for (const auto& entry : session.peers()) peerStats(entry.second); }
 bool gatewayStillMatches(Wire& wire, const Link& link) {
     if (!wire.send(arp(link.ownMac, link.own, {}, link.gateway, true))) return false;
     uint64_t end = clockMs() + 400;
@@ -216,13 +214,20 @@ void run(Session& session, Link& link, Wire& wire, Input& input, ForwardingGuard
     std::string reason = "stopped"; uint64_t announceAt = 0, checkAt = 0, statsAt = 0, repairAt = 0;
     std::map<uint32_t, uint64_t> repairs;
     bool sameLink = true;
+    // Even the initial integrity check can block on xtables; finish it before arming.
+    need(interfaceMac(link, true) == link.ownMac, "link_changed");
+    need(guard.intact(), "forwarding_guard_lost");
+    checkAt = clockMs() + 2000;
+    session.beginActive(clockMs());
     output("STARTED");
+    stats(session); // Establish per-policy baselines before the first intercepted packet.
     try {
         while (!interrupted && !input.eof && session.active() && !session.expired(clockMs())) {
             uint64_t now = clockMs();
             if (now >= checkAt) {
-                need(interfaceMac(link, true) == link.ownMac, "link_changed"); checkAt = now + 2000;
+                need(interfaceMac(link, true) == link.ownMac, "link_changed");
                 need(guard.intact(), "forwarding_guard_lost");
+                checkAt = clockMs() + 2000;
             }
             now = clockMs();
             if (session.expired(now)) break;
@@ -244,6 +249,13 @@ void run(Session& session, Link& link, Wire& wire, Input& input, ForwardingGuard
                 if (w.size() == 1 && w[0] == "PING") session.heartbeat(now);
                 else if (w.size() == 1 && w[0] == "STOP") { reason = "stopped"; session.stop(now); }
                 else if (w.size() == 1 && w[0] == "ABORT") { reason = "link_changed"; sameLink = false; session.stop(now); }
+                else if (!w.empty() && w[0] == "SET") {
+                    uint32_t address = session.configure(command, now);
+                    repairs.erase(address);
+                    peerStats(session.peers().at(address));
+                    for (const auto& frame : session.announcements(false, address)) need(wire.send(frame), "send_failed");
+                    statsAt = 0;
+                }
                 else if (w.size() == 2 && w[0] == "RESTORE") {
                     uint32_t address = ip(w[1]); session.restore(address, now); repairs[address] = now + 2000;
                     wire.announce(session.announcements(true, address)); output("RESTORED " + ipText(address));

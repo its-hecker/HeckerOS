@@ -127,9 +127,14 @@ bool Bucket::take(size_t bytes, uint64_t now) {
     if (credit_ < std::min(double(bytes), capacity)) return false;
     credit_ -= bytes; return true;
 }
-Session::Session(Link link, uint64_t now, uint32_t seconds) : link_(std::move(link)), deadline_(now + seconds * 1000ULL), heartbeat_(now) {
+Session::Session(Link link, uint64_t now, uint32_t seconds) : link_(std::move(link)), deadline_(now + seconds * 1000ULL), heartbeat_(now), seconds_(seconds) {
     link_.validate(); require(seconds >= 1 && seconds <= 3600, "invalid_duration");
     require(unicast(link_.ownMac) && unicast(link_.gatewayMac) && link_.ownMac != link_.gatewayMac, "invalid_mac");
+}
+void Session::beginActive(uint64_t now) {
+    // Privilege prompts, peer verification and firewall setup are not active control time.
+    require(!armed_ && !stopping_ && active(), "invalid_session_start");
+    armed_ = true; heartbeat_ = now; deadline_ = now + seconds_ * 1000ULL;
 }
 void Session::add(uint32_t address, const Mac& hardware, Mode policy, uint32_t up, uint32_t down, uint64_t now) {
     require(!stopping_ && peers_.size() < kMaxPeers && !peers_.count(address) && link_.peer(address)
@@ -145,11 +150,20 @@ void Session::update(uint32_t address, Mode policy, uint32_t up, uint32_t down, 
     Peer& p = peers_.at(address); p.mode = policy; p.up = up; p.down = down;
     p.upload.bucket.configure(up, now); p.download.bucket.configure(down, now);
 }
+uint32_t Session::configure(const std::string& command, uint64_t now) {
+    auto w = words(command);
+    require(w.size() == 5 && w[0] == "SET", "invalid_command");
+    auto policy = mode(w[2]); uint32_t up = number(w[3], kMaxRate), down = number(w[4], kMaxRate);
+    require(policy != Mode::Pass && (policy != Mode::Block || (!up && !down)), "invalid_command");
+    uint32_t address = ip(w[1]); update(address, policy, up, down, now); return address;
+}
 std::vector<Bytes> Session::announcements(bool restore, uint32_t only) const {
     std::vector<Bytes> result;
     for (const auto& entry : peers_) {
         const Peer& p = entry.second;
         if ((only && only != p.address) || (!restore && p.mode == Mode::Pass)) continue;
+        // A peer re-cut during another peer's session must not receive an old repair job.
+        if (restore && only && p.mode != Mode::Pass) continue;
         result.push_back(arp(restore ? link_.gatewayMac : link_.ownMac, link_.gateway, p.hardware, p.address, false));
         result.push_back(arp(restore ? p.hardware : link_.ownMac, p.address, link_.gatewayMac, link_.gateway, false));
     }

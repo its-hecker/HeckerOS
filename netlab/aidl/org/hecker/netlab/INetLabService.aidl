@@ -12,4 +12,5 @@ interface INetLabService {
     Bundle lanStart(in String[] addresses, in String[] macs, boolean block, int uploadKbps, int downloadKbps, int seconds);
     Bundle lanRestore(String address);
     Bundle lanStop();
+    Bundle lanUpdate(in String[] addresses, in String[] macs, boolean block, int uploadKbps, int downloadKbps);
 }
