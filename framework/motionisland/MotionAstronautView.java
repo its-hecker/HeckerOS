@@ -51,8 +51,9 @@ final class MotionAstronautView extends View {
         long age = SystemClock.elapsedRealtime() - when;
         if (when < 0 || age < 0 || age >= MotionIslandState.ACTION_DURATION || atlas == null) return;
         float alpha = animate ? MotionIslandAnimation.alpha(age) : 1;
-        int pose = animate ? MotionIslandAnimation.pose(age,
-                action == MotionIslandState.PLAY || action == MotionIslandState.PAUSE) : 0;
+        boolean wave = action == MotionIslandState.PLAY || action == MotionIslandState.PAUSE;
+        int pose = !animate ? 0 : wave ? MotionIslandAnimation.pose(age, true)
+                : direction != 0 ? MotionIslandAnimation.swingPose(age) : 0;
         int save = canvas.save();
         canvas.translate(getWidth() / 2f, dp(1));
         if (animate) {
@@ -70,8 +71,10 @@ final class MotionAstronautView extends View {
         float[] gripX = {.762f, .697f, .612f};
         float gripY = .292f;
         Rect source = new Rect(pose * cell, 0, (pose + 1) * cell, atlas.getHeight());
-        RectF target = new RectF(-size * gripX[pose], rope - size * gripY,
-                size * (1 - gripX[pose]), rope + size * (1 - gripY));
+        canvas.translate(0, rope);
+        if (animate) canvas.rotate(MotionIslandAnimation.bodyRock(age, direction));
+        RectF target = new RectF(-size * gripX[pose], -size * gripY,
+                size * (1 - gripX[pose]), size * (1 - gripY));
         paint.setAlpha(Math.round(255 * alpha));
         canvas.drawBitmap(atlas, source, target, paint);
         canvas.restoreToCount(save);

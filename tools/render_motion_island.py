@@ -44,19 +44,22 @@ sources['android/content/Context.java']='package android.content;public class Co
 sources['android/os/SystemClock.java']='package android.os;public class SystemClock{public static long now=10000;public static long elapsedRealtime(){return now;}}'
 sources['com/android/systemui/res/R.java']='package com.android.systemui.res;public class R{public static class drawable{public static int hecker_motion_astronaut=1;}public static class string{public static int hecker_motion_open_player=1;}}'
 sources['com/android/systemui/hecker/HeckerQsMedia.java']='package com.android.systemui.hecker;public class HeckerQsMedia{public static class Snapshot{public android.graphics.Bitmap artwork;public boolean playing=true;}}'
-sources['android/graphics/Bitmap.java']='package android.graphics;public class Bitmap{public boolean isRecycled(){return false;}public int getWidth(){return 2172;}public int getHeight(){return 724;}}'
+sources['android/graphics/Bitmap.java']='package android.graphics;public class Bitmap{public final boolean cover;public Bitmap(){this(false);}public Bitmap(boolean cover){this.cover=cover;}public boolean isRecycled(){return false;}public int getWidth(){return cover?512:2172;}public int getHeight(){return cover?512:724;}}'
 sources['android/graphics/BitmapFactory.java']='package android.graphics;public class BitmapFactory{public static class Options{public boolean inScaled;}public static Bitmap decodeResource(android.content.res.Resources r,int id,Options o){return new Bitmap();}}'
 sources['android/graphics/Rect.java']='package android.graphics;public class Rect{public int left,top,right,bottom;public Rect(int a,int b,int c,int d){left=a;top=b;right=c;bottom=d;}}'
 sources['android/graphics/RectF.java']=sources['android/graphics/RectF.java'].replace('public void set(', 'public RectF(){}public RectF(float a,float b,float c,float d){set(a,b,c,d);}public void set(')
 sources['android/graphics/Paint.java']=sources['android/graphics/Paint.java'].replace('ANTI_ALIAS_FLAG=1;', 'ANTI_ALIAS_FLAG=1,FILTER_BITMAP_FLAG=2;').replace('public void setStyle(', 'public void setAlpha(int a){color=(color&0xffffff)|(a<<24);}public void setStyle(')
-sources['android/graphics/Path.java']=sources['android/graphics/Path.java'].replace('public void reset()', 'public enum Direction{CW}public void addRoundRect(RectF r,float x,float y,Direction d){}public void reset()')
+sources['android/graphics/Path.java']=sources['android/graphics/Path.java'].replace('public void reset()', 'public enum Direction{CW}public RectF roundRect;public float radius;public void addRoundRect(RectF r,float x,float y,Direction d){roundRect=r;radius=x;}public void reset()')
 sources['android/view/View.java']=sources['android/view/View.java'].replace('getWidth(){return 672;}', 'getWidth(){return width;}public int getHeight(){return height;}public int width=672,height=450;public android.content.Context getContext(){return context;}public void setClickable(boolean v){}public void setFocusable(boolean v){}public boolean post(Runnable r){return true;}public boolean postDelayed(Runnable r,long d){return true;}public boolean removeCallbacks(Runnable r){return true;}').replace('IMPORTANT_FOR_ACCESSIBILITY_YES=1,', 'IMPORTANT_FOR_ACCESSIBILITY_YES=1,IMPORTANT_FOR_ACCESSIBILITY_NO=2,')
 sources['android/text/TextUtils.java']=sources['android/text/TextUtils.java'].replace('return s;', 'int n=Math.max(1,(int)(width/(p.size*.54f)));return s.length()>n?s.substring(0,Math.max(0,n-1))+"…":s;')
 canvas=sources['android/graphics/Canvas.java']
 canvas=canvas[:-1]+r'''
-public void clipPath(Path path){}
+public void clipPath(Path path){
+ RectF r=path.roundRect;String id="b"+(clips++);
+ s.append("<defs><clipPath id=\""+id+"\"><rect x=\""+r.left+"\" y=\""+r.top+"\" width=\""+(r.right-r.left)+"\" height=\""+(r.bottom-r.top)+"\" rx=\""+path.radius+"\"/></clipPath></defs><g clip-path=\"url(#"+id+")\">");depth++;
+}
 public void drawBitmap(Bitmap bitmap,Rect source,RectF target,Paint p){
- s.append("<svg x=\""+target.left+"\" y=\""+target.top+"\" width=\""+(target.right-target.left)+"\" height=\""+(target.bottom-target.top)+"\" viewBox=\""+source.left+" "+source.top+" "+(source.right-source.left)+" "+(source.bottom-source.top)+"\" opacity=\""+((p.color>>>24)/255f)+"\"><image width=\"2172\" height=\"724\" href=\""+System.getProperty("atlasData")+"\"/></svg>");
+ s.append("<svg x=\""+target.left+"\" y=\""+target.top+"\" width=\""+(target.right-target.left)+"\" height=\""+(target.bottom-target.top)+"\" viewBox=\""+source.left+" "+source.top+" "+(source.right-source.left)+" "+(source.bottom-source.top)+"\" opacity=\""+((p.color>>>24)/255f)+"\"><image width=\""+bitmap.getWidth()+"\" height=\""+bitmap.getHeight()+"\" href=\""+System.getProperty(bitmap.cover?"coverData":"atlasData")+"\"/></svg>");
 }
 }'''
 sources['android/graphics/Canvas.java']=canvas
@@ -64,19 +67,22 @@ sources['com/android/systemui/hecker/Preview.java']=r'''package com.android.syst
 public class Preview {public static void main(String[] args)throws Exception{
 java.nio.file.Path out=java.nio.file.Path.of(args[0]);java.nio.file.Files.createDirectories(out);
 String data=java.util.Base64.getEncoder().encodeToString(java.nio.file.Files.readAllBytes(java.nio.file.Path.of(args[1])));System.setProperty("atlasData","data:image/png;base64,"+data);
+String cover=java.util.Base64.getEncoder().encodeToString(java.nio.file.Files.readAllBytes(java.nio.file.Path.of(args[2])));System.setProperty("coverData","data:image/svg+xml;base64,"+cover);
 String[] labels={"Midnight orbit","Track skipped","Previous track","Playing","Paused"};int[] actions={0,3,4,1,2};
 for(int scene=0;scene<actions.length;scene++){
  MotionIslandState state=new MotionIslandState();state.environment(true,true,true,true,0);
  if(actions[scene]!=0){state.accept(actions[scene],0,10000,10000);state.direction=scene==1?1:scene==2?-1:0;}
  MotionIslandView view=new MotionIslandView(new android.content.Context());view.width=444;view.height=96;
  MotionAstronautView person=new MotionAstronautView(new android.content.Context());person.width=672;person.height=450;
- HeckerQsMedia.Snapshot music=new HeckerQsMedia.Snapshot();music.playing=scene!=4;
+ HeckerQsMedia.Snapshot music=new HeckerQsMedia.Snapshot();music.playing=scene!=4;music.artwork=new android.graphics.Bitmap(true);
  for(int frame=0;frame<48;frame++){
  android.os.SystemClock.now=10000+frame*55;
- view.update(music,labels[scene],true);person.update(state,true);
+ state.environment(true,true,true,music.playing,0);
+ view.update(music,state.current(android.os.SystemClock.now)==0?labels[0]:labels[scene],true);person.update(state,true);
  android.graphics.Canvas canvas=new android.graphics.Canvas();
- int save=canvas.save();canvas.translate(114,0);view.onDraw(canvas);canvas.restoreToCount(save);
- if(actions[scene]!=0){save=canvas.save();canvas.translate(0,87);person.onDraw(canvas);canvas.restoreToCount(save);}
+ int save;
+ if(state.visible(android.os.SystemClock.now)){save=canvas.save();canvas.translate(114,0);view.onDraw(canvas);canvas.restoreToCount(save);}
+ if(state.creatureVisible(android.os.SystemClock.now)){save=canvas.save();canvas.translate(0,87);person.onDraw(canvas);canvas.restoreToCount(save);}
  String svg="<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"672\" height=\"500\"><defs><linearGradient id=\"bg\" x2=\"0\" y2=\"1\"><stop stop-color=\"#2d6076\"/><stop offset=\"1\" stop-color=\"#0c1624\"/></linearGradient></defs><rect width=\"100%\" height=\"100%\" rx=\"24\" fill=\"url(#bg)\"/>"+canvas.s+"</svg>";
  java.nio.file.Files.writeString(out.resolve(String.format("%02d-%02d.svg",scene,frame)),svg);
  }
@@ -87,7 +93,7 @@ for name,code in sources.items():
  p=work/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(code);files.append(str(p))
 production=root/'framework/motionisland'
 subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-d',str(work/'classes'),*files,*[str(production/n) for n in ('MotionIslandState.java','MotionIslandAnimation.java','MotionIslandView.java','MotionAstronautView.java')]],check=True)
-subprocess.run(['java','-cp',str(work/'classes'),'com.android.systemui.hecker.Preview',str(work/'frames'),str(production/'astronaut-wave.png')],check=True)
+subprocess.run(['java','-cp',str(work/'classes'),'com.android.systemui.hecker.Preview',str(work/'frames'),str(production/'astronaut-wave.png'),str(root/'docs/previews/motion-island-album.svg')],check=True)
 import cairosvg,io
 from PIL import Image
 frames=[]

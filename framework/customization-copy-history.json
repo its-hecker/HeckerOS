@@ -245,5 +245,11 @@
   ],
   "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_motion_island.xml": [
     "d5a8b9805862d12c02691e6227f10b05515a9aaa"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionIslandAnimation.java": [
+    "38a9e1cc8382d427c7501ad5b52c504176c2d0cd"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionAstronautView.java": [
+    "62e80c6e127f75786455df7c078da0d9cbca4cdf"
   ]
 }

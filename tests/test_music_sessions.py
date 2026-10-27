@@ -29,7 +29,7 @@ STUBS = {
 'android/media/MediaMetadata.java': '''package android.media;public class MediaMetadata{
  public static String METADATA_KEY_TITLE="title",METADATA_KEY_ARTIST="artist",METADATA_KEY_ALBUM="album",METADATA_KEY_MEDIA_ID="id",METADATA_KEY_ALBUM_ART="art",METADATA_KEY_ART="art2",METADATA_KEY_DURATION="duration";
  public java.util.Map<String,String> values=new java.util.HashMap<>();public String getString(String k){return values.get(k);}public long getLong(String k){return 100000;}
- public android.graphics.Bitmap getBitmap(String k){return null;}public Description getDescription(){return new Description();}public static class Description{public android.graphics.Bitmap getIconBitmap(){return null;}}
+ public java.util.Map<String,android.graphics.Bitmap> pictures=new java.util.HashMap<>();public android.graphics.Bitmap getBitmap(String k){return pictures.get(k);}public Description getDescription(){return new Description();}public static class Description{public android.graphics.Bitmap getIconBitmap(){return null;}}
 }''',
 'android/media/session/MediaSession.java': '''package android.media.session;public class MediaSession {public static class Token{}}''',
 'android/media/session/PlaybackState.java': '''package android.media.session;public class PlaybackState{
@@ -78,6 +78,14 @@ public class SessionTest {
   b.playback(3);check(current.playing&&current.token==b.token); // No membership change.
   b.attrs(3);check(current.token==a.token&&!current.playing); // Music -> movie cannot linger.
   b.attrs(2);check(current.playing&&current.token==b.token);
+  android.graphics.Bitmap firstCover=new android.graphics.Bitmap(),nextCover=new android.graphics.Bitmap();
+  b.metadata.pictures.put(android.media.MediaMetadata.METADATA_KEY_ALBUM_ART,firstCover);
+  for(var callback:new ArrayList<>(b.callbacks))callback.onMetadataChanged(b.metadata);
+  check(current.artwork==firstCover); // Capsule observer receives real session album art.
+  b.metadata.pictures.put(android.media.MediaMetadata.METADATA_KEY_ALBUM_ART,nextCover);
+  for(var callback:new ArrayList<>(b.callbacks))callback.onMetadataChanged(b.metadata);
+  check(current.artwork==nextCover); // Track/cover changes replace the thumbnail.
+
   check(m.snapshotFor(v.token).active==false&&m.snapshotFor(b.token).active);
   b.playback(2);a.playback(3);check(current.token==a.token);
   HeckerQsMedia pinned=new HeckerQsMedia(c,s->{},true,b.token);pinned.start();pinned.playPause();

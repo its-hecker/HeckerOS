@@ -16,6 +16,20 @@ final class MotionIslandAnimation {
         if (!wave || age < 160 || age > 1700) return 0;
         return (age / 180) % 2 == 0 ? 1 : 2;
     }
+    static int swingPose(long age) {
+        // Reach out for balance, wave around the outward arc, then lower the free arm.
+        if (age < 140 || age >= 1120) return 0;
+        if (age < 280) return 1;
+        if (age < 460) return 2;
+        if (age < 640) return 1;
+        if (age < 820) return 2;
+        return 1;
+    }
+    static float bodyRock(long age, int direction) {
+        if (age < 0 || age >= MotionIslandState.ACTION_DURATION || direction == 0) return 0;
+        // A small counterbalance around the gripping hand, independent of the rope's pendulum.
+        return (float) (direction * 6 * Math.sin(age * Math.PI / 420) * Math.exp(-age / 1000.0));
+    }
     static float bar(long time, int index) {
         return (float) (3 + 10 * (.5 + .5 * Math.sin(time / (135.0 + index * 21) + index * 1.7)));
     }

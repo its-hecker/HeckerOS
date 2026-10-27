@@ -70,6 +70,18 @@ public class PolicyTest {
   check(MotionIslandAnimation.angle(320,0)==0);
   check(MotionIslandAnimation.pose(360,true)!=MotionIslandAnimation.pose(540,true));
   check(MotionIslandAnimation.pose(360,false)==0&&MotionIslandAnimation.pose(1800,true)==0);
+  check(MotionIslandAnimation.swingPose(-1)==0&&MotionIslandAnimation.swingPose(0)==0
+        &&MotionIslandAnimation.swingPose(1700)==0&&MotionIslandAnimation.swingPose(2400)==0);
+  java.util.Set<Integer> armPoses=new java.util.HashSet<>();
+  for(int age=0;age<1200;age+=50)armPoses.add(MotionIslandAnimation.swingPose(age));
+  check(armPoses.equals(java.util.Set.of(0,1,2))); // Arm participates in the flick, not just play/pause.
+  for(int age=0;age<=2400;age+=16){
+   float right=MotionIslandAnimation.bodyRock(age,1),left=MotionIslandAnimation.bodyRock(age,-1);
+   if(!Float.isFinite(right)||Math.abs(right)>6||Math.abs(right+left)>.001f)
+       throw new AssertionError("invalid or asymmetric balance at "+age);
+  }
+  check(MotionIslandAnimation.bodyRock(200,1)!=0&&MotionIslandAnimation.bodyRock(200,0)==0);
+  check(MotionIslandAnimation.bodyRock(-1,1)==0&&MotionIslandAnimation.bodyRock(2400,1)==0);
   check(MotionIslandState.volumePercent(5,11)==45);
   check(MotionIslandState.volumePercent(0,11)==0);
   check(MotionIslandState.volumePercent(11,11)==100);

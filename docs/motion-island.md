@@ -23,8 +23,11 @@ Outside tap, back, screen off, user change or session destruction dismisses it.
 The astronaut follows the user's second reference, with a glossy black visor,
 white outline and intact limbs. Its raised hand grips a thin rope from the
 capsule. A flick swings it first in the **physical hand direction**, including
-when the user's next/previous mapping is reversed. Play and pause wave the free
-hand in a brief goodbye. Each gesture restarts a 2.4-second appearance with a
+when the user's next/previous mapping is reversed. During the swing it raises
+its free arm for balance, gives a small wave near the outer arc, and gently
+counterbalances its body around the gripping hand before lowering the arm.
+The hand stays registered to the rope endpoint in all poses. Play and pause
+wave the free hand in a brief goodbye. Each gesture restarts a 2.4-second appearance with a
 soft entrance, damped swing and 420 ms fade/retraction after inactivity. A pause
 allows that farewell to finish before the capsule hides; ordinary pause hides
 the capsule. The astronaut is hidden while the expanded player is open.
@@ -74,6 +77,8 @@ and bounded pre-command identities stay within the privileged package boundary.
 
 `tools/render_motion_island.py` executes the production capsule/astronaut drawing
 code against recording Canvas declarations and renders it with Pillow/CairoSVG.
+The sample album cover is `docs/previews/motion-island-album.svg`; actual playback
+uses the player's album art, falling back to a music note only when artwork is absent.
 The sprite was created with a transparent-background imagegen reference edit;
 `framework/motionisland/artwork.json` records its provenance. This is a host
 design preview, not a phone screenshot.
