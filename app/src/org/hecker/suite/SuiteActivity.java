@@ -74,6 +74,10 @@ public final class SuiteActivity extends Activity {
         integrity.addView(Ui.text(this,getString(R.string.integrity_summary),12,false));
         integrity.setFocusable(true);integrity.setClickable(true);
         integrity.setOnClickListener(v->openIntegrity());content.addView(integrity);
+        if ("coral".equals(android.os.Build.DEVICE)) {
+            Ui.actionCard(this, content, R.string.root_privacy_title, R.string.root_privacy_summary,
+                    v -> open("RootPrivacyActivity"));
+        }
         LinearLayout footer=Ui.card(this); footer.addView(Ui.text(this,"HeckerOS",17,true));
         footer.addView(Ui.text(this,getString(R.string.suite_footer),12,false));content.addView(footer);
     }

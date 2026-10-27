@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="root_privacy_title">Root manager privacy</string>
+    <string name="root_privacy_summary">Choose apps that cannot query installed root managers</string>
+    <string name="root_privacy_body">Selected apps cannot query the supported root manager packages. Close and reopen an app after changing its setting. Keep root access disabled for these apps and enable their Umount modules profile in KernelSU. This setting does not guarantee banking app compatibility.</string>
+    <string name="root_privacy_save_error">Could not save the setting. Try again.</string>
+</resources>

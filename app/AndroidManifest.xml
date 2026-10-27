@@ -35,6 +35,8 @@
     <application android:label="@string/suite_title"
         android:icon="@drawable/ic_suite" android:theme="@style/SuiteTheme"
         android:allowBackup="false" android:supportsRtl="true">
+        <activity android:name=".RootPrivacyActivity" android:exported="false"
+            android:label="@string/root_privacy_title" />
         <activity android:name=".SuiteRouterActivity" android:exported="true"
             android:permission="org.hecker.suite.permission.OPEN_FEATURE"
             android:excludeFromRecents="true" android:noHistory="true" />

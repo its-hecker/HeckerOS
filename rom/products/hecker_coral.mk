@@ -64,6 +64,7 @@ PRODUCT_DEVICE := coral
 PRODUCT_MANUFACTURER := Google
 PRODUCT_MODEL := Pixel 4 XL
 PRODUCT_NAME := hecker_coral
+PRODUCT_SYSTEM_EXT_PROPERTIES += ro.hecker.coral_root_privacy=true
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
     BuildDesc="coral-user 13 TP1A.221005.002.B2 9382335 release-keys" \

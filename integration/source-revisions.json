@@ -80,8 +80,8 @@
     },
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
-      "branch": "heckeros-17",
-      "revision": "7367a79dcb02c6388ab80b1cdf9ed7d223f8fcea",
+      "branch": "test/coral-root-privacy-20261027",
+      "revision": "16fd1e0f7e6e50dee06ab424dce7e7d3cacd3f2f",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -156,11 +156,11 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "main",
-    "integration_branch": "main",
+    "source_branch": "test/coral-root-privacy-20261027",
+    "integration_branch": "test/coral-root-privacy-20261027",
     "release": "hecker_suite",
     "base_release": "cp2a",
-    "status": "Source validation only; full ROM build and phone tests required"
+    "status": "Experimental Coral root privacy; full kernel/ROM build and device tests pending"
   },
   "heckeros": {
     "version": "1.0",
@@ -184,8 +184,8 @@
     },
     "kernel": {
       "repository": "its-hecker/heckeros-floral-kernel",
-      "branch": "main",
-      "revision": "f8648fd85fb258165c6a2dd6cb8ea34bae206af5"
+      "branch": "test/coral-root-privacy-20261027",
+      "revision": "841d1148dcc8bab35177019f291a877032781359"
     }
   },
   "platform_ownership": {
@@ -197,5 +197,13 @@
     "updates": "Upstream changes require explicit pin updates, review and another build. No automatic merges or phone updates.",
     "bulk_migration_required": false,
     "upstream_lock": "integration/upstream-platform-lock.json"
+  },
+  "root_privacy_test": {
+    "devices": [
+      "coral"
+    ],
+    "branch": "test/coral-root-privacy-20261027",
+    "kernel_su_revision": "89b7bea65591634bcc6ff040db5fd97c8ca787a9",
+    "flame_enabled": false
   }
 }
