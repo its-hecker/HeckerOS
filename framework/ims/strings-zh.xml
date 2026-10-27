@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hecker_volte_description">SIM 卡 %1$d 的 VoLTE 可用</string>
+    <string name="hecker_vowifi_description">SIM 卡 %1$d 的 Wi-Fi 通话可用</string>
+</resources>

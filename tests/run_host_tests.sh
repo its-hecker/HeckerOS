@@ -49,6 +49,10 @@ java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
 java -cp "$suite_test_output" com.android.systemui.hecker.FaceIslandStateTest
 
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/ims/ImsIconState.java tests/ImsIconStateTest.java
+java -cp "$suite_test_output" com.android.systemui.hecker.ImsIconStateTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     framework/qs/HeckerQsTileOrder.java tests/HeckerQsTileOrderTest.java
 java -cp "$suite_test_output" com.android.systemui.hecker.HeckerQsTileOrderTest
 

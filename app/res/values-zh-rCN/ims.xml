@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ims_icons_title">通话指示图标</string>
+    <string name="ims_icons_summary">当 IMS 语音通话可用时，显示相应 SIM 卡的指示图标。</string>
+    <string name="show_volte_icon">显示 VoLTE 图标</string>
+    <string name="show_vowifi_icon">显示 VoWiFi 图标</string>
+</resources>

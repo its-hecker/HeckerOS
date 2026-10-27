@@ -395,9 +395,10 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/dagger/SystemUIModule.java": [
     {
       "old": "public abstract class SystemUIModule {",
-      "new": "public abstract class SystemUIModule {\n\n    @Binds\n    @IntoMap\n    @ClassKey(com.android.systemui.hecker.HeckerFaceUnlockStartable.class)\n    abstract CoreStartable bindHeckerFaceUnlockIsland(\n            com.android.systemui.hecker.HeckerFaceUnlockStartable startable);\n\n    @Binds\n    @IntoMap\n    @ClassKey(com.android.systemui.hecker.HeckerQsActions.class)\n    abstract CoreStartable bindHeckerQuickSettingsActions(\n            com.android.systemui.hecker.HeckerQsActions startable);",
+      "new": "public abstract class SystemUIModule {\n\n    @Binds\n    @IntoMap\n    @ClassKey(com.android.systemui.hecker.HeckerFaceUnlockStartable.class)\n    abstract CoreStartable bindHeckerFaceUnlockIsland(\n            com.android.systemui.hecker.HeckerFaceUnlockStartable startable);\n\n    @Binds\n    @IntoMap\n    @ClassKey(com.android.systemui.hecker.HeckerQsActions.class)\n    abstract CoreStartable bindHeckerQuickSettingsActions(\n            com.android.systemui.hecker.HeckerQsActions startable);\n\n    @Binds\n    @IntoMap\n    @ClassKey(com.android.systemui.hecker.HeckerImsIcons.class)\n    abstract CoreStartable bindHeckerImsIcons(\n            com.android.systemui.hecker.HeckerImsIcons startable);",
       "previous": [
-        "public abstract class SystemUIModule {\n\n    @Binds\n    @IntoMap\n    @ClassKey(com.android.systemui.hecker.HeckerFaceUnlockStartable.class)\n    abstract CoreStartable bindHeckerFaceUnlockIsland(\n            com.android.systemui.hecker.HeckerFaceUnlockStartable startable);"
+        "public abstract class SystemUIModule {\n\n    @Binds\n    @IntoMap\n    @ClassKey(com.android.systemui.hecker.HeckerFaceUnlockStartable.class)\n    abstract CoreStartable bindHeckerFaceUnlockIsland(\n            com.android.systemui.hecker.HeckerFaceUnlockStartable startable);",
+        "public abstract class SystemUIModule {\n\n    @Binds\n    @IntoMap\n    @ClassKey(com.android.systemui.hecker.HeckerFaceUnlockStartable.class)\n    abstract CoreStartable bindHeckerFaceUnlockIsland(\n            com.android.systemui.hecker.HeckerFaceUnlockStartable startable);\n\n    @Binds\n    @IntoMap\n    @ClassKey(com.android.systemui.hecker.HeckerQsActions.class)\n    abstract CoreStartable bindHeckerQuickSettingsActions(\n            com.android.systemui.hecker.HeckerQsActions startable);"
       ]
     }
   ],

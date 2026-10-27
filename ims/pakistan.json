@@ -1,0 +1,22 @@
+{
+  "revision": 1,
+  "carriers": {
+    "41001": {"name": "Jazz", "ims_apn": "ims", "protocol": "IP"},
+    "41003": {"name": "Ufone", "ims_apn": "ims", "protocol": "IPV4V6"},
+    "41004": {"name": "Zong", "ims_apn": "ims", "protocol": "IPV4V6"},
+    "41006": {"name": "Telenor", "ims_apn": "ims", "protocol": "IPV4V6"},
+    "41007": {"name": "Jazz (Warid)", "ims_apn": "ims", "protocol": "IP"}
+  },
+  "bool_configs": {
+    "carrier_volte_available_bool": true,
+    "enhanced_4g_lte_on_by_default_bool": true,
+    "editable_enhanced_4g_lte_bool": true,
+    "hide_enhanced_4g_lte_bool": false,
+    "carrier_wfc_ims_available_bool": true,
+    "carrier_default_wfc_ims_enabled_bool": true,
+    "editable_wfc_mode_bool": true
+  },
+  "int_configs": {
+    "carrier_default_wfc_ims_mode_int": 2
+  }
+}

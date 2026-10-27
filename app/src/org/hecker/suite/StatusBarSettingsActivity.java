@@ -9,6 +9,12 @@ public final class StatusBarSettingsActivity extends Activity {
         super.onCreate(state);
         LinearLayout page=Ui.page(this,R.string.status_bar_title);
         Ui.hero(this, page, R.raw.suite_status, R.string.status_styles_summary);
+        LinearLayout calling = Ui.card(this);
+        calling.addView(Ui.text(this, getString(R.string.ims_icons_title), 18, true));
+        calling.addView(Ui.text(this, getString(R.string.ims_icons_summary), 14, false));
+        toggle(calling, R.string.show_volte_icon, "hecker_show_volte_icon");
+        toggle(calling, R.string.show_vowifi_icon, "hecker_show_vowifi_icon");
+        page.addView(calling);
         Ui.actionCard(this,page,R.string.theme_wifi,R.string.wifi_theme_summary,v->SuitePages.theme(this,1));
         Ui.actionCard(this,page,R.string.theme_battery,R.string.battery_theme_summary,v->SuitePages.theme(this,3));
         LinearLayout battery = Ui.card(this);

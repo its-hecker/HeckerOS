@@ -106,5 +106,11 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientRenderer.kt": "framework/ambient/HeckerAmbientRenderer.kt",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientContent.kt": "framework/ambient/HeckerAmbientContent.kt",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/AmbientPulsePolicy.java": "framework/ambient/AmbientPulsePolicy.java",
-  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/OsloFeedbackPulse.java": "framework/glow/OsloFeedbackPulse.java"
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/OsloFeedbackPulse.java": "framework/glow/OsloFeedbackPulse.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerImsIcons.java": "framework/ims/HeckerImsIcons.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/ImsIconState.java": "framework/ims/ImsIconState.java",
+  "frameworks/base/packages/SystemUI/res/drawable/ic_hecker_volte.xml": "framework/ims/ic_hecker_volte.xml",
+  "frameworks/base/packages/SystemUI/res/drawable/ic_hecker_vowifi.xml": "framework/ims/ic_hecker_vowifi.xml",
+  "frameworks/base/packages/SystemUI/res/values/hecker_ims.xml": "framework/ims/strings.xml",
+  "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_ims.xml": "framework/ims/strings-zh.xml"
 }

@@ -130,6 +130,7 @@ python3 tools/check_launcher.py --sdk-cache generated/sdk
 python3 tools/check_about_phone.py --sdk-cache generated/sdk
 python3 tools/check_motion_manifest.py
 python3 tools/check_native_ports.py
+python3 tools/check_ims_icons.py --sdk-cache generated/sdk
 python3 tools/check_spoofing.py
 python3 tools/check_spoofing_hub.py
 python3 tools/freeze_upstream.py --check
@@ -138,6 +139,9 @@ python3 -m unittest discover -s integration/tests -p 'test_*.py'
 python3 tools/fetch_theme_assets.py
 python3 tools/build_bootanimation.py --check
 ```
+
+Pakistan IMS defaults, status-bar switches, modem limitations and device test
+instructions are documented in [ims/README.md](ims/README.md).
 
 See [Suite behavior and phone checks](docs/Suite.md),
 [source provenance](docs/Origins.md), [Settings design](settings/README.md), and
