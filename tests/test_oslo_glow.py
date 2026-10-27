@@ -11,6 +11,13 @@ ROOT = Path(__file__).resolve().parents[1]
 class OsloGlowTests(unittest.TestCase):
     def test_native_glow_keeps_one_attached_window_through_gesture_callbacks(self):
         files = {
+            'com/android/systemui/hecker/HeckerMotionIsland.java': '''package com.android.systemui.hecker;
+public final class HeckerMotionIsland {
+ public static HeckerMotionIsland last;public boolean closed,ambient;public int added,removed;
+ public static HeckerMotionIsland create(android.content.Context c){last=new HeckerMotionIsland();return last;}
+ public void feedbackAdded(android.view.View v){added++;}public void feedbackRemoved(android.view.View v){removed++;}
+ public void setAmbient(boolean value){ambient=value;}public void close(){closed=true;}
+}''',
             'android/content/Context.java': '''package android.content;
 public class Context { public Object service; public String getPackageName(){return "com.google.oslo";}
  public Context createWindowContext(int type,Object options){return this;}
@@ -108,6 +115,7 @@ public class GlowTest {
  android.opengl.GLSurfaceView shader=new android.opengl.GLSurfaceView(context);
  ((ViewGroup)host).addView(shader);((ViewGroup)host).addView(feedback);
  check(feedback.dozing&&!feedback.pulsing&&feedback.dozeCalls==1&&feedback.pulseCalls==1);
+ check(com.android.systemui.hecker.HeckerMotionIsland.last.added==1&&com.android.systemui.hecker.HeckerMotionIsland.last.ambient);
  int[] pulses={0};HeckerOsloOverlayHost.attachDoze(()->{pulses[0]++;return 1;});
  for(int kind:new int[]{3,5,14}){feedback.animate(kind);View.drain();android.os.Handler.drain();}
  check(pulses[0]==0&&feedback.starts==3&&host.getVisibility()==View.INVISIBLE);
@@ -117,6 +125,7 @@ public class GlowTest {
  }
  status.dozing=false;for(var c:new ArrayList<>(status.callbacks))c.onDozingChanged(false);
  check(host.getVisibility()==View.VISIBLE&&shader.renders>frames);frames=shader.renders;
+ check(!com.android.systemui.hecker.HeckerMotionIsland.last.ambient);
  HeckerOsloOverlayHost.onDozeScreenState(Display.STATE_OFF);check(host.getVisibility()==View.INVISIBLE&&shader.renders==frames);
  HeckerOsloOverlayHost.onDozeScreenState(Display.STATE_ON);check(host.getVisibility()==View.VISIBLE&&shader.renders>frames);
  check(feedback.dozeCalls==1&&feedback.pulseCalls==1);
@@ -124,6 +133,7 @@ public class GlowTest {
  check(windows.adds==1&&windows.removes==0);
  int beforeDisconnect=pulses[0];
  HeckerOsloOverlayHost.disconnect(plugin);feedback.animate(5);View.drain();check(pulses[0]==beforeDisconnect);
+ check(com.android.systemui.hecker.HeckerMotionIsland.last.closed);
  HeckerOsloOverlayHost.detachDoze();check(windows.current==null&&lock.callbacks.isEmpty()&&status.callbacks.isEmpty());
  int before=forwarded[0];callback.onHoldStatusBarOpenChange();check(forwarded[0]==before);
  View pending=HeckerOsloOverlayHost.rootFor(plugin,context,root,lock,status);

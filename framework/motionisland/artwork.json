@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "asset": "astronaut-wave.png",
+  "sha256": "db1563ba126edd594f5129b7bdd2b8e1d53f041c08d432a98a907b201b22ce30",
+  "mode": "Built-in imagegen reference edit with transparent background",
+  "reference": "User-provided black-and-white rope-hanging astronaut screenshot",
+  "prompt": "Preserve the reference astronaut: glossy black visor, white outlined helmet and intact white suit, raised right hand gripping a rope. Transparent 3-cell horizontal atlas, aligned body and gripping hand. Left arm down, waving, and raised wave. No rope, capsule, background or text.",
+  "rendering": "Original PNG retained. Android Canvas selects source cells and registers each gripping hand to the native rope endpoint."
+}

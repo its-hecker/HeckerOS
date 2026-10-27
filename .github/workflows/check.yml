@@ -59,7 +59,7 @@ jobs:
         run: python3 tools/compile_sdk.py --cache generated/sdk
       - name: Compile retained Google weather and Hecker Launcher artwork
         run: python3 tools/check_launcher.py --sdk-cache generated/sdk
-      - name: Compile headphone, sandbox and face-island native adapter Java and resources
+      - name: Compile headphone, sandbox, face and Motion Island native Java and resources
         run: python3 tools/check_device_features.py --sdk-cache generated/sdk
       - name: Compile the connected-headphone page and Bluetooth reader
         run: python3 tools/check_headphone_companion.py --sdk-cache generated/sdk

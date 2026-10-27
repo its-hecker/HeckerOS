@@ -184,7 +184,8 @@
     "d3f9b261aa1182594bf009eb6dc0564f15e6309c",
     "311d7bacc5fc8f08be2d237113d6ce63b4d6e57d",
     "2a4fe3bf57a9b5b25f60609922331fefd247175e",
-    "83f8d4f875778bff8b7b66e1acc0d45f97297348"
+    "83f8d4f875778bff8b7b66e1acc0d45f97297348",
+    "98370d31787f0b906f4df471e57be4501d0e765f"
   ],
   "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_strings.xml": [
     "d086944d48156bce7c4bbcf46e806f1eba761b25",
@@ -194,7 +195,8 @@
     "6d131afb18ddedf23d0808822ec8a5567cbbfe4a"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsMedia.java": [
-    "305001f4caeae8be8b9c99e895e0f97843daf364"
+    "305001f4caeae8be8b9c99e895e0f97843daf364",
+    "ee0a8071d7da8ac99d47566e876901e68aad6432"
   ],
   "frameworks/base/services/core/java/com/android/server/hecker/HeckerGameService.java": [
     "4ac29633cb0d964407cdd5122e3af935b80f06b1",
@@ -222,5 +224,26 @@
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientContent.kt": [
     "863770170b1a922e9f96d26edab2078c353917f8"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMediaCard.kt": [
+    "4840b9bbb302caaf73dbcf7a2b7a286a4a58d62c"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMotionIsland.java": [
+    "b9e18585e75500f62a906a0a163c0c52df90c52d"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionIslandState.java": [
+    "eb55dca8174260270c856a48bac3300103c39790"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionIslandView.java": [
+    "79aac1e5c1bd9b11ff33cf92cd7ff45ed68621e1"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/OsloGlowVisibility.java": [
+    "4fd174fe15b710e0ab34d31cdd9201fe55e51c78"
+  ],
+  "frameworks/base/packages/SystemUI/res/values/hecker_motion_island.xml": [
+    "d4379e10f2f60800c5585b296e312e6d79c9d1cc"
+  ],
+  "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_motion_island.xml": [
+    "d5a8b9805862d12c02691e6227f10b05515a9aaa"
   ]
 }

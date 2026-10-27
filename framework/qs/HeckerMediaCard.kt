@@ -34,12 +34,17 @@ import kotlinx.coroutines.isActive
 /** Compact real-session player. The native host still decides keyguard visibility. */
 @Composable
 fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hideWhenInactive: Boolean = false,
-    nativeFallback: (@Composable () -> Unit)? = null) {
+    nativeFallback: (@Composable () -> Unit)? = null,
+    sessionToken: android.media.session.MediaSession.Token? = null, musicOnly: Boolean = false,
+    onInactive: (() -> Unit)? = null) {
     val context = LocalContext.current
     var snapshot by remember { mutableStateOf<HeckerQsMedia.Snapshot?>(null) }
-    val media = remember(context) { HeckerQsMedia(context) { snapshot = it } }
+    val media = remember(context, sessionToken, musicOnly) {
+        HeckerQsMedia(context, { snapshot = it }, musicOnly, sessionToken)
+    }
     DisposableEffect(media) { media.start(); onDispose { media.stop() } }
     val state = snapshot
+    LaunchedEffect(state?.active) { if (state != null && !state.active) onInactive?.invoke() }
     if (hideWhenInactive && state?.active != true) {
         // Native media resumption can outlive an active session. Keep its real
         // resume action and dismissal behavior when there is no controller.

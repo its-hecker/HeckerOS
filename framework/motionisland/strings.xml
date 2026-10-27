@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hecker_motion_ready">Motion Sense</string>
+    <string name="hecker_motion_play">Play requested</string>
+    <string name="hecker_motion_playing">Playing</string>
+    <string name="hecker_motion_pause">Pause requested</string>
+    <string name="hecker_motion_paused">Paused</string>
+    <string name="hecker_motion_next">Next track</string>
+    <string name="hecker_motion_skipped">Track skipped</string>
+    <string name="hecker_motion_previous">Previous track</string>
+    <string name="hecker_motion_previous_done">Track changed</string>
+    <string name="hecker_motion_volume">Volume %1$d%%</string>
+    <string name="hecker_motion_volume_up">Volume up</string>
+    <string name="hecker_motion_volume_down">Volume down</string>
+    <string name="hecker_motion_forward">Seek +10 s</string>
+    <string name="hecker_motion_rewind">Seek −10 s</string>
+    <string name="hecker_motion_track_mode">Track mode</string>
+    <string name="hecker_motion_volume_mode">Volume mode</string>
+    <string name="hecker_motion_seek_mode">Seek mode</string>
+    <string name="hecker_motion_open_player">Open music player</string>
+</resources>

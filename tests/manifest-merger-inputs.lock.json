@@ -32,19 +32,19 @@
     "sha256": "1bcc74e8ce84e2c25eaafde10f1248349cce3062b6e36978cbeec610db1e930a"
   },
   "source/motionsense.mk": {
-    "url": "https://raw.githubusercontent.com/its-hecker/floral-motionsense-plugin/92d0051faf53acac3dfefec6597a12d587eefa73/motionsense.mk",
+    "url": "https://raw.githubusercontent.com/its-hecker/floral-motionsense-plugin/87b91ac74c46de0d00992f72c6fe115189a2e83e/motionsense.mk",
     "sha256": "a378e13ddabf501fc19ed09800a1158e25a48d2d37882348915efec6d47c3546"
   },
   "source/settings/AndroidManifest.xml": {
-    "url": "https://raw.githubusercontent.com/its-hecker/floral-motionsense-plugin/92d0051faf53acac3dfefec6597a12d587eefa73/settings/AndroidManifest.xml",
+    "url": "https://raw.githubusercontent.com/its-hecker/floral-motionsense-plugin/87b91ac74c46de0d00992f72c6fe115189a2e83e/settings/AndroidManifest.xml",
     "sha256": "17f31b652375129aa33ada32e3bd082d45f7fe96232953241efe838d78cc967d"
   },
   "source/settings/Android.bp.in": {
-    "url": "https://raw.githubusercontent.com/its-hecker/floral-motionsense-plugin/92d0051faf53acac3dfefec6597a12d587eefa73/settings/Android.bp.in",
+    "url": "https://raw.githubusercontent.com/its-hecker/floral-motionsense-plugin/87b91ac74c46de0d00992f72c6fe115189a2e83e/settings/Android.bp.in",
     "sha256": "3f2be7bbba14c6fc79fddefcb7724a275cc3d317f55b81212a4fae6518ce664e"
   },
   "source/settings/src/org/hecker/floral/motionsense/motionsense/MotionSenseFragment.java": {
-    "url": "https://raw.githubusercontent.com/its-hecker/floral-motionsense-plugin/92d0051faf53acac3dfefec6597a12d587eefa73/settings/src/org/hecker/floral/motionsense/motionsense/MotionSenseFragment.java",
-    "sha256": "4bc0269256bfaf1c7e99d4696b4706c103437073e712297b86d9ee1fdbd32ede"
+    "url": "https://raw.githubusercontent.com/its-hecker/floral-motionsense-plugin/87b91ac74c46de0d00992f72c6fe115189a2e83e/settings/src/org/hecker/floral/motionsense/motionsense/MotionSenseFragment.java",
+    "sha256": "a603b1077fca61191522eb68b912ed2a117e942ad62198443622f8406ff8a466"
   }
 }

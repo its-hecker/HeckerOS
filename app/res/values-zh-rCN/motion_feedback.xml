@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="motion_feedback_title">隔空操作胶囊与狞猫</string>
+    <string name="motion_feedback_summary">音乐胶囊、锁屏播放器和悬绳摇摆的宇航员。</string>
+    <string name="motion_island_title">隔空操作胶囊</string>
+    <string name="motion_island_summary">音乐播放时显示专辑封面和动态竖条。点按可打开锁屏媒体播放器。</string>
+    <string name="motion_creature_title">宇航员伙伴</string>
+    <string name="motion_creature_summary">宇航员悬挂在灵动岛下，随左右手势摇摆，播放或暂停时挥手，随后淡出。</string>
+    <string name="motion_feedback_behavior">胶囊仅在音乐播放时出现，暂停手势的短暂告别结束后隐藏。宇航员需要启用 Motion Island。息屏和环境显示时均隐藏。省电模式和减少动态效果使用静态姿势与竖条。现有手势控制保持原样。</string>
+    <string name="motion_feedback_save_failed">无法保存此设置。</string>
+</resources>

@@ -122,6 +122,7 @@ public final class HeckerOsloOverlayHost {
         View.OnAttachStateChangeListener pending;
         volatile boolean destroyed;
         boolean wasAmbient;
+        HeckerMotionIsland companion;
 
         Host(Context context, KeyguardStateController keyguard, StatusBarStateController status)
                 throws ReflectiveOperationException {
@@ -138,6 +139,7 @@ public final class HeckerOsloOverlayHost {
                 }
                 @Override public void onViewRemoved(View child) {
                     seeded.remove(child);
+                    if (companion != null) companion.feedbackRemoved(child);
                     super.onViewRemoved(child);
                 }
             };
@@ -156,6 +158,7 @@ public final class HeckerOsloOverlayHost {
             params.setTitle("HeckerOsloGestureFeedback");
             WindowManager.LayoutParams.class.getMethod("setTrustedOverlay").invoke(params);
             windows.addView(container, params);
+            companion = HeckerMotionIsland.create(overlayContext);
             keyguard.addCallback(keyguardCallback);
             status.addCallback(dozeCallback);
             refreshFrame();
@@ -170,6 +173,7 @@ public final class HeckerOsloOverlayHost {
             // Pulsing first prevents a late-attached view from briefly entering the wrong AOD mode.
             listener.onPulsingChanged(status.isPulsing());
             listener.onDozingChanged(status.isDozing());
+            if (companion != null) companion.feedbackAdded(child);
             refreshFrame();
         }
 
@@ -181,6 +185,7 @@ public final class HeckerOsloOverlayHost {
             if (destroyed) return;
             boolean ambient = ambient();
             container.setVisibility(ambient ? View.INVISIBLE : View.VISIBLE);
+            if (companion != null) companion.setAmbient(ambient);
             if (wasAmbient != ambient) {
                 wasAmbient = ambient;
                 if (nativeCallback != null) nativeCallback.onHoldStatusBarOpenChange();
@@ -196,6 +201,8 @@ public final class HeckerOsloOverlayHost {
 
         void destroy() {
             destroyed = true;
+            if (companion != null) companion.close();
+            companion = null;
             keyguard.removeCallback(keyguardCallback);
             status.removeCallback(dozeCallback);
             seeded.clear(); nativeCallback = null;

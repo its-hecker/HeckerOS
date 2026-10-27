@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hecker_motion_ready">隔空操作</string>
+    <string name="hecker_motion_play">已请求播放</string>
+    <string name="hecker_motion_playing">正在播放</string>
+    <string name="hecker_motion_pause">已请求暂停</string>
+    <string name="hecker_motion_paused">已暂停</string>
+    <string name="hecker_motion_next">下一首</string>
+    <string name="hecker_motion_skipped">已切换曲目</string>
+    <string name="hecker_motion_previous">上一首</string>
+    <string name="hecker_motion_previous_done">曲目已更改</string>
+    <string name="hecker_motion_volume">音量 %1$d%%</string>
+    <string name="hecker_motion_volume_up">调高音量</string>
+    <string name="hecker_motion_volume_down">调低音量</string>
+    <string name="hecker_motion_forward">快进 10 秒</string>
+    <string name="hecker_motion_rewind">快退 10 秒</string>
+    <string name="hecker_motion_track_mode">曲目模式</string>
+    <string name="hecker_motion_volume_mode">音量模式</string>
+    <string name="hecker_motion_seek_mode">进度模式</string>
+    <string name="hecker_motion_open_player">打开音乐播放器</string>
+</resources>

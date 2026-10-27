@@ -28,6 +28,7 @@ public final class SuiteRouterActivity extends Activity {
     private static Class<? extends Activity> target(String page) {
         if (page == null) return null;
         switch (page) {
+            case "MotionFeedbackSettingsActivity": return MotionFeedbackSettingsActivity.class;
             case "RootPrivacyActivity": return RootPrivacyActivity.class;
             case "QuickSettingsActivity": return QuickSettingsActivity.class;
             case "LockScreenSettingsActivity": return LockScreenSettingsActivity.class;

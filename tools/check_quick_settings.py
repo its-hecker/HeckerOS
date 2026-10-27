@@ -18,6 +18,13 @@ from compile_sdk import fetch
 
 ROOT = Path(__file__).resolve().parents[1]
 JAVA = {
+    # SystemUIDialog and ComposeInitializer signatures reviewed at framework pin
+    # 140b06a482a6ecbbdbe33190a149228c50220fb1; never packaged in the ROM.
+    'com/android/systemui/statusbar/phone/SystemUIDialog.java': '''package com.android.systemui.statusbar.phone;
+public class SystemUIDialog extends android.app.AlertDialog {
+ public static final int DIALOG_WINDOW_TYPE = 2017;
+ public SystemUIDialog(android.content.Context context) { super(context); }
+}''',
     'com/android/systemui/hecker/HeckerSystemUiControl.java': '''package com.android.systemui.hecker;
 public final class HeckerSystemUiControl { public static void start(android.content.Context c) {} public static void boost(android.content.Context c) {} }''',
 
@@ -58,6 +65,7 @@ public final class UserHandle implements Parcelable {
  public static final int USER_ALL=-1, USER_CURRENT=-2;
  public static final UserHandle ALL=null, SYSTEM=null;
  public static UserHandle of(int user) { return null; }
+ public static boolean isApp(int uid) { return false; }
  public int describeContents() { return 0; }
  public void writeToParcel(Parcel out,int flags) {}
 }''',
@@ -246,7 +254,13 @@ def main():
         for name, content in JAVA.items():
             target = out / 'java' / name
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)
-        for name, content in {**KOTLIN, 'ReferenceRoute.kt': scene_probe()}.items():
+        compose_initializer = '''package com.android.systemui.compose
+object ComposeInitializer {
+ fun onAttachedToWindow(root: android.view.View) {}
+ fun onDetachedFromWindow(root: android.view.View) {}
+}'''
+        for name, content in {**KOTLIN, 'ReferenceRoute.kt': scene_probe(),
+                              'ComposeInitializer.kt': compose_initializer}.items():
             target = out / 'kotlin' / name
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)
         java_sources = list((out / 'java').rglob('*.java')) + [p for p in (ROOT / 'framework/qs').glob('*.java') if p.name != 'HeckerSystemUiControl.java']
@@ -263,6 +277,7 @@ def main():
             '-d', out / 'classes-kotlin', *sorted((out / 'kotlin').glob('*.kt')),
             *sorted((ROOT / 'framework/qs').glob('*.kt')),
             *sorted((ROOT / 'framework/ambient').glob('*.kt')),
+            ROOT / 'framework/motionisland/HeckerMotionMediaDialog.kt',
             ROOT / 'framework/lyrics/HeckerLockscreenLyrics.kt',
             ROOT / 'framework/themes/HeckerThemeAssets.kt',
             ROOT / 'framework/themes/HeckerConnectivityIcons.kt',

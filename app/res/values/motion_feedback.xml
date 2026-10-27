@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="motion_feedback_title">Motion Island &amp; creature</string>
+    <string name="motion_feedback_summary">A music capsule with your lockscreen player and a rope-swinging astronaut.</string>
+    <string name="motion_island_title">Motion Island</string>
+    <string name="motion_island_summary">Show album art and slim animated bars while music plays. Tap to open the lockscreen media player.</string>
+    <string name="motion_creature_title">Astronaut companion</string>
+    <string name="motion_creature_summary">An astronaut hangs from the island, swings with left/right gestures and waves for play or pause, then fades away.</string>
+    <string name="motion_feedback_behavior">The capsule appears during music playback. A pause gesture finishes a brief goodbye before it hides. The astronaut needs Motion Island enabled. Both hide on screen off and ambient display. Battery saver and reduced motion use a still pose and static bars. Existing gesture controls stay the same.</string>
+    <string name="motion_feedback_save_failed">Could not save this setting.</string>
+</resources>

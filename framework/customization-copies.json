@@ -112,5 +112,16 @@
   "frameworks/base/packages/SystemUI/res/drawable/ic_hecker_volte.xml": "framework/ims/ic_hecker_volte.xml",
   "frameworks/base/packages/SystemUI/res/drawable/ic_hecker_vowifi.xml": "framework/ims/ic_hecker_vowifi.xml",
   "frameworks/base/packages/SystemUI/res/values/hecker_ims.xml": "framework/ims/strings.xml",
-  "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_ims.xml": "framework/ims/strings-zh.xml"
+  "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_ims.xml": "framework/ims/strings-zh.xml",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMotionIsland.java": "framework/motionisland/HeckerMotionIsland.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionIslandState.java": "framework/motionisland/MotionIslandState.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionIslandView.java": "framework/motionisland/MotionIslandView.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/OsloGlowVisibility.java": "framework/motionisland/OsloGlowVisibility.java",
+  "frameworks/base/packages/SystemUI/res/values/hecker_motion_island.xml": "framework/motionisland/strings.xml",
+  "frameworks/base/packages/SystemUI/res/values-zh-rCN/hecker_motion_island.xml": "framework/motionisland/strings-zh.xml",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionAstronautView.java": "framework/motionisland/MotionAstronautView.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionIslandAnimation.java": "framework/motionisland/MotionIslandAnimation.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMotionMediaDialog.kt": "framework/motionisland/HeckerMotionMediaDialog.kt",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MusicSessionPolicy.java": "framework/qs/MusicSessionPolicy.java",
+  "frameworks/base/packages/SystemUI/res/drawable-nodpi/hecker_motion_astronaut.png": "framework/motionisland/astronaut-wave.png"
 }

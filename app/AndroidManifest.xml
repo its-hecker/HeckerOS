@@ -45,6 +45,8 @@
             android:excludeFromRecents="true" android:noHistory="true" />
         <activity android:name=".RootPrivacyActivity" android:exported="false"
             android:label="@string/root_privacy_title" />
+        <activity android:name=".MotionFeedbackSettingsActivity" android:exported="false"
+            android:label="@string/motion_feedback_title" />
         <activity android:name=".LockScreenSettingsActivity" android:exported="false" android:label="@string/lock_screen_title" />
         <activity android:name=".StatusBarSettingsActivity" android:exported="false" android:label="@string/status_bar_title" />
         <activity android:name=".ThemePackActivity" android:exported="false" android:label="@string/themes_title" />
