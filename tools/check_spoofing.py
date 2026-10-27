@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Type-check the Axion port against Android 17 and test private configuration/crypto.
+"""Type-check the Evolution X port against Android 17 and test private configuration/crypto.
 
 This is a javac/host check, not a Soong build or an attestation verdict.
 """
@@ -43,7 +43,8 @@ def main():
         # Flags and the pre-existing PixelOS keybox hooks absent from AOSP's jar.
         stubs = sorted((ROOT/'tests/spoofing/type-stubs').rglob('*.java'))
         run(args.java, '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', jar,
-            '-d', out/'types', *java, *keystore, store, *stubs)
+            '-d', out/'types', *java, *keystore, store,
+            framework/'core/java/com/android/internal/util/PropImitationHooks.java', *stubs)
 
         aidl = (framework/'core/java/android/app/IActivityManager.aidl').read_text()
         ams = (framework/'services/core/java/com/android/server/am/ActivityManagerService.java').read_text()
@@ -51,9 +52,14 @@ def main():
                      'getSpoofTrickyStorePatch','getHeckerSpoofConfig','setHeckerSpoofConfig']:
             assert aidl.count(name+'(') == 1 and ams.count(name+'(') == 1, name
         props = (framework/'core/java/com/android/internal/util/PropImitationHooks.java').read_text()
-        assert '.getInstance().shouldSpoof(processName)) return;' in props
+        assert 'if (sIsGms || sIsFinsky) return;' in props
         assert 'sPixelOneProps.forEach((PropImitationHooks::setPropValue))' in props
-        assert 'TrickyStoreService.getInstance().hasKeyboxes()) return;' in props
+        assert 'setPlayIntegrityProps(' not in props and 'onEngineGetCertificateChain(' not in props
+        for file in ['keystore/java/android/security/KeyStore2.java',
+                     'keystore/java/android/security/KeyStoreSecurityLevel.java']:
+            assert 'KeyboxImitationHooks' not in (framework/file).read_text()
+        assert 'PlayIntegritySpoofService.shouldBlockCertificateChain()' in (
+            framework/'keystore/java/android/security/keystore2/AndroidKeyStoreSpi.java').read_text()
         thread = (framework/'core/java/android/app/ActivityThread.java').read_text()
         assert 'GamePropsSpoofService.getInstance()' in thread
         assert thread.index('GamePropsSpoofService.getInstance()') < thread.index('app = data.info.makeApplicationInner')

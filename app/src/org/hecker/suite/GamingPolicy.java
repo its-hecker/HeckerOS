@@ -6,6 +6,17 @@ import java.util.List;
 
 /** Pure session/cleanup rules, shared by the service and host regression checks. */
 final class GamingPolicy {
+    /** Task callbacks can precede the activity's first visible frame. Retry briefly,
+     * then return to event-only observation when no game is running. */
+    static final class TaskObservation {
+        private long settleUntil;
+        void changed(long now) { settleUntil = now + 2500; }
+        void clear() { settleUntil = 0; }
+        long nextDelay(long now, boolean active, long recordGrace) {
+            if (active || now < recordGrace) return 1000;
+            return now < settleUntil ? 150 : -1;
+        }
+    }
     static final class Task {
         final int id;final String pkg;final boolean visible,focused,freeform;
         Task(int id,String pkg,boolean visible,boolean focused,boolean freeform){

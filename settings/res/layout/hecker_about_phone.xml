@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/hecker_card_background"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView android:id="@+id/hecker_about_rom" style="@style/HeckerAboutValue"
+            android:textSize="20sp" android:textColor="@color/hecker_accent" />
+
+        <TextView android:id="@+id/hecker_about_build_type"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" android:background="@drawable/hecker_about_badge"
+            android:textSize="13sp" android:textColor="@color/hecker_accent" />
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:gravity="center_vertical" android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical">
+                <TextView android:id="@+id/hecker_about_model" style="@style/HeckerAboutValue"
+                    android:textSize="28sp" />
+                <TextView android:id="@+id/hecker_about_codename" style="@style/HeckerAboutLabel"
+                    android:layout_marginTop="6dp" />
+                <TextView style="@style/HeckerAboutLabel" android:layout_marginTop="12dp"
+                    android:text="@string/hecker_about_tagline" android:textSize="10sp"
+                    android:letterSpacing="0.12" />
+            </LinearLayout>
+            <com.android.settings.hecker.HeckerPhoneArtView
+                android:id="@+id/hecker_about_phone_art"
+                android:layout_width="112dp" android:layout_height="112dp"
+                android:layout_marginStart="8dp"
+                android:importantForAccessibility="no" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="20dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical" android:paddingEnd="8dp">
+                <TextView style="@style/HeckerAboutLabel" android:text="@string/hecker_about_android" />
+                <TextView android:id="@+id/hecker_about_android" style="@style/HeckerAboutValue" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical" android:paddingStart="8dp">
+                <TextView style="@style/HeckerAboutLabel" android:text="@string/hecker_about_memory" />
+                <TextView android:id="@+id/hecker_about_memory" style="@style/HeckerAboutValue" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="20dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical" android:paddingEnd="8dp">
+                <TextView style="@style/HeckerAboutLabel" android:text="@string/hecker_about_storage" />
+                <TextView android:id="@+id/hecker_about_storage" style="@style/HeckerAboutValue" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical" android:paddingStart="8dp">
+                <TextView style="@style/HeckerAboutLabel" android:text="@string/hecker_about_battery" />
+                <TextView android:id="@+id/hecker_about_battery" style="@style/HeckerAboutValue" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView style="@style/HeckerAboutLabel" android:layout_marginTop="20dp"
+            android:text="@string/hecker_about_processor" />
+        <TextView android:id="@+id/hecker_about_processor" style="@style/HeckerAboutValue" />
+        <TextView style="@style/HeckerAboutLabel" android:layout_marginTop="16dp"
+            android:text="@string/hecker_about_kernel" />
+        <TextView android:id="@+id/hecker_about_kernel" style="@style/HeckerAboutValue" />
+
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:layout_marginTop="20dp" android:layout_marginBottom="16dp"
+            android:background="@color/hecker_border" />
+        <TextView android:id="@+id/hecker_about_maintainer" style="@style/HeckerAboutLabel" />
+        <Button android:id="@+id/hecker_about_community"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="48dp" android:layout_marginTop="4dp"
+            android:text="@string/hecker_about_community" android:textAllCaps="false"
+            android:textColor="@color/hecker_accent" />
+    </LinearLayout>
+</LinearLayout>

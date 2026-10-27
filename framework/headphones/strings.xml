@@ -1,0 +1,12 @@
+<resources>
+    <string name="hecker_headphones">Headphones</string>
+    <string name="hecker_headphones_wired">Wired headphones</string>
+    <string name="hecker_headphones_connected">Connected</string>
+    <string name="hecker_headphones_settings">View device details</string>
+    <string name="hecker_headphones_battery">Battery %1$d%%</string>
+    <string name="hecker_headphones_battery_unknown">Battery information unavailable</string>
+    <string name="hecker_headphones_left">Left</string>
+    <string name="hecker_headphones_right">Right</string>
+    <string name="hecker_headphones_case">Case</string>
+    <string name="hecker_headphones_sound_settings">Sound settings</string>
+</resources>

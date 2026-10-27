@@ -11,7 +11,10 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
+import time
+import urllib.error
 import urllib.request
 import zipfile
 
@@ -25,8 +28,20 @@ def fetch(cache, name, item):
             raise ValueError("Cached SDK input differs: " + name)
         return target
     request = urllib.request.Request(item["url"], headers={"User-Agent": "HeckerSuite-source-check/1"})
-    with urllib.request.urlopen(request, timeout=90) as response:
-        data = response.read()
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(request, timeout=90) as response:
+                data = response.read()
+            break
+        except (urllib.error.URLError, TimeoutError) as error:
+            # Only transient transport/server failures are retryable. Invalid
+            # URLs, authorization errors and checksum mismatches remain fatal.
+            if (attempt == 3 or isinstance(error, urllib.error.HTTPError)
+                    and error.code not in {408, 429, 500, 502, 503, 504}):
+                raise
+            print(f"Temporary download failure for {name}; retry {attempt + 1}/3",
+                  file=sys.stderr)
+            time.sleep(2 ** attempt)
     if item.get("base64"):
         data = base64.b64decode(data, validate=True)
     if hashlib.sha256(data).hexdigest() != item["sha256"]:
@@ -68,6 +83,15 @@ def main():
         environment["LD_LIBRARY_PATH"] = str(cache / "lib64")
         run(cache / "aidl", "--lang=java", "--out=" + str(output / "aidl-generated"),
             "-I", output / "aidl", probe, env=environment)
+        for name in ("Bundle", "ParcelFileDescriptor"):
+            parcelable = output / "aidl/android/os" / (name + ".aidl")
+            parcelable.parent.mkdir(parents=True, exist_ok=True)
+            parcelable.write_text("package android.os; parcelable " + name + ";\n")
+        network_aidl = output / "aidl/org/hecker/netlab/INetLabService.aidl"
+        network_aidl.parent.mkdir(parents=True, exist_ok=True)
+        network_aidl.write_text((ROOT / "netlab/aidl/org/hecker/netlab/INetLabService.aidl").read_text())
+        run(cache / "aidl", "--lang=java", "--out=" + str(output / "netlab-aidl"),
+            "-I", output / "aidl", network_aidl, env=environment)
         generated = (output / "aidl-generated/suite/probe/IAccessProbe.java").read_text()
         assert "android.Manifest.permission.LOCK_APPS" in generated
         assert "android.Manifest.permission.HECKER_SUITE_APP_LOCK" in generated
@@ -96,7 +120,20 @@ def main():
         run("java", "-m", "jdk.compiler/com.sun.tools.javac.Main", "-cp", classpath,
             "-d", output / "classes", output / "generated/org/hecker/suite/R.java",
             *sorted((ROOT / "tests/platform-api-stubs").rglob("*.java")),
-            *sorted((ROOT / "app/src").rglob("*.java")))
+            *sorted((ROOT / "app/src").rglob("*.java")),
+            ROOT / "framework/sandbox/HeckerSandboxRules.java",
+            *sorted((ROOT / "netlab/common").rglob("*.java")),
+            *sorted((output / "netlab-aidl").rglob("*.java")),
+            *sorted((output / "feature-aidl").rglob("*.java")))
+        run(aapt, "compile", "--dir", ROOT / "netlab/res", "-o", output / "netlab-resources.zip")
+        run(aapt, "link", "-I", cache / "android.jar", "--manifest", ROOT / "netlab/AndroidManifest.xml",
+            "--java", output / "netlab-resources", "-o", output / "netlab.apk", output / "netlab-resources.zip")
+        run("java", "-m", "jdk.compiler/com.sun.tools.javac.Main", "-cp", classpath,
+            "-d", output / "netlab-classes", output / "netlab-resources/org/hecker/netlab/R.java",
+            *sorted((ROOT / "netlab/common").rglob("*.java")),
+            *sorted((ROOT / "netlab/src").rglob("*.java")),
+            *sorted((output / "netlab-aidl").rglob("*.java")))
+        print("NetLab separate controller, public/system networking declarations and real AIDL: PASS")
         # Compile exactly the Settings UI module without backend classes on its
         # classpath, so a feature Activity reference cannot silently join its UID.
         (output / "settings-ui-classes").mkdir()

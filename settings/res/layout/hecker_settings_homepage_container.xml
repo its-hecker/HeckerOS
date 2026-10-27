@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:settings="http://schemas.android.com/apk/res-auto" android:id="@+id/settings_homepage_container" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/hecker_background">
     <androidx.core.widget.NestedScrollView android:id="@+id/main_content_scrollable_container" android:layout_width="match_parent" android:layout_height="match_parent" settings:layout_behavior="com.android.settings.widget.HomepageAppBarScrollingViewBehavior">
-        <LinearLayout android:id="@+id/homepage_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="-8dp" android:orientation="vertical">
+        <LinearLayout android:id="@+id/homepage_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="12dp" android:orientation="vertical">
             <FrameLayout android:id="@+id/suggestion_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="?android:attr/listPreferredItemPaddingStart" android:layout_marginEnd="?android:attr/listPreferredItemPaddingEnd" />
             <FrameLayout android:id="@+id/contextual_cards_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="@dimen/contextual_card_side_margin" android:layout_marginEnd="@dimen/contextual_card_side_margin" />
             <FrameLayout android:id="@+id/main_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:animateLayoutChanges="true" />

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gaming_battery_saver">省电模式</string>
+    <string name="gaming_game_mode">游戏模式</string>
+    <string name="gaming_block_navigation">屏蔽导航按钮</string>
+    <string name="gaming_block_edge">屏蔽边缘面板</string>
+    <string name="gaming_block_brightness">屏蔽自动亮度</string>
+    <string name="gaming_block_assistant">屏蔽语音助手</string>
+    <string name="gaming_floating_menu">浮动菜单</string>
+    <string name="gaming_system_monitor">系统监视器</string>
+    <string name="gaming_booster_settings">游戏助推器设置</string>
+    <string name="gaming_bypass">游戏时暂停 USB 充电</string>
+    <string name="gaming_bypass_off">关</string>
+    <string name="gaming_bypass_on">开</string>
+    <string name="gaming_bypass_unsupported">此设备不支持旁路充电。</string>
+    <string name="gaming_bypass_active">电池充电已暂停 · USB 供电仍可用</string>
+    <string name="gaming_bypass_connect">连接有线充电器以暂停电池充电。</string>
+    <string name="gaming_bypass_battery">电量高于 20% 时可用。</string>
+    <string name="gaming_bypass_error">无法暂停充电，已恢复充电控制。</string>
+    <string name="gaming_bypass_ready">使用 USB 供电玩游戏时暂停电池充电。</string>
+</resources>

@@ -16,6 +16,10 @@ public final class SuiteRouterActivity extends Activity {
             if (target == ThemePackActivity.class) {
                 intent.putExtra("category", getIntent().getIntExtra("category", -1));
             }
+            if (target == AppLockActivity.class) {
+                intent.putExtra("org.hecker.suite.APP_PACKAGE",
+                        getIntent().getStringExtra("org.hecker.suite.APP_PACKAGE"));
+            }
             startActivity(intent);
         }
         finish();
@@ -27,12 +31,16 @@ public final class SuiteRouterActivity extends Activity {
             case "RootPrivacyActivity": return RootPrivacyActivity.class;
             case "QuickSettingsActivity": return QuickSettingsActivity.class;
             case "LockScreenSettingsActivity": return LockScreenSettingsActivity.class;
+            case "LyricsSettingsActivity": return LyricsSettingsActivity.class;
             case "StatusBarSettingsActivity": return StatusBarSettingsActivity.class;
             case "ThemePackActivity": return ThemePackActivity.class;
-            case "AnimationSettingsActivity": return AnimationSettingsActivity.class;
+            case "NetworkLabActivity": return NetworkLabActivity.class;
+            case "LauncherSettingsActivity": return LauncherSettingsActivity.class;
+            case "SandboxActivity": return SandboxActivity.class;
+            case "HeadphonesActivity": return HeadphonesActivity.class;
+            case "CaptureSettingsActivity": return CaptureSettingsActivity.class;
             case "AppLockActivity": return AppLockActivity.class;
             case "GamingActivity": return GamingActivity.class;
-            case "LauncherSettingsActivity": return LauncherSettingsActivity.class;
             case "InfraredCameraActivity": return InfraredCameraActivity.class;
             default: return null;
         }

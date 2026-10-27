@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ims_icons_title">Calling indicators</string>
+    <string name="ims_icons_summary">Show each SIM’s indicator when IMS voice calling is available.</string>
+    <string name="show_volte_icon">Show VoLTE icon</string>
+    <string name="show_vowifi_icon">Show VoWiFi icon</string>
+</resources>

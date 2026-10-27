@@ -1,0 +1,8 @@
+<permissions>
+    <privapp-permissions package="org.hecker.librepods">
+        <permission name="android.permission.BLUETOOTH_PRIVILEGED" />
+        <permission name="android.permission.LOCAL_MAC_ADDRESS" />
+        <permission name="android.permission.INTERACT_ACROSS_USERS" />
+        <deny-permission name="android.permission.MODIFY_PHONE_STATE" />
+    </privapp-permissions>
+</permissions>

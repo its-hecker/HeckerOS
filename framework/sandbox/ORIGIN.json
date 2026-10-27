@@ -1,0 +1,20 @@
+{
+  "license": "Apache-2.0",
+  "sources": [
+    {
+      "repository": "https://github.com/AxionAOSP/android_axion_sdk",
+      "revision": "8538d03cd7509d006b3ee82a5cd31754be5326f5",
+      "files": [
+        "ax_sandbox/common/src/android/app/AxSandboxManager.java",
+        "ax_sandbox/server/src/com/android/server/wm/sandbox/isolation/SandboxIsolationRepository.java",
+        "ax_sandbox/server/src/com/android/server/wm/sandbox/isolation/SandboxIsolationService.java"
+      ]
+    },
+    {
+      "repository": "https://github.com/ProjectInfinity-X/packages_apps_Sandbox",
+      "revision": "067327711ce3a1519edb9b263d3f7dc09e2da6e7",
+      "branch": "16"
+    }
+  ],
+  "adaptation": "Sandboxed-app restrictions only: Axion GID filtering and forced native app-data isolation, with a Hecker Suite UI, per-user Secure storage, system/shared-UID exclusions and explicit process restart. Existing Android 17 App Lock remains separate."
+}

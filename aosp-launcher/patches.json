@@ -1,0 +1,255 @@
+{
+  "Android.bp": [
+    {
+      "old": "android_app {\n    name: \"Launcher3\",\n    defaults: [\n        \"launcher-non-platform-apis-defaults\",\n    ],\n\n    static_libs: [\n        \"Launcher3ResLib\",\n        // Compose dep\n        \"androidx.compose.runtime_runtime\",\n    ],\n    srcs: [\n        \":launcher-src\",\n        \":launcher-src_no_quickstep\",\n        \":launcher-build-config\",\n    ],\n\n    optimize: {\n        proguard_flags_files: [\":launcher-proguard-rules\"],\n        // Proguard is disable for testing. Derivarive prjects to keep proguard enabled\n        enabled: false,\n    },\n\n    sdk_version: \"current\",\n    min_sdk_version: min_launcher3_sdk_version,\n    target_sdk_version: \"current\",\n    plugins: [\"dagger2-compiler\"],\n    privileged: true,\n    system_ext_specific: true,\n\n    overrides: [\n        \"Home\",\n        \"Launcher2\",\n    ],\n    required: [\"privapp_whitelist_com.android.launcher3\"],\n\n    jacoco: {\n        include_filter: [\"com.android.launcher3.**\"],\n    },\n    additional_manifests: [\n        \"AndroidManifest-common.xml\",\n    ],\n    lint: {\n        extra_check_modules: [\"Launcher3LintChecker\"],\n        baseline_filename: \"lint-baseline.xml\",\n    },\n    kotlincflags: [\n        \"-Xjvm-default=all\",\n    ],\n}",
+      "new": "android_app {\n    name: \"Launcher3\",\n    defaults: [\n        \"launcher-non-platform-apis-defaults\",\n    ],\n\n    static_libs: [\n        \"Launcher3ResLib\",\n        // Compose dep\n        \"androidx.compose.runtime_runtime\",\n    ],\n    srcs: [\n        \":launcher-src\",\n        \":launcher-src_no_quickstep\",\n        \":launcher-build-config\",\n    ],\n\n    optimize: {\n        proguard_flags_files: [\":launcher-proguard-rules\"],\n        // Proguard is disable for testing. Derivarive prjects to keep proguard enabled\n        enabled: false,\n    },\n\n    sdk_version: \"current\",\n    min_sdk_version: min_launcher3_sdk_version,\n    target_sdk_version: \"current\",\n    plugins: [\"dagger2-compiler\"],\n    privileged: true,\n    system_ext_specific: true,\n\n    overrides: [\n        \"Home\",\n        \"Launcher2\",\n    ],\n    required: [\"privapp_whitelist_com.android.launcher3\"],\n\n    jacoco: {\n        include_filter: [\"com.android.launcher3.**\"],\n    },\n    additional_manifests: [\n        \"AndroidManifest-common.xml\",\n    ],\n    lint: {\n        extra_check_modules: [\"Launcher3LintChecker\"],\n        baseline_filename: \"lint-baseline.xml\",\n    },\n    kotlincflags: [\n        \"-Xjvm-default=all\",\n    ],\n}\n\n// HeckerOS HOME only. Pixel Launcher retains the Recents/Quickstep service.\nandroid_app {\n    name: \"HeckerLauncher\",\n    certificate: \"platform\",\n    manifest: \"generated/hecker-launcher/AndroidManifest.xml\",\n    resource_dirs: [\"generated/hecker-launcher/res\"],\n    defaults: [\n        \"launcher-non-platform-apis-defaults\",\n    ],\n\n    static_libs: [\n        \"Launcher3ResLib\",\n        \"HeckerLauncherGoogleWeather\",\n        // Compose dep\n        \"androidx.compose.runtime_runtime\",\n    ],\n    srcs: [\n        \":launcher-src\",\n        \":launcher-src_no_quickstep\",\n        \":launcher-build-config\",\n    ],\n\n    optimize: {\n        proguard_flags_files: [\":launcher-proguard-rules\"],\n        // Proguard is disable for testing. Derivarive prjects to keep proguard enabled\n        enabled: false,\n    },\n\n    sdk_version: \"current\",\n    min_sdk_version: min_launcher3_sdk_version,\n    target_sdk_version: \"current\",\n    plugins: [\"dagger2-compiler\"],\n    privileged: true,\n    system_ext_specific: true,\n\n    overrides: [\n        \"Home\",\n        \"Launcher2\",\n    ],\n    required: [\"privapp_whitelist_com.android.launcher3\", \"HeckerLauncherPermissions\"],\n\n    jacoco: {\n        include_filter: [\"com.android.launcher3.**\"],\n    },\n    additional_manifests: [\n        \"AndroidManifest-common.xml\",\n    ],\n    lint: {\n        extra_check_modules: [\"Launcher3LintChecker\"],\n        baseline_filename: \"lint-baseline.xml\",\n    },\n    kotlincflags: [\n        \"-Xjvm-default=all\",\n    ],\n}",
+      "previous": [
+        "android_app {\n    name: \"Launcher3\",\n    defaults: [\n        \"launcher-non-platform-apis-defaults\",\n    ],\n\n    static_libs: [\n        \"Launcher3ResLib\",\n        // Compose dep\n        \"androidx.compose.runtime_runtime\",\n    ],\n    srcs: [\n        \":launcher-src\",\n        \":launcher-src_no_quickstep\",\n        \":launcher-build-config\",\n    ],\n\n    optimize: {\n        proguard_flags_files: [\":launcher-proguard-rules\"],\n        // Proguard is disable for testing. Derivarive prjects to keep proguard enabled\n        enabled: false,\n    },\n\n    sdk_version: \"current\",\n    min_sdk_version: min_launcher3_sdk_version,\n    target_sdk_version: \"current\",\n    plugins: [\"dagger2-compiler\"],\n    privileged: true,\n    system_ext_specific: true,\n\n    overrides: [\n        \"Home\",\n        \"Launcher2\",\n    ],\n    required: [\"privapp_whitelist_com.android.launcher3\"],\n\n    jacoco: {\n        include_filter: [\"com.android.launcher3.**\"],\n    },\n    additional_manifests: [\n        \"AndroidManifest-common.xml\",\n    ],\n    lint: {\n        extra_check_modules: [\"Launcher3LintChecker\"],\n        baseline_filename: \"lint-baseline.xml\",\n    },\n    kotlincflags: [\n        \"-Xjvm-default=all\",\n    ],\n}\n\n// HeckerOS HOME only. Pixel Launcher retains the Recents/Quickstep service.\nandroid_app {\n    name: \"HeckerLauncher\",\n    certificate: \"platform\",\n    manifest: \"generated/hecker-launcher/AndroidManifest.xml\",\n    resource_dirs: [\"generated/hecker-launcher/res\"],\n    defaults: [\n        \"launcher-non-platform-apis-defaults\",\n    ],\n\n    static_libs: [\n        \"Launcher3ResLib\",\n        // Compose dep\n        \"androidx.compose.runtime_runtime\",\n    ],\n    srcs: [\n        \":launcher-src\",\n        \":launcher-src_no_quickstep\",\n        \":launcher-build-config\",\n    ],\n\n    optimize: {\n        proguard_flags_files: [\":launcher-proguard-rules\"],\n        // Proguard is disable for testing. Derivarive prjects to keep proguard enabled\n        enabled: false,\n    },\n\n    sdk_version: \"current\",\n    min_sdk_version: min_launcher3_sdk_version,\n    target_sdk_version: \"current\",\n    plugins: [\"dagger2-compiler\"],\n    privileged: true,\n    system_ext_specific: true,\n\n    overrides: [\n        \"Home\",\n        \"Launcher2\",\n    ],\n    required: [\"privapp_whitelist_com.android.launcher3\"],\n\n    jacoco: {\n        include_filter: [\"com.android.launcher3.**\"],\n    },\n    additional_manifests: [\n        \"AndroidManifest-common.xml\",\n    ],\n    lint: {\n        extra_check_modules: [\"Launcher3LintChecker\"],\n        baseline_filename: \"lint-baseline.xml\",\n    },\n    kotlincflags: [\n        \"-Xjvm-default=all\",\n    ],\n}",
+        "android_app {\n    name: \"Launcher3\",\n    defaults: [\n        \"launcher-non-platform-apis-defaults\",\n    ],\n\n    static_libs: [\n        \"Launcher3ResLib\",\n        // Compose dep\n        \"androidx.compose.runtime_runtime\",\n    ],\n    srcs: [\n        \":launcher-src\",\n        \":launcher-src_no_quickstep\",\n        \":launcher-build-config\",\n    ],\n\n    optimize: {\n        proguard_flags_files: [\":launcher-proguard-rules\"],\n        // Proguard is disable for testing. Derivarive prjects to keep proguard enabled\n        enabled: false,\n    },\n\n    sdk_version: \"current\",\n    min_sdk_version: min_launcher3_sdk_version,\n    target_sdk_version: \"current\",\n    plugins: [\"dagger2-compiler\"],\n    privileged: true,\n    system_ext_specific: true,\n\n    overrides: [\n        \"Home\",\n        \"Launcher2\",\n    ],\n    required: [\"privapp_whitelist_com.android.launcher3\"],\n\n    jacoco: {\n        include_filter: [\"com.android.launcher3.**\"],\n    },\n    additional_manifests: [\n        \"AndroidManifest-common.xml\",\n    ],\n    lint: {\n        extra_check_modules: [\"Launcher3LintChecker\"],\n        baseline_filename: \"lint-baseline.xml\",\n    },\n    kotlincflags: [\n        \"-Xjvm-default=all\",\n    ],\n}\n\n// HeckerOS HOME only. Pixel Launcher retains the Recents/Quickstep service.\nandroid_app {\n    name: \"HeckerLauncher\",\n    certificate: \"platform\",\n    manifest: \"generated/hecker-launcher/AndroidManifest.xml\",\n    resource_dirs: [\"generated/hecker-launcher/res\"],\n    defaults: [\n        \"launcher-non-platform-apis-defaults\",\n    ],\n\n    static_libs: [\n        \"Launcher3ResLib\",\n        \"HeckerLauncherGoogleWeather\",\n        // Compose dep\n        \"androidx.compose.runtime_runtime\",\n    ],\n    srcs: [\n        \":launcher-src\",\n        \":launcher-src_no_quickstep\",\n        \":launcher-build-config\",\n    ],\n\n    optimize: {\n        proguard_flags_files: [\":launcher-proguard-rules\"],\n        // Proguard is disable for testing. Derivarive prjects to keep proguard enabled\n        enabled: false,\n    },\n\n    sdk_version: \"current\",\n    min_sdk_version: min_launcher3_sdk_version,\n    target_sdk_version: \"current\",\n    plugins: [\"dagger2-compiler\"],\n    privileged: true,\n    system_ext_specific: true,\n\n    overrides: [\n        \"Home\",\n        \"Launcher2\",\n    ],\n    required: [\"privapp_whitelist_com.android.launcher3\"],\n\n    jacoco: {\n        include_filter: [\"com.android.launcher3.**\"],\n    },\n    additional_manifests: [\n        \"AndroidManifest-common.xml\",\n    ],\n    lint: {\n        extra_check_modules: [\"Launcher3LintChecker\"],\n        baseline_filename: \"lint-baseline.xml\",\n    },\n    kotlincflags: [\n        \"-Xjvm-default=all\",\n    ],\n}"
+      ]
+    }
+  ],
+  "src/com/android/launcher3/Workspace.java": [
+    {
+      "old": "    public boolean onTouchEvent(MotionEvent ev) {\n        if (isTrackpadMultiFingerSwipe(ev)) {\n            return false;\n        }\n        return super.onTouchEvent(ev);\n    }",
+      "new": "    public boolean onTouchEvent(MotionEvent ev) {\n        if (isTrackpadMultiFingerSwipe(ev)) {\n            return false;\n        }\n        boolean heckerHandled = com.android.launcher3.hecker.HeckerWorkspaceGestures.touch(this, ev,\n                mLauncher.isInState(NORMAL) && !workspaceInModalState() && !isSwitchingState());\n        return super.onTouchEvent(ev) || heckerHandled;\n    }",
+      "previous": [
+        "    public boolean onTouchEvent(MotionEvent ev) {\n        if (isTrackpadMultiFingerSwipe(ev)) {\n            return false;\n        }\n        if (com.android.launcher3.hecker.HeckerWorkspaceGestures.touch(this, ev,\n                !workspaceInModalState() && !isSwitchingState())) return true;\n        return super.onTouchEvent(ev);\n    }"
+      ]
+    },
+    {
+      "old": "        super.onAttachedToWindow();\n        mWallpaperOffset.setWindowToken(getWindowToken());",
+      "new": "        super.onAttachedToWindow();\n        com.android.launcher3.hecker.HeckerLauncherGlass.attach(this);\n        mWallpaperOffset.setWindowToken(getWindowToken());"
+    },
+    {
+      "old": "        super.onDetachedFromWindow();\n        mWallpaperOffset.setWindowToken(null);",
+      "new": "        com.android.launcher3.hecker.HeckerLauncherGlass.detach(this);\n        super.onDetachedFromWindow();\n        mWallpaperOffset.setWindowToken(null);"
+    },
+    {
+      "old": "        mWallpaperOffset.syncWithScroll();\n    }",
+      "new": "        mWallpaperOffset.syncWithScroll();\n        com.android.launcher3.hecker.HeckerLauncherGlass.offset(this, mWallpaperOffset.wallpaperOffsetForScroll(getScrollX()));\n    }"
+    },
+    {
+      "old": "    public void startDrag(CellInfo cellInfo, DragOptions options) {\n        View child = cellInfo.cell;",
+      "new": "    public void startDrag(CellInfo cellInfo, DragOptions options) {\n        if (com.android.launcher3.hecker.HeckerStudio.blockMove(getContext())) return;\n        View child = cellInfo.cell;"
+    },
+    {
+      "old": "    public void beginDragShared(View child, DragSource source, DragOptions options) {\n        Object dragObject = child.getTag();",
+      "new": "    public void beginDragShared(View child, DragSource source, DragOptions options) {\n        if (com.android.launcher3.hecker.HeckerStudio.blockMove(getContext())) return;\n        Object dragObject = child.getTag();"
+    },
+    {
+      "old": "            ItemInfo dragObject, DragPreviewProvider previewProvider, DragOptions dragOptions) {\n        float iconScale = 1f;",
+      "new": "            ItemInfo dragObject, DragPreviewProvider previewProvider, DragOptions dragOptions) {\n        if (com.android.launcher3.hecker.HeckerStudio.blockMove(getContext())) return null;\n        float iconScale = 1f;"
+    },
+    {
+      "old": "        newScreen.setCellLayoutContainer(this);",
+      "new": "        newScreen.setCellLayoutContainer(this);\n        if (screenId == FIRST_SCREEN_ID) newScreen.enableHeckerHomeClock();"
+    }
+  ],
+  "res/xml/launcher_preferences.xml": [
+    {
+      "old": "</androidx.preference.PreferenceScreen>",
+      "new": "    <SwitchPreference\n        android:key=\"hecker_double_tap_sleep\"\n        android:title=\"@string/hecker_double_tap_title\"\n        android:summary=\"@string/hecker_double_tap_summary\"\n        android:defaultValue=\"true\"\n        android:persistent=\"true\" />\n\n    <SwitchPreference android:key=\"hecker_swipe_down\" android:title=\"@string/hecker_swipe_title\" android:summary=\"@string/hecker_swipe_summary\" android:defaultValue=\"true\" />\n    <PreferenceCategory android:title=\"@string/hecker_glass_title\">\n        <ListPreference android:key=\"hecker_glass\" android:title=\"@string/hecker_glass_style\" android:entries=\"@array/hecker_glass_styles\" android:entryValues=\"@array/hecker_glass_values\" android:defaultValue=\"1\" android:summary=\"%s\" />\n        <SwitchPreference android:key=\"hecker_glass_dock\" android:title=\"@string/hecker_glass_dock\" android:defaultValue=\"true\" />\n        <SwitchPreference android:key=\"hecker_glass_folders\" android:title=\"@string/hecker_glass_folders\" android:defaultValue=\"true\" />\n        <SwitchPreference android:key=\"hecker_glass_search\" android:title=\"@string/hecker_glass_search\" android:defaultValue=\"true\" />\n        <SwitchPreference android:key=\"hecker_glass_widgets\" android:title=\"@string/hecker_glass_widgets\" android:defaultValue=\"true\" />\n        <ListPreference android:key=\"hecker_glass_corner_tl\" android:title=\"@string/hecker_glass_corner_tl\" android:entries=\"@array/hecker_glass_corners\" android:entryValues=\"@array/hecker_glass_corner_values\" android:defaultValue=\"28\" android:summary=\"%s\" />\n        <ListPreference android:key=\"hecker_glass_corner_tr\" android:title=\"@string/hecker_glass_corner_tr\" android:entries=\"@array/hecker_glass_corners\" android:entryValues=\"@array/hecker_glass_corner_values\" android:defaultValue=\"28\" android:summary=\"%s\" />\n        <ListPreference android:key=\"hecker_glass_corner_br\" android:title=\"@string/hecker_glass_corner_br\" android:entries=\"@array/hecker_glass_corners\" android:entryValues=\"@array/hecker_glass_corner_values\" android:defaultValue=\"28\" android:summary=\"%s\" />\n        <ListPreference android:key=\"hecker_glass_corner_bl\" android:title=\"@string/hecker_glass_corner_bl\" android:entries=\"@array/hecker_glass_corners\" android:entryValues=\"@array/hecker_glass_corner_values\" android:defaultValue=\"28\" android:summary=\"%s\" />\n    </PreferenceCategory>\n</androidx.preference.PreferenceScreen>",
+      "previous": [
+        "    <SwitchPreference\n        android:key=\"hecker_double_tap_sleep\"\n        android:title=\"@string/hecker_double_tap_title\"\n        android:summary=\"@string/hecker_double_tap_summary\"\n        android:defaultValue=\"true\"\n        android:persistent=\"true\" />\n\n</androidx.preference.PreferenceScreen>"
+      ]
+    }
+  ],
+  "src/com/android/launcher3/InvariantDeviceProfile.java": [
+    {
+      "old": "        initGrid(gridName);\n        mThemeManager.generateIconShape(iconBitmapSize);",
+      "new": "        initGrid(gridName);\n        Runnable heckerStop = com.android.launcher3.hecker.HeckerStudio.observeProfile(\n                context, this::onConfigChanged);\n        lifeCycle.addCloseable(heckerStop::run);\n        mThemeManager.generateIconShape(iconBitmapSize);"
+    },
+    {
+      "old": "        applyPartnerDeviceProfileOverrides(context, metrics);",
+      "new": "        applyPartnerDeviceProfileOverrides(context, metrics);\n\n        // Hecker Studio uses the native grid migration path, retaining every prior layout DB.\n        numRows = com.android.launcher3.hecker.HeckerStudio.number(context, \"home_rows\", numRows, 4, 9);\n        numColumns = com.android.launcher3.hecker.HeckerStudio.number(context, \"home_columns\", numColumns, 3, 7);\n        numSearchContainerColumns = Math.min(numSearchContainerColumns, numColumns);\n        numShownHotseatIcons = com.android.launcher3.hecker.HeckerStudio.number(context, \"dock_count\", numShownHotseatIcons, 3, 7);\n        numDatabaseHotseatIcons = numShownHotseatIcons;\n        numAllAppsColumns = com.android.launcher3.hecker.HeckerStudio.number(context, \"drawer_columns\", numAllAppsColumns, 3, 8);\n        numDatabaseAllAppsColumns = numAllAppsColumns;\n        numAllAppsRowsForCellHeightCalculation = com.android.launcher3.hecker.HeckerStudio.number(context, \"drawer_rows\", numAllAppsRowsForCellHeightCalculation, 3, 9);\n        if (numRows != closestProfile.numRows || numColumns != closestProfile.numColumns\n                || numShownHotseatIcons != closestProfile.numHotseatIcons) {\n            dbFile = \"launcher_hecker_\" + numColumns + \"x\" + numRows + \"_\" + numShownHotseatIcons + \".db\";\n        }\n        iconTextSize = iconTextSize.clone();\n        allAppsIconTextSize = allAppsIconTextSize.clone();\n        java.util.Arrays.fill(iconTextSize, com.android.launcher3.hecker.HeckerStudio.number(context, \"home_label_size\", 13, 9, 20));\n        java.util.Arrays.fill(allAppsIconTextSize, com.android.launcher3.hecker.HeckerStudio.number(context, \"drawer_label_size\", 13, 9, 20));\n        borderSpaces = com.android.launcher3.hecker.HeckerStudio.spacing(borderSpaces,\n                com.android.launcher3.hecker.HeckerStudio.number(context, \"home_spacing\", 0, 0, 18));\n        allAppsBorderSpaces = com.android.launcher3.hecker.HeckerStudio.spacing(allAppsBorderSpaces,\n                com.android.launcher3.hecker.HeckerStudio.number(context, \"drawer_spacing\", 0, 0, 18));"
+    }
+  ],
+  "src/com/android/launcher3/DeviceProfile.java": [
+    {
+      "old": "        mIsResponsiveGrid = inv.workspaceSpecsId != INVALID_RESOURCE_HANDLE",
+      "new": "        mIsResponsiveGrid = !com.android.launcher3.hecker.HeckerStudio.customGridMetrics(info.context)\n                && inv.workspaceSpecsId != INVALID_RESOURCE_HANDLE"
+    },
+    {
+      "old": "        int qsbHeight = res.getDimensionPixelSize(R.dimen.qsb_widget_height);",
+      "new": "        int qsbHeight = com.android.launcher3.hecker.HeckerDockBar.profileHeight(context,\n                res.getDimensionPixelSize(R.dimen.qsb_widget_height), isVerticalBarLayout());"
+    }
+  ],
+  "src/com/android/launcher3/settings/SettingsActivity.java": [
+    {
+      "old": "        super.onCreate(savedInstanceState);\n        setContentView(R.layout.settings_activity);",
+      "new": "        super.onCreate(savedInstanceState);\n        if (!getIntent().getBooleanExtra(\"hecker_native_settings\", false)\n                && com.android.launcher3.hecker.HeckerStudio.res(this, \"string\", \"hs_launcher_studio\") != 0) {\n            com.android.launcher3.hecker.HeckerStudio.open(this, \"root\");\n            finish();\n            return;\n        }\n        setContentView(R.layout.settings_activity);"
+    }
+  ],
+  "src/com/android/launcher3/BubbleTextView.java": [
+    {
+      "old": "    protected int mDisplay;",
+      "new": "    protected int mDisplay;\n    private android.content.ComponentName mHeckerComponent;\n    private android.os.UserHandle mHeckerUser = android.os.Process.myUserHandle();"
+    },
+    {
+      "old": "        mIconSize = a.getDimensionPixelSize(R.styleable.BubbleTextView_iconSizeOverride,\n                defaultIconSize);\n        a.recycle();",
+      "new": "        mIconSize = Math.max(1, Math.round(a.getDimensionPixelSize(\n                R.styleable.BubbleTextView_iconSizeOverride, defaultIconSize)\n                * com.android.launcher3.hecker.HeckerStudio.number(context, \"icon_size\", 100, 65, 125) / 100f));\n        a.recycle();",
+      "previous": [
+        "        mIconSize = a.getDimensionPixelSize(R.styleable.BubbleTextView_iconSizeOverride,\n                defaultIconSize);\n        a.recycle();\n        mIconSize = Math.max(1, Math.round(mIconSize\n                * com.android.launcher3.hecker.HeckerStudio.number(context, \"icon_size\", 100, 65, 125) / 100f));"
+      ]
+    },
+    {
+      "old": "    public void applyIconAndLabel(ItemInfoWithIcon info) {\n        FastBitmapDrawable oldIcon = mIcon;",
+      "new": "    public void applyIconAndLabel(ItemInfoWithIcon info) {\n        mHeckerComponent = info.getTargetComponent();\n        mHeckerUser = info.user;\n        FastBitmapDrawable oldIcon = mIcon;"
+    },
+    {
+      "old": "        applyLabel(info.title, info.contentDescription,",
+      "new": "        applyLabel(com.android.launcher3.hecker.HeckerIconStudio.label(getContext(),\n                info.getTargetComponent(), info.user, info.title), info.contentDescription,"
+    },
+    {
+      "old": "                && infoWithIcon.isInactiveArchive(), info.isDisabled());",
+      "new": "                && infoWithIcon.isInactiveArchive(), info.isDisabled());\n        boolean heckerDrawer = mDisplay == DISPLAY_ALL_APPS || mDisplay == DISPLAY_PREDICTION_ROW\n                || mDisplay == DISPLAY_SEARCH_RESULT || mDisplay == DISPLAY_SEARCH_RESULT_APP_ROW;\n        setContainerTextVisibility(mDisplay != DISPLAY_TASKBAR\n                && com.android.launcher3.hecker.HeckerStudio.enabled(getContext(),\n                        heckerDrawer ? \"drawer_labels\" : \"home_labels\", true));\n        com.android.launcher3.hecker.HeckerIconStudio.labels(this, heckerDrawer);"
+    },
+    {
+      "old": "        icon.setBounds(0, 0, mIconSize, mIconSize);",
+      "new": "        java.lang.ref.WeakReference<BubbleTextView> heckerView = new java.lang.ref.WeakReference<>(this);\n        android.content.ComponentName expectedComponent = mHeckerComponent;\n        icon = com.android.launcher3.hecker.HeckerIconStudio.icon(getContext(), mHeckerComponent,\n                mHeckerUser, icon, () -> {\n                    BubbleTextView target = heckerView.get();\n                    if (target != null && java.util.Objects.equals(target.mHeckerComponent, expectedComponent)\n                            && target.getIcon() != null) {\n                        target.applyCompoundDrawables(target.getIcon());\n                        target.invalidate();\n                    }\n                });\n        icon.setBounds(0, 0, mIconSize, mIconSize);"
+    },
+    {
+      "old": "    protected void drawDotIfNecessary(Canvas canvas) {",
+      "new": "    protected void drawDotIfNecessary(Canvas canvas) {\n        if (!mForceHideDot && mDotInfo != null) {\n            getIconBounds(mDotParams.iconBounds);\n            com.android.launcher3.hecker.HeckerIconStudio.badge(getContext(), canvas,\n                    mDotParams.iconBounds, mDotInfo.getNotificationCount());\n        }\n        // Native DotInfo remains the sole count source, including channel/dismissal updates.\n        if (com.android.launcher3.hecker.HeckerStudio.res(getContext(), \"string\", \"hs_launcher_studio\") != 0) return;"
+    },
+    {
+      "old": "        maybeApplyProgressLevel(info, oldIcon);\n        applyLabel(info);",
+      "new": "        maybeApplyProgressLevel(info, oldIcon);\n        applyLabel(info);\n        if (mIcon != null && mIcon == oldIcon) applyCompoundDrawables(mIcon);"
+    },
+    {
+      "old": "    public void applyIconAndLabel(Drawable icon, CharSequence title, CharSequence description) {\n        applyCompoundDrawables(icon);",
+      "new": "    public void applyIconAndLabel(Drawable icon, CharSequence title, CharSequence description) {\n        mHeckerComponent = null;\n        applyCompoundDrawables(icon);"
+    }
+  ],
+  "src/com/android/launcher3/allapps/AllAppsStore.java": [
+    {
+      "old": "        return mApps;",
+      "new": "        return Arrays.stream(mApps).filter(app -> !com.android.launcher3.hecker.HeckerStudio.hidden(\n                mActivityContext.asContext(), app.componentName, app.user)).map(app -> {\n                    CharSequence label = com.android.launcher3.hecker.HeckerIconStudio.label(\n                            mActivityContext.asContext(), app.componentName, app.user, app.title);\n                    if (android.text.TextUtils.equals(label, app.title)) return app;\n                    AppInfo copy = app.clone();\n                    copy.title = label;\n                    return copy;\n                }).toArray(AppInfo[]::new);"
+    }
+  ],
+  "src/com/android/launcher3/popup/SystemShortcut.java": [
+    {
+      "old": "    public interface Factory<T extends ActivityContext> {",
+      "new": "    public static final Factory<com.android.launcher3.Launcher> HECKER_APP_LOCK = (context, item, view) -> {\n        if (item.getTargetComponent() == null || com.android.launcher3.hecker.HeckerStudio.res(context, \"string\", \"hs_app_lock\") == 0) return null;\n        return new SystemShortcut<com.android.launcher3.Launcher>(android.R.drawable.ic_lock_lock,\n                com.android.launcher3.hecker.HeckerStudio.res(context, \"string\", \"hs_app_lock\"), context, item, view, false) {\n            @Override public void onClick(View v) {\n                dismissTaskMenuView();\n                com.android.launcher3.hecker.HeckerStudio.appLock(mTarget, mItemInfo.getTargetComponent(), mItemInfo.user);\n            }\n        };\n    };\n    public static final Factory<com.android.launcher3.Launcher> HECKER_HIDE = (context, item, view) -> {\n        if (item.getTargetComponent() == null || com.android.launcher3.hecker.HeckerStudio.res(context, \"string\", \"hs_hide_app\") == 0) return null;\n        return new SystemShortcut<com.android.launcher3.Launcher>(android.R.drawable.ic_menu_close_clear_cancel,\n                com.android.launcher3.hecker.HeckerStudio.res(context, \"string\", \"hs_hide_app\"), context, item, view, false) {\n            @Override public void onClick(View v) {\n                dismissTaskMenuView();\n                com.android.launcher3.hecker.HeckerStudio.hide(mTarget, mItemInfo.getTargetComponent(), mItemInfo.user, true);\n            }\n        };\n    };\n    public static final Factory<com.android.launcher3.Launcher> HECKER_ICON = (context, item, view) -> {\n        if (item.getTargetComponent() == null || com.android.launcher3.hecker.HeckerStudio.res(context, \"string\", \"hs_app_customization\") == 0) return null;\n        return new SystemShortcut<com.android.launcher3.Launcher>(android.R.drawable.ic_menu_edit,\n                com.android.launcher3.hecker.HeckerStudio.res(context, \"string\", \"hs_app_customization\"), context, item, view, false) {\n            @Override public void onClick(View v) {\n                dismissTaskMenuView();\n                com.android.launcher3.hecker.HeckerStudio.editIcon(mTarget, mItemInfo.getTargetComponent(), mItemInfo.user);\n            }\n        };\n    };\n\n    public interface Factory<T extends ActivityContext> {"
+    }
+  ],
+  "src/com/android/launcher3/Launcher.java": [
+    {
+      "old": "    public Stream<SystemShortcut.Factory> getSupportedShortcuts(ItemInfo itemInfo) {\n        int container = itemInfo.container;\n        if (container == CONTAINER_DESKTOP || container == CONTAINER_HOTSEAT) {\n            return Stream.of(APP_INFO, WIDGETS, INSTALL, REMOVE);\n        } else if (container == CONTAINER_ALL_APPS || container == CONTAINER_ALL_APPS_PREDICTION) {\n            // TODO(b/444744861): Update private space apps to have its own container.\n            boolean isPinnable = itemInfo instanceof ItemInfoWithIcon info\n                    && (info.runtimeStatusFlags & FLAG_NOT_PINNABLE) == 0;\n            if (isPinnable) {\n                return Stream.of(APP_INFO, WIDGETS, INSTALL, ADD_TO_HOME_SCREEN);\n            } else {\n                return Stream.of(APP_INFO, WIDGETS, INSTALL);\n            }\n        }\n        return Stream.of(APP_INFO, WIDGETS, INSTALL);\n    }",
+      "new": "    private Stream<SystemShortcut.Factory> getNativeSupportedShortcuts(ItemInfo itemInfo) {\n        int container = itemInfo.container;\n        if (container == CONTAINER_DESKTOP || container == CONTAINER_HOTSEAT) {\n            return Stream.of(APP_INFO, WIDGETS, INSTALL, REMOVE);\n        } else if (container == CONTAINER_ALL_APPS || container == CONTAINER_ALL_APPS_PREDICTION) {\n            // TODO(b/444744861): Update private space apps to have its own container.\n            boolean isPinnable = itemInfo instanceof ItemInfoWithIcon info\n                    && (info.runtimeStatusFlags & FLAG_NOT_PINNABLE) == 0;\n            if (isPinnable) {\n                return Stream.of(APP_INFO, WIDGETS, INSTALL, ADD_TO_HOME_SCREEN);\n            } else {\n                return Stream.of(APP_INFO, WIDGETS, INSTALL);\n            }\n        }\n        return Stream.of(APP_INFO, WIDGETS, INSTALL);\n    }\n\n    public Stream<SystemShortcut.Factory> getSupportedShortcuts(ItemInfo itemInfo) {\n        Stream<SystemShortcut.Factory> nativeActions = getNativeSupportedShortcuts(itemInfo);\n        if (com.android.launcher3.hecker.HeckerStudio.locked(this)) {\n            nativeActions = nativeActions.filter(factory -> factory != REMOVE && factory != ADD_TO_HOME_SCREEN);\n        }\n        return Stream.concat(nativeActions, Stream.of(SystemShortcut.HECKER_APP_LOCK,\n                SystemShortcut.HECKER_HIDE, SystemShortcut.HECKER_ICON));\n    }"
+    }
+  ],
+  "src/com/android/launcher3/widget/LauncherAppWidgetHostView.java": [
+    {
+      "old": "        super.updateAppWidget(remoteViews);",
+      "new": "        if (com.android.launcher3.hecker.HeckerClockWidget.bind(this)) return;\n        if (com.android.launcher3.hecker.HeckerSearchTouch.bind(this)) return;\n        super.updateAppWidget(remoteViews);"
+    }
+  ],
+  "src/com/android/launcher3/allapps/search/AppsSearchContainerLayout.java": [
+    {
+      "old": "    @Override\n    public void onAppsUpdated() {",
+      "new": "    @Override\n    public boolean performClick() {\n        if (com.android.launcher3.hecker.HeckerSearchTouch.click(this)) return true;\n        return super.performClick();\n    }\n\n    @Override\n    public boolean onTouchEvent(android.view.MotionEvent event) {\n        if (com.android.launcher3.hecker.HeckerSearchTouch.touch(this, event)) return true;\n        return super.onTouchEvent(event);\n    }\n\n    @Override\n    public void onAppsUpdated() {"
+    },
+    {
+      "old": "    public void preDispatchKeyEvent(KeyEvent event) {",
+      "new": "    public void preDispatchKeyEvent(KeyEvent event) {\n        if (com.android.launcher3.hecker.HeckerSearchTouch.enabled(getContext())\n                && event.getAction() == KeyEvent.ACTION_DOWN && event.getUnicodeChar() > 32) {\n            getContext().startActivity(new android.content.Intent(getContext(),\n                    com.android.launcher3.hecker.HeckerSearchActivity.class)\n                    .putExtra(\"query\", new String(Character.toChars(event.getUnicodeChar()))));\n            return;\n        }"
+    }
+  ],
+  "src/com/android/launcher3/qsb/OseWidgetView.kt": [
+    {
+      "old": "    override fun onAttachedToWindow() {",
+      "new": "    override fun performClick(): Boolean {\n        if (com.android.launcher3.hecker.HeckerSearchTouch.click(this)) return true\n        return super.performClick()\n    }\n\n    override fun onInterceptTouchEvent(event: android.view.MotionEvent): Boolean {\n        if (com.android.launcher3.hecker.HeckerSearchTouch.enabled(context)) return true\n        return super.onInterceptTouchEvent(event)\n    }\n\n    override fun onTouchEvent(event: android.view.MotionEvent): Boolean {\n        if (com.android.launcher3.hecker.HeckerSearchTouch.touch(this, event)) return true\n        return super.onTouchEvent(event)\n    }\n\n    override fun onAttachedToWindow() {"
+    }
+  ],
+  "src/com/android/launcher3/allapps/search/DefaultAppSearchAlgorithm.java": [
+    {
+      "old": "    private final LauncherAppState mAppState;",
+      "new": "    private final LauncherAppState mAppState;\n    private final Context mHeckerContext;"
+    },
+    {
+      "old": "        mAppState = LauncherAppState.getInstance(context);",
+      "new": "        mHeckerContext = context.getApplicationContext();\n        mAppState = LauncherAppState.getInstance(context);"
+    },
+    {
+      "old": "            ArrayList<AdapterItem> result = getTitleMatchResult(apps.data, query);",
+      "new": "            List<AppInfo> heckerVisible = new ArrayList<>();\n            for (AppInfo app : apps.data) {\n                if (!com.android.launcher3.hecker.HeckerStudio.hidden(mHeckerContext, app.componentName, app.user)) {\n                    AppInfo copy = app.clone();\n                    copy.title = com.android.launcher3.hecker.HeckerIconStudio.label(mHeckerContext,\n                            app.componentName, app.user, app.title);\n                    heckerVisible.add(copy);\n                }\n            }\n            ArrayList<AdapterItem> result = getTitleMatchResult(heckerVisible, query);"
+    }
+  ],
+  "src/com/android/launcher3/AppWidgetResizeFrame.kt": [
+    {
+      "old": "        fun showForWidget(widget: LauncherAppWidgetHostView?, cellLayout: CellLayout) {",
+      "new": "        fun showForWidget(widget: LauncherAppWidgetHostView?, cellLayout: CellLayout) {\n            if (com.android.launcher3.hecker.HeckerStudio.blockMove(cellLayout.context)) return"
+    }
+  ],
+  "src/com/android/launcher3/touch/ItemLongClickListener.java": [
+    {
+      "old": "        Launcher launcher = Launcher.getLauncher(v.getContext());\n        if (!canStartAllAppsItemDrag(launcher)) return false;",
+      "new": "        Launcher launcher = Launcher.getLauncher(v.getContext());\n        if (com.android.launcher3.hecker.HeckerStudio.blockMove(v.getContext())) return false;\n        if (!canStartAllAppsItemDrag(launcher)) return false;"
+    },
+    {
+      "old": "            DragOptions dragOptions) {\n        if (info.container >= 0) {",
+      "new": "            DragOptions dragOptions) {\n        if (com.android.launcher3.hecker.HeckerStudio.blockMove(v.getContext())) return;\n        if (info.container >= 0) {"
+    }
+  ],
+  "src/com/android/launcher3/CellLayout.java": [
+    {
+      "old": "    protected final ShortcutAndWidgetContainer mShortcutsAndWidgets;",
+      "new": "    protected final ShortcutAndWidgetContainer mShortcutsAndWidgets;\n    private com.android.launcher3.hecker.HeckerHomeClock mHeckerClock;\n    private int mHeckerClockSpace;\n\n    public void enableHeckerHomeClock() {\n        if (mHeckerClock != null) return;\n        mHeckerClock = new com.android.launcher3.hecker.HeckerHomeClock(getContext());\n        addView(mHeckerClock);\n    }\n\n    @Override public int getPaddingTop() { return super.getPaddingTop() + mHeckerClockSpace; }"
+    },
+    {
+      "old": "        int childWidthSize = widthSize - (getPaddingLeft() + getPaddingRight());",
+      "new": "        mHeckerClockSpace = mHeckerClock == null ? 0 : mHeckerClock.reservedHeight(\n                heightSize - super.getPaddingTop() - getPaddingBottom(), mCountY, mBorderSpace.y);\n        if (mHeckerClock != null) {\n            mHeckerClock.setVisibility(mHeckerClockSpace > 0 ? VISIBLE : GONE);\n            mHeckerClock.measure(MeasureSpec.makeMeasureSpec(\n                    widthSize - getPaddingLeft() - getPaddingRight(), MeasureSpec.EXACTLY),\n                    MeasureSpec.makeMeasureSpec(mHeckerClockSpace, MeasureSpec.EXACTLY));\n        }\n        int childWidthSize = widthSize - (getPaddingLeft() + getPaddingRight());"
+    },
+    {
+      "old": "        if (mFixedCellWidth < 0 || mFixedCellHeight < 0) {\n            int cw = DeviceProfile.calculateCellWidth(childWidthSize, mBorderSpace.x,\n                    mCountX);\n            int ch = DeviceProfile.calculateCellHeight(childHeightSize, mBorderSpace.y,\n                    mCountY);",
+      "new": "        if (mFixedCellWidth < 0 || mFixedCellHeight < 0 || mHeckerClock != null) {\n            int cw = mHeckerClock != null && mFixedCellWidth >= 0 ? mFixedCellWidth : DeviceProfile.calculateCellWidth(\n                    childWidthSize, mBorderSpace.x, mCountX);\n            int ch = mHeckerClock != null && mHeckerClockSpace == 0 && mFixedCellHeight >= 0 ? mFixedCellHeight\n                    : DeviceProfile.calculateCellHeight(childHeightSize, mBorderSpace.y, mCountY);"
+    },
+    {
+      "old": "        mShortcutsAndWidgets.layout(left, top, right, bottom);",
+      "new": "        mShortcutsAndWidgets.layout(left, top, right, bottom);\n        if (mHeckerClock != null && mHeckerClockSpace > 0) {\n            mHeckerClock.layout(left, super.getPaddingTop(), right, getPaddingTop());\n        }"
+    }
+  ],
+  "src/com/android/launcher3/qsb/QsbWidgetFactory.kt": [
+    {
+      "old": "        return LayoutInflater.from(container.context)\n            .inflate(R.layout.qsb_container_hotseat, container, false)",
+      "new": "        return com.android.launcher3.hecker.HeckerDockBar.create(container)",
+      "previous": [
+        "        return com.android.launcher3.hecker.HeckerDockBar(container.context)"
+      ]
+    }
+  ],
+  "src/com/android/launcher3/Hotseat.java": [
+    {
+      "old": "    private final View mQsb;",
+      "new": "    private final View mQsb;\n    private int mHeckerNavigationInset;"
+    },
+    {
+      "old": "        mQsb = LauncherComponentProvider.get(context).getQsbWidgetFactory().createView(this);",
+      "new": "        mQsb = com.android.launcher3.hecker.HeckerDockBar.available(context)\n                ? new com.android.launcher3.hecker.HeckerDockBar(context)\n                : LauncherComponentProvider.get(context).getQsbWidgetFactory().createView(this);"
+    },
+    {
+      "old": "        int topOverlap = 0;\n        if (grid.isVerticalBarLayout()) {",
+      "new": "        mHeckerNavigationInset = insets.bottom;\n        int topOverlap = 0;\n        if (grid.isVerticalBarLayout()) {"
+    },
+    {
+      "old": "        Rect padding = grid.getHotseatLayoutPadding(getContext());\n        setPadding(padding.left, padding.top + topOverlap, padding.right, padding.bottom);",
+      "new": "        Rect padding = grid.getHotseatLayoutPadding(getContext());\n        int heckerExtra = com.android.launcher3.hecker.HeckerDockBar.extraHeight(\n                mQsb, padding.bottom, grid.getQsbOffsetY(), mHeckerNavigationInset,\n                grid.isVerticalBarLayout());\n        if (!grid.isVerticalBarLayout()) lp.height += heckerExtra;\n        setPadding(padding.left, padding.top + topOverlap, padding.right, padding.bottom + heckerExtra);",
+      "previous": [
+        "        Rect padding = grid.getHotseatLayoutPadding(getContext());\n        int heckerExtra = com.android.launcher3.hecker.HeckerDockBar.extraHeight(\n                mQsb, grid.getHotseatProfile().isQsbInline() ? 0 : grid.getHotseatProfile().getQsbHeight(),\n                grid.isVerticalBarLayout());\n        if (!grid.isVerticalBarLayout()) lp.height += heckerExtra;\n        setPadding(padding.left, padding.top + topOverlap, padding.right, padding.bottom + heckerExtra);"
+      ]
+    },
+    {
+      "old": "        mQsb.measure(\n                makeMeasureSpec(dp.getHotseatProfile().getQsbWidth(), MeasureSpec.EXACTLY),\n                makeMeasureSpec(dp.getHotseatProfile().getQsbHeight(), MeasureSpec.EXACTLY)\n        );",
+      "new": "        com.android.launcher3.hecker.HeckerDockBar.measure(mQsb,\n                dp.getHotseatProfile().getQsbWidth(), dp.getHotseatProfile().getQsbHeight(),\n                getMeasuredWidth());"
+    },
+    {
+      "old": "        int bottom = b - t - dp.getQsbOffsetY();\n        int top = bottom - dp.getHotseatProfile().getQsbHeight();",
+      "new": "        int bottom = b - t - com.android.launcher3.hecker.HeckerDockBar.bottomOffset(\n                mQsb, dp.getQsbOffsetY(), mHeckerNavigationInset);\n        int top = bottom - mQsb.getMeasuredHeight();"
+    },
+    {
+      "old": "        if (dp.getHotseatProfile().isQsbInline()) {",
+      "new": "        if (!(mQsb instanceof com.android.launcher3.hecker.HeckerDockBar)\n                && dp.getHotseatProfile().isQsbInline()) {"
+    }
+  ]
+}

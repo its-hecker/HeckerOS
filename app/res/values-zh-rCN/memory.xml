@@ -1,0 +1,28 @@
+<resources>
+    <string name="memory_title">内存加速</string>
+    <string name="memory_summary">应用后台规则和一键清理</string>
+    <string name="memory_description">设置应用的后台运行方式。内存加速会清理符合条件的缓存进程，并保护常驻、前台和重要应用。</string>
+    <string name="memory_system">显示系统应用</string>
+    <string name="memory_start">后台启动</string>
+    <string name="memory_start_summary">阻止自动启动进程，仍可手动打开应用。</string>
+    <string name="memory_background">后台任务</string>
+    <string name="memory_background_summary">在进程不再重要后清理后台进程。这可能延迟通知。</string>
+    <string name="memory_clean_task">清理任务</string>
+    <string name="memory_clean_task_summary">从最近任务中移除应用时清理符合条件的进程。</string>
+    <string name="memory_resident">常驻应用</string>
+    <string name="memory_resident_summary">不参与清理，并提高运行进程的内存优先级。内存不足时 Android 仍可回收进程。</string>
+    <string name="memory_protected">受保护的系统角色或共享 UID</string>
+    <string name="memory_default">默认后台行为</string>
+    <string name="memory_active">自定义后台规则</string>
+    <string name="memory_boost">立即加速</string>
+    <string name="memory_done">已清理 %1$d 个后台应用和 %2$d 个进程</string>
+    <string name="memory_none">没有可清理的后台进程</string>
+    <string name="memory_failed">内存控制不可用。请确认已安装匹配的 ROM 版本。</string>
+    <string name="memory_save_failed">无法保存应用规则</string>
+    <string name="status_popup_title">状态栏弹出操作</string>
+    <string name="status_popup_summary">长按时钟或状态图标可打开快捷操作和内存加速。正常滑动可打开通知。</string>
+    <string name="volume_style_title">One UI 音量面板</string>
+    <string name="volume_style_summary">TouchWiz 风格的紧凑和展开控制，包含亮度和原生音量警告</string>
+    <string name="volume_expand">展开音量控制</string>
+    <string name="volume_collapse">收起音量控制</string>
+</resources>

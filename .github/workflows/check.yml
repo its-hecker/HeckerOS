@@ -9,6 +9,26 @@ concurrency:
   group: hecker-source-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  librepods:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Build the GPL LibrePods variant with Soundcore and generic headphones
+        run: python3 tools/prepare_librepods.py --sdk-cache "$ANDROID_HOME"
+      - name: Verify source recipe and APK cache
+        run: python3 tools/prepare_librepods.py --offline
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hecker-librepods
+          path: |
+            prebuilts/librepods/prebuilt/HeckerLibrePods.apk
+            prebuilts/librepods/prebuilt/build.json
+          if-no-files-found: error
   public-metadata:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
@@ -32,13 +52,31 @@ jobs:
           distribution: temurin
           java-version: '21'
       - name: Verify authorization, raw decoding, gaming, lyrics and patch safety
-        run: bash tests/run_host_tests.sh
+        run: |
+          python3 -m pip install Pillow
+          bash tests/run_host_tests.sh
       - name: Compile Suite Java and link Android resources with locked dependencies
         run: python3 tools/compile_sdk.py --cache generated/sdk
+      - name: Compile retained Google weather and Hecker Launcher artwork
+        run: python3 tools/check_launcher.py --sdk-cache generated/sdk
+      - name: Compile headphone, sandbox and face-island native adapter Java and resources
+        run: python3 tools/check_device_features.py --sdk-cache generated/sdk
+      - name: Compile the connected-headphone page and Bluetooth reader
+        run: python3 tools/check_headphone_companion.py --sdk-cache generated/sdk
+      - name: Compile Quick Settings Kotlin and Java with locked Compose dependencies
+        run: python3 tools/check_quick_settings.py --sdk-cache generated/sdk
+      - name: Compile the System UI restart control receiver
+        run: python3 tools/check_interaction_features.py --sdk-cache generated/sdk
+      - name: Compile native About Phone and verify HeckerOS release identity
+        run: python3 tools/check_about_phone.py --sdk-cache generated/sdk
+      - name: Merge the native and standalone Motion Sense manifests with Android 17's merger
+        run: python3 tools/check_motion_manifest.py
       - name: Check owned Pixel enrollment and Axion integrity adapters
         run: python3 tools/check_platform_features.py --sdk-cache generated/sdk
       - name: Check Android 17 keystore integration and private spoofing configuration
         run: python3 tools/check_spoofing.py
+      - name: Check Spoofing hub imports, Canary metadata and certificate diagnostics
+        run: python3 tools/check_spoofing_hub.py
       - name: Verify pinned upstream sources without requiring platform forks
         run: python3 tools/freeze_upstream.py --check
       - name: Verify coral integration and recovery tools
@@ -46,29 +84,19 @@ jobs:
           python3 integration/tools/validate.py
           python3 -m unittest discover -s integration/tests -p 'test_*.py'
       - name: Apply and revert adapters against pinned native sources
-        run: python3 tools/check_native_ports.py
+        run: python3 tools/check_native_ports.py --sdk-cache generated/sdk
       - name: Verify all pinned theme payloads
         run: python3 tools/fetch_theme_assets.py
       - name: Compile Settings artwork and layouts
-        run: generated/sdk/aapt2 compile --dir settings/res -o /tmp/hecker-settings-resources.zip
+        run: |
+          generated/sdk/aapt2 compile --dir settings/res -o /tmp/hecker-settings-resources.zip
+          generated/sdk/aapt2 compile --dir motion/res -o /tmp/hecker-motion-resources.zip
   boot-assets:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    permissions:
-      contents: write
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-      - name: Install boot renderer dependencies
-        run: sudo apt-get update && sudo apt-get install -y python3-pil python3-numpy ffmpeg fonts-dejavu-core
-      - name: Render and verify the approved animation
-        run: /usr/bin/python3 tools/build_bootanimation.py
-      - name: Publish generated ROM payload and preview
-        run: |
-          git config user.name 'HeckerOS build bot'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add bootanimation/bootanimation.zip bootanimation/preview-coral.mp4 bootanimation/payload.json
-          if ! git diff --cached --quiet; then
-            git commit -m 'Generate approved coral boot animation and preview'
-            git push origin HEAD:main
-          fi
+      - name: Install boot validator dependency
+        run: sudo apt-get update && sudo apt-get install -y python3-pil
+      - name: Verify the approved terminal animation without changing the asset
+        run: /usr/bin/python3 tools/build_bootanimation.py --check

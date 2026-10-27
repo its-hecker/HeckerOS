@@ -1,0 +1,25 @@
+<resources>
+  <string name="derived_app_name">Hecker 桌面</string>
+  <string name="hecker_double_tap_title">双击息屏</string>
+  <string name="hecker_double_tap_summary">双击主屏幕空白处关闭屏幕</string>
+  <string name="hecker_swipe_title">下滑打开快捷设置</string>
+  <string name="hecker_swipe_summary">在主屏幕空白处下滑，打开通知栏和快捷控制</string>
+  <string name="hecker_glass_title">玻璃外观</string>
+  <string name="hecker_glass_style">玻璃样式</string>
+  <string name="hecker_glass_dock">底部栏</string>
+  <string name="hecker_glass_folders">文件夹</string>
+  <string name="hecker_glass_search">搜索栏</string>
+  <string name="hecker_glass_widgets">小部件容器</string>
+  <string name="hecker_glass_corner">圆角半径</string>
+  <string-array name="hecker_glass_styles">
+    <item>关闭</item>
+    <item>磨砂玻璃</item>
+    <item>流动玻璃</item>
+  </string-array>
+    <string name="hecker_glass_corner_tl">左上圆角</string>
+    <string name="hecker_glass_corner_tr">右上圆角</string>
+    <string name="hecker_glass_corner_br">右下圆角</string>
+    <string name="hecker_glass_corner_bl">左下圆角</string>
+  <string name="hs_dock_search">底部托盘下方的 Hecker 搜索栏</string>
+  <string name="hs_dock_search_brand">Hecker 搜索</string>
+</resources>

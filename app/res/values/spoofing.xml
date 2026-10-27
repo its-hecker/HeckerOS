@@ -1,0 +1,4 @@
+<resources>
+    <string name="spoofing_title">Spoofing hub</string>
+    <string name="spoofing_summary">Manage device fingerprints, keybox certificates and target apps</string>
+</resources>

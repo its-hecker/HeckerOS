@@ -11,21 +11,21 @@ import sys
 import xml.etree.ElementTree as ET
 
 from camera_install import configure as configure_camera, SOURCE as CAMERA_SOURCE, SERVICE as CAMERA_SERVICE
+from floral_target import DEVICE, VENDOR, PRODUCT, VENDOR_REPOSITORIES, manifest_device
 
 
 ROOT = Path(__file__).resolve().parents[1]
 PROJECTS = {
     "device/google/coral": "its-hecker/heckeros-floral-devicetree",
-    "vendor/google/coral": "its-hecker/heckeros-coral-vendor",
+    VENDOR: VENDOR_REPOSITORIES[DEVICE],
     "kernel/google/msm-4.14": "its-hecker/heckeros-floral-kernel",
     "packages/apps/ElmyraService": "LineageOS/android_packages_apps_ElmyraService",
     "vendor/lunaris/dolby": "its-hecker/vendor_lunaris_dolby",
     "vendor/hecker/floral/motionsense": "its-hecker/floral-motionsense-plugin",
     "vendor/hecker/floral/faceid": "its-hecker/floral-3D-faceid-plugin",
     "vendor/hecker/floral/suite": "its-hecker/HeckerOS",
-    "packages/apps/Launcher3": "RisingOS-Revived/android_packages_apps_Launcher3",
-    "packages/services/OmniJaws": "RisingOS-Revived/android_packages_services_OmniJaws",
 }
+REMOVED_PROJECTS = {"packages/services/OmniJaws"}
 
 
 def require(condition, message):
@@ -34,12 +34,13 @@ def require(condition, message):
 
 
 def manifest(root=ROOT):
+    require(manifest_device(root) == DEVICE, "HECKER_DEVICE does not match the manifest vendor")
     xml = ET.parse(root / "floral.xml").getroot()
     projects = xml.findall("project")
     require(len(projects) == len(PROJECTS), "Unexpected project count")
     require(len({p.get('path') for p in projects}) == len(projects), "Duplicate project path")
     removals = {p.get("path") for p in xml.findall("remove-project") if p.get("optional") == "true"}
-    require(removals == set(PROJECTS), "Every replacement needs an optional path removal")
+    require(removals == (set(PROJECTS) | REMOVED_PROJECTS), "Every replaced/retired project needs an optional path removal")
     for project in projects:
         path = project.get("path")
         require(project.get("name") == PROJECTS[path], "Incorrect repository for " + path)
@@ -50,7 +51,7 @@ def manifest(root=ROOT):
             require(project.get("upstream", "").startswith("refs/heads/"), "Missing upstream ref")
         if path.startswith("kernel/"):
             require(project.get("sync-s") == "true", "KernelSU submodule sync is disabled")
-            require(project.get("upstream") == "refs/heads/test/coral-root-privacy-20261027", "Wrong Coral test kernel branch")
+            require(project.get("upstream") in {"refs/heads/main", "refs/heads/feat/game-booster-reference", "refs/heads/test/coral-root-privacy-20261027"}, "Wrong HeckerOS kernel branch")
     print("Local manifest paths, dependency pins and kernel submodule sync: PASS")
 
 
@@ -58,33 +59,33 @@ def camera_prebuilt(rom):
     # Pairing this V1 prebuilt with the newer AOSP service makes Soong traverse
     # both camera metadata versions, even when prefer: true selects the blob.
     stock = "android.hardware.camera.provider@2.7-service-google"
-    module = stock + "-coral"
+    module = stock + "-" + DEVICE
     device = rom / "device/google/coral"
-    vendor = rom / "vendor/google/coral"
+    vendor = rom / VENDOR
     bp = (vendor / "Android.bp").read_text()
     matches = re.findall(r'(?ms)^cc_prebuilt_binary\s*\{\s*name:\s*"' +
                          re.escape(module) + r'",.*?^\}', bp)
-    require(len(matches) == 1, "Missing distinct Coral camera prebuilt module; sync device/vendor sources")
+    require(len(matches) == 1, f"Missing distinct {DEVICE.title()} camera prebuilt module; sync device/vendor sources")
     block = matches[0]
     require('overrides: ["' + stock + '"]' in block and
             'no_full_install: true' not in block,
-            "Sync vendor/google/coral: the stock camera must own its full install rules")
+            f"Sync {VENDOR}: the stock camera must own its full install rules")
     require('stem: "' + stock + '"' in block and
             '"proprietary/vendor/bin/hw/' + stock + '"' in block and
             'relative_install_path: "hw"' in block and 'soc_specific: true' in block,
-            "Coral camera prebuilt does not install at its stock vendor service path")
+            f"{DEVICE.title()} camera prebuilt does not install at its stock vendor service path")
     aidl = set(re.findall(r'"(android\.hardware\.camera\.[^"/]+-V\d+-ndk)"', block))
     require(aidl == {"android.hardware.camera.device-V1-ndk",
                      "android.hardware.camera.common-V1-ndk",
                      "android.hardware.camera.provider-V1-ndk"},
-            "Stock Coral camera prebuilt must retain its AIDL V1 dependencies")
-    for path in (device / "device-common.mk", vendor / "coral-vendor.mk"):
+            f"Stock {DEVICE.title()} camera prebuilt must retain its AIDL V1 dependencies")
+    for path in (device / "device-common.mk", vendor / (DEVICE + "-vendor.mk")):
         text = path.read_text()
         require(re.search(r'(?m)^\s*' + re.escape(module) + r'\s*(?:\\)?\s*$', text) and
                 not re.search(r'(?m)^\s*' + re.escape(stock) + r'\s*(?:\\)?\s*$', text),
                 str(path) + ": select only the distinct Coral camera prebuilt")
-    entry = "vendor/bin/hw/" + stock + ";MODULE_SUFFIX=-coral"
-    require(entry in (device / "coral/proprietary-files-vendor.txt").read_text().splitlines(),
+    entry = "vendor/bin/hw/" + stock + ";MODULE_SUFFIX=-" + DEVICE
+    require(entry in (device / DEVICE / "proprietary-files-vendor.txt").read_text().splitlines(),
             "Camera extraction would recreate the AOSP/prebuilt module collision")
     init = vendor / "proprietary/vendor/etc/init" / (stock + ".rc")
     require("/vendor/bin/hw/" + stock in init.read_text(), "Camera init executable path differs")
@@ -94,7 +95,7 @@ def camera_prebuilt(rom):
     require(hal is not None and hal.get("format") == "aidl" and
             hal.findtext("name") == "android.hardware.camera.provider" and
             hal.findtext("version") == "1", "Stock camera VINTF provider changed")
-    print("Coral camera prebuilt identity, stock service path and AIDL V1 packaging: PASS")
+    print(f"{DEVICE.title()} camera prebuilt identity, stock service path and AIDL V1 packaging: PASS")
 
 
 def camera_init(rom):
@@ -106,21 +107,21 @@ def camera_init(rom):
                       re.escape(CAMERA_SERVICE) + r'",.*?^\}', source_bp.read_text())
     require(block is not None and re.search(r'init_rc:\s*\[(?:\s*"' +
             re.escape(filename) + r'"\s*,?)?\s*\]', block.group()),
-            "Review the AOSP camera init installer before building Coral")
-    vendor_bp = (rom / "vendor/google/coral/Android.bp").read_text()
+            f"Review the AOSP camera init installer before building {DEVICE.title()}")
+    vendor_bp = (rom / (VENDOR + "/Android.bp")).read_text()
     selected = re.search(r'(?ms)^cc_prebuilt_binary\s*\{\s*name:\s*"' +
-                         re.escape(CAMERA_SERVICE + "-coral") + r'",.*?^\}', vendor_bp)
+                         re.escape(CAMERA_SERVICE + "-" + DEVICE) + r'",.*?^\}', vendor_bp)
     relative = "proprietary/vendor/etc/init/" + filename
     require(selected is not None and re.search(r'init_rc:\s*\[\s*"' +
             re.escape(relative) + r'"\s*,?\s*\]', selected.group()),
-            "Sync vendor/google/coral: the selected camera prebuilt must install its init script")
-    stock = rom / "vendor/google/coral/proprietary/vendor/etc/init" / filename
+            f"Sync {VENDOR}: the selected camera prebuilt must install its init script")
+    stock = rom / (VENDOR + "/proprietary/vendor/etc/init") / filename
     require((source_bp.parent / filename).read_bytes() == stock.read_bytes(),
-            "AOSP camera init differs from Coral's stock script; review startup configuration")
-    copy_prefix = "vendor/google/coral/proprietary/vendor/etc/init/" + filename + ":"
-    make = (rom / "vendor/google/coral/coral-vendor.mk").read_text()
+            f"AOSP camera init differs from {DEVICE.title()}'s stock script; review startup configuration")
+    copy_prefix = (VENDOR + "/proprietary/vendor/etc/init/") + filename + ":"
+    make = (rom / (VENDOR + "/" + DEVICE + "-vendor.mk")).read_text()
     require(not any(line.lstrip().startswith(copy_prefix) for line in make.splitlines()),
-            "Sync vendor/google/coral: remove the duplicate camera init PRODUCT_COPY_FILES entry")
+            f"Sync {VENDOR}: remove the duplicate camera init PRODUCT_COPY_FILES entry")
 
 
 def init_installers(rom, copies):
@@ -130,7 +131,7 @@ def init_installers(rom, copies):
     def add(destination, owner):
         owners.setdefault(destination, set()).add(owner)
 
-    for relative in ("vendor/google/coral/Android.bp", CAMERA_SOURCE,
+    for relative in ((VENDOR + "/Android.bp"), CAMERA_SOURCE,
                      "vendor/hecker/floral/faceid/Android.bp"):
         path = rom / relative
         for block in re.findall(r'(?ms)^cc_(?:prebuilt_)?binary\s*\{.*?^\}', path.read_text()):
@@ -163,12 +164,12 @@ FACE_REPLACEMENTS = {
 
 
 def replaced_vendor_installers(rom):
-    source = (rom / "vendor/google/coral/Android.bp").read_text()
+    source = (rom / (VENDOR + "/Android.bp")).read_text()
     for name in FACE_REPLACEMENTS.values():
         blocks = re.findall(r'(?ms)^cc_prebuilt_(?:binary|library_shared)\s*\{\s*name:\s*"' +
                             re.escape(name) + r'",.*?^\}', source)
         require(len(blocks) == 1 and re.search(r'(?m)^    no_full_install: true,', blocks[0]),
-                "Sync vendor/google/coral: suppress the replaced stock install rule for " + name)
+                f"Sync {VENDOR}: suppress the replaced stock install rule for " + name)
 
 
 def motion_permissions(rom):
@@ -198,7 +199,7 @@ def motion_permissions(rom):
 
 def hardware_setup(rom):
     device = rom / "device/google/coral"
-    product = (rom / "vendor/hecker/floral/suite/rom/products/hecker_coral.mk").read_text()
+    product = (rom / PRODUCT).read_text()
     flag = "PRODUCT_NO_CAMERA := true"
     require(flag in product and product.index(flag) < product.index(
             "$(call inherit-product, vendor/custom/config/common_full_phone.mk)"),
@@ -231,10 +232,10 @@ def hardware_setup(rom):
 
 def source(rom):
     required = [
-        "vendor/hecker/floral/suite/rom/products/hecker_coral.mk", "device/google/coral/BoardConfig-common.mk",
-        "vendor/google/coral/Android.mk", "vendor/google/coral/Android.bp",
-        "vendor/google/coral/proprietary/vendor/dsp/sdsp/oslo.so",
-        "vendor/google/coral/proprietary/vendor/dsp/sdsp/oslo.napp_header",
+        PRODUCT, "device/google/coral/BoardConfig-common.mk",
+        (VENDOR + "/Android.mk"), (VENDOR + "/Android.bp"),
+        (VENDOR + "/proprietary/vendor/dsp/sdsp/oslo.so"),
+        (VENDOR + "/proprietary/vendor/dsp/sdsp/oslo.napp_header"),
         "vendor/pixel/gms/products/gms.mk", "vendor/custom/config/common_full_phone.mk",
         "kernel/google/msm-4.14/arch/arm64/configs/floral_defconfig",
         "kernel/google/msm-4.14/KernelSU/kernel/Kconfig",
@@ -262,12 +263,12 @@ def source(rom):
             face_check.stdout + face_check.stderr)
     require(configure_camera(rom) == "already configured",
             "Run build.sh preparation to select the stock camera install rules")
-    product = (rom / "vendor/hecker/floral/suite/rom/products/hecker_coral.mk").read_text()
+    product = (rom / PRODUCT).read_text()
     common = "$(call inherit-product, vendor/custom/config/common_full_phone.mk)"
-    vendor = "$(call inherit-product, vendor/google/coral/coral-vendor.mk)"
+    vendor = f"$(call inherit-product, {VENDOR}/{DEVICE}-vendor.mk)"
     require(product.index("TARGET_FACE_UNLOCK_SUPPORTED := false") < product.index(common),
             "PixelOS software face provider is not disabled before common inheritance")
-    require("PRODUCT_NAME := hecker_coral" in product, "Wrong PixelOS product name")
+    require("PRODUCT_NAME := hecker_" + DEVICE in product, "Wrong HeckerOS product name")
     require("vendor/infinity" not in product, "Infinity product inherited")
     for feature, name, board in [("motionsense", "motionsense.mk", "BoardConfigMotionSense.mk"),
                                  ("faceid", "faceid.mk", "BoardConfigFaceID.mk")]:
@@ -302,14 +303,14 @@ def source(rom):
     board = (device / "BoardConfig-common.mk").read_text()
     require("BoardConfigMotionSense.mk" not in board and "BoardConfigFaceID.mk" not in board,
             "Device BoardConfig still owns ROM feature policy")
-    require("include vendor/hecker/floral/suite/rom/BoardConfig.mk" in (device / "coral/BoardConfig.mk").read_text(),
-            "Coral does not include the ROM policy configuration")
-    print("HeckerOS coral product, ROM-owned features and retained hardware fixes: PASS")
-    radio_make = (rom / "vendor/google/coral/Android.mk").read_text()
+    require("include vendor/hecker/floral/suite/rom/BoardConfig.mk" in (device / DEVICE / "BoardConfig.mk").read_text(),
+            f"{DEVICE.title()} does not include the ROM policy configuration")
+    print(f"HeckerOS {DEVICE} product, ROM-owned features and retained hardware fixes: PASS")
+    radio_make = (rom / (VENDOR + "/Android.mk")).read_text()
     images = re.findall(r"add-radio-file-sha1-checked,(radio/[^,]+),([0-9a-f]{40})", radio_make)
-    require(len(images) == 11, "Unexpected stock Coral radio image list; review the changed base")
+    require(len(images) == 11, f"Unexpected stock {DEVICE.title()} radio image list; review the changed base")
     for relative, expected in images:
-        path = rom / "vendor/google/coral" / relative
+        path = rom / VENDOR / relative
         digest = hashlib.sha1()
         with path.open("rb") as handle:
             prefix = handle.read(128)

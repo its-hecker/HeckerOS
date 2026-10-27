@@ -1,0 +1,33 @@
+<resources>
+    <string name="hecker_brand_tagline">简洁、强大，独属于你。</string>
+    <string name="hecker_android_version">Android 17</string>
+    <string name="hecker_maintained_by">维护者</string>
+    <string name="hecker_maintainer_name">Hecker</string>
+    <string name="hecker_suite_name">Hecker 套件</string>
+    <string name="hecker_suite_unavailable">此版本暂不提供 Hecker 套件。</string>
+    <string name="hecker_display_title">显示与个性化</string>
+    <string name="hecker_display_hero_title">让手机\n更像你。</string>
+    <string name="hecker_display_hero_summary">你的设备，你的风格。\n探索更多可能，\n打造熟悉又独特的体验。</string>
+    <string name="hecker_theme_pack_title">主题和图标</string>
+    <string name="hecker_theme_pack_summary">系统、信号、Wi-Fi、电池及充电样式</string>
+    <string name="hecker_wallpaper_title">壁纸和样式</string>
+    <string name="hecker_wallpaper_summary">壁纸、颜色和主题图标</string>
+    <string name="hecker_open_more_display">显示设置</string>
+    <string name="hecker_open_more_display_summary">高级显示选项</string>
+    <string name="hecker_about_rom">HeckerOS %1$s</string>
+    <string name="hecker_about_tagline">超越平凡。</string>
+    <string name="hecker_about_official">官方版</string>
+    <string name="hecker_about_unofficial">非官方版</string>
+    <string name="hecker_about_unspecified">版本类型未知</string>
+    <string name="hecker_about_android">Android</string>
+    <string name="hecker_about_memory">内存</string>
+    <string name="hecker_about_storage">数据存储</string>
+    <string name="hecker_about_storage_value">已用 %1$s，共 %2$s</string>
+    <string name="hecker_about_battery">电池</string>
+    <string name="hecker_about_battery_charging">%1$s · 正在充电</string>
+    <string name="hecker_about_processor">处理器</string>
+    <string name="hecker_about_kernel">内核</string>
+    <string name="hecker_about_maintainer">由 %1$s 维护</string>
+    <string name="hecker_about_community">认识 Hecker 与社区</string>
+    <string name="hecker_about_unavailable">不可用</string>
+</resources>

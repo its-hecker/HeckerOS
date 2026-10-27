@@ -1,22 +1,32 @@
-# HeckerOS boot animation
+# HeckerOS terminal boot animation
 
-Approved sequence: ring glow, suited caracal appears wearing sunglasses, removes them,
-looks at you, winks, then the HeckerOS wordmark and BEYOND ORDINARY. appear.
-The intro runs once. A subtle ring orbit then loops until Android finishes booting.
-Both parts can exit immediately when boot completes.
+The approved asset is Hecker's supplied `bootanimation_B_terminal_boot.zip`,
+stored in two checksum-pinned binary chunks under `source/` and assembled byte
+for byte as `bootanimation.zip` during build preparation. It reveals the suited caracal,
+types the HeckerOS wordmark and terminal startup lines, then loops the ring and
+cursor until Android finishes booting. The tagline is BEYOND ORDINARY.
 
-The native viewport is 720 × 1200 at 30 fps, centered at its native size on coral's
-1440 × 3040 display. The 318 px cat remains small on the panel. The MP4 preview
-shows the actual screen proportions at half resolution.
+The native viewport is 720 × 1200 at 30 fps, centered at its native size on
+coral's 1440 × 3040 display. `part0` contains 150 frames (five seconds); its `c`
+descriptor lets the intro finish even if Android becomes ready sooner. `part1`
+contains 60 frames (two seconds) and uses `p 0` to loop until boot completes.
+The supplied PNGs and descriptor are retained without resampling or re-encoding.
+`preview-coral.mp4` shows these exact frames on the coral screen at half size.
 
-`python3 tools/build_bootanimation.py` regenerates the STORE-format bootanimation.zip,
-preview and checksum record. Requires Pillow, numpy, ffmpeg and DejaVu Sans.
-`python3 tools/build_bootanimation.py --check` checks the shipped ZIP without dependencies
-beyond Pillow and numpy. The ROM consumes the checked-in ZIP; it never renders at boot.
+`python3 tools/build_bootanimation.py --check` assembles the exact ZIP and verifies its locked SHA-256,
+size, descriptor, 210 complete PNG frames, dimensions, unique archive entries
+and Android's STORE compression requirement. Default invocation also validates;
+neither CI nor build preparation renders or re-encodes the animation. Pillow is
+the only third-party dependency. `payload.json` records the selected ZIP and
+its sequence and both source chunks. The assembled ZIP is ignored by Git; the
+old keyframe sheet is retained as historical source only.
 
-Keyframe source was created with the built-in image generation tool from Hecker's
-approved storyboard. Prompt: a registered 4 × 3 sheet of the same realistic suited
-caracal on black, progressively removing blue sunglasses, looking at the viewer,
-winking once, then lowering its paw. No text or ring baked into the sheet.
-Frame nine is intentionally excluded because its wink is on the opposite eye.
-FFmpeg optical flow interpolates poses. Ring and typography are rendered separately.
+`bootanimation_heckeros` remains the sole enabled prebuilt installing
+`product/media/bootanimation.zip`. The guarded source adapter selects that
+package and disables the inherited PixelOS prebuilt. Native source checks
+verify the single owner against both module definitions.
+
+The native boot selector tries the product animation before the APEX default.
+On dark boots (`ro.boot.theme=1`), it tries the dark asset, then the normal
+product ZIP. Shutdown and userspace reboot retain their own paths. The build
+helper checks the installed ZIP against the approved payload hash.

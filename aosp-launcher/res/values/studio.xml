@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="hs_launcher_studio">Hecker Launcher Studio</string>
+  <string name="hs_studio_summary">Make your home screen feel like yours.</string>
+  <string name="hs_clock">Hecker Clock Studio</string>
+  <string name="hs_clock_summary">Ten clocks, live readings and a little personality.</string>
+  <string name="hs_home">Home screen</string>
+  <string name="hs_home_summary">Grids, spacing, dock and gesture controls.</string>
+  <string name="hs_appearance">Appearance</string>
+  <string name="hs_appearance_summary">Glass, icon packs and labels, made your way.</string>
+  <string name="hs_privacy">Privacy</string>
+  <string name="hs_privacy_summary">App Lock and independent hidden-app controls.</string>
+  <string name="hs_universal_search">Universal search</string>
+  <string name="hs_native_settings">More launcher settings</string>
+  <string name="hs_layout_migration">Grid changes use Launcher3’s native layout migration. Items are rearranged to fit; no app data is removed.</string>
+  <string name="hs_home_columns">Home columns</string>
+  <string name="hs_home_rows">Home rows</string>
+  <string name="hs_drawer_columns">Drawer columns</string>
+  <string name="hs_drawer_rows">Drawer rows</string>
+  <string name="hs_home_spacing">Extra home spacing (dp)</string>
+  <string name="hs_drawer_spacing">Extra drawer spacing (dp)</string>
+  <string name="hs_dock_count">Dock icons</string>
+  <string name="hs_layout_lock">Lock home layout</string>
+  <string name="hs_layout_locked">Layout is locked. Unlock it in Home screen settings to move items.</string>
+  <string name="hs_hecker_double_tap_sleep">Double tap to sleep</string>
+  <string name="hs_hecker_swipe_down">Swipe down for Quick Settings</string>
+  <string name="hs_glass">Glass Studio</string>
+  <string name="hs_live_preview">Live preview</string>
+  <string name="hs_glass_presets">Glass presets</string>
+  <string name="hs_glass_mode">Glass style</string>
+  <string name="hs_clear">Clear</string>
+  <string name="hs_frosted">Frosted</string>
+  <string name="hs_smoked">Smoked</string>
+  <string name="hs_violet">Violet</string>
+  <string name="hs_off">Off</string>
+  <string name="hs_liquid">Liquid glass</string>
+  <string name="hs_opacity">Opacity (%)</string>
+  <string name="hs_frost">Frosting strength</string>
+  <string name="hs_border">Border width (dp)</string>
+  <string name="hs_tint">Glass tint</string>
+  <string name="hs_ice">Ice</string>
+  <string name="hs_mint">Mint</string>
+  <string name="hs_warm">Warm</string>
+  <string name="hs_red">Tint · Red</string>
+  <string name="hs_green">Tint · Green</string>
+  <string name="hs_blue">Tint · Blue</string>
+  <string name="hs_hecker_glass_dock">Glass dock</string>
+  <string name="hs_hecker_glass_folders">Glass folders</string>
+  <string name="hs_hecker_glass_search">Glass search bar</string>
+  <string name="hs_hecker_glass_widgets">Glass widget containers</string>
+  <string name="hs_corner_tl">Top left corner (dp)</string>
+  <string name="hs_corner_tr">Top right corner (dp)</string>
+  <string name="hs_corner_br">Bottom right corner (dp)</string>
+  <string name="hs_corner_bl">Bottom left corner (dp)</string>
+  <string name="hs_clock_glass">C · Glass</string>
+  <string name="hs_clock_minimal">D · Minimal</string>
+  <string name="hs_clock_mono">F · Mono</string>
+  <string name="hs_clock_signature">G · Signature</string>
+  <string name="hs_clock_compact">H · Compact</string>
+  <string name="hs_clock_thermal">I · Thermal · animated</string>
+  <string name="hs_clock_digital">J · Digital</string>
+  <string name="hs_clock_analog">K · Analog</string>
+  <string name="hs_clock_stacked">L · Stacked · animated</string>
+  <string name="hs_clock_caracal">M · Caracal · animated</string>
+  <string name="hs_clock_animation">Animate clocks and Caracal</string>
+  <string name="hs_clock_messages">Rotating messages</string>
+  <string name="hs_clock_home">Built-in home clock</string>
+  <string name="hs_clock_home_summary">A permanent clock above the first home page. Tap for a new message; hold to open Clock Studio. No widget placement is needed. Reduce the home grid rows if there is not enough room.</string>
+  <string name="hs_clock_applied">Home clock updated</string>
+  <string name="hs_clock_palette">Clock colours</string>
+  <string name="hs_aurora">Aurora · mint and lilac</string>
+  <string name="hs_sunrise">Sunrise · peach and gold</string>
+  <string name="hs_lagoon">Lagoon · aqua and blue</string>
+  <string name="hs_orchid">Orchid · pink and violet</string>
+  <string name="hs_classic">Classic · soft ivory</string>
+  <string name="hs_clock_metrics">Battery temperature, battery level and RAM use live device readings. CPU load appears only when system counters are available. Clock animations pause when hidden and follow Android’s animation setting.</string>
+  <string name="hs_apply_clock">Apply clock</string>
+  <string name="hs_add_clock">Add clock to home screen</string>
+  <string name="hs_widget_picker_hint">Open Widgets from your home screen and choose Hecker Clock Studio.</string>
+  <string name="hs_battery">Battery</string>
+  <string name="hs_battery_temp">Battery temp</string>
+  <string name="hs_cpu_load">CPU load</string>
+  <string name="hs_ram">RAM</string>
+  <string name="hs_alarm">Alarm</string>
+  <string name="hs_icons">Icon Studio</string>
+  <string name="hs_icon_pack">Icon pack</string>
+  <string name="hs_icon_shape">Icon shape</string>
+  <string name="hs_system">System default</string>
+  <string name="hs_circle">Circle</string>
+  <string name="hs_squircle">Squircle</string>
+  <string name="hs_rounded_square">Rounded square</string>
+  <string name="hs_icon_size">Icon size (%)</string>
+  <string name="hs_home_labels">Show home labels</string>
+  <string name="hs_drawer_labels">Show drawer labels</string>
+  <string name="hs_home_label_size">Home label size (sp)</string>
+  <string name="hs_drawer_label_size">Drawer label size (sp)</string>
+  <string name="hs_badges">Notification number badges</string>
+  <string name="hs_badges_summary">Counts use active notifications. Allow Hecker Launcher under Notification access. Dismissing notifications clears their badges.</string>
+  <string name="hs_notification_access">Notification access</string>
+  <string name="hs_individual_icons">Individual app icons and labels</string>
+  <string name="hs_app_customization">Customize app</string>
+  <string name="hs_renamed_label">Custom label (blank uses the app name)</string>
+  <string name="hs_save_label">Save label</string>
+  <string name="hs_choose_icon">Choose an icon from a pack</string>
+  <string name="hs_reset_app">Reset icon and label</string>
+  <string name="hs_search_icons">Search icon names</string>
+  <string name="hs_pack_empty">This pack has no compatible appfilter icons.</string>
+  <string name="hs_app_lock">HeckerOS App Lock</string>
+  <string name="hs_app_lock_profile">Manage App Lock inside that Android profile.</string>
+  <string name="hs_app_lock_unavailable">HeckerOS App Lock is unavailable on this build.</string>
+  <string name="hs_hide_app">Hide app from drawer and search</string>
+  <string name="hs_hide_summary">Hiding removes an app from this launcher’s drawer and search. Existing home shortcuts remain. App Lock independently protects the app through Android authentication.</string>
+  <string name="hs_hidden_apps">Manage hidden apps</string>
+  <string name="hs_search">Universal search</string>
+  <string name="hs_search_shortcuts">Include app shortcuts</string>
+  <string name="hs_try_search">Open search</string>
+  <string name="hs_search_hint">Search apps and shortcuts</string>
+  <string name="hs_search_local">Search stays on your device. Only available apps and shortcuts in accessible profiles are included.</string>
+  <string name="hs_search_home_required">Set Hecker Launcher as your home app to search app shortcuts.</string>
+  <string name="hs_loading">Loading apps and shortcuts…</string>
+  <string name="hs_app">App</string>
+  <string name="hs_shortcut">App shortcut</string>
+  <string name="hs_launch_unavailable">This app or shortcut is no longer available.</string>
+  <string-array name="hs_clock_messages">
+    <item>A little clarity.</item>
+    <item>One thing at a time.</item>
+    <item>Stay curious.</item>
+    <item>Make today yours.</item>
+    <item>Take your time.</item>
+    <item>Keep your cool.</item>
+    <item>A fresh perspective.</item>
+    <item>Enjoy the moment.</item>
+    <item>Find your rhythm.</item>
+    <item>Stay curious. Stay Hecker.</item>
+    <item>Create your own pace.</item>
+    <item>Small steps. New possibilities.</item>
+    <item>Your next idea starts here.</item>
+    <item>Less rush. More wonder.</item>
+    <item>Leave a little room for magic.</item>
+    <item>Keep a spark in your pocket.</item>
+    <item>Make space for something good.</item>
+    <item>Today has a few surprises left.</item>
+    <item>Take a breath. Find your flow.</item>
+    <item>The little things count, too.</item>
+  </string-array>
+  <style name="HeckerStudioTheme" parent="android:style/Theme.Material.NoActionBar">
+    <item name="android:fontFamily">sans</item>
+    <item name="android:colorAccent">#A8DFD5</item>
+    <item name="android:windowLightStatusBar">false</item>
+    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:windowActionModeOverlay">true</item>
+    <item name="android:windowBackground">#10161C</item>
+    <item name="android:statusBarColor">#10161C</item>
+    <item name="android:navigationBarColor">#10161C</item>
+    <item name="android:windowSoftInputMode">adjustResize</item>
+  </style>
+  <string name="hs_dock_search">Hecker search below dock</string>
+  <string name="hs_dock_search_brand">Hecker Search</string>
+</resources>

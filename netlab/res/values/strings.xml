@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="netlab_controller_title">Hecker NetLab controller</string>
+    <string name="netlab_active_rules">NetLab: %1$d hotspot restrictions</string>
+    <string name="netlab_restore_notification">Tap to restore all NetLab-owned hotspot restrictions.</string>
+    <string name="netlab_restore_all">Restore all</string>
+    <string name="netlab_lan_title">NetLab · rooted IPv4 controls</string>
+    <string name="netlab_lan_active">Temporary ARP session. Tap to stop and restore.</string>
+    <string name="netlab_lan_stop">Stop and restore</string>
+</resources>

@@ -1,0 +1,3 @@
+# A fixed init action repairs ownership after late/rebound charger probing.
+system_internal_prop(hecker_game_control_prop)
+set_prop(system_server, hecker_game_control_prop)

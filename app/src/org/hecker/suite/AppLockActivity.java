@@ -42,6 +42,8 @@ public final class AppLockActivity extends Activity {
     private boolean authenticated;
     private boolean started;
     private int generation;
+    private static final int CHANGE_LOCK = 71;
+    private boolean changeInFlight;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -57,6 +59,9 @@ public final class AppLockActivity extends Activity {
         search = new EditText(this);
         search.setHint(R.string.search_apps);
         search.setSingleLine(true);
+        // The signature-only launcher shortcut focuses this app after authentication.
+        String requestedPackage = getIntent().getStringExtra("org.hecker.suite.APP_PACKAGE");
+        if (requestedPackage != null && requestedPackage.length() <= 255) search.setText(requestedPackage);
         search.setEnabled(false);
         page.addView(search);
         list = new LinearLayout(this);
@@ -98,7 +103,7 @@ public final class AppLockActivity extends Activity {
 
     private void authenticate() {
         final int request = ++generation;
-        animation.show(R.raw.suite_scan, true);
+        animation.show(R.raw.suite_applock, true);
         summary.setText(R.string.authenticate_subtitle);
         cancellation = new CancellationSignal();
         new BiometricPrompt.Builder(this)
@@ -185,7 +190,7 @@ public final class AppLockActivity extends Activity {
     }
 
     private void change(ApplicationInfo info, boolean enabled) {
-        if (!authenticated || !started) return;
+        if (!authenticated || !started || changeInFlight) return;
         try {
             PendingIntent intent = nativeLock.change(info.packageName, enabled);
             if (intent == null) {
@@ -196,11 +201,30 @@ public final class AppLockActivity extends Activity {
                 android.app.ActivityOptions options = android.app.ActivityOptions.makeBasic();
                 options.setPendingIntentBackgroundActivityStartMode(
                         android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-                intent.send(this, 0, null, null, null, null, options.toBundle());
+                changeInFlight = true;
+                startIntentSenderForResult(intent.getIntentSender(), CHANGE_LOCK, null,
+                        0, 0, 0, options.toBundle());
             }
-        } catch (ReflectiveOperationException | PendingIntent.CanceledException | SecurityException error) {
+        } catch (ReflectiveOperationException | android.content.IntentSender.SendIntentException | SecurityException error) {
+            changeInFlight = false;
             Toast.makeText(this, R.string.app_lock_change_unavailable, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override protected void onActivityResult(int request, int result, Intent data) {
+        super.onActivityResult(request, result, data);
+        if (request == CHANGE_LOCK) refreshAfterChange();
+    }
+
+    @Override public void onWindowFocusChanged(boolean focused) {
+        super.onWindowFocusChanged(focused);
+        // A translucent native authentication prompt need not stop this activity.
+        if (focused && changeInFlight) refreshAfterChange();
+    }
+
+    private void refreshAfterChange() {
+        changeInFlight = false;
+        if (started && authenticated) loadApps(generation);
     }
 
     @Override protected void onStop() {

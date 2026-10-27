@@ -1,0 +1,18 @@
+{
+  "source_repository": "silverwind/oui-data",
+  "source_revision": "3d56bc5011206fe59900f330259fe7b441b18750",
+  "source_version": "2.1.46",
+  "source_date": "2026-10-24T09:06:10Z",
+  "url": "https://raw.githubusercontent.com/silverwind/oui-data/3d56bc5011206fe59900f330259fe7b441b18750/index.json",
+  "source_sha256": "42c68d6d9436fb2faabbb277675941d52a8cab803e6c68de23cc89131827aa7c",
+  "license": "BSD-2-Clause",
+  "attribution": "app/assets/netlab/NOTICE.txt",
+  "asset": "app/assets/netlab/ieee-vendors.tsv.gz",
+  "asset_sha256": "275027adf576b8e2904b64731347d283cb9c84b86cc5f03510d3d934c7551df0",
+  "assignments": 54269,
+  "prefix_counts": {
+    "6": 40374,
+    "7": 6651,
+    "9": 7244
+  }
+}

@@ -18,8 +18,8 @@ import android.widget.TextView;
 import java.util.ArrayDeque;
 
 final class GamingUi {
-    static final int BG = 0xff080e14, CARD = 0xff121c27, TEXT = 0xfff3f6fb, MUTED = 0xff99a8ba;
-    static int accent(Context c) { return GamingPrefs.get(c).getInt("accent", 0xff35eee3); }
+    static final int BG = 0xff0c1321, CARD = 0xff19263a, TEXT = 0xfff3f3f6, MUTED = 0xffa7a7b5;
+    static int accent(Context c) { return GamingPrefs.get(c).getInt("accent", 0xff8fdcff); }
     static int dp(Context c, float v) { return Math.round(v * c.getResources().getDisplayMetrics().density); }
     static GradientDrawable background(Context c, int color, int radius, boolean outline) {
         GradientDrawable d = new GradientDrawable(); d.setColor(color); d.setCornerRadius(dp(c, radius));
@@ -52,6 +52,51 @@ final class GamingUi {
     }
     static void weighted(LinearLayout row, View child) { row.addView(child,new LinearLayout.LayoutParams(0,-2,1)); }
 
+    static GradientDrawable engineBackground(Context c, int alpha) {
+        GradientDrawable d = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                new int[]{Color.argb(alpha, 42, 42, 52), Color.argb(alpha, 23, 23, 30)});
+        d.setCornerRadius(dp(c, 18));
+        d.setStroke(dp(c, 1), 0x664e4e5d);
+        return d;
+    }
+
+    /** OEM-style instrument; the value always comes from the game's TaskFpsCallback. */
+    static final class EngineGauge extends View {
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private String value = "—";
+        EngineGauge(Context c) { super(c); setFps(value); }
+        void setFps(String fps) {
+            value = fps;
+            setContentDescription(getContext().getString(R.string.gaming_fps, fps));
+            invalidate();
+        }
+        @Override protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            float cx = getWidth()/2f, cy = getHeight()/2f, r = Math.min(getHeight()*.43f, getWidth()*.28f);
+            int accent = accent(getContext());
+            paint.setStyle(Paint.Style.STROKE); paint.setStrokeCap(Paint.Cap.ROUND);
+            paint.setStrokeWidth(dp(getContext(), 2)); paint.setColor(0xff494955);
+            canvas.drawCircle(cx, cy, r, paint);
+            paint.setColor(accent); paint.setStrokeWidth(dp(getContext(), 3));
+            canvas.drawArc(cx-r, cy-r, cx+r, cy+r, 135, 270, false, paint);
+            // Subtle, bounded glow and wings, rather than a screen-sized chart card.
+            for (int i = 3; i >= 1; i--) {
+                paint.setStrokeWidth(dp(getContext(), i*2));
+                paint.setAlpha(18);
+                canvas.drawLine(cx-r-dp(getContext(), 24), cy, cx-r-dp(getContext(), 5), cy, paint);
+                canvas.drawLine(cx+r+dp(getContext(), 5), cy, cx+r+dp(getContext(), 24), cy, paint);
+            }
+            paint.setAlpha(255); paint.setStrokeWidth(dp(getContext(), 2));
+            canvas.drawLine(cx-r-dp(getContext(), 22), cy, cx-r-dp(getContext(), 6), cy, paint);
+            canvas.drawLine(cx+r+dp(getContext(), 6), cy, cx+r+dp(getContext(), 22), cy, paint);
+            paint.setStyle(Paint.Style.FILL); paint.setColor(TEXT); paint.setTextAlign(Paint.Align.CENTER);
+            paint.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+            paint.setTextSize(dp(getContext(), 24)); canvas.drawText(value, cx, cy+dp(getContext(), 3), paint);
+            paint.setColor(MUTED); paint.setTextSize(dp(getContext(), 9));
+            canvas.drawText("FPS", cx, cy+dp(getContext(), 17), paint);
+        }
+    }
+
     static final class Icon extends View {
         final String type; final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG); int color;
         Icon(Context c,String type,int color) { super(c); this.type=type;this.color=color;setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO); }
@@ -78,7 +123,11 @@ final class GamingUi {
                 case "play": Path play=new Path();play.moveTo(7,4);play.lineTo(20,12);play.lineTo(7,20);play.close();p.setStyle(Paint.Style.FILL);canvas.drawPath(play,p);break;
                 case "back": canvas.drawLine(15,4,7,12,p);canvas.drawLine(7,12,15,20,p);break;
                 case "close": canvas.drawLine(5,5,19,19,p);canvas.drawLine(19,5,5,19,p);break;
+                case "more": p.setStyle(Paint.Style.FILL);for(int y=5;y<22;y+=7)canvas.drawCircle(12,y,1.5f,p);break;
+                case "edit": canvas.drawLine(5,18,17,6,p);canvas.drawLine(8,21,20,9,p);canvas.drawLine(5,18,4,22,p);canvas.drawLine(4,22,8,21,p);canvas.drawLine(16,5,20,9,p);break;
                 case "plus": canvas.drawLine(4,12,20,12,p);canvas.drawLine(12,4,12,20,p);break;
+                case "apps":
+                    for(int x=3;x<=14;x+=11)for(int y=3;y<=14;y+=11)canvas.drawRoundRect(x,y,x+7,y+7,1,1,p);break;
                 default:
                     canvas.drawRoundRect(2,6,22,19,5,5,p);canvas.drawLine(6,12,12,12,p);canvas.drawLine(9,9,9,15,p);canvas.drawPoint(17,11,p);canvas.drawPoint(19,14,p);
             }
@@ -107,7 +156,7 @@ final class GamingUi {
         Banner(Context c,Drawable icon,boolean hero){super(c);this.icon=icon;this.hero=hero;setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);}
         @Override protected void onDraw(Canvas canvas){
             super.onDraw(canvas);float w=getWidth(),h=getHeight();
-            paint.setShader(new LinearGradient(0,0,w,h,new int[]{0xff153c4c,0xff202045,0xff080e14},null,Shader.TileMode.CLAMP));canvas.drawRoundRect(0,0,w,h,dp(getContext(),18),dp(getContext(),18),paint);paint.setShader(null);
+            paint.setShader(new LinearGradient(0,0,w,h,new int[]{0xff402531,0xff25232f,0xff111116},null,Shader.TileMode.CLAMP));canvas.drawRoundRect(0,0,w,h,dp(getContext(),18),dp(getContext(),18),paint);paint.setShader(null);
             paint.setColor(accent(getContext()));paint.setAlpha(65);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(dp(getContext(),1));
             for(int i=0;i<7;i++)canvas.drawLine(w*.2f+i*w*.13f,0,w*.03f+i*w*.14f,h,paint);
             canvas.drawOval(w*.38f,h*.07f,w*.96f,h*.88f,paint);canvas.drawOval(w*.32f,h*.18f,w,h*.75f,paint);

@@ -16,20 +16,17 @@
   <project name="its-hecker/vendor_lunaris_dolby" path="vendor/lunaris/dolby" remote="floral-github" revision="544e6271c955e2bf450c8481ac1e71551cb5a800" upstream="refs/heads/pixelos-compat" dest-branch="pixelos-compat" />
   <project name="its-hecker/floral-motionsense-plugin" path="vendor/hecker/floral/motionsense" remote="floral-github" revision="92d0051faf53acac3dfefec6597a12d587eefa73" upstream="refs/heads/main" dest-branch="main" />
   <project name="its-hecker/floral-3D-faceid-plugin" path="vendor/hecker/floral/faceid" remote="floral-github" revision="d998995e1452d2c3d9882bfdf659e1db760a99be" upstream="refs/heads/main" dest-branch="main" />
-  <project name="its-hecker/HeckerOS" path="vendor/hecker/floral/suite" remote="floral-github" revision="refs/heads/main" upstream="refs/heads/main" dest-branch="main" />
-  <remove-project path="packages/apps/Launcher3" optional="true" />
-  <project path="packages/apps/Launcher3" name="RisingOS-Revived/android_packages_apps_Launcher3" remote="floral-github" revision="e2331fb7bc34fa33ecbe6040615457324a9ea60d" upstream="refs/heads/seventeen" dest-branch="seventeen" />
+  <project name="its-hecker/HeckerOS" path="vendor/hecker/floral/suite" remote="floral-github" revision="refs/heads/feat/suite-polish" upstream="refs/heads/feat/suite-polish" dest-branch="feat/suite-polish" />
   <remove-project path="packages/services/OmniJaws" optional="true" />
-  <project path="packages/services/OmniJaws" name="RisingOS-Revived/android_packages_services_OmniJaws" remote="floral-github" revision="83f9fb29597f91e6b3685d46c3068449af440e2a" upstream="refs/heads/seventeen" dest-branch="seventeen" />
   <extend-project name="PixelOS-AOSP/android_packages_apps_DolbyAtmos" path="packages/apps/DolbyAtmos" revision="13bbe61cf3e1046e3a1f0bda4719c321c953ce50" upstream="refs/heads/seventeen" />
   <extend-project name="LineageOS/android_hardware_lineage_compat" path="hardware/lineage/compat" revision="590c94850e079642136a4577305d02e4174caabc" upstream="refs/heads/lineage-24.0" />
   <extend-project name="LineageOS/android_vendor_qcom_opensource_audioreach-graphservices" path="hardware/qcom-caf/sm8750/audio/graphservices" revision="62591b81ddb14cb1ddecf2a8e7162f2082456793" upstream="refs/heads/lineage-24.0-caf-sm8750" />
   <extend-project name="LineageOS/android_hardware_qcom-caf_common" path="hardware/qcom-caf/common" revision="5e84e6f8fc47530881fa8d95cf533617ff51e820" upstream="refs/heads/lineage-24.0" />
-  <extend-project name="its-hecker/heckeros_vendor_custom" path="vendor/custom" revision="e389a1e2caec0cd1e8dc5a5459b88cc2bad38897" upstream="refs/heads/heckeros-17" />
+  <extend-project name="its-hecker/heckeros_vendor_custom" path="vendor/custom" revision="302ac1f722258085326e38d45e2742a067316d59" upstream="refs/heads/feat/about-phone-official" />
   <extend-project name="its-hecker/heckeros_vendor_lineage" path="vendor/lineage" revision="0d2ff0b8055eb745d36dfef3600a73f5185a4fff" upstream="refs/heads/heckeros-17" />
   <extend-project name="its-hecker/heckeros_frameworks_base" path="frameworks/base" revision="7367a79dcb02c6388ab80b1cdf9ed7d223f8fcea" upstream="refs/heads/heckeros-17" />
   <extend-project name="platform/hardware/google/camera" path="hardware/google/camera" revision="cd15337bd229dd521a860d88bca3e37c3ca845f7" upstream="refs/tags/android-17.0.0_r1" />
   <extend-project name="PixelOS-AOSP/android_system_sepolicy" path="system/sepolicy" revision="99c58a7cc9a44fe33c93808452d018e756d84753" upstream="refs/heads/seventeen" />
   <extend-project name="PixelOS-AOSP/android_system_core" path="system/core" revision="a5313eaec0219b021aaa5e59cc10dd07cfa8504c" upstream="refs/heads/seventeen" />
-  <extend-project name="its-hecker/heckeros_packages_apps_Settings" path="packages/apps/Settings" revision="63e2adf289417fb9a3578216754c2281d8f46c7e" upstream="refs/heads/heckeros-17" />
+  <extend-project name="its-hecker/heckeros_packages_apps_Settings" path="packages/apps/Settings" revision="e6fe59aea717e5f206de5c9a4e9c4da336738875" upstream="refs/heads/feat/suite-polish" />
 </manifest>

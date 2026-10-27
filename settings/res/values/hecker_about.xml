@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<resources>
+    <string name="hecker_about_rom">HeckerOS %1$s</string>
+    <string name="hecker_about_tagline">BEYOND ORDINARY.</string>
+    <string name="hecker_about_official">Official</string>
+    <string name="hecker_about_unofficial">Unofficial</string>
+    <string name="hecker_about_unspecified">Build type unavailable</string>
+    <string name="hecker_about_android">Android</string>
+    <string name="hecker_about_memory">Memory</string>
+    <string name="hecker_about_storage">Data storage</string>
+    <string name="hecker_about_storage_value">%1$s used of %2$s</string>
+    <string name="hecker_about_battery">Battery</string>
+    <string name="hecker_about_battery_charging">%1$s · Charging</string>
+    <string name="hecker_about_processor">Processor</string>
+    <string name="hecker_about_kernel">Kernel</string>
+    <string name="hecker_about_maintainer">Maintained by %1$s</string>
+    <string name="hecker_about_community">Meet Hecker &amp; the community</string>
+    <string name="hecker_about_unavailable">Unavailable</string>
+    <style name="HeckerAboutLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/hecker_secondary</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+    <style name="HeckerAboutValue">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textColor">@color/hecker_foreground</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+</resources>

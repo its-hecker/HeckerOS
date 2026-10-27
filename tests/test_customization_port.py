@@ -6,7 +6,7 @@ import tempfile
 import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
-from customization_port import customization_plan
+from customization_port import customization_plan, SYSTEM_SERVER
 from prepare import replace_guarded
 
 class CustomizationPortTests(unittest.TestCase):
@@ -16,7 +16,13 @@ class CustomizationPortTests(unittest.TestCase):
         base.parent.mkdir(parents=True,exist_ok=True);base.write_text('// fixture')
         for relative,pairs in patches.items():
             path=folder/relative;path.parent.mkdir(parents=True,exist_ok=True)
-            path.write_text('\n// next anchor\n'.join(pair['old'] for pair in pairs))
+            if relative == SYSTEM_SERVER:
+                path.write_text(pairs[1]['old'] + '\n'
+                    '        mSystemServiceManager.startBootPhase(t, SystemService.PHASE_SYSTEM_SERVICES_READY);\n'
+                    '        mSystemServiceManager.startBootPhase(t, SystemService.PHASE_ACTIVITY_MANAGER_READY);\n'
+                    + pairs[0]['old'])
+            else:
+                path.write_text('\n// next anchor\n'.join(pair['old'] for pair in pairs))
     def write(self, changes):
         for path,source in changes.items():
             if source is None:path.unlink()
@@ -40,6 +46,25 @@ class CustomizationPortTests(unittest.TestCase):
             before=self.snapshot(folder)
             with self.assertRaises(ValueError):customization_plan(folder,replace_guarded)
             self.assertEqual(before,self.snapshot(folder))
+
+    def test_gaming_context_is_unique_after_fresh_and_previously_prepared_upgrades(self):
+        relative = 'system/sepolicy/private/service_contexts'
+        pair = json.loads((ROOT/'framework/customization-patches.json').read_text())[relative][0]
+        for initial in [pair['old'], *pair['previous']]:
+            with self.subTest(previous=initial), tempfile.TemporaryDirectory() as temporary:
+                folder = Path(temporary)
+                self.stage(folder)
+                path = folder/relative
+                path.write_text(initial + '\n# unrelated policy comment\n')
+                self.write(customization_plan(folder, replace_guarded))
+                merged = path.read_text() + '\n' + (ROOT/'rom/sepolicy/private/service_contexts').read_text()
+                records = [line.split() for line in merged.splitlines()
+                           if line.strip() and not line.lstrip().startswith('#')]
+                game = [record for record in records if record[0] == 'hecker_game']
+                self.assertEqual(game, [['hecker_game', 'u:object_r:hecker_game_service:s0']])
+                self.assertNotIn('hecker_memory', [record[0] for record in records])
+                self.assertIn('# unrelated policy comment', path.read_text())
+                self.assertEqual({}, customization_plan(folder, replace_guarded))
     def test_foreign_copy_is_preserved(self):
         with tempfile.TemporaryDirectory() as temporary:
             folder=Path(temporary);self.stage(folder)
@@ -48,3 +73,95 @@ class CustomizationPortTests(unittest.TestCase):
             before=self.snapshot(folder)
             with self.assertRaises(ValueError):customization_plan(folder,replace_guarded)
             self.assertEqual(before,self.snapshot(folder))
+
+    def test_existing_prepared_adapters_upgrade_and_revert_without_losing_edits(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder=Path(temporary);self.stage(folder)
+            original=self.snapshot(folder)
+            self.write(customization_plan(folder,replace_guarded))
+            patches=json.loads((ROOT/'framework/customization-patches.json').read_text())
+            upgraded=[]
+            for relative,pairs in patches.items():
+                for pair in pairs:
+                    if not pair.get('previous'):continue
+                    if relative == SYSTEM_SERVER and pair is pairs[1]:continue
+                    path=folder/relative
+                    self.assertEqual(1,path.read_text().count(pair['new']))
+                    previous=path.read_text().replace(pair['new'],pair['previous'][0])
+                    if relative == SYSTEM_SERVER:
+                        # The published version had the late block instead of
+                        # the new early block, rather than two service starts.
+                        previous=previous.replace(pairs[1]['new'],pairs[1]['old'])
+                    path.write_text(previous+'\n// unrelated maintainer edit\n')
+                    original[relative]+='\n// unrelated maintainer edit\n'.encode()
+                    upgraded.append(path)
+            self.assertGreaterEqual(len(upgraded),2)
+            changes=customization_plan(folder,replace_guarded)
+            self.assertEqual(set(upgraded),set(changes))
+            self.write(changes)
+            self.assertEqual({},customization_plan(folder,replace_guarded))
+            self.write(customization_plan(folder,replace_guarded,True))
+            self.assertEqual(original,self.snapshot(folder))
+
+    def test_existing_early_theme_start_upgrades_to_game_service_start(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder=Path(temporary);self.stage(folder)
+            self.write(customization_plan(folder,replace_guarded))
+            path=folder/SYSTEM_SERVER
+            pairs=json.loads((ROOT/'framework/customization-patches.json').read_text())[SYSTEM_SERVER]
+            path.write_text(path.read_text().replace(pairs[1]['new'],next(value for value in pairs[1]['previous'] if 'StartHeckerGameService' not in value)))
+            changes=customization_plan(folder,replace_guarded)
+            self.assertEqual({path},set(changes));self.write(changes)
+            self.assertEqual(1,path.read_text().count('startService(com.android.server.hecker.HeckerGameService.class)'))
+            self.assertEqual({},customization_plan(folder,replace_guarded))
+
+    def test_unreviewed_previous_adapter_is_preserved(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder=Path(temporary);self.stage(folder)
+            self.write(customization_plan(folder,replace_guarded))
+            patches=json.loads((ROOT/'framework/customization-patches.json').read_text())
+            for relative,pairs in patches.items():
+                candidates=[pair for pair in pairs if pair.get('previous')]
+                if not candidates:continue
+                pair=candidates[0];path=folder/relative
+                path.write_text(path.read_text().replace(pair['new'],'// unreviewed local integration'))
+                break
+            before=self.snapshot(folder)
+            with self.assertRaises(ValueError):customization_plan(folder,replace_guarded)
+            self.assertEqual(before,self.snapshot(folder))
+
+    def test_published_memory_policy_upgrades_without_a_clean_checkout(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder=Path(temporary);self.stage(folder)
+            self.write(customization_plan(folder,replace_guarded))
+            relative='frameworks/base/services/core/java/com/android/server/am/HeckerMemoryPolicy.java'
+            path=folder/relative
+            self.assertFalse(path.exists())
+            # Exercise the actual reviewed published bytes, rather than synthesizing
+            # a getter change on a newer implementation that was never published.
+            previous=(ROOT/'tests/fixtures/memory-policy-586695c.snapshot').read_text()
+            path.parent.mkdir(parents=True,exist_ok=True);path.write_text(previous)
+            changes=customization_plan(folder,replace_guarded)
+            self.assertEqual({path},set(changes))
+            self.write(changes)
+            self.assertFalse(path.exists())
+            self.assertEqual({},customization_plan(folder,replace_guarded))
+            path.write_text(previous+'\n// local maintainer edit\n')
+            with self.assertRaises(ValueError):customization_plan(folder,replace_guarded)
+            self.assertEqual(previous+'\n// local maintainer edit\n',path.read_text())
+
+    def test_prefix_upgrade_removes_old_fade_tail_in_both_qs_paths(self):
+        patches=json.loads((ROOT/'framework/customization-patches.json').read_text())
+        for relative,pairs in patches.items():
+            if not relative.endswith(('FromShadeToQuickSettingsTransition.kt','FromQuickQuickSettingsToQuickSettings.kt')):continue
+            pair=pairs[0]
+            for previous in pair['previous']:
+                with self.subTest(path=relative,previous=previous), tempfile.TemporaryDirectory() as temporary:
+                    folder=Path(temporary);self.stage(folder)
+                    path=folder/relative
+                    other='\n'.join(x['old'] for x in pairs[1:])
+                    path.write_text(previous+'\n'+other)
+                    self.write(customization_plan(folder,replace_guarded))
+                    result=path.read_text()
+                    self.assertEqual(result.count('fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader)'),1)
+                    self.assertEqual({},customization_plan(folder,replace_guarded))

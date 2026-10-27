@@ -10,12 +10,12 @@ import com.airbnb.lottie.LottieAnimationView;
 
 /** Small, original Lottie assets; system authentication is never driven by animation state. */
 final class SuiteAnimation {
-    private final LottieAnimationView view;
+    private final AutoAnimationView view;
 
     SuiteAnimation(Activity activity, LinearLayout parent) { this(activity, parent, 156); }
 
     SuiteAnimation(Activity activity, LinearLayout parent, int size) {
-        view = new LottieAnimationView(activity);
+        view = new AutoAnimationView(activity);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 size == 156 ? ViewGroup.LayoutParams.MATCH_PARENT : Ui.dp(activity, size), Ui.dp(activity, size));
         params.gravity = Gravity.CENTER;
@@ -29,10 +29,35 @@ final class SuiteAnimation {
         view.cancelAnimation();
         view.setAnimation(animation);
         view.setRepeatCount(repeat ? ValueAnimator.INFINITE : 0);
-        if (ValueAnimator.areAnimatorsEnabled() && android.provider.Settings.Secure.getInt(
-                view.getContext().getContentResolver(), "hecker_lottie_enabled", 1) == 1) view.playAnimation();
-        else view.setProgress(1f);
+        view.active = true;
+        view.resumeIfVisible();
     }
 
-    void stop() { view.cancelAnimation(); }
+    void stop() { view.active = false; view.cancelAnimation(); }
+
+    private static final class AutoAnimationView extends LottieAnimationView {
+        boolean active;
+        AutoAnimationView(Activity activity) {
+            super(activity);
+            setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
+            // Composition loading is asynchronous. Attachment can precede it,
+            // especially for the two previews in the QS picker.
+            addLottieOnCompositionLoadedListener(composition -> post(this::resumeIfVisible));
+        }
+        void resumeIfVisible() {
+            if (!active) return;
+            if (!ValueAnimator.areAnimatorsEnabled()) { setProgress(0.5f); return; }
+            if (isAttachedToWindow() && getWindowVisibility() == VISIBLE && isShown()) resumeAnimation();
+        }
+        @Override protected void onAttachedToWindow() { super.onAttachedToWindow(); resumeIfVisible(); }
+        @Override protected void onDetachedFromWindow() { pauseAnimation(); super.onDetachedFromWindow(); }
+        @Override protected void onWindowVisibilityChanged(int visibility) {
+            super.onWindowVisibilityChanged(visibility);
+            if (visibility == VISIBLE) resumeIfVisible(); else pauseAnimation();
+        }
+        @Override protected void onVisibilityChanged(android.view.View changedView, int visibility) {
+            super.onVisibilityChanged(changedView, visibility);
+            if (visibility == VISIBLE) post(this::resumeIfVisible); else pauseAnimation();
+        }
+    }
 }

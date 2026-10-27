@@ -3,9 +3,14 @@
 # Run from the Android source root, after repo sync.
 # Android's envsetup does not support nounset, so do not enable set -u here.
 set -eo pipefail
+export HECKER_DEVICE="${HECKER_DEVICE:-coral}"
+case "$HECKER_DEVICE" in
+    coral|flame) ;;
+    *) echo "HECKER_DEVICE must be coral or flame." >&2; exit 1 ;;
+esac
 case "${HECKER_BUILD_VARIANT:-userdebug}" in
     userdebug|eng) ;;
-    *) echo "The validated Coral configuration requires a userdebug or eng build." >&2; exit 1 ;;
+    *) echo "The Floral configuration requires a userdebug or eng build." >&2; exit 1 ;;
 esac
 if [[ ! -d .repo ]]; then
     echo "Run this script from the HeckerOS Android source root containing .repo." >&2
@@ -26,26 +31,30 @@ if [[ ! -f trusty/vendor/google/aosp/lk_inc.mk || ! -f lk_inc.mk ]] || \
     exit 1
 fi
 floral_setup_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+python3 "$floral_setup_dir/tools/retire_launcher.py"
 python3 "$floral_setup_dir/tools/check_qcom_namespaces.py"
-git -C vendor/google/coral lfs pull
+python3 "$floral_setup_dir/tools/validate.py"
+git -C "vendor/google/$HECKER_DEVICE" lfs pull
 python3 "$floral_setup_dir/tools/prepare.py" "$@"
 python3 "$floral_setup_dir/tools/validate.py" --rom-root "$PWD"
 source build/envsetup.sh
 # Select the native App Lock and Compose QS flags for HeckerOS.
-lunch "hecker_coral-hecker_suite-${HECKER_BUILD_VARIANT:-userdebug}"
+lunch "hecker_${HECKER_DEVICE}-hecker_suite-${HECKER_BUILD_VARIANT:-userdebug}"
 floral_product_out="$(get_build_var PRODUCT_OUT)"
-floral_stale_camera=false
+floral_stale_app=false
+mapfile -t floral_retired_apps < "$floral_setup_dir/retired-apps.txt"
 for floral_partition in system system_ext product vendor; do
     for floral_app_type in app priv-app; do
-        for floral_stock_camera in Aperture Camera2; do
-            if [[ -d "$floral_product_out/$floral_partition/$floral_app_type/$floral_stock_camera" ]]; then
-                floral_stale_camera=true
+        for floral_removed_app in Aperture Camera2 OmniJaws "${floral_retired_apps[@]}"; do
+            if [[ -d "$floral_product_out/$floral_partition/$floral_app_type/$floral_removed_app" ]]; then
+                floral_stale_app=true
             fi
         done
     done
 done
-if [[ "$floral_stale_camera" == true ]]; then
-    echo "Removing previous stock camera installations from build outputs (installclean)."
+if find "$floral_product_out"/product/overlay -maxdepth 3 -iname '*HeckerLauncherRecents*' -print -quit 2>/dev/null | read -r; then floral_stale_app=true; fi
+if [[ "$floral_stale_app" == true ]]; then
+    echo "Removing retired app installations from build outputs (installclean)."
     m installclean
 fi
 m -j"${HECKER_BUILD_JOBS:-$(nproc)}" heckeros

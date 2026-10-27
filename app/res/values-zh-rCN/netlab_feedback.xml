@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="netlab_feedback_master">Wi-Fi 总控</string>
+    <string name="netlab_feedback_pause_all">暂停所有 Wi-Fi 设备</string>
+    <string name="netlab_feedback_limit_all">所有 Wi-Fi 设备的限速</string>
+    <string name="netlab_feedback_no_peers">请先扫描 Wi-Fi 以查找设备。</string>
+    <string name="netlab_feedback_group_limit">当前控制器每次最多支持 32 台设备。请选择最多 32 台设备一起控制。</string>
+    <string name="netlab_feedback_mixed">设备的控制状态不同</string>
+    <string name="netlab_feedback_private">私有 MAC</string>
+    <string name="netlab_feedback_vendor_source">MAC 分配：%1$s（IEEE 注册表；硬件厂商提示）</string>
+    <string name="netlab_feedback_advertised_brand">设备广播的品牌提示：%1$s</string>
+    <string name="netlab_feedback_private_hint">此设备使用本地管理的 MAC，无法通过该 MAC 前缀确定厂商。</string>
+</resources>

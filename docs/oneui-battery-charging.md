@@ -1,0 +1,9 @@
+# One UI battery charging animation and bolts
+
+The One UI battery style keeps its original theme silhouette, fill direction and percentage. A liquid edge follows the true level and a soft shimmer runs inside the fill. The shimmer remains visible at 100% while the native view still reports charging/plugged in. It does not animate a false increase in percentage.
+
+The legacy BatteryMeterView previously installed the custom drawable without starting it. Both that status-bar path and the Compose/ImageView path now start and stop it with attachment, visibility, window visibility, screen state and system animation duration. The legacy path unregisters its duration-scale listener on detach and stops old drawables on theme changes or native unknown/defender fallback. Animation stops on unplug, power saver, hidden/detached views, display off/doze, disabled animations, or the appearance switch.
+
+Hecker Suite → Status bar → Battery appearance provides the One UI animation switch, a separate right-side bolt switch, and Classic, Split and Spark bolt shapes. Enabled bolts have a reserved slot so plugging/unplugging does not shift other status icons. Disabling the bolt removes its slot and the internal One UI bolt; the percentage remains readable. The original battery body dimensions remain in use. Secure-setting observers update these options live.
+
+The drawable requests at most one frame every 33 ms, uses a 2.4-second period at normal system speed, and reuses paths, matrices and paint. Host regressions exercise the production drawable and the actual inserted legacy adapter, including charging at 100%, reduced-motion disable/re-enable, unplug, screen/doze, visibility, theme replacement, fallback and detach. The locked Android/Compose compiler checks the Compose bridge and actual drawable. Full SystemUI/ROM compilation and Coral visual testing remain required.

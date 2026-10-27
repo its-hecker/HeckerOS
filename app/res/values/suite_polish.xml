@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="navigate_back">Back</string>
+    <string name="status_styles_summary">Make your status bar yours with Wi-Fi and battery styles.</string>
+    <string name="charging_energy_title">Energy orbit charging animation</string>
+    <string name="charging_energy_summary">A cyan and violet energy ring with the live battery percentage when wired charging starts.</string>
+    <string name="capture_title">Screenshots</string>
+    <string name="capture_summary">Control capture of protected app windows.</string>
+    <string name="capture_secure_title">Allow secure screenshots</string>
+    <string name="capture_secure_summary">Allow screenshots and screen recordings of app windows that use FLAG_SECURE. Off by default. DRM-protected video may remain blank.</string>
+</resources>

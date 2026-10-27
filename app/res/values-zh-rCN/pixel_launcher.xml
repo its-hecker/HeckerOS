@@ -1,0 +1,19 @@
+<resources>
+    <string name="pixel_launcher_title">Pixel 启动器增强</string>
+    <string name="pixel_launcher_summary">双击息屏和原生启动器玻璃效果</string>
+    <string name="pixel_launcher_description">保留 Pixel 启动器及其最近任务手势。双击桌面空白区域息屏。玻璃效果使用静态壁纸，动态壁纸使用半透明背景。</string>
+    <string name="pixel_double_tap">双击息屏</string>
+    <string name="pixel_glass_mode">玻璃效果</string>
+    <string name="pixel_glass_off">原始外观</string>
+    <string name="pixel_glass_frosted">磨砂玻璃</string>
+    <string name="pixel_glass_liquid">液态玻璃</string>
+    <string name="pixel_glass_dock">底栏</string>
+    <string name="pixel_glass_search">搜索容器</string>
+    <string name="pixel_glass_folders">展开的文件夹</string>
+    <string name="pixel_glass_widgets">透明小部件后方</string>
+    <string name="pixel_corner_tl">左上圆角</string>
+    <string name="pixel_corner_tr">右上圆角</string>
+    <string name="pixel_corner_br">右下圆角</string>
+    <string name="pixel_corner_bl">左下圆角</string>
+    <string name="pixel_launcher_apply">返回桌面以应用更改。未识别的启动器布局保留原始外观。</string>
+</resources>

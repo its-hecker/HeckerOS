@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 from camera_install import configure as configure_camera, SOURCE as CAMERA_SOURCE
 from validate import camera_prebuilt, replaced_vendor_installers, motion_permissions, hardware_setup
 from google_camera import prepare as prepare_google_camera
+from floral_target import DEVICE, VENDOR, PRODUCT
 
 
 OVERLAY_ROOTS = [
@@ -19,7 +20,7 @@ OVERLAY_ROOTS = [
     "vendor/custom/overlay/common",
     "device/google/coral/overlay",
     "device/google/coral/overlay-lineage",
-    "device/google/coral/coral/overlay",
+    f"device/google/coral/{DEVICE}/overlay",
 ]
 
 
@@ -50,12 +51,12 @@ def prepare(rom, offline=False, allowlists=(), biometrics=()):
     face = "vendor/hecker/floral/faceid"
     suite = "vendor/hecker/floral/suite"
     required = [
-        "vendor/hecker/floral/suite/rom/products/hecker_coral.mk",
+        PRODUCT,
         "device/google/coral/BoardConfig-common.mk",
-        "vendor/google/coral/Android.bp",
+        (VENDOR + "/Android.bp"),
         CAMERA_SOURCE,
-        "vendor/google/coral/proprietary/vendor/firmware/faceauth_config.yaml",
-        "vendor/google/coral/proprietary/vendor/firmware/faceauth_v1.mdt",
+        (VENDOR + "/proprietary/vendor/firmware/faceauth_config.yaml"),
+        (VENDOR + "/proprietary/vendor/firmware/faceauth_v1.mdt"),
         "vendor/custom/config/common_full_phone.mk",
         "vendor/lineage/overlay/common/frameworks/base/packages/SystemUI/res/values/config.xml",
         "frameworks/base/packages/SystemUI/res/values/config.xml",
@@ -68,7 +69,7 @@ def prepare(rom, offline=False, allowlists=(), biometrics=()):
         raise ValueError("Missing source inputs:\n  " + "\n  ".join(missing)
                          + "\nRun repo sync, then if tracked files are still absent run:"
                          + "\n  python3 .repo/local_manifests/tools/restore_checkout.py --restore")
-    product = (rom / "vendor/hecker/floral/suite/rom/products/hecker_coral.mk").read_text()
+    product = (rom / PRODUCT).read_text()
     if "TARGET_FACE_UNLOCK_SUPPORTED := false" not in product:
         raise ValueError("Disable PixelOS ParanoidSense before using the IR Face HAL")
     camera_prebuilt(rom)
@@ -77,7 +78,7 @@ def prepare(rom, offline=False, allowlists=(), biometrics=()):
     hardware_setup(rom)
     # Keep source modules available for dependencies, but export only the
     # selected stock prebuilt's full install rules to Make.
-    print("Coral camera install ownership:", configure_camera(rom, write=True))
+    print(DEVICE + " camera install ownership:", configure_camera(rom, write=True))
     # Refuse unfamiliar framework methods before making any framework changes.
     run(rom, face, "apply_framework_fixes.py", "--rom-root", rom, "--check")
     run(rom, suite, "prepare.py", "--rom-root", rom, "--check")
@@ -95,13 +96,14 @@ def prepare(rom, offline=False, allowlists=(), biometrics=()):
     for path in motion_files:
         motion_arguments += ["--allowlist-xml", path]
     run(rom, motion, "prepare.py", *motion_arguments)
-    face_arguments = ["--rom-root", rom, "--vendor-tree", rom / "vendor/google/coral"]
+    face_arguments = ["--rom-root", rom, "--vendor-tree", rom / VENDOR]
     for path in face_files:
         face_arguments += ["--biometrics-xml", path]
     run(rom, face, "prepare.py", *face_arguments)
     for plugin in [motion, face]:
         run(rom, plugin, "verify_ready.py")
     prepare_google_camera(rom, offline=offline)
+    run(rom, suite, "prepare_librepods.py", *(["--offline"] if offline else []))
     theme_args = ["--offline"] if offline else []
     run(rom, suite, "fetch_theme_assets.py", *theme_args)
     run(rom, suite, "build_bootanimation.py", "--check")

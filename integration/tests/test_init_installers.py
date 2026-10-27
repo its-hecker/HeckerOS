@@ -7,6 +7,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+from floral_target import DEVICE, VENDOR
 from camera_install import SOURCE, SERVICE
 from validate import camera_init, init_installers
 
@@ -21,16 +22,16 @@ class InitInstallerTests(unittest.TestCase):
         self.source.write_text('cc_binary {\n    name: "' + SERVICE + '",\n'
                                '    no_full_install: true,\n'
                                '    init_rc: ["' + SERVICE + '.rc"],\n}\n')
-        for relative in ("vendor/google/coral/Android.bp", "vendor/hecker/floral/faceid/Android.bp"):
+        for relative in ((VENDOR + "/Android.bp"), "vendor/hecker/floral/faceid/Android.bp"):
             path = self.rom / relative
             path.parent.mkdir(parents=True, exist_ok=True)
             path.touch()
-        vendor_bp = self.rom / "vendor/google/coral/Android.bp"
-        vendor_bp.write_text('cc_prebuilt_binary {\n    name: "' + SERVICE + '-coral",\n'
+        vendor_bp = self.rom / (VENDOR + "/Android.bp")
+        vendor_bp.write_text('cc_prebuilt_binary {\n    name: "' + SERVICE + '-' + DEVICE + '",\n'
                              '    init_rc: ["proprietary/vendor/etc/init/' + SERVICE + '.rc"],\n}\n')
-        self.make = self.rom / "vendor/google/coral/coral-vendor.mk"
+        self.make = self.rom / (VENDOR + "/" + DEVICE + "-vendor.mk")
         self.make.write_text("PRODUCT_COPY_FILES += keep:vendor/etc/init/keep.rc\n")
-        self.stock = self.rom / "vendor/google/coral/proprietary/vendor/etc/init" / (SERVICE + ".rc")
+        self.stock = self.rom / (VENDOR + "/proprietary/vendor/etc/init") / (SERVICE + ".rc")
         self.stock.parent.mkdir(parents=True)
         self.stock.write_text("service camera /vendor/bin/hw/" + SERVICE + "\n    user system\n")
         (self.source.parent / self.stock.name).write_bytes(self.stock.read_bytes())
@@ -51,7 +52,7 @@ class InitInstallerTests(unittest.TestCase):
             camera_init(self.rom)
 
     def test_unused_source_is_not_accepted_as_the_only_runtime_installer(self):
-        (self.rom / "vendor/google/coral/Android.bp").write_text("")
+        (self.rom / (VENDOR + "/Android.bp")).write_text("")
         with self.assertRaisesRegex(ValueError, "selected camera prebuilt must install"):
             camera_init(self.rom)
 
@@ -61,7 +62,7 @@ class InitInstallerTests(unittest.TestCase):
 
     def test_a_different_source_init_is_refused(self):
         (self.source.parent / self.stock.name).write_text("service camera /vendor/bin/other\n")
-        with self.assertRaisesRegex(ValueError, "differs from Coral"):
+        with self.assertRaisesRegex(ValueError, "differs from " + DEVICE.title()):
             camera_init(self.rom)
 
 

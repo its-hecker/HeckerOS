@@ -10,22 +10,94 @@ license {
     license_text: ["LICENSE"],
 }
 
+license {
+    name: "hecker_netlab_registry_license",
+    license_kinds: ["SPDX-license-identifier-BSD-2-Clause"],
+    license_text: ["app/assets/netlab/NOTICE.txt"],
+}
+
 android_app {
     name: "HeckerSuite",
+    licenses: ["hecker_suite_license", "hecker_netlab_registry_license"],
     manifest: "app/AndroidManifest.xml",
     srcs: ["app/src/**/*.java"],
-    exclude_srcs: ["app/src/org/hecker/suite/SuiteActivity.java"],
+    exclude_srcs: ["app/src/org/hecker/suite/SuiteActivity.java",
+        "app/src/org/hecker/suite/LauncherController.java",
+        "app/src/org/hecker/suite/AnimationSettingsActivity.java"],
     resource_dirs: ["app/res"],
     asset_dirs: ["app/assets"],
     platform_apis: true,
     certificate: "platform",
     privileged: true,
     system_ext_specific: true,
-    static_libs: ["lottie"],
-    required: ["HeckerSuitePrivappPermissions", "HeckerSuiteFreeformFeature"],
+    static_libs: ["lottie", "HeckerNetLabApi"],
+    required: ["HeckerSuitePrivappPermissions", "HeckerSuiteFreeformFeature", "HeckerGameInit"],
     optimize: {
         proguard_flags_files: ["app/proguard.flags"],
     },
+}
+
+// Keep hotspot permissions out of Settings and the presentation package.
+java_library {
+    name: "HeckerNetLabApi",
+    srcs: ["netlab/aidl/**/*.aidl", "netlab/common/**/*.java"],
+    sdk_version: "system_current",
+    aidl: { local_include_dirs: ["netlab/aidl"] },
+    installable: false,
+}
+
+android_app {
+    name: "HeckerNetLabController",
+    manifest: "netlab/AndroidManifest.xml",
+    srcs: ["netlab/src/**/*.java"],
+    resource_dirs: ["netlab/res"],
+    static_libs: ["HeckerNetLabApi"],
+    // Platform apps must select explicit java_sdk_library API artifacts.
+    // Hotspot callbacks are System APIs; tethering lives in framework-tethering.
+    libs: [
+        "framework-wifi.stubs.system",
+        "framework-tethering.stubs.system",
+        "framework-connectivity.stubs.system",
+    ],
+    platform_apis: true,
+    certificate: "platform",
+    privileged: true,
+    system_ext_specific: true,
+    required: ["HeckerNetLabPermissions", "HeckerNetLabDefaultPermissions", "hecker-netlab-lan"],
+}
+
+cc_binary {
+    name: "hecker-netlab-lan",
+    srcs: ["netlab/native/lan_core.cpp", "netlab/native/lan_main.cpp", "netlab/native/forwarding_guard.cpp"],
+    cpp_std: "c++17",
+    // Protocol errors unwind RAII descriptors and the session cleanup path.
+    cppflags: ["-fexceptions"],
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+    system_ext_specific: true,
+}
+
+prebuilt_etc {
+    name: "HeckerLauncherPermissions",
+    src: "configs/privapp-permissions-hecker-launcher.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}
+
+prebuilt_etc {
+    name: "HeckerNetLabPermissions",
+    src: "configs/privapp-permissions-hecker-netlab.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}
+
+prebuilt_etc {
+    name: "HeckerNetLabDefaultPermissions",
+    src: "configs/default-permissions-hecker-netlab.xml",
+    filename_from_src: true,
+    sub_dir: "default-permissions",
+    system_ext_specific: true,
 }
 
 // UI is linked into the native Settings APK. Privileged feature services retain
@@ -72,16 +144,6 @@ aconfig_value_set {
     values: ["hecker_suite_security_flags", "hecker_suite_systemui_flags"],
 }
 
-// Disabled by default: Pixel Launcher remains the initial Recents provider.
-// Suite enables this signed overlay only when its owner selects Hecker's Launcher.
-runtime_resource_overlay {
-    name: "HeckerLauncherRecentsOverlay",
-    manifest: "launcher/recents/AndroidManifest.xml",
-    resource_dirs: ["launcher/recents/res"],
-    certificate: "platform",
-    product_specific: true,
-}
-
 prebuilt_media {
     name: "bootanimation_heckeros",
     src: "bootanimation/bootanimation.zip",
@@ -93,4 +155,13 @@ aconfig_values {
     name: "hecker_suite_systemui_flags",
     package: "com.android.systemui",
     srcs: ["flags/systemui/*_flag_values.textproto"],
+}
+
+// Grant the trusted game service access to the independent, leased kernel inhibitor.
+prebuilt_etc {
+    name: "HeckerGameInit",
+    src: "configs/hecker-game.rc",
+    filename_from_src: true,
+    sub_dir: "init",
+    system_ext_specific: true,
 }

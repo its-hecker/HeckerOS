@@ -1,0 +1,4 @@
+<resources>
+    <string name="spoofing_title">伪装中心</string>
+    <string name="spoofing_summary">管理设备指纹、密钥盒证书和目标应用</string>
+</resources>

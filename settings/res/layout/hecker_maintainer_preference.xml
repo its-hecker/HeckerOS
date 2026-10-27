@@ -5,6 +5,6 @@
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/hecker_maintained_by" android:textSize="11sp" android:textColor="@color/hecker_secondary"/>
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/hecker_maintainer_name" android:textSize="17sp" android:textStyle="bold" android:textColor="@color/hecker_foreground"/>
         </LinearLayout>
-        <Button android:id="@+id/hecker_suite_button" android:layout_width="wrap_content" android:layout_height="48dp" android:minWidth="90dp" android:text="@string/hecker_suite_name" android:textSize="11sp" android:textAllCaps="false" />
+        <Button android:background="@drawable/hecker_button_background" android:backgroundTint="@color/hecker_icon_background" android:textColor="@color/hecker_accent" android:id="@+id/hecker_suite_button" android:layout_width="wrap_content" android:layout_height="48dp" android:minWidth="90dp" android:text="@string/hecker_suite_name" android:textSize="11sp" android:textAllCaps="false" />
     </LinearLayout>
 </LinearLayout>

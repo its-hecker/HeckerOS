@@ -1,0 +1,130 @@
+/* Copyright (C) 2026 HeckerOS. SPDX-License-Identifier: Apache-2.0 */
+package com.android.systemui.hecker
+
+import android.content.Context
+import android.content.BroadcastReceiver
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.SystemClock
+import android.text.format.DateFormat
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+
+@Composable
+private fun dozing(controller: StatusBarStateController): Boolean {
+    var value by remember(controller) { mutableStateOf(controller.isDozing) }
+    DisposableEffect(controller) {
+        val listener = object : StatusBarStateController.StateListener {
+            override fun onDozingChanged(dozing: Boolean) { value = dozing }
+        }
+        controller.addCallback(listener)
+        onDispose { controller.removeCallback(listener) }
+    }
+    return value
+}
+
+@Composable
+private fun clockText(context: Context): Pair<String,String> {
+    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    DisposableEffect(context) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(c: Context, intent: Intent) { now = System.currentTimeMillis() }
+        }
+        context.registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_CHANGED).apply {
+            addAction(Intent.ACTION_TIMEZONE_CHANGED); addAction(Intent.ACTION_LOCALE_CHANGED)
+        }, Context.RECEIVER_EXPORTED)
+        onDispose { context.unregisterReceiver(receiver) }
+    }
+    LaunchedEffect(context) {
+        while (isActive) {
+            now = System.currentTimeMillis()
+            delay(60000 - now % 60000)
+        }
+    }
+    val date = Date(now)
+    val locale = Locale.getDefault()
+    val time = SimpleDateFormat(if(DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm", Locale.US).format(date)
+    val pattern = DateFormat.getBestDateTimePattern(locale,"EEEMMMd")
+    return Pair(time, SimpleDateFormat(pattern,locale).format(date))
+}
+
+/** Returns true only while owning the AOD upper region; stock UI is composed otherwise. */
+@Composable
+fun HeckerAmbientUpperRegion(context: Context, controller: StatusBarStateController,
+    modifier: Modifier = Modifier): Boolean {
+    DisposableEffect(context) { HeckerAmbientCharging.start(context); onDispose {} }
+    val state by HeckerAmbientCharging.state.collectAsState()
+    if (!dozing(controller) || !state.ambient || !state.plugged ||
+        (state.style == 0 && state.introStart < 0 && !state.introPending)) return false
+    val renderer = remember(context) { HeckerAmbientRenderer(context) }
+    val clock = if (state.style == 1) clockText(context) else Pair("", "")
+    var elapsed by remember(state.introStart) { mutableLongStateOf(0) }
+    LaunchedEffect(state.introStart) {
+        if (state.introStart < 0) return@LaunchedEffect
+        while (isActive) {
+            elapsed = SystemClock.elapsedRealtime() - state.introStart
+            if (elapsed >= AmbientChargingPolicy.INTRO_MILLIS) break
+            withFrameNanos { }
+        }
+        HeckerAmbientCharging.finishIntro()
+    }
+    val fraction = if (state.introStart >= 0)
+        (elapsed.toFloat()/AmbientChargingPolicy.INTRO_MILLIS).coerceIn(0f,1f)
+        else if (state.introPending) 0f else null
+    Canvas(modifier.fillMaxSize().clipToBounds().semantics {
+        contentDescription = renderer.status(state) + " " + if(state.level.isFinite()) "${state.level.toInt()}%" else ""
+    }) {
+        drawIntoCanvas { canvas ->
+            val c = canvas.nativeCanvas
+            c.save(); c.scale(density,density)
+            renderer.charging(c,state,clock.first,clock.second,size.width/density,size.height/density,fraction)
+            c.restore()
+        }
+    }
+    return true
+}
+
+/** Replaces the selected plugin's entire clock region, so its native clock/date cannot overlap. */
+@Composable
+fun HeckerCustomClockEnabled(context: Context): Boolean {
+    DisposableEffect(context) { HeckerAmbientCharging.start(context); onDispose {} }
+    val state by HeckerAmbientCharging.state.collectAsState()
+    return state.customClock
+}
+
+@Composable
+fun HeckerCustomLockscreenClock(context: Context, small: Boolean,
+    modifier: Modifier = Modifier): Boolean {
+    DisposableEffect(context) { HeckerAmbientCharging.start(context); onDispose {} }
+    val state by HeckerAmbientCharging.state.collectAsState()
+    if (!state.customClock) return false
+    val clock = clockText(context)
+    val renderer = remember(context) { HeckerAmbientRenderer(context) }
+    Canvas(modifier.fillMaxWidth().height(if(small) 136.dp else 184.dp)
+        .semantics { contentDescription = clock.first + " " + clock.second }) {
+        drawIntoCanvas { canvas ->
+            val c = canvas.nativeCanvas
+            c.save(); c.scale(density,density)
+            renderer.clock(c,clock.first,clock.second,size.width/density,if(small) 36f else 52f,
+                if(small) 52f else 72f)
+            c.restore()
+        }
+    }
+    return true
+}

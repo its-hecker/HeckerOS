@@ -1,0 +1,13 @@
+{
+  "repository": "https://github.com/librepods-org/librepods",
+  "version": "v1.0.4",
+  "source_commit": "89356c08cea3db0b6b54792d9329d09a87cc85fa",
+  "package": "org.hecker.librepods",
+  "upstream_release": {
+    "url": "https://github.com/librepods-org/librepods/releases/download/v1.0.4/LibrePods-FOSS-v1.0.4-100040301-release.apk",
+    "sha256": "813e2e532b45cb6184a87908b9036e0984661f834a396cf7619d443f9b74db54",
+    "size": 13608565
+  },
+  "variant": "hecker1",
+  "build": "tools/prepare_librepods.py"
+}

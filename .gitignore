@@ -1,4 +1,6 @@
 __pycache__/
 *.pyc
 generated/
-out/
+out/*
+!out/.find-ignore
+/bootanimation/bootanimation.zip

@@ -2,29 +2,11 @@
   "repository": "Lunaris-AOSP/AxThemeStore_themes_repository",
   "revision": "6cb99e5f70586d557ad3650e8d669996ab106403",
   "files": {
-    "AquariumSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_aa",
-      "sha256": "394bfe125ce7e40ca6f1ff0c948e0303bf494ef016c64a91205c9d5e6ae35c83",
-      "size": 30001,
-      "module": "HeckerThemeAquariumSignalOverlay"
-    },
-    "AuroraSignalOverlay.apk": {
-      "package": "com.custom.overlay.systemui.signalAurora",
-      "sha256": "20a394740f5c38647c3129c28297149db0d17dfefe14180b3f5c896871f0f5f6",
-      "size": 35308,
-      "module": "HeckerThemeAuroraSignalOverlay"
-    },
     "AuroraWiFiOverlay.apk": {
       "package": "com.custom.overlay.systemui.wifiAurora",
       "sha256": "0ab56f41dca6f194715e93e533abb1b2e49d82e4207f11be6136d097b81a7fa6",
       "size": 13033,
       "module": "HeckerThemeAuroraWiFiOverlay"
-    },
-    "BarsSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_h",
-      "sha256": "1037ff70cf1583edd8b9186ca304efcfc3b941fe99ba5ea130db2cd6c5cb68b9",
-      "size": 21809,
-      "module": "HeckerThemeBarsSignalOverlay"
     },
     "BarsWiFiOverlay.apk": {
       "package": "com.android.systemui.wifibar_h",
@@ -62,59 +44,11 @@
       "size": 12638,
       "module": "HeckerThemeBatteryStyleiOS16Overlay"
     },
-    "ButterflySignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_ab",
-      "sha256": "1b245c814305e695e6bed640241f6cf74416d9907460755eee7a25b24188b512",
-      "size": 21809,
-      "module": "HeckerThemeButterflySignalOverlay"
-    },
-    "CircleSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_aq",
-      "sha256": "28bac144c966996f909a18391fc0f23ed3911b6226597fe9a0b03f029e20804e",
-      "size": 17713,
-      "module": "HeckerThemeCircleSignalOverlay"
-    },
-    "DaunSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_ac",
-      "sha256": "0f718e0a8cd453a9c2c67b5313a3be85c86b09c9cc1baedb0f5fb2e588d372eb",
-      "size": 30001,
-      "module": "HeckerThemeDaunSignalOverlay"
-    },
-    "DecSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_ad",
-      "sha256": "7c77aaab444861a0cf01ee9e077c8b983d6518761c5229b17baeb243a401aad3",
-      "size": 46385,
-      "module": "HeckerThemeDecSignalOverlay"
-    },
-    "DeepSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_ae",
-      "sha256": "3ae128c7b003316b1551aa3c3bf84201bd8127865003de0f146057b39a7870a7",
-      "size": 30001,
-      "module": "HeckerThemeDeepSignalOverlay"
-    },
-    "DoraSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_j",
-      "sha256": "9cc015606d231732158c932b422955834c0024a7f907d2c421c1787e00c454b6",
-      "size": 42289,
-      "module": "HeckerThemeDoraSignalOverlay"
-    },
     "DoraWiFiOverlay.apk": {
       "package": "com.android.systemui.wifibar_j",
       "sha256": "56e64dba74bca56d6f77b5ee2221270a6da374a1b1a949fa53e793092b8825df",
       "size": 25418,
       "module": "HeckerThemeDoraWiFiOverlay"
-    },
-    "EqualSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_af",
-      "sha256": "97817e5b1e570a8dcb073f4a378f83eefa517e1d807c20b54c24aa4045e4fec6",
-      "size": 34097,
-      "module": "HeckerThemeEqualSignalOverlay"
-    },
-    "FaintUISignalOverlay.apk": {
-      "package": "com.custom.overlay.systemui.signalFaintUI",
-      "sha256": "d0ec2977b1b4837504d5fd7e37680232cf1b03beba5679a83103f7e6b610aa8d",
-      "size": 39404,
-      "module": "HeckerThemeFaintUISignalOverlay"
     },
     "FaintUIWiFiOverlay.apk": {
       "package": "com.custom.overlay.systemui.wifiFaintUI",
@@ -122,29 +56,11 @@
       "size": 17332,
       "module": "HeckerThemeFaintUIWiFiOverlay"
     },
-    "FanSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_ag",
-      "sha256": "9b6b6c5ea58309b0c70873fc096e4e50259930eb7e07a53d3899912c1e450915",
-      "size": 25905,
-      "module": "HeckerThemeFanSignalOverlay"
-    },
-    "ForlornSignalOverlay.apk": {
-      "package": "com.custom.overlay.systemui.signalForlorn",
-      "sha256": "9d57bbfef4ad8621f2e978d4f8fb32ebae2720c02a68f6e5935c023d6b44e450",
-      "size": 31212,
-      "module": "HeckerThemeForlornSignalOverlay"
-    },
     "ForlornWiFiOverlay.apk": {
       "package": "com.custom.overlay.systemui.wifiForlorn",
       "sha256": "272c0ac9a98799e7c2333d67b449e094cd67ec4a9e46abf8e5acc0f8a127eb21",
       "size": 17332,
       "module": "HeckerThemeForlornWiFiOverlay"
-    },
-    "GradiconSignalOverlay.apk": {
-      "package": "com.android.systemui.signalGradicon",
-      "sha256": "041619e976766708852dfbfebf46a48c1108aa295b3581443176f186045ca89e",
-      "size": 115666,
-      "module": "HeckerThemeGradiconSignalOverlay"
     },
     "GradiconWiFiOverlay.apk": {
       "package": "com.android.systemui.wifiGradicon",
@@ -152,245 +68,11 @@
       "size": 45664,
       "module": "HeckerThemeGradiconWiFiOverlay"
     },
-    "HuaweiSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_ah",
-      "sha256": "ace811e06ae895751274cd6098702dbd39e1228f5dea959b109eefde1e2e21b4",
-      "size": 25905,
-      "module": "HeckerThemeHuaweiSignalOverlay"
-    },
-    "IconPackAcherusAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.acherus.android",
-      "sha256": "f3614b78a6365e646bf1eb75f38d5817479d5a36bf42e787312d608d99a6531f",
-      "size": 44567,
-      "module": "HeckerThemeIconPackAcherusAndroidOverlay"
-    },
-    "IconPackAcherusSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.acherus.systemui",
-      "sha256": "6cd32269dd1bb65a73bf4543f1678cdbbae7ddf0b8acda6988b44f5ab2c5de66",
-      "size": 138190,
-      "module": "HeckerThemeIconPackAcherusSystemUIOverlay"
-    },
-    "IconPackAuroraAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.aurora.android",
-      "sha256": "85efa3da6c4c312364efb53cb0b239b15f2db1c23795db9eacea304fb1da6d3e",
-      "size": 135346,
-      "module": "HeckerThemeIconPackAuroraAndroidOverlay"
-    },
-    "IconPackAuroraSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.aurora.systemui",
-      "sha256": "5165eddc8b6d0421b9954715c40718295a9bc3b0551b3013992c58015c635321",
-      "size": 388877,
-      "module": "HeckerThemeIconPackAuroraSystemUIOverlay"
-    },
-    "IconPackCircularAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.circular.android",
-      "sha256": "1cdf916171747113de35f9d25016582431ee3b1ed72bfe65e7fff70de2432988",
-      "size": 84530,
-      "module": "HeckerThemeIconPackCircularAndroidOverlay"
-    },
-    "IconPackCircularSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.circular.systemui",
-      "sha256": "bdd9ce702d469acd22bcde409decd2d4f9d2a91a294e156ac7333911f0a02990",
-      "size": 70484,
-      "module": "HeckerThemeIconPackCircularSystemUIOverlay"
-    },
-    "IconPackFilledAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.filled.android",
-      "sha256": "73cdfbb048c90af629c35ecbd3b4bf5fff02249004183a7aaae86aa929e2d971",
-      "size": 71767,
-      "module": "HeckerThemeIconPackFilledAndroidOverlay"
-    },
-    "IconPackFilledSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.filled.systemui",
-      "sha256": "af72bdbc2c1e421f09f989f5f25e3eaffa2799de45a44a4d98510137e5559f39",
-      "size": 62292,
-      "module": "HeckerThemeIconPackFilledSystemUIOverlay"
-    },
-    "IconPackGradiconAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.gradicon.android",
-      "sha256": "36493b638eed294cbc4d326ce55baf796fc98ca105dae65305a8b0d6476185ff",
-      "size": 406338,
-      "module": "HeckerThemeIconPackGradiconAndroidOverlay"
-    },
-    "IconPackGradiconSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.gradicon.systemui",
-      "sha256": "c58c3a12cfeca3a638a92a74c770fb537283926cc61b060ffe902ffc6cc22cc6",
-      "size": 1125207,
-      "module": "HeckerThemeIconPackGradiconSystemUIOverlay"
-    },
-    "IconPackKaiAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.kai.android",
-      "sha256": "e1744071dd278bcb910053ccbe9cf45c57465d2a82884f670ba2b69c12c927cb",
-      "size": 104973,
-      "module": "HeckerThemeIconPackKaiAndroidOverlay"
-    },
-    "IconPackKaiSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.kai.systemui",
-      "sha256": "1d2c0ffda87836fde3a70ac71d1daef2fa359d4fb22c7d450aa6e2b307cdbca0",
-      "size": 128030,
-      "module": "HeckerThemeIconPackKaiSystemUIOverlay"
-    },
-    "IconPackLornAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.lorn.android",
-      "sha256": "45fb8a5ea1f14c857e47668d2fd17786837adddb7e5002e0d4df0aa067d414c6",
-      "size": 131324,
-      "module": "HeckerThemeIconPackLornAndroidOverlay"
-    },
-    "IconPackLornSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.lorn.systemui",
-      "sha256": "c874db06371404a56a932c4a01e6c345a89894a37ca9c3e2f45a7ce3d9b150d8",
-      "size": 367388,
-      "module": "HeckerThemeIconPackLornSystemUIOverlay"
-    },
-    "IconPackNostalgicAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.nostalgic.android",
-      "sha256": "4ef6c546ca75cb75de458dfba241c3851e9142488b08e616a3c04da50a7db91b",
-      "size": 53926,
-      "module": "HeckerThemeIconPackNostalgicAndroidOverlay"
-    },
-    "IconPackNostalgicSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.nostalgic.systemui",
-      "sha256": "ed2fb8307838ca485adb70aaee5b26576d44420b2344a34ed66e76e009bc32f9",
-      "size": 67113,
-      "module": "HeckerThemeIconPackNostalgicSystemUIOverlay"
-    },
-    "IconPackOOSAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.oos.android",
-      "sha256": "761388b0b0f9035fbd95397ab68a2e4d26c51dda37b970e2a534072144d97381",
-      "size": 80483,
-      "module": "HeckerThemeIconPackOOSAndroidOverlay"
-    },
-    "IconPackOOSSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.oos.systemui",
-      "sha256": "5eaf062017a10b4abe001be76ddc709896ec05cac867046d0afce90763927dfe",
-      "size": 66214,
-      "module": "HeckerThemeIconPackOOSSystemUIOverlay"
-    },
-    "IconPackOutlineAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.outline.android",
-      "sha256": "7f1432abad413abd95fa4358ab0e9027ab662502e179a36c41369bb4b654d4a5",
-      "size": 149210,
-      "module": "HeckerThemeIconPackOutlineAndroidOverlay"
-    },
-    "IconPackOutlineSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.outline.systemui",
-      "sha256": "c3fcf6b3a45fc838880fcb3fda3bfab2920f6555df1f51847405440f802e1c49",
-      "size": 278421,
-      "module": "HeckerThemeIconPackOutlineSystemUIOverlay"
-    },
-    "IconPackPUIAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.pui.android",
-      "sha256": "3209c8c797528a8c44b6d6b0de2fc2440e18c7052e8bf540337d49953d6c226f",
-      "size": 152490,
-      "module": "HeckerThemeIconPackPUIAndroidOverlay"
-    },
-    "IconPackPUISystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.pui.systemui",
-      "sha256": "e29568ff16d5c1e73c332945eb57baef3405faf7a3afcd6fa9db4ba6e40d38dc",
-      "size": 170152,
-      "module": "HeckerThemeIconPackPUISystemUIOverlay"
-    },
-    "IconPackPlumpyAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.plumpy.android",
-      "sha256": "cb4556b499021a9e8b4c70cf91b38844bd222190aef8291ba7b23afd7f397073",
-      "size": 138914,
-      "module": "HeckerThemeIconPackPlumpyAndroidOverlay"
-    },
-    "IconPackPlumpySystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.plumpy.systemui",
-      "sha256": "9db27a200065b6007517aa34bef669450106c95a28d3ee9473160c745eafb0b0",
-      "size": 425659,
-      "module": "HeckerThemeIconPackPlumpySystemUIOverlay"
-    },
-    "IconPackRoundedAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.rounded.android",
-      "sha256": "9c9d52f0c1c79e888d77c566b2ef3e78593c55587ba58afec1fe371d70fe0d2f",
-      "size": 75863,
-      "module": "HeckerThemeIconPackRoundedAndroidOverlay"
-    },
-    "IconPackRoundedSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.rounded.systemui",
-      "sha256": "1bf300c331d1aaece6bdacfdc8300f47cdf25d8a5a5b0472e651e345b566d1db",
-      "size": 66388,
-      "module": "HeckerThemeIconPackRoundedSystemUIOverlay"
-    },
-    "IconPackSamAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.sam.android",
-      "sha256": "8ce35c6f77d140f33208c27d2f179240a9a67be2d7f1ece5986be8ca9aea9943",
-      "size": 96247,
-      "module": "HeckerThemeIconPackSamAndroidOverlay"
-    },
-    "IconPackSamSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.sam.systemui",
-      "sha256": "adb8ee2df16c06cb70fb294161f97d55a9db4dafcf0b7a5bda3b9d95b022b082",
-      "size": 113942,
-      "module": "HeckerThemeIconPackSamSystemUIOverlay"
-    },
-    "IconPackVictorAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.victor.android",
-      "sha256": "e56ca504ec26cd85f9ee6683fb26a4368893f3f4e5bba4f76fb20b8cc217e114",
-      "size": 96449,
-      "module": "HeckerThemeIconPackVictorAndroidOverlay"
-    },
-    "IconPackVictorSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.victor.systemui",
-      "sha256": "837b080d61de4ce43737d798a7fdfe182e77b3e838a5c42330b5c923eb9e3c4c",
-      "size": 124242,
-      "module": "HeckerThemeIconPackVictorSystemUIOverlay"
-    },
-    "IconPackXperiaAndroidOverlay.apk": {
-      "package": "com.android.theme.icon_pack.xperia.android",
-      "sha256": "e1456b33b16eaaf3138fd02d797ddf60047e444091145a6f8f398d74e2db4877",
-      "size": 76316,
-      "module": "HeckerThemeIconPackXperiaAndroidOverlay"
-    },
-    "IconPackXperiaSystemUIOverlay.apk": {
-      "package": "com.android.theme.icon_pack.xperia.systemui",
-      "sha256": "2fb59fbef2d62b36d88afb65b973b4a15027fdc9711d91ffb5a160e09ac4e5d6",
-      "size": 57943,
-      "module": "HeckerThemeIconPackXperiaSystemUIOverlay"
-    },
-    "InsideSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_g",
-      "sha256": "1c29ccf3cdfce5498dc62a0753d5457d8b47a09f6b5da8065aa741fa18ca6377",
-      "size": 17713,
-      "module": "HeckerThemeInsideSignalOverlay"
-    },
     "InsideWiFiOverlay.apk": {
       "package": "com.android.systemui.wifibar_g",
       "sha256": "e068b9ed9235f195e1c407bef71d7b314b2e994387c1fb2363e8c6d9ec9babc7",
       "size": 13033,
       "module": "HeckerThemeInsideWiFiOverlay"
-    },
-    "IosSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_ar",
-      "sha256": "bde677dc7545765cf124fe29e11e22eef17e1e4347e528a7ac3cab345185d5cf",
-      "size": 17713,
-      "module": "HeckerThemeIosSignalOverlay"
-    },
-    "MiniSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_as",
-      "sha256": "63725e0fea3fc72157a268d32dab91f4c0b7e13af937732b6a173ed6978debe1",
-      "size": 17713,
-      "module": "HeckerThemeMiniSignalOverlay"
-    },
-    "MotoChargingAnimationOverlay.apk": {
-      "package": "com.android.systemui.charging_animation.moto",
-      "sha256": "58fc6bcb0e1dc355bf06c292ce08b323ef08563ac1cc26cd62d8fc226798327d",
-      "size": 3496250,
-      "module": "HeckerThemeMotoChargingAnimationOverlay"
-    },
-    "NothingChargingAnimationOverlay.apk": {
-      "package": "com.android.systemui.charging_animation.nothing",
-      "sha256": "de639de543de96af3387eb2370b35ba5defa45b7685093455741ec730e30ec09",
-      "size": 954385,
-      "module": "HeckerThemeNothingChargingAnimationOverlay"
-    },
-    "NothingDotSignalOverlay.apk": {
-      "package": "com.android.systemui.signalNothingDot",
-      "sha256": "4ef4cd9a7a54a7a23c76f21bb2e7429a9afce27d618ecb96e10da372edd1e9e4",
-      "size": 103810,
-      "module": "HeckerThemeNothingDotSignalOverlay"
     },
     "NothingDotWiFiOverlay.apk": {
       "package": "com.android.systemui.wifiNothingDot",
@@ -398,47 +80,11 @@
       "size": 13033,
       "module": "HeckerThemeNothingDotWiFiOverlay"
     },
-    "OdinSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_ap",
-      "sha256": "44cb0e01d9d841b848bacf55f1ee9f645e2983508b7345e8c630f942fb63dd91",
-      "size": 17713,
-      "module": "HeckerThemeOdinSignalOverlay"
-    },
-    "PillsSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_at",
-      "sha256": "da5e78d18fe5198ba111d829447bde4c2830d8859e2ee931695fdc26b875e31e",
-      "size": 21809,
-      "module": "HeckerThemePillsSignalOverlay"
-    },
-    "PlumpySignalOverlay.apk": {
-      "package": "com.custom.overlay.systemui.signalPlumpy",
-      "sha256": "6e05e222d8d39774127b4ead31febd3e968e12521b0566c07d38b20b7e99b44e",
-      "size": 35308,
-      "module": "HeckerThemePlumpySignalOverlay"
-    },
     "PlumpyWiFiOverlay.apk": {
       "package": "com.custom.overlay.systemui.wifiPlumpy",
       "sha256": "b527ac0864e49bc988bd73fb25fc6118380d7df52f0d9f2b4a9c14bd90af078b",
       "size": 17332,
       "module": "HeckerThemePlumpyWiFiOverlay"
-    },
-    "RelSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_ai",
-      "sha256": "8a2af544ca71f6a6093691a9de50044a4737e4e900edade29e1bb96555c496fa",
-      "size": 30001,
-      "module": "HeckerThemeRelSignalOverlay"
-    },
-    "RomanSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_au",
-      "sha256": "c40e85dcd30e0cfa14227d937e3b983b8c8830295e828ba5abe290d693338089",
-      "size": 17713,
-      "module": "HeckerThemeRomanSignalOverlay"
-    },
-    "RoundSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_f",
-      "sha256": "bc3abe2e9dbd25eb54705911053b13ae8d88c0d734eb279f5ea90aea559fe6fa",
-      "size": 17713,
-      "module": "HeckerThemeRoundSignalOverlay"
     },
     "RoundWiFiOverlay.apk": {
       "package": "com.android.systemui.wifibar_f",
@@ -446,59 +92,17 @@
       "size": 13033,
       "module": "HeckerThemeRoundWiFiOverlay"
     },
-    "ScrollSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_aj",
-      "sha256": "84022dabecfaac54ebafd7b84c074f24ba6492048d41867bf69c8af546673c8e",
-      "size": 25905,
-      "module": "HeckerThemeScrollSignalOverlay"
-    },
-    "SeaSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_ak",
-      "sha256": "3bff9260f839e12eb9cf893e648f3af3270b0180fa9479d6e5aea91c53afbb52",
-      "size": 30001,
-      "module": "HeckerThemeSeaSignalOverlay"
-    },
-    "SneakySignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_b",
-      "sha256": "b71c0e49ad44b88bf488fcd8e1bdb482cfbe4fd28346b46715fd7b06f48b6ab5",
-      "size": 21809,
-      "module": "HeckerThemeSneakySignalOverlay"
-    },
     "SneakyWiFiOverlay.apk": {
       "package": "com.android.systemui.wifibar_b",
       "sha256": "8042cfe1b456eb331a9c77ef49cc0447c2b029ae9e5b808e5d2be350e5b80714",
       "size": 13033,
       "module": "HeckerThemeSneakyWiFiOverlay"
     },
-    "StackSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_al",
-      "sha256": "00f34e641b99f27802eb1666c7b8b9a3f7cfdc6936b0310fcf13efb66d260864",
-      "size": 50481,
-      "module": "HeckerThemeStackSignalOverlay"
-    },
-    "StrokeSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_a",
-      "sha256": "a4aad54b3af36a1270737dc77d353c23778d5a80be3ffe8be4cb1bcf87175c3f",
-      "size": 17713,
-      "module": "HeckerThemeStrokeSignalOverlay"
-    },
     "StrokeWiFiOverlay.apk": {
       "package": "com.android.systemui.wifibar_a",
       "sha256": "867040a253bee01ec66f8e67dffb02215b539a35707801431787dae8f2742891",
       "size": 13033,
       "module": "HeckerThemeStrokeWiFiOverlay"
-    },
-    "WannuiSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_am",
-      "sha256": "de1d3e7234b745df6e02910fffc4320ad8df609dc194596755756db21dba8e7b",
-      "size": 25905,
-      "module": "HeckerThemeWannuiSignalOverlay"
-    },
-    "WavySignalOverlay.apk": {
-      "package": "com.crdroid.systemui.signalbar_e",
-      "sha256": "e88bae4c2f0b4fd1c969b54765d5277914b9f9afe7e90b2423b28163d7cb1122",
-      "size": 21809,
-      "module": "HeckerThemeWavySignalOverlay"
     },
     "WavyWiFiOverlay.apk": {
       "package": "com.android.systemui.wifibar_e",
@@ -512,35 +116,11 @@
       "size": 25321,
       "module": "HeckerThemeWeedWiFiOverlay"
     },
-    "WindowsSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_an",
-      "sha256": "1d78d95c4fede03933cb93746e76aa35f3e98a70ee2979ed3e843d776443aa19",
-      "size": 34097,
-      "module": "HeckerThemeWindowsSignalOverlay"
-    },
-    "WingSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_ao",
-      "sha256": "e279fc00ab67bda7e1fddbc7c010b44b82bae5bedbcf5ea372cbc30d9ea80488",
-      "size": 144689,
-      "module": "HeckerThemeWingSignalOverlay"
-    },
-    "XperiaSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_c",
-      "sha256": "a60a58fe21f5a7291fca8f4f2c4b0465d907b2b89e3060bb6876937cfe8e612d",
-      "size": 17713,
-      "module": "HeckerThemeXperiaSignalOverlay"
-    },
     "XperiaWiFiOverlay.apk": {
       "package": "com.android.systemui.wifibar_c",
       "sha256": "a438094c4ce8fd828be2848612f9fd402ae913c152cec2b66305217d69b63b20",
       "size": 17129,
       "module": "HeckerThemeXperiaWiFiOverlay"
-    },
-    "ZigZagSignalOverlay.apk": {
-      "package": "com.android.systemui.signalbar_d",
-      "sha256": "2cc7965fb674233aa1f48f914ce74c0a2c568e26b4e145f10f4401f54ea7760a",
-      "size": 17713,
-      "module": "HeckerThemeZigZagSignalOverlay"
     },
     "ZigZagWiFiOverlay.apk": {
       "package": "com.android.systemui.wifibar_d",

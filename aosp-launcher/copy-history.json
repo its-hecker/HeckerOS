@@ -1,0 +1,35 @@
+{
+  "src/com/android/launcher3/hecker/HeckerWorkspaceGestures.java": [
+    "691a1d7fdb130e47236c340b885e2df064bacf62"
+  ],
+  "generated/hecker-launcher/res/values/strings.xml": [
+    "a6ed14c93f6aff66751a044c7e6bca4b211294e3"
+  ],
+  "generated/hecker-launcher/res/drawable/ic_launcher_home.xml": [
+    "51e421ee088a77b841f7e6e5d1bf875278115d65"
+  ],
+  "generated/hecker-launcher/res/values-zh-rCN/strings.xml": [
+    "efef38e44d9b62c70e67925f6bd3ed35c9006bf8",
+    "3e0312bf69709f56d246f1e39ba332b17f2842a8"
+  ],
+  "src/com/android/launcher3/hecker/HeckerLauncherGlass.java": [
+    "84e86f9b117b6aadb7f3d3582d3f28679cc99a7d",
+    "0612cdf6695a5b557e2936a0ea8099a82193a819",
+    "f580f30188bff0a2662c8a3fd0b63cdc8b1c0e45"
+  ],
+  "src/com/android/launcher3/hecker/HeckerStudioActivity.java": [
+    "4e1f752e60dee1876b4b25a86b4e3fa5ccf0eb93",
+    "1c8e079d853fd5164899ae66107c80cab66fac8e"
+  ],
+  "src/com/android/launcher3/hecker/HeckerClockView.java": [
+    "fc66b0dadc06aec42d9823d1b6fc757e9128d185"
+  ],
+  "generated/hecker-launcher/res/values/studio.xml": [
+    "027dfae0d51492105a0cdc34ccac5206af9f9451",
+    "72d15ee58bef398d767d148b7aab06bce7bb7acf"
+  ],
+  "src/com/android/launcher3/hecker/HeckerDockBar.java": [
+    "986161c90f2b9e87232d3a49f6592a126249c6b4",
+    "353838905cb4518694c67879c82d57fa4b70e066"
+  ]
+}

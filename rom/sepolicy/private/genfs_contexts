@@ -1,0 +1,4 @@
+# Narrow labels for the two hardware endpoints used by Game Booster.
+genfscon sysfs /devices/platform/soc/2c00000.qcom,kgsl-3d0/gpubusy u:object_r:sysfs_hecker_game_gpu:s0
+genfscon sysfs /devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pm8150b@2:google,bms/power_supply/charger/game_charge_disable u:object_r:sysfs_hecker_game_charge:s0
+genfscon sysfs /devices/platform/soc/2c00000.qcom,kgsl-3d0/kgsl/kgsl-3d0/gpubusy u:object_r:sysfs_hecker_game_gpu:s0

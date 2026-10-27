@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="root_privacy_title">Root 管理器隐私</string>
+    <string name="root_privacy_summary">选择无法查询已安装 Root 管理器的应用</string>
+    <string name="root_privacy_body">所选应用无法查询受支持的 Root 管理器软件包。更改设置后，请关闭并重新打开应用。请勿向这些应用授予 Root 权限，并在 KernelSU 中为其启用“卸载模块”配置。这项设置不保证银行应用兼容。</string>
+    <string name="root_privacy_save_error">无法保存设置，请重试。</string>
+</resources>

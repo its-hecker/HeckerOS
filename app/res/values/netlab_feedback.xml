@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="netlab_feedback_master">Master Wi-Fi control</string>
+    <string name="netlab_feedback_pause_all">Pause all Wi-Fi devices</string>
+    <string name="netlab_feedback_limit_all">Speed limit for all Wi-Fi devices</string>
+    <string name="netlab_feedback_no_peers">Scan Wi-Fi to find devices first.</string>
+    <string name="netlab_feedback_group_limit">The current controller supports up to 32 devices per session. Select up to 32 devices to control together.</string>
+    <string name="netlab_feedback_mixed">Devices have different control states</string>
+    <string name="netlab_feedback_private">Private MAC</string>
+    <string name="netlab_feedback_vendor_source">MAC assignment: %1$s (IEEE registry; hardware vendor hint)</string>
+    <string name="netlab_feedback_advertised_brand">Advertised brand hint: %1$s</string>
+    <string name="netlab_feedback_private_hint">This device uses a locally administered MAC. A manufacturer cannot be established from that MAC prefix.</string>
+</resources>

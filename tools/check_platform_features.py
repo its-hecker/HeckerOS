@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Compile the owned Settings adapters and check Axion PIF against pinned source.
+"""Compile the owned Settings adapters and check Evolution X PIF against pinned source.
 
 This does not build Settings/Android, run biometric enrollment, or obtain a Play verdict.
 """
@@ -77,6 +77,8 @@ def main():
     assert 'mProgressView.setEnrollmentActive(false);' in fragment
     assert 'mSurfaceView.getHolder().setFixedSize(' in fragment
     enrolling = (settings/'src/com/android/settings/biometrics/face/FaceEnrollEnrolling.java').read_text()
+    progress = (settings/'src/com/android/settings/biometrics/face/FaceEnrollProgressView.java').read_text()
+    assert 'FacePoseEnrollmentState.usesPoseGrid(Build.DEVICE,' in progress
     assert 'if (remaining == 0 && !mCompletionStarted)' in enrolling
     assert 'launchFinish(mToken);' in enrolling
     manifest = (settings/'AndroidManifest.xml').read_text()
@@ -110,7 +112,7 @@ def main():
         java = [p for p in (settings/'src').rglob('*.java') if p.name not in excluded]
         # The fetched source set is narrow; --settings-source can point to a full checkout.
         java = [p for p in java if str(p.relative_to(settings/'src')) in lock['settings_java']]
-        run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',str(sdk/'android-system.jar')+os.pathsep+str(jar),
+        run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',os.pathsep.join(map(str,[sdk/'android-system.jar',sdk/'lottie.jar',sdk/'core.jar',sdk/'appcompat.jar',jar])),
             '-d',out/'settings-classes',out/'generated/com/android/settings/R.java',*java,
             ROOT/'tests/platform-api-stubs/android/security/spoof/HeckerSpoofConfig.java',
             *sorted((settings/'tools/hecker/tests').glob('*.java')))
@@ -168,7 +170,7 @@ extern "C" int __system_property_get(const char*,char*);
         run(out/'native-test')
         assert 'FindClass("android/security/pif/PlayIntegritySpoofService")' in cpp
         assert '"([Ljava/lang/String;[Ljava/lang/String;Z)Z"' in cpp
-    print('Owned Settings UI Java/resource checks and Axion PIF host regressions: PASS')
+    print('Owned Settings UI Java/resource checks and Evolution X PIF host regressions: PASS')
     print('Full Settings/platform build, Pixel 4 enrollment and Play Integrity verdict testing remain required.')
 
 

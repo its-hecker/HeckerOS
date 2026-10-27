@@ -1,0 +1,19 @@
+<resources>
+    <string name="pixel_launcher_title">Pixel Launcher enhancements</string>
+    <string name="pixel_launcher_summary">Double tap to sleep and native launcher glass</string>
+    <string name="pixel_launcher_description">Keep Pixel Launcher and its Recents gestures. Double tap empty home-screen space to sleep. Glass uses your static wallpaper; live wallpapers keep a translucent fallback.</string>
+    <string name="pixel_double_tap">Double tap to sleep</string>
+    <string name="pixel_glass_mode">Glass effect</string>
+    <string name="pixel_glass_off">Stock appearance</string>
+    <string name="pixel_glass_frosted">Frosted glass</string>
+    <string name="pixel_glass_liquid">Liquid glass</string>
+    <string name="pixel_glass_dock">Dock</string>
+    <string name="pixel_glass_search">Search containers</string>
+    <string name="pixel_glass_folders">Open folders</string>
+    <string name="pixel_glass_widgets">Behind transparent widgets</string>
+    <string name="pixel_corner_tl">Top-left corner</string>
+    <string name="pixel_corner_tr">Top-right corner</string>
+    <string name="pixel_corner_br">Bottom-right corner</string>
+    <string name="pixel_corner_bl">Bottom-left corner</string>
+    <string name="pixel_launcher_apply">Return home to apply changes. Unknown launcher layouts keep their normal appearance.</string>
+</resources>

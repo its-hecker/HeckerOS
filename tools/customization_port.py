@@ -1,29 +1,75 @@
 # SPDX-License-Identifier: Apache-2.0
 """Atomic source plan for the Android 17 lyrics and theme adapters."""
 import json
+import hashlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+SYSTEM_SERVER = "frameworks/base/services/java/com/android/server/SystemServer.java"
 
 
-def customization_plan(rom, replace, revert=False):
+def verify_theme_service_startup(source):
+    start = "mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);"
+    phase = "mSystemServiceManager.startBootPhase(t, SystemService.PHASE_SYSTEM_SERVICES_READY);"
+    if source.count(start) != 1 or source.count(phase) != 1 or source.index(start) > source.index(phase):
+        raise ValueError("Theme engine must start exactly once before system-services-ready; "
+                         "a late start misses its settings observer boot phase")
+
+
+def customization_plan(rom, replace, revert=False, *, pending_changes=None):
     base = rom / "frameworks/base"
     if not (base / "core/java/android/content/res/Resources.java").exists(): return {}
     changes = {}
+    pending_changes = pending_changes or {}
     for relative, pairs in json.loads((ROOT / "framework/customization-patches.json").read_text()).items():
         path = rom / relative
         current = path.read_text()
-        target = current
+        # Compose with earlier adapters in the same atomic plan. Reading only
+        # disk here would overwrite the App Lock permission in the manifest
+        # when the theme broadcast is added on a fresh checkout.
+        target = pending_changes.get(path, current)
+        if not isinstance(target, str):
+            raise ValueError("Cannot patch non-text pending content: " + str(path))
         for pair in reversed(pairs) if revert else pairs:
+            # Upgrade only explicitly reviewed earlier adapters. A prepared
+            # checkout must not require reverting every unrelated native port.
+            if not revert:
+                # A short historical adapter can be a prefix of a longer one.
+                # Replacing it first leaves the old tail in the file (including
+                # a second scene alpha transformation). Prefer the complete form.
+                for previous in sorted(pair.get("previous", []), key=len, reverse=True):
+                    if previous in target and (pair["new"] not in target
+                            or len(previous) > len(pair["new"])):
+                        if target.count(previous) != 1:
+                            raise ValueError("Duplicate historical adapter: " + str(path))
+                        target = target.replace(previous, pair["new"], 1)
+                        break
             target = replace(target, pair["old"], pair["new"], str(path), revert)
+        if not revert and relative == SYSTEM_SERVER:
+            verify_theme_service_startup(target)
         if target != current: changes[path] = target
     copies = json.loads((ROOT / "framework/customization-copies.json").read_text())
+    history_file = ROOT / "framework/customization-copy-history.json"
+    history = json.loads(history_file.read_text()) if history_file.exists() else {}
     for relative, source in copies.items():
         path = rom / relative
         expected = (ROOT / source).read_bytes()
         if path.exists() and path.read_bytes() != expected:
-            raise ValueError("Preserving an unfamiliar HeckerOS adapter: " + str(path))
+            current = path.read_bytes()
+            identity = hashlib.sha1(b"blob " + str(len(current)).encode() + b"\0" + current).hexdigest()
+            if identity not in history.get(relative, []):
+                raise ValueError("Preserving an unfamiliar HeckerOS adapter: " + str(path))
         if revert:
             if path.exists(): changes[path] = None
-        elif not path.exists(): changes[path] = expected
+        elif not path.exists() or path.read_bytes() != expected: changes[path] = expected
+    retired_file = ROOT / "framework/customization-retired-copies.json"
+    if retired_file.exists():
+        for relative, identities in json.loads(retired_file.read_text()).items():
+            path = rom / relative
+            if not path.exists(): continue
+            current = path.read_bytes()
+            identity = hashlib.sha1(b"blob " + str(len(current)).encode() + b"\0" + current).hexdigest()
+            if identity not in identities:
+                raise ValueError("Preserving an unfamiliar retired adapter: " + str(path))
+            changes[path] = None
     return changes

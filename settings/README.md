@@ -12,7 +12,7 @@ controls and policy handling remain in Settings. Source adapters are guarded and
 reversible; the main activity/fragment names stay native.
 
 Suite retains its random offline Lottie greeting and the previously selected
-App Lock, Gaming, launcher, infrared camera and About pages alongside the new grid.
+App Lock, Gaming, infrared camera and About pages alongside the new grid.
 
 The Suite dashboard and About UI are built as `HeckerSuiteSettingsUi`, a static
 library of the native `Settings` APK. The existing Motion Sense controls and
@@ -33,6 +33,9 @@ camera buffer/cutout, accessibility help and native completion gate are preserve
 The mesh renders only for callbacks or bounded animations and respects reduced
 motion. The original Pixel rendering archive remains pinned for provenance; the
 new mesh does not instantiate its renderer.
+Coral and flame select that mesh on either preview path. The camera-ownership
+resource still selects the existing camera controller, so a Camera2 preview does
+not silently replace the pose grid with the generic progress ring.
 
 Asset: `res/drawable-nodpi/hecker_mascot.webp`, also shared by Suite. Generated
 with the built-in image generation tool, transparent-background mode, from the
@@ -44,3 +47,33 @@ The generated PNG was losslessly converted to WebP; no pixel editing was used.
 
 Phone screenshot comparison, font-scale testing and the complete Settings APK
 build remain part of coral validation. Resource compilation alone is not that test.
+
+## Native About Phone
+
+`MyDeviceInfoFragment` hosts one `HeckerAboutPhonePreference` above its original
+information categories. The previous account/avatar header stays hidden; device
+name editing, identifiers, legal/regulatory information, search and the build-number
+developer-options flow keep their native controllers, including the partial
+Catalyst hierarchy. The new card uses the same light/dark Hecker palette.
+
+The square caracal emblem uses a native vector with tall ear tufts, sunglasses
+and a soft accent halo, replacing the tall phone outline and letter H. The mark
+uses the light/dark Settings palette and a small, bounded orbit/bob animation.
+It stops when hidden, detached or the page stops and respects the system
+animator setting. Model, codename, Android, processor, kernel, maintainer and ROM
+version come from this build. RAM and data-partition usage are queried off the UI
+thread; the battery value follows the battery broadcast only while the page is
+started. Unknown values are displayed as unavailable. Data storage means the
+data filesystem, not an invented retail storage capacity.
+
+Artwork preview in dark and light mode (vector rendering, not a device screenshot):
+
+![Caracal emblem artwork preview](../docs/previews/about-phone-logo.png)
+
+The Official badge and Suite About page both read `ro.heckeros.build_type`.
+Coral sets its release identity before inheriting platform configuration. The
+vendor/custom adapter keeps HeckerOS away from the inherited PixelOS OTA channel;
+an Official maintainer build does not imply an OTA feed or a certification verdict.
+
+Device validation still needs normal/large fonts, dark/light mode, TalkBack,
+page exit/return, rotation, live battery changes and the existing native controls.

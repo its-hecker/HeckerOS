@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.hecker.netlab">
+    <uses-sdk android:minSdkVersion="37" android:targetSdkVersion="37" />
+    <permission android:name="org.hecker.netlab.permission.CONTROL" android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
+    <uses-permission android:name="android.permission.TETHER_PRIVILEGED" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <application android:name=".NetLabApplication" android:label="@string/netlab_controller_title"
+        android:persistent="true" android:directBootAware="true" android:defaultToDeviceProtectedStorage="true"
+        android:allowBackup="false" android:allowClearUserData="false" android:usesCleartextTraffic="false">
+        <service android:name=".NetLabService" android:exported="true" android:permission="org.hecker.netlab.permission.CONTROL" />
+        <receiver android:name=".NetLabReceiver" android:exported="false">
+            <intent-filter><action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" /></intent-filter>
+        </receiver>
+    </application>
+</manifest>

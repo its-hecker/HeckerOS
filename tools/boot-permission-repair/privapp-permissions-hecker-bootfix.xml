@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<permissions>
+    <privapp-permissions package="com.android.launcher3">
+        <permission name="android.permission.READ_WALLPAPER_INTERNAL" />
+    </privapp-permissions>
+    <privapp-permissions package="org.hecker.netlab">
+        <permission name="android.permission.NETWORK_SETTINGS" />
+        <permission name="android.permission.TETHER_PRIVILEGED" />
+        <permission name="android.permission.SCHEDULE_EXACT_ALARM" />
+    </privapp-permissions>
+</permissions>

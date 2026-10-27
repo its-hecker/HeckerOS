@@ -32,37 +32,47 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
 @Composable
-fun HeckerLockscreenLyrics(context: Context) {
+fun HeckerLockscreenLyrics(context: Context,
+    statusBarState: com.android.systemui.plugins.statusbar.StatusBarStateController,
+    modifier: Modifier = Modifier) {
+    var dozing by remember(statusBarState) { mutableStateOf(statusBarState.isDozing) }
+    DisposableEffect(statusBarState) {
+        val callback = object : com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener {
+            override fun onDozingChanged(value: Boolean) { dozing = value }
+        }
+        statusBarState.addCallback(callback)
+        onDispose { statusBarState.removeCallback(callback) }
+    }
     var snapshot by remember { mutableStateOf<LyricsController.Snapshot?>(null) }
     var active by remember { mutableStateOf(-1) }
     DisposableEffect(context) {
         val controller = LyricsController(context) { snapshot = it }
         onDispose { controller.close() }
     }
-    LaunchedEffect(snapshot) {
+    LaunchedEffect(snapshot, dozing) {
         val state = snapshot ?: return@LaunchedEffect
         do {
             active = state.activeIndex(SystemClock.elapsedRealtime())
             if (!state.playing) break
-            delay(100)
+            delay(if (dozing) 1000 else 100)
         } while (isActive)
     }
     val state = snapshot ?: return
     if (active !in state.lines.indices) return
     Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 10.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        for (relative in -1..1) {
+        for (relative in if (dozing) 0..0 else -1..1) {
             val line = state.lines.getOrNull(active + relative)?.text.orEmpty()
             Text(
                 text = line,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (relative == 0) 1f else 0.45f),
-                fontSize = if (relative == 0) 17.sp else 13.sp,
+                color = androidx.compose.ui.graphics.Color.White.copy(alpha = if (relative == 0) (if (dozing) .72f else 1f) else 0.45f),
+                fontSize = if (dozing) 14.sp else if (relative == 0) 16.sp else 12.sp,
                 fontWeight = if (relative == 0) FontWeight.Bold else FontWeight.Normal,
                 textAlign = TextAlign.Center,
-                maxLines = 2,
+                maxLines = if (relative == 0) 2 else 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxWidth(),
             )

@@ -1,0 +1,38 @@
+{
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerStatusBarPopup.java": [
+    "c5642cf2fe2d558c656fabcf7fbc2194cea3485f"
+  ],
+  "frameworks/base/core/java/android/os/IHeckerLauncherService.aidl": [
+    "adaf69c6e0ed55150cdbb9c1cf00af1eef136f19"
+  ],
+  "frameworks/base/core/java/com/android/internal/hecker/HeckerHomeDoubleTap.java": [
+    "71b6f69faf145ba8f1bcf586e41c7fb7a981747f"
+  ],
+  "frameworks/base/core/java/com/android/internal/hecker/HeckerLauncherEnhancements.java": [
+    "93215c80dbfe63f38d41481691022d6ef1cdadaf"
+  ],
+  "frameworks/base/services/core/java/com/android/server/hecker/HeckerLauncherService.java": [
+    "913ddef6fe2cd9c9f196744aa35593a7ec1d7481"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerVolumeSlider.java": [
+    "8376c5716e78a2186b4a4898d31f0b1a642aa170"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerVolumeDialog.java": [
+    "2dc8ca7ddafc20bb356c11591b9b15817a0d9fca"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerBrightnessControl.java": [
+    "e604b15d579f8bb0a79b90807ceecec7f0e0bffb"
+  ],
+  "frameworks/base/core/java/com/android/internal/hecker/HeckerMemoryRules.java": [
+    "f46cfb03bc49efeeb1b6f1d607bf0d5ce89d17c3"
+  ],
+  "frameworks/base/core/java/android/os/IHeckerMemoryService.aidl": [
+    "bcc20e11b2e2716d2c916ba748e910e47cca20a8",
+    "23ff83308152e06ccd7360f36efb49465494b7a2"
+  ],
+  "frameworks/base/services/core/java/com/android/server/am/HeckerMemoryPolicy.java": [
+    "1edde411f5a743f23e1b59c084f62f5848fc3ab2",
+    "d227b01c6f2184cda032d30c91d5673a2515f02d",
+    "e1a7c9cf9161b2ee9dfd541264c20aaf197179d0"
+  ]
+}
