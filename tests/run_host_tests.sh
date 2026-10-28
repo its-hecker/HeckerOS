@@ -86,6 +86,13 @@ java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     netlab/common/org/hecker/netlab/NetLabIdentity.java tests/NetLabIdentityTest.java
 java -cp "$suite_test_output" NetLabIdentityTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    netlab/common/org/hecker/netlab/NetLabIdentity.java \
+    netlab/common/org/hecker/netlab/NetLabSavedDevices.java \
+    netlab/common/org/hecker/netlab/NetLabOnlineVendors.java \
+    tests/NetLabSavedDevicesTest.java tests/NetLabOnlineVendorsTest.java
+java -cp "$suite_test_output" NetLabSavedDevicesTest
+java -cp "$suite_test_output" NetLabOnlineVendorsTest
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     netlab/common/org/hecker/netlab/NetLabVendors.java netlab/common/org/hecker/netlab/NetLabIdentity.java \
     netlab/common/org/hecker/netlab/NetLabGroupPolicy.java tests/NetLabVendorsTest.java tests/NetLabGroupPolicyTest.java
 java -cp "$suite_test_output" NetLabVendorsTest "$suite_root/app/assets/netlab/ieee-vendors.tsv.gz"

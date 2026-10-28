@@ -29,7 +29,7 @@ Android resources link and complete Suite/controller Java plus generated AIDL co
 
 The public [IEEE assignment listings](https://standards.ieee.org/products-programs/regauth/) define MA-L/MA-M/MA-S prefixes. This build uses a hash-pinned snapshot from [silverwind/oui-data](https://github.com/silverwind/oui-data), version 2.1.46. The exact revision, input hash, output hash, counts and asset path are in `netlab/vendor-registry.lock.json`; the BSD-2-Clause attribution/license ships in `app/assets/netlab/NOTICE.txt`. The Android module declares that additional license.
 
-`python3 tools/update_netlab_vendors.py --check` checks the installed data snapshot. Use `--source /path/to/the/pinned/index.json --check` to prove exact reproducibility, or omit `--check` to rebuild from that verified source. Without `--source`, the maintenance tool downloads only the pinned source URL. The app itself loads the compressed table once off the UI thread and sends no MAC addresses to an external lookup service. Longest-prefix matching checks 36, then 28, then 24 bits. Locally administered/multicast/invalid MACs never produce a manufacturer from the prefix. Existing service-advertised identity can still supply a brand/device-type hint.
+`python3 tools/update_netlab_vendors.py --check` checks the installed data snapshot. Use `--source /path/to/the/pinned/index.json --check` to prove exact reproducibility, or omit `--check` to rebuild from that verified source. Without `--source`, the maintenance tool downloads only the pinned source URL. The app loads the compressed table once off the UI thread. The optional automatic lookup described below sends only a public manufacturer prefix; complete MAC addresses stay local. Longest-prefix matching checks 36, then 28, then 24 bits. Locally administered/multicast/invalid MACs never produce a manufacturer from the prefix. Existing service-advertised identity can still supply a brand/device-type hint.
 
 ## Slider/cut follow-up
 
@@ -95,3 +95,56 @@ still require device verification.
 Source verification: all 118 Python host tests, the complete existing Java/native
 host suite, and locked Android Suite/controller Java, AIDL and resource compilation
 pass. The new interaction regression covers the 13 event/state sequences above.
+
+
+## Saved names and automatic identification — 28 October 2026
+
+Tap any device heading, including **Untitled**, to choose **Rename device** or
+show/hide its controls. Renaming an already named device updates the same saved
+entry. Leave the name blank to restore detected naming. **Option → Saved device
+names** lists the saved aliases and opens the same editor, including for peers
+that are currently offline.
+
+Names/trust are stored separately from optional scan history in the current
+Android user’s private preferences. Up to 512 saved records are keyed by the
+observed, normalized unicast MAC, including private MACs. They survive IP changes,
+rescans, Activity recreation and reboot. Filling the list never silently evicts
+an existing name; an existing record remains editable. Clearing scan history
+retains saved names. Clear local metadata removes names and the lookup cache.
+Old hotspot aliases migrate using their MAC identity; old IP-only entries cannot
+be safely matched to a new MAC. Without an observed MAC, a name is limited to the
+current scan/network session. A device that changes its private MAC appears new.
+
+A saved name is always the final display-name override. Cloud results and local
+service advertisements never write into the saved-name list. Renaming a device
+while a lookup is in flight therefore retains the user’s name when it completes.
+
+**Option → Online identification after scans** defaults on for this feature.
+After a user-started scan, a separate worker checks eligible, unrenamed public MAC
+prefixes with [MACLookup’s company-name endpoint](https://maclookup.app/api-v2/documentation).
+Only the first six hexadecimal digits are sent, over fixed-host HTTPS through
+normal Android routing (including the active VPN). Full MACs, IPs, SSIDs and saved
+names are never sent. Private/multicast/malformed addresses are skipped. Existing
+offline longest-prefix registrations take precedence over a coarser online OUI.
+
+The lookup is bounded to 32 candidate prefixes per scan, batches of 16, a 12-second
+batch budget, 1.5-second connect/read timeouts and at most one request every 600 ms.
+Successes are cached privately for 30 days; unknown/private entries for one day.
+Errors and rate limits back off for at least 15 minutes, honoring longer bounded
+Retry-After delays. Disabled lookups, stopping, network changes and Activity exit
+cancel pending work; callbacks require the same network/scan epoch. Lookup
+failures preserve local results and never block scans, controls or polling.
+
+The public API supplies manufacturer registrations, not exact product models or
+OS fingerprints. Device type/model come from actual local DNS-SD/TXT or hotspot
+metadata; the default gateway is shown as a router. The existing Android, iPhone/
+iPad, Mac, Windows and Linux hints remain, with workstation/printer advertisements
+and Apple model identifiers recognized. These details now appear directly in
+the device card. Unknown information remains unknown. No arbitrary web search,
+port sweep, credentialed probe or model guess based only on manufacturer is added.
+
+Validation exercises the production saved-name store across serialization/restart,
+renames, changed addresses, private MACs, Unicode, explicit clearing and capacity;
+and the production lookup client for prefix-only requests, cache TTL/reload,
+manual-name priority, malformed responses, offline/rate-limit backoff and
+cancellation. Host/SDK checks do not replace a full ROM build and phone tests.

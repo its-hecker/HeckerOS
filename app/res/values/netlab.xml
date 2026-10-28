@@ -185,4 +185,19 @@
     <string name="netlab_lan_repair_error">The original Wi-Fi link was lost. ARP repairs could not be sent there; affected devices may need to reconnect or wait for their cache to expire.</string>
     <string name="netlab_lan_action_error">The root operation did not complete. Check the connection, scan again, or use Stop and restore.</string>
     <string name="netlab_lan_cleanup_error">NetLab could not confirm removal of its per-device forwarding guard. Reconnect the affected devices. If their IPv4 traffic is still blocked, reboot this phone to clear the temporary rules.</string>
+    <string name="netlab_saved_names">Saved device names</string>
+    <string name="netlab_saved_names_empty">Tap a device name in the list to save a name. Saved names appear here and are reused on later scans.</string>
+    <string name="netlab_online_identity">Online identification after scans</string>
+    <string name="netlab_online_identity_summary">Check manufacturer prefixes with MACLookup automatically. Only the prefix is sent. Device type and model use details shared by the device; saved names always take priority.</string>
+    <string name="netlab_name_actions">%1$s · Rename or show controls</string>
+    <string name="netlab_rename_device">Rename device</string>
+    <string name="netlab_show_controls">Show device controls</string>
+    <string name="netlab_hide_controls">Hide device controls</string>
+    <string name="netlab_name_saved_summary">Saved by MAC address across scans and restarts. Leave the name blank to use detected information. A changed private MAC appears as a new device.</string>
+    <string name="netlab_name_session_only">MAC address unavailable. This name lasts until the next scan or network change.</string>
+    <string name="netlab_saved_names_full">The 512-device saved list is full. Clear an unused name before adding another.</string>
+    <string name="netlab_type_router">Router / gateway</string>
+    <string name="netlab_type_computer">Likely computer</string>
+    <string name="netlab_type_printer">Likely printer</string>
+    <string name="netlab_online_vendor_source">Online manufacturer registry: %1$s</string>
 </resources>

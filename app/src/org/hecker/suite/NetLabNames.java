@@ -16,7 +16,7 @@ import org.hecker.netlab.NetLabIdentity;
 final class NetLabNames implements AutoCloseable {
     private static final String[] TYPES = {"_device-info._tcp", "_companion-link._tcp",
             "_airplay._tcp", "_adb-tls-connect._tcp", "_androidtvremote2._tcp",
-            "_googlecast._tcp", "_smb._tcp"};
+            "_googlecast._tcp", "_smb._tcp", "_workstation._tcp", "_ipp._tcp", "_ipps._tcp"};
     private final NsdManager nsd;
     private final Executor executor;
     private final List<NsdManager.DiscoveryListener> discoveries = new CopyOnWriteArrayList<>();
@@ -46,6 +46,7 @@ final class NetLabNames implements AutoCloseable {
                             if (closed || value.getNetwork() != null && !link.network.equals(value.getNetwork())) return;
                             String name = NetLabIdentity.clean(value.getServiceName());
                             String model = attribute(value, "model", "md", "ty");
+                            if(model.isEmpty()&&value.getServiceType().startsWith("_companion-link"))model=attribute(value,"am");
                             String kind = NetLabIdentity.kind(name, model, value.getServiceType());
                             String brand=NetLabIdentity.brand(name,model,attribute(value,"manufacturer","mfr","vendor"));
                             for (InetAddress address : value.getHostAddresses()) {

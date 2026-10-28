@@ -100,7 +100,7 @@ class NetLabStyle {
     static LinearLayout card(Object context){return new LinearLayout();}
     static Object text(Object context,String label,int size,boolean bold){return new Object();}
 }
-class Preferences {boolean trusted(String id){return false;}}
+class Preferences {boolean trusted(String id){return false;}boolean trusted(Bundle peer){return false;}}
 class R {static class string {
     static final int netlab_device_changed=1, netlab_ui_paused=2,
         netlab_ui_find_devices=3,netlab_no_devices=4,netlab_no_jailed=5,

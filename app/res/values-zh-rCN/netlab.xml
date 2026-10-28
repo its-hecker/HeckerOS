@@ -185,4 +185,19 @@
     <string name="netlab_lan_verify_missing">%1$s 未响应（预期 MAC 为 %2$s）。</string>
     <string name="netlab_lan_verify_changed">%1$s：预期 MAC 为 %2$s，收到 %3$s。</string>
     <string name="netlab_lan_verify_more">另有 %1$d 台设备未通过验证。</string>
+    <string name="netlab_saved_names">已保存的设备名称</string>
+    <string name="netlab_saved_names_empty">点按设备列表中的名称即可命名。已保存的名称会显示在这里，并在后续扫描时自动使用。</string>
+    <string name="netlab_online_identity">扫描后在线识别</string>
+    <string name="netlab_online_identity_summary">自动通过 MACLookup 查询制造商前缀，仅发送前缀。设备类型和型号来自设备共享的信息；已保存的名称始终优先。</string>
+    <string name="netlab_name_actions">%1$s · 重命名或显示控制项</string>
+    <string name="netlab_rename_device">重命名设备</string>
+    <string name="netlab_show_controls">显示设备控制项</string>
+    <string name="netlab_hide_controls">隐藏设备控制项</string>
+    <string name="netlab_name_saved_summary">按 MAC 地址保存，扫描或重启后仍可使用。留空则使用识别信息。更换私有 MAC 地址会被视为新设备。</string>
+    <string name="netlab_name_session_only">无法获取 MAC 地址。此名称仅保留到下次扫描或网络切换。</string>
+    <string name="netlab_saved_names_full">已保存 512 台设备。请先清除一个不用的名称。</string>
+    <string name="netlab_type_router">路由器 / 网关</string>
+    <string name="netlab_type_computer">可能是电脑</string>
+    <string name="netlab_type_printer">可能是打印机</string>
+    <string name="netlab_online_vendor_source">在线制造商数据库：%1$s</string>
 </resources>

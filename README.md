@@ -3,7 +3,7 @@
 This experimental `feat/settings-depth-lockscreen-20261028` branch combines the
 [reference Settings homepage, animated word clock and imported-layer depth clock](docs/settings-depth-lockscreen.md),
 [synchronized smoked-glass folders/icons/search, launcher toggles and default Caracal Dawn artwork](docs/launcher-glass-caracal.md),
-and [NetLab slider-cancellation and refresh fixes](docs/netlab-ui.md)
+and [NetLab touch fixes, saved device names and automatic manufacturer enrichment](docs/netlab-ui.md)
 on top of the complete Coral root-privacy/astronaut test. Use this same branch in the
 [Coral local manifest](https://github.com/its-hecker/HeckerOs-localmanifest/tree/feat/settings-depth-lockscreen-20261028).
 Full ROM and phone validation remain pending; the navigation
