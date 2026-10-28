@@ -41,8 +41,16 @@ class PrivappPermissionTests(unittest.TestCase):
         self.allowlist = self.root / "configs/privapp-permissions-hecker-suite.xml"
 
     def test_actual_suite_and_allowlist_cover_sandbox_permission(self):
-        self.assertEqual({"android.permission.FORCE_STOP_PACKAGES"},
+        self.assertEqual({"android.permission.FORCE_STOP_PACKAGES", "android.permission.READ_WALLPAPER_INTERNAL"},
                          check_privapp_permissions(self.platform, self.root))
+
+    def test_suite_default_wallpaper_read_has_matching_privileged_decision(self):
+        tree = ET.parse(self.allowlist)
+        block = tree.getroot().find("privapp-permissions")
+        block.remove(block.find("permission[@name='android.permission.READ_WALLPAPER_INTERNAL']"))
+        tree.write(self.allowlist)
+        with self.assertRaisesRegex(ValueError, "READ_WALLPAPER_INTERNAL"):
+            check_privapp_permissions(self.platform, self.root)
 
     def test_reported_bootloop_is_rejected_before_source_changes(self):
         tree = ET.parse(self.allowlist)

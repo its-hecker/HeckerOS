@@ -116,7 +116,8 @@ public final class DepthWallpaperActivity extends Activity {
                 write(new File(directory, "foreground.png"), fg);
                 if (Thread.currentThread().isInterrupted()) throw new IOException("Import cancelled");
                 // Publish the identity last: readers can never observe half of a new pair.
-                if (!Settings.Secure.putInt(getContentResolver(), "hecker_custom_lockscreen_clock", 1)
+                if (!Settings.Secure.putInt(getContentResolver(), DefaultAppearance.WALLPAPER_ID, DefaultAppearance.wallpaperId(this))
+                        || !Settings.Secure.putInt(getContentResolver(), "hecker_custom_lockscreen_clock", 1)
                         || !Settings.Secure.putInt(getContentResolver(), "hecker_lockscreen_clock_style", 2)
                         || !Settings.Secure.putInt(getContentResolver(), "hecker_depth_wallpaper", 1)
                         || !Settings.Secure.putString(getContentResolver(), DepthWallpaperProvider.ID, id))

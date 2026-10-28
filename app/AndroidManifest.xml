@@ -32,6 +32,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.READ_WALLPAPER_INTERNAL" />
     <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
     <uses-permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES" />
     <uses-permission android:name="android.permission.REBOOT" />
@@ -49,7 +51,7 @@
             android:label="@string/motion_feedback_title" />
         <activity android:name=".LockScreenSettingsActivity" android:exported="false" android:label="@string/lock_screen_title" />
         <activity android:name=".DepthWallpaperActivity" android:exported="false" android:label="@string/depth_wallpaper_title" />
-        <provider android:name=".DepthWallpaperProvider" android:authorities="org.hecker.suite.depth"
+        <provider android:name=".DepthWallpaperProvider" android:authorities="org.hecker.suite.depth" android:directBootAware="true"
             android:exported="true" android:grantUriPermissions="false"
             android:readPermission="android.permission.STATUS_BAR" android:writePermission="android.permission.STATUS_BAR" />
         <activity android:name=".StatusBarSettingsActivity" android:exported="false" android:label="@string/status_bar_title" />
@@ -74,6 +76,14 @@
         </service>
         <service android:name=".GamingRecordingService" android:exported="false"
             android:foregroundServiceType="mediaProjection" />
+        <receiver android:name=".AppearanceBootReceiver" android:exported="false" android:directBootAware="true">
+            <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
+            </intent-filter>
+        </receiver>
         <receiver android:name=".GamingBootReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

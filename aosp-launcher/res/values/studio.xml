@@ -156,4 +156,12 @@
   </style>
   <string name="hs_dock_search">Hecker search below dock</string>
   <string name="hs_dock_search_brand">Hecker Search</string>
+  <string name="hs_add_new_apps">Add new apps to Home screen</string>
+  <string name="hs_glass_icons">Glass icons</string>
+  <string name="hs_glass_icons_summary">Soft wallpaper blur with pale monochrome app symbols. Your selected icon packs and individual icons take priority.</string>
+  <string name="hs_google_search">Google search bar</string>
+  <string name="hs_google_search_summary">Replace Hecker search with Google search. Voice search and Lens appear when their apps are available.</string>
+  <string name="hs_google_voice">Google voice search</string>
+  <string name="hs_google_lens">Google Lens</string>
+  <string name="hs_google_unavailable">Install or enable the Google app or a web browser to use Google search.</string>
 </resources>

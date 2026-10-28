@@ -33,6 +33,8 @@ object HeckerAmbientCharging {
     const val STYLE = "hecker_aod_charging_style"
     const val CLOCK = "hecker_custom_lockscreen_clock"
     const val CLOCK_STYLE = "hecker_lockscreen_clock_style"
+    const val CLOCK_OPACITY = "hecker_lockscreen_clock_opacity"
+    const val DEPTH_WALLPAPER_ID = "hecker_depth_wallpaper_wallpaper_id"
     const val DEPTH = "hecker_depth_wallpaper"
     const val DEPTH_ID = "hecker_depth_wallpaper_id"
     const val DEPTH_WAKE = "hecker_depth_wallpaper_wake"
@@ -46,7 +48,7 @@ object HeckerAmbientCharging {
         val watts: Double = Double.NaN, val remaining: Long = -1,
         val introStart: Long = -1, val introPending: Boolean = false,
         val current: Int = Int.MIN_VALUE, val connectedAt: Long = -1,
-        val clockStyle: Int = 0, val depth: Boolean = false, val depthId: String? = null,
+        val clockStyle: Int = 0, val clockOpacity: Int = 76, val depth: Boolean = false, val depthId: String? = null,
         val depthWake: Boolean = true, val user: Int = -1, val screenAwake: Boolean = true,
         val powerSave: Boolean = false, val wakeGeneration: Long = 0,
     )
@@ -74,14 +76,14 @@ object HeckerAmbientCharging {
             override fun onChange(selfChange: Boolean) { readSettings(); reconcileDoze() }
         }
         for (key in arrayOf(ROUTE, AOD_ROUTE, "doze_always_on", STYLE, CLOCK, ANIMATION, ART,
-                CLOCK_STYLE, DEPTH, DEPTH_ID, DEPTH_WAKE)) {
+                CLOCK_STYLE, CLOCK_OPACITY, DEPTH, DEPTH_ID, DEPTH_WAKE, DEPTH_WALLPAPER_ID)) {
             c.contentResolver.registerContentObserver(Settings.Secure.getUriFor(key), false,
                 observer, UserHandle.USER_ALL)
         }
         val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED).apply {
             addAction(Intent.ACTION_SCREEN_ON); addAction(Intent.ACTION_USER_SWITCHED)
             addAction(Intent.ACTION_SCREEN_OFF); addAction(Intent.ACTION_USER_UNLOCKED)
-            addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+            addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED); addAction(Intent.ACTION_WALLPAPER_CHANGED)
         }
         c.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -93,7 +95,7 @@ object HeckerAmbientCharging {
                             wakeGeneration = mutable.value.wakeGeneration + 1)
                     }
                     Intent.ACTION_SCREEN_OFF -> mutable.value = mutable.value.copy(screenAwake = false)
-                    Intent.ACTION_USER_UNLOCKED, PowerManager.ACTION_POWER_SAVE_MODE_CHANGED -> readSettings()
+                    Intent.ACTION_USER_UNLOCKED, Intent.ACTION_WALLPAPER_CHANGED, PowerManager.ACTION_POWER_SAVE_MODE_CHANGED -> readSettings()
                     Intent.ACTION_USER_SWITCHED -> { cancelPulse(); cancelIntro(); readSettings(); reconcileDoze() }
                 }
             }
@@ -112,12 +114,28 @@ object HeckerAmbientCharging {
         val defaultAod = if (defaultId != 0 && c.resources.getBoolean(defaultId)) 1 else 0
         val route = AmbientChargingPolicy.route(value("doze_always_on", defaultAod) != 0,
             value(AOD_ROUTE, 1) != 0, value(ROUTE, 1) != 0)
+        val currentUser = android.app.ActivityManager.getCurrentUser()
+        var depthEnabled = value(DEPTH, 0) != 0
+        val expectedWallpaper = value(DEPTH_WALLPAPER_ID, Int.MIN_VALUE)
+        if (depthEnabled && expectedWallpaper != Int.MIN_VALUE) {
+            val actual = try {
+                val manager = android.app.WallpaperManager.getInstance(
+                    c.createContextAsUser(UserHandle.of(currentUser), 0))
+                val lock = manager.getWallpaperId(android.app.WallpaperManager.FLAG_LOCK)
+                if (lock > 0) lock else manager.getWallpaperId(android.app.WallpaperManager.FLAG_SYSTEM)
+            } catch (_: RuntimeException) { expectedWallpaper }
+            if (actual != expectedWallpaper) {
+                depthEnabled = false
+                Settings.Secure.putIntForUser(c.contentResolver, DEPTH, 0, UserHandle.USER_CURRENT)
+            }
+        }
         val next = previous.copy(ambient = route,
             style = value(STYLE, 1).coerceIn(0, 2), customClock = value(CLOCK, 0) != 0,
             animation = value(ANIMATION, 1) != 0, art = value(ART, 0).coerceIn(0, 2),
-            clockStyle = value(CLOCK_STYLE, 0).coerceIn(0, 2), depth = value(DEPTH, 0) != 0,
+            clockStyle = value(CLOCK_STYLE, 0).coerceIn(0, 2),
+            clockOpacity = value(CLOCK_OPACITY, 76).coerceIn(15, 100), depth = depthEnabled,
             depthId = Settings.Secure.getStringForUser(c.contentResolver, DEPTH_ID, UserHandle.USER_CURRENT),
-            depthWake = value(DEPTH_WAKE, 1) != 0, user = android.app.ActivityManager.getCurrentUser(),
+            depthWake = value(DEPTH_WAKE, 1) != 0, user = currentUser,
             screenAwake = interactive(c), powerSave = c.getSystemService(PowerManager::class.java)?.isPowerSaveMode == true)
         mutable.value = next
         if (!next.ambient || (!next.animation && next.style == 0)) cancelPulse()

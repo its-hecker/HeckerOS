@@ -35,7 +35,9 @@ public final class DepthWallpaperProvider extends ContentProvider {
             throw new FileNotFoundException("Unknown depth asset");
         String active = Settings.Secure.getString(getContext().getContentResolver(), ID);
         if (!parts.get(0).equals(active)) throw new FileNotFoundException("Inactive depth pair");
-        File file = new File(new File(new File(getContext().getFilesDir(), "depth"), parts.get(0)),
+        android.content.Context storage = "ca2aca1da00000000000000000000001".equals(parts.get(0))
+                ? getContext().createDeviceProtectedStorageContext() : getContext();
+        File file = new File(new File(new File(storage.getFilesDir(), "depth"), parts.get(0)),
                 parts.get(1) + ".png");
         return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
     }

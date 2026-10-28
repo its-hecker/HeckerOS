@@ -2,9 +2,10 @@
 package com.android.launcher3.hecker;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.graphics.Canvas;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.view.Gravity;
@@ -15,17 +16,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-/** Launcher-owned search below the dock, independent of Google widgets and Quickstep. */
+/** One inset-safe slot and one glass renderer for the user's Hecker/Google search choice. */
 public final class HeckerDockBar extends LinearLayout
         implements SharedPreferences.OnSharedPreferenceChangeListener {
     private int requestedVisibility = VISIBLE;
-    private final GradientDrawable colourWash;
     public static boolean available(Context context) {
         return HeckerStudio.res(context, "string", "hs_dock_search") != 0;
     }
     public static int profileHeight(Context context, int nativeHeight, boolean vertical) {
-        // Feed the slot into Launcher3 before it sizes the workspace, so lifting
-        // the dock also leaves room above it for the last home-screen icon row.
         return available(context) && !vertical && HeckerStudio.enabled(context, "dock_search", true)
                 ? Math.max(nativeHeight, HeckerStudio.dp(context, 60)) : nativeHeight;
     }
@@ -37,40 +35,59 @@ public final class HeckerDockBar extends LinearLayout
     }
     public HeckerDockBar(Context context) {
         super(context); setGravity(Gravity.CENTER_VERTICAL);
-        int pad = HeckerStudio.dp(context, 18); setPadding(pad, 0, pad, 0);
-        GradientDrawable glass = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
-                new int[]{0xc22b3b47, 0xc32e3646, 0xc5363549});
-        glass.setCornerRadius(HeckerStudio.dp(context, 28));
-        colourWash = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
-                new int[]{0x183f8088, 0x102f6874, 0x082f465f, 0x105d587c, 0x18796a97});
-        colourWash.setCornerRadius(HeckerStudio.dp(context, 28));
-        setWillNotDraw(false);
-        glass.setStroke(HeckerStudio.dp(context, 1), 0x38cfdee8);
-        setBackground(new RippleDrawable(ColorStateList.valueOf(0x248dbdff), glass, null));
-        ImageView mark = new ImageView(context);
-        mark.setImageResource(HeckerStudio.res(context, "drawable", "hs_search_mark"));
-        mark.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        addView(mark, new LayoutParams(HeckerStudio.dp(context, 28), HeckerStudio.dp(context, 28)));
-        TextView label = HeckerStudio.label(context, HeckerStudio.text(context, "dock_search_brand"), 15);
-        label.setTextColor(0xffe0fcff);
-        label.setSingleLine(); label.setEllipsize(android.text.TextUtils.TruncateAt.END);
-        label.setPadding(HeckerStudio.dp(context, 12), 0, 0, 0);
-        addView(label, new LayoutParams(0, -2, 1));
-        ImageView detail = new ImageView(context);
-        detail.setImageResource(android.R.drawable.ic_menu_search);
-        detail.setImageTintList(ColorStateList.valueOf(0xffced2e5));
-        detail.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
-        addView(detail, new LayoutParams(HeckerStudio.dp(context, 23), HeckerStudio.dp(context, 23)));
-        setFocusable(true); setContentDescription(HeckerStudio.text(context, "search_hint"));
-        setOnClickListener(view -> HeckerStudio.search(context));
+        int pad = HeckerStudio.dp(context, 10); setPadding(pad, 0, pad, 0);
+        GradientDrawable fallback = new GradientDrawable(); fallback.setColor(0xb830232e);
+        fallback.setCornerRadius(HeckerStudio.dp(context, 28));
+        fallback.setStroke(HeckerStudio.dp(context, 1), 0x35efd6e2);
+        setBackground(new RippleDrawable(ColorStateList.valueOf(0x25f1d5e2), fallback, null));
+        setFocusable(true);
         setOnLongClickListener(view -> { HeckerStudio.open(context, "search"); return true; });
         int id = HeckerStudio.res(context, "id", "search_container_hotseat");
         if (id != 0) setId(id);
+        rebuild();
     }
-    @Override protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        // Retain the brand colours when Glass Studio replaces the background with wallpaper frost.
-        colourWash.setBounds(0, 0, getWidth(), getHeight()); colourWash.draw(canvas);
+    private void rebuild() {
+        removeAllViews(); Context context = getContext();
+        boolean google = HeckerStudio.enabled(context, "google_search", false);
+        if (google) {
+            TextView mark = new TextView(context); mark.setText("G"); mark.setTextSize(27);
+            mark.setTextColor(0xffefdee5); mark.setTypeface(Typeface.create("sans-serif", Typeface.BOLD));
+            mark.setGravity(Gravity.CENTER); mark.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+            addView(mark, new LayoutParams(HeckerStudio.dp(context, 38), -1));
+            View spacer = new View(context); addView(spacer, new LayoutParams(0, 1, 1));
+            action("google_search", "hs_google_search", () -> HeckerGoogleSearch.search(context));
+            Intent voice = HeckerGoogleSearch.voice(), lens = HeckerGoogleSearch.lens(context);
+            if (HeckerGoogleSearch.available(context, voice))
+                action("google_voice", "hs_google_mic", () -> HeckerGoogleSearch.launch(context, voice));
+            if (HeckerGoogleSearch.available(context, lens))
+                action("google_lens", "hs_google_lens", () -> HeckerGoogleSearch.launch(context, lens));
+            setContentDescription(HeckerStudio.text(context, "google_search"));
+            setOnClickListener(view -> HeckerGoogleSearch.search(context));
+        } else {
+            ImageView mark = new ImageView(context);
+            mark.setImageResource(HeckerStudio.res(context, "drawable", "hs_search_mark"));
+            mark.setImageTintList(ColorStateList.valueOf(0xffefdee5));
+            mark.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+            LayoutParams markSize = new LayoutParams(HeckerStudio.dp(context, 28), HeckerStudio.dp(context, 28));
+            markSize.leftMargin = HeckerStudio.dp(context, 7); addView(mark, markSize);
+            TextView label = HeckerStudio.label(context, HeckerStudio.text(context, "dock_search_brand"), 15);
+            label.setTextColor(0xffefdee5); label.setSingleLine();
+            label.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            label.setPadding(HeckerStudio.dp(context, 12), 0, 0, 0);
+            addView(label, new LayoutParams(0, -2, 1));
+            action("search_hint", "hs_google_search", () -> HeckerStudio.search(context));
+            setContentDescription(HeckerStudio.text(context, "search_hint"));
+            setOnClickListener(view -> HeckerStudio.search(context));
+        }
+    }
+    private void action(String description, String resource, Runnable click) {
+        Context context = getContext(); ImageView icon = new ImageView(context);
+        icon.setImageResource(HeckerStudio.res(context, "drawable", resource));
+        icon.setImageTintList(ColorStateList.valueOf(0xffefdee5));
+        int padding = HeckerStudio.dp(context, 10); icon.setPadding(padding, padding, padding, padding);
+        icon.setContentDescription(HeckerStudio.text(context, description)); icon.setFocusable(true);
+        icon.setOnClickListener(view -> click.run());
+        addView(icon, new LayoutParams(HeckerStudio.dp(context, 44), HeckerStudio.dp(context, 48)));
     }
     @Override public void setVisibility(int visibility) {
         requestedVisibility = visibility;
@@ -79,7 +96,7 @@ public final class HeckerDockBar extends LinearLayout
     @Override protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         HeckerStudio.prefs(getContext()).registerOnSharedPreferenceChangeListener(this);
-        setVisibility(requestedVisibility);
+        rebuild(); setVisibility(requestedVisibility);
     }
     @Override protected void onDetachedFromWindow() {
         HeckerStudio.prefs(getContext()).unregisterOnSharedPreferenceChangeListener(this);
@@ -88,6 +105,8 @@ public final class HeckerDockBar extends LinearLayout
     @Override public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
         if ((HeckerStudio.PREFIX + "dock_search").equals(key)) {
             setVisibility(requestedVisibility); requestLayout();
+        } else if ((HeckerStudio.PREFIX + "google_search").equals(key)) {
+            rebuild(); requestLayout();
         }
     }
     public static int extraHeight(View bar, int nativeBottomPadding, int nativeOffset,

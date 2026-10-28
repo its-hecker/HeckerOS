@@ -40,6 +40,8 @@ The built-in home clock does not modify lock-screen or AOD clocks. Existing cloc
 
 ## Glass Studio
 
+The current experiment includes the [reference smoked-glass look, synchronized folder reveal, glass app icons, Google search toggle and default Caracal Dawn wallpaper](launcher-glass-caracal.md).
+
 The live preview uses the same wallpaper sampler and glass drawable as the dock,
 folders, search bar and widget containers. Controls include style, opacity, full
 RGB tint, frosting strength, border width, per-container enable switches and the

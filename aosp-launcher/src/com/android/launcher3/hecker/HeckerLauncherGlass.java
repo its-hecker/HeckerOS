@@ -25,6 +25,7 @@ public final class HeckerLauncherGlass {
         final SharedPreferences prefs;
         final Context app;
         final WeakHashMap<View,Drawable> originals=new WeakHashMap<>();
+        final WeakHashMap<View,Glass> panels=new WeakHashMap<>();
         Bitmap wallpaper,frosted;
         boolean stopped,queued;
         int generation;
@@ -33,7 +34,7 @@ public final class HeckerLauncherGlass {
         final Runnable refresh=this::refresh;
         final Runnable refrost=this::refrost;
         int option(String key,int fallback,int min,int max){try{return Math.max(min,Math.min(max,prefs.getInt("hecker_glass_"+key,fallback)));}catch(ClassCastException bad){return fallback;}}
-        void refresh(){queued=false;if(!stopped){restore();View v=workspace.get();if(v!=null&&mode()!=0)scan(v.getRootView(),new int[]{0});}}
+        void refresh(){queued=false;if(!stopped){restore();View v=workspace.get();if(v!=null&&mode()!=0)scan(v.getRootView(),new int[]{0});invalidate();}}
         Session(View v){workspace=new WeakReference<>(v);app=v.getContext().getApplicationContext();prefs=app.getSharedPreferences(LauncherFiles.SHARED_PREFERENCES_KEY,Context.MODE_PRIVATE);}
         int mode(){try{return Math.max(0,Math.min(2,Integer.parseInt(prefs.getString("hecker_glass","1"))));}catch(NumberFormatException|ClassCastException bad){return 1;}}
         int corner(String position){try{return Math.max(0,Math.min(48,Integer.parseInt(prefs.getString("hecker_glass_corner_"+position,"28"))));}catch(NumberFormatException|ClassCastException bad){return 28;}}
@@ -46,10 +47,10 @@ public final class HeckerLauncherGlass {
         }
         void close(){stopped=true;generation++;MAIN.removeCallbacks(refresh);MAIN.removeCallbacks(refrost);prefs.unregisterOnSharedPreferenceChangeListener(this);
             app.unregisterReceiver(changed);View v=workspace.get();if(v!=null){ViewTreeObserver observer=v.getRootView().getViewTreeObserver();if(observer.isAlive())observer.removeOnGlobalLayoutListener(this);}
-            restore();wallpaper=null;frosted=null;
+            restore();panels.clear();wallpaper=null;frosted=null;
         }
         void restore(){for(Map.Entry<View,Drawable> e:new ArrayList<>(originals.entrySet())){View v=e.getKey();if(v!=null&&v.getBackground() instanceof Glass)v.setBackground(e.getValue());}originals.clear();}
-        void invalidate(){for(View v:new ArrayList<>(originals.keySet()))if(v!=null)v.invalidate();}
+        void invalidate(){for(View v:new ArrayList<>(originals.keySet()))if(v!=null)v.invalidate();for(View v:new ArrayList<>(panels.keySet()))if(v!=null)v.invalidate();}
         void schedule(){if(!stopped&&!queued){queued=true;MAIN.post(refresh);}}
         @Override public void onSharedPreferenceChanged(SharedPreferences p,String key){if(key!=null&&key.startsWith("hecker_glass")){schedule();if(key.equals("hecker_glass_frost")){MAIN.removeCallbacks(refrost);MAIN.postDelayed(refrost,120);}}}
         @Override public void onGlobalLayout(){
@@ -61,21 +62,20 @@ public final class HeckerLauncherGlass {
             if(++count[0]>3000||v.getVisibility()!=View.VISIBLE)return;
             String name=v.getClass().getName(),id="";
             try{if(v.getId()!=View.NO_ID)id=v.getResources().getResourceEntryName(v.getId());}catch(RuntimeException ignored){}
-            String target="hecker_glass_preview".equals(v.getTag())?"preview":name.endsWith(".Hotseat")?"dock":name.endsWith(".folder.Folder")?"folders"
-                    :name.endsWith(".hecker.HeckerDockBar")||name.endsWith(".qsb.OseWidgetView")||id.equals("qsb_container")||id.equals("search_container_workspace")||id.equals("search_container_all_apps")?"search"
+            String target="hecker_glass_preview".equals(v.getTag())?"preview":name.endsWith(".Hotseat")?"dock":name.endsWith(".hecker.HeckerDockBar")||name.endsWith(".qsb.OseWidgetView")||id.equals("qsb_container")||id.equals("search_container_workspace")||id.equals("search_container_all_apps")?"search"
                     :v instanceof android.appwidget.AppWidgetHostView?"widgets":null;
             if(v instanceof android.appwidget.AppWidgetHostView && ((android.appwidget.AppWidgetHostView)v).getAppWidgetInfo()!=null
                     && ((android.appwidget.AppWidgetHostView)v).getAppWidgetInfo().provider.equals(new ComponentName(app,HeckerClockWidget.class))
                     && v instanceof ViewGroup && ((ViewGroup)v).getChildCount()>0 && ((ViewGroup)v).getChildAt(0) instanceof HeckerClockView
                     && !((HeckerClockView)((ViewGroup)v).getChildAt(0)).style().equals("glass"))target=null;
-            if(target!=null&&prefs.getBoolean("hecker_glass_"+target,true)&&!originals.containsKey(v)){
+            if(target!=null&&prefs.getBoolean("hecker_glass_"+target,!"dock".equals(target))&&!originals.containsKey(v)){
                 originals.put(v,v.getBackground());v.setBackground(new Glass(v,this));
             }
             if(v instanceof ViewGroup){ViewGroup group=(ViewGroup)v;for(int i=0;i<group.getChildCount();i++)scan(group.getChildAt(i),count);}
         }
         void refrost(){
             Bitmap source=wallpaper;if(source==null||stopped)return;
-            int request=++generation,radius=option("frost",14,0,32);
+            int request=++generation,radius=option("frost",18,0,32);
             WORKER.execute(()->{Bitmap soft=frost(source,radius);MAIN.post(()->{if(!stopped&&request==generation){frosted=soft;invalidate();}});});
         }
         void load(){
@@ -94,7 +94,7 @@ public final class HeckerLauncherGlass {
                             while(Math.max(bounds.outWidth,bounds.outHeight)/sample>1024)sample*=2;
                             options.inSampleSize=sample;options.inPreferredConfig=Bitmap.Config.ARGB_8888;
                             image=BitmapFactory.decodeFileDescriptor(file.getFileDescriptor(),null,options);
-                            if(image!=null)blur=frost(image,option("frost",14,0,32));
+                            if(image!=null)blur=frost(image,option("frost",18,0,32));
                         }
                     }
                 }catch(Exception unavailable){android.util.Log.w("HeckerLauncher","Wallpaper glass uses translucent fallback",unavailable);}
@@ -125,46 +125,118 @@ public final class HeckerLauncherGlass {
             }
         }
     }
-    private static final class Glass extends Drawable {
-        final WeakReference<View> host;final Session owner;
-        final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);final RectF bounds=new RectF();final Path path=new Path();
-        RuntimeShader liquid;int alpha=255;
-        private static final String PROGRAM="uniform shader image;uniform float2 size;uniform float4 radii;"
-                +"half4 main(float2 xy){float2 p=xy-size*.5;float radius=p.x < 0.0 ? (p.y < 0.0 ? radii.x : radii.w) : (p.y < 0.0 ? radii.y : radii.z);float2 q=abs(p)-size*.5+radius;"
-                +"float d=length(max(q,0.))+min(max(q.x,q.y),0.)-radius;"
-                +"float2 n=normalize(p+float2(.001));float edge=1.-smoothstep(0.,14.,abs(d));"
-                +"half4 c=image.eval(xy+n*edge*7.);return half4(c.rgb*.82+half3(.025,.04,.06)+edge*.06,1.);}";
-        Glass(View view,Session owner){host=new WeakReference<>(view);this.owner=owner;}
-        @Override public void draw(Canvas canvas){
-            View view=host.get();if(view==null)return;bounds.set(getBounds());if(bounds.isEmpty())return;
-            float density=view.getResources().getDisplayMetrics().density,limit=Math.min(bounds.width(),bounds.height())/2;
-            float[] radii=new float[8];String[] positions={"tl","tr","br","bl"};
-            for(int i=0;i<4;i++)radii[i*2]=radii[i*2+1]=Math.min(limit,owner.corner(positions[i])*density);
-            path.reset();path.addRoundRect(bounds,radii,Path.Direction.CW);
-            boolean night=(view.getResources().getConfiguration().uiMode&android.content.res.Configuration.UI_MODE_NIGHT_MASK)==android.content.res.Configuration.UI_MODE_NIGHT_YES;
-            int opacity=owner.option("opacity",60,0,100)*alpha/100;
-            int tint=owner.option("tint",0xffaac8da,Integer.MIN_VALUE,Integer.MAX_VALUE);
-            paint.setShader(null);paint.setColor(tint);paint.setAlpha(opacity);
-            Bitmap image=owner.option("frost",14,0,32)>0?owner.frosted:owner.wallpaper;
-            if(image==null)image=owner.wallpaper;
-            if(image!=null&&!image.isRecycled())try{
-                int[] position=new int[2];view.getLocationOnScreen(position);View root=view.getRootView();
-                float w=root.getWidth(),h=root.getHeight(),zoom=1f;
-                int maxScale=view.getResources().getIdentifier("config_wallpaperMaxScale","dimen","android");
-                if(maxScale!=0)zoom=view.getResources().getFloat(maxScale);
-                float scale=Math.max(w/image.getWidth(),h/image.getHeight())*zoom;
-                Matrix matrix=new Matrix();matrix.setScale(scale,scale);matrix.postTranslate((w-image.getWidth()*scale)*owner.offset-position[0],(h-image.getHeight()*scale)*.5f-position[1]);
-                BitmapShader texture=new BitmapShader(image,Shader.TileMode.CLAMP,Shader.TileMode.CLAMP);texture.setLocalMatrix(matrix);texture.setFilterMode(BitmapShader.FILTER_MODE_LINEAR);
-                paint.setAlpha(opacity);
-                if(owner.mode()==2){if(liquid==null)liquid=new RuntimeShader(PROGRAM);liquid.setInputShader("image",texture);liquid.setFloatUniform("size",bounds.width(),bounds.height());liquid.setFloatUniform("radii",radii[0],radii[2],radii[4],radii[6]);paint.setShader(liquid);}else paint.setShader(texture);
-            }catch(RuntimeException unsupported){paint.setShader(null);}
-            canvas.drawPath(path,paint);paint.setShader(null);paint.setColor(tint);paint.setAlpha(opacity/2);canvas.drawPath(path,paint);
-            int border=owner.option("border",1,0,4);
-            if(border>0){paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(density*border);paint.setColor(view instanceof HeckerDockBar ? (night?0x30ffffff:0x301c3848) : night?0x85ffffff:0x851c3848);canvas.drawPath(path,paint);paint.setStyle(Paint.Style.FILL);}
+    private static Session session(View host) {
+        View root = host.getRootView();
+        for (Session session : SESSIONS.values()) {
+            View workspace = session.workspace.get();
+            if (!session.stopped && workspace != null && workspace.getRootView() == root) return session;
         }
-        @Override public void setAlpha(int value){alpha=value;invalidateSelf();}
-        @Override public void setColorFilter(ColorFilter filter){paint.setColorFilter(filter);}
-        @Override public int getOpacity(){return PixelFormat.TRANSLUCENT;}
+        return null;
+    }
+    private static Glass panel(Session session, View host) {
+        Glass result = session.panels.get(host);
+        if (result == null) { result = new Glass(host, session); session.panels.put(host, result); }
+        return result;
+    }
+    /** Called INSIDE Folder.dispatchDraw's native reveal clip, including the closing animation.
+     * Folder.getBackground() returns its private gradient, not View's background. Installing a
+     * second View background paints outside that clip and leaves a full-size trailing rectangle.
+     */
+    public static boolean drawFolder(View host, Canvas canvas, Drawable nativeBackground) {
+        Session session = session(host);
+        if (session == null || session.mode() == 0 || !session.prefs.getBoolean("hecker_glass_folders", true)) return false;
+        Glass glass = panel(session, host); glass.setBounds(nativeBackground.getBounds());
+        glass.round = false; glass.draw(canvas); return true;
+    }
+    public static boolean drawFolderPreview(View host, Canvas canvas, Path mask,
+            int left, int top, int diameter) {
+        if (host == null) return false;
+        Session session = session(host);
+        if (session == null || session.mode() == 0 || !session.prefs.getBoolean("hecker_glass_folders", true)) return false;
+        Glass glass = panel(session, host); glass.round = false; glass.setBounds(left, top, left + diameter, top + diameter);
+        int save = canvas.save(); canvas.clipPath(mask); glass.draw(canvas); canvas.restoreToCount(save);
+        return true;
+    }
+    static boolean drawIconPlate(View host, Canvas canvas, Rect bounds) {
+        if (host == null) return false;
+        Session session = session(host);
+        if (session == null || session.mode() == 0) return false;
+        Glass glass = panel(session, host); glass.round = true; glass.setBounds(bounds); glass.draw(canvas);
+        return true;
+    }
+    private static final class Glass extends Drawable {
+        final WeakReference<View> host; final Session owner;
+        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+        final RectF bounds = new RectF(); final Path path = new Path();
+        final Matrix matrix = new Matrix(); final int[] position = new int[2];
+        final float[] radii = new float[8];
+        private static final String[] POSITIONS = {"tl", "tr", "br", "bl"};
+        Bitmap textureImage; BitmapShader texture; RuntimeShader liquid;
+        final RectF rimBounds = new RectF(); LinearGradient rim;
+        int alpha = 255; boolean round;
+        private static final String PROGRAM = "uniform shader image;uniform float2 size;uniform float4 radii;"
+                + "half4 main(float2 xy){float2 p=xy-size*.5;float radius=p.x < 0.0 ? (p.y < 0.0 ? radii.x : radii.w) : (p.y < 0.0 ? radii.y : radii.z);float2 q=abs(p)-size*.5+radius;"
+                + "float d=length(max(q,0.))+min(max(q.x,q.y),0.)-radius;"
+                + "float2 n=normalize(p+float2(.001));float edge=1.-smoothstep(0.,14.,abs(d));"
+                + "half4 c=image.eval(xy+n*edge*4.);return half4(c.rgb+edge*.025,1.);}";
+        Glass(View view, Session owner) { host = new WeakReference<>(view); this.owner = owner; }
+        @Override public void draw(Canvas canvas) {
+            View view = host.get(); if (view == null || alpha == 0) return;
+            bounds.set(getBounds()); if (bounds.isEmpty()) return;
+            float density = view.getResources().getDisplayMetrics().density;
+            float limit = Math.min(bounds.width(), bounds.height()) / 2;
+            for (int i = 0; i < 4; i++) radii[i * 2] = radii[i * 2 + 1] = round ? limit
+                    : Math.min(limit, owner.corner(POSITIONS[i]) * density);
+            path.reset(); path.addRoundRect(bounds, radii, Path.Direction.CW);
+            float opacity = owner.option("opacity", 72, 0, 100) / 100f;
+            if (opacity == 0) return;
+            int tint = owner.option("tint", 0xff30232e, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            Bitmap image = owner.option("frost", 18, 0, 32) > 0 ? owner.frosted : owner.wallpaper;
+            if (image == null) image = owner.wallpaper;
+            paint.setShader(null); paint.setStyle(Paint.Style.FILL);
+            if (image != null && !image.isRecycled()) try {
+                view.getLocationOnScreen(position); View root = view.getRootView();
+                float w = root.getWidth(), h = root.getHeight(), zoom = 1f;
+                int maxScale = view.getResources().getIdentifier("config_wallpaperMaxScale", "dimen", "android");
+                if (maxScale != 0) zoom = view.getResources().getFloat(maxScale);
+                float scale = Math.max(w / image.getWidth(), h / image.getHeight()) * zoom;
+                matrix.setScale(scale, scale);
+                matrix.postTranslate((w - image.getWidth() * scale) * owner.offset - position[0],
+                        (h - image.getHeight() * scale) * .5f - position[1]);
+                if (textureImage != image) {
+                    textureImage = image; texture = new BitmapShader(image, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+                    texture.setFilterMode(BitmapShader.FILTER_MODE_LINEAR);
+                }
+                texture.setLocalMatrix(matrix);
+                if (owner.mode() == 2) {
+                    if (liquid == null) liquid = new RuntimeShader(PROGRAM);
+                    liquid.setInputShader("image", texture); liquid.setFloatUniform("size", bounds.width(), bounds.height());
+                    liquid.setFloatUniform("radii", radii[0], radii[2], radii[4], radii[6]); paint.setShader(liquid);
+                } else paint.setShader(texture);
+                paint.setColor(Color.WHITE); paint.setAlpha(Math.round(alpha * opacity * .94f));
+                canvas.drawPath(path, paint);
+            } catch (RuntimeException unsupported) { paint.setShader(null); }
+            paint.setShader(null); paint.setColor(tint);
+            paint.setAlpha(Math.round(alpha * opacity * (image == null ? .98f : .65f)));
+            canvas.drawPath(path, paint);
+            int border = owner.option("border", 1, 0, 4);
+            if (border > 0) {
+                // Inset the rim so it remains inside both the reveal clip and icon plate.
+                paint.setStyle(Paint.Style.STROKE); paint.setStrokeWidth(density * border * .65f);
+                if (rim == null || !rimBounds.equals(bounds)) {
+                    rimBounds.set(bounds);
+                    rim = new LinearGradient(bounds.left, bounds.top, bounds.right, bounds.bottom,
+                            new int[]{0x65fff1f3, 0x12ffffff, 0x30dfbacd}, null, Shader.TileMode.CLAMP);
+                }
+                paint.setShader(rim);
+                paint.setAlpha(Math.round(alpha * opacity)); canvas.drawPath(path, paint);
+                paint.setShader(null); paint.setStyle(Paint.Style.FILL);
+            }
+        }
+        @Override public void setAlpha(int value) { alpha = Math.max(0, Math.min(255, value)); invalidateSelf(); }
+        @Override public int getAlpha() { return alpha; }
+        @Override public void setColorFilter(ColorFilter filter) { paint.setColorFilter(filter); invalidateSelf(); }
+        @Override public int getOpacity() { return PixelFormat.TRANSLUCENT; }
     }
     private HeckerLauncherGlass(){}
 }

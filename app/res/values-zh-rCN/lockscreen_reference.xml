@@ -1,0 +1,5 @@
+<resources>
+    <string name="caracal_defaults_title">应用猞猁黎明主题</string>
+    <string name="caracal_defaults_summary">设置内置动漫猞猁女孩主屏幕与锁屏壁纸、半透明大时钟及唤醒景深过渡。</string>
+    <string name="lock_clock_opacity">大时钟不透明度</string>
+</resources>

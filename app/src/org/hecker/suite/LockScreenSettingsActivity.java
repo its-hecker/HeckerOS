@@ -28,12 +28,35 @@ public final class LockScreenSettingsActivity extends Activity {
         faceCard.addView(Ui.text(this, getString(R.string.face_island_summary), 14, false));
         page.addView(faceCard);
         Ui.actionCard(this,page,R.string.lyrics_title,R.string.lyrics_summary,v->startActivity(new Intent(this,LyricsSettingsActivity.class)));
+        Ui.actionCard(this, page, R.string.caracal_defaults_title, R.string.caracal_defaults_summary, v -> {
+            AppearanceBootReceiver.WORKER.execute(() -> {
+                boolean applied;
+                try { applied = DefaultAppearance.apply(this, true); }
+                catch (Exception | OutOfMemoryError failure) { applied = false; }
+                final boolean success = applied;
+                runOnUiThread(() -> { if (!isFinishing() && !isDestroyed()) {
+                    Toast.makeText(this, success ? R.string.depth_wallpaper_applied : R.string.depth_wallpaper_invalid,
+                            Toast.LENGTH_LONG).show(); if (success) recreate();
+                } });
+            });
+        });
         Ui.actionCard(this,page,R.string.lockscreen_wallpaper_title,R.string.lockscreen_wallpaper_summary,v->SuitePages.wallpaper(this));
         LinearLayout clock = Ui.card(this);
         toggle(clock, R.string.custom_clock_title, R.string.custom_clock_summary,
                 "hecker_custom_lockscreen_clock", 0);
         choices(clock, "hecker_lockscreen_clock_style", 0,
                 new int[]{R.string.lock_clock_geometric, R.string.lock_clock_word, R.string.lock_clock_tall});
+        android.widget.SeekBar opacity = new android.widget.SeekBar(this); opacity.setMin(15); opacity.setMax(100);
+        opacity.setProgress(Settings.Secure.getInt(getContentResolver(), "hecker_lockscreen_clock_opacity", 76));
+        clock.addView(Ui.text(this, getString(R.string.lock_clock_opacity), 16, true));
+        opacity.setContentDescription(getString(R.string.lock_clock_opacity));
+        opacity.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+            public void onStartTrackingTouch(android.widget.SeekBar bar) { }
+            public void onStopTrackingTouch(android.widget.SeekBar bar) { }
+            public void onProgressChanged(android.widget.SeekBar bar, int value, boolean user) {
+                if (user) put("hecker_lockscreen_clock_opacity", value);
+            }
+        }); clock.addView(opacity);
         page.addView(clock);
         LinearLayout depth = Ui.card(this);
         toggle(depth, R.string.depth_wallpaper_title, R.string.depth_wallpaper_summary,

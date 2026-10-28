@@ -29,7 +29,7 @@ public final class HeckerIconStudio {
             for (ResolveInfo r : c.getPackageManager().queryIntentActivities(new Intent(action), 0)) unique.put(r.activityInfo.packageName, r);
         return new ArrayList<>(unique.values());
     }
-    public static synchronized void clear() { ICONS.evictAll(); FILTERS.clear(); }
+    public static synchronized void clear() { ICONS.evictAll(); FILTERS.clear(); HeckerGlassIcons.clear(); }
     /** Supported public icon-pack format, in res/xml/appfilter.xml or assets/appfilter.xml. */
     public static Map<String, String> filter(Context c, String pack) {
         if (FILTERS.containsKey(pack)) return FILTERS.get(pack);
@@ -64,12 +64,12 @@ public final class HeckerIconStudio {
         Context c = view.getContext(); String target = drawer ? "drawer" : "home";
         view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, HeckerStudio.number(c, target + "_label_size", 13, 9, 20));
     }
-    public static Drawable icon(Context c, ComponentName component, UserHandle user, Drawable original, Runnable refresh) {
+    public static Drawable icon(Context c, ComponentName component, UserHandle user, Drawable original, Runnable refresh, android.view.View host) {
         if (component == null || original == null) return original;
         String selected = HeckerStudio.value(c, "icon_" + HeckerStudio.appKey(c, component, user), "");
         if (selected.equals("@system")) return shaped(c, original);
         String pack = selected.isEmpty() ? HeckerStudio.value(c, "icon_pack", "") : selected.split("\\|", 2)[0];
-        if (pack.isEmpty()) return shaped(c, original);
+        if (pack.isEmpty()) return HeckerGlassIcons.icon(c, component, user, shaped(c, original), refresh, host);
         String key = pack + ":" + selected + ":" + component.flattenToString() + ":" + c.getResources().getConfiguration().densityDpi;
         Bitmap cached;
         synchronized (HeckerIconStudio.class) {
@@ -117,6 +117,8 @@ public final class HeckerIconStudio {
             float radius = shape == 1 ? r.width() / 2 : r.width() * (shape == 2 ? .28f : .15f);
             path.addRoundRect(r, radius, radius, Path.Direction.CW); int save = canvas.save(); canvas.clipPath(path); child.setBounds(getBounds()); child.draw(canvas); canvas.restoreToCount(save);
         }
+        @Override public int getIntrinsicWidth() { return child.getIntrinsicWidth(); }
+        @Override public int getIntrinsicHeight() { return child.getIntrinsicHeight(); }
         @Override public void setAlpha(int value) { child.setAlpha(value); }
         @Override public void setColorFilter(ColorFilter value) { child.setColorFilter(value); }
         @Override public int getOpacity() { return PixelFormat.TRANSLUCENT; }

@@ -20,7 +20,8 @@ public abstract class ContentProvider { public Context context=new Context(); pu
             'android/database/Cursor.java':'package android.database;public interface Cursor{}',
             'android/content/ContentResolver.java':'package android.content;public class ContentResolver {public String active;}',
             'android/content/Context.java':'''package android.content;
-public class Context {public java.io.File directory;public final ContentResolver resolver=new ContentResolver();
+public class Context {public java.io.File directory;public Context device;
+ public Context createDeviceProtectedStorageContext(){return device;}public final ContentResolver resolver=new ContentResolver();
  public android.content.pm.ApplicationInfo getApplicationInfo(){return new android.content.pm.ApplicationInfo();}
  public android.content.pm.PackageManager getPackageManager(){return new android.content.pm.PackageManager();}
  public ContentResolver getContentResolver(){return resolver;}public java.io.File getFilesDir(){return directory;} }''',
@@ -58,6 +59,10 @@ public class DepthReaderProbe {
   denied(()->p.openFile(Uri.parse("content://org.hecker.suite.depth/"+id+"/unknown"),"r"));
   p.context.resolver.active="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";denied(()->p.openFile(uri,"r"));
   p.context.directory=new File(args[0],"user10");p.context.resolver.active=id;denied(()->p.openFile(uri,"r"));
+  p.context.device=new android.content.Context();p.context.device.directory=new File(args[0],"de-user10");
+  String builtin="ca2aca1da00000000000000000000001";p.context.resolver.active=builtin;
+  File bundled=new File(p.context.device.directory,"depth/"+builtin+"/foreground.png");bundled.getParentFile().mkdirs();bundled.createNewFile();
+  if(!p.openFile(Uri.parse("content://org.hecker.suite.depth/"+builtin+"/foreground"),"r").file.equals(bundled))throw new AssertionError("Direct-boot defaults");
   System.out.println("Production depth provider: owner/SystemUI signatures, active identity, read-only paths and per-user storage PASS");
  }
 }''',

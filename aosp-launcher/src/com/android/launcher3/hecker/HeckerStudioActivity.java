@@ -77,6 +77,11 @@ public final class HeckerStudioActivity extends Activity {
         slider("home_columns", 5, 3, 7, false); slider("home_rows", 5, 4, 9, false);
         slider("drawer_columns", 5, 3, 8, false); slider("drawer_rows", 6, 3, 9, false);
         slider("home_spacing", 0, 0, 18, false); slider("drawer_spacing", 0, 0, 18, false); slider("dock_count", 5, 3, 7, false);
+        Switch addApps = new Switch(this); addApps.setText(t("add_new_apps")); addApps.setTextColor(0xfff5f2e8);
+        addApps.setChecked(com.android.launcher3.SessionCommitReceiver.isEnabled(
+                this, android.os.Process.myUserHandle()));
+        addApps.setOnCheckedChangeListener((button, checked) -> HeckerStudio.prefs(this).edit()
+                .putBoolean(com.android.launcher3.SessionCommitReceiver.ADD_ICON_PREFERENCE_KEY, checked).apply()); page.addView(addApps);
         toggle("layout_lock", false); toggle("hecker_double_tap_sleep", true, false); toggle("hecker_swipe_down", true, false);
         button("universal_search", v -> HeckerStudio.open(this, "search"));
     }
@@ -86,26 +91,26 @@ public final class HeckerStudioActivity extends Activity {
     private void glass() {
         HeckerGlassPreview preview = new HeckerGlassPreview(this); page.addView(preview, new LinearLayout.LayoutParams(-1, HeckerStudio.dp(this, 160)));
         choice("glass_presets", new String[]{t("clear"), t("frosted"), t("smoked"), t("violet")}, selected -> {
-            int[] opacity = {25, 60, 82, 56}, frost = {0, 14, 22, 18}, tint = {0xffd2edf3, 0xffaac8da, 0xff15232f, 0xff7763ab};
+            int[] opacity = {25, 72, 82, 66}, frost = {0, 18, 22, 18}, tint = {0xff30232e, 0xff30232e, 0xff19151e, 0xff49303f};
             HeckerStudio.prefs(this).edit().putString("hecker_glass", "1").putInt("hecker_glass_opacity", opacity[selected])
                     .putInt("hecker_glass_frost", frost[selected]).putInt("hecker_glass_tint", tint[selected]).putInt("hecker_glass_border", 1).apply(); render();
         });
         choice("glass_mode", new String[]{t("off"), t("frosted"), t("liquid")}, selected -> HeckerStudio.prefs(this).edit().putString("hecker_glass", Integer.toString(selected)).apply());
-        glassSlider("opacity", 60, 0, 100); glassSlider("frost", 14, 0, 32); glassSlider("border", 1, 0, 4);
+        glassSlider("opacity", 72, 0, 100); glassSlider("frost", 18, 0, 32); glassSlider("border", 1, 0, 4);
         choice("tint", new String[]{t("ice"), t("mint"), t("violet"), t("smoked"), t("warm")}, selected -> {
             int[] colors = {0xffaac8da, 0xff86c9b2, 0xff8974b7, 0xff15232f, 0xffd9bba0};
             HeckerStudio.prefs(this).edit().putInt("hecker_glass_tint", colors[selected]).apply();
         });
         // Full RGB tint control also allows colors outside the presets.
-        int tint = HeckerStudio.prefs(this).getInt("hecker_glass_tint", 0xffaac8da);
+        int tint = HeckerStudio.prefs(this).getInt("hecker_glass_tint", 0xff30232e);
         for (int channel = 0; channel < 3; channel++) {
             final int shift = (2 - channel) * 8; final String name = new String[]{"red", "green", "blue"}[channel];
             rawSlider(name, tint >> shift & 255, 0, 255, value -> {
-                int color = HeckerStudio.prefs(this).getInt("hecker_glass_tint", 0xffaac8da);
+                int color = HeckerStudio.prefs(this).getInt("hecker_glass_tint", 0xff30232e);
                 HeckerStudio.prefs(this).edit().putInt("hecker_glass_tint", (color & ~(255 << shift)) | value << shift | 0xff000000).apply();
             }, true);
         }
-        for (String target : new String[]{"dock", "folders", "search", "widgets"}) toggle("hecker_glass_" + target, true, false);
+        for (String target : new String[]{"dock", "folders", "search", "widgets"}) toggle("hecker_glass_" + target, !target.equals("dock"), false);
         for (String position : new String[]{"tl", "tr", "br", "bl"}) {
             int current; try { current = Integer.parseInt(HeckerStudio.prefs(this).getString("hecker_glass_corner_" + position, "28")); } catch (RuntimeException bad) { current = 28; }
             rawSlider("corner_" + position, current, 0, 48, value -> HeckerStudio.prefs(this).edit().putString("hecker_glass_corner_" + position, Integer.toString(value)).apply(), true);
@@ -146,6 +151,8 @@ public final class HeckerStudioActivity extends Activity {
         });
     }
     private void icons() {
+        toggle("glass_icons", true);
+        page.addView(HeckerStudio.label(this, t("glass_icons_summary"), 14));
         button("icon_pack", v -> choosePack(pack -> { HeckerIconStudio.clear(); HeckerStudio.prefs(this).edit().putString(HeckerStudio.PREFIX + "icon_pack", pack).apply(); }));
         choice("icon_shape", new String[]{t("system"), t("circle"), t("squircle"), t("rounded_square")}, selected -> HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX + "icon_shape", selected).apply());
         slider("icon_size", 100, 65, 125, false);
@@ -174,7 +181,9 @@ public final class HeckerStudioActivity extends Activity {
         button("hidden_apps", v -> chooseApp(true)); page.addView(HeckerStudio.label(this, t("hide_summary"), 14));
     }
     private void search() {
-        toggle("dock_search", true); toggle("universal_search", true); toggle("search_shortcuts", true);
+        toggle("dock_search", true); toggle("google_search", false);
+        page.addView(HeckerStudio.label(this, t("google_search_summary"), 14));
+        toggle("universal_search", true); toggle("search_shortcuts", true);
         page.addView(HeckerStudio.label(this, t("search_local"), 14)); button("try_search", v -> HeckerStudio.search(this));
     }
     private interface Pick { void accept(String value); }

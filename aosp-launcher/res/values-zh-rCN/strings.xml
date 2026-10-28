@@ -22,4 +22,12 @@
     <string name="hecker_glass_corner_bl">左下圆角</string>
   <string name="hs_dock_search">底部托盘下方的 Hecker 搜索栏</string>
   <string name="hs_dock_search_brand">Hecker 搜索</string>
+  <string name="hs_add_new_apps">将新应用添加到主屏幕</string>
+  <string name="hs_glass_icons">玻璃图标</string>
+  <string name="hs_glass_icons_summary">柔和的壁纸模糊与浅色单色应用符号。您选择的图标包和单个图标优先显示。</string>
+  <string name="hs_google_search">Google 搜索栏</string>
+  <string name="hs_google_search_summary">将 Hecker 搜索替换为 Google 搜索。安装相应应用后显示语音搜索和智能镜头。</string>
+  <string name="hs_google_voice">Google 语音搜索</string>
+  <string name="hs_google_lens">Google 智能镜头</string>
+  <string name="hs_google_unavailable">请安装或启用 Google 应用或浏览器以使用 Google 搜索。</string>
 </resources>

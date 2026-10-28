@@ -157,7 +157,7 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
                 1 -> reference.word(c, hour, minute, clock.second.uppercase(Locale.getDefault()),
                     size.width / density, size.height / density, rotation, small)
                 2 -> reference.tall(c, hour, minute, DateFormat.is24HourFormat(context), clock.second,
-                    size.width / density, size.height / density, reveal, small)
+                    size.width / density, size.height / density, reveal, small, state.clockOpacity / 100f)
                 else -> renderer.clock(c,clock.first,clock.second,size.width/density,if(small) 36f else 52f,
                     if(small) 52f else 72f)
             }

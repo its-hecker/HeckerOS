@@ -36,7 +36,8 @@ def main():
         "android.permission.FOREGROUND_SERVICE_SPECIAL_USE", "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
         "android.permission.RECEIVE_BOOT_COMPLETED", "android.permission.MANAGE_ROLE_HOLDERS",
         "android.permission.CHANGE_OVERLAY_PACKAGES", "android.permission.REBOOT",
-        "android.permission.WRITE_SECURE_SETTINGS"}
+        "android.permission.WRITE_SECURE_SETTINGS", "android.permission.SET_WALLPAPER",
+        "android.permission.READ_WALLPAPER_INTERNAL"}
     assert not any("TEST_LOCK_APPS" in p for p in permissions)
     # LAN discovery needs sockets; hotspot administration remains in a separate UID.
     assert not {"android.permission.NETWORK_SETTINGS", "android.permission.TETHER_PRIVILEGED",
@@ -66,14 +67,20 @@ def main():
     assert services[".GamingService"].get(A + "foregroundServiceType") == "specialUse"
     assert services[".GamingRecordingService"].get(A + "foregroundServiceType") == "mediaProjection"
     receivers = app.findall("receiver")
-    assert len(receivers) == 1 and receivers[0].get(A + "exported") == "false"
+    assert {node.get(A + "name") for node in receivers} == {".GamingBootReceiver", ".AppearanceBootReceiver"}
+    assert all(node.get(A + "exported") == "false" for node in receivers)
+    appearance = next(node for node in receivers if node.get(A + "name") == ".AppearanceBootReceiver")
+    assert appearance.get(A + "directBootAware") == "true"
+    assert {node.get(A + "name") for node in appearance.findall("intent-filter/action")} == {
+        "android.intent.action.LOCKED_BOOT_COMPLETED", "android.intent.action.BOOT_COMPLETED",
+        "android.intent.action.MY_PACKAGE_REPLACED", "android.intent.action.WALLPAPER_CHANGED"}
     allowlist = ET.parse(ROOT / "configs/privapp-permissions-hecker-suite.xml").getroot()
     assert {node.get("name") for node in allowlist.findall(".//permission")} == {
         "android.permission.SYSTEM_CAMERA", "android.permission.ACCESS_FPS_COUNTER", "android.permission.MANAGE_GAME_MODE",
         "android.permission.REAL_GET_TASKS", "android.permission.START_ACTIVITIES_FROM_BACKGROUND",
         "android.permission.KILL_ALL_BACKGROUND_PROCESSES", "android.permission.FORCE_STOP_PACKAGES",
         "android.permission.CHANGE_OVERLAY_PACKAGES", "android.permission.REBOOT",
-        "android.permission.WRITE_SECURE_SETTINGS"}
+        "android.permission.WRITE_SECURE_SETTINGS", "android.permission.READ_WALLPAPER_INTERNAL"}
     freeform = ET.parse(ROOT / "configs/hecker-suite-freeform.xml").getroot()
     assert [node.get("name") for node in freeform.findall("feature")] == ["android.software.freeform_window_management"]
     assert '"HeckerSuiteFreeformFeature"' in (ROOT / "Android.bp").read_text()

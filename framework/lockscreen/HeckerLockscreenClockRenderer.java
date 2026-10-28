@@ -86,11 +86,15 @@ public final class HeckerLockscreenClockRenderer {
     }
     public void tall(Canvas c, int hour, int minute, boolean twentyFourHour, String date,
             float width, float height, float reveal, boolean compact) {
+        tall(c, hour, minute, twentyFourHour, date, width, height, reveal, compact, .76f);
+    }
+    public void tall(Canvas c, int hour, int minute, boolean twentyFourHour, String date,
+            float width, float height, float reveal, boolean compact, float opacity) {
         if (width <= 0 || height <= 0) return;
         String h = String.format(Locale.US, "%02d", twentyFourHour ? hour : (hour + 11) % 12 + 1);
         String m = String.format(Locale.US, "%02d", minute);
         paint.reset(); paint.setAntiAlias(true); paint.setColor(Color.WHITE);
-        paint.setAlpha(Math.round(255 * Math.max(0, Math.min(1, reveal))));
+        paint.setAlpha(Math.round(255 * Math.max(0, Math.min(1, reveal)) * Math.max(.15f, Math.min(1, opacity))));
         paint.setTypeface(Typeface.create("sans-serif-thin", Typeface.NORMAL));
         float target = compact ? height * .56f : height * .43f;
         paint.setTextSize(200);
@@ -104,7 +108,8 @@ public final class HeckerLockscreenClockRenderer {
         paint.setTextScaleX(1); paint.setTextSize(12);
         paint.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         float dateWidth = paint.measureText(date);
-        if (dateWidth > width - 60) paint.setTextSize(12 * Math.max(1, width - 60) / dateWidth);
-        c.drawText(date, 30, height - 12, paint);
+        float dateSpace = Math.max(1, width * .46f);
+        if (dateWidth > dateSpace) paint.setTextSize(12 * dateSpace / dateWidth);
+        c.drawText(date, Math.max(30, width - 28 - paint.measureText(date)), compact ? height - 12 : 34, paint);
     }
 }

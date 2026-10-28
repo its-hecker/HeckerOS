@@ -1,0 +1,5 @@
+<resources>
+    <string name="caracal_defaults_title">Apply Caracal Dawn</string>
+    <string name="caracal_defaults_summary">Set the bundled anime Caracal-girl home and lock wallpapers, translucent tall clock and wake depth transition.</string>
+    <string name="lock_clock_opacity">Tall clock opacity</string>
+</resources>

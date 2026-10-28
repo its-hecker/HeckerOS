@@ -2,6 +2,7 @@
 
 This experimental `feat/settings-depth-lockscreen-20261028` branch adds the
 [reference Settings homepage, animated word clock and imported-layer depth clock](docs/settings-depth-lockscreen.md)
+and [synchronized smoked-glass folders/icons/search, launcher toggles and default Caracal Dawn artwork](docs/launcher-glass-caracal.md)
 on top of the complete Coral root-privacy/astronaut test. Use the matching Coral
 local-manifest branch. Full ROM and phone validation remain pending; the navigation
 freeze is under investigation and is not claimed fixed.
