@@ -74,6 +74,8 @@ public final class HeckerStudioActivity extends Activity {
     }
     private void home() {
         page.addView(HeckerStudio.label(this, t("layout_migration"), 14));
+        toggle("home_depth", true); toggle("home_depth_wake", true);
+        page.addView(HeckerStudio.label(this, t("home_depth_summary"), 14));
         slider("home_columns", 5, 3, 7, false); slider("home_rows", 5, 4, 9, false);
         slider("drawer_columns", 5, 3, 8, false); slider("drawer_rows", 6, 3, 9, false);
         slider("home_spacing", 0, 0, 18, false); slider("drawer_spacing", 0, 0, 18, false); slider("dock_count", 5, 3, 7, false);
@@ -138,7 +140,8 @@ public final class HeckerStudioActivity extends Activity {
         }
         choice("clock_palette", new String[]{t("aurora"), t("sunrise"), t("lagoon"), t("orchid"), t("classic")},
                 selectedPalette -> HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX + "clock_palette", selectedPalette).apply());
-        toggle("clock_animation", true); toggle("clock_messages", true);
+        toggle("clock_animation", true); toggle("clock_messages", true); toggle("clock_weather", true);
+        page.addView(HeckerStudio.label(this, t("clock_weather_summary"), 13));
         page.addView(HeckerStudio.label(this, t("clock_metrics"), 13));
         button("apply_clock", v -> {
             if (pickingWidget) {

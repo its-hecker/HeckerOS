@@ -12,7 +12,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 
-/** Read-only, per-user depth assets. Only SystemUI and this app can open the active pair. */
+/** Read-only active layers for SystemUI, this app and the same-user platform Hecker Launcher. */
 public final class DepthWallpaperProvider extends ContentProvider {
     public static final String ID = "hecker_depth_wallpaper_id";
     @Override public boolean onCreate() { return true; }
@@ -23,8 +23,17 @@ public final class DepthWallpaperProvider extends ContentProvider {
         if (packages != null) for (String name : packages) {
             if ("com.android.systemui".equals(name) && getContext().getPackageManager()
                     .checkSignatures("android", name) == android.content.pm.PackageManager.SIGNATURE_MATCH) return;
+            if ("com.android.launcher3".equals(name) && getContext().getPackageManager()
+                    .checkSignatures("android", name) == android.content.pm.PackageManager.SIGNATURE_MATCH) {
+                try {
+                    android.content.pm.ApplicationInfo app = getContext().getPackageManager().getApplicationInfo(name, 0);
+                    if (app.uid == caller && (app.flags & (android.content.pm.ApplicationInfo.FLAG_SYSTEM
+                            | android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0
+                            && android.os.UserHandle.getUserHandleForUid(caller).equals(android.os.UserHandle.getUserHandleForUid(getContext().getApplicationInfo().uid))) return;
+                } catch (android.content.pm.PackageManager.NameNotFoundException ignored) { }
+            }
         }
-        throw new SecurityException("Depth assets are private to SystemUI");
+        throw new SecurityException("Depth assets are private to SystemUI and the preinstalled Hecker Launcher");
     }
     @Override public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
         enforceReader();
@@ -35,7 +44,8 @@ public final class DepthWallpaperProvider extends ContentProvider {
             throw new FileNotFoundException("Unknown depth asset");
         String active = Settings.Secure.getString(getContext().getContentResolver(), ID);
         if (!parts.get(0).equals(active)) throw new FileNotFoundException("Inactive depth pair");
-        android.content.Context storage = "ca2aca1da00000000000000000000001".equals(parts.get(0))
+        android.content.Context storage = ("ca2aca1da00000000000000000000001".equals(parts.get(0))
+                || "ca2aca2da00000000000000000000002".equals(parts.get(0)))
                 ? getContext().createDeviceProtectedStorageContext() : getContext();
         File file = new File(new File(new File(storage.getFilesDir(), "depth"), parts.get(0)),
                 parts.get(1) + ".png");

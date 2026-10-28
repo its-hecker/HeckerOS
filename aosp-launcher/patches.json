@@ -292,5 +292,11 @@
       "old": "    private void drawPreviewItem(Canvas canvas, PreviewItemDrawingParams params, PointF offset,\n            boolean shouldClipPath, Path clipPath) {\n        canvas.save();",
       "new": "    private void drawPreviewItem(Canvas canvas, PreviewItemDrawingParams params, PointF offset,\n            boolean shouldClipPath, Path clipPath) {\n        if (params.item != null && com.android.launcher3.hecker.HeckerGameLibrary.hidden(\n                mContext, params.item.getTargetComponent(), params.item.user)) return;\n        canvas.save();"
     }
+  ],
+  "src/com/android/launcher3/dragndrop/DragLayer.java": [
+    {
+      "old": "    protected void dispatchDraw(Canvas canvas) {\n",
+      "new": "    protected void dispatchDraw(Canvas canvas) {\n        com.android.launcher3.hecker.HeckerHomeDepth.background(this, canvas);\n"
+    }
   ]
 }

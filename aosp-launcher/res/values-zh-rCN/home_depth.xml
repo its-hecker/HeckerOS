@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="hs_home_depth">景深壁纸</string>
+  <string name="hs_home_depth_wake">解锁时播放景深动画</string>
+  <string name="hs_home_depth_summary">在时钟后使用已准备的壁纸图层，应用和控件保持在最上层。可在 Hecker 套件 → 锁屏中更改壁纸。</string>
+  <string name="hs_clock_weather">显示天气</string>
+  <string name="hs_clock_weather_summary">在所有时钟样式下方显示当前 Google 天气。Google 应用提供天气数据时显示。</string>
+</resources>

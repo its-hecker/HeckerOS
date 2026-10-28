@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="hs_home_depth">Depth wallpaper</string>
+  <string name="hs_home_depth_wake">Animate depth on unlock</string>
+  <string name="hs_home_depth_summary">Use your prepared wallpaper layers behind clocks. Apps and controls stay on top. Change the wallpaper in Hecker’s Suite → Lock screen.</string>
+  <string name="hs_clock_weather">Show weather</string>
+  <string name="hs_clock_weather_summary">Show current Google weather below every clock style. Weather appears when the Google app provides it.</string>
+</resources>

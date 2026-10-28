@@ -32,7 +32,10 @@ RAM is system used/total memory from `ActivityManager.MemoryInfo`. CPU is a real
 `/proc/stat` delta when Android permits reading those counters; otherwise it shows
 an unavailable marker. No sample percentages are substituted. Weather uses the
 already retained Google Smartspace adapter and disappears when unavailable.
-There is one weather subscription shared by the visible Glass clocks.
+There is one weather subscription shared by visible clocks of all ten styles.
+**Clock Studio → Show weather** is on by default; a bounded weather row stays above
+the Home depth subject. Missing Google weather leaves the clock/date usable.
+See [Home depth, defaults and weather](home-depth-weather.md).
 
 Continuous animation is a local Hecker Launcher widget-host extension. Another
 launcher can display the standard time fallback, not the local animated renderer.

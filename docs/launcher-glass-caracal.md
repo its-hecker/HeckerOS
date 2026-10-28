@@ -1,6 +1,6 @@
 # Reference glass, folder reveal and Caracal Dawn
 
-This update is on `feat/settings-depth-lockscreen-20261028`, after the native Settings/depth-clock work. It retains the Coral root-privacy kernel/framework selections and Pakistan IMS/carrier configuration. It needs a rebuilt ROM; it does not update the running phone.
+The combined update is on `test/floral-low-brightness-flicker-20261029`, after the native Settings/depth-clock work. It retains the Coral root-privacy kernel/framework selections and Pakistan IMS/carrier configuration. It needs a rebuilt ROM; it does not update the running phone.
 
 ## Folder animation fix
 
@@ -26,13 +26,15 @@ Live wallpapers use the existing translucent fallback because the launcher does 
 
 ## Default wallpaper and lockscreen
 
-Original **Caracal Dawn** artwork ships as an opaque dawn-city scenery layer and an aligned, genuinely transparent adult anime Caracal-girl layer. Both sources are 860×1828. `DefaultAppearance` composites the same pair for the home/lock wallpaper on a fresh user's first boot, then stores bounded 1600px depth layers in that user's device-protected files for availability before first unlock.
+Original **Caracal Dawn** artwork ships as an opaque dawn-city scenery layer and an aligned, genuinely transparent modestly dressed adult anime Caracal-girl layer. Both sources are 860×1828. `DefaultAppearance` composites the same pair for the home/lock wallpaper on a fresh user's first boot, then stores bounded 1600px depth layers in that user's device-protected files for availability before first unlock.
+
+Hecker Launcher now renders the same prepared scene in layers with an unlock reveal; see [Home depth and clock weather](home-depth-weather.md).
 
 Fresh users receive the tall thin live clock at **76% opacity**, with the existing **750 ms** wake reveal. Clock opacity is adjustable under **Hecker's Suite → Lock screen**. Time/date remain live native drawing, not wallpaper pixels. The original word clock and geometric style remain selectable. AOD retains its native-safe geometric treatment; wake motion respects Battery Saver and disabled system animations.
 
 Saved wallpapers, live wallpapers and previously chosen clock settings prevent automatic replacement. Applying this update on a dirty flash therefore retains existing choices. **Hecker's Suite → Lock screen → Apply Caracal Dawn** explicitly applies the new pair and clock to an existing user. Picking another wallpaper disables the old depth subject; importing another prepared pair records the new wallpaper identity. There is still no automatic arbitrary-photo subject segmentation.
 
-Asset generation used the built-in Image Generation skill. Source images and prompt specifications are in [`app/assets/wallpapers/caracal-dawn-v1`](../app/assets/wallpapers/caracal-dawn-v1/README.md).
+Asset generation used the built-in Image Generation skill. Source images and prompt specifications are in [`app/assets/wallpapers/caracal-dawn-v2`](../app/assets/wallpapers/caracal-dawn-v2/README.md).
 
 ## Validation
 

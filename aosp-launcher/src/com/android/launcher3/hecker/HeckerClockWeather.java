@@ -21,7 +21,7 @@ public final class HeckerClockWeather {
                     text = provider == null ? null : (String) type.getMethod("text").invoke(provider);
                     icon = provider == null ? null : (Drawable) type.getMethod("icon").invoke(provider);
                 } catch (ReflectiveOperationException unavailable) { text = null; icon = null; }
-                for (View v : new ArrayList<>(VIEWS.keySet())) if (v != null) v.invalidate();
+                for (View v : new ArrayList<>(VIEWS.keySet())) if (v instanceof HeckerClockView) ((HeckerClockView) v).weatherChanged(); else if (v != null) v.invalidate();
             };
             provider = type.getConstructor(Context.class, Runnable.class).newInstance(view.getContext().getApplicationContext(), changed);
             type.getMethod("start").invoke(provider);

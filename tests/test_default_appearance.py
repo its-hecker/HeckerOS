@@ -61,10 +61,15 @@ class DefaultAppearanceProbe{
   Context fresh=user(args[0],"fresh0");check(DefaultAppearance.apply(fresh,false),"Built-in wallpaper's positive native ID was mistaken for custom");
   check(fresh.wallpaper.sets==1&&value(fresh,"hecker_lockscreen_clock_style")==2,"Fresh clock/pair not installed");
   check(value(fresh,"hecker_lockscreen_clock_opacity")==76&&value(fresh,"hecker_depth_wallpaper")==1,"Translucent depth defaults");
+  check(value(fresh,DefaultAppearance.HOME_DEPTH)==1&&value(fresh,DefaultAppearance.HOME_WALLPAPER_ID)==fresh.wallpaper.homeId,"Home depth not bound to actual wallpaper");
   check(new java.io.File(fresh.device.files,"depth/"+DefaultAppearance.ID+"/foreground.png").isFile(),"Direct boot layer missing");
   Secure.putInt(fresh.getContentResolver(),"hecker_lockscreen_clock_opacity",91);
   check(!DefaultAppearance.apply(fresh,false)&&fresh.wallpaper.sets==1&&value(fresh,"hecker_lockscreen_clock_opacity")==91,"Reboot overwrote a user choice");
-  fresh.wallpaper.homeId++;DefaultAppearance.reconcile(fresh);check(value(fresh,"hecker_depth_wallpaper")==0,"Changing wallpaper retained old subject overlay");
+  fresh.wallpaper.homeId++;DefaultAppearance.reconcile(fresh);check(value(fresh,"hecker_depth_wallpaper")==0&&value(fresh,DefaultAppearance.HOME_DEPTH)==0,"Changing wallpaper retained old subject overlay");
+  Context split=user(args[0],"split");DefaultAppearance.apply(split,false);split.wallpaper.lockId=split.wallpaper.homeId;split.wallpaper.homeId++;
+  DefaultAppearance.reconcile(split);check(value(split,"hecker_depth_wallpaper")==1&&value(split,DefaultAppearance.HOME_DEPTH)==0,"Home change disabled separate lock wallpaper");
+  Context lockOnly=user(args[0],"lock-only");DefaultAppearance.apply(lockOnly,false);lockOnly.wallpaper.lockId=999;
+  DefaultAppearance.reconcile(lockOnly);check(value(lockOnly,"hecker_depth_wallpaper")==0&&value(lockOnly,DefaultAppearance.HOME_DEPTH)==1,"Lock change disabled owned home wallpaper");
   Context custom=user(args[0],"custom");custom.wallpaper.savedHome=true;
   check(!DefaultAppearance.apply(custom,false)&&custom.wallpaper.sets==0&&custom.resolver.values.isEmpty(),"Existing photo overwritten");
   Context clock=user(args[0],"clock");Secure.putInt(clock.getContentResolver(),"hecker_custom_lockscreen_clock",0);
@@ -72,6 +77,15 @@ class DefaultAppearanceProbe{
   Context live=user(args[0],"live");live.wallpaper.live=true;
   check(!DefaultAppearance.apply(live,false)&&live.wallpaper.sets==0,"Live wallpaper overwritten");
   check(DefaultAppearance.apply(custom,true)&&custom.wallpaper.sets==1,"Explicit Apply Caracal did not restore defaults");
+  Context previous=user(args[0],"previous");previous.wallpaper.savedHome=true;
+  Secure.putString(previous.resolver,"hecker_depth_wallpaper_id","ca2aca1da00000000000000000000001");Secure.putInt(previous.resolver,DefaultAppearance.WALLPAPER_ID,previous.wallpaper.homeId);
+  Secure.putInt(previous.resolver,"hecker_depth_wallpaper",1);Secure.putInt(previous.resolver,"hecker_lockscreen_clock_opacity",91);
+  previous.device.prefs.edit().putBoolean("applied_v1",true).commit();
+  check(DefaultAppearance.apply(previous,false)&&DefaultAppearance.ID.equals(Secure.getString(previous.resolver,"hecker_depth_wallpaper_id")),"Owned v1 did not migrate to modest v2");
+  check(value(previous,"hecker_lockscreen_clock_opacity")==91&&value(previous,DefaultAppearance.HOME_DEPTH)==1,"Migration reset chosen clock or omitted home depth");
+  Context changed=user(args[0],"changed-v1");changed.wallpaper.savedHome=true;changed.wallpaper.lockId=23;changed.wallpaper.homeId=555;
+  Secure.putString(changed.resolver,"hecker_depth_wallpaper_id","ca2aca1da00000000000000000000001");Secure.putInt(changed.resolver,DefaultAppearance.WALLPAPER_ID,23);Secure.putInt(changed.resolver,"hecker_depth_wallpaper",1);
+  check(!DefaultAppearance.apply(changed,false)&&changed.wallpaper.sets==0,"Migration overwrote a changed home photo");
   Context other=user(args[0],"user10");check(DefaultAppearance.apply(other,false)&&other.wallpaper.sets==1,"Other user's fresh default was suppressed");
   Context bad=user(args[0],"bad");android.graphics.BitmapFactory.mismatch=true;
   try{DefaultAppearance.apply(bad,false);throw new AssertionError("Mismatched pair accepted");}catch(java.io.IOException expected){}
@@ -93,7 +107,7 @@ class DefaultAppearanceTests(unittest.TestCase):
             subprocess.run(['java','-cp',str(work/'classes'),'DefaultAppearanceProbe',str(work)],check=True)
 
     def test_bundled_layers_are_aligned_and_foreground_has_real_transparency(self):
-        folder=ROOT/'app/assets/wallpapers/caracal-dawn-v1'
+        folder=ROOT/'app/assets/wallpapers/caracal-dawn-v2'
         with Image.open(folder/'background.png') as back, Image.open(folder/'foreground.png') as front:
             self.assertEqual(back.size,front.size)
             self.assertEqual(front.mode,'RGBA')

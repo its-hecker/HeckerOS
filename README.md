@@ -11,6 +11,9 @@ on top of the complete Coral root-privacy/astronaut test. Use this same branch i
 [Brightness/volume percentages in both QS layouts](docs/qs-slider-percentages.md) are included.
 [Game Space](docs/game-booster.md) adds battery temperature to its floating pill,
 free shortcut movement and a launcher entry with default-on game-icon hiding.
+[The modest Caracal Dawn v2 artwork, layered Home wallpaper and weather in all
+Clock Studio styles](docs/home-depth-weather.md) are included. Fresh users receive
+the depth lock wallpaper and tall 76% clock automatically.
 Full ROM and phone validation remain pending; the navigation
 freeze is under investigation and is not claimed fixed.
 

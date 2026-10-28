@@ -133,9 +133,22 @@ class HotseatSearchProbe extends FrameLayout {
 ''' + hooks + '\n}\n'
 
 
+def home_depth_draw_probe(source):
+    draw = method(source, 'protected void dispatchDraw(Canvas canvas)')
+    assert draw.index('HeckerHomeDepth.background') < draw.index('mWorkspaceDragScrim.draw') < draw.index('super.dispatchDraw')
+    return '''import android.content.Context;
+import android.graphics.Canvas;
+import android.widget.FrameLayout;
+class HomeDepthDragProbe extends FrameLayout {
+HomeDepthDragProbe(Context context){super(context);}
+static class Draw {void draw(Canvas canvas){}}
+final Draw mWorkspaceDragScrim=new Draw(),mFocusIndicatorHelper=new Draw();
+''' + draw + '\n}\n'
+
+
 def check(launcher, sdk, helper_classes):
-    resources = ET.parse(ROOT / 'aosp-launcher/res/values/studio.xml').getroot()
-    names = {node.get('name') for node in resources}
+    names = {node.get('name') for path in (ROOT / 'aosp-launcher/res/values').glob('*.xml')
+             for node in ET.parse(path).getroot()}
     for source in (ROOT / 'aosp-launcher/src').rglob('*.java'):
         code = source.read_text()
         keys = re.findall(r'\bt\("([a-z_]+)"\)', code)
@@ -167,6 +180,8 @@ def check(launcher, sdk, helper_classes):
     apps = (launcher / 'src/com/android/launcher3/allapps/AllAppsStore.java').read_text()
     get_apps = method(apps, 'public AppInfo[] getApps()')
     stubs = {
+        'HomeDepthDragProbe.java': home_depth_draw_probe(
+            (launcher / 'src/com/android/launcher3/dragndrop/DragLayer.java').read_text()),
         'HotseatSearchProbe.java': hotseat_search_probe(
             (launcher / 'src/com/android/launcher3/Hotseat.java').read_text()),
         'HomeClockProbe.java': home_clock_probe(

@@ -20,16 +20,18 @@ public abstract class ContentProvider { public Context context=new Context(); pu
             'android/database/Cursor.java':'package android.database;public interface Cursor{}',
             'android/content/ContentResolver.java':'package android.content;public class ContentResolver {public String active;}',
             'android/content/Context.java':'''package android.content;
-public class Context {public java.io.File directory;public Context device;
+public class Context {public java.io.File directory;public Context device;public int ownerUid=100;
  public Context createDeviceProtectedStorageContext(){return device;}public final ContentResolver resolver=new ContentResolver();
- public android.content.pm.ApplicationInfo getApplicationInfo(){return new android.content.pm.ApplicationInfo();}
+ public android.content.pm.ApplicationInfo getApplicationInfo(){android.content.pm.ApplicationInfo a=new android.content.pm.ApplicationInfo();a.uid=ownerUid;return a;}
  public android.content.pm.PackageManager getPackageManager(){return new android.content.pm.PackageManager();}
  public ContentResolver getContentResolver(){return resolver;}public java.io.File getFilesDir(){return directory;} }''',
-            'android/content/pm/ApplicationInfo.java':'package android.content.pm;public class ApplicationInfo{public int uid=100;}',
+            'android/content/pm/ApplicationInfo.java':'package android.content.pm;public class ApplicationInfo{public static final int FLAG_SYSTEM=1,FLAG_UPDATED_SYSTEM_APP=128;public int uid=100,flags=1;}',
             'android/content/pm/PackageManager.java':'''package android.content.pm;
-public class PackageManager{public static final int SIGNATURE_MATCH=0;public static boolean signed=true;
- public String[] getPackagesForUid(int uid){return uid==200?new String[]{"com.android.systemui"}:new String[]{"third.party"};}
+public class PackageManager{public static final int SIGNATURE_MATCH=0;public static boolean signed=true;public static int launcherUid=450,launcherFlags=1;
+ public String[] getPackagesForUid(int uid){return uid==200?new String[]{"com.android.systemui"}:uid==450||uid==1000450?new String[]{"com.android.launcher3"}:new String[]{"third.party"};}
+ public ApplicationInfo getApplicationInfo(String name,int flags)throws NameNotFoundException{ApplicationInfo a=new ApplicationInfo();a.uid=launcherUid;a.flags=launcherFlags;return a;}public static class NameNotFoundException extends Exception{}
  public int checkSignatures(String a,String b){return signed?0:-1;} }''',
+            'android/os/UserHandle.java':'package android.os;public record UserHandle(int id){public static UserHandle getUserHandleForUid(int uid){return new UserHandle(uid/100000);}}',
             'android/os/Binder.java':'package android.os;public class Binder {public static int uid=100;public static int getCallingUid(){return uid;}}',
             'android/os/ParcelFileDescriptor.java':'''package android.os;public class ParcelFileDescriptor{
  public static final int MODE_READ_ONLY=1; public java.io.File file;
@@ -55,6 +57,13 @@ public class DepthReaderProbe {
   Binder.uid=200;android.content.pm.PackageManager.signed=false;denied(()->p.openFile(uri,"r"));
   android.content.pm.PackageManager.signed=true;
   if(!p.openFile(uri,"r").file.equals(layer))throw new AssertionError("SystemUI read");
+  Binder.uid=450;if(!p.openFile(uri,"r").file.equals(layer))throw new AssertionError("Launcher read");
+  android.content.pm.PackageManager.signed=false;denied(()->p.openFile(uri,"r"));android.content.pm.PackageManager.signed=true;
+  android.content.pm.PackageManager.launcherFlags=0;denied(()->p.openFile(uri,"r"));android.content.pm.PackageManager.launcherFlags=128;
+  if(!p.openFile(uri,"r").file.equals(layer))throw new AssertionError("Updated system launcher");
+  Binder.uid=1000450;android.content.pm.PackageManager.launcherUid=1000450;denied(()->p.openFile(uri,"r"));
+  Binder.uid=450;android.content.pm.PackageManager.launcherUid=999;denied(()->p.openFile(uri,"r"));
+  android.content.pm.PackageManager.launcherUid=450;android.content.pm.PackageManager.launcherFlags=1;Binder.uid=200;
   denied(()->p.openFile(uri,"rw"));denied(()->p.openFile(Uri.parse("content://org.hecker.suite.depth/../foreground"),"r"));
   denied(()->p.openFile(Uri.parse("content://org.hecker.suite.depth/"+id+"/unknown"),"r"));
   p.context.resolver.active="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";denied(()->p.openFile(uri,"r"));
@@ -63,6 +72,8 @@ public class DepthReaderProbe {
   String builtin="ca2aca1da00000000000000000000001";p.context.resolver.active=builtin;
   File bundled=new File(p.context.device.directory,"depth/"+builtin+"/foreground.png");bundled.getParentFile().mkdirs();bundled.createNewFile();
   if(!p.openFile(Uri.parse("content://org.hecker.suite.depth/"+builtin+"/foreground"),"r").file.equals(bundled))throw new AssertionError("Direct-boot defaults");
+  String v2="ca2aca2da00000000000000000000002";p.context.resolver.active=v2;File modern=new File(p.context.device.directory,"depth/"+v2+"/foreground.png");modern.getParentFile().mkdirs();modern.createNewFile();
+  if(!p.openFile(Uri.parse("content://org.hecker.suite.depth/"+v2+"/foreground"),"r").file.equals(modern))throw new AssertionError("Direct-boot v2");
   System.out.println("Production depth provider: owner/SystemUI signatures, active identity, read-only paths and per-user storage PASS");
  }
 }''',

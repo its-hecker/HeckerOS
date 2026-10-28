@@ -88,7 +88,7 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
         HeckerClockWeather.stop(this);
     }
     private void restartMotion() {
-        if (running && style.equals("glass")) HeckerClockWeather.start(this); else HeckerClockWeather.stop(this);
+        if (running && HeckerStudio.enabled(getContext(), "clock_weather", true)) HeckerClockWeather.start(this); else HeckerClockWeather.stop(this);
         if (animator != null) { animator.cancel(); animator = null; }
         if (!running || !ValueAnimator.areAnimatorsEnabled() || !HeckerStudio.enabled(getContext(), "clock_animation", true)
                 || !(style.equals("thermal") || style.equals("stacked") || style.equals("caracal"))) return;
@@ -107,7 +107,7 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
             cycleMessage();
             messageSlot = slot;
         }
-        setContentDescription(time() + ", " + date() + (battery >= 0 ? ", " + HeckerStudio.text(getContext(), "battery") + " " + percent(battery) : "") + ". " + message);
+        updateDescription();
         invalidate();
         if (sampling || !(style.equals("thermal") || style.equals("stacked") || style.equals("caracal"))) return;
         sampling = true; int request = generation;
@@ -139,7 +139,13 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
             if (messages.length > 1 && messages[choice].equals(message)) choice = (choice + 1) % messages.length;
             message = messages[choice];
         }
-        setContentDescription(time() + ", " + date() + ". " + message); invalidate();
+        updateDescription(); invalidate();
+    }
+    void weatherChanged() { updateDescription(); invalidate(); }
+    private void updateDescription() {
+        String weather = HeckerStudio.enabled(getContext(), "clock_weather", true) ? HeckerClockWeather.text() : null;
+        setContentDescription(time() + ", " + date() + (battery >= 0 ? ", " + HeckerStudio.text(getContext(), "battery") + " " + percent(battery) : "")
+                + (weather == null || weather.isEmpty() ? "" : ", " + weather) + ". " + message);
     }
     private int[] palette() {
         int[][] colors = {{0xffb4f8d9,0xff8edbed,0xffc5acff}, {0xffffd59c,0xffffaaa4,0xffffcc74},
@@ -167,9 +173,11 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
     @Override protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         float logicalHeight = style.equals("caracal") ? 230 : style.equals("analog") || style.equals("stacked") || style.equals("thermal") ? 220 : 180;
-        float scale = Math.min(getWidth() / 380f, getHeight() / logicalHeight);
+        boolean weatherEnabled = HeckerStudio.enabled(getContext(), "clock_weather", true);
+        float scale = Math.min(getWidth() / 380f, getHeight() / (logicalHeight + (weatherEnabled ? 30 : 0)));
         if (scale <= 0) return;
-        int save = canvas.save(); canvas.translate((getWidth() - 380 * scale) / 2, (getHeight() - logicalHeight * scale) / 2); canvas.scale(scale, scale);
+        float originX = (getWidth() - 380 * scale) / 2, originY = (getHeight() - (logicalHeight + (weatherEnabled ? 30 : 0)) * scale) / 2;
+        int save = canvas.save(); canvas.translate(originX, originY); canvas.scale(scale, scale);
         int[] colors = palette();
         final int ivory = colors[0], muted = 0xffcad7e4, mint = colors[1], accent = colors[2];
         String time = displayTime.isEmpty() ? time() : displayTime, date = displayDate.isEmpty() ? date() : displayDate;
@@ -178,14 +186,7 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
             canvas.drawRoundRect(12, 4, 368, 142, 24, 24, paint); paint.setShader(null);
             line(canvas, 12, 4, 368, 4, 0x70ffffff, 1);
             fitTime(canvas, time, 190, 83, 72, ivory, true, 330);
-            String weather = HeckerClockWeather.text();
-            if (weather == null || weather.isEmpty()) text(canvas, date, 190, 119, 20, muted, false, Paint.Align.CENTER);
-            else {
-                text(canvas, date, 30, 119, 17, muted, false, Paint.Align.LEFT);
-                text(canvas, weather, 345, 119, 17, muted, false, Paint.Align.RIGHT);
-                android.graphics.drawable.Drawable icon = HeckerClockWeather.icon();
-                if (icon != null) { icon.setBounds(225, 98, 250, 123); icon.draw(canvas); }
-            }
+            text(canvas, date, 190, 119, 20, muted, false, Paint.Align.CENTER);
         } else if (style.equals("analog")) {
             drawAnalog(canvas); text(canvas, date, 190, 194, 15, muted, false, Paint.Align.CENTER);
         } else if (style.equals("stacked")) {
@@ -232,6 +233,23 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
         if (!style.equals("caracal") && HeckerStudio.enabled(getContext(), "clock_messages", true))
             text(canvas, message, 190, logicalHeight - 6, 14, accent, false, Paint.Align.CENTER);
         canvas.restoreToCount(save);
+        HeckerHomeDepth.foreground(this, canvas);
+        // Keep current weather readable above the depth subject, in its own reserved row.
+        if (weatherEnabled) {
+            save = canvas.save(); canvas.translate(originX, originY); canvas.scale(scale, scale);
+            drawWeather(canvas, logicalHeight + 21); canvas.restoreToCount(save);
+        }
+    }
+    private void drawWeather(Canvas canvas, float baseline) {
+        String weather = HeckerClockWeather.text(); if (weather == null || weather.isEmpty()) return;
+        android.graphics.drawable.Drawable icon = HeckerClockWeather.icon();
+        paint.reset(); paint.setAntiAlias(true); paint.setColor(0xffe5edf5); paint.setTextSize(17);
+        paint.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        String label = android.text.TextUtils.ellipsize(weather, new android.text.TextPaint(paint),
+                icon == null ? 344 : 316, android.text.TextUtils.TruncateAt.END).toString();
+        float width = paint.measureText(label), start = (380 - width - (icon == null ? 0 : 28)) / 2;
+        if (icon != null) { icon.setBounds(Math.round(start), Math.round(baseline - 19), Math.round(start + 21), Math.round(baseline + 2)); icon.draw(canvas); start += 28; }
+        paint.setTextAlign(Paint.Align.LEFT); canvas.drawText(label, start, baseline, paint);
     }
     private float fitTime(Canvas c, String value, float x, float y, float size, int color, boolean bold, float width) {
         paint.setTypeface(Typeface.create(style.equals("mono") ? "monospace" : "sans-serif", bold ? Typeface.BOLD : Typeface.NORMAL)); paint.setTextSize(size);

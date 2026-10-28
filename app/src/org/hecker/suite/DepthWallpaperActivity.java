@@ -27,6 +27,7 @@ public final class DepthWallpaperActivity extends Activity {
     private Bitmap back, front;
     private ImageView preview;
     private Button apply;
+    private android.widget.Switch home;
     private int generation;
     private boolean stopped;
     @Override public void onCreate(Bundle state) {
@@ -38,6 +39,8 @@ public final class DepthWallpaperActivity extends Activity {
         }
         LinearLayout page = Ui.page(this, R.string.depth_wallpaper_title);
         page.addView(Ui.text(this, getString(R.string.depth_wallpaper_import_help), 15, false));
+        home = new android.widget.Switch(this); home.setText(R.string.depth_apply_home);
+        home.setChecked(state == null || state.getBoolean("apply_home", true)); page.addView(home);
         Ui.actionCard(this, page, R.string.depth_pick_background, R.string.depth_background_summary, v -> pick(1));
         Ui.actionCard(this, page, R.string.depth_pick_foreground, R.string.depth_foreground_summary, v -> pick(2));
         preview = new ImageView(this); preview.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -105,6 +108,7 @@ public final class DepthWallpaperActivity extends Activity {
         if (back == null || front == null) return;
         apply.setEnabled(false);
         Bitmap bg = back, fg = front;
+        boolean applyHome = home.isChecked();
         int token = ++generation;
         worker.execute(() -> {
             String id = UUID.randomUUID().toString().replace("-", "");
@@ -115,8 +119,15 @@ public final class DepthWallpaperActivity extends Activity {
                 write(new File(directory, "background.png"), bg);
                 write(new File(directory, "foreground.png"), fg);
                 if (Thread.currentThread().isInterrupted()) throw new IOException("Import cancelled");
+                Bitmap image = Bitmap.createBitmap(bg.getWidth(), bg.getHeight(), Bitmap.Config.ARGB_8888);
+                Canvas imageCanvas = new Canvas(image); imageCanvas.drawBitmap(bg, 0, 0, null); imageCanvas.drawBitmap(fg, 0, 0, null);
+                android.app.WallpaperManager manager = android.app.WallpaperManager.getInstance(this);
+                manager.setBitmap(image, null, true, android.app.WallpaperManager.FLAG_LOCK
+                        | (applyHome ? android.app.WallpaperManager.FLAG_SYSTEM : 0));
                 // Publish the identity last: readers can never observe half of a new pair.
                 if (!Settings.Secure.putInt(getContentResolver(), DefaultAppearance.WALLPAPER_ID, DefaultAppearance.wallpaperId(this))
+                        || !Settings.Secure.putInt(getContentResolver(), DefaultAppearance.HOME_WALLPAPER_ID, manager.getWallpaperId(android.app.WallpaperManager.FLAG_SYSTEM))
+                        || !Settings.Secure.putInt(getContentResolver(), DefaultAppearance.HOME_DEPTH, applyHome ? 1 : 0)
                         || !Settings.Secure.putInt(getContentResolver(), "hecker_custom_lockscreen_clock", 1)
                         || !Settings.Secure.putInt(getContentResolver(), "hecker_lockscreen_clock_style", 2)
                         || !Settings.Secure.putInt(getContentResolver(), "hecker_depth_wallpaper", 1)
@@ -147,6 +158,7 @@ public final class DepthWallpaperActivity extends Activity {
     @Override protected void onSaveInstanceState(Bundle state) {
         if (background != null) state.putString("background", background.toString());
         if (foreground != null) state.putString("foreground", foreground.toString());
+        state.putBoolean("apply_home", home.isChecked());
         super.onSaveInstanceState(state);
     }
     @Override protected void onDestroy() {
