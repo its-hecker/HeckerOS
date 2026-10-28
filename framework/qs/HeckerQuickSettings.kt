@@ -250,8 +250,9 @@ private fun HeckerTile(tile: TileViewModel, large: Boolean, modifier: Modifier, 
 
 @Composable
 private fun VerticalControl(content: @Composable () -> Unit) {
-    Box(Modifier.size(width = 62.dp, height = 200.dp), contentAlignment = Alignment.Center) {
-        Box(Modifier.requiredSize(width = 200.dp, height = 62.dp).graphicsLayer { rotationZ = -90f }) { content() }
+    val thickness = HeckerSliderValues.verticalThickness(LocalConfiguration.current.fontScale).dp
+    Box(Modifier.size(width = thickness, height = 200.dp), contentAlignment = Alignment.Center) {
+        Box(Modifier.requiredSize(width = 200.dp, height = thickness).graphicsLayer { rotationZ = -90f }) { content() }
     }
 }
 
@@ -265,30 +266,37 @@ fun HeckerVolumeSlider() {
     val audio = remember(context) { context.getSystemService(AudioManager::class.java) }
     var volume by remember { mutableStateOf(audio.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat()) }
     var dragging by remember { mutableStateOf(false) }
-    val maximum = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC).coerceAtLeast(1).toFloat()
+    var muted by remember { mutableStateOf(audio.isStreamMute(AudioManager.STREAM_MUSIC)) }
     val minimum = audio.getStreamMinVolume(AudioManager.STREAM_MUSIC).toFloat()
+    val limit = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC).toFloat()
+    val maximum = limit.coerceAtLeast(minimum + 1f)
     DisposableEffect(audio) {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(c: Context, intent: Intent) {
                 if (!dragging) volume = audio.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat()
+                muted = audio.isStreamMute(AudioManager.STREAM_MUSIC)
             }
         }
-        context.registerReceiver(receiver, IntentFilter("android.media.VOLUME_CHANGED_ACTION"), Context.RECEIVER_NOT_EXPORTED)
+        val filter = IntentFilter("android.media.VOLUME_CHANGED_ACTION").apply { addAction("android.media.STREAM_MUTE_CHANGED_ACTION") }
+        context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
         onDispose { context.unregisterReceiver(receiver) }
     }
     Slider(value = volume.coerceIn(minimum, maximum), valueRange = minimum..maximum,
-        enabled = !audio.isVolumeFixed, onValueChange = { value ->
+        enabled = !audio.isVolumeFixed && limit > minimum, steps = (maximum - minimum - 1f).toInt().coerceAtLeast(0), onValueChange = { value ->
             dragging = true
-            try { audio.setStreamVolume(AudioManager.STREAM_MUSIC, value.toInt(), 0) }
+            try { audio.setStreamVolume(AudioManager.STREAM_MUSIC, Math.round(value), 0) }
             catch (_: SecurityException) { }
             volume = audio.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat()
+            muted = audio.isStreamMute(AudioManager.STREAM_MUSIC)
         }, onValueChangeFinished = { dragging = false },
-        modifier = Modifier.fillMaxWidth().height(64.dp).semantics {
+        modifier = Modifier.fillMaxWidth().height(if (LocalHeckerVerticalBrightness.current) HeckerSliderValues.verticalThickness(LocalConfiguration.current.fontScale).dp else 64.dp).semantics {
             contentDescription = context.getString(com.android.systemui.res.R.string.hecker_media_volume)
+            stateDescription = HeckerSliderValues.label(if (muted) 0f else HeckerSliderValues.fraction(volume, 0f, limit), java.util.Locale.getDefault())
         }, thumb = {}, track = { _ ->
-            HeckerGlassTrack(((volume - minimum) / (maximum - minimum).coerceAtLeast(1f)),
-                if (volume <= minimum) com.android.systemui.res.R.drawable.hecker_qs_mute
-                else com.android.systemui.res.R.drawable.hecker_qs_speaker)
+            HeckerGlassTrack(if (muted) 0f else HeckerSliderValues.fraction(volume, minimum, limit),
+                if (muted || volume <= 0f) com.android.systemui.res.R.drawable.hecker_qs_mute
+                else com.android.systemui.res.R.drawable.hecker_qs_speaker,
+                labelFraction = if (muted) 0f else HeckerSliderValues.fraction(volume, 0f, limit))
         })
 }
 

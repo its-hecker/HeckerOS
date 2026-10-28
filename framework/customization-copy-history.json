@@ -17,7 +17,8 @@
     "7f5e89dc71c622e9200e6a55035a3774e8266249",
     "7c374e655ce6b0bf50ebaefc34ccd91739cedec2",
     "88ecbf6e4cb6319a468b363e2ce4098b3fd12ec2",
-    "1a69fc6d854a883a9c5d71d2e9ee139b90bdd828"
+    "1a69fc6d854a883a9c5d71d2e9ee139b90bdd828",
+    "8462bb6691abcc6cde6e62a09c0cbcb971f5ec01"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerBattery.kt": [
     "006348861f13e89e4a0c1be873e91c8f8e8d50fc",
@@ -150,7 +151,8 @@
     "268841ac035788cde44b5a586e099ab3d5f08ce5",
     "2d9591b6658e4ca24d743d58caf821fba70ae96f",
     "f6dd5540ba8a30afc403f1e81400740d045a2cdf",
-    "9fc9586f57119645f11336fff868346e7f1386ce"
+    "9fc9586f57119645f11336fff868346e7f1386ce",
+    "79501590527fca3d757a2e4deed033a8ff757787"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsScene.kt": [
     "8f4bca91cc5e8d5cc0e34f9400270cf0c4cb0ac1"
@@ -209,7 +211,8 @@
     "81c414683b5fc5fcb63fddccb1d164c29a969abf"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerGlassQuickSettings.kt": [
-    "7eadce202b0d3ba93cc3b13c4c031b86ee4caa88"
+    "7eadce202b0d3ba93cc3b13c4c031b86ee4caa88",
+    "0bb1fa2f2ab8c35ec4b75206fd8e34e977e26bb4"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerSystemUiControl.java": [
     "31c3c703977bfe99e291c019778fd130ccdaabe4"

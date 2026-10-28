@@ -225,6 +225,20 @@ class StartScope { fun onStopOrDispose(stop: () -> Unit) {} }
 ''' + body + '\n}\n'
 
 
+def brightness_track_probe():
+    # Compile the exact native brightness adapter against the real shared track,
+    # including its current-value label, rather than just a matching facade.
+    patches=json.loads((ROOT/'framework/customization-patches.json').read_text())
+    path='frameworks/base/packages/SystemUI/src/com/android/systemui/brightness/ui/compose/BrightnessSlider.kt'
+    body=patches[path][2]['new'].split('if (heckerGlass) {',1)[1].split('} else {',1)[0]
+    return '''package com.android.systemui.brightness.ui.compose
+import androidx.compose.runtime.Composable
+data class NativeBrightnessFraction(val coercedValueAsFraction: Float)
+@Composable fun NativeBrightnessTrackProbe(value: Int,valueRange: IntRange,fraction: Float) {
+ val sliderState=NativeBrightnessFraction(fraction)
+''' + body + '\n}\n'
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--sdk-cache', type=Path, required=True)
@@ -261,6 +275,7 @@ object ComposeInitializer {
  fun onDetachedFromWindow(root: android.view.View) {}
 }'''
         for name, content in {**KOTLIN, 'ReferenceRoute.kt': scene_probe(),
+                              'NativeBrightnessTrackProbe.kt': brightness_track_probe(),
                               'ComposeInitializer.kt': compose_initializer}.items():
             target = out / 'kotlin' / name
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)

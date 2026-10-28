@@ -110,7 +110,8 @@ private fun GlassModule(modifier: Modifier, content: @Composable ColumnScope.() 
 private fun GlassVerticalControl(content: @Composable () -> Unit) {
     // Both controls share the exact same track and measure policy. Rotation does
     // not resize a child, so measure it at the transposed dimensions first.
-    Box(Modifier.size(64.dp, 178.dp).clip(RoundedCornerShape(32.dp)), contentAlignment = Alignment.Center) {
-        Box(Modifier.requiredSize(178.dp, 64.dp).graphicsLayer { rotationZ = -90f }, contentAlignment = Alignment.Center) { content() }
+    val thickness = HeckerSliderValues.verticalThickness(LocalConfiguration.current.fontScale).dp
+    Box(Modifier.size(thickness, 178.dp).clip(RoundedCornerShape(thickness / 2)), contentAlignment = Alignment.Center) {
+        Box(Modifier.requiredSize(178.dp, thickness).graphicsLayer { rotationZ = -90f }, contentAlignment = Alignment.Center) { content() }
     }
 }

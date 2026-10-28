@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -338,16 +339,32 @@ private fun ReferenceDarkButton(tile: TileViewModel?) {
 
 /** Visual track only: native brightness still owns policy, gamma, falsing, haptics and drag events. */
 @Composable
-fun HeckerGlassTrack(fraction: Float, icon: Int, modifier: Modifier = Modifier) {
+fun HeckerGlassTrack(fraction: Float, icon: Int, modifier: Modifier = Modifier, labelFraction: Float = fraction) {
     val vertical = LocalHeckerVerticalBrightness.current
-    Box(modifier.fillMaxWidth().height(if (vertical) 64.dp else 44.dp), contentAlignment = Alignment.CenterStart) {
+    val configuration = LocalConfiguration.current
+    val locale = configuration.locales[0] ?: java.util.Locale.getDefault()
+    val percentage = HeckerSliderValues.percent(labelFraction)
+    val text = remember(percentage, locale) { HeckerSliderValues.label(percentage / 100f, locale) }
+    val progress = HeckerSliderValues.unit(fraction)
+    val thickness = HeckerSliderValues.verticalThickness(configuration.fontScale).dp
+    Box(modifier.fillMaxWidth().height(if (vertical) thickness else 44.dp), contentAlignment = Alignment.CenterStart) {
         Canvas(Modifier.fillMaxSize()) {
             val corner = androidx.compose.ui.geometry.CornerRadius(size.height / 2)
             drawRoundRect(Color.White.copy(alpha = .28f), cornerRadius = corner)
             drawRoundRect(White.copy(alpha = .88f), size = androidx.compose.ui.geometry.Size(
-                (size.width * fraction.coerceIn(0f, 1f)).coerceAtLeast(size.height).coerceAtMost(size.width), size.height), cornerRadius = corner)
+                (size.width * progress).coerceAtLeast(size.height).coerceAtMost(size.width), size.height), cornerRadius = corner)
         }
-        Box(Modifier.padding(start = 15.dp)) { ReferenceIcon(icon, 23, Ink) }
+        Box(Modifier.padding(start = 15.dp).graphicsLayer { rotationZ = if (vertical) 90f else 0f }) { ReferenceIcon(icon, 23, Ink) }
+        // The vertical control rotates its child. Counter-rotate the entire badge
+        // so numbers and localized percent signs remain upright in both layouts.
+        Box(Modifier.align(if (vertical) Alignment.Center else Alignment.CenterEnd)
+            .padding(end = if (vertical) 0.dp else 12.dp)
+            .graphicsLayer { rotationZ = if (vertical) 90f else 0f }
+            .background(Ink.copy(alpha = .94f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 5.dp, vertical = 2.dp).clearAndSetSemantics { }) {
+            Text(text, color = White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                maxLines = 1, softWrap = false)
+        }
     }
 }
 
@@ -385,8 +402,12 @@ private fun ReferenceVolume() {
                     volume = audio.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat()
                     muted = audio.isStreamMute(AudioManager.STREAM_MUSIC)
                 }, onValueChangeFinished = { dragging = false }, thumb = {},
-                track = { HeckerGlassTrack((volume - minimum) / (maximum - minimum), R.drawable.hecker_qs_music) },
-                modifier = Modifier.weight(1f).height(48.dp).semantics { contentDescription = context.getString(R.string.hecker_media_volume) })
+                track = { HeckerGlassTrack(if (muted) 0f else HeckerSliderValues.fraction(volume, minimum.toFloat(), limit.toFloat()), R.drawable.hecker_qs_music,
+                    labelFraction = if (muted) 0f else HeckerSliderValues.fraction(volume, 0f, limit.toFloat())) },
+                modifier = Modifier.weight(1f).height(48.dp).semantics {
+                    contentDescription = context.getString(R.string.hecker_media_volume)
+                    stateDescription = HeckerSliderValues.label(if (muted) 0f else HeckerSliderValues.fraction(volume, 0f, limit.toFloat()), java.util.Locale.getDefault())
+                })
             Box(Modifier.size(48.dp).clip(CircleShape).background(Disc)
                 .semantics { contentDescription = context.getString(if (muted) R.string.hecker_qs_unmute else R.string.hecker_qs_mute) }
                 .clickable(enabled = !audio.isVolumeFixed) {
