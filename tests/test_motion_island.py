@@ -68,20 +68,33 @@ public class PolicyTest {
   check(MotionIslandAnimation.alpha(600)==1&&MotionIslandAnimation.alpha(2300)<.25f);
   check(MotionIslandAnimation.angle(320,1)<0&&MotionIslandAnimation.angle(320,-1)>0);
   check(MotionIslandAnimation.angle(320,0)==0);
-  check(MotionIslandAnimation.pose(360,true)!=MotionIslandAnimation.pose(540,true));
-  check(MotionIslandAnimation.pose(360,false)==0&&MotionIslandAnimation.pose(1800,true)==0);
-  check(MotionIslandAnimation.swingPose(-1)==0&&MotionIslandAnimation.swingPose(0)==0
-        &&MotionIslandAnimation.swingPose(1700)==0&&MotionIslandAnimation.swingPose(2400)==0);
-  java.util.Set<Integer> armPoses=new java.util.HashSet<>();
-  for(int age=0;age<1200;age+=50)armPoses.add(MotionIslandAnimation.swingPose(age));
-  check(armPoses.equals(java.util.Set.of(0,1,2))); // Arm participates in the flick, not just play/pause.
+  check(MotionIslandAnimation.pose(360,MotionIslandState.PAUSE,0)
+        !=MotionIslandAnimation.pose(540,MotionIslandState.PAUSE,0));
+  check(MotionIslandAnimation.pose(500,MotionIslandState.PLAY,0)==2
+        &&MotionIslandAnimation.pose(900,MotionIslandState.PLAY,0)==2);
+  StringBuilder welcome=new StringBuilder(),bye=new StringBuilder(),left=new StringBuilder(),right=new StringBuilder();
   for(int age=0;age<=2400;age+=16){
-   float right=MotionIslandAnimation.bodyRock(age,1),left=MotionIslandAnimation.bodyRock(age,-1);
-   if(!Float.isFinite(right)||Math.abs(right)>6||Math.abs(right+left)>.001f)
-       throw new AssertionError("invalid or asymmetric balance at "+age);
+   welcome.append(MotionIslandAnimation.pose(age,MotionIslandState.PLAY,0));
+   bye.append(MotionIslandAnimation.pose(age,MotionIslandState.PAUSE,0));
+   left.append(MotionIslandAnimation.pose(age,MotionIslandState.PREVIOUS,-1));
+   right.append(MotionIslandAnimation.pose(age,MotionIslandState.NEXT,1));
+   for(int action:new int[]{MotionIslandState.PLAY,MotionIslandState.PAUSE,MotionIslandState.NEXT}){
+    float rope=MotionIslandAnimation.ropeLength(age,action);
+    float body=MotionIslandAnimation.bodyRock(age,action,1);
+    if(!Float.isFinite(rope)||rope<0||rope>55||!Float.isFinite(body)||Math.abs(body)>8.01f)
+        throw new AssertionError("unsafe choreography at "+age);
+   }
   }
-  check(MotionIslandAnimation.bodyRock(200,1)!=0&&MotionIslandAnimation.bodyRock(200,0)==0);
-  check(MotionIslandAnimation.bodyRock(-1,1)==0&&MotionIslandAnimation.bodyRock(2400,1)==0);
+  check(!welcome.toString().equals(bye.toString()));
+  check(!left.toString().equals(right.toString()));
+  check(MotionIslandAnimation.ropeLength(0,1)==0&&MotionIslandAnimation.ropeLength(-1,1)==0
+        &&MotionIslandAnimation.ropeLength(2400,1)==0);
+  check(MotionIslandAnimation.ropeLength(2000,2)>MotionIslandAnimation.ropeLength(2200,2)
+        &&MotionIslandAnimation.ropeLength(2200,2)>MotionIslandAnimation.ropeLength(2300,2));
+  check(MotionIslandAnimation.welcomeSparkle(700)>0&&MotionIslandAnimation.welcomeSparkle(0)==0
+        &&MotionIslandAnimation.welcomeSparkle(1200)==0);
+  check(MotionIslandAnimation.pose(-1,1,0)==0&&MotionIslandAnimation.pose(2400,2,0)==0);
+  check(MotionIslandAnimation.bodyRock(-1,1,0)==0&&MotionIslandAnimation.bodyRock(2400,2,0)==0);
   check(MotionIslandState.volumePercent(5,11)==45);
   check(MotionIslandState.volumePercent(0,11)==0);
   check(MotionIslandState.volumePercent(11,11)==100);

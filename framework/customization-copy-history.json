@@ -229,7 +229,8 @@
     "4840b9bbb302caaf73dbcf7a2b7a286a4a58d62c"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMotionIsland.java": [
-    "b9e18585e75500f62a906a0a163c0c52df90c52d"
+    "b9e18585e75500f62a906a0a163c0c52df90c52d",
+    "26ebab4ebbce86375c830f10705ce342821b1810"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionIslandState.java": [
     "eb55dca8174260270c856a48bac3300103c39790"
@@ -247,9 +248,11 @@
     "d5a8b9805862d12c02691e6227f10b05515a9aaa"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionIslandAnimation.java": [
-    "38a9e1cc8382d427c7501ad5b52c504176c2d0cd"
+    "38a9e1cc8382d427c7501ad5b52c504176c2d0cd",
+    "f6c7f9f1ed5dc53ef9b8c46762d78eef0d5facec"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionAstronautView.java": [
-    "62e80c6e127f75786455df7c078da0d9cbca4cdf"
+    "62e80c6e127f75786455df7c078da0d9cbca4cdf",
+    "0f0444ffaeabd7a2eb70e43e55b04e90acaa744a"
   ]
 }

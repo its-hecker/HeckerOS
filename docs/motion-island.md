@@ -7,9 +7,10 @@ both. The root privacy and retained Suite Polish source baseline is preserved.
 
 ## Behavior
 
-Open **Hecker Suite → Motion Sense → Motion Island & creature**, also available
-under **Status bar**. Both switches default on for this test. Motion Island is
-required for the astronaut; its separate switch turns only the character off.
+Open **Hecker Suite → Motion Sense → Motion Island**, also available under
+**Status bar**. The **Motion bar** and **Astronaut character** switches both
+default on and apply immediately. Character off leaves the music bar running.
+Bar off hides both and preserves the separate character preference.
 
 The black status-bar capsule stays visible during music playback, independently
 of the Oslo glow. It shows album art, a short title or recent gesture result,
@@ -21,15 +22,22 @@ The expanded card is pinned to that session and can remain open while paused.
 Outside tap, back, screen off, user change or session destruction dismisses it.
 
 The astronaut follows the user's second reference, with a glossy black visor,
-white outline and intact limbs. Its raised hand grips a thin rope from the
-capsule. A flick swings it first in the **physical hand direction**, including
-when the user's next/previous mapping is reversed. During the swing it raises
-its free arm for balance, gives a small wave near the outer arc, and gently
-counterbalances its body around the gripping hand before lowering the arm.
-The hand stays registered to the rope endpoint in all poses. Play and pause
-wave the free hand in a brief goodbye. Each gesture restarts a 2.4-second appearance with a
-soft entrance, damped swing and 420 ms fade/retraction after inactivity. A pause
-allows that farewell to finish before the capsule hides; ordinary pause hides
+white outline and intact limbs. Its raised hand grips a thin rope attached
+strictly underneath the capsule. Each gesture has a different reaction:
+
+- **Play:** a soft drop/bounce, a held open-arm welcome and two tiny sparkles.
+- **Pause:** repeated bye-bye waves and a small goodbye bow.
+- **Left flick:** lean into the left swing and reach out with the free arm.
+- **Right flick:** swing right with cheerful arm pumps and a balancing wiggle.
+
+The physical flick side drives the swing even when next/previous mapping is
+reversed. The gripping hand remains registered to the rope endpoint in every
+pose. At the end of the 2.4-second appearance, the rope shortens over 500 ms
+while both the rope and character fade. Its top attachment stays fixed. The
+astronaut window starts at the capsule's painted bottom, with density rounding
+matched, and an explicit clip is installed before any drawing transforms.
+Nothing from the rope, body or sparkles can paint in front of/above the bar.
+A pause finishes its goodbye before the capsule hides; ordinary pause hides
 the capsule. The astronaut is hidden while the expanded player is open.
 
 Screen off, AOD, disabled Motion Sense or disabled Island removes both views.
@@ -79,6 +87,9 @@ and bounded pre-command identities stay within the privileged package boundary.
 code against recording Canvas declarations and renders it with Pillow/CairoSVG.
 The sample album cover is `docs/previews/motion-island-album.svg`; actual playback
 uses the player's album art, falling back to a music note only when artwork is absent.
+The renderer compares all 300 frames against a capsule-only baseline, checking
+that the character never changes a pixel in the bar. Removing the clip in a
+negative control reproduces the overlap and is detected by that check.
 The sprite was created with a transparent-background imagegen reference edit;
 `framework/motionisland/artwork.json` records its provenance. This is a host
 design preview, not a phone screenshot.

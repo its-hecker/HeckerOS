@@ -178,7 +178,8 @@ public final class HeckerMotionIsland implements AutoCloseable {
         if (state.creatureVisible(now()) && dialog == null) {
             if (astronaut == null) {
                 MotionAstronautView view = new MotionAstronautView(context);
-                if (add(view, dp(224), dp(150), dp(29), true, "HeckerMotionAstronaut")) astronaut = view;
+                // Match MotionIslandView's painted bottom, including density rounding.
+                if (add(view, dp(224), dp(150), dp(32) - dp(3), true, "HeckerMotionAstronaut")) astronaut = view;
             }
             if (astronaut != null) astronaut.update(state, animate);
         } else removeAstronaut();

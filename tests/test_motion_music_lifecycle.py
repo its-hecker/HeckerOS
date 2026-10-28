@@ -19,19 +19,29 @@ class MotionMusicLifecycleTests(unittest.TestCase):
 }''',
 'android/animation/ValueAnimator.java': 'package android.animation;public class ValueAnimator{public static boolean areAnimatorsEnabled(){return true;}}',
 'android/database/ContentObserver.java': 'package android.database;public class ContentObserver{public ContentObserver(android.os.Handler h){}public void onChange(boolean b){}}',
-'android/content/ContentResolver.java': 'package android.content;public class ContentResolver{public void registerContentObserver(Object uri,boolean all,android.database.ContentObserver o,int user){}public void unregisterContentObserver(android.database.ContentObserver o){}}',
-'android/provider/Settings.java': 'package android.provider;public class Settings{public static class Secure{public static Object getUriFor(String k){return k;}public static int getIntForUser(android.content.ContentResolver r,String k,int d,int u){return 1;}}}',
+'android/content/ContentResolver.java': '''package android.content;public class ContentResolver{
+ public java.util.Map<String,android.database.ContentObserver> observers=new java.util.HashMap<>();
+ public void registerContentObserver(Object uri,boolean all,android.database.ContentObserver o,int user){observers.put((String)uri,o);}
+ public void unregisterContentObserver(android.database.ContentObserver o){observers.values().removeIf(v->v==o);}
+ public void notifyChanged(String key){var o=observers.get(key);if(o!=null)o.onChange(false);}
+}''',
+'android/provider/Settings.java': '''package android.provider;public class Settings{public static class Secure{
+ public static java.util.Map<String,Integer> values=new java.util.HashMap<>(java.util.Map.of("aware_enabled",1));
+ public static Object getUriFor(String k){return k;}
+ public static int getIntForUser(android.content.ContentResolver r,String k,int d,int u){return values.getOrDefault(k,d);}
+ public static boolean putInt(android.content.ContentResolver r,String k,int v){values.put(k,v);r.notifyChanged(k);return true;}
+}}''',
 'android/content/res/Resources.java': 'package android.content.res;public class Resources{public static class Metrics{public float density=1;}public Metrics getDisplayMetrics(){return new Metrics();}}',
 'android/content/Context.java': '''package android.content;public class Context{
  public static int RECEIVER_NOT_EXPORTED=4,RECEIVER_EXPORTED=2;public android.media.session.MediaSessionManager manager=new android.media.session.MediaSessionManager();public android.os.PowerManager power=new android.os.PowerManager();public android.view.WindowManager windows=new android.view.WindowManager();
- public java.util.Map<BroadcastReceiver,IntentFilter> receivers=new java.util.LinkedHashMap<>();
+ public final ContentResolver resolver=new ContentResolver();public java.util.Map<BroadcastReceiver,IntentFilter> receivers=new java.util.LinkedHashMap<>();
  public <T>T getSystemService(Class<T> t){Object v=t==android.os.PowerManager.class?power:t==android.view.WindowManager.class?windows:manager;return t.cast(v);}
  public java.util.concurrent.Executor getMainExecutor(){return Runnable::run;}
  public void registerReceiver(BroadcastReceiver r,IntentFilter f,int flags){receivers.put(r,f);}
  public void registerReceiver(BroadcastReceiver r,IntentFilter f,String permission,android.os.Handler h,int flags){receivers.put(r,f);}
  public void unregisterReceiver(BroadcastReceiver r){receivers.remove(r);}
  public void emit(Intent i){for(var e:new java.util.ArrayList<>(receivers.entrySet()))if(e.getValue().actions.contains(i.getAction()))e.getKey().onReceive(this,i);}
- public ContentResolver getContentResolver(){return new ContentResolver();}public android.content.res.Resources getResources(){return new android.content.res.Resources();}
+ public ContentResolver getContentResolver(){return resolver;}public android.content.res.Resources getResources(){return new android.content.res.Resources();}
  public String getString(int i,Object... args){return "music";}public String getPackageName(){return "com.android.systemui";}public void sendBroadcastAsUser(Intent i,android.os.UserHandle u){}
 }''',
 'android/content/IntentFilter.java': 'package android.content;public class IntentFilter{public java.util.Set<String> actions=new java.util.HashSet<>();public IntentFilter(String a){actions.add(a);}public void addAction(String a){actions.add(a);}}',
@@ -69,7 +79,7 @@ public class LifecycleTest{
   check(c.windows.views.size()==1);var params=c.windows.views.values().iterator().next();
   check(params.width==148&&params.height==32&&(params.flags&WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)==0);
   event(c,m,3,-1);check(c.windows.views.size()==2&&MotionAstronautView.direction==-1);
-  check(c.windows.views.entrySet().stream().anyMatch(e->e.getKey() instanceof MotionAstronautView&&(e.getValue().flags&16)!=0));
+  check(c.windows.views.entrySet().stream().anyMatch(e->e.getKey() instanceof MotionAstronautView&&(e.getValue().flags&16)!=0&&e.getValue().y==29));
   SystemClock.now+=2500;Handler.due();check(c.windows.views.size()==1); // Capsule persists, companion expires.
   SystemClock.now=600000;m.playback(2);check(c.windows.views.isEmpty()); // Long playback, callback before event.
   event(c,m,2,0);check(c.windows.views.size()==2&&MotionAstronautView.action==2);
@@ -80,7 +90,17 @@ public class LifecycleTest{
   m.playback(2);check(c.windows.views.isEmpty()&&HeckerMotionMediaDialog.last.showing); // Expanded resume remains usable.
   c.emit(new Intent(Intent.ACTION_SCREEN_OFF));check(c.windows.views.isEmpty()&&!HeckerMotionMediaDialog.last.showing&&m.callbacks.isEmpty());
   c.emit(new Intent(Intent.ACTION_SCREEN_ON));m.playback(3);check(c.windows.views.size()==1);
-  host.close();check(c.windows.views.isEmpty()&&m.callbacks.isEmpty()&&c.receivers.isEmpty()&&c.manager.listeners.isEmpty());
+  event(c,m,3,1);check(c.windows.views.size()==2);
+  android.provider.Settings.Secure.putInt(c.getContentResolver(),"hecker_motion_creature",0);
+  check(c.windows.views.size()==1&&m.callbacks.size()==1); // Character off keeps the playing capsule.
+  android.provider.Settings.Secure.putInt(c.getContentResolver(),"hecker_motion_island",0);
+  check(c.windows.views.isEmpty()&&m.callbacks.isEmpty()); // Master switch removes both immediately.
+  android.provider.Settings.Secure.putInt(c.getContentResolver(),"hecker_motion_island",1);
+  check(c.windows.views.size()==1); // Character preference remains off across bar off/on.
+  event(c,m,4,-1);check(c.windows.views.size()==1);
+  android.provider.Settings.Secure.putInt(c.getContentResolver(),"hecker_motion_creature",1);
+  check(c.windows.views.size()==2&&m.plays==0&&m.pauses==0); // Visual switches never send playback commands.
+  host.close();check(c.windows.views.isEmpty()&&m.callbacks.isEmpty()&&c.receivers.isEmpty()&&c.manager.listeners.isEmpty()&&c.resolver.observers.isEmpty());
   SystemClock.now+=10000;Handler.due();check(c.windows.views.isEmpty());
   System.out.println("Motion music coordinator: "+checks+" checks PASS");
  }

@@ -5,7 +5,7 @@ from pathlib import Path
 import subprocess
 root=Path(__file__).resolve().parents[1]
 work=root/'generated/motion-preview'; work.mkdir(parents=True,exist_ok=True)
-for stale in (work/'frames').glob('[0-9][0-9]-[0-9][0-9].svg'): stale.unlink()
+for stale in (work/'frames').glob('[0-9][0-9]-[0-9][0-9]*.svg'): stale.unlink()
 sources={
 'android/content/Context.java': 'package android.content;public class Context{public android.content.res.Resources getResources(){return new android.content.res.Resources();}}',
 'android/content/res/Resources.java': 'package android.content.res;public class Resources{public android.util.DisplayMetrics getDisplayMetrics(){return new android.util.DisplayMetrics();}public int getIdentifier(String a,String b,String c){return 1;}public int getDimensionPixelSize(int id){return 72;}}',
@@ -68,23 +68,27 @@ public class Preview {public static void main(String[] args)throws Exception{
 java.nio.file.Path out=java.nio.file.Path.of(args[0]);java.nio.file.Files.createDirectories(out);
 String data=java.util.Base64.getEncoder().encodeToString(java.nio.file.Files.readAllBytes(java.nio.file.Path.of(args[1])));System.setProperty("atlasData","data:image/png;base64,"+data);
 String cover=java.util.Base64.getEncoder().encodeToString(java.nio.file.Files.readAllBytes(java.nio.file.Path.of(args[2])));System.setProperty("coverData","data:image/svg+xml;base64,"+cover);
-String[] labels={"Midnight orbit","Track skipped","Previous track","Playing","Paused"};int[] actions={0,3,4,1,2};
+String[] labels={"Midnight orbit","Playing","Previous track","Track skipped","Paused"};int[] actions={0,1,4,3,2};
+String[] captions={"Music playing · capsule stays visible","PLAY · Welcome: bounce, open arm and sparkles","LEFT · Reach into the swing","RIGHT · Balance with a playful wiggle","PAUSE · Bye-bye wave and smooth retraction"};
 for(int scene=0;scene<actions.length;scene++){
  MotionIslandState state=new MotionIslandState();state.environment(true,true,true,true,0);
- if(actions[scene]!=0){state.accept(actions[scene],0,10000,10000);state.direction=scene==1?1:scene==2?-1:0;}
+ if(actions[scene]!=0){state.accept(actions[scene],0,10000,10000);state.direction=scene==2?-1:scene==3?1:0;}
  MotionIslandView view=new MotionIslandView(new android.content.Context());view.width=444;view.height=96;
  MotionAstronautView person=new MotionAstronautView(new android.content.Context());person.width=672;person.height=450;
  HeckerQsMedia.Snapshot music=new HeckerQsMedia.Snapshot();music.playing=scene!=4;music.artwork=new android.graphics.Bitmap(true);
- for(int frame=0;frame<48;frame++){
- android.os.SystemClock.now=10000+frame*55;
+ for(int frame=0;frame<60;frame++){
+ android.os.SystemClock.now=10000+frame*50;
  state.environment(true,true,true,music.playing,0);
  view.update(music,state.current(android.os.SystemClock.now)==0?labels[0]:labels[scene],true);person.update(state,true);
  android.graphics.Canvas canvas=new android.graphics.Canvas();
  int save;
  if(state.visible(android.os.SystemClock.now)){save=canvas.save();canvas.translate(114,0);view.onDraw(canvas);canvas.restoreToCount(save);}
+ String capsuleOnly=canvas.s.toString();
  if(state.creatureVisible(android.os.SystemClock.now)){save=canvas.save();canvas.translate(0,87);person.onDraw(canvas);canvas.restoreToCount(save);}
- String svg="<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"672\" height=\"500\"><defs><linearGradient id=\"bg\" x2=\"0\" y2=\"1\"><stop stop-color=\"#2d6076\"/><stop offset=\"1\" stop-color=\"#0c1624\"/></linearGradient></defs><rect width=\"100%\" height=\"100%\" rx=\"24\" fill=\"url(#bg)\"/>"+canvas.s+"</svg>";
- java.nio.file.Files.writeString(out.resolve(String.format("%02d-%02d.svg",scene,frame)),svg);
+ String base="<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"672\" height=\"500\"><defs><linearGradient id=\"bg\" x2=\"0\" y2=\"1\"><stop stop-color=\"#2d6076\"/><stop offset=\"1\" stop-color=\"#0c1624\"/></linearGradient></defs><rect width=\"100%\" height=\"100%\" rx=\"24\" fill=\"url(#bg)\"/>";
+ String caption="<text x=\"336\" y=\"475\" text-anchor=\"middle\" font-family=\"sans-serif\" font-size=\"18\" fill=\"#e2eef7\">"+captions[scene]+"</text>";
+ java.nio.file.Files.writeString(out.resolve(String.format("%02d-%02d.svg",scene,frame)),base+canvas.s+caption+"</svg>");
+ java.nio.file.Files.writeString(out.resolve(String.format("%02d-%02d.capsule.svg",scene,frame)),base+capsuleOnly+caption+"</svg>");
  }
 }
 }}'''
@@ -94,13 +98,24 @@ for name,code in sources.items():
 production=root/'framework/motionisland'
 subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-d',str(work/'classes'),*files,*[str(production/n) for n in ('MotionIslandState.java','MotionIslandAnimation.java','MotionIslandView.java','MotionAstronautView.java')]],check=True)
 subprocess.run(['java','-cp',str(work/'classes'),'com.android.systemui.hecker.Preview',str(work/'frames'),str(production/'astronaut-wave.png'),str(root/'docs/previews/motion-island-album.svg')],check=True)
-import cairosvg,io
-from PIL import Image
-frames=[]
-for svg in sorted((work/'frames').glob('*.svg')):
- frames.append(Image.open(io.BytesIO(cairosvg.svg2png(bytestring=svg.read_bytes()))).convert('RGB'))
+import cairosvg,io,re
+from PIL import Image, ImageChops
+frames=[];negative_control=False
+for svg in sorted((work/'frames').glob('[0-9][0-9]-[0-9][0-9].svg')):
+ source=svg.read_bytes()
+ actual=Image.open(io.BytesIO(cairosvg.svg2png(bytestring=source))).convert('RGB')
+ baseline=Image.open(io.BytesIO(cairosvg.svg2png(url=str(svg.with_suffix('.capsule.svg'))))).convert('RGB')
+ bar=(0,0,672,87)
+ assert ImageChops.difference(actual.crop(bar),baseline.crop(bar)).getbbox() is None, 'Character overlapped capsule: '+svg.name
+ if svg.name=='01-01.svg':
+  unclipped=re.sub(rb' clip-path="url\(#c\d+\)"',b'',source)
+  unsafe=Image.open(io.BytesIO(cairosvg.svg2png(bytestring=unclipped))).convert('RGB')
+  negative_control=ImageChops.difference(unsafe.crop(bar),baseline.crop(bar)).getbbox() is not None
+ frames.append(actual)
+assert negative_control, 'Clipping regression check did not detect its negative control'
 out=root/'docs/previews';out.mkdir(exist_ok=True)
-frames[56].save(out/'motion-island.png')
-frames[150].save(work/'wave.png')
-frames[0].save(out/'motion-island.gif',save_all=True,append_images=frames[1:],duration=55,loop=0,optimize=True)
+frames[72].save(out/'motion-island.png')
+frames[252].save(work/'wave.png')
+frames[0].save(out/'motion-island.gif',save_all=True,append_images=frames[1:],duration=50,loop=0,optimize=True)
+print('Rope/character pixel comparison:',len(frames),'frames leave the capsule untouched; unclipped negative control detected')
 print('Native production draw-command preview:',out/'motion-island.gif')

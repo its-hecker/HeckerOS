@@ -51,16 +51,15 @@ final class MotionAstronautView extends View {
         long age = SystemClock.elapsedRealtime() - when;
         if (when < 0 || age < 0 || age >= MotionIslandState.ACTION_DURATION || atlas == null) return;
         float alpha = animate ? MotionIslandAnimation.alpha(age) : 1;
-        boolean wave = action == MotionIslandState.PLAY || action == MotionIslandState.PAUSE;
-        int pose = !animate ? 0 : wave ? MotionIslandAnimation.pose(age, true)
-                : direction != 0 ? MotionIslandAnimation.swingPose(age) : 0;
+        if (alpha <= 0) return;
+        int pose = animate ? MotionIslandAnimation.pose(age, action, direction) : 0;
         int save = canvas.save();
-        canvas.translate(getWidth() / 2f, dp(1));
-        if (animate) {
-            canvas.rotate(MotionIslandAnimation.angle(age, direction));
-            canvas.translate(0, -dp(13) * (1 - alpha));
-        }
-        float rope = dp(47);
+        // The window starts exactly at the painted capsule's bottom. Clip before all
+        // transforms, including on the host preview, so no rope/body/sparkle can draw over it.
+        canvas.clipRect(0, 0, getWidth(), getHeight());
+        canvas.translate(getWidth() / 2f, dp(.4f));
+        if (animate) canvas.rotate(MotionIslandAnimation.angle(age, direction));
+        float rope = dp(animate ? MotionIslandAnimation.ropeLength(age, action) : 47);
         paint.setColor(0xffe7edf2); paint.setAlpha(Math.round(235 * alpha));
         paint.setStrokeWidth(dp(.8f)); paint.setStrokeCap(Paint.Cap.ROUND);
         canvas.drawLine(0, 0, 0, rope + dp(2), paint);
@@ -72,11 +71,22 @@ final class MotionAstronautView extends View {
         float gripY = .292f;
         Rect source = new Rect(pose * cell, 0, (pose + 1) * cell, atlas.getHeight());
         canvas.translate(0, rope);
-        if (animate) canvas.rotate(MotionIslandAnimation.bodyRock(age, direction));
+        if (animate) canvas.rotate(MotionIslandAnimation.bodyRock(age, action, direction));
         RectF target = new RectF(-size * gripX[pose], -size * gripY,
                 size * (1 - gripX[pose]), size * (1 - gripY));
         paint.setAlpha(Math.round(255 * alpha));
         canvas.drawBitmap(atlas, source, target, paint);
+        if (animate && action == MotionIslandState.PLAY) {
+            float glow = MotionIslandAnimation.welcomeSparkle(age);
+            paint.setColor(0xffb3e9fa); paint.setAlpha(Math.round(255 * alpha * glow));
+            paint.setStrokeWidth(dp(.8f));
+            sparkle(canvas, -dp(48), -dp(16), dp(2.7f));
+            sparkle(canvas, dp(5), dp(10), dp(2));
+        }
         canvas.restoreToCount(save);
+    }
+    private void sparkle(Canvas canvas, float x, float y, float radius) {
+        canvas.drawLine(x - radius, y, x + radius, y, paint);
+        canvas.drawLine(x, y - radius, x, y + radius, paint);
     }
 }
