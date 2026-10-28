@@ -62,3 +62,36 @@ Selected-device verification now retries only unresolved addresses, with at most
 Missing replies use `peer_unreachable`; an observed mismatch uses `peer_mac_changed`. Bounded `VERIFY` records report the selected IP, expected MAC and actual MAC or `missing`. Suite displays up to three failed peers with a count of additional failures, keeping the footer usable for large selections. Failed entries are marked unavailable until a fresh scan, excluding them from subsequent master selections. Changed identities are never silently substituted, and a failed group request never starts partial control. Private/randomized unicast MACs remain valid. Details stay in transient controller state; logcat records only the failure category.
 
 The native regression runs the production packet wrapper, discovery loop, peer verifier and gateway recheck against simulated sockets and clocks. It covers lost first broadcasts, delayed replies, directed/broadcast retries, mixed groups, a fully missing 32-peer selection, exact mismatch details, unrelated/self/outgoing frames, Stop, controller EOF, send failures and gateway checks during signal cleanup. Address/undefined-behavior sanitizers run without network I/O. The Java protocol checks also cover malformed verification records. These checks and Android Java/AIDL/resource compilation validate source behavior; a rebuilt ROM and a fresh owned-device test are still required to establish the result on the affected LAN.
+
+## Touch and refresh follow-up — 28 October 2026
+
+A slider DOWN set the Activity's `adjustingRate` flag, but a pre-drag CANCEL
+inside the scrolling device list did not clear it. Android's AbsSeekBar only
+calls `onStopTrackingTouch` on cancellation after tracking starts. The held flag
+then suppressed both peer-card refreshes and master-slider updates until a tab
+change reset it. A host reproduction using the production callbacks fails on
+the old cancellation path.
+
+Slider UP and CANCEL now schedule one completion after event dispatch, including
+cancellation before tracking. DOWN claims the slider gesture from its scrolling
+parent; both terminal events release it. Cancelled/unchanged gestures apply
+nothing, and a proposed rate still requires the existing confirmation.
+
+Activity touch dispatch holds card replacements and header/footer control updates
+until UP or CANCEL. Polling continues to update the model, then renders its latest
+state after dispatch. Poll comparisons use displayed fields and availability,
+rather than Bundle's parcel-description string or unrelated traffic counters.
+This avoids both missed state changes and unnecessary card replacements. Peer
+actions resolve the latest model by ID and reject a changed MAC identity.
+
+The regression executes the production gesture, dispatch and list-render methods
+for pre-drag cancellation, drags, cancelled drags, unchanged taps, keyboard/
+TalkBack debounce, network changes, polling during a press, Activity cancellation,
+stopping, fresh peer state, counter-only polls, equal-sized parcel descriptions,
+and changed peer identity. It uses simulated events and does not prove physical
+touch behavior. Full ROM/Soong compilation and the supplied phone reproduction
+still require device verification.
+
+Source verification: all 118 Python host tests, the complete existing Java/native
+host suite, and locked Android Suite/controller Java, AIDL and resource compilation
+pass. The new interaction regression covers the 13 event/state sequences above.

@@ -49,11 +49,12 @@ public final class NetworkLabActivity extends Activity {
     private Button stopControlButton;
     private NetLabDiscovery scanner;
     private NetLabDiscovery.Link link;
-    private boolean started,bound,polling,acting,scanning,rootScanning,rateReady,adjustingRate;
+    private boolean started,bound,polling,acting,scanning,rootScanning,rateReady,adjustingRate,touchingPage;
     private int tab,filter,limit=50,generation;
     private String query="",scope="",gateway="",gatewayMac="",arpStatus="",lastList="";
     private String expandedDevice;
     private final Runnable hideBrand=()->{if(brandPopup!=null)brandPopup.setVisibility(View.GONE);};
+    private final Runnable afterTouch=this::finishTouch;
     private long previousRx=-1,previousTx=-1,previousTime,rxRate,txRate;
     private final Runnable poll=new Runnable(){public void run(){refresh();if(started)main.postDelayed(this,2000);}};
     private final ServiceConnection connection=new ServiceConnection(){
@@ -140,11 +141,23 @@ public final class NetworkLabActivity extends Activity {
     private void showBrand(){main.removeCallbacks(hideBrand);brandPopup.setVisibility(View.VISIBLE);main.postDelayed(hideBrand,3500);}
     private Button button(int title,View.OnClickListener click){Button button=NetLabStyle.button(this);button.setText(title);button.setOnClickListener(click);return button;}
     private void text(LinearLayout parent,int title,int summary){parent.addView(NetLabStyle.text(this,getString(title),18,true));parent.addView(NetLabStyle.text(this,getString(summary),14,false));}
+    @Override public boolean dispatchTouchEvent(MotionEvent event){
+        int action=event.getActionMasked();
+        if(action==MotionEvent.ACTION_DOWN){main.removeCallbacks(afterTouch);touchingPage=true;}
+        try{return super.dispatchTouchEvent(event);}
+        finally{if(action==MotionEvent.ACTION_UP||action==MotionEvent.ACTION_CANCEL){
+            touchingPage=false;main.removeCallbacks(afterTouch);main.post(afterTouch);
+        }}
+    }
+    private void finishTouch(){
+        if(!started||touchingPage)return;
+        updateHeader();renderDevices();updateRoot();
+    }
     @Override protected void onStart(){super.onStart();started=true;
         try{bound=bindService(new Intent().setComponent(new ComponentName("org.hecker.netlab","org.hecker.netlab.NetLabService")),connection,Context.BIND_AUTO_CREATE);}
         catch(SecurityException unavailable){bound=false;}main.post(poll);
     }
-    @Override protected void onStop(){started=false;rootPending=null;main.removeCallbacks(poll);main.removeCallbacks(hideBrand);hideBrand.run();cancelRateChoice();generation++;if(scanner!=null)scanner.close();scanner=null;scanning=false;
+    @Override protected void onStop(){started=false;touchingPage=false;rootPending=null;main.removeCallbacks(afterTouch);main.removeCallbacks(poll);main.removeCallbacks(hideBrand);hideBrand.run();cancelRateChoice();generation++;if(scanner!=null)scanner.close();scanner=null;scanning=false;
         if(bound){unbindService(connection);bound=false;}controller=null;super.onStop();}
     @Override protected void onDestroy(){worker.shutdownNow();super.onDestroy();}
     @Override protected void onSaveInstanceState(Bundle out){out.putInt("tab",tab);out.putInt("filter",filter);out.putString("query",query);out.putString("expanded",expandedDevice);super.onSaveInstanceState(out);}
@@ -207,6 +220,8 @@ public final class NetworkLabActivity extends Activity {
     }
     private boolean jailed(Bundle d){return Arrays.asList("applying","enforced","restoring","failed","active_unverified","blocking","relaying").contains(d.getString("state"));}
     private void updateHeader(){
+        // Poll the model normally, but keep targets/enabled states stable until dispatch finishes.
+        if(touchingPage)return;
         int online=0,controlled=0;for(Bundle d:devices){if(d.getBoolean("online"))online++;if(jailed(d))controlled++;}
         Bundle root=rootState();boolean busy=root.getBoolean("busy");
         rootScanning=busy&&"SCAN".equals(root.getString("action"))||rootScanning&&acting;
@@ -339,8 +354,8 @@ public final class NetworkLabActivity extends Activity {
     }
     private void diagnostic(LinearLayout card,int label,boolean supported){card.addView(NetLabStyle.text(this,getString(label)+" · "+getString(supported?R.string.netlab_supported:R.string.netlab_unavailable),14,false));}
     private void renderDevices(){
-        if(list==null||adjustingRate)return;
-        String fingerprint=devices.toString()+query+filter+tab+expandedDevice+acting+rootState().getBoolean("busy")+limit;
+        if(list==null||adjustingRate||touchingPage)return;
+        String fingerprint=devicePresentation();
         if(fingerprint.equals(lastList))return;lastList=fingerprint;list.removeAllViews();int shown=0,total=0;
         String needle=tab==0?query.toLowerCase(Locale.ROOT):"";
         for(Bundle d:devices){String id=d.getString("id"),name=label(d);
@@ -356,6 +371,22 @@ public final class NetworkLabActivity extends Activity {
             else if(devices.isEmpty())empty.addView(NetLabStyle.text(this,getString(R.string.netlab_ui_scan_hint),14,false));list.addView(empty);}
         if(total>limit){list.addView(NetLabStyle.text(this,getString(R.string.netlab_page_count,limit,total),12,false));list.addView(button(R.string.netlab_show_more,v->{limit+=50;lastList="";renderDevices();}));}
     }
+    private String devicePresentation(){
+        // Bundle.toString() can describe only its parcel size, or include changing counters.
+        // Compare the fields actually drawn, including preference and control availability.
+        StringBuilder key=new StringBuilder();
+        presentationValues(key,query,filter,tab,expandedDevice,acting,rootState().getBoolean("busy"),rootState().getBoolean("active"),scope,gateway,limit);
+        for(Bundle d:devices)presentationValues(key,d.getString("id"),label(d),displayName(d),addresses(d),d.getString("mac"),
+                preferences.trusted(d.getString("id")),d.getBoolean("online"),d.getBoolean("managed"),d.getBoolean("root_peer"),d.getBoolean("session_member"),
+                d.getString("state"),d.getString("mode"),d.getString("requested_mode"),d.getInt("down_kbps"),d.getInt("up_kbps"),
+                d.getInt("requested_down",d.getInt("down_kbps")),d.getInt("requested_up",d.getInt("up_kbps")),expiryLabel(d),
+                d.getString("brand"),d.getString("os"),d.getString("model"));
+        return key.toString();
+    }
+    private static void presentationValues(StringBuilder key,Object...values){
+        for(Object value:values){String text=String.valueOf(value);key.append(text.length()).append(':').append(text);}
+    }
+    private String expiryLabel(Bundle d){return d.getLong("until")>0?android.text.format.DateFormat.getTimeFormat(this).format(new Date(d.getLong("until"))):"—";}
     private LinearLayout peerCard(Bundle d){
         String id=d.getString("id"),name=displayName(d);
         LinearLayout card=NetLabStyle.card(this);card.setPadding(0,0,0,0);
@@ -386,7 +417,7 @@ public final class NetworkLabActivity extends Activity {
         TextView trust=NetLabStyle.text(this,getString(R.string.netlab_ref_trusted,getString(preferences.trusted(id)?R.string.netlab_ref_yes:R.string.netlab_ref_no)),12,true);
         String control=jailed(d)?shortStatus(d):getString(R.string.netlab_ref_no);
         TextView stateLabel=NetLabStyle.text(this,getString(R.string.netlab_ref_control,control),12,false);
-        String expiry=d.getLong("until")>0?android.text.format.DateFormat.getTimeFormat(this).format(new Date(d.getLong("until"))):"—";
+        String expiry=expiryLabel(d);
         TextView until=NetLabStyle.text(this,getString(R.string.netlab_ref_timer,expiry),12,false);until.setGravity(Gravity.END);
         facts.addView(trust,new LinearLayout.LayoutParams(0,-2,1));facts.addView(stateLabel,new LinearLayout.LayoutParams(0,-2,1.4f));facts.addView(until,new LinearLayout.LayoutParams(0,-2,1));info.addView(facts);card.addView(info);
         if(id.equals(expandedDevice)){
@@ -431,24 +462,36 @@ public final class NetworkLabActivity extends Activity {
                 if(action==NetLabSliderPolicy.Action.NONE){updateHeader();lastList="";renderDevices();return;}
                 if(!gestureScope.equals(scope)){toast(R.string.netlab_device_changed);updateHeader();lastList="";renderDevices();return;}
                 if(all){if(value==12)confirmRestore();else controlAll(value!=0,speedRate(value));}
-                else if(value==0)pausePeer(peer);else if(value==12){if(jailed(peer))restorePeer(peer);}else controlWifi(Collections.singletonList(peer),true,speedRate(value));
+                else{Bundle current=currentPeer(peer);if(current!=null){
+                    if(value==0)pausePeer(current);else if(value==12){if(jailed(current))restorePeer(current);}else controlWifi(Collections.singletonList(current),true,speedRate(value));
+                }}
                 lastList="";updateHeader();renderDevices();
             };
+            private void scheduleApply(long delay){
+                if(pendingRateChoice!=null)main.removeCallbacks(pendingRateChoice);
+                pendingRateChoice=apply;main.postDelayed(apply,delay);
+            }
             {
                 speed.setOnTouchListener((v,event)->{
                     switch(event.getActionMasked()){
-                        case MotionEvent.ACTION_DOWN:cancelRateChoice();adjustingRate=true;changed=false;touch=true;up=false;cancelled=false;break;
-                        case MotionEvent.ACTION_UP:up=true;break;
-                        case MotionEvent.ACTION_CANCEL:cancelled=true;break;
+                        case MotionEvent.ACTION_DOWN:
+                            cancelRateChoice();adjustingRate=true;changed=false;touch=true;up=false;cancelled=false;
+                            if(v.getParent()!=null)v.getParent().requestDisallowInterceptTouchEvent(true);break;
+                        case MotionEvent.ACTION_UP:up=true;scheduleApply(0);break;
+                        // AbsSeekBar skips onStopTrackingTouch if ScrollView cancels before dragging.
+                        case MotionEvent.ACTION_CANCEL:cancelled=true;scheduleApply(0);break;
+                    }
+                    if(event.getActionMasked()==MotionEvent.ACTION_UP||event.getActionMasked()==MotionEvent.ACTION_CANCEL){
+                        if(v.getParent()!=null)v.getParent().requestDisallowInterceptTouchEvent(false);
                     }return false;
                 });
             }
             public void onStartTrackingTouch(SeekBar bar){cancelRateChoice();adjustingRate=true;}
             public void onProgressChanged(SeekBar bar,int value,boolean user){
                 bar.setStateDescription(value==0?getString(R.string.netlab_ui_paused):rate(speedRate(value)));
-                if(user){changed=true;if(!touch){if(pendingRateChoice!=null)main.removeCallbacks(pendingRateChoice);adjustingRate=true;pendingRateChoice=apply;main.postDelayed(apply,400);}}
+                if(user){changed=true;if(!touch){adjustingRate=true;scheduleApply(400);}}
             }
-            public void onStopTrackingTouch(SeekBar bar){if(pendingRateChoice!=null)main.removeCallbacks(pendingRateChoice);apply.run();}
+            public void onStopTrackingTouch(SeekBar bar){scheduleApply(0);}
         });
     }
     private String displayName(Bundle d){String name=preferences.label(d.getString("id"),d.getString("name",""));return name.isEmpty()?getString(R.string.netlab_ref_untitled):name;}
@@ -456,13 +499,20 @@ public final class NetworkLabActivity extends Activity {
         ClipboardManager clipboard=(ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
         clipboard.setPrimaryClip(ClipData.newPlainText(displayName(d),getString(R.string.netlab_ref_ip,addresses(d))+"\n"+getString(R.string.netlab_ref_mac,d.getString("mac",""))));
     }
-    private void togglePeer(Bundle d){if(jailed(d))restorePeer(d);else pausePeer(d);}
+    private Bundle currentPeer(Bundle peer){
+        for(Bundle current:devices)if(current.getString("id","").equals(peer.getString("id",""))){
+            if(current.getString("mac","").equalsIgnoreCase(peer.getString("mac","")))return current;
+            break;
+        }
+        toast(R.string.netlab_device_changed);return null;
+    }
+    private void togglePeer(Bundle d){Bundle current=currentPeer(d);if(current==null)return;if(jailed(current))restorePeer(current);else pausePeer(current);}
     private void pausePeer(Bundle d){
-        if(acting)return;if(router(d)||!canOperate(d)){details(d);return;}
+        if(acting)return;d=currentPeer(d);if(d==null)return;if(router(d)||!canOperate(d)){details(d);return;}
         if(jailed(d)&&!(d.getBoolean("root_peer")&&rootState().getBoolean("active"))){deviceActions(d);return;}
         if(d.getBoolean("managed"))chooseDuration(Collections.singletonList(d));else controlWifi(Collections.singletonList(d),false);
     }
-    private void restorePeer(Bundle d){if(!acting&&jailed(d))perform("restore",Collections.singletonList(d),0);}
+    private void restorePeer(Bundle d){if(acting)return;Bundle current=currentPeer(d);if(current!=null&&jailed(current))perform("restore",Collections.singletonList(current),0);}
     private static int speedRate(int position){return NetLabSliderPolicy.rate(position);}
     private static int speedPosition(int kbps){return NetLabSliderPolicy.ratePosition(kbps);}
     private int sliderPosition(Bundle d){return NetLabSliderPolicy.position(d.getString("state",""),d.getString("mode",""),d.getString("requested_mode",""),d.getInt("down_kbps"),d.getInt("requested_down",d.getInt("down_kbps")));}
