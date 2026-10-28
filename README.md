@@ -1,15 +1,17 @@
 # HeckerOS · Android 17
 
-This experimental `feat/settings-depth-lockscreen-20261028` branch adds the
-[reference Settings homepage, animated word clock and imported-layer depth clock](docs/settings-depth-lockscreen.md)
-and [synchronized smoked-glass folders/icons/search, launcher toggles and default Caracal Dawn artwork](docs/launcher-glass-caracal.md)
-on top of the complete Coral root-privacy/astronaut test. Use the matching Coral
-local-manifest branch. Full ROM and phone validation remain pending; the navigation
+This experimental `feat/settings-depth-lockscreen-20261028` branch combines the
+[reference Settings homepage, animated word clock and imported-layer depth clock](docs/settings-depth-lockscreen.md),
+[synchronized smoked-glass folders/icons/search, launcher toggles and default Caracal Dawn artwork](docs/launcher-glass-caracal.md),
+and [NetLab slider-cancellation and refresh fixes](docs/netlab-ui.md)
+on top of the complete Coral root-privacy/astronaut test. Use this same branch in the
+[Coral local manifest](https://github.com/its-hecker/HeckerOs-localmanifest/tree/feat/settings-depth-lockscreen-20261028).
+Full ROM and phone validation remain pending; the navigation
 freeze is under investigation and is not claimed fixed.
 
 Hecker's custom PixelOS-based ROM for the Google Pixel 4 XL (**coral**) and
 Google Pixel 4 (**flame**). Both products inherit the same feature sources. The
-current integration branch is `feat/suite-polish`; the hardware tree uses `main`
+integration branch for this Coral experiment is `feat/settings-depth-lockscreen-20261028`; the hardware tree uses `main`
 for Coral and `flame` for Flame. Full Flame build and hardware validation are pending.
 
 For Flame, use the [dedicated local manifest](https://github.com/its-hecker/HeckerOs-Flame-localmanifest)
