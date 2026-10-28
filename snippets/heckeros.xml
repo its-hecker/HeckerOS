@@ -9,14 +9,14 @@
   <remove-project path="vendor/hecker/floral/motionsense" optional="true" />
   <remove-project path="vendor/hecker/floral/faceid" optional="true" />
   <remove-project path="vendor/hecker/floral/suite" optional="true" />
-  <project name="its-hecker/heckeros-floral-devicetree" path="device/google/coral" remote="floral-github" revision="8e19009ad632f66473ddcdb10c00595fefdb79b4" upstream="refs/heads/main" dest-branch="main" />
+  <project name="its-hecker/heckeros-floral-devicetree" path="device/google/coral" remote="floral-github" revision="4829092f7b7b988fc5fb2efe57c481f266364c71" upstream="refs/heads/test/floral-low-brightness-flicker-20261029" dest-branch="test/floral-low-brightness-flicker-20261029" />
   <project name="its-hecker/heckeros-coral-vendor" path="vendor/google/coral" remote="floral-github" revision="60b0c615e939cd09ce956e6fe6df5d5aa6ccbdd4" upstream="refs/heads/main" dest-branch="main" />
   <project name="its-hecker/heckeros-floral-kernel" path="kernel/google/msm-4.14" remote="floral-github" revision="f8648fd85fb258165c6a2dd6cb8ea34bae206af5" upstream="refs/heads/main" dest-branch="main" sync-s="true" />
   <project name="LineageOS/android_packages_apps_ElmyraService" path="packages/apps/ElmyraService" remote="floral-github" revision="baab2beb7165caef27b4ee235641775e9d189acc" upstream="refs/heads/lineage-24.0" />
   <project name="its-hecker/vendor_lunaris_dolby" path="vendor/lunaris/dolby" remote="floral-github" revision="544e6271c955e2bf450c8481ac1e71551cb5a800" upstream="refs/heads/pixelos-compat" dest-branch="pixelos-compat" />
   <project name="its-hecker/floral-motionsense-plugin" path="vendor/hecker/floral/motionsense" remote="floral-github" revision="87b91ac74c46de0d00992f72c6fe115189a2e83e" upstream="refs/heads/test/coral-root-privacy-20261027" dest-branch="test/coral-root-privacy-20261027" />
   <project name="its-hecker/floral-3D-faceid-plugin" path="vendor/hecker/floral/faceid" remote="floral-github" revision="d998995e1452d2c3d9882bfdf659e1db760a99be" upstream="refs/heads/main" dest-branch="main" />
-  <project name="its-hecker/HeckerOS" path="vendor/hecker/floral/suite" remote="floral-github" revision="refs/heads/feat/settings-depth-lockscreen-20261028" upstream="refs/heads/feat/settings-depth-lockscreen-20261028" dest-branch="feat/settings-depth-lockscreen-20261028" />
+  <project name="its-hecker/HeckerOS" path="vendor/hecker/floral/suite" remote="floral-github" revision="refs/heads/test/floral-low-brightness-flicker-20261029" upstream="refs/heads/test/floral-low-brightness-flicker-20261029" dest-branch="test/floral-low-brightness-flicker-20261029" />
   <remove-project path="packages/services/OmniJaws" optional="true" />
   <extend-project name="PixelOS-AOSP/android_packages_apps_DolbyAtmos" path="packages/apps/DolbyAtmos" revision="13bbe61cf3e1046e3a1f0bda4719c321c953ce50" upstream="refs/heads/seventeen" />
   <extend-project name="LineageOS/android_hardware_lineage_compat" path="hardware/lineage/compat" revision="590c94850e079642136a4577305d02e4174caabc" upstream="refs/heads/lineage-24.0" />

@@ -34,7 +34,7 @@
   <project path="external/wpa_supplicant_8" name="PixelOS-AOSP/android_external_wpa_supplicant_8" groups="pdk" remote="github"  revision="3346cba3ebae1c14aed18ed97ee7345d6799dcb5"  upstream="refs/heads/seventeen" />
   <project path="external/zstd" name="PixelOS-AOSP/android_external_zstd" groups="pdk" remote="github"  revision="ec76dd347d213816a4a6b0bdf6830885cc5812a2"  upstream="refs/heads/seventeen" />
   <project path="frameworks/av" name="PixelOS-AOSP/android_frameworks_av" groups="pdk,sysui-studio" remote="github"  revision="3a806486c35d4825bd97d95af3e172309aed2fda"  upstream="refs/heads/seventeen" />
-  <project path="frameworks/base" name="its-hecker/heckeros_frameworks_base" groups="pdk-cw-fs,pdk-fs,sysui-studio" remote="heckeros" />
+  <project path="frameworks/base" name="its-hecker/heckeros_frameworks_base" groups="pdk-cw-fs,pdk-fs,sysui-studio" remote="heckeros" revision="f2091fa0550856c69e53afc5f58147acd48d0c52" upstream="refs/heads/test/floral-low-brightness-flicker-20261029" dest-branch="test/floral-low-brightness-flicker-20261029" />
   <project path="frameworks/native" name="PixelOS-AOSP/android_frameworks_native" groups="pdk,sysui-studio" remote="github"  revision="fe64500f2fb0b0053667f3e1af3603122643e270"  upstream="refs/heads/seventeen" />
   <project path="frameworks/opt/telephony" name="PixelOS-AOSP/android_frameworks_opt_telephony" groups="pdk,sysui-studio" remote="github"  revision="7ee96142e28c3580c2426760a4b533256743d06f"  upstream="refs/heads/seventeen" />
   <project path="hardware/google/pixel" name="PixelOS-AOSP/android_hardware_google_pixel" groups="generic_fs,pixel,pdk-gs-arm,pdk-gs-imgtec,pdk-desktop" remote="github"  revision="697c4370a439248b35f8cbc17dde3974425b4fc2"  upstream="refs/heads/seventeen" />

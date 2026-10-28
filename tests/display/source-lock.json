@@ -1,0 +1,20 @@
+{
+  "framework": {
+    "repository": "its-hecker/heckeros_frameworks_base",
+    "revision": "f2091fa0550856c69e53afc5f58147acd48d0c52",
+    "files": {
+      "services/core/java/com/android/server/display/mode/DisplayModeDirector.java": "7a2279ad03258b314769cf4a21b9ea69af034a26527de3ec7ce64cec914200ca",
+      "services/core/java/com/android/server/display/mode/LowZoneBrightnessHysteresis.java": "a6df862808f36de09ed9aa9e63f085962ca6392030bc466eaa7ae498735028f9",
+      "core/res/res/values/config.xml": "0d2ea94f248b1fd3a28b99a61e591a35d49fc69b956efcb0ecec6ead75f7a6be",
+      "core/res/res/values/symbols.xml": "372e9aba16fb9ab8a8beb73425fe317ebab1415a14ddc18a225bdd5daa36de4f"
+    }
+  },
+  "device": {
+    "repository": "its-hecker/heckeros-floral-devicetree",
+    "revision": "4829092f7b7b988fc5fb2efe57c481f266364c71",
+    "files": {
+      "coral/overlay/frameworks/base/core/res/res/values/config.xml": "ba7b918557d0a11eed963a9b775860c1d463d66e050b59c4576dec5d9712134a",
+      "flame/overlay/frameworks/base/core/res/res/values/config.xml": "c1781a488eb85cd53ea024a57fdb4b74c81d6687f2faea42a0fdd1fbca8e7e6e"
+    }
+  }
+}

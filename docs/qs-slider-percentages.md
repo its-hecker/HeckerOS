@@ -37,9 +37,12 @@ instead of switching between 60 and 90 Hz. This trades smoother 90 Hz rendering
 for avoiding those refresh transitions. Google documents the Smooth Display
 control in its [Pixel display settings](https://support.google.com/pixelphone/answer/6111557?hl=en).
 
-This source update retains Coral's existing low-brightness display/ambient
-thresholds. Android's display configuration explains why refresh-rate
-gamma changes can matter at low brightness:
+The experimental display branch now adds brightness-only low-zone protection
+and exit hysteresis; see [Floral refresh protection](floral-display-flicker.md)
+for the implementation, pinned inputs and required phone checks. It retains
+the panel-specific entry brightness and protected refresh rate. Android's
+display configuration explains why refresh-rate gamma changes can matter at
+low brightness:
 [AOSP DisplayDeviceConfig](https://android.googlesource.com/platform/frameworks/base/+/refs/heads/main/services/core/java/com/android/server/display/DisplayDeviceConfig.java).
 
 On an adb-connected host, run the read-only helper from this repository while

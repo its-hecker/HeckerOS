@@ -1,5 +1,5 @@
 {
-  "checked_on": "2026-10-28",
+  "checked_on": "2026-10-29",
   "pixelos_manifest": {
     "repository": "PixelOS-AOSP/android_manifest",
     "branch": "seventeen",
@@ -91,8 +91,8 @@
     },
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
-      "branch": "test/coral-root-privacy-20261027",
-      "revision": "140b06a482a6ecbbdbe33190a149228c50220fb1",
+      "branch": "test/floral-low-brightness-flicker-20261029",
+      "revision": "f2091fa0550856c69e53afc5f58147acd48d0c52",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -182,7 +182,10 @@
         "services/core/java/com/android/server/pm/AppsFilterBase.java",
         "services/core/java/com/android/server/pm/AppsFilterImpl.java",
         "services/core/java/com/android/server/pm/HeckerRootVisibility.java",
-        "tests/hecker/test_root_visibility.py"
+        "tests/hecker/test_root_visibility.py",
+        "services/core/java/com/android/server/display/mode/DisplayModeDirector.java",
+        "services/core/java/com/android/server/display/mode/LowZoneBrightnessHysteresis.java",
+        "core/res/res/values/symbols.xml"
       ]
     },
     "hardware/google/camera": {
@@ -242,8 +245,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "feat/settings-depth-lockscreen-20261028",
-    "integration_branch": "feat/settings-depth-lockscreen-20261028",
+    "source_branch": "test/floral-low-brightness-flicker-20261029",
+    "integration_branch": "test/floral-low-brightness-flicker-20261029",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required",
@@ -299,8 +302,8 @@
   "hardware_sources": {
     "device": {
       "repository": "its-hecker/heckeros-floral-devicetree",
-      "branch": "main",
-      "revision": "8e19009ad632f66473ddcdb10c00595fefdb79b4"
+      "branch": "test/floral-low-brightness-flicker-20261029",
+      "revision": "4829092f7b7b988fc5fb2efe57c481f266364c71"
     },
     "vendor": {
       "repository": "its-hecker/heckeros-coral-vendor",
@@ -361,5 +364,16 @@
     "depth": "Prepared matching background/transparent foreground; no automatic subject extraction.",
     "navigation": "Read-only frozen/recovered capture helper; root cause and device fix unconfirmed.",
     "validation": "Owned Java/resources/Compose, native source adapters and host checks; full ROM and phone tests required."
+  },
+  "display_flicker_test": {
+    "branch": "test/floral-low-brightness-flicker-20261029",
+    "parent_branch": "feat/settings-depth-lockscreen-20261028",
+    "parent_suite_revision": "75a6a0f7b75e74a771276e71519e1c97c417a858",
+    "parent_manifest_revision": "06b551437950b1ecdafee57ff841a989196968a6",
+    "framework_revision": "f2091fa0550856c69e53afc5f58147acd48d0c52",
+    "device_revision": "4829092f7b7b988fc5fb2efe57c481f266364c71",
+    "coral": "Display-only entry 74, protected 90 Hz, four raw steps of exit hysteresis.",
+    "flame": "Shared overlay prepared with entry 16/protected 60 Hz; Flame manifest unchanged pending Coral validation.",
+    "validation": "1372 host checks of the real native constructor, nine observer methods and helper; AAPT2 framework/internal symbol/device resources pass. Full system-server/ROM builds and physical display acceptance remain pending."
   }
 }

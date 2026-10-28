@@ -1,0 +1,113 @@
+// SPDX-License-Identifier: Apache-2.0
+package com.android.server.display.mode;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+// The voting and zone methods below are inserted verbatim from the pinned
+// framework. Only Android services, sensors and vote storage are host fixtures.
+final class NativeBrightnessObserver {
+    final Object mLock = new Object();
+    final LowZoneBrightnessHysteresis mLowZoneHysteresis;
+    Context mContext;
+    Handler mHandler;
+    Injector mInjector;
+    final Storage mVotesStorage = new Storage();
+    float[] mLowDisplayBrightnessThresholds;
+    float[] mLowAmbientBrightnessThresholds = {-1f};
+    float[] mHighDisplayBrightnessThresholds = {};
+    float[] mHighAmbientBrightnessThresholds = {};
+    boolean mShouldObserveDisplayLowChange = true;
+    boolean mShouldObserveAmbientLowChange;
+    boolean mShouldObserveDisplayHighChange;
+    boolean mShouldObserveAmbientHighChange;
+    boolean mRefreshRateChangeable = true;
+    boolean mLowPowerModeEnabled;
+    boolean mLoggingEnabled;
+    int mDefaultDisplayState = Display.STATE_ON;
+    int mRefreshRateInLowZone;
+    int mRefreshRateInHighZone;
+    int mPeakRefreshRate = 90;
+    int mThermalStatus;
+    float mBrightness = Float.NaN;
+    float mAmbientLux;
+    Object mLowZoneRefreshRateForThermals;
+    Object mHighZoneRefreshRateForThermals;
+    DisplayConfig mDefaultDisplayDeviceConfig = new DisplayConfig();
+    static final String TAG = "display-host-test";
+
+    NativeBrightnessObserver(int threshold, int rate, int margin) {
+        this(new Context(margin), new Handler(), new Injector(), new DisplayManagerFlags());
+        mLowDisplayBrightnessThresholds = new float[]{brightness(threshold)};
+        mRefreshRateInLowZone = rate;
+    }
+
+    /* PRODUCTION_CONSTRUCTOR */
+
+    static float brightness(int raw) { return (raw - 1) / 254f; }
+    void sample(int raw, float lux) {
+        mBrightness = brightness(raw);
+        mAmbientLux = lux;
+        updateFlickerRefreshRateVotes();
+    }
+    Vote vote() { return mVotesStorage.votes.get(Vote.PRIORITY_FLICKER_REFRESH_RATE); }
+    boolean switchingBlocked() {
+        return mVotesStorage.votes.containsKey(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
+    }
+    private boolean hasLowLightVrrConfig() { return false; } // Floral is non-VRR.
+    private void updateSensorStatus() {}
+    private void updateBlockingZoneThresholds(Object config, boolean readParams) {}
+    private void loadIdleScreenRefreshRateConfigs(Object config) {}
+
+    /* PRODUCTION_METHODS */
+
+    static final class Display { static final int STATE_ON = 2, STATE_DOZE = 3, STATE_OFF = 1; }
+    static final class Handler {}
+    static final class Injector {}
+    static final class DisplayManagerFlags {}
+    static final class R {
+        static final class integer {
+            static final int config_lowZoneRefreshRateHysteresis = 1;
+            static final int config_fixedRefreshRateInHighZone = 2;
+        }
+    }
+    static final class Context {
+        final int margin;
+        Context(int steps) { margin = steps; }
+        Resources getResources() { return new Resources(margin); }
+    }
+    static final class Resources {
+        final int margin;
+        Resources(int steps) { margin = steps; }
+        int getInteger(int resource) {
+            return resource == R.integer.config_lowZoneRefreshRateHysteresis ? margin : 0;
+        }
+    }
+    static final class Slog { static void d(String tag, String value) {} }
+    static final class Storage {
+        final Map<Integer, Vote> votes = new HashMap<>();
+        void updateGlobalVote(int priority, Vote vote) {
+            if (vote == null) votes.remove(priority); else votes.put(priority, vote);
+        }
+    }
+    static final class Vote {
+        static final int PRIORITY_FLICKER_REFRESH_RATE = 1;
+        static final int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 2;
+        final float min, max;
+        Vote(float minimum, float maximum) { min = minimum; max = maximum; }
+        static Vote forPhysicalRefreshRates(float min, float max) { return new Vote(min, max); }
+        static Vote forDisableRefreshRateSwitching() { return new Vote(0, 0); }
+        static Vote forSupportedRefreshRates(List<Object> rates) {
+            throw new AssertionError("Floral must retain its non-VRR voting path");
+        }
+    }
+    static final class RefreshRateRange { float min, max; }
+    static final class SkinThermalStatusObserver {
+        static RefreshRateRange findBestMatchingRefreshRateRange(int status, Object map) {
+            throw new AssertionError("Unexpected thermal map in host fixture");
+        }
+    }
+    static final class DisplayConfig { RateData getRefreshRateData() { return new RateData(); } }
+    static final class RateData { List<Object> lowLightBlockingZoneSupportedModes = List.of(); }
+}

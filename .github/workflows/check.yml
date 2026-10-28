@@ -57,6 +57,8 @@ jobs:
           bash tests/run_host_tests.sh
       - name: Compile Suite Java and link Android resources with locked dependencies
         run: python3 tools/compile_sdk.py --cache generated/sdk
+      - name: Verify pinned native low-brightness refresh voting and device resources
+        run: python3 tools/check_display_flicker.py --aapt2 generated/sdk/aapt2
       - name: Compile retained Google weather and Hecker Launcher artwork
         run: python3 tools/check_launcher.py --sdk-cache generated/sdk
       - name: Compile headphone, sandbox, face and Motion Island native Java and resources

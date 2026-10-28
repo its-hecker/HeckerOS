@@ -56,7 +56,7 @@
   },
   "framework": {
     "repository": "its-hecker/heckeros_frameworks_base",
-    "revision": "140b06a482a6ecbbdbe33190a149228c50220fb1",
+    "revision": "f2091fa0550856c69e53afc5f58147acd48d0c52",
     "files": {
       "core/java/android/app/ActivityThread.java": "bbcf0686b14e6191ea14111c3b886d9f53f485bc8c4d5430f8a62a9fe56490bd",
       "core/java/android/app/IActivityManager.aidl": "28ea763ad5aa2fe6344d89dd4207e70d31f0f999dca19d0e44962ec827a7da17",
