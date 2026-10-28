@@ -3,13 +3,15 @@
 Game Space uses the supplied Samsung Game Booster images as the panel reference:
 translucent navy glass, rounded action pills, a game-icon telemetry header,
 Performance / Balanced / Battery saver with purple / blue / teal selection,
-and an editable six-app dock. The collapsed overlay is a movable 170 × 40 dp
-FPS / CPU % / GPU % / RAM % pill. The panel tracks the reference's approximate
+and an editable six-app dock. The collapsed overlay is a movable 246 dp-wide
+FPS / CPU % / GPU % / RAM % / battery °C pill, clamped to the screen width.
+Large text uses two rows with an increased height. The panel tracks the reference's approximate
 43% landscape width, with safe-area limits and scrolling on short displays.
 
 The expanded dashboard has a dedicated top drag grip. It moves the complete window;
 the bottom grip still resizes it. Sliders and scrolling retain their own gestures.
-The collapsed edge handle can move vertically, while an inward swipe opens the panel.
+The collapsed 48 × 48 dp dashboard shortcut moves horizontally and vertically;
+tapping it opens the panel. Closing the panel retains its saved position.
 Dashboard, handle and stats-pill positions are clamped to the cutout/navigation safe
 area and saved separately for portrait and landscape. Resizing reclamps placement;
 cancelled or multi-touch drags restore the starting position. Directional accessibility
@@ -37,6 +39,9 @@ are omitted.
 
 FPS comes from the active game's `TaskFpsCallback`, CPU from `/proc/stat` deltas,
 GPU from the KGSL `gpubusy` sample window, and RAM from Android memory information.
+The pill's `BATT °C` reading comes from `ACTION_BATTERY_CHANGED` temperature in
+tenths of a degree Celsius, matching the dashboard's battery-temperature reading.
+It describes the battery sensor; CPU, GPU and skin temperatures are separate measurements.
 Missing readings display an em dash. No display-refresh or fake telemetry fallback
 is used. The platform service alone reads the hardware endpoints, authenticates
 the platform-signed Suite UID, and requires a visible game on the current user's
@@ -78,24 +83,48 @@ context caches.
 A full Android/Soong build, SELinux enforcement, physical charging measurements,
 freeform apps and visual comparison on Coral/Flame remain device validation work.
 
+## Game library in Hecker Launcher
+
+Game Space now has its own launcher entry, opening the existing game library.
+The default-on **Hide games in Hecker Launcher** switch in Game Space → Tools
+hides library games from the drawer, launcher searches, home-screen icons and
+folder previews. The library includes automatically detected games and manually
+added apps, respecting exclusions. The Game Space entry stays visible.
+
+Removing a game from the library or turning the switch off restores its launcher
+visibility. Existing home/folder records and positions are retained. The filter
+does not disable packages, so games still launch normally from Game Space.
+Other launchers are unaffected, and each Android user's library is separate;
+the personal-profile filter does not hide work-profile apps.
+
+The read-only library provider accepts the Suite itself and the same-user,
+preinstalled, matching-signature Hecker Launcher. Its signature permission is
+requested only by the Hecker HOME variant. Launcher queries run off the UI
+thread, observe library/package changes, retry observation after unlock, and
+retain their last private cache during temporary provider failure. Existing
+manual launcher hiding continues to apply independently.
+
+The host regression runs the production provider and launcher client together,
+covering caller identity, opt-out/removal restoration, cached results, view
+recycling, observer recovery and profile isolation. The actual shortcut drag
+listener is exercised for XY movement, tap, cancellation and accessibility.
+
 ## Build from an existing Coral checkout
 
-The Suite, kernel and local manifest use `feat/game-booster-reference`. These
-branches include the earlier launcher/theme/boot fixes from the existing working
-branch. For the first checkout of this new manifest branch:
+The Suite and local manifest use `feat/settings-depth-lockscreen-20261028`.
+The manifest pins the matching kernel and shared feature sources. Update this
+same branch in the existing checkout:
 
 ```sh
 cd ~/heckeros-coral
-git -C .repo/local_manifests fetch origin feat/game-booster-reference:refs/remotes/origin/feat/game-booster-reference
-git -C .repo/local_manifests switch --track origin/feat/game-booster-reference
-repo sync -c -j2 --fail-fast --no-clone-bundle --no-tags vendor/hecker/floral/suite kernel/google/msm-4.14
+git -C .repo/local_manifests switch feat/settings-depth-lockscreen-20261028
+git -C .repo/local_manifests pull --ff-only
+repo sync -c -j2 --fail-fast --no-clone-bundle --no-tags
 HECKER_BUILD_JOBS=8 bash .repo/local_manifests/build.sh
 ```
 
-If the manifest branch already exists locally, use `git switch
-feat/game-booster-reference` and `git pull --ff-only` in `.repo/local_manifests`
-instead of creating another tracking branch. Sync both the Suite and kernel;
-Suite-only sync does not install the new charging control.
+Sync the complete manifest so the Suite, launcher preparation and hardware
+sources match. Suite-only sync does not install a different charging kernel.
 
 The panel uses a larger initial height and leaves 8 dp of vertical margin at its maximum. A
 previous full-height selection follows the new limit. Both portrait and compact landscape panels

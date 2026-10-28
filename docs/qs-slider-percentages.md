@@ -30,11 +30,15 @@ revert check restores the original native file exactly.
 
 ## Low-brightness flicker
 
-The reported flicker has not been reproduced or attributed to a specific
-software path. This percentage update does not claim to fix it. The current
-Coral device selection retains its low-brightness display/ambient refresh
-thresholds; no unverified brightness floor, fixed refresh rate or dimming hack
-is introduced. Android's display configuration explains why refresh-rate
+The report was clarified as phone-wide Pixel 4/4 XL low-brightness flicker during
+dynamic refresh-rate switching, also observed on stock firmware. The practical
+workaround is **Settings → Display → Smooth Display → off**, using fixed 60 Hz
+instead of switching between 60 and 90 Hz. This trades smoother 90 Hz rendering
+for avoiding those refresh transitions. Google documents the Smooth Display
+control in its [Pixel display settings](https://support.google.com/pixelphone/answer/6111557?hl=en).
+
+This source update retains Coral's existing low-brightness display/ambient
+thresholds. Android's display configuration explains why refresh-rate
 gamma changes can matter at low brightness:
 [AOSP DisplayDeviceConfig](https://android.googlesource.com/platform/frameworks/base/+/refs/heads/main/services/core/java/com/android/server/display/DisplayDeviceConfig.java).
 
@@ -48,6 +52,6 @@ bash tools/capture_display_state.sh hecker-display-capture
 Use a new output directory. The helper captures brightness mode/level, refresh
 preferences, Extra Dim state, 20 seconds of native display snapshots and
 display-specific logs. It does not change settings or request root. Report
-whether the symptom occurs across home/apps, only in QS, or only while dragging;
-include an external video if available. Full ROM build, visual layout and
+whether fixed 60 Hz stops the phone-wide symptom; include an external video
+if available. Full ROM build, visual layout and
 physical low-brightness validation still require the Coral phone.

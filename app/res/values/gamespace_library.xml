@@ -1,0 +1,5 @@
+<resources>
+    <string name="gaming_hud_battery_temperature">BATT °C</string>
+    <string name="gaming_hide_launcher">Hide games in Hecker Launcher</string>
+    <string name="gaming_hide_launcher_summary">Keep library games in Game Space. Hide their launcher icons and searches; removing a game or turning this off restores them.</string>
+</resources>

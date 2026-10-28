@@ -64,18 +64,30 @@ final class GamingBoosterUi {
                 (int)(Color.green(from)+(Color.green(to)-Color.green(from))*f),(int)(Color.blue(from)+(Color.blue(to)-Color.blue(from))*f));}
     }
     static final class MetricPill extends LinearLayout {
-        private final TextView[] values=new TextView[4];
-        MetricPill(Context c){super(c);setGravity(Gravity.CENTER);setPadding(dp(c,5),dp(c,2),dp(c,5),dp(c,2));setBackground(glass(c,0xd9000914,24));
-            String[] labels={"FPS","CPU %","GPU %","RAM %"};
-            for(int i=0;i<4;i++){
+        private final TextView[] values=new TextView[5];
+        static boolean stacked(Context c){return c.getResources().getConfiguration().fontScale>1.3f;}
+        static int height(Context c){return dp(c,Math.max(40,(stacked(c)?2:1)*28*c.getResources().getConfiguration().fontScale+8));}
+        MetricPill(Context c){
+            super(c);setOrientation(VERTICAL);setGravity(Gravity.CENTER);setPadding(dp(c,5),dp(c,2),dp(c,5),dp(c,2));setBackground(glass(c,0xd9000914,24));
+            String[] labels={"FPS","CPU %","GPU %","RAM %",c.getString(R.string.gaming_hud_battery_temperature)};
+            LinearLayout row=null;
+            for(int i=0;i<values.length;i++){
+                if(i==0||stacked(c)&&i==3){row=GamingUi.row(c);row.setGravity(Gravity.CENTER);addView(row,new LinearLayout.LayoutParams(-1,0,1));}
                 LinearLayout col=GamingUi.column(c);col.setGravity(Gravity.CENTER);
-                TextView label=GamingUi.text(c,labels[i],7,MUTED,false);col.addView(label);
-                values[i]=GamingUi.text(c,"—",14,Color.WHITE,false);values[i].setSingleLine();col.addView(values[i]);
-                addView(col,new LinearLayout.LayoutParams(0,-2,1));
+                TextView label=GamingUi.text(c,labels[i],8,MUTED,false);label.setSingleLine();col.addView(label);
+                values[i]=GamingUi.text(c,"—",14,Color.WHITE,false);values[i].setSingleLine();
+                values[i].setAutoSizeTextTypeUniformWithConfiguration(9,14,1,android.util.TypedValue.COMPLEX_UNIT_SP);
+                col.addView(values[i]);row.addView(col,new LinearLayout.LayoutParams(0,-2,1));
             }
         }
-        void update(String fps,int cpu,int gpu,int ram){String[] v={fps,number(cpu),number(gpu),number(ram)};for(int i=0;i<4;i++)values[i].setText(v[i]);
-            setContentDescription("FPS "+fps+", CPU "+number(cpu)+"%, GPU "+number(gpu)+"%, RAM "+number(ram)+"%. "+getContext().getString(R.string.gaming_open_dashboard));}
+        void update(String fps,int cpu,int gpu,int ram,String temperature){
+            String thermal=temperature==null?"—":temperature.replace("°C","").trim();
+            if(thermal.isEmpty())thermal="—";
+            String[] v={fps,number(cpu),number(gpu),number(ram),thermal};
+            for(int i=0;i<values.length;i++)values[i].setText(v[i]);
+            setContentDescription("FPS "+fps+", CPU "+number(cpu)+"%, GPU "+number(gpu)+"%, RAM "+number(ram)+"%. "
+                    +getContext().getString(R.string.gaming_battery_temp)+" "+temperature+". "+getContext().getString(R.string.gaming_open_dashboard));
+        }
         private String number(int n){return n<0?"—":Integer.toString(n);}
     }
     interface Change{void value(int value);}

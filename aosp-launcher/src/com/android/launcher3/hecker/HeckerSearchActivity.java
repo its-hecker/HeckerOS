@@ -23,7 +23,8 @@ public final class HeckerSearchActivity extends Activity {
     private LauncherApps launcher;
     private int generation;
     private Future<?> task;
-    private boolean ready;
+    private boolean ready, resumed;
+    private Runnable stopGameLibrary;
 
     private static final class Entry {
         final ComponentName component; final UserHandle user; final String label, packageName;
@@ -71,9 +72,13 @@ public final class HeckerSearchActivity extends Activity {
         if (initial != null && initial.length() <= 200) { search.setText(initial); search.setSelection(search.length()); }
         search.requestFocus(); search.post(() -> getSystemService(InputMethodManager.class).showSoftInput(search, InputMethodManager.SHOW_IMPLICIT));
     }
-    @Override protected void onResume() { super.onResume(); load(); }
+    @Override protected void onResume() {
+        super.onResume(); resumed=true;
+        stopGameLibrary=HeckerGameLibrary.observe(this,()->{if(resumed)load();});load();
+    }
     private void load() {
         ready = false; int request = ++generation; if (task != null) task.cancel(true);
+        results.clear();adapter.notifyDataSetChanged();
         task = work.submit(() -> {
             List<Entry> entries = new ArrayList<>(); boolean shortcutsAllowed = launcher.hasShortcutHostPermission();
             for (UserHandle user : launcher.getProfiles()) {
@@ -129,6 +134,9 @@ public final class HeckerSearchActivity extends Activity {
             finish();
         } catch (RuntimeException unavailable) { Toast.makeText(this, HeckerStudio.text(this, "launch_unavailable"), Toast.LENGTH_SHORT).show(); }
     }
-    @Override protected void onStop() { generation++; if (task != null) task.cancel(true); super.onStop(); }
+    @Override protected void onStop() {
+        resumed=false;if(stopGameLibrary!=null){stopGameLibrary.run();stopGameLibrary=null;}
+        generation++; if (task != null) task.cancel(true); super.onStop();
+    }
     @Override protected void onDestroy() { work.shutdownNow(); super.onDestroy(); }
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="gaming_dashboard_move">Move game dashboard. Drag this grip, or use accessibility directional actions.</string>
-    <string name="gaming_handle_move">Open game dashboard. Drag up or down to move the handle; swipe inward to open.</string>
+    <string name="gaming_handle_move">Open game dashboard. Drag in any direction to move this shortcut; tap to open.</string>
 </resources>

@@ -222,10 +222,9 @@ final class GamingOverlay {
         v.addView(icon, new FrameLayout.LayoutParams(dp(18), dp(18), Gravity.CENTER));
         v.setContentDescription(c.getString(R.string.gaming_handle_move));
         v.setFocusable(true); v.setOnClickListener(w -> openPanel());
-        WindowManager.LayoutParams p = params(dp(28), dp(56), false);
+        WindowManager.LayoutParams p = params(dp(48), dp(48), false);
         restorePosition("handle",p,left()?0f:1f,.5f);
-        GamingWindowBounds edgeBounds=placement("handle",p);p.x=left()?edgeBounds.minX:edgeBounds.maxX;
-        draggable(v,v,p,"handle",true);
+        draggable(v,v,p,"handle",false);
         wm.addView(v, p); handle = v;
     }
     private void buildHud() {
@@ -234,8 +233,8 @@ final class GamingOverlay {
         WindowMetrics metrics=wm.getCurrentWindowMetrics();
         Rect screen=metrics.getBounds();
         Insets insets=metrics.getWindowInsets().getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout());
-        final int width=Math.min(dp(170),Math.max(1,screen.width()-insets.left-insets.right-dp(12)));
-        hudParams = params(width, dp(40), false);
+        final int width=Math.min(dp(246),Math.max(1,screen.width()-insets.left-insets.right-dp(12)));
+        hudParams = params(width, Math.min(GamingBoosterUi.MetricPill.height(c),Math.max(1,screen.height()-insets.top-insets.bottom-dp(12))), false);
         restorePosition("hud",hudParams,1f,0f);
         hud.setOnClickListener(v -> openPanel());
         draggable(hud,hud,hudParams,"hud",false);
@@ -512,7 +511,7 @@ final class GamingOverlay {
     }
     void update(String fps, String temperature, String battery, String wifi) {
         this.fps=fps; this.temperature=temperature; this.battery=battery; this.wifi=wifi;
-        if(hud!=null)hud.update(fps,cpu,gpu,ram);
+        if(hud!=null)hud.update(fps,cpu,gpu,ram,temperature);
         if(volumeSlider!=null)volumeSlider.external(c.getSystemService(AudioManager.class).getStreamVolume(AudioManager.STREAM_MUSIC));
         if(brightnessSlider!=null)brightnessSlider.external(actions.brightnessLevel());
         if(fpsText!=null)fpsText.setText(fps);if(ramText!=null)ramText.setText(number(ram));

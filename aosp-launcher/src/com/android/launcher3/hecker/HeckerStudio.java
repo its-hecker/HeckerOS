@@ -39,7 +39,8 @@ public final class HeckerStudio {
         return app.flattenToString() + "@" + manager.getSerialNumberForUser(user);
     }
     public static boolean hidden(Context c, ComponentName app, UserHandle user) {
-        return app != null && prefs(c).getStringSet(PREFIX + "hidden", Collections.emptySet()).contains(appKey(c, app, user));
+        return HeckerGameLibrary.hidden(c,app,user)
+                || app != null && prefs(c).getStringSet(PREFIX + "hidden", Collections.emptySet()).contains(appKey(c, app, user));
     }
     public static void hide(Context c, ComponentName app, UserHandle user, boolean hidden) {
         Set<String> next = new HashSet<>(prefs(c).getStringSet(PREFIX + "hidden", Collections.emptySet()));

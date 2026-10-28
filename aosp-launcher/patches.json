@@ -119,7 +119,10 @@
     },
     {
       "old": "        maybeApplyProgressLevel(info, oldIcon);\n        applyLabel(info);",
-      "new": "        maybeApplyProgressLevel(info, oldIcon);\n        applyLabel(info);\n        if (mIcon != null && mIcon == oldIcon) applyCompoundDrawables(mIcon);"
+      "new": "        maybeApplyProgressLevel(info, oldIcon);\n        applyLabel(info);\n        if (mIcon != null && mIcon == oldIcon) applyCompoundDrawables(mIcon);\n        com.android.launcher3.hecker.HeckerGameLibrary.bind(this, info.getTargetComponent(), info.user);",
+      "previous": [
+        "        maybeApplyProgressLevel(info, oldIcon);\n        applyLabel(info);\n        if (mIcon != null && mIcon == oldIcon) applyCompoundDrawables(mIcon);"
+      ]
     },
     {
       "old": "    public void applyIconAndLabel(Drawable icon, CharSequence title, CharSequence description) {\n        applyCompoundDrawables(icon);",
@@ -130,6 +133,10 @@
     {
       "old": "        return mApps;",
       "new": "        return Arrays.stream(mApps).filter(app -> !com.android.launcher3.hecker.HeckerStudio.hidden(\n                mActivityContext.asContext(), app.componentName, app.user)).map(app -> {\n                    CharSequence label = com.android.launcher3.hecker.HeckerIconStudio.label(\n                            mActivityContext.asContext(), app.componentName, app.user, app.title);\n                    if (android.text.TextUtils.equals(label, app.title)) return app;\n                    AppInfo copy = app.clone();\n                    copy.title = label;\n                    return copy;\n                }).toArray(AppInfo[]::new);"
+    },
+    {
+      "old": "        mActivityContext = context;",
+      "new": "        mActivityContext = context;\n        Runnable heckerGameStop = com.android.launcher3.hecker.HeckerGameLibrary.observe(\n                context.asContext(), this::notifyUpdate);\n        context.closeOnDestroy(heckerGameStop::run);"
     }
   ],
   "src/com/android/launcher3/popup/SystemShortcut.java": [
@@ -276,6 +283,14 @@
     {
       "old": "            } else if (!maybeHandleAutomationExit(wii, p)) {\n                p.drawable = wii.newIcon(mContext, FLAG_THEMED);\n            }",
       "new": "            } else if (!maybeHandleAutomationExit(wii, p)) {\n                p.drawable = wii.newIcon(mContext, FLAG_THEMED);\n                p.drawable = com.android.launcher3.hecker.HeckerIconStudio.icon(mContext,\n                        wii.getTargetComponent(), wii.user, p.drawable, () -> {\n                            if (p.item == wii) {\n                                setDrawableInternal(p, wii, false);\n                                mIcon.invalidate();\n                            }\n                        }, mIcon);\n            }"
+    },
+    {
+      "old": "    public void draw(Canvas canvas) {\n        int saveCount = canvas.getSaveCount();",
+      "new": "    public void draw(Canvas canvas) {\n        com.android.launcher3.hecker.HeckerGameLibrary.watch(mIcon);\n        int saveCount = canvas.getSaveCount();"
+    },
+    {
+      "old": "    private void drawPreviewItem(Canvas canvas, PreviewItemDrawingParams params, PointF offset,\n            boolean shouldClipPath, Path clipPath) {\n        canvas.save();",
+      "new": "    private void drawPreviewItem(Canvas canvas, PreviewItemDrawingParams params, PointF offset,\n            boolean shouldClipPath, Path clipPath) {\n        if (params.item != null && com.android.launcher3.hecker.HeckerGameLibrary.hidden(\n                mContext, params.item.getTargetComponent(), params.item.user)) return;\n        canvas.save();"
     }
   ]
 }

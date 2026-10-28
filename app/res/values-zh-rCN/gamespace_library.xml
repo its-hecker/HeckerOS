@@ -1,0 +1,5 @@
+<resources>
+    <string name="gaming_hud_battery_temperature">电池 °C</string>
+    <string name="gaming_hide_launcher">在 Hecker 桌面中隐藏游戏</string>
+    <string name="gaming_hide_launcher_summary">将游戏库中的游戏集中显示在游戏空间内，隐藏桌面图标和搜索结果。移出游戏库或关闭此选项即可恢复。</string>
+</resources>

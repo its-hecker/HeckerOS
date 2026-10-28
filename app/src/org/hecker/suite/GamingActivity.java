@@ -65,7 +65,7 @@ public final class GamingActivity extends Activity implements SharedPreferences.
         generation++;main.removeCallbacksAndMessages(null);GamingPrefs.get(this).unregisterOnSharedPreferenceChangeListener(this);worker.shutdownNow();super.onDestroy();
     }
     @Override public void onSharedPreferenceChanged(SharedPreferences prefs,String key){
-        if(key!=null&&visible&&!key.startsWith("session_")&&!key.startsWith("hud_")&&!key.startsWith("panel_")&&!key.equals("focus_applied")){
+        if(key!=null&&visible&&!key.startsWith("session_")&&!key.startsWith("hud_")&&!key.startsWith("panel_")&&!key.startsWith("handle_")&&!key.equals("focus_applied")){
             main.removeCallbacks(refresh);main.post(refresh);
         }
     }
@@ -206,6 +206,7 @@ public final class GamingActivity extends Activity implements SharedPreferences.
     }
     private void tools(){
         toggle(R.string.gaming_auto,R.string.gaming_auto_summary,GamingPrefs.get(this).getBoolean("automatic",true),v->GamingPrefs.get(this).edit().putBoolean("automatic",v).apply());
+        toggle(R.string.gaming_hide_launcher,R.string.gaming_hide_launcher_summary,GamingPrefs.get(this).getBoolean("hide_from_launcher",true),v->GamingPrefs.get(this).edit().putBoolean("hide_from_launcher",v).apply());
         toggle(R.string.gaming_enable,0,GamingPrefs.enabled(this),this::setEnabled);
         toggle(R.string.gaming_fps_toggle,R.string.gaming_fps_summary,GamingPrefs.get(this).getBoolean("fps",true),v->GamingPrefs.get(this).edit().putBoolean("fps",v).apply());
         toggle(R.string.gaming_focus,R.string.gaming_focus_summary,GamingPrefs.get(this).getBoolean("focus",false),v->{

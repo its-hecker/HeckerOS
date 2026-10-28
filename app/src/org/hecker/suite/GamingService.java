@@ -288,7 +288,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
     @Override public int brightnessLevel(){return Float.isFinite(sessionBrightness)?Math.round(sessionBrightness*255):Settings.System.getInt(getContentResolver(),Settings.System.SCREEN_BRIGHTNESS,128);}
     @Override public void brightness(float brightness){try{GamingPlatform.brightness(this,brightness);brightnessChanged=true;sessionBrightness=brightness;}catch(ReflectiveOperationException|RuntimeException e){toast(getString(R.string.gaming_unavailable));}}
     @Override public void onSharedPreferenceChanged(SharedPreferences prefs,String key){
-        if(destroyed||key==null||key.startsWith("hud_")||key.startsWith("panel_")||key.startsWith("profile_")||key.equals("focus_applied"))return;
+        if(destroyed||key==null||key.startsWith("hud_")||key.startsWith("panel_")||key.startsWith("handle_")||key.startsWith("profile_")||key.equals("focus_applied"))return;
         if(key.equals("enabled")&&!GamingPrefs.enabled(this)){stopSelf();return;}
         if(key.equals("added")||key.equals("excluded")||key.equals("automatic"))loadCatalog();
         else if(active){

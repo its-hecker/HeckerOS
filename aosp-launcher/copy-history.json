@@ -39,5 +39,11 @@
   ],
   "src/com/android/launcher3/hecker/HeckerIconStudio.java": [
     "509ca22e0f2363a23f81a010d30497d54b532655"
+  ],
+  "src/com/android/launcher3/hecker/HeckerStudio.java": [
+    "9d4bd88f3347f68af8540e6b094c18fe8dc84949"
+  ],
+  "src/com/android/launcher3/hecker/HeckerSearchActivity.java": [
+    "2721ac854b3948254a6e6f050eecaebeedd6d30f"
   ]
 }

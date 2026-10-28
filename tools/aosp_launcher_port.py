@@ -59,6 +59,8 @@ def aosp_launcher_plan(rom, replace, revert=False):
     else:
         import re
         expected=re.sub(r'(<application\b[^>]*?)/>',r'\1>'+studio_components+'</application>',expected,count=1)
+    game_previous_manifest=expected
+    expected=expected.replace('</manifest>', '    <uses-permission android:name="org.hecker.suite.permission.READ_GAME_LIBRARY" />\n</manifest>',1)
     copies={'generated/hecker-launcher/AndroidManifest.xml':expected}
     for path in (ROOT/'aosp-launcher/src').rglob('*.java'):
         copies['src/'+str(path.relative_to(ROOT/'aosp-launcher/src'))]=path.read_text()
@@ -77,7 +79,7 @@ def aosp_launcher_plan(rom, replace, revert=False):
     for relative,expected in copies.items():
         path=source/relative;current=path.read_text() if path.exists() else None
         identity=hashlib.sha1(b'blob '+str(len(current.encode())).encode()+b'\0'+current.encode()).hexdigest() if current is not None else None
-        known_manifest=relative=='generated/hecker-launcher/AndroidManifest.xml' and current in (previous_manifest,glass_manifest)
+        known_manifest=relative=='generated/hecker-launcher/AndroidManifest.xml' and current in (previous_manifest,glass_manifest,game_previous_manifest)
         if current is not None and current!=expected and identity not in history.get(relative,[]) and not known_manifest:
             raise ValueError('Preserving unfamiliar Hecker Launcher source: '+str(path))
         if revert:

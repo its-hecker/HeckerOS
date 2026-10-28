@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Execute the shipped grip listener, including cancellation and edge-open arbitration."""
+"""Execute the shipped grip listener, including cancellation and free shortcut movement."""
 from pathlib import Path
 import subprocess
 import sys
@@ -15,6 +15,9 @@ class GamingMovementTest(unittest.TestCase):
     def test_drag_tap_cancel_rotation_grip_and_accessibility(self):
         source = (ROOT / 'app/src/org/hecker/suite/GamingOverlay.java').read_text()
         actual = method(source, '    private void draggable(')
+        handle = method(source, '    private void buildHandle()')
+        self.assertIn('restorePosition("handle",p,', handle)
+        self.assertIn('draggable(v,v,p,"handle",false)', handle)
         probe = r'''public class MovementProbe {
 Object c=new Object();int saved,moves,opens;boolean onLeft;
 int dp(float n){return Math.round(n);}
@@ -67,6 +70,13 @@ public static void main(String[] args){
  check(lp.x==140&&lp.y==260&&grip.clicks==1&&p.saved==1);
  check(grip.accessibility.performAccessibilityAction(grip,4,null));check(lp.x==164&&p.saved==2);
  AccessibilityNodeInfo info=new AccessibilityNodeInfo();grip.accessibility.onInitializeAccessibilityNodeInfo(grip,info);check(info.actions.size()==4);
+ // The collapsed shortcut uses the same free XY policy as the panel/pill.
+ View shortcut=new View();WindowManager.LayoutParams sp=new WindowManager.LayoutParams();p.draggable(shortcut,shortcut,sp,"handle",false);
+ shortcut.send(0,100,100);shortcut.send(2,170,180);shortcut.send(1,170,180);
+ check(sp.x==170&&sp.y==280&&p.opens==0&&shortcut.clicks==0&&p.saved==3);
+ shortcut.send(0,170,180);shortcut.send(1,170,180);check(shortcut.clicks==1&&p.saved==3);
+ shortcut.send(0,170,180);shortcut.send(2,240,260);shortcut.send(3,240,260);check(sp.x==170&&sp.y==280&&p.saved==3);
+ p.saved=2;
  View edge=new View();WindowManager.LayoutParams ep=new WindowManager.LayoutParams();p.draggable(edge,edge,ep,"handle",true);
  edge.send(0,100,100);edge.send(2,70,100);edge.send(1,70,100);check(p.opens==1&&edge.clicks==0&&p.saved==2);
  edge.send(0,100,100);edge.send(2,91,100);edge.send(2,85,100);edge.send(1,85,100);check(p.opens==2);

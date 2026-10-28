@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="gaming_dashboard_move">移动游戏面板。拖动此手柄，或使用无障碍方向操作。</string>
-    <string name="gaming_handle_move">打开游戏面板。上下拖动可移动手柄，向内滑动可打开。</string>
+    <string name="gaming_handle_move">打开游戏面板。向任意方向拖动以移动快捷按钮，点按即可打开。</string>
 </resources>

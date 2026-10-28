@@ -4,6 +4,7 @@
     <uses-sdk android:minSdkVersion="36" android:targetSdkVersion="37" />
     <permission android:name="org.hecker.suite.permission.OPEN_FEATURE"
         android:protectionLevel="signature" />
+    <permission android:name="org.hecker.suite.permission.READ_GAME_LIBRARY" android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.HECKER_SUITE_APP_LOCK" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
@@ -66,6 +67,14 @@
             android:label="@string/ir_title" android:excludeFromRecents="true" />
         <activity android:name=".GamingActivity" android:exported="false"
             android:label="@string/gaming_title" android:theme="@style/GamingTheme" />
+        <activity-alias android:name=".GameSpaceLauncher" android:targetActivity=".GamingActivity"
+            android:exported="true" android:label="@string/gaming_title" android:icon="@drawable/ic_gaming">
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+        </activity-alias>
+        <provider android:name=".GamingLibraryProvider" android:authorities="org.hecker.suite.games"
+            android:exported="true" android:grantUriPermissions="false"
+            android:readPermission="org.hecker.suite.permission.READ_GAME_LIBRARY"
+            android:writePermission="org.hecker.suite.permission.READ_GAME_LIBRARY" />
         <activity android:name=".GamingCaptureConsentActivity" android:exported="false"
             android:theme="@android:style/Theme.Material.NoActionBar"
             android:taskAffinity="org.hecker.suite.capture" android:excludeFromRecents="true" />

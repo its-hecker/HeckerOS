@@ -55,7 +55,15 @@ def main():
     native = ET.parse(ROOT / "settings/suite/AndroidManifest.xml").getroot()
     assert native.find("application/activity").get(A + "name") == "org.hecker.suite.SuiteActivity"
     assert native.find("uses-permission").get(A + "name") == permission.get(A + "name")
-    assert not manifest.findall(".//category[@" + A + "name='android.intent.category.LAUNCHER']")
+    aliases=app.findall("activity-alias")
+    assert len(aliases)==1 and aliases[0].get(A+"name")==".GameSpaceLauncher"
+    assert aliases[0].get(A+"targetActivity")==".GamingActivity" and aliases[0].get(A+"exported")=="true"
+    assert aliases[0].find("intent-filter/category").get(A+"name")=="android.intent.category.LAUNCHER"
+    assert len(manifest.findall(".//category[@"+A+"name='android.intent.category.LAUNCHER']"))==1
+    library=app.find("provider[@"+A+"name='.GamingLibraryProvider']")
+    assert library.get(A+"readPermission")=="org.hecker.suite.permission.READ_GAME_LIBRARY"
+    assert library.get(A+"writePermission")==library.get(A+"readPermission")
+    assert manifest.find("permission[@"+A+"name='org.hecker.suite.permission.READ_GAME_LIBRARY']").get(A+"protectionLevel")=="signature"
     services = {node.get(A + "name"): node for node in app.findall("service")}
     tiles = {".SuiteTileService", ".MotionSenseTileService", ".FaceUnlockTileService", ".NetworkLabTileService"}
     assert set(services) == {".GamingService", ".GamingRecordingService"} | tiles

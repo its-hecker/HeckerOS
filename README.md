@@ -7,6 +7,8 @@ and [NetLab touch fixes, saved device names and automatic manufacturer enrichmen
 on top of the complete Coral root-privacy/astronaut test. Use this same branch in the
 [Coral local manifest](https://github.com/its-hecker/HeckerOs-localmanifest/tree/feat/settings-depth-lockscreen-20261028).
 [Brightness/volume percentages in both QS layouts](docs/qs-slider-percentages.md) are included.
+[Game Space](docs/game-booster.md) adds battery temperature to its floating pill,
+free shortcut movement and a launcher entry with default-on game-icon hiding.
 Full ROM and phone validation remain pending; the navigation
 freeze is under investigation and is not claimed fixed.
 
