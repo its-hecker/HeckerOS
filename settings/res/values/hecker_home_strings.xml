@@ -1,0 +1,9 @@
+<resources>
+  <string name="hecker_home_connections">Connections</string>
+  <string name="hecker_home_sound">Sounds and vibration</string>
+  <string name="hecker_home_display">Display</string>
+  <string name="hecker_home_themes">Themes</string>
+  <string name="hecker_home_launcher">Home screen</string>
+  <string name="hecker_home_lock">Lock screen and AOD</string>
+  <string name="hecker_home_voice_search">Search settings by voice</string>
+</resources>

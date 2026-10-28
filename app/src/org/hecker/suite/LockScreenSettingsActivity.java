@@ -32,7 +32,17 @@ public final class LockScreenSettingsActivity extends Activity {
         LinearLayout clock = Ui.card(this);
         toggle(clock, R.string.custom_clock_title, R.string.custom_clock_summary,
                 "hecker_custom_lockscreen_clock", 0);
+        choices(clock, "hecker_lockscreen_clock_style", 0,
+                new int[]{R.string.lock_clock_geometric, R.string.lock_clock_word, R.string.lock_clock_tall});
         page.addView(clock);
+        LinearLayout depth = Ui.card(this);
+        toggle(depth, R.string.depth_wallpaper_title, R.string.depth_wallpaper_summary,
+                "hecker_depth_wallpaper", 0);
+        toggle(depth, R.string.depth_wallpaper_wake, R.string.depth_wallpaper_wake_summary,
+                "hecker_depth_wallpaper_wake", 1);
+        page.addView(depth);
+        Ui.actionCard(this, page, R.string.depth_wallpaper_import, R.string.depth_wallpaper_import_help,
+                v -> { imported = true; startActivity(new Intent(this, DepthWallpaperActivity.class)); });
         LinearLayout charge = Ui.card(this);
         int defaultAodId=getResources().getIdentifier("config_dozeAlwaysOnEnabled","bool","android");
         toggle(charge, R.string.always_on_title, R.string.always_on_summary,
@@ -57,6 +67,12 @@ public final class LockScreenSettingsActivity extends Activity {
         page.addView(charge);
         Ui.scroll(this,page);
     }
+    @Override protected void onResume() {
+        super.onResume();
+        // Import can enable the tall clock. Refresh controls when returning from that page.
+        if (imported) { imported = false; recreate(); }
+    }
+    private boolean imported;
     private void toggle(LinearLayout card, int title, int summary, String key, int fallback) {
         Switch button = new Switch(this);
         button.setText(title); button.setTextColor(getColor(R.color.hecker_foreground));

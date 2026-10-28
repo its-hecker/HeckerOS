@@ -1,0 +1,19 @@
+<resources>
+  <string name="lock_clock_geometric">几何时钟</string>
+  <string name="lock_clock_word">文字时钟 · 英语</string>
+  <string name="lock_clock_tall">纵向景深时钟</string>
+  <string name="depth_wallpaper_title">景深壁纸</string>
+  <string name="depth_wallpaper_summary">将壁纸主体置于纵向时钟前方。请先导入对应的背景和透明前景。</string>
+  <string name="depth_wallpaper_wake">亮屏时显示景深动画</string>
+  <string name="depth_wallpaper_wake_summary">亮屏时平滑显示时钟和景深图层。息屏显示和省电模式下停止动画。</string>
+  <string name="depth_wallpaper_import">导入景深壁纸</string>
+  <string name="depth_wallpaper_import_help">请选择背景和主体透明 PNG。两张图片须保持相同画布和裁剪范围。暂不提供自动主体抠图。应用后将选择纵向时钟。</string>
+  <string name="depth_pick_background">选择背景</string>
+  <string name="depth_background_summary">位于时钟后方的完整壁纸。</string>
+  <string name="depth_pick_foreground">选择透明主体</string>
+  <string name="depth_foreground_summary">与背景对齐、主体周围透明的 PNG 抠图。</string>
+  <string name="depth_wallpaper_preview">景深壁纸图层预览</string>
+  <string name="depth_wallpaper_apply">应用景深壁纸</string>
+  <string name="depth_wallpaper_invalid">无法导入这组图片。请使用对齐、尺寸匹配且主体背景透明的图片。</string>
+  <string name="depth_wallpaper_applied">已应用景深壁纸</string>
+</resources>

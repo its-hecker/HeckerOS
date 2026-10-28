@@ -100,3 +100,7 @@ java -cp "$suite_test_output" NetLabLanProtocolTest
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
     framework/ambient/AmbientChargingPolicy.java framework/ambient/AmbientPulsePolicy.java tests/AmbientChargingPolicyTest.java
 java -cp "$suite_test_output" AmbientChargingPolicyTest
+
+java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \
+    framework/lockscreen/WordClockText.java framework/lockscreen/DepthWallpaperGeometry.java tests/LockscreenDepthPolicyTest.java
+java -cp "$suite_test_output" LockscreenDepthPolicyTest

@@ -1,0 +1,9 @@
+<resources>
+  <string name="hecker_home_connections">连接</string>
+  <string name="hecker_home_sound">声音与振动</string>
+  <string name="hecker_home_display">显示</string>
+  <string name="hecker_home_themes">主题</string>
+  <string name="hecker_home_launcher">主屏幕</string>
+  <string name="hecker_home_lock">锁屏与息屏显示</string>
+  <string name="hecker_home_voice_search">语音搜索设置</string>
+</resources>

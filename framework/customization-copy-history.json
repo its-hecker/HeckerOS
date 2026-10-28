@@ -91,10 +91,12 @@
     "9fa88fdeb1c4acb6ed8734a07e21a668173a0fba"
   ],
   "packages/apps/Settings/res/layout/hecker_homepage_preference.xml": [
-    "a50ae92a32d573414ab3fcdd24f607777ae10304"
+    "a50ae92a32d573414ab3fcdd24f607777ae10304",
+    "2a311ae91c759bbd70714f7263ab0274eaf2a5a5"
   ],
   "packages/apps/Settings/res/layout/hecker_settings_homepage_container.xml": [
-    "052f3cb21a8875a1263552ab0f6968984487af12"
+    "052f3cb21a8875a1263552ab0f6968984487af12",
+    "536fc0dfe8d0301253694e40b70abfbca53d90e4"
   ],
   "packages/apps/Settings/res/layout/hecker_brand_preference.xml": [
     "a7eac5fcc47fa9a0b65a720606ab8c32480eb0c7"
@@ -217,13 +219,15 @@
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientCharging.kt": [
     "b94244db9ced9df2edf311577d1a6d98e0c299d4",
-    "471e37400ca417497d126f216bd906ed8ea03fed"
+    "471e37400ca417497d126f216bd906ed8ea03fed",
+    "77a92a97acc0ed332c95c210ffbc31ce4dafb042"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientRenderer.kt": [
     "cadd7d01e1b32d0c6fcba75ad3f0826151a84e49"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerAmbientContent.kt": [
-    "863770170b1a922e9f96d26edab2078c353917f8"
+    "863770170b1a922e9f96d26edab2078c353917f8",
+    "9a4cdc0d54208ae01e91f9a553bc38b320eaafb3"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMediaCard.kt": [
     "4840b9bbb302caaf73dbcf7a2b7a286a4a58d62c"

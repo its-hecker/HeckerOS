@@ -1,16 +1,23 @@
 <?xml version='1.0' encoding='utf-8'?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:settings="http://schemas.android.com/apk/res-auto" android:id="@+id/settings_homepage_container" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/hecker_background">
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:settings="http://schemas.android.com/apk/res-auto" android:id="@+id/settings_homepage_container" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/hecker_home_background">
     <androidx.core.widget.NestedScrollView android:id="@+id/main_content_scrollable_container" android:layout_width="match_parent" android:layout_height="match_parent" settings:layout_behavior="com.android.settings.widget.HomepageAppBarScrollingViewBehavior">
-        <LinearLayout android:id="@+id/homepage_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="12dp" android:orientation="vertical">
+        <LinearLayout android:id="@+id/homepage_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="12dp" android:paddingBottom="100dp" android:orientation="vertical">
             <FrameLayout android:id="@+id/suggestion_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="?android:attr/listPreferredItemPaddingStart" android:layout_marginEnd="?android:attr/listPreferredItemPaddingEnd" />
             <FrameLayout android:id="@+id/contextual_cards_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="@dimen/contextual_card_side_margin" android:layout_marginEnd="@dimen/contextual_card_side_margin" />
             <FrameLayout android:id="@+id/main_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:animateLayoutChanges="true" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
     <com.google.android.material.appbar.AppBarLayout android:id="@+id/app_bar" android:layout_width="match_parent" android:layout_height="wrap_content" settings:elevation="0dp" android:touchscreenBlocksFocus="false" android:keyboardNavigationCluster="false">
-        <LinearLayout android:id="@+id/app_bar_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingTop="@dimen/search_bar_container_top_padding" android:paddingBottom="@dimen/settingslib_expressive_space_extrasmall4" android:paddingStart="?android:attr/listPreferredItemPaddingStart" android:paddingEnd="?android:attr/listPreferredItemPaddingEnd" android:background="@color/hecker_background">
+        <LinearLayout settings:layout_scrollFlags="scroll|enterAlways|snap" android:id="@+id/app_bar_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingTop="@dimen/search_bar_container_top_padding" android:paddingBottom="@dimen/settingslib_expressive_space_extrasmall4" android:paddingStart="?android:attr/listPreferredItemPaddingStart" android:paddingEnd="?android:attr/listPreferredItemPaddingEnd" android:background="@color/hecker_home_background">
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="8dp" android:paddingBottom="14dp" android:text="@string/settings_label" android:textSize="32sp" android:textStyle="bold" android:textColor="@color/hecker_foreground" />
-            <include layout="@layout/search_bar" />
+
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
+    <FrameLayout android:layout_width="240dp" android:layout_height="wrap_content" android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="20dp" android:layout_marginStart="16dp" android:layout_marginEnd="16dp" android:elevation="8dp" android:background="@drawable/hecker_home_search">
+        <LinearLayout android:id="@+id/search_action_bar" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="54dp" android:gravity="center_vertical" android:paddingStart="18dp" android:paddingEnd="4dp" android:background="?android:attr/selectableItemBackground" android:focusable="true" android:contentDescription="@string/homepage_search">
+            <ImageView android:id="@+id/imageView" android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_homepage_search" android:tint="@color/hecker_home_foreground" android:importantForAccessibility="no" />
+            <TextView android:id="@+id/search_bar_title" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:paddingStart="10dp" android:text="@string/homepage_search" android:textSize="18sp" android:textColor="@color/hecker_home_foreground" />
+            <ImageButton android:id="@+id/hecker_voice_search" android:layout_width="48dp" android:layout_height="48dp" android:background="?android:attr/selectableItemBackgroundBorderless" android:src="@drawable/hecker_home_mic" android:contentDescription="@string/hecker_home_voice_search" />
+        </LinearLayout>
+    </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.SystemClock
+import android.animation.ValueAnimator
 import android.text.format.DateFormat
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -109,21 +113,56 @@ fun HeckerCustomClockEnabled(context: Context): Boolean {
 }
 
 @Composable
-fun HeckerCustomLockscreenClock(context: Context, small: Boolean,
+fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: StatusBarStateController,
     modifier: Modifier = Modifier): Boolean {
     DisposableEffect(context) { HeckerAmbientCharging.start(context); onDispose {} }
     val state by HeckerAmbientCharging.state.collectAsState()
     if (!state.customClock) return false
     val clock = clockText(context)
     val renderer = remember(context) { HeckerAmbientRenderer(context) }
-    Canvas(modifier.fillMaxWidth().height(if(small) 136.dp else 184.dp)
+    val reference = remember { HeckerLockscreenClockRenderer() }
+    val ambient = dozing(controller)
+    var onKeyguard by remember(controller) { mutableStateOf(controller.state == 1) }
+    DisposableEffect(controller) {
+        val listener = object : StatusBarStateController.StateListener {
+            override fun onStateChanged(value: Int) { onKeyguard = value == 1 }
+        }
+        controller.addCallback(listener)
+        onDispose { controller.removeCallback(listener) }
+    }
+    val style = if (ambient) 0 else state.clockStyle
+    val parts = clock.first.split(':')
+    val hour = parts[0].toIntOrNull() ?: 0
+    val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+    var rotation by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(style, ambient, onKeyguard, state.screenAwake, state.powerSave) {
+        if (style != 1 || ambient || !onKeyguard || !state.screenAwake || state.powerSave || !ValueAnimator.areAnimatorsEnabled()) return@LaunchedEffect
+        val start = withFrameNanos { it }
+        while (isActive && ValueAnimator.areAnimatorsEnabled()) {
+            withFrameNanos { rotation = ((it - start) / 1_000_000_000f * 20f) % 360f }
+        }
+    }
+    var origin by remember { mutableStateOf(Offset.Zero) }
+    val foreground = if (style == 2) HeckerDepthScene.foreground(context, state) else null
+    val reveal = if (foreground == null) 1f else HeckerDepthScene.reveal
+    val height = if (small) { if (style == 1) 218.dp else 136.dp }
+        else when (style) { 1 -> 310.dp; 2 -> 480.dp; else -> 184.dp }
+    Canvas(modifier.fillMaxWidth().height(height).clipToBounds()
+        .onGloballyPositioned { origin = it.positionInRoot() }
         .semantics { contentDescription = clock.first + " " + clock.second }) {
         drawIntoCanvas { canvas ->
             val c = canvas.nativeCanvas
             c.save(); c.scale(density,density)
-            renderer.clock(c,clock.first,clock.second,size.width/density,if(small) 36f else 52f,
-                if(small) 52f else 72f)
+            when (style) {
+                1 -> reference.word(c, hour, minute, clock.second.uppercase(Locale.getDefault()),
+                    size.width / density, size.height / density, rotation, small)
+                2 -> reference.tall(c, hour, minute, DateFormat.is24HourFormat(context), clock.second,
+                    size.width / density, size.height / density, reveal, small)
+                else -> renderer.clock(c,clock.first,clock.second,size.width/density,if(small) 36f else 52f,
+                    if(small) 52f else 72f)
+            }
             c.restore()
+            foreground?.invoke(c, origin)
         }
     }
     return true

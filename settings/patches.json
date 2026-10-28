@@ -6,13 +6,28 @@
     },
     {
       "old": "        recyclerView.setHorizontalScrollBarEnabled(false);",
-      "new": "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));"
+      "new": "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_home_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));",
+      "previous": [
+        "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));"
+      ]
     }
   ],
   "packages/apps/Settings/src/com/android/settings/widget/HomepagePreferenceLayoutHelper.java": [
     {
       "old": "        preference.setLayoutResource(\n                SettingsThemeHelper.isExpressiveTheme(preference.getContext())\n                        ? R.layout.homepage_preference_expressive\n                        : R.layout.homepage_preference);",
       "new": "        preference.setLayoutResource(R.layout.hecker_homepage_preference);"
+    },
+    {
+      "old": "    private View mIcon;",
+      "new": "    private Preference mHeckerPreference;\n    private View mIcon;"
+    },
+    {
+      "old": "    public HomepagePreferenceLayoutHelper(Preference preference) {",
+      "new": "    public HomepagePreferenceLayoutHelper(Preference preference) {\n        mHeckerPreference = preference;"
+    },
+    {
+      "old": "        setAlert(mAlertValue);",
+      "new": "        setAlert(mAlertValue);\n        com.android.settings.hecker.HeckerHomepageStyle.bind(holder, mHeckerPreference);"
     }
   ],
   "packages/apps/Settings/src/com/android/settings/homepage/SettingsHomepageActivity.java": [
@@ -22,7 +37,18 @@
     },
     {
       "old": ": Utils.getColorAttrDefaultColor(this, android.R.attr.colorBackground);",
-      "new": ": getColor(R.color.hecker_background);"
+      "new": ": getColor(R.color.hecker_home_background);",
+      "previous": [
+        ": getColor(R.color.hecker_background);"
+      ]
+    },
+    {
+      "old": "        initSearchBarView();",
+      "new": "        initSearchBarView();\n        com.android.settings.hecker.HeckerSettingsVoiceSearch.bind(this);"
+    },
+    {
+      "old": "    private void initSearchBarView() {",
+      "new": "    @Override\n    protected void onActivityResult(int requestCode, int resultCode, Intent data) {\n        super.onActivityResult(requestCode, resultCode, data);\n        com.android.settings.hecker.HeckerSettingsVoiceSearch.result(this, requestCode, resultCode, data);\n    }\n\n    private void initSearchBarView() {"
     }
   ],
   "packages/apps/Settings/src/com/android/settings/DisplaySettings.java": [

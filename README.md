@@ -1,5 +1,11 @@
 # HeckerOS · Android 17
 
+This experimental `feat/settings-depth-lockscreen-20261028` branch adds the
+[reference Settings homepage, animated word clock and imported-layer depth clock](docs/settings-depth-lockscreen.md)
+on top of the complete Coral root-privacy/astronaut test. Use the matching Coral
+local-manifest branch. Full ROM and phone validation remain pending; the navigation
+freeze is under investigation and is not claimed fixed.
+
 Hecker's custom PixelOS-based ROM for the Google Pixel 4 XL (**coral**) and
 Google Pixel 4 (**flame**). Both products inherit the same feature sources. The
 current integration branch is `feat/suite-polish`; the hardware tree uses `main`
@@ -11,7 +17,8 @@ at `device/google/coral`, with its own vendor at `vendor/google/flame`.
 
 ## Included source
 
-- The approved navy Settings UI: caracal hero, maintainer row, grouped native
+- The reference grouped Settings UI: retained caracal hero, maintainer row, coloured icons,
+  floating native Search, and grouped native
   categories, a two-column Hecker Suite dashboard, and Display & Personalization.
 - One native About Phone card with a small animated phone, live device details,
   maintainer/community access and an Official badge tied to build properties.

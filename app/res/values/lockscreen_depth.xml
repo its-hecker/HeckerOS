@@ -1,0 +1,19 @@
+<resources>
+  <string name="lock_clock_geometric">Geometric</string>
+  <string name="lock_clock_word">Word clock · English</string>
+  <string name="lock_clock_tall">Tall depth clock</string>
+  <string name="depth_wallpaper_title">Depth wallpaper</string>
+  <string name="depth_wallpaper_summary">Place the wallpaper subject in front of the tall clock. Import a matching background and transparent foreground first.</string>
+  <string name="depth_wallpaper_wake">Animate depth on wake</string>
+  <string name="depth_wallpaper_wake_summary">Smoothly reveal the clock and depth layers when the screen turns on. Motion pauses on AOD and in Battery Saver.</string>
+  <string name="depth_wallpaper_import">Import depth wallpaper</string>
+  <string name="depth_wallpaper_import_help">Choose a background and its subject as a transparent PNG. Both images must keep the same canvas and crop. Automatic subject extraction is not included. Applying selects the tall clock.</string>
+  <string name="depth_pick_background">Choose background</string>
+  <string name="depth_background_summary">The complete wallpaper behind the clock.</string>
+  <string name="depth_pick_foreground">Choose transparent subject</string>
+  <string name="depth_foreground_summary">A PNG cutout aligned with the background, with transparent space around the subject.</string>
+  <string name="depth_wallpaper_preview">Depth wallpaper layers preview</string>
+  <string name="depth_wallpaper_apply">Apply depth wallpaper</string>
+  <string name="depth_wallpaper_invalid">Could not import this pair. Use aligned images with a transparent subject and matching dimensions.</string>
+  <string name="depth_wallpaper_applied">Depth wallpaper applied</string>
+</resources>

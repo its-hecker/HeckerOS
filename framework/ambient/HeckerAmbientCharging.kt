@@ -32,6 +32,10 @@ object HeckerAmbientCharging {
     const val AOD_ROUTE = "hecker_charging_on_aod"
     const val STYLE = "hecker_aod_charging_style"
     const val CLOCK = "hecker_custom_lockscreen_clock"
+    const val CLOCK_STYLE = "hecker_lockscreen_clock_style"
+    const val DEPTH = "hecker_depth_wallpaper"
+    const val DEPTH_ID = "hecker_depth_wallpaper_id"
+    const val DEPTH_WAKE = "hecker_depth_wallpaper_wake"
     const val ANIMATION = "hecker_charging_animation"
     const val ART = "hecker_charging_animation_style"
     data class State(
@@ -42,6 +46,9 @@ object HeckerAmbientCharging {
         val watts: Double = Double.NaN, val remaining: Long = -1,
         val introStart: Long = -1, val introPending: Boolean = false,
         val current: Int = Int.MIN_VALUE, val connectedAt: Long = -1,
+        val clockStyle: Int = 0, val depth: Boolean = false, val depthId: String? = null,
+        val depthWake: Boolean = true, val user: Int = -1, val screenAwake: Boolean = true,
+        val powerSave: Boolean = false, val wakeGeneration: Long = 0,
     )
     private val mutable = MutableStateFlow(State())
     val state: StateFlow<State> = mutable
@@ -66,18 +73,27 @@ object HeckerAmbientCharging {
         val observer = object : ContentObserver(main) {
             override fun onChange(selfChange: Boolean) { readSettings(); reconcileDoze() }
         }
-        for (key in arrayOf(ROUTE, AOD_ROUTE, "doze_always_on", STYLE, CLOCK, ANIMATION, ART)) {
+        for (key in arrayOf(ROUTE, AOD_ROUTE, "doze_always_on", STYLE, CLOCK, ANIMATION, ART,
+                CLOCK_STYLE, DEPTH, DEPTH_ID, DEPTH_WAKE)) {
             c.contentResolver.registerContentObserver(Settings.Secure.getUriFor(key), false,
                 observer, UserHandle.USER_ALL)
         }
         val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED).apply {
             addAction(Intent.ACTION_SCREEN_ON); addAction(Intent.ACTION_USER_SWITCHED)
+            addAction(Intent.ACTION_SCREEN_OFF); addAction(Intent.ACTION_USER_UNLOCKED)
+            addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
         }
         c.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 when (intent.action) {
                     Intent.ACTION_BATTERY_CHANGED -> battery(intent)
-                    Intent.ACTION_SCREEN_ON -> if (interactive(c)) { cancelPulse(); cancelIntro() }
+                    Intent.ACTION_SCREEN_ON -> if (interactive(c)) {
+                        cancelPulse(); cancelIntro(); readSettings()
+                        mutable.value = mutable.value.copy(screenAwake = true,
+                            wakeGeneration = mutable.value.wakeGeneration + 1)
+                    }
+                    Intent.ACTION_SCREEN_OFF -> mutable.value = mutable.value.copy(screenAwake = false)
+                    Intent.ACTION_USER_UNLOCKED, PowerManager.ACTION_POWER_SAVE_MODE_CHANGED -> readSettings()
                     Intent.ACTION_USER_SWITCHED -> { cancelPulse(); cancelIntro(); readSettings(); reconcileDoze() }
                 }
             }
@@ -98,7 +114,11 @@ object HeckerAmbientCharging {
             value(AOD_ROUTE, 1) != 0, value(ROUTE, 1) != 0)
         val next = previous.copy(ambient = route,
             style = value(STYLE, 1).coerceIn(0, 2), customClock = value(CLOCK, 0) != 0,
-            animation = value(ANIMATION, 1) != 0, art = value(ART, 0).coerceIn(0, 2))
+            animation = value(ANIMATION, 1) != 0, art = value(ART, 0).coerceIn(0, 2),
+            clockStyle = value(CLOCK_STYLE, 0).coerceIn(0, 2), depth = value(DEPTH, 0) != 0,
+            depthId = Settings.Secure.getStringForUser(c.contentResolver, DEPTH_ID, UserHandle.USER_CURRENT),
+            depthWake = value(DEPTH_WAKE, 1) != 0, user = android.app.ActivityManager.getCurrentUser(),
+            screenAwake = interactive(c), powerSave = c.getSystemService(PowerManager::class.java)?.isPowerSaveMode == true)
         mutable.value = next
         if (!next.ambient || (!next.animation && next.style == 0)) cancelPulse()
         if (!next.ambient || !next.animation) cancelIntro()

@@ -19,8 +19,8 @@ public final class HeckerHomeDecoration extends RecyclerView.ItemDecoration {
     private final int card, border;
     private final float radius, stroke;
     public HeckerHomeDecoration(Context context) {
-        card=context.getColor(R.color.hecker_card); border=context.getColor(R.color.hecker_border);
-        radius=context.getResources().getDisplayMetrics().density*22;
+        card=context.getColor(R.color.hecker_home_card); border=context.getColor(R.color.hecker_home_separator);
+        radius=context.getResources().getDisplayMetrics().density*26;
         stroke=context.getResources().getDisplayMetrics().density;
     }
     @Override public void onDraw(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
@@ -39,11 +39,9 @@ public final class HeckerHomeDecoration extends RecyclerView.ItemDecoration {
             RectF bounds=new RectF(view.getLeft(),view.getTop()+view.getTranslationY(),view.getRight(),view.getBottom()+view.getTranslationY());
             Path path=new Path();path.addRoundRect(bounds,new float[]{top,top,top,top,bottom,bottom,bottom,bottom},Path.Direction.CW);
             paint.setStyle(Paint.Style.FILL);paint.setColor(card);canvas.drawPath(path,paint);
-            paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(stroke);paint.setColor(border);
-            // Contiguous rows share one card; the fine separator sits inside the icon margin.
-            canvas.save();canvas.clipRect(bounds.left,bounds.top+(first?0:stroke),bounds.right,bounds.bottom-(last?0:stroke));
-            canvas.drawPath(path,paint);canvas.restore();
-            if(!last)canvas.drawLine(bounds.left+60*stroke,bounds.bottom,bounds.right-12*stroke,bounds.bottom,paint);
+            // The reference has inset separators and a clean silhouette, without a card outline.
+            paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(stroke*.6f);paint.setColor(border);
+            if(!last)canvas.drawLine(bounds.left+64*stroke,bounds.bottom,bounds.right-18*stroke,bounds.bottom,paint);
         }
     }
 }

@@ -1,5 +1,5 @@
 {
-  "checked_on": "2026-10-27",
+  "checked_on": "2026-10-28",
   "pixelos_manifest": {
     "repository": "PixelOS-AOSP/android_manifest",
     "branch": "seventeen",
@@ -242,8 +242,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "test/coral-root-privacy-20261027",
-    "integration_branch": "test/coral-root-privacy-20261027",
+    "source_branch": "feat/settings-depth-lockscreen-20261028",
+    "integration_branch": "feat/settings-depth-lockscreen-20261028",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required",
@@ -352,5 +352,14 @@
     "baseline_correction": "The initial main-based test snapshot is superseded. Test branches now merge the complete Suite Polish source set and matching dependencies without changing stable branches.",
     "validation": "112 Suite host tests, locked-SDK Java/resources/AIDL/controller compilation and framework visibility host checks passed. Full kernel/ROM builds and Coral phone acceptance remain required.",
     "flame": "Not updated; wait for successful Coral phone testing."
+  },
+  "settings_depth_test": {
+    "branch": "feat/settings-depth-lockscreen-20261028",
+    "parent_branch": "test/coral-root-privacy-20261027",
+    "parent_suite_revision": "040820a87ea4d3275451189a3f04d26c9443bae9",
+    "device": "coral",
+    "depth": "Prepared matching background/transparent foreground; no automatic subject extraction.",
+    "navigation": "Read-only frozen/recovered capture helper; root cause and device fix unconfirmed.",
+    "validation": "Owned Java/resources/Compose, native source adapters and host checks; full ROM and phone tests required."
   }
 }

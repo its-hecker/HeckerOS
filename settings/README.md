@@ -1,10 +1,12 @@
-# Approved HeckerOS Settings design
+# HeckerOS Settings design
 
 Adapted to the native Android 17 Settings app at the revision recorded in
-`integration/source-revisions.json`. The user's three-screen reference defines
-the dark navy cards, blue icon discs, caracal branding, maintainer row, Suite
-grid and Display & Personalization hero. Light mode uses corresponding native
-light surfaces. No reference battery, storage or account readings are hard-coded.
+`integration/source-revisions.json`. The latest reference defines a black homepage,
+charcoal rounded groups, coloured icon discs, inset separators, title-only rows and
+a floating Search pill. The HeckerOS hero, maintainer/Suite row, Suite grid and
+Display & Personalization hero remain. Light mode uses corresponding light surfaces.
+No reference battery, storage or account readings are hard-coded. See
+[the Settings and depth lockscreen notes](../docs/settings-depth-lockscreen.md).
 
 All 23 native home categories and their controllers remain present. Native search,
 embedding IDs, badges, work-profile behavior, accessibility labels, display

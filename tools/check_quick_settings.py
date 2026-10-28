@@ -41,6 +41,7 @@ public final class ThemeEngine {
 }''',
     'android/content/ContentResolver.java': '''package android.content;
 public abstract class ContentResolver {
+ public final java.io.InputStream openInputStream(android.net.Uri uri) throws java.io.FileNotFoundException { return null; }
  public final void registerContentObserver(android.net.Uri uri, boolean descendants, android.database.ContentObserver o, int user) {}
  public final void unregisterContentObserver(android.database.ContentObserver o) {}
 }''',
@@ -84,8 +85,8 @@ public class MediaSessionManager {
 }''',
     'com/android/systemui/plugins/statusbar/StatusBarStateController.java': '''package com.android.systemui.plugins.statusbar;
 public interface StatusBarStateController {
- boolean isDozing(); void addCallback(StateListener listener); void removeCallback(StateListener listener);
- interface StateListener { default void onDozingChanged(boolean dozing) {} }
+ boolean isDozing(); int getState(); void addCallback(StateListener listener); void removeCallback(StateListener listener);
+ interface StateListener { default void onDozingChanged(boolean dozing) {} default void onStateChanged(int state) {} }
 }''',
     'com/android/systemui/plugins/ActivityStarter.java': '''package com.android.systemui.plugins;
 public interface ActivityStarter { void postStartActivityDismissingKeyguard(android.content.Intent intent,int delay); }
@@ -266,6 +267,7 @@ object ComposeInitializer {
         java_sources = list((out / 'java').rglob('*.java')) + [p for p in (ROOT / 'framework/qs').glob('*.java') if p.name != 'HeckerSystemUiControl.java']
         java_sources += sorted((ROOT / 'framework/lyrics').glob('*.java'))
         java_sources += sorted((ROOT / 'framework/ambient').glob('*.java'))
+        java_sources += sorted((ROOT / 'framework/lockscreen').glob('*.java'))
         java_sources += [ROOT / 'framework/themes/ThemeIconNames.java', ROOT / 'framework/applock/HeckerAppLockPrompt.java']
         run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', sdk / 'android-system.jar',
             '-d', out / 'classes', *java_sources)
@@ -277,6 +279,7 @@ object ComposeInitializer {
             '-d', out / 'classes-kotlin', *sorted((out / 'kotlin').glob('*.kt')),
             *sorted((ROOT / 'framework/qs').glob('*.kt')),
             *sorted((ROOT / 'framework/ambient').glob('*.kt')),
+            *sorted((ROOT / 'framework/lockscreen').glob('*.kt')),
             ROOT / 'framework/motionisland/HeckerMotionMediaDialog.kt',
             ROOT / 'framework/lyrics/HeckerLockscreenLyrics.kt',
             ROOT / 'framework/themes/HeckerThemeAssets.kt',

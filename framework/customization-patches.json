@@ -273,13 +273,28 @@
     },
     {
       "old": "        recyclerView.setHorizontalScrollBarEnabled(false);",
-      "new": "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));"
+      "new": "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_home_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));",
+      "previous": [
+        "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));"
+      ]
     }
   ],
   "packages/apps/Settings/src/com/android/settings/widget/HomepagePreferenceLayoutHelper.java": [
     {
       "old": "        preference.setLayoutResource(\n                SettingsThemeHelper.isExpressiveTheme(preference.getContext())\n                        ? R.layout.homepage_preference_expressive\n                        : R.layout.homepage_preference);",
       "new": "        preference.setLayoutResource(R.layout.hecker_homepage_preference);"
+    },
+    {
+      "old": "    private View mIcon;",
+      "new": "    private Preference mHeckerPreference;\n    private View mIcon;"
+    },
+    {
+      "old": "    public HomepagePreferenceLayoutHelper(Preference preference) {",
+      "new": "    public HomepagePreferenceLayoutHelper(Preference preference) {\n        mHeckerPreference = preference;"
+    },
+    {
+      "old": "        setAlert(mAlertValue);",
+      "new": "        setAlert(mAlertValue);\n        com.android.settings.hecker.HeckerHomepageStyle.bind(holder, mHeckerPreference);"
     }
   ],
   "packages/apps/Settings/src/com/android/settings/homepage/SettingsHomepageActivity.java": [
@@ -289,7 +304,18 @@
     },
     {
       "old": ": Utils.getColorAttrDefaultColor(this, android.R.attr.colorBackground);",
-      "new": ": getColor(R.color.hecker_background);"
+      "new": ": getColor(R.color.hecker_home_background);",
+      "previous": [
+        ": getColor(R.color.hecker_background);"
+      ]
+    },
+    {
+      "old": "        initSearchBarView();",
+      "new": "        initSearchBarView();\n        com.android.settings.hecker.HeckerSettingsVoiceSearch.bind(this);"
+    },
+    {
+      "old": "    private void initSearchBarView() {",
+      "new": "    @Override\n    protected void onActivityResult(int requestCode, int resultCode, Intent data) {\n        super.onActivityResult(requestCode, resultCode, data);\n        com.android.settings.hecker.HeckerSettingsVoiceSearch.result(this, requestCode, resultCode, data);\n    }\n\n    private void initSearchBarView() {"
     }
   ],
   "packages/apps/Settings/src/com/android/settings/DisplaySettings.java": [
@@ -728,7 +754,10 @@
     },
     {
       "old": "                    LockscreenSceneLayout(viewModel.isUdfpsSupported)",
-      "new": "                    LockscreenSceneLayout(viewModel.isUdfpsSupported, lyrics = {\n                        com.android.systemui.hecker.HeckerLockscreenLyrics(\n                            this@LockscreenRootElementProvider.context,\n                            heckerStatusBarState,\n                            Modifier.burnInAware(viewModel.burnIn, isClock = false),\n                        )\n                    })"
+      "new": "                    androidx.compose.foundation.layout.Box(Modifier.fillMaxSize().thenIf(contentScope.isIdleWithOverlay()) {\n                        Modifier.graphicsLayer { alpha = 0f }\n                    }) {\n                        com.android.systemui.hecker.HeckerDepthLockscreenBackdrop(\n                            this@LockscreenRootElementProvider.context, heckerStatusBarState, Modifier.matchParentSize())\n                    LockscreenSceneLayout(viewModel.isUdfpsSupported, lyrics = {\n                        com.android.systemui.hecker.HeckerLockscreenLyrics(\n                            this@LockscreenRootElementProvider.context,\n                            heckerStatusBarState,\n                            Modifier.burnInAware(viewModel.burnIn, isClock = false),\n                        )\n                    })\n                    }",
+      "previous": [
+        "                    LockscreenSceneLayout(viewModel.isUdfpsSupported, lyrics = {\n                        com.android.systemui.hecker.HeckerLockscreenLyrics(\n                            this@LockscreenRootElementProvider.context,\n                            heckerStatusBarState,\n                            Modifier.burnInAware(viewModel.burnIn, isClock = false),\n                        )\n                    })"
+      ]
     },
     {
       "old": "    isUdfpsSupported: Boolean,\n    modifier: Modifier = Modifier,",
@@ -753,6 +782,10 @@
     {
       "old": "            lockIconPlaceable.place(lockIconBounds.left, lockIconBounds.top)",
       "new": "            lockIconPlaceable.place(lockIconBounds.left, lockIconBounds.top)\n            val lyricsBottom = lockIconBounds.top -\n                (if (isUdfpsSupported) 0 else ambientIndicationPlaceable.measuredHeight) - lyricsGap\n            lyricsPlaceable.placeRelative((constraints.maxWidth - lyricsPlaceable.width) / 2,\n                (lyricsBottom - lyricsPlaceable.height).coerceAtLeast(statusBarPlaceable.height))"
+    },
+    {
+      "old": "import androidx.compose.runtime.Composable",
+      "new": "import androidx.compose.foundation.layout.fillMaxSize\nimport androidx.compose.runtime.Composable"
     }
   ],
   "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/shade/ui/composable/ShadeScene.kt": [
@@ -898,7 +931,10 @@
     },
     {
       "old": "        protected fun TransitionBuilder.configureClockCenteringTransition() {",
-      "new": "        @Composable\n        protected fun LockscreenScope<ContentScope>.HeckerClockRegion(small: Boolean) {\n            val androidContext = this@LockscreenUpperRegionElementProvider.context\n            if (com.android.systemui.hecker.HeckerCustomClockEnabled(androidContext)) {\n                MovableElement(if (small) Clock.Small else Clock.Large,\n                        Modifier.burnInAware(isClock = false).nonAuthUI()) {\n                    content {\n                        com.android.systemui.hecker.HeckerCustomLockscreenClock(androidContext, small)\n                    }\n                }\n            } else {\n                LockscreenElement(if (small) Region.Clock.Small else Region.Clock.Large)\n            }\n        }\n\n        protected fun TransitionBuilder.configureClockCenteringTransition() {"
+      "new": "        @Composable\n        protected fun LockscreenScope<ContentScope>.HeckerClockRegion(small: Boolean) {\n            val androidContext = this@LockscreenUpperRegionElementProvider.context\n            if (com.android.systemui.hecker.HeckerCustomClockEnabled(androidContext)) {\n                MovableElement(if (small) Clock.Small else Clock.Large,\n                        Modifier.burnInAware(isClock = true).nonAuthUI()) {\n                    content {\n                        com.android.systemui.hecker.HeckerCustomLockscreenClock(androidContext, small, heckerStatusBarState)\n                    }\n                }\n            } else {\n                LockscreenElement(if (small) Region.Clock.Small else Region.Clock.Large)\n            }\n        }\n\n        protected fun TransitionBuilder.configureClockCenteringTransition() {",
+      "previous": [
+        "        @Composable\n        protected fun LockscreenScope<ContentScope>.HeckerClockRegion(small: Boolean) {\n            val androidContext = this@LockscreenUpperRegionElementProvider.context\n            if (com.android.systemui.hecker.HeckerCustomClockEnabled(androidContext)) {\n                MovableElement(if (small) Clock.Small else Clock.Large,\n                        Modifier.burnInAware(isClock = false).nonAuthUI()) {\n                    content {\n                        com.android.systemui.hecker.HeckerCustomLockscreenClock(androidContext, small)\n                    }\n                }\n            } else {\n                LockscreenElement(if (small) Region.Clock.Small else Region.Clock.Large)\n            }\n        }\n\n        protected fun TransitionBuilder.configureClockCenteringTransition() {"
+      ]
     },
     {
       "old": "                    Column {\n                        LockscreenElement(Region.Clock.Small)\n                        MediaCarousel(Modifier.align(Alignment.Start))\n",

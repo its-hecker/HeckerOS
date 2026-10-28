@@ -123,5 +123,18 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionIslandAnimation.java": "framework/motionisland/MotionIslandAnimation.java",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMotionMediaDialog.kt": "framework/motionisland/HeckerMotionMediaDialog.kt",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MusicSessionPolicy.java": "framework/qs/MusicSessionPolicy.java",
-  "frameworks/base/packages/SystemUI/res/drawable-nodpi/hecker_motion_astronaut.png": "framework/motionisland/astronaut-wave.png"
+  "frameworks/base/packages/SystemUI/res/drawable-nodpi/hecker_motion_astronaut.png": "framework/motionisland/astronaut-wave.png",
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerHomepageStyle.java": "settings/src/com/android/settings/hecker/HeckerHomepageStyle.java",
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerSettingsVoiceSearch.java": "settings/src/com/android/settings/hecker/HeckerSettingsVoiceSearch.java",
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerFeaturePreference.java": "settings/src/com/android/settings/hecker/HeckerFeaturePreference.java",
+  "packages/apps/Settings/res/values-zh-rCN/hecker_home_strings.xml": "settings/res/values-zh-rCN/hecker_home_strings.xml",
+  "packages/apps/Settings/res/values-night/hecker_home.xml": "settings/res/values-night/hecker_home.xml",
+  "packages/apps/Settings/res/values/hecker_home_strings.xml": "settings/res/values/hecker_home_strings.xml",
+  "packages/apps/Settings/res/values/hecker_home.xml": "settings/res/values/hecker_home.xml",
+  "packages/apps/Settings/res/drawable/hecker_home_mic.xml": "settings/res/drawable/hecker_home_mic.xml",
+  "packages/apps/Settings/res/drawable/hecker_home_search.xml": "settings/res/drawable/hecker_home_search.xml",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerDepthWallpaper.kt": "framework/lockscreen/HeckerDepthWallpaper.kt",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerLockscreenClockRenderer.java": "framework/lockscreen/HeckerLockscreenClockRenderer.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/WordClockText.java": "framework/lockscreen/WordClockText.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/DepthWallpaperGeometry.java": "framework/lockscreen/DepthWallpaperGeometry.java"
 }

@@ -1,0 +1,7 @@
+<resources>
+    <color name="hecker_home_background">#F5F2F7</color>
+    <color name="hecker_home_card">#FFFFFF</color>
+    <color name="hecker_home_separator">#D8D1DD</color>
+    <color name="hecker_home_foreground">#211D26</color>
+    <color name="hecker_home_search">#E3DDE9</color>
+</resources>
