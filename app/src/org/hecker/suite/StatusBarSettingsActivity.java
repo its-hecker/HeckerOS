@@ -12,6 +12,7 @@ public final class StatusBarSettingsActivity extends Activity {
         if ("coral".equals(android.os.Build.DEVICE))
             Ui.actionCard(this, page, R.string.motion_feedback_title, R.string.motion_feedback_summary,
                     v -> startActivity(new android.content.Intent(this, MotionFeedbackSettingsActivity.class)));
+        StatusBarCustomization.add(this,page);
         LinearLayout calling = Ui.card(this);
         calling.addView(Ui.text(this, getString(R.string.ims_icons_title), 18, true));
         calling.addView(Ui.text(this, getString(R.string.ims_icons_summary), 14, false));

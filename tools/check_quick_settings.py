@@ -279,12 +279,25 @@ object ComposeInitializer {
                               'ComposeInitializer.kt': compose_initializer}.items():
             target = out / 'kotlin' / name
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)
+        # Compile the native override signatures together with the production row host.
+        from check_statusbar_rows import hook_probe
+        row_patch=json.loads((ROOT/'framework/customization-patches.json').read_text())[
+            'frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarView.java']
+        native='\\n'.join(pair['new'] for pair in row_patch)
+        # Attach/detach are retained native methods; the source-plan check validates full prepared input.
+        probe=hook_probe(native)
+        destination=out/'java/com/android/systemui/statusbar/phone/HeckerRowsNativeProbe.java'
+        destination.parent.mkdir(parents=True,exist_ok=True);destination.write_text(probe)
         java_sources = list((out / 'java').rglob('*.java')) + [p for p in (ROOT / 'framework/qs').glob('*.java') if p.name != 'HeckerSystemUiControl.java']
         java_sources += sorted((ROOT / 'framework/lyrics').glob('*.java'))
+        java_sources += [ROOT / 'framework/statusbar/HeckerStatusBarRows.java', ROOT / 'framework/statusbar/StatusBarRowsPolicy.java']
         java_sources += sorted((ROOT / 'framework/ambient').glob('*.java'))
         java_sources += sorted((ROOT / 'framework/lockscreen').glob('*.java'))
         java_sources += sorted((ROOT / 'aosp-launcher/src/org/hecker/motion').glob('*.java'))
-        java_sources += [ROOT / 'framework/themes/ThemeIconNames.java', ROOT / 'framework/applock/HeckerAppLockPrompt.java']
+        java_sources += [ROOT / 'framework/themes/StatusBarHeightSync.java',
+            ROOT / 'tests/platform-api-stubs/android/content/om/OverlayIdentifier.java',
+            ROOT / 'tests/platform-api-stubs/android/content/om/OverlayManagerTransaction.java',
+            ROOT / 'framework/themes/ThemeIconNames.java', ROOT / 'framework/applock/HeckerAppLockPrompt.java']
         run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', sdk / 'android-system.jar',
             '-d', out / 'classes', *java_sources)
         jars = sorted(cache.glob('*.jar'))

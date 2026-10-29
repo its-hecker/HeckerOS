@@ -29,6 +29,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -38,9 +39,11 @@ import java.util.function.Consumer;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-/** Current-user lyrics while the lock-screen root is composed, including ambient display. */
+/** One current-user LRCLIB/media engine, shared by independently enabled visible surfaces. */
 public final class LyricsController implements AutoCloseable {
     public static final String SETTING = "hecker_lockscreen_lyrics";
+    public static final String STATUS_SETTING = "hecker_statusbar_lyrics";
+    public static final int LOCKSCREEN = 0, STATUS_BAR = 1;
     public static final class Snapshot {
         public final List<LyricsPolicy.Line> lines;
         public final long position, updatedAt, duration;
@@ -65,173 +68,211 @@ public final class LyricsController implements AutoCloseable {
         Cached(List<LyricsPolicy.Line> lines) { this.lines = lines; }
     }
     private static final LruCache<String, Cached> CACHE = new LruCache<>(24);
-    private final Context context;
+    private static Engine shared;
     private final Consumer<Snapshot> listener;
-    private final Handler main = new Handler(Looper.getMainLooper());
-    private final ThreadPoolExecutor worker = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(1), runnable -> new Thread(runnable, "HeckerLyrics"));
-    private final ContentObserver setting = new ContentObserver(main) {
-        @Override public void onChange(boolean self) { refreshSessions(); }
-    };
-    private final BroadcastReceiver users = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) { bindUser(); }
-    };
-    private final MediaSessionManager.OnActiveSessionsChangedListener sessions = this::chooseSession;
-    private final MediaController.Callback callbacks = new MediaController.Callback() {
-        @Override public void onMetadataChanged(MediaMetadata metadata) { updateTrack(); }
-        @Override public void onPlaybackStateChanged(PlaybackState state) { publish(); }
-        @Override public void onSessionDestroyed() { refreshSessions(); }
-    };
-    private MediaSessionManager manager;
-    private MediaController controller;
-    private List<LyricsPolicy.Line> lines = Collections.emptyList();
-    private String trackKey = "";
-    private int userId, generation;
-    private Future<?> request;
-    private volatile HttpURLConnection connection;
-    private boolean closed;
+    private final int surface;
+    private boolean visible, closed;
+    private final Engine engine;
 
+    /** Main-thread subscription. Neither display owns or duplicates the network worker. */
     public LyricsController(Context context, Consumer<Snapshot> listener) {
-        this.context = context.getApplicationContext();
-        this.listener = listener;
-        this.context.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(SETTING),
-                false, setting, UserHandle.USER_ALL);
-        this.context.registerReceiver(users, new IntentFilter(Intent.ACTION_USER_SWITCHED),
-                null, main, Context.RECEIVER_NOT_EXPORTED);
-        bindUser();
+        this(context, LOCKSCREEN, true, listener);
+    }
+    public LyricsController(Context context, int surface, boolean visible, Consumer<Snapshot> listener) {
+        if (surface != LOCKSCREEN && surface != STATUS_BAR) throw new IllegalArgumentException("Unknown lyrics surface");
+        this.listener = listener; this.surface = surface; this.visible = visible;
+        if (shared == null) shared = new Engine(context);
+        engine = shared; engine.clients.add(this); engine.refreshSessions();
+    }
+    public void setVisible(boolean value) {
+        if (closed || visible == value) return;
+        visible = value; engine.refreshSessions();
+    }
+    @Override public void close() {
+        if (closed) return;
+        closed = true; engine.clients.remove(this);
+        if (engine.clients.isEmpty()) { engine.close(); if (shared == engine) shared = null; }
+        else engine.refreshSessions();
     }
 
-    private boolean enabled() {
-        return !closed && Settings.Secure.getIntForUser(context.getContentResolver(),
-                SETTING, 0, userId) == 1;
-    }
+    private static final class Engine implements AutoCloseable {
+        private final Context context;
+        private final List<LyricsController> clients = new ArrayList<>();
+        private final Handler main = new Handler(Looper.getMainLooper());
+        private final ThreadPoolExecutor worker = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(1), runnable -> new Thread(runnable, "HeckerLyrics"));
+        private final ContentObserver setting = new ContentObserver(main) {
+            @Override public void onChange(boolean self) { refreshSessions(); }
+        };
+        private final BroadcastReceiver users = new BroadcastReceiver() {
+            @Override public void onReceive(Context context, Intent intent) { bindUser(); }
+        };
+        private final MediaSessionManager.OnActiveSessionsChangedListener sessions = this::chooseSession;
+        private final MediaController.Callback callbacks = new MediaController.Callback() {
+            @Override public void onMetadataChanged(MediaMetadata metadata) { updateTrack(); }
+            @Override public void onPlaybackStateChanged(PlaybackState state) { publish(); }
+            @Override public void onSessionDestroyed() { refreshSessions(); }
+        };
+        private MediaSessionManager manager;
+        private MediaController controller;
+        private List<LyricsPolicy.Line> lines = Collections.emptyList();
+        private String trackKey = "";
+        private int userId, generation;
+        private Future<?> request;
+        private volatile HttpURLConnection connection;
+        private boolean closed;
 
-    private void bindUser() {
-        if (manager != null) manager.removeOnActiveSessionsChangedListener(sessions);
-        detach();
-        userId = ActivityManager.getCurrentUser();
-        manager = context.createContextAsUser(UserHandle.of(userId), 0)
-                .getSystemService(MediaSessionManager.class);
-        refreshSessions();
-    }
-
-    private void refreshSessions() {
-        if (closed || manager == null) return;
-        manager.removeOnActiveSessionsChangedListener(sessions);
-        if (!enabled()) { detach(); return; }
-        try {
-            manager.addOnActiveSessionsChangedListener(sessions, null, main);
-            chooseSession(manager.getActiveSessions(null));
-        } catch (SecurityException unavailable) { detach(); }
-    }
-
-    private void chooseSession(List<MediaController> available) {
-        if (!enabled()) { detach(); return; }
-        MediaController chosen = null;
-        if (available != null) {
-            for (MediaController item : available) {
-                PlaybackState state = item.getPlaybackState();
-                if (state != null && state.getState() == PlaybackState.STATE_PLAYING) { chosen = item; break; }
-            }
+        private Engine(Context context) {
+            this.context = context.getApplicationContext();
+            for (String key : new String[]{SETTING, STATUS_SETTING})
+                this.context.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(key),
+                        false, setting, UserHandle.USER_ALL);
+            this.context.registerReceiver(users, new IntentFilter(Intent.ACTION_USER_SWITCHED),
+                    null, main, Context.RECEIVER_NOT_EXPORTED);
+            bindUser();
         }
-        if (chosen == null) { detach(); return; }
-        if (controller == null || !controller.getSessionToken().equals(chosen.getSessionToken())) {
+
+        private boolean enabled() {
+            if (closed) return false;
+            for (LyricsController client : clients) if (interested(client)) return true;
+            return false;
+        }
+        private boolean interested(LyricsController client) {
+            return !client.closed && client.visible && Settings.Secure.getIntForUser(context.getContentResolver(),
+                    client.surface == STATUS_BAR ? STATUS_SETTING : SETTING, 0, userId) == 1;
+        }
+
+        private void bindUser() {
+            if (manager != null) manager.removeOnActiveSessionsChangedListener(sessions);
             detach();
-            controller = chosen;
-            controller.registerCallback(callbacks, main);
+            userId = ActivityManager.getCurrentUser();
+            manager = context.createContextAsUser(UserHandle.of(userId), 0)
+                    .getSystemService(MediaSessionManager.class);
+            refreshSessions();
         }
-        updateTrack();
-    }
 
-    private void updateTrack() {
-        if (!enabled() || controller == null) { detach(); return; }
-        MediaMetadata metadata = controller.getMetadata();
-        String title = metadata == null ? null : metadata.getString(MediaMetadata.METADATA_KEY_TITLE);
-        String artist = metadata == null ? null : metadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
-        long duration = metadata == null ? 0 : metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
-        if (title == null || artist == null || title.isBlank() || artist.isBlank()) {
-            cancel(); trackKey = ""; lines = Collections.emptyList(); publish(); return;
+        private void refreshSessions() {
+            if (closed || manager == null) return;
+            manager.removeOnActiveSessionsChangedListener(sessions);
+            if (!enabled()) { detach(); return; }
+            try {
+                manager.addOnActiveSessionsChangedListener(sessions, null, main);
+                chooseSession(manager.getActiveSessions(null));
+            } catch (SecurityException unavailable) { detach(); }
         }
-        String key = userId + ":" + controller.getPackageName() + ":"
-                + LyricsPolicy.normalize(artist) + ":" + LyricsPolicy.normalize(title) + ":" + duration;
-        if (key.equals(trackKey)) { publish(); return; }
-        cancel(); trackKey = key; lines = Collections.emptyList(); publish();
-        Cached cached = CACHE.get(key);
-        if (cached != null && (!cached.lines.isEmpty() || SystemClock.elapsedRealtime() - cached.at < 300_000)) {
-            lines = cached.lines; publish(); return;
-        }
-        int serial = generation;
-        request = worker.submit(() -> {
-            List<LyricsPolicy.Line> found = lookup(artist, title, duration);
-            main.post(() -> {
-                if (closed || serial != generation || !enabled() || !key.equals(trackKey)) return;
-                CACHE.put(key, new Cached(found)); lines = found; publish();
-            });
-        });
-    }
 
-    private List<LyricsPolicy.Line> lookup(String artist, String title, long duration) {
-        HttpURLConnection http = null;
-        try {
-            String query = URLEncoder.encode(artist + " " + title, StandardCharsets.UTF_8);
-            http = (HttpURLConnection) new URL("https://lrclib.net/api/search?q=" + query).openConnection();
-            connection = http;
-            http.setConnectTimeout(5000); http.setReadTimeout(5000); http.setInstanceFollowRedirects(false);
-            http.setRequestProperty("User-Agent", "HeckerOS-LockscreenLyrics/1.0 (https://github.com/its-hecker/HeckerOS)");
-            if (http.getResponseCode() != 200 || Thread.currentThread().isInterrupted()) return Collections.emptyList();
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            try (InputStream stream = http.getInputStream()) {
-                byte[] buffer = new byte[8192];
-                for (int count; (count = stream.read(buffer)) != -1;) {
-                    if (output.size() + count > 1_048_576 || Thread.currentThread().isInterrupted()) return Collections.emptyList();
-                    output.write(buffer, 0, count);
+        private void chooseSession(List<MediaController> available) {
+            if (!enabled()) { detach(); return; }
+            MediaController chosen = null;
+            if (available != null) {
+                for (MediaController item : available) {
+                    PlaybackState state = item.getPlaybackState();
+                    if (state != null && state.getState() == PlaybackState.STATE_PLAYING) { chosen = item; break; }
                 }
             }
-            JSONArray results = new JSONArray(output.toString(StandardCharsets.UTF_8));
-            int bestScore = -1;
-            List<LyricsPolicy.Line> best = Collections.emptyList();
-            for (int i = 0; i < Math.min(results.length(), 10); i++) {
-                JSONObject candidate = results.getJSONObject(i);
-                int score = LyricsPolicy.matchScore(artist, title, candidate.optString("artistName"),
-                        candidate.optString("trackName"));
-                long candidateDuration = Math.round(candidate.optDouble("duration", 0) * 1000);
-                if (!LyricsPolicy.usableRecording(score, duration, candidateDuration)
-                        || candidate.optBoolean("instrumental") || score <= bestScore) continue;
-                List<LyricsPolicy.Line> parsed = LyricsPolicy.parse(candidate.optString("syncedLyrics", ""));
-                if (!parsed.isEmpty()) { best = parsed; bestScore = score; }
+            if (chosen == null) { detach(); return; }
+            if (controller == null || !controller.getSessionToken().equals(chosen.getSessionToken())) {
+                detach();
+                controller = chosen;
+                controller.registerCallback(callbacks, main);
             }
-            return best;
-        } catch (Exception unavailable) { return Collections.emptyList(); }
-        finally { if (http != null) http.disconnect(); if (connection == http) connection = null; }
-    }
+            updateTrack();
+        }
 
-    private void publish() {
-        if (closed) return;
-        MediaMetadata metadata = controller == null ? null : controller.getMetadata();
-        listener.accept(new Snapshot(enabled() ? lines : Collections.emptyList(),
-                controller == null ? null : controller.getPlaybackState(),
-                metadata == null ? 0 : metadata.getLong(MediaMetadata.METADATA_KEY_DURATION)));
-    }
+        private void updateTrack() {
+            if (!enabled() || controller == null) { detach(); return; }
+            MediaMetadata metadata = controller.getMetadata();
+            String title = metadata == null ? null : metadata.getString(MediaMetadata.METADATA_KEY_TITLE);
+            String artist = metadata == null ? null : metadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+            long duration = metadata == null ? 0 : metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+            if (title == null || artist == null || title.isBlank() || artist.isBlank()) {
+                cancel(); trackKey = ""; lines = Collections.emptyList(); publish(); return;
+            }
+            String key = userId + ":" + controller.getPackageName() + ":"
+                    + LyricsPolicy.normalize(artist) + ":" + LyricsPolicy.normalize(title) + ":" + duration;
+            if (key.equals(trackKey)) { publish(); return; }
+            cancel(); trackKey = key; lines = Collections.emptyList(); publish();
+            Cached cached = CACHE.get(key);
+            if (cached != null && (!cached.lines.isEmpty() || SystemClock.elapsedRealtime() - cached.at < 300_000)) {
+                lines = cached.lines; publish(); return;
+            }
+            int serial = generation;
+            request = worker.submit(() -> {
+                List<LyricsPolicy.Line> found = lookup(artist, title, duration);
+                main.post(() -> {
+                    if (closed || serial != generation || !enabled() || !key.equals(trackKey)) return;
+                    CACHE.put(key, new Cached(found)); lines = found; publish();
+                });
+            });
+        }
 
-    private void cancel() {
-        generation++;
-        if (request != null) request.cancel(true);
-        HttpURLConnection active = connection;
-        if (active != null) active.disconnect();
-        worker.getQueue().clear();
-    }
+        private List<LyricsPolicy.Line> lookup(String artist, String title, long duration) {
+            HttpURLConnection http = null;
+            try {
+                String query = URLEncoder.encode(artist + " " + title, StandardCharsets.UTF_8);
+                http = (HttpURLConnection) new URL("https://lrclib.net/api/search?q=" + query).openConnection();
+                connection = http;
+                http.setConnectTimeout(5000); http.setReadTimeout(5000); http.setInstanceFollowRedirects(false);
+                http.setRequestProperty("User-Agent", "HeckerOS-SharedLyrics/1.1 (https://github.com/its-hecker/HeckerOS)");
+                if (http.getResponseCode() != 200 || Thread.currentThread().isInterrupted()) return Collections.emptyList();
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                try (InputStream stream = http.getInputStream()) {
+                    byte[] buffer = new byte[8192];
+                    for (int count; (count = stream.read(buffer)) != -1;) {
+                        if (output.size() + count > 1_048_576 || Thread.currentThread().isInterrupted()) return Collections.emptyList();
+                        output.write(buffer, 0, count);
+                    }
+                }
+                JSONArray results = new JSONArray(output.toString(StandardCharsets.UTF_8));
+                int bestScore = -1;
+                List<LyricsPolicy.Line> best = Collections.emptyList();
+                for (int i = 0; i < Math.min(results.length(), 10); i++) {
+                    JSONObject candidate = results.getJSONObject(i);
+                    int score = LyricsPolicy.matchScore(artist, title, candidate.optString("artistName"),
+                            candidate.optString("trackName"));
+                    long candidateDuration = Math.round(candidate.optDouble("duration", 0) * 1000);
+                    if (!LyricsPolicy.usableRecording(score, duration, candidateDuration)
+                            || candidate.optBoolean("instrumental") || score <= bestScore) continue;
+                    List<LyricsPolicy.Line> parsed = LyricsPolicy.parse(candidate.optString("syncedLyrics", ""));
+                    if (!parsed.isEmpty()) { best = parsed; bestScore = score; }
+                }
+                return best;
+            } catch (Exception unavailable) { return Collections.emptyList(); }
+            finally { if (http != null) http.disconnect(); if (connection == http) connection = null; }
+        }
 
-    private void detach() {
-        cancel();
-        if (controller != null) controller.unregisterCallback(callbacks);
-        controller = null; trackKey = ""; lines = Collections.emptyList(); publish();
-    }
+        private void publish() {
+            if (closed) return;
+            MediaMetadata metadata = controller == null ? null : controller.getMetadata();
+            Snapshot current = new Snapshot(enabled() ? lines : Collections.emptyList(),
+                    controller == null ? null : controller.getPlaybackState(),
+                    metadata == null ? 0 : metadata.getLong(MediaMetadata.METADATA_KEY_DURATION));
+            for (LyricsController client : new ArrayList<>(clients)) {
+                if (!client.closed) client.listener.accept(interested(client) ? current :
+                        new Snapshot(Collections.emptyList(), null, 0));
+            }
+        }
 
-    @Override public void close() {
-        closed = true; detach();
-        if (manager != null) manager.removeOnActiveSessionsChangedListener(sessions);
-        context.getContentResolver().unregisterContentObserver(setting);
-        context.unregisterReceiver(users);
-        worker.shutdownNow();
+        private void cancel() {
+            generation++;
+            if (request != null) request.cancel(true);
+            HttpURLConnection active = connection;
+            if (active != null) active.disconnect();
+            worker.getQueue().clear();
+        }
+
+        private void detach() {
+            cancel();
+            if (controller != null) controller.unregisterCallback(callbacks);
+            controller = null; trackKey = ""; lines = Collections.emptyList(); publish();
+        }
+
+        @Override public void close() {
+            closed = true; detach();
+            if (manager != null) manager.removeOnActiveSessionsChangedListener(sessions);
+            context.getContentResolver().unregisterContentObserver(setting);
+            context.unregisterReceiver(users);
+            worker.shutdownNow();
+        }
     }
 }

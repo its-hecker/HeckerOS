@@ -676,6 +676,18 @@
         "    @Override\n    public boolean dispatchTouchEvent(MotionEvent event) {\n        if (mIsStatusBarInteractiveSupplier != null\n                && !mIsStatusBarInteractiveSupplier.getAsBoolean()) {\n            // Consume the event to prevent any calls to #onTouchEvent on status bar view or its\n            // components, essentially making the status bar and its children completely\n            // non-interactive.\n            return true;\n        }\n        if (com.android.systemui.hecker.HeckerStatusBarPopup.onTouch(this, event)) return true;\n        return super.dispatchTouchEvent(event);\n    }\n\n    @Override\n    public boolean onTouchEvent(MotionEvent event) {",
         "    @Override\n    public boolean dispatchTouchEvent(MotionEvent event) {\n        if (mIsStatusBarInteractiveSupplier != null\n                && !mIsStatusBarInteractiveSupplier.getAsBoolean()) {\n            // Consume the event to prevent any calls to #onTouchEvent on status bar view or its\n            // components, essentially making the status bar and its children completely\n            // non-interactive.\n            return true;\n        }\n        return super.dispatchTouchEvent(event);\n    }\n\n    @Override\n    public boolean dispatchTouchEvent(MotionEvent event) {\n        if (com.android.systemui.hecker.HeckerStatusBarPopup.onTouch(this, event)) return true;\n        return super.dispatchTouchEvent(event);\n    }\n\n    @Override\n    public boolean onTouchEvent(MotionEvent event) {"
       ]
+    },
+    {
+      "old": "    protected void onAttachedToWindow() {\n        super.onAttachedToWindow();",
+      "new": "    protected void onAttachedToWindow() {\n        super.onAttachedToWindow();\n        com.android.systemui.hecker.HeckerStatusBarRows.attach(this);"
+    },
+    {
+      "old": "    protected void onDetachedFromWindow() {\n        super.onDetachedFromWindow();",
+      "new": "    protected void onDetachedFromWindow() {\n        com.android.systemui.hecker.HeckerStatusBarRows.detach(this);\n        super.onDetachedFromWindow();"
+    },
+    {
+      "old": "    // Per b/300629388, we let the PhoneStatusBarView detect onConfigurationChanged to",
+      "new": "    @Override\n    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {\n        com.android.systemui.hecker.HeckerStatusBarRows.beforeMeasure(this);\n        super.onMeasure(widthMeasureSpec, heightMeasureSpec);\n    }\n\n    @Override\n    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {\n        super.onLayout(changed, left, top, right, bottom);\n        com.android.systemui.hecker.HeckerStatusBarRows.layout(this);\n    }\n\n    @Override\n    public void onVisibilityAggregated(boolean visible) {\n        super.onVisibilityAggregated(visible);\n        com.android.systemui.hecker.HeckerStatusBarRows.visibilityChanged(this);\n    }\n\n    // Per b/300629388, we let the PhoneStatusBarView detect onConfigurationChanged to"
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/volume/VolumeDialogComponent.java": [

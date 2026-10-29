@@ -288,4 +288,36 @@
     <string name="flow_sand">沙色</string>
     <string name="flow_mint">薄荷色</string>
     <string name="flow_blue">蓝色</string>
+
+    <string name="sb_layout_title">状态栏布局</string>
+    <string name="sb_dual_title">双排状态栏</string>
+    <string name="sb_dual_summary">使用双排布局，并为应用、快捷设置和锁屏预留相应空间。紧凑元素会适配所选高度。</string>
+    <string name="sb_height_unavailable">此版本未包含内置状态栏高度。</string>
+    <string name="sb_height_title">状态栏高度</string>
+    <string name="sb_height_compact">紧凑 · 44 dp</string>
+    <string name="sb_height_balanced">均衡 · 52 dp</string>
+    <string name="sb_height_tall">加高 · 60 dp</string>
+    <string name="sb_second_row">第二排</string>
+    <string name="sb_row_notifications">通知图标和电池信息</string>
+    <string name="sb_row_lyrics">歌词专用排</string>
+    <string name="sb_row_gap">排间距</string>
+    <string name="sb_icon_size">图标大小</string>
+    <string name="sb_lyrics_title">状态栏歌词</string>
+    <string name="sb_lyrics_summary">解锁时显示当前同步歌词。单排模式与通知图标共享空间；缺失、暂停或结束时隐藏。锁屏歌词保留独立开关。</string>
+    <string name="sb_lyric_position">歌词位置</string>
+    <string name="sb_left">左侧</string>
+    <string name="sb_center">居中</string>
+    <string name="sb_right">右侧</string>
+    <string name="sb_lyric_width">歌词宽度</string>
+    <string name="sb_lyric_font">歌词字号</string>
+    <string name="sb_lyric_transition">歌词切换效果</string>
+    <string name="sb_fade">淡入淡出</string>
+    <string name="sb_scroll">滚动长歌词</string>
+    <string name="sb_no_transition">无</string>
+    <string name="sb_lyric_colour">歌词颜色</string>
+    <string name="sb_adaptive">自适应</string>
+    <string name="sb_pink">粉色</string>
+    <string name="sb_custom">自定义</string>
+    <string name="sb_custom_colour">自定义歌词颜色</string>
+    <string name="sb_invalid_colour">请输入 #RRGGBB 格式，例如 #A8D5FF。</string>
 </resources>

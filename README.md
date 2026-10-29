@@ -1,7 +1,8 @@
 # HeckerOS · Android 17
 
-This experimental `feat/living-flow-20261029` branch adds
-[Living Flow clocks, wake blur, Hecker QS and native motion](docs/living-flow.md)
+This experimental `feat/statusbar-lyrics-dual-20261029` branch adds
+[shared status-bar lyrics and optional dual rows](docs/statusbar-lyrics-dual.md)
+on top of [Living Flow clocks, wake blur, Hecker QS and native motion](docs/living-flow.md)
 alongside the existing
 [native low-brightness refresh protection and exit hysteresis](docs/floral-display-flicker.md)
 and complete `feat/settings-depth-lockscreen-20261028` feature set. It includes the
@@ -9,7 +10,7 @@ and complete `feat/settings-depth-lockscreen-20261028` feature set. It includes 
 [synchronized smoked-glass folders/icons/search, launcher toggles and default Caracal Dawn artwork](docs/launcher-glass-caracal.md),
 and [NetLab touch fixes, saved device names and automatic manufacturer enrichment](docs/netlab-ui.md)
 on top of the complete Coral root-privacy/astronaut test. Use this same branch in the
-[Coral local manifest](https://github.com/its-hecker/HeckerOs-localmanifest/tree/feat/living-flow-20261029).
+[Coral local manifest](https://github.com/its-hecker/HeckerOs-localmanifest/tree/feat/statusbar-lyrics-dual-20261029).
 [Brightness/volume percentages in both QS layouts](docs/qs-slider-percentages.md) are included.
 [Game Space](docs/game-booster.md) adds battery temperature to its floating pill,
 free shortcut movement and a launcher entry with default-on game-icon hiding.
@@ -21,11 +22,11 @@ freeze is under investigation and is not claimed fixed.
 
 Hecker's custom PixelOS-based ROM for the Google Pixel 4 XL (**coral**) and
 Google Pixel 4 (**flame**). Both products inherit the same feature sources. The
-integration branch for this Coral experiment is `feat/living-flow-20261029`;
+integration branch for this Coral experiment is `feat/statusbar-lyrics-dual-20261029`;
 the matching manifest also selects experimental device/framework branches.
-Flame's existing manifest remains unchanged pending Coral phone validation.
+The matching Flame feature manifest retains its own framework, hardware and kernel pins.
 
-For Flame, use the [dedicated local manifest](https://github.com/its-hecker/HeckerOs-Flame-localmanifest)
+For Flame, use the [dedicated local manifest](https://github.com/its-hecker/HeckerOs-Flame-localmanifest/tree/feat/statusbar-lyrics-dual-20261029)
 and [Flame build notes](docs/flame-bringup.md). Its shared hardware checkout remains
 at `device/google/coral`, with its own vendor at `vendor/google/flame`.
 
@@ -66,6 +67,8 @@ at `device/google/coral`, with its own vendor at `vendor/google/flame`.
   caps, with Stop/restore and a native watchdog. IPv6, direct local traffic and router
   protections remain outside that backend; phone validation is pending.
   See [NetLab behavior, limits and phone tests](docs/network-lab.md).
+- Optional dual status-bar rows with real native insets, and independently enabled
+  status-bar lyrics sharing LRCLIB fetching, caching and timing with the lock screen.
 - Opt-in synchronized lock-screen lyrics adapted from Infinity-X. The settings
   page discloses the LRCLIB artist/title lookup before it is enabled.
 - Offline pickers for 21 pinned Wi-Fi and battery styles under Status Bar,
@@ -88,7 +91,7 @@ optional and is not a build prerequisite.
 
 ```bash
 repo init -u https://github.com/its-hecker/HeckerOS -b main --git-lfs
-git clone -b feat/living-flow-20261029 https://github.com/its-hecker/HeckerOs-localmanifest .repo/local_manifests
+git clone -b feat/statusbar-lyrics-dual-20261029 https://github.com/its-hecker/HeckerOs-localmanifest .repo/local_manifests
 repo sync -c -j8 --fail-fast --no-clone-bundle --no-tags
 bash .repo/local_manifests/build.sh
 ```

@@ -88,6 +88,7 @@ public class ThemeEngineManagerService extends SystemService {
     private final Context mContext;
     private final BinderService mBinderService;
     private final Handler mHandler;
+    private final StatusBarHeightSync mStatusBarHeightSync;
     private final HandlerThread mHandlerThread;
 
     private final Map<String, String> mEnabledThemes = new ConcurrentHashMap<>();
@@ -136,6 +137,7 @@ public class ThemeEngineManagerService extends SystemService {
         mHandlerThread = new HandlerThread("ThemeEngineManagerService");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
+        mStatusBarHeightSync = new StatusBarHeightSync(context);
 
         mBitmapCache = new LruCache<String, Bitmap>(BITMAP_CACHE_SIZE) {
             @Override
@@ -166,6 +168,23 @@ public class ThemeEngineManagerService extends SystemService {
                     Settings.Secure.getUriFor(SETTINGS_THEME_ENGINE_DATA),
                     false, mSettingsObserver, UserHandle.USER_ALL);
 
+            ContentObserver statusBarHeight = new ContentObserver(mHandler) {
+                @Override public void onChange(boolean selfChange) {
+                    mStatusBarHeightSync.sync(mUserId);
+                }
+            };
+            for (String key : new String[]{"hecker_dual_statusbar", "hecker_dual_statusbar_height"})
+                mContext.getContentResolver().registerContentObserver(
+                        Settings.Secure.getUriFor(key), false, statusBarHeight, UserHandle.USER_ALL);
+            IntentFilter heightOverlays = new IntentFilter(Intent.ACTION_OVERLAY_CHANGED);
+            heightOverlays.addDataScheme("package");
+            heightOverlays.addDataSchemeSpecificPart("android", android.os.PatternMatcher.PATTERN_LITERAL);
+            mContext.registerReceiverAsUser(new BroadcastReceiver() {
+                @Override public void onReceive(Context context, Intent intent) {
+                    mStatusBarHeightSync.sync(mUserId);
+                }
+            }, UserHandle.ALL, heightOverlays, null, mHandler);
+            mHandler.post(() -> mStatusBarHeightSync.sync(mUserId));
             loadThemeConfig();
 
             mLastUiMode = mContext.getResources().getConfiguration().uiMode
@@ -206,6 +225,7 @@ public class ThemeEngineManagerService extends SystemService {
     public void onUserSwitching(TargetUser from, TargetUser to) {
         mHandler.removeCallbacks(mPersistPerAppRunnable);
         mUserId = to.getUserIdentifier();
+        mHandler.post(() -> mStatusBarHeightSync.sync(mUserId));
         notifyThemeChangedInternal(null);
     }
 

@@ -36,19 +36,24 @@ fun HeckerLockscreenLyrics(context: Context,
     statusBarState: com.android.systemui.plugins.statusbar.StatusBarStateController,
     modifier: Modifier = Modifier) {
     var dozing by remember(statusBarState) { mutableStateOf(statusBarState.isDozing) }
+    var keyguard by remember(statusBarState) { mutableStateOf(statusBarState.state != 0) }
     DisposableEffect(statusBarState) {
         val callback = object : com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener {
             override fun onDozingChanged(value: Boolean) { dozing = value }
+            override fun onStateChanged(value: Int) { keyguard = value != 0 }
         }
         statusBarState.addCallback(callback)
         onDispose { statusBarState.removeCallback(callback) }
     }
     var snapshot by remember { mutableStateOf<LyricsController.Snapshot?>(null) }
     var active by remember { mutableStateOf(-1) }
+    var subscription by remember { mutableStateOf<LyricsController?>(null) }
     DisposableEffect(context) {
-        val controller = LyricsController(context) { snapshot = it }
+        val controller = LyricsController(context, LyricsController.LOCKSCREEN, keyguard) { snapshot = it }
+        subscription = controller
         onDispose { controller.close() }
     }
+    LaunchedEffect(subscription, keyguard) { subscription?.setVisible(keyguard) }
     LaunchedEffect(snapshot, dozing) {
         val state = snapshot ?: return@LaunchedEffect
         do {
@@ -58,6 +63,7 @@ fun HeckerLockscreenLyrics(context: Context,
         } while (isActive)
     }
     val state = snapshot ?: return
+    if (!keyguard) return
     if (active !in state.lines.indices) return
     Column(
         modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 10.dp),

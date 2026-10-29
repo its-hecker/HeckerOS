@@ -140,5 +140,9 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerSliderValues.java": "framework/qs/HeckerSliderValues.java",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerLivingFlow.kt": "framework/qs/HeckerLivingFlow.kt",
   "frameworks/base/packages/SystemUI/src/org/hecker/motion/FlowClockRenderer.java": "aosp-launcher/src/org/hecker/motion/FlowClockRenderer.java",
-  "frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/transition/HeckerFlowWindowAnimation.java": "framework/motion/HeckerFlowWindowAnimation.java"
+  "frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/transition/HeckerFlowWindowAnimation.java": "framework/motion/HeckerFlowWindowAnimation.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/StatusBarRowsPolicy.java": "framework/statusbar/StatusBarRowsPolicy.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerStatusBarRows.java": "framework/statusbar/HeckerStatusBarRows.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/StatusBarLyricsPolicy.java": "framework/lyrics/StatusBarLyricsPolicy.java",
+  "frameworks/base/services/core/java/com/android/server/theme/StatusBarHeightSync.java": "framework/themes/StatusBarHeightSync.java"
 }

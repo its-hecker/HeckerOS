@@ -1,9 +1,11 @@
 {
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/LyricsController.java": [
-    "19d7f073e40903d5d81ce208a490772f29bc84bc"
+    "19d7f073e40903d5d81ce208a490772f29bc84bc",
+    "d01bb56fad0712f03049746fe8eacb956d515aa8"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerLockscreenLyrics.kt": [
-    "191e12def55cc7967f3e09efad53bce28d54850b"
+    "191e12def55cc7967f3e09efad53bce28d54850b",
+    "e37860cfc09ac857d8f049f6ab0e336c0581791d"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/LyricsPolicy.java": [
     "2433e96772ed18fe4b9666846e49f16c44715b9b"
@@ -51,7 +53,8 @@
     "92c50c5e65bdd9547c743d6dd987c8e932835941"
   ],
   "frameworks/base/services/core/java/com/android/server/theme/ThemeEngineManagerService.java": [
-    "98f55684b508bbb90485a4db8d6af1e7f040c357"
+    "98f55684b508bbb90485a4db8d6af1e7f040c357",
+    "9b5712f0cd78eaf293c8a232257f9fc52915459c"
   ],
   "frameworks/base/core/java/android/content/res/IThemeEngineManager.aidl": [
     "77d4a4ec040b7dc0b8e754e84da3898dc549e595"

@@ -185,7 +185,9 @@
         "tests/hecker/test_root_visibility.py",
         "services/core/java/com/android/server/display/mode/DisplayModeDirector.java",
         "services/core/java/com/android/server/display/mode/LowZoneBrightnessHysteresis.java",
-        "core/res/res/values/symbols.xml"
+        "core/res/res/values/symbols.xml",
+        "packages/SystemUI/src/com/android/systemui/statusbar/window/StatusBarWindowControllerImpl.java",
+        "core/java/com/android/internal/policy/SystemBarUtils.java"
       ]
     },
     "hardware/google/camera": {
@@ -245,8 +247,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "feat/living-flow-20261029",
-    "integration_branch": "feat/living-flow-20261029",
+    "source_branch": "feat/statusbar-lyrics-dual-20261029",
+    "integration_branch": "feat/statusbar-lyrics-dual-20261029",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required",
@@ -375,5 +377,22 @@
     "coral": "Display-only entry 74, protected 90 Hz, four raw steps of exit hysteresis.",
     "flame": "Shared overlay prepared with entry 16/protected 60 Hz; Flame manifest unchanged pending Coral validation.",
     "validation": "1372 host checks of the real native constructor, nine observer methods and helper; AAPT2 framework/internal symbol/device resources pass. Full system-server/ROM builds and physical display acceptance remain pending."
+  },
+  "statusbar_rows_test": {
+    "branch": "feat/statusbar-lyrics-dual-20261029",
+    "parent_suite_revision": "65f42ab27da9ce25fde3e1bb8862879cd78814f9",
+    "devices": [
+      "flame",
+      "coral"
+    ],
+    "lyrics": "Shared LRCLIB worker/cache/media state with independent per-user lock and status subscriptions; status subscription remains active while unlocked.",
+    "heights_dp": [
+      44,
+      52,
+      60
+    ],
+    "insets": "Built-in signed framework RROs; native theme service mirrors the foreground choice into system-user resources without rewriting preferences.",
+    "flame_framework_revision": "854e6dbf73ae1cd61095085a9655c8d9136104eb",
+    "validation": "Source, SDK, native-adapter and host checks; full Soong/ROM builds and both phones remain required."
   }
 }

@@ -67,4 +67,36 @@
     <string name="flow_sand">Sand</string>
     <string name="flow_mint">Mint</string>
     <string name="flow_blue">Blue</string>
+
+    <string name="sb_layout_title">Status bar layout</string>
+    <string name="sb_dual_title">Dual status bar</string>
+    <string name="sb_dual_summary">Use two rows and reserve matching space for apps, Quick Settings and the lock screen. Compact elements are fitted to the selected height.</string>
+    <string name="sb_height_unavailable">The built-in row heights are unavailable in this build.</string>
+    <string name="sb_height_title">Status bar height</string>
+    <string name="sb_height_compact">Compact · 44 dp</string>
+    <string name="sb_height_balanced">Balanced · 52 dp</string>
+    <string name="sb_height_tall">Tall · 60 dp</string>
+    <string name="sb_second_row">Second row</string>
+    <string name="sb_row_notifications">Notifications and battery information</string>
+    <string name="sb_row_lyrics">Dedicated lyrics row</string>
+    <string name="sb_row_gap">Row spacing</string>
+    <string name="sb_icon_size">Icon size</string>
+    <string name="sb_lyrics_title">Status bar lyrics</string>
+    <string name="sb_lyrics_summary">Show the current synchronized line while unlocked. A single row shares available space with notification icons. Missing, paused or finished lyrics are hidden. Lock-screen lyrics keep their own switch.</string>
+    <string name="sb_lyric_position">Lyric position</string>
+    <string name="sb_left">Left</string>
+    <string name="sb_center">Centre</string>
+    <string name="sb_right">Right</string>
+    <string name="sb_lyric_width">Lyric width</string>
+    <string name="sb_lyric_font">Lyric font size</string>
+    <string name="sb_lyric_transition">Line transition</string>
+    <string name="sb_fade">Fade</string>
+    <string name="sb_scroll">Scroll long lines</string>
+    <string name="sb_no_transition">None</string>
+    <string name="sb_lyric_colour">Lyric colour</string>
+    <string name="sb_adaptive">Adaptive</string>
+    <string name="sb_pink">Pink</string>
+    <string name="sb_custom">Custom</string>
+    <string name="sb_custom_colour">Custom lyric colour</string>
+    <string name="sb_invalid_colour">Use #RRGGBB, for example #A8D5FF.</string>
 </resources>

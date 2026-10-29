@@ -361,6 +361,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cache', type=Path, default=ROOT / 'out/native-source-cache')
     parser.add_argument('--offline', action='store_true')
+    parser.add_argument('--framework-revision', help='Validate another manifest-pinned framework commit (for Flame)')
     parser.add_argument('--upgrade-from', type=Path,
                         help='Also exercise upgrading a checkout prepared by this older Suite source')
     parser.add_argument('--launcher-source', type=Path,
@@ -372,6 +373,9 @@ def main():
     args = parser.parse_args()
     revisions = json.loads((ROOT / 'integration/source-revisions.json').read_text())
     sources = dict(revisions['pixelos_inputs'])
+    if args.framework_revision:
+        if not re.fullmatch(r'[0-9a-f]{40}',args.framework_revision): raise SystemExit('Expected immutable framework commit')
+        sources['frameworks/base'] = dict(sources['frameworks/base'],revision=args.framework_revision)
     sources['device/google/coral'] = revisions['hardware_sources']['device']
     git_sources = {}
     def git_source(origin):
@@ -395,6 +399,8 @@ def main():
         git_sources[revision] = folder
         return folder
     paths = set(json.loads((ROOT / 'framework/customization-patches.json').read_text()))
+    from check_statusbar_rows import WINDOW as STATUS_WINDOW, UTILS as STATUS_UTILS, PHONE as STATUS_PHONE
+    paths.update([STATUS_WINDOW, STATUS_UTILS])
     paths.update(PIN_INPUTS)
     paths.update(INTERACTION_INPUTS)
     paths.add('frameworks/base/core/java/android/view/WindowManager.java')
@@ -518,11 +524,15 @@ def main():
             check_clock_plugins(folder, args.sdk_cache.resolve())
             check_pin_bouncer(folder, args.kotlin_cache.resolve())
             check_statusbar_dispatch(folder, args.kotlin_cache.resolve())
+            from check_statusbar_rows import check_native_insets, check_overlays, hook_probe
+            hook_probe((folder / STATUS_PHONE).read_text())
+            check_native_insets(folder)
+            check_overlays(args.sdk_cache.resolve())
         for plan in reversed(plans):
             write(plan(folder, replace_guarded, True))
         assert before == snapshot(folder), 'Revert changed upstream content'
     print(f'{len(paths)} immutable upstream files checked; {count} source adapters/copies apply idempotently and revert exactly.')
-    print('Full Android/Soong compilation and coral testing are still required.')
+    print('Full Android/Soong compilation and phone testing are still required.')
 
 
 if __name__ == '__main__':
