@@ -85,8 +85,8 @@ public class MediaSessionManager {
 }''',
     'com/android/systemui/plugins/statusbar/StatusBarStateController.java': '''package com.android.systemui.plugins.statusbar;
 public interface StatusBarStateController {
- boolean isDozing(); int getState(); void addCallback(StateListener listener); void removeCallback(StateListener listener);
- interface StateListener { default void onDozingChanged(boolean dozing) {} default void onStateChanged(int state) {} }
+ boolean isDozing(); float getDozeAmount(); int getState(); void addCallback(StateListener listener); void removeCallback(StateListener listener);
+ interface StateListener { default void onDozingChanged(boolean dozing) {} default void onStateChanged(int state) {} default void onDozeAmountChanged(float linear,float eased) {} }
 }''',
     'com/android/systemui/plugins/ActivityStarter.java': '''package com.android.systemui.plugins;
 public interface ActivityStarter { void postStartActivityDismissingKeyguard(android.content.Intent intent,int delay); }
@@ -283,6 +283,7 @@ object ComposeInitializer {
         java_sources += sorted((ROOT / 'framework/lyrics').glob('*.java'))
         java_sources += sorted((ROOT / 'framework/ambient').glob('*.java'))
         java_sources += sorted((ROOT / 'framework/lockscreen').glob('*.java'))
+        java_sources += sorted((ROOT / 'aosp-launcher/src/org/hecker/motion').glob('*.java'))
         java_sources += [ROOT / 'framework/themes/ThemeIconNames.java', ROOT / 'framework/applock/HeckerAppLockPrompt.java']
         run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', sdk / 'android-system.jar',
             '-d', out / 'classes', *java_sources)

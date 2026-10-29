@@ -13,6 +13,14 @@ public final class AnimationSettingsActivity extends Activity {
     private static final String[] KEYS={Settings.Global.WINDOW_ANIMATION_SCALE,Settings.Global.TRANSITION_ANIMATION_SCALE,Settings.Global.ANIMATOR_DURATION_SCALE};
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);LinearLayout page=Ui.page(this,R.string.animations_title);
+        Switch flow=new Switch(this);flow.setText(R.string.living_flow_title);
+        flow.setChecked(Settings.Secure.getInt(getContentResolver(),"hecker_living_flow",1)!=0);
+        flow.setOnClickListener(v->{
+            try { if(!Settings.Secure.putInt(getContentResolver(),"hecker_living_flow",flow.isChecked()?1:0))
+                flow.setChecked(!flow.isChecked()); }
+            catch(SecurityException unavailable){flow.setChecked(!flow.isChecked());}
+        });page.addView(flow);
+        page.addView(Ui.text(this,getString(R.string.living_flow_summary),14,false));
         Switch lottie=new Switch(this);lottie.setText(R.string.animations_lottie);
         lottie.setChecked(Settings.Secure.getInt(getContentResolver(),"hecker_lottie_enabled",1)==1);
         lottie.setOnCheckedChangeListener((button,checked)->Settings.Secure.putInt(getContentResolver(),"hecker_lottie_enabled",checked?1:0));page.addView(lottie);

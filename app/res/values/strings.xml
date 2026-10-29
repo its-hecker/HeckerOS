@@ -50,4 +50,21 @@
     <string name="hecker_launcher_native_settings">Home screen settings, notification dots and double tap to sleep</string>
     <string name="launcher_native_home_summary">Choose Hecker Launcher, Pixel Launcher or another installed home app</string>
     <string name="launcher_pixel_retained">Pixel Launcher stays installed and handles Recents and system gestures.</string>
+
+    <string name="living_flow_title">Living Flow animations</string>
+    <string name="living_flow_summary">Continuous clock, wake and control animations. Respects Battery Saver and the system animation scale.</string>
+    <string name="lock_clock_living_tall">Living · tall</string>
+    <string name="lock_clock_living_wide">Living · horizontal</string>
+    <string name="lock_clock_living_bold">Living · bold</string>
+    <string name="lock_clock_living_help">A matching live clock on AOD, Lock screen and Home. Size, position and colour apply to the living styles; placement stays inside the native clock area.</string>
+    <string name="lock_clock_size">Clock size</string>
+    <string name="lock_clock_horizontal">Horizontal position</string>
+    <string name="lock_clock_vertical">Vertical position</string>
+    <string name="lock_clock_home">Match clock on Home</string>
+    <string name="lock_clock_home_help">Use the selected living clock in Hecker Launcher’s built-in Home clock.</string>
+    <string name="flow_white">White</string>
+    <string name="flow_lilac">Lilac</string>
+    <string name="flow_sand">Sand</string>
+    <string name="flow_mint">Mint</string>
+    <string name="flow_blue">Blue</string>
 </resources>

@@ -6,6 +6,7 @@ cd "$suite_root"
 python3 tools/check_source.py
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 tools/check_netlab_native.py
+python3 tools/check_flow_windows.py
 suite_test_output="$(mktemp -d)"
 trap 'rm -rf -- "$suite_test_output"' EXIT
 java -m jdk.compiler/com.sun.tools.javac.Main -d "$suite_test_output" \

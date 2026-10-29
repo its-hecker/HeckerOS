@@ -45,7 +45,15 @@ public final class LockScreenSettingsActivity extends Activity {
         toggle(clock, R.string.custom_clock_title, R.string.custom_clock_summary,
                 "hecker_custom_lockscreen_clock", 0);
         choices(clock, "hecker_lockscreen_clock_style", 0,
-                new int[]{R.string.lock_clock_geometric, R.string.lock_clock_word, R.string.lock_clock_tall});
+                new int[]{R.string.lock_clock_geometric, R.string.lock_clock_word, R.string.lock_clock_tall,
+                        R.string.lock_clock_living_tall, R.string.lock_clock_living_wide, R.string.lock_clock_living_bold});
+        clock.addView(Ui.text(this, getString(R.string.lock_clock_living_help), 14, false));
+        range(clock, R.string.lock_clock_size, "hecker_lockscreen_clock_scale", 70, 110, 100);
+        range(clock, R.string.lock_clock_horizontal, "hecker_lockscreen_clock_x", -100, 100, 0);
+        range(clock, R.string.lock_clock_vertical, "hecker_lockscreen_clock_y", -100, 100, 0);
+        choices(clock, "hecker_lockscreen_clock_color", 0,
+                new int[]{R.string.flow_white, R.string.flow_lilac, R.string.flow_sand, R.string.flow_mint, R.string.flow_blue});
+        toggle(clock, R.string.lock_clock_home, R.string.lock_clock_home_help, "hecker_living_clock_home", 1);
         android.widget.SeekBar opacity = new android.widget.SeekBar(this); opacity.setMin(15); opacity.setMax(100);
         opacity.setProgress(Settings.Secure.getInt(getContentResolver(), "hecker_lockscreen_clock_opacity", 76));
         clock.addView(Ui.text(this, getString(R.string.lock_clock_opacity), 16, true));
@@ -96,6 +104,25 @@ public final class LockScreenSettingsActivity extends Activity {
         if (imported) { imported = false; recreate(); }
     }
     private boolean imported;
+    private void range(LinearLayout card, int title, String key, int min, int max, int fallback) {
+        android.widget.TextView label = Ui.text(this, getString(title), 16, true);
+        card.addView(label);
+        android.widget.SeekBar slider = new android.widget.SeekBar(this);
+        slider.setMax(max - min);
+        slider.setProgress(Math.max(min, Math.min(max, Settings.Secure.getInt(getContentResolver(), key, fallback))) - min);
+        slider.setContentDescription(getString(title));
+        slider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+            public void onStartTrackingTouch(android.widget.SeekBar bar) { }
+            public void onStopTrackingTouch(android.widget.SeekBar bar) { }
+            public void onProgressChanged(android.widget.SeekBar bar, int value, boolean user) {
+                int selected = value + min;
+                label.setText(getString(title) + " · " + selected);
+                if (user && !put(key, selected)) bar.setProgress(
+                        Settings.Secure.getInt(getContentResolver(), key, fallback) - min);
+            }
+        });
+        card.addView(slider);
+    }
     private void toggle(LinearLayout card, int title, int summary, String key, int fallback) {
         Switch button = new Switch(this);
         button.setText(title); button.setTextColor(getColor(R.color.hecker_foreground));

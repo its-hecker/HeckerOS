@@ -105,7 +105,7 @@ for(int w:new int[]{320,720,1440})for(int h:new int[]{400,1520,3040})for(int i=0
  float[] lock=com.android.systemui.hecker.DepthWallpaperGeometry.crop(800,1600,w,h,reveal,false);
  for(int n=0;n<3;n++)check(Math.abs(home[n]-lock[n])<.0001f);
 }
-Context c=new Context();c.resolver.values.put("hecker_depth_wallpaper_id",id);c.resolver.values.put("hecker_home_depth_wallpaper","1");c.resolver.values.put("hecker_home_depth_wallpaper_wallpaper_id","51");
+Context c=new Context();c.resolver.values.put("hecker_living_flow","0");c.resolver.values.put("hecker_depth_wallpaper_id",id);c.resolver.values.put("hecker_home_depth_wallpaper","1");c.resolver.values.put("hecker_home_depth_wallpaper_wallpaper_id","51");
 View root=new View(c);check(draw(root).layers.isEmpty());settle();Canvas bg=draw(root);check(bg.layers.equals(List.of(0,1)));check(Arrays.equals(bg.bounds.get(0),bg.bounds.get(1)));
 check(ValueAnimator.active.size()==1&&ValueAnimator.active.get(0).duration==750);
 View clock=new View(c);clock.parent=root;clock.x=18;clock.y=80;clock.width=600;clock.height=220;Canvas fg=new Canvas();HeckerHomeDepth.foreground(clock,fg);
@@ -122,6 +122,8 @@ c.resolver.available=true;android.graphics.BitmapFactory.oversized=true;c.send(I
 c.resolver.onOpen=()->c.wallpaper.id=52;c.send(Intent.ACTION_USER_UNLOCKED);settle();check(draw(root).layers.isEmpty());c.wallpaper.id=51;
 c.power.save=true;c.send(Intent.ACTION_USER_UNLOCKED);settle();check(ValueAnimator.active.isEmpty()&&draw(root).layers.size()==2);
 c.power.save=false;c.keyguard.locked=true;c.send(Intent.ACTION_SCREEN_ON);check(ValueAnimator.active.isEmpty());c.keyguard.locked=false;c.send(Intent.ACTION_USER_PRESENT);check(ValueAnimator.active.size()==1);
+ValueAnimator.finish();c.resolver.values.put("hecker_living_flow","1");c.send(Intent.ACTION_USER_PRESENT);
+check(ValueAnimator.active.isEmpty());bg=draw(root);check(Math.abs(bg.bounds.get(0)[0]-finalCrop[1])<.001f);c.resolver.values.put("hecker_living_flow","0");
 c.power.interactive=false;c.send(Intent.ACTION_SCREEN_OFF);check(ValueAnimator.active.isEmpty());c.power.interactive=true;ValueAnimator.enabled=false;c.send(Intent.ACTION_USER_PRESENT);check(ValueAnimator.active.isEmpty());ValueAnimator.enabled=true;
 c.prefs.put(HeckerStudio.PREFIX+"home_depth_wake",false);settle();check(ValueAnimator.active.isEmpty());
 root.detach();check(c.resolver.observers.isEmpty()&&c.receivers.isEmpty()&&c.prefs.listeners.isEmpty());check(draw(root).layers.isEmpty());

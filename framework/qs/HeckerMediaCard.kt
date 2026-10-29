@@ -62,12 +62,13 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
         } while (isActive)
     }
     val art = state?.artwork
+    val flow = LocalHeckerFlowGlass.current
     val shape = RoundedCornerShape(if (square) 30.dp else 28.dp)
-    Box(modifier.fillMaxWidth().clip(shape).background(Color(0xCC173C50))
+    Box(modifier.fillMaxWidth().clip(shape).background(if (flow) Color.White.copy(alpha = .10f) else Color(0xCC173C50))
         .border(1.dp, Color.White.copy(alpha = .16f), shape)) {
         if (art != null) Image(art.asImageBitmap(), null, contentScale = ContentScale.Crop,
             modifier = Modifier.matchParentSize().blur(32.dp))
-        Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(Color(0x9C213D55), Color(0xDC0A2639)))))
+        Box(Modifier.matchParentSize().background(Brush.verticalGradient(if (flow) listOf(Color(0x18282838), Color(0x78201B2D)) else listOf(Color(0x9C213D55), Color(0xDC0A2639)))))
         Column(Modifier.fillMaxWidth().padding(horizontal = if (square) 12.dp else 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(if (square) 8.dp else 4.dp)) {
             if (square) {

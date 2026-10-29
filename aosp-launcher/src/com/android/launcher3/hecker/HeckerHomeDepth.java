@@ -94,6 +94,9 @@ public final class HeckerHomeDepth {
         }
         void reveal(){
             settle();if(pair==null||!canAnimate())return;
+            // Keyguard already finished the aligned wake crop. Re-starting a zoom here jumps
+            // the subject edge at the unlock handoff; Living Flow keeps that final crop.
+            if(Settings.Secure.getInt(context.getContentResolver(),"hecker_living_flow",1)!=0)return;
             progress=0;animator=ValueAnimator.ofFloat(0,1);animator.setDuration(750);
             animator.setInterpolator(new PathInterpolator(.4f,0,.2f,1));
             animator.addUpdateListener(a->{progress=(float)a.getAnimatedValue();invalidate();});animator.start();

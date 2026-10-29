@@ -8,11 +8,10 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas as NativeCanvas
 import android.graphics.Paint
 import android.graphics.RectF
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import android.net.Uri
 import android.os.UserHandle
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -21,6 +20,10 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.graphicsLayer
+import org.hecker.motion.FlowClockRenderer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -38,10 +41,14 @@ internal object HeckerDepthScene {
     var reveal by mutableFloatStateOf(1f)
     private var cache: DepthPair? = null
     private val loadMutex = Mutex()
+    private val imagePaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+    private val maskPaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
+        xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OUT)
+    }
 
     @Composable
     private fun pair(context: Context, state: HeckerAmbientCharging.State): DepthPair? {
-        if (!state.depth || !state.customClock || state.clockStyle != 2 ||
+        if (!state.depth || !state.customClock || !FlowClockRenderer.supportsDepth(state.clockStyle) ||
                 !DepthWallpaperGeometry.validIdentity(state.depthId)) return null
         val id = state.depthId ?: return null
         val image by produceState<DepthPair?>(null, state.user, id, state.wakeGeneration) {
@@ -71,13 +78,13 @@ internal object HeckerDepthScene {
     }
 
     private fun draw(canvas: NativeCanvas, image: Bitmap, viewport: DepthViewport,
-            reveal: Float, foreground: Boolean) {
+            reveal: Float, foreground: Boolean, mask: Boolean = false) {
         if (viewport.width <= 0 || viewport.height <= 0) return
         val transform = DepthWallpaperGeometry.crop(image.width, image.height,
             viewport.width, viewport.height, reveal, foreground)
         val rectangle = RectF(transform[1], transform[2], transform[1] + image.width * transform[0],
             transform[2] + image.height * transform[0])
-        canvas.drawBitmap(image, null, rectangle, Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG))
+        canvas.drawBitmap(image, null, rectangle, if (mask) maskPaint else imagePaint)
     }
 
     @Composable
@@ -87,7 +94,7 @@ internal object HeckerDepthScene {
         val fraction = reveal
         return { canvas, origin ->
             canvas.save(); canvas.translate(bounds.origin.x - origin.x, bounds.origin.y - origin.y)
-            draw(canvas, image.front, bounds, fraction, true)
+            draw(canvas, image.front, bounds, fraction, true, mask = true)
             canvas.restore()
         }
     }
@@ -96,28 +103,26 @@ internal object HeckerDepthScene {
     fun backdrop(context: Context, controller: StatusBarStateController, modifier: Modifier) {
         DisposableEffect(context) { HeckerAmbientCharging.start(context); onDispose {} }
         val state by HeckerAmbientCharging.state.collectAsState()
-        var dozing by remember(controller) { mutableStateOf(controller.isDozing) }
         var status by remember(controller) { mutableIntStateOf(controller.state) }
         DisposableEffect(controller) {
             val listener = object : StatusBarStateController.StateListener {
-                override fun onDozingChanged(value: Boolean) { dozing = value }
                 override fun onStateChanged(value: Int) { status = value }
             }
             controller.addCallback(listener)
             onDispose { controller.removeCallback(listener) }
         }
         val image = pair(context, state)
-        val awake = state.screenAwake && !dozing && status == 1
-        LaunchedEffect(awake, state.wakeGeneration, state.depthWake, state.powerSave, image?.id) {
-            reveal = 1f
-            if (awake && image != null && state.depthWake && !state.powerSave && ValueAnimator.areAnimatorsEnabled()) {
-                reveal = 0f
-                animate(0f, 1f, animationSpec = tween(750, easing = FastOutSlowInEasing)) { value, _ -> reveal = value }
-            }
-        }
-        if (!awake || image == null) return
+        val awakeFraction = heckerAwakeFraction(controller)
+        // Clock, subject crop, opacity and blur all follow the same reversible native doze frames.
+        // Depth opt-out and reduced motion settle immediately; AOD never draws a wallpaper.
+        val animated = state.flow && state.depthWake && !state.powerSave && ValueAnimator.areAnimatorsEnabled()
+        reveal = if (animated) awakeFraction else 1f
+        if (status != 1 || image == null || awakeFraction <= 0f) return
         val fraction = reveal
-        Canvas(modifier.fillMaxSize().clipToBounds().onGloballyPositioned {
+        val blur = if (animated && awakeFraction < 1f) (1f - awakeFraction) * 18f else 0f
+        val effect = remember(blur) { if (blur > .1f) BlurEffect(blur, blur, TileMode.Clamp) else null }
+        Canvas(modifier.fillMaxSize().graphicsLayer { alpha = awakeFraction; renderEffect = effect }
+            .clipToBounds().onGloballyPositioned {
             viewport = DepthViewport(it.positionInRoot(), it.size.width.toFloat(), it.size.height.toFloat())
         }) {
             val bounds = DepthViewport(Offset.Zero, size.width, size.height)

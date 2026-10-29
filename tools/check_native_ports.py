@@ -361,6 +361,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cache', type=Path, default=ROOT / 'out/native-source-cache')
     parser.add_argument('--offline', action='store_true')
+    parser.add_argument('--upgrade-from', type=Path,
+                        help='Also exercise upgrading a checkout prepared by this older Suite source')
     parser.add_argument('--launcher-source', type=Path,
                         help='Read the pinned commit directly from an existing launcher Git checkout')
     parser.add_argument('--sdk-cache', type=Path,
@@ -452,6 +454,15 @@ def main():
         print('Suite, NetLab and Launcher additions have system_ext allowlist decisions for '
               + str(sum(map(len, required.values()))) + ' privileged permission requests in the pinned framework')
         plans = (customization_plan, aosp_launcher_plan)
+        if args.upgrade_from:
+            from unittest.mock import patch
+            older = args.upgrade_from.resolve()
+            if not (older / 'framework/customization-copies.json').is_file():
+                raise SystemExit('Missing older Suite source: ' + str(older))
+            with patch('customization_port.ROOT', older), patch('aosp_launcher_port.ROOT', older):
+                for plan in plans:
+                    write(plan(folder, replace_guarded))
+            print('Prepared the older Suite adapters for upgrade: ' + str(older))
         count = 0
         for plan in plans:
             changes = plan(folder, replace_guarded)

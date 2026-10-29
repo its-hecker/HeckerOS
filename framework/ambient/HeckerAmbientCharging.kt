@@ -38,6 +38,7 @@ object HeckerAmbientCharging {
     const val DEPTH = "hecker_depth_wallpaper"
     const val DEPTH_ID = "hecker_depth_wallpaper_id"
     const val DEPTH_WAKE = "hecker_depth_wallpaper_wake"
+    const val FLOW = "hecker_living_flow"
     const val ANIMATION = "hecker_charging_animation"
     const val ART = "hecker_charging_animation_style"
     data class State(
@@ -51,6 +52,8 @@ object HeckerAmbientCharging {
         val clockStyle: Int = 0, val clockOpacity: Int = 76, val depth: Boolean = false, val depthId: String? = null,
         val depthWake: Boolean = true, val user: Int = -1, val screenAwake: Boolean = true,
         val powerSave: Boolean = false, val wakeGeneration: Long = 0,
+        val flow: Boolean = true, val clockScale: Int = 100, val clockX: Int = 0,
+        val clockY: Int = 0, val clockColor: Int = 0,
     )
     private val mutable = MutableStateFlow(State())
     val state: StateFlow<State> = mutable
@@ -76,7 +79,9 @@ object HeckerAmbientCharging {
             override fun onChange(selfChange: Boolean) { readSettings(); reconcileDoze() }
         }
         for (key in arrayOf(ROUTE, AOD_ROUTE, "doze_always_on", STYLE, CLOCK, ANIMATION, ART,
-                CLOCK_STYLE, CLOCK_OPACITY, DEPTH, DEPTH_ID, DEPTH_WAKE, DEPTH_WALLPAPER_ID)) {
+                CLOCK_STYLE, CLOCK_OPACITY, DEPTH, DEPTH_ID, DEPTH_WAKE, DEPTH_WALLPAPER_ID,
+                FLOW, "hecker_lockscreen_clock_scale", "hecker_lockscreen_clock_x",
+                "hecker_lockscreen_clock_y", "hecker_lockscreen_clock_color")) {
             c.contentResolver.registerContentObserver(Settings.Secure.getUriFor(key), false,
                 observer, UserHandle.USER_ALL)
         }
@@ -132,7 +137,12 @@ object HeckerAmbientCharging {
         val next = previous.copy(ambient = route,
             style = value(STYLE, 1).coerceIn(0, 2), customClock = value(CLOCK, 0) != 0,
             animation = value(ANIMATION, 1) != 0, art = value(ART, 0).coerceIn(0, 2),
-            clockStyle = value(CLOCK_STYLE, 0).coerceIn(0, 2),
+            clockStyle = value(CLOCK_STYLE, 0).coerceIn(0, 5),
+            flow = value(FLOW, 1) != 0,
+            clockScale = value("hecker_lockscreen_clock_scale", 100).coerceIn(70, 110),
+            clockX = value("hecker_lockscreen_clock_x", 0).coerceIn(-100, 100),
+            clockY = value("hecker_lockscreen_clock_y", 0).coerceIn(-100, 100),
+            clockColor = value("hecker_lockscreen_clock_color", 0).coerceIn(0, 4),
             clockOpacity = value(CLOCK_OPACITY, 76).coerceIn(15, 100), depth = depthEnabled,
             depthId = Settings.Secure.getStringForUser(c.contentResolver, DEPTH_ID, UserHandle.USER_CURRENT),
             depthWake = value(DEPTH_WAKE, 1) != 0, user = currentUser,

@@ -245,8 +245,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "test/floral-low-brightness-flicker-20261029",
-    "integration_branch": "test/floral-low-brightness-flicker-20261029",
+    "source_branch": "feat/living-flow-20261029",
+    "integration_branch": "feat/living-flow-20261029",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required",

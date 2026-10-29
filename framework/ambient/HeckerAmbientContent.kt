@@ -29,6 +29,7 @@ import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import org.hecker.motion.FlowClockRenderer
 
 @Composable
 private fun dozing(controller: StatusBarStateController): Boolean {
@@ -121,7 +122,9 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
     val clock = clockText(context)
     val renderer = remember(context) { HeckerAmbientRenderer(context) }
     val reference = remember { HeckerLockscreenClockRenderer() }
+    val living = remember { FlowClockRenderer() }
     val ambient = dozing(controller)
+    val awake = heckerAwakeFraction(controller)
     var onKeyguard by remember(controller) { mutableStateOf(controller.state == 1) }
     DisposableEffect(controller) {
         val listener = object : StatusBarStateController.StateListener {
@@ -130,7 +133,8 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
         controller.addCallback(listener)
         onDispose { controller.removeCallback(listener) }
     }
-    val style = if (ambient) 0 else state.clockStyle
+    // Keep one selected clock throughout doze: swapping renderers caused the old wake jump.
+    val style = if (ambient && state.clockStyle < 2) 0 else state.clockStyle
     val parts = clock.first.split(':')
     val hour = parts[0].toIntOrNull() ?: 0
     val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
@@ -143,26 +147,31 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
         }
     }
     var origin by remember { mutableStateOf(Offset.Zero) }
-    val foreground = if (style == 2) HeckerDepthScene.foreground(context, state) else null
-    val reveal = if (foreground == null) 1f else HeckerDepthScene.reveal
+    val foreground = if (FlowClockRenderer.supportsDepth(style)) HeckerDepthScene.foreground(context, state) else null
     val height = if (small) { if (style == 1) 218.dp else 136.dp }
-        else when (style) { 1 -> 310.dp; 2 -> 480.dp; else -> 184.dp }
+        else when (style) { 1 -> 310.dp; 2, 3, 5 -> 480.dp; 4 -> 240.dp; else -> 184.dp }
     Canvas(modifier.fillMaxWidth().height(height).clipToBounds()
         .onGloballyPositioned { origin = it.positionInRoot() }
         .semantics { contentDescription = clock.first + " " + clock.second }) {
         drawIntoCanvas { canvas ->
             val c = canvas.nativeCanvas
+            // Mask the clock with the subject alpha. This reveals the one background scene
+            // without painting a second, differently faded/blurred subject over the digits.
+            val layer = if (foreground != null && awake > 0f) c.saveLayer(0f, 0f, size.width, size.height, null) else c.save()
             c.save(); c.scale(density,density)
             when (style) {
                 1 -> reference.word(c, hour, minute, clock.second.uppercase(Locale.getDefault()),
                     size.width / density, size.height / density, rotation, small)
-                2 -> reference.tall(c, hour, minute, DateFormat.is24HourFormat(context), clock.second,
-                    size.width / density, size.height / density, reveal, small, state.clockOpacity / 100f)
+                2, 3, 4, 5 -> living.draw(c, hour, minute, DateFormat.is24HourFormat(context), clock.second,
+                    Locale.getDefault(), size.width / density, size.height / density,
+                    if (style == 2) 3 else style, awake, small, false, state.clockOpacity / 100f,
+                    state.clockColor, state.clockScale, state.clockX, state.clockY)
                 else -> renderer.clock(c,clock.first,clock.second,size.width/density,if(small) 36f else 52f,
                     if(small) 52f else 72f)
             }
             c.restore()
-            foreground?.invoke(c, origin)
+            if (awake > 0f) foreground?.invoke(c, origin)
+            c.restoreToCount(layer)
         }
     }
     return true

@@ -1,13 +1,15 @@
 # HeckerOS · Android 17
 
-This experimental `test/floral-low-brightness-flicker-20261029` branch adds
+This experimental `feat/living-flow-20261029` branch adds
+[Living Flow clocks, wake blur, Hecker QS and native motion](docs/living-flow.md)
+alongside the existing
 [native low-brightness refresh protection and exit hysteresis](docs/floral-display-flicker.md)
-to the complete `feat/settings-depth-lockscreen-20261028` feature set. It includes the
+and complete `feat/settings-depth-lockscreen-20261028` feature set. It includes the
 [reference Settings homepage, animated word clock and imported-layer depth clock](docs/settings-depth-lockscreen.md),
 [synchronized smoked-glass folders/icons/search, launcher toggles and default Caracal Dawn artwork](docs/launcher-glass-caracal.md),
 and [NetLab touch fixes, saved device names and automatic manufacturer enrichment](docs/netlab-ui.md)
 on top of the complete Coral root-privacy/astronaut test. Use this same branch in the
-[Coral local manifest](https://github.com/its-hecker/HeckerOs-localmanifest/tree/test/floral-low-brightness-flicker-20261029).
+[Coral local manifest](https://github.com/its-hecker/HeckerOs-localmanifest/tree/feat/living-flow-20261029).
 [Brightness/volume percentages in both QS layouts](docs/qs-slider-percentages.md) are included.
 [Game Space](docs/game-booster.md) adds battery temperature to its floating pill,
 free shortcut movement and a launcher entry with default-on game-icon hiding.
@@ -19,7 +21,7 @@ freeze is under investigation and is not claimed fixed.
 
 Hecker's custom PixelOS-based ROM for the Google Pixel 4 XL (**coral**) and
 Google Pixel 4 (**flame**). Both products inherit the same feature sources. The
-integration branch for this Coral experiment is `test/floral-low-brightness-flicker-20261029`;
+integration branch for this Coral experiment is `feat/living-flow-20261029`;
 the matching manifest also selects experimental device/framework branches.
 Flame's existing manifest remains unchanged pending Coral phone validation.
 
@@ -86,7 +88,7 @@ optional and is not a build prerequisite.
 
 ```bash
 repo init -u https://github.com/its-hecker/HeckerOS -b main --git-lfs
-git clone -b test/floral-low-brightness-flicker-20261029 https://github.com/its-hecker/HeckerOs-localmanifest .repo/local_manifests
+git clone -b feat/living-flow-20261029 https://github.com/its-hecker/HeckerOs-localmanifest .repo/local_manifests
 repo sync -c -j8 --fail-fast --no-clone-bundle --no-tags
 bash .repo/local_manifests/build.sh
 ```

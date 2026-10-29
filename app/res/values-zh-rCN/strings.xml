@@ -271,4 +271,21 @@
     <string name="hecker_launcher_native_settings">主屏幕设置、通知圆点和双击息屏</string>
     <string name="launcher_native_home_summary">选择 Hecker 桌面、Pixel 桌面或其他已安装的桌面</string>
     <string name="launcher_pixel_retained">保留 Pixel 桌面，由其提供最近任务和系统手势。</string>
+
+    <string name="living_flow_title">灵动流畅动画</string>
+    <string name="living_flow_summary">连贯的时钟、唤醒及控件动画。遵循省电模式与系统动画缩放设置。</string>
+    <string name="lock_clock_living_tall">灵动 · 修长</string>
+    <string name="lock_clock_living_wide">灵动 · 横向</string>
+    <string name="lock_clock_living_bold">灵动 · 粗体</string>
+    <string name="lock_clock_living_help">息屏、锁屏与主屏幕使用一致的实时时钟。大小、位置与颜色适用于灵动样式，且不会超出原生时钟区域。</string>
+    <string name="lock_clock_size">时钟大小</string>
+    <string name="lock_clock_horizontal">水平位置</string>
+    <string name="lock_clock_vertical">垂直位置</string>
+    <string name="lock_clock_home">主屏幕匹配时钟</string>
+    <string name="lock_clock_home_help">Hecker 启动器内置主屏幕时钟使用所选的灵动样式。</string>
+    <string name="flow_white">白色</string>
+    <string name="flow_lilac">淡紫色</string>
+    <string name="flow_sand">沙色</string>
+    <string name="flow_mint">薄荷色</string>
+    <string name="flow_blue">蓝色</string>
 </resources>

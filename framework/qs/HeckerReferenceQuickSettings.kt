@@ -22,6 +22,8 @@ import android.widget.ImageView
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -57,6 +59,7 @@ import kotlin.math.roundToInt
 
 /** Scoped to the reference panel and brightness mirror, not global brightness controls. */
 val LocalHeckerReferenceGlass = staticCompositionLocalOf { false }
+val LocalHeckerFlowGlass = staticCompositionLocalOf { false }
 private val Ink = Color(0xFF25323F)
 private val Glass = Color.White.copy(alpha = .13f)
 private val Disc = Color(0xFF092F4D).copy(alpha = .25f)
@@ -243,7 +246,8 @@ private fun ReferenceConnection(tile: TileViewModel, modifier: Modifier) {
 }
 
 @Composable
-private fun referenceActions(tile: TileViewModel, toggleFirst: Boolean = true): Modifier {
+internal fun referenceActions(tile: TileViewModel, toggleFirst: Boolean = true,
+    interactions: MutableInteractionSource? = null): Modifier {
     val context = LocalContext.current
     val state by produceState(tile.currentState, tile) { tile.state.collect { value = it } }
     val ui = state.toUiState(context.resources)
@@ -253,9 +257,23 @@ private fun referenceActions(tile: TileViewModel, toggleFirst: Boolean = true): 
         stateDescription = accessibility.stateDescription
         role = accessibility.accessibilityRole
         accessibility.toggleableState?.let { toggleableState = it }
-    }.combinedClickable(enabled = ui.handlesMainClick,
+    }.combinedClickable(interactionSource = interactions ?: remember { MutableInteractionSource() },
+        indication = LocalIndication.current, enabled = ui.handlesMainClick,
         onClick = { if (toggleFirst && ui.handlesToggleClick) tile.toggleClick() else tile.mainClick(null) },
         onLongClick = if (ui.handlesSettingsClick) ({ tile.settingsClick(null) }) else null)
+}
+
+@Composable
+internal fun ReferenceTileIcon(tile: TileViewModel, foreground: Color) {
+    val context = LocalContext.current
+    val state by produceState(tile.currentState, tile) { tile.state.collect { value = it } }
+    val icon = iconFor(tile.spec.spec)
+    if (icon != 0) ReferenceIcon(icon, 25, foreground)
+    else AndroidView(factory = { ImageView(it).apply { importantForAccessibility = android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO } },
+        modifier = Modifier.size(25.dp), update = {
+            it.setImageDrawable(state.toIconProvider().icon?.getDrawable(context)?.mutate())
+            it.setColorFilter(foreground.toArgb())
+        })
 }
 
 @Composable

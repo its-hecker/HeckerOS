@@ -137,5 +137,8 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerLockscreenClockRenderer.java": "framework/lockscreen/HeckerLockscreenClockRenderer.java",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/WordClockText.java": "framework/lockscreen/WordClockText.java",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/DepthWallpaperGeometry.java": "framework/lockscreen/DepthWallpaperGeometry.java",
-  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerSliderValues.java": "framework/qs/HeckerSliderValues.java"
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerSliderValues.java": "framework/qs/HeckerSliderValues.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerLivingFlow.kt": "framework/qs/HeckerLivingFlow.kt",
+  "frameworks/base/packages/SystemUI/src/org/hecker/motion/FlowClockRenderer.java": "aosp-launcher/src/org/hecker/motion/FlowClockRenderer.java",
+  "frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/transition/HeckerFlowWindowAnimation.java": "framework/motion/HeckerFlowWindowAnimation.java"
 }

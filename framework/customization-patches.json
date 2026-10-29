@@ -468,9 +468,10 @@
   "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/shade/ui/composable/ShadePanelScrim.kt": [
     {
       "old": ".background(color = scrimColor(isTransparencyEnabled))",
-      "new": ".background(color = com.android.systemui.hecker.heckerReferenceScrim(isTransparencyEnabled))",
+      "new": ".background(color = if (com.android.systemui.hecker.heckerCustomizedLayout())\n                    com.android.systemui.hecker.heckerLivingScrim(isTransparencyEnabled)\n                else com.android.systemui.hecker.heckerReferenceScrim(isTransparencyEnabled))",
       "previous": [
-        ".background(color = if (com.android.systemui.hecker.heckerCustomizedLayout()) {\n                    scrimColor(isTransparencyEnabled)\n                } else {\n                    com.android.systemui.hecker.heckerReferenceScrim(isTransparencyEnabled)\n                })"
+        ".background(color = if (com.android.systemui.hecker.heckerCustomizedLayout()) {\n                    scrimColor(isTransparencyEnabled)\n                } else {\n                    com.android.systemui.hecker.heckerReferenceScrim(isTransparencyEnabled)\n                })",
+        ".background(color = com.android.systemui.hecker.heckerReferenceScrim(isTransparencyEnabled))"
       ]
     }
   ],
@@ -487,6 +488,10 @@
     {
       "old": "    fractionRange(end = .14f) {\n        fade(ShadeHeader.Elements.CollapsedContentStart)\n        fade(ShadeHeader.Elements.CollapsedContentEnd)\n    }",
       "new": "    fractionRange(end = .10f) {\n        fade(ShadeHeader.Elements.CollapsedContentStart)\n        fade(ShadeHeader.Elements.CollapsedContentEnd)\n    }"
+    },
+    {
+      "old": "spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt())",
+      "new": "spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt(),\n        easing = com.android.systemui.hecker.HeckerFlowEasing)"
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/qs/composefragment/ui/FromQuickQuickSettingsToQuickSettings.kt": [
@@ -1035,6 +1040,22 @@
     {
       "old": "    @AnyThread\n    private void onTimeTick() {",
       "new": "    private void heckerDozeTimeTick() {\n        mHost.dozeTimeTick();\n        com.android.systemui.hecker.HeckerOsloOverlayHost.dozeTimeTick();\n    }\n\n    @AnyThread\n    private void onTimeTick() {"
+    }
+  ],
+  "frameworks/base/libs/WindowManager/Shell/src/com/android/wm/shell/transition/DefaultTransitionHandler.java": [
+    {
+      "old": "        } else {\n            a = loadAttributeAnimation(\n                    type, info, change, wallpaperTransit, mTransitionAnimation, isDreamTransition);\n        }\n\n        if (a != null) {",
+      "new": "        } else {\n            // Custom/cross-profile/voice/relaunch/scene transitions above retain their native path.\n            // Pixel's remote Recents transitions remain owned by its provider.\n            a = !isDreamTransition && overrideType == ANIM_NONE\n                    ? HeckerFlowWindowAnimation.create(mContext, type, change, enter, isOpeningType)\n                    : null;\n            if (a == null) a = loadAttributeAnimation(\n                    type, info, change, wallpaperTransit, mTransitionAnimation, isDreamTransition);\n        }\n\n        if (a != null) {"
+    },
+    {
+      "old": "        if (a != null) {\n            if (!a.isInitialized()) {",
+      "new": "        if (a != null) {\n            if (!info.isKeyguardGoingAway() && !isDreamTransition\n                    && (overrideType == ANIM_CLIP_REVEAL || overrideType == ANIM_SCALE_UP)) {\n                HeckerFlowWindowAnimation.tuneLaunch(mContext, type, change, a);\n            }\n            if (!a.isInitialized()) {"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/scene/ui/composable/transitions/FromLockscreenToGoneTransition.kt": [
+    {
+      "old": "/*\n * Copyright (C) 2026 The Android Open Source Project\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\npackage com.android.systemui.scene.ui.composable.transitions\n\nimport androidx.compose.animation.core.tween\nimport androidx.compose.ui.unit.dp\nimport com.android.compose.animation.Easings\nimport com.android.compose.animation.scene.TransitionBuilder\nimport com.android.systemui.plugins.keyguard.ui.composable.elements.LockscreenElementKeys\n\nfun TransitionBuilder.lockscreenToGoneWithAnimationOverLockscreenTransition() {\n    spec = tween(durationMillis = 500)\n\n    fractionRange(end = 0.3f, easing = Easings.PredictiveBack) {\n        // Fade out all lock screen elements, except the status bar.\n        fade(LockscreenElementKeys.Region.Upper)\n        fade(LockscreenElementKeys.LockIcon)\n        fade(LockscreenElementKeys.AmbientIndicationArea)\n        fade(LockscreenElementKeys.Region.Lower)\n        fade(LockscreenElementKeys.SettingsMenu)\n\n        fade(LockscreenElementKeys.BehindScrim)\n    }\n}\n\nfun TransitionBuilder.lockscreenToGoneTransition() {\n    lockscreenToGoneWithAnimationOverLockscreenTransition()\n\n    fractionRange(end = 0.3f, easing = Easings.PredictiveBack) {\n        translate(LockscreenElementKeys.Region.Upper, y = (-48).dp)\n        translate(LockscreenElementKeys.Notifications.Stack, y = (-72).dp)\n    }\n}\n\nfun TransitionBuilder.aodToGoneTransition() {\n    spec = tween(durationMillis = 500)\n\n    fractionRange(end = 0.2f) { fade(LockscreenElementKeys.Root) }\n}\n",
+      "new": "/*\n * Copyright (C) 2026 The Android Open Source Project\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\npackage com.android.systemui.scene.ui.composable.transitions\n\nimport androidx.compose.animation.core.tween\nimport androidx.compose.ui.unit.dp\nimport com.android.compose.animation.Easings\nimport com.android.compose.animation.scene.TransitionBuilder\nimport com.android.systemui.plugins.keyguard.ui.composable.elements.LockscreenElementKeys\n\nfun TransitionBuilder.lockscreenToGoneWithAnimationOverLockscreenTransition() {\n    spec = tween(durationMillis = 500, easing = com.android.systemui.hecker.HeckerFlowEasing)\n\n    fractionRange(end = 0.72f, easing = com.android.systemui.hecker.HeckerFlowEasing) {\n        // Fade out all lock screen elements, except the status bar.\n        fade(LockscreenElementKeys.Region.Upper)\n        fade(LockscreenElementKeys.LockIcon)\n        fade(LockscreenElementKeys.AmbientIndicationArea)\n        fade(LockscreenElementKeys.Region.Lower)\n        fade(LockscreenElementKeys.SettingsMenu)\n\n        fade(LockscreenElementKeys.BehindScrim)\n    }\n}\n\nfun TransitionBuilder.lockscreenToGoneTransition() {\n    lockscreenToGoneWithAnimationOverLockscreenTransition()\n\n    fractionRange(end = 0.72f, easing = com.android.systemui.hecker.HeckerFlowEasing) {\n        translate(LockscreenElementKeys.Region.Upper, y = (-24).dp)\n        translate(LockscreenElementKeys.Notifications.Stack, y = (-72).dp)\n    }\n}\n\nfun TransitionBuilder.aodToGoneTransition() {\n    spec = tween(durationMillis = 500, easing = com.android.systemui.hecker.HeckerFlowEasing)\n\n    fractionRange(end = 0.2f) { fade(LockscreenElementKeys.Root) }\n}\n"
     }
   ]
 }

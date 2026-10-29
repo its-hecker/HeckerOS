@@ -298,5 +298,11 @@
       "old": "    protected void dispatchDraw(Canvas canvas) {\n",
       "new": "    protected void dispatchDraw(Canvas canvas) {\n        com.android.launcher3.hecker.HeckerHomeDepth.background(this, canvas);\n"
     }
+  ],
+  "src/com/android/launcher3/folder/FolderAnimationManager.java": [
+    {
+      "old": "        Resources res = mContent.getResources();\n        mDuration = res.getInteger(R.integer.config_materialFolderExpandDuration);\n        mDelay = res.getInteger(R.integer.config_folderDelay);\n\n        mFolderOpenInterpolator = AnimationUtils.loadInterpolator(mContext,\n                R.interpolator.standard_interpolator);\n        mFolderCloseInterpolator = AnimationUtils.loadInterpolator(mContext,\n                R.interpolator.standard_interpolator);\n        mLargeFolderPreviewItemOpenInterpolator = AnimationUtils.loadInterpolator(mContext,\n                R.interpolator.large_folder_preview_item_open_interpolator);\n        mLargeFolderPreviewItemCloseInterpolator = AnimationUtils.loadInterpolator(mContext,\n                R.interpolator.standard_accelerate_interpolator);",
+      "new": "        Resources res = mContent.getResources();\n        boolean heckerFlow = com.android.launcher3.hecker.HeckerLauncherMotion.enabled(mContext);\n        mDuration = heckerFlow ? 360 : res.getInteger(R.integer.config_materialFolderExpandDuration);\n        mDelay = heckerFlow ? 0 : res.getInteger(R.integer.config_folderDelay);\n\n        mFolderOpenInterpolator = heckerFlow ? com.android.launcher3.hecker.HeckerLauncherMotion.CURVE\n                : AnimationUtils.loadInterpolator(mContext, R.interpolator.standard_interpolator);\n        mFolderCloseInterpolator = heckerFlow ? com.android.launcher3.hecker.HeckerLauncherMotion.CURVE\n                : AnimationUtils.loadInterpolator(mContext, R.interpolator.standard_interpolator);\n        mLargeFolderPreviewItemOpenInterpolator = heckerFlow ? mFolderOpenInterpolator\n                : AnimationUtils.loadInterpolator(mContext, R.interpolator.large_folder_preview_item_open_interpolator);\n        mLargeFolderPreviewItemCloseInterpolator = heckerFlow ? mFolderCloseInterpolator\n                : AnimationUtils.loadInterpolator(mContext, R.interpolator.standard_accelerate_interpolator);"
+    }
   ]
 }

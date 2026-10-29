@@ -8,6 +8,9 @@ import android.graphics.*;
 import android.os.*;
 import android.text.format.DateFormat;
 import android.view.View;
+import android.database.ContentObserver;
+import android.provider.Settings;
+import org.hecker.motion.FlowClockRenderer;
 import java.io.*;
 import java.text.NumberFormat;
 import java.util.*;
@@ -29,6 +32,13 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
     private boolean attached, running, sampling, screenAwake = true;
     private int generation;
     private ValueAnimator animator;
+    private ValueAnimator homeAnimator;
+    private float homeReveal = 1;
+    private boolean arrivalPending;
+    private final FlowClockRenderer livingClock = new FlowClockRenderer();
+    private final ContentObserver livingSettings = new ContentObserver(main) {
+        @Override public void onChange(boolean self) { invalidate(); }
+    };
     private final Runnable tick = new Runnable() { public void run() {
         if (!running) return;
         refresh();
@@ -38,6 +48,7 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
         @Override public void onReceive(Context c, Intent intent) {
             if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) screenAwake = false;
             if (Intent.ACTION_SCREEN_ON.equals(intent.getAction()) || Intent.ACTION_USER_PRESENT.equals(intent.getAction())) screenAwake = true;
+            if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) arrivalPending = true;
             if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
                 battery = StudioPolicy.battery(intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1), intent.getIntExtra(BatteryManager.EXTRA_SCALE, 0));
                 int t = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Integer.MIN_VALUE);
@@ -66,9 +77,14 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
         filter.addAction(Intent.ACTION_SCREEN_ON); filter.addAction(Intent.ACTION_SCREEN_OFF); filter.addAction(Intent.ACTION_USER_PRESENT);
         getContext().registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
         HeckerStudio.prefs(getContext()).registerOnSharedPreferenceChangeListener(this); syncVisibility();
+        for (String key : new String[]{"hecker_living_clock_home", "hecker_custom_lockscreen_clock",
+                "hecker_lockscreen_clock_style", "hecker_lockscreen_clock_color",
+                "hecker_lockscreen_clock_opacity", "hecker_lockscreen_clock_scale"})
+            getContext().getContentResolver().registerContentObserver(Settings.Secure.getUriFor(key), false, livingSettings);
     }
     @Override protected void onDetachedFromWindow() {
         attached = false; stop(); getContext().unregisterReceiver(receiver);
+        getContext().getContentResolver().unregisterContentObserver(livingSettings);
         HeckerStudio.prefs(getContext()).unregisterOnSharedPreferenceChangeListener(this);
         super.onDetachedFromWindow();
     }
@@ -77,15 +93,31 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
     private void syncVisibility() {
         if (main == null) return;
         boolean visible = attached && screenAwake && isShown() && getWindowVisibility() == VISIBLE;
-        if (visible == running) return;
+        if (visible == running) { if (visible && arrivalPending) homeArrival(); return; }
         if (!visible) { stop(); return; }
         running = true; messageSlot = -1;
-        restartMotion(); main.post(tick);
+        restartMotion(); main.post(tick); if (arrivalPending) homeArrival();
     }
     private void stop() {
         running = false; generation++; sampling = false; main.removeCallbacks(tick);
         if (animator != null) { animator.cancel(); animator = null; }
+        if (homeAnimator != null) { homeAnimator.cancel(); homeAnimator = null; }
+        homeReveal = 1;
         HeckerClockWeather.stop(this);
+    }
+    private void homeArrival() {
+        arrivalPending = false;
+        if (homeAnimator != null) { homeAnimator.cancel(); homeAnimator = null; }
+        homeReveal = 1;
+        if (widgetId != -1 || !HeckerLauncherMotion.enabled(getContext())
+                || Settings.Secure.getInt(getContext().getContentResolver(), "hecker_living_clock_home", 1) == 0
+                || Settings.Secure.getInt(getContext().getContentResolver(), "hecker_custom_lockscreen_clock", 0) == 0) return;
+        int selected = Settings.Secure.getInt(getContext().getContentResolver(), "hecker_lockscreen_clock_style", 0);
+        if (!FlowClockRenderer.supportsDepth(selected)) return;
+        homeReveal = 0; homeAnimator = ValueAnimator.ofFloat(0, 1); homeAnimator.setDuration(520);
+        homeAnimator.setInterpolator(HeckerLauncherMotion.CURVE);
+        homeAnimator.addUpdateListener(a -> { homeReveal = (float) a.getAnimatedValue(); invalidate(); });
+        homeAnimator.start();
     }
     private void restartMotion() {
         if (running && HeckerStudio.enabled(getContext(), "clock_weather", true)) HeckerClockWeather.start(this); else HeckerClockWeather.stop(this);
@@ -172,6 +204,7 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
     }
     @Override protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if (drawLivingClock(canvas)) return;
         float logicalHeight = style.equals("caracal") ? 230 : style.equals("analog") || style.equals("stacked") || style.equals("thermal") ? 220 : 180;
         boolean weatherEnabled = HeckerStudio.enabled(getContext(), "clock_weather", true);
         float scale = Math.min(getWidth() / 380f, getHeight() / (logicalHeight + (weatherEnabled ? 30 : 0)));
@@ -239,6 +272,33 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
             save = canvas.save(); canvas.translate(originX, originY); canvas.scale(scale, scale);
             drawWeather(canvas, logicalHeight + 21); canvas.restoreToCount(save);
         }
+    }
+    private boolean drawLivingClock(Canvas canvas) {
+        // The built-in Home clock follows keyguard. Independently configured widgets/previews keep their style.
+        if (widgetId != -1 || Settings.Secure.getInt(getContext().getContentResolver(), "hecker_living_clock_home", 1) == 0
+                || Settings.Secure.getInt(getContext().getContentResolver(), "hecker_custom_lockscreen_clock", 0) == 0) return false;
+        int selected = Settings.Secure.getInt(getContext().getContentResolver(), "hecker_lockscreen_clock_style", 0);
+        if (!FlowClockRenderer.supportsDepth(selected)) return false;
+        Calendar now = Calendar.getInstance();
+        int color = Settings.Secure.getInt(getContext().getContentResolver(), "hecker_lockscreen_clock_color", 0);
+        int size = Settings.Secure.getInt(getContext().getContentResolver(), "hecker_lockscreen_clock_scale", 100);
+        float opacity = Settings.Secure.getInt(getContext().getContentResolver(), "hecker_lockscreen_clock_opacity", 76) / 100f;
+        float density = getResources().getDisplayMetrics().density;
+        boolean weather = HeckerStudio.enabled(getContext(), "clock_weather", true);
+        int saved = canvas.save(); canvas.scale(density, density);
+        float height = getHeight() / density - (weather ? 24 : 0);
+        livingClock.draw(canvas, now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE),
+                DateFormat.is24HourFormat(getContext()), date(), Locale.getDefault(), getWidth() / density,
+                height, selected == 2 ? 3 : selected, homeReveal, true, true, opacity, color, size, 0, 0);
+        canvas.restoreToCount(saved);
+        HeckerHomeDepth.foreground(this, canvas);
+        if (weather) {
+            saved = canvas.save(); canvas.scale(density, density);
+            float scale = getWidth() / density / 380f;
+            canvas.translate(0, height); canvas.scale(scale, scale); drawWeather(canvas, 18);
+            canvas.restoreToCount(saved);
+        }
+        return true;
     }
     private void drawWeather(Canvas canvas, float baseline) {
         String weather = HeckerClockWeather.text(); if (weather == null || weather.isEmpty()) return;
