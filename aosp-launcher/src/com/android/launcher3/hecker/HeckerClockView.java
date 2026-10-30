@@ -59,7 +59,7 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
     };
 
     public HeckerClockView(Context c, int id) {
-        super(c); widgetId = id; style = readStyle(); setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+        super(c); org.hecker.motion.FlowClockFonts.apply(c, livingClock); widgetId = id; style = readStyle(); setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         setMinimumHeight(HeckerStudio.dp(c, 160));
     }
     private String readStyle() {

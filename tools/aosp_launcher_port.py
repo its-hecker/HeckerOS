@@ -66,6 +66,10 @@ def aosp_launcher_plan(rom, replace, revert=False):
         copies['src/'+str(path.relative_to(ROOT/'aosp-launcher/src'))]=path.read_text()
     for path in (ROOT/'aosp-launcher/res').rglob('*.xml'):
         copies['generated/hecker-launcher/res/'+str(path.relative_to(ROOT/'aosp-launcher/res'))]=path.read_text()
+    for path in (ROOT/'fonts/living-flow').glob('*.ttf'):
+        copies['generated/hecker-launcher/res/font/'+path.name]=path.read_bytes()
+    notice=ROOT/'fonts/living-flow/LICENSE.txt'
+    if notice.is_file():copies['generated/hecker-launcher/res/raw/hecker_living_flow_font_notice.txt']=notice.read_text()
     # Retained Google Smartspace client, shared with the original launcher work. No weather service fork.
     copies['src/com/android/launcher3/hecker/HeckerWeather.java']=(ROOT/'launcher/src/HeckerWeather.java').read_text()
     weather=ROOT/'launcher/compat/googleweather'
@@ -77,8 +81,9 @@ def aosp_launcher_plan(rom, replace, revert=False):
     history_file=ROOT/'aosp-launcher/copy-history.json'
     history=json.loads(history_file.read_text()) if history_file.exists() else {}
     for relative,expected in copies.items():
-        path=source/relative;current=path.read_text() if path.exists() else None
-        identity=hashlib.sha1(b'blob '+str(len(current.encode())).encode()+b'\0'+current.encode()).hexdigest() if current is not None else None
+        path=source/relative;current=(path.read_bytes() if isinstance(expected,bytes) else path.read_text()) if path.exists() else None
+        raw=current if isinstance(current,bytes) else current.encode() if current is not None else None
+        identity=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest() if raw is not None else None
         known_manifest=relative=='generated/hecker-launcher/AndroidManifest.xml' and current in (previous_manifest,glass_manifest,game_previous_manifest)
         if current is not None and current!=expected and identity not in history.get(relative,[]) and not known_manifest:
             raise ValueError('Preserving unfamiliar Hecker Launcher source: '+str(path))

@@ -1,0 +1,10 @@
+<resources>
+    <integer name="config_batterymeterWidth">28</integer>
+    <integer name="config_batterymeterHeight">14</integer>
+    <bool name="config_batterymeterHorizontalFill">true</bool>
+    <bool name="config_themedBatteryPercentWhileCharging">true</bool>
+    <string name="config_batterymeterPerimeterPath" translatable="false">M3,0 H23 Q26,0 26,3 V11 Q26,14 23,14 H3 Q0,14 0,11 V3 Q0,0 3,0 Z M3,1.5 Q1.5,1.5 1.5,3 V11 Q1.5,12.5 3,12.5 H23 Q24.5,12.5 24.5,11 V3 Q24.5,1.5 23,1.5 Z M26.5,4 H28 V10 H26.5 Z</string>
+    <string name="config_batterymeterFillMask" translatable="false">M4,3 H22 Q23,3 23,4 V10 Q23,11 22,11 H4 Q3,11 3,10 V4 Q3,3 4,3 Z</string>
+    <string name="config_batterymeterBoltPath" translatable="false">M14,2 L9,8 H12 L11,12 L17,6 H14 Z</string>
+    <string name="config_batterymeterPowersavePath" translatable="false">M12,3 H14 V6 H17 V8 H14 V11 H12 V8 H9 V6 H12 Z</string>
+</resources>

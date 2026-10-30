@@ -1,0 +1,28 @@
+{
+  "title": "Caracal Harbor",
+  "created": "2026-10-30",
+  "generator": "OpenAI built-in image generation",
+  "license": "HeckerOS original generated artwork",
+  "purpose": "Independent Home background and transparent foreground; lock artwork is unchanged.",
+  "processing": "Bounded to 1600 pixels; WebP background, lossless WebP alpha foreground; runtime exports aligned PNG layers.",
+  "layers": {
+    "background": {
+      "sha256": "97b1a5b0699a68aabed08d91f00282ec0fbb603cc8b0ce45a0a91aaf9849a4dc",
+      "source_sha256": "5447ca80fb73b8e917f617e947d6ebb070b4253c3562e571d540f2aceb292016",
+      "size": [
+        752,
+        1600
+      ],
+      "bytes": 278916
+    },
+    "foreground": {
+      "sha256": "ead0827a996c2177ca8cd1f4d10ae0686428d410e5b91f4055856409ef6529bf",
+      "source_sha256": "4a77795bbece1a9b3ab3908df1b0326b389cd318c154af74936de3b412cc9a28",
+      "size": [
+        752,
+        1600
+      ],
+      "bytes": 850316
+    }
+  }
+}

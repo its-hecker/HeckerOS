@@ -34,7 +34,7 @@
   <project path="external/wpa_supplicant_8" name="PixelOS-AOSP/android_external_wpa_supplicant_8" groups="pdk" remote="github"  revision="3346cba3ebae1c14aed18ed97ee7345d6799dcb5"  upstream="refs/heads/seventeen" />
   <project path="external/zstd" name="PixelOS-AOSP/android_external_zstd" groups="pdk" remote="github"  revision="ec76dd347d213816a4a6b0bdf6830885cc5812a2"  upstream="refs/heads/seventeen" />
   <project path="frameworks/av" name="PixelOS-AOSP/android_frameworks_av" groups="pdk,sysui-studio" remote="github"  revision="3a806486c35d4825bd97d95af3e172309aed2fda"  upstream="refs/heads/seventeen" />
-  <project path="frameworks/base" name="its-hecker/heckeros_frameworks_base" groups="pdk-cw-fs,pdk-fs,sysui-studio" remote="heckeros" revision="f2091fa0550856c69e53afc5f58147acd48d0c52" upstream="refs/heads/test/floral-low-brightness-flicker-20261029" dest-branch="test/floral-low-brightness-flicker-20261029" />
+  <project path="frameworks/base" name="its-hecker/heckeros_frameworks_base" groups="pdk-cw-fs,pdk-fs,sysui-studio" remote="heckeros" revision="c72dce10290956bd3c4bfd23e787800d1340c46e" upstream="refs/heads/feat/coral-upstream-20261030" dest-branch="feat/coral-upstream-20261030" />
   <project path="frameworks/native" name="PixelOS-AOSP/android_frameworks_native" groups="pdk,sysui-studio" remote="github"  revision="fe64500f2fb0b0053667f3e1af3603122643e270"  upstream="refs/heads/seventeen" />
   <project path="frameworks/opt/telephony" name="PixelOS-AOSP/android_frameworks_opt_telephony" groups="pdk,sysui-studio" remote="github"  revision="7ee96142e28c3580c2426760a4b533256743d06f"  upstream="refs/heads/seventeen" />
   <project path="hardware/google/pixel" name="PixelOS-AOSP/android_hardware_google_pixel" groups="generic_fs,pixel,pdk-gs-arm,pdk-gs-imgtec,pdk-desktop" remote="github"  revision="697c4370a439248b35f8cbc17dde3974425b4fc2"  upstream="refs/heads/seventeen" />
@@ -47,7 +47,7 @@
   <project path="kernel/configs" name="PixelOS-AOSP/android_kernel_configs" groups="vts,pdk" remote="github"  revision="3c25f55b591d2689c8f7dee0c01b135e87a863a2"  upstream="refs/heads/seventeen" />
   <project path="packages/apps/ContactsPicker" name="PixelOS-AOSP/android_packages_apps_ContactsPicker" groups="pdk-fs" remote="github"  revision="2874941c128ccc4bc8a6d254f90e2ce535e8a49b"  upstream="refs/heads/seventeen" />
   <project path="packages/apps/ParanoidSense" name="PixelOS-AOSP/android_packages_apps_ParanoidSense" remote="github"  revision="912c40b765915c9d6a6eb90763ed4c48f53cd86e"  upstream="refs/heads/seventeen" />
-  <project path="packages/apps/Settings" name="its-hecker/heckeros_packages_apps_Settings" groups="pdk-fs,pdk-cw-tvc,sysui-studio" remote="heckeros" />
+  <project path="packages/apps/Settings" name="its-hecker/heckeros_packages_apps_Settings" groups="pdk-fs,pdk-cw-tvc,sysui-studio" remote="heckeros" revision="3831282d93ecda4d52a6894077482fe01ecea903" upstream="refs/heads/feat/suite-polish" dest-branch="feat/suite-polish" />
   <project path="packages/apps/TouchGestures" name="PixelOS-AOSP/android_packages_apps_TouchGestures" remote="github"  revision="5294f537f8100d2f98e705fd54b55becd4ad76ec"  upstream="refs/heads/seventeen" />
   <project path="packages/apps/TV" name="PixelOS-AOSP/android_packages_apps_TV" groups="pdk" remote="github"  revision="d8ecbce13f949d3a96f3ec8b74710cd83a8985cc"  upstream="refs/heads/seventeen" />
   <project path="packages/apps/Updater" name="PixelOS-AOSP/android_packages_apps_Updater" remote="github"  revision="19b609fb0fa63c31405a69de97ed5aa5cc927e9d"  upstream="refs/heads/seventeen" />
@@ -86,8 +86,8 @@
   <project path="system/security" name="PixelOS-AOSP/android_system_security" groups="pdk" remote="github"  revision="7feccd559d2781778a05ea718459572b77f7c3c4"  upstream="refs/heads/seventeen" />
   <project path="system/update_engine" name="PixelOS-AOSP/android_system_update_engine" groups="pdk" remote="github"  revision="1938420295a90e0bfef3ce9ed867b87da2e63a6f"  upstream="refs/heads/seventeen" />
   <project path="system/vold" name="PixelOS-AOSP/android_system_vold" groups="pdk" remote="github"  revision="11d8982f824d52e8122c7aa732207ba66b8f23c8"  upstream="refs/heads/seventeen" />
-  <project path="vendor/lineage" name="its-hecker/heckeros_vendor_lineage" remote="heckeros" />
-  <project path="vendor/custom" name="its-hecker/heckeros_vendor_custom" remote="heckeros" />
+  <project path="vendor/lineage" name="its-hecker/heckeros_vendor_lineage" remote="heckeros" revision="a8286e3a3edc3aed7e774ca57476477f178a0c46" upstream="refs/heads/feat/coral-upstream-20261030" dest-branch="feat/coral-upstream-20261030" />
+  <project path="vendor/custom" name="its-hecker/heckeros_vendor_custom" remote="heckeros" revision="82457873ad4f7c75195c21ddf9da35903a0d975f" upstream="refs/heads/feat/coral-upstream-20261030" dest-branch="feat/coral-upstream-20261030" />
   <project path="vendor/custom-preference" name="PixelOS-AOSP/android_vendor_custom-preference" remote="github"  revision="4d569cc0e76cb4183c0761bebd1f8c81f5fc7a95"  upstream="refs/heads/seventeen" />
   <project path="vendor/crowdin" name="PixelOS-AOSP/android_vendor_crowdin" remote="github" revision="b19ea47aaa62ed4b72b3d21267b54bb12270c2f4"  upstream="refs/heads/seventeen" />
 
@@ -104,4 +104,5 @@
   <project path="vendor/pixel/launcher" name="PixelOS-AOSP/proprietary_vendor_pixel_launcher" remote="gitlab"  revision="67ed56a43d89158436bb249e8e5633afdfc845a0"  upstream="refs/heads/seventeen" />
   <project path="vendor/pixel/sounds" name="PixelOS-AOSP/proprietary_vendor_pixel_sounds" remote="gitlab"  revision="7e322bfc120005918bd6d2800f46ed31ad8c3b74"  upstream="refs/heads/seventeen" />
   <project path="vendor/pixel/themepicker" name="PixelOS-AOSP/proprietary_vendor_pixel_themepicker" remote="gitlab"  revision="28a194eb2eeddb8985723501a1688a9b71d3c356"  upstream="refs/heads/seventeen" />
+  <project path="system/memory/libmeminfo" name="PixelOS-AOSP/android_system_memory_libmeminfo" groups="pdk" remote="github" revision="e970d14536c482bc08f46b93ed2a6185f83a165c" upstream="refs/heads/seventeen" />
 </manifest>

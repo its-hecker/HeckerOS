@@ -29,7 +29,7 @@ public final class DepthWallpaperActivity extends Activity {
     private Button apply;
     private android.widget.Switch home;
     private int generation;
-    private boolean stopped;
+    private boolean stopped,homeOnly;
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         if (state != null) {
@@ -37,10 +37,11 @@ public final class DepthWallpaperActivity extends Activity {
             if (b != null) background = Uri.parse(b);
             if (f != null) foreground = Uri.parse(f);
         }
-        LinearLayout page = Ui.page(this, R.string.depth_wallpaper_title);
+        homeOnly=getIntent().getBooleanExtra("home_only",false);
+        LinearLayout page = Ui.page(this, homeOnly?R.string.home_depth_picker_title:R.string.depth_wallpaper_title);
         page.addView(Ui.text(this, getString(R.string.depth_wallpaper_import_help), 15, false));
         home = new android.widget.Switch(this); home.setText(R.string.depth_apply_home);
-        home.setChecked(state == null || state.getBoolean("apply_home", true)); page.addView(home);
+        home.setChecked(homeOnly || state == null || state.getBoolean("apply_home", true)); home.setVisibility(homeOnly?android.view.View.GONE:android.view.View.VISIBLE); page.addView(home);
         Ui.actionCard(this, page, R.string.depth_pick_background, R.string.depth_background_summary, v -> pick(1));
         Ui.actionCard(this, page, R.string.depth_pick_foreground, R.string.depth_foreground_summary, v -> pick(2));
         preview = new ImageView(this); preview.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -122,21 +123,27 @@ public final class DepthWallpaperActivity extends Activity {
                 Bitmap image = Bitmap.createBitmap(bg.getWidth(), bg.getHeight(), Bitmap.Config.ARGB_8888);
                 Canvas imageCanvas = new Canvas(image); imageCanvas.drawBitmap(bg, 0, 0, null); imageCanvas.drawBitmap(fg, 0, 0, null);
                 android.app.WallpaperManager manager = android.app.WallpaperManager.getInstance(this);
-                manager.setBitmap(image, null, true, android.app.WallpaperManager.FLAG_LOCK
-                        | (applyHome ? android.app.WallpaperManager.FLAG_SYSTEM : 0));
-                // Publish the identity last: readers can never observe half of a new pair.
-                if (!Settings.Secure.putInt(getContentResolver(), DefaultAppearance.WALLPAPER_ID, DefaultAppearance.wallpaperId(this))
-                        || !Settings.Secure.putInt(getContentResolver(), DefaultAppearance.HOME_WALLPAPER_ID, manager.getWallpaperId(android.app.WallpaperManager.FLAG_SYSTEM))
-                        || !Settings.Secure.putInt(getContentResolver(), DefaultAppearance.HOME_DEPTH, applyHome ? 1 : 0)
-                        || !Settings.Secure.putInt(getContentResolver(), "hecker_custom_lockscreen_clock", 1)
-                        || !Settings.Secure.putInt(getContentResolver(), "hecker_lockscreen_clock_style", 2)
-                        || !Settings.Secure.putInt(getContentResolver(), "hecker_depth_wallpaper", 1)
-                        || !Settings.Secure.putString(getContentResolver(), DepthWallpaperProvider.ID, id))
-                    throw new IOException("Cannot publish depth pair");
+                boolean lockOwned=Settings.Secure.getInt(getContentResolver(),DefaultAppearance.WALLPAPER_ID,-1)==DefaultAppearance.wallpaperId(this);
+                manager.setBitmap(image, null, true, homeOnly?android.app.WallpaperManager.FLAG_SYSTEM:
+                    android.app.WallpaperManager.FLAG_LOCK|(applyHome?android.app.WallpaperManager.FLAG_SYSTEM:0));
+                // Each display has its own identity. A lock-only import cannot disable or erase Home.
+                boolean saved=true;
+                if(homeOnly||applyHome)saved=Settings.Secure.putInt(getContentResolver(),DefaultAppearance.HOME_WALLPAPER_ID,manager.getWallpaperId(android.app.WallpaperManager.FLAG_SYSTEM))
+                    &&Settings.Secure.putInt(getContentResolver(),DefaultAppearance.HOME_DEPTH,1)
+                    &&Settings.Secure.putString(getContentResolver(),HomeAppearance.KEY,id);
+                if(!homeOnly)saved=saved&&Settings.Secure.putInt(getContentResolver(),DefaultAppearance.WALLPAPER_ID,DefaultAppearance.wallpaperId(this))
+                    &&Settings.Secure.putInt(getContentResolver(),"hecker_custom_lockscreen_clock",1)
+                    &&Settings.Secure.putInt(getContentResolver(),"hecker_lockscreen_clock_style",3)
+                    &&Settings.Secure.putInt(getContentResolver(),"hecker_depth_wallpaper",1)
+                    &&Settings.Secure.putString(getContentResolver(),DepthWallpaperProvider.ID,id);
+                else if(lockOwned)saved=saved&&Settings.Secure.putInt(getContentResolver(),DefaultAppearance.WALLPAPER_ID,DefaultAppearance.wallpaperId(this));
+                if(!saved)throw new IOException("Cannot publish depth pair");
                 committed = true;
                 File[] previous = directory.getParentFile().listFiles();
                 if (previous != null) for (File old : previous)
-                    if (!old.equals(directory) && old.getName().matches("[a-f0-9]{32}")) erase(old);
+                    if (!old.equals(directory) && old.getName().matches("[a-f0-9]{32}")
+                            && !old.getName().equals(Settings.Secure.getString(getContentResolver(),DepthWallpaperProvider.ID))
+                            && !old.getName().equals(Settings.Secure.getString(getContentResolver(),HomeAppearance.KEY))) erase(old);
                 runOnUiThread(() -> { if (!stopped && generation == token) { error(R.string.depth_wallpaper_applied); finish(); } });
             } catch (IOException | RuntimeException failure) {
                 runOnUiThread(() -> { if (!stopped && generation == token) { error(R.string.depth_wallpaper_invalid); apply.setEnabled(true); } });

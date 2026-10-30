@@ -261,3 +261,13 @@ android_app_import {
     enforce_uses_libs: false,
     dex_preopt: { enabled: false },
 }
+
+// Original local resource pack; read by both native battery pipelines, not an active RRO.
+android_app {
+    name: "HeckerLivingFlowBattery",
+    manifest: "livingflow/AndroidManifest.xml",
+    resource_dirs: ["livingflow/res"],
+    sdk_version: "current",
+    certificate: "platform",
+    product_specific: true,
+}

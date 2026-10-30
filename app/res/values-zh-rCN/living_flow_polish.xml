@@ -1,0 +1,6 @@
+<resources>
+    <string name="flow_battery_title">Living Flow 电池</string>
+    <string name="flow_battery_summary">横向描边与内嵌电量填充。显示真实电量颜色，并支持可选充电波纹。</string>
+    <string name="home_depth_picker_title">主屏幕景深壁纸</string>
+    <string name="home_depth_picker_summary">为主屏幕导入单独的壁纸图层。锁屏壁纸与时钟保持当前选择。</string>
+</resources>

@@ -84,6 +84,7 @@ internal object HeckerDepthScene {
             viewport.width, viewport.height, reveal, foreground)
         val rectangle = RectF(transform[1], transform[2], transform[1] + image.width * transform[0],
             transform[2] + image.height * transform[0])
+        if (mask) maskPaint.alpha = (255 * FlowClockRenderer.depthMask(reveal)).toInt()
         canvas.drawBitmap(image, null, rectangle, if (mask) maskPaint else imagePaint)
     }
 

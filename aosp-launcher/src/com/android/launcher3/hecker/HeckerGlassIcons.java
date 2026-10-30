@@ -22,10 +22,11 @@ import java.util.concurrent.Executors;
 public final class HeckerGlassIcons {
     private static final int SIZE = 144;
     private static final LruCache<String, Bitmap> MASKS = new LruCache<>(96);
+    private static final Map<View,Boolean> HOSTS=new WeakHashMap<>();
     private static final Map<String, List<Runnable>> PENDING = new HashMap<>();
     private static final ExecutorService WORKER = Executors.newSingleThreadExecutor();
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
-    public static synchronized void clear() { MASKS.evictAll(); }
+    public static synchronized void clear() { MASKS.evictAll(); MAIN.post(() -> { synchronized(HeckerGlassIcons.class) { for(View v:new ArrayList<>(HOSTS.keySet()))if(v!=null)v.invalidate(); } }); }
 
     public static Drawable icon(Context context, ComponentName component, UserHandle user,
             Drawable original, Runnable refresh, View host) {
@@ -33,6 +34,7 @@ public final class HeckerGlassIcons {
                 || original instanceof android.graphics.drawable.Animatable
                 || original.getColorFilter() != null
                 || original.getClass().getSimpleName().contains("Preload")) return original;
+        if(host!=null)synchronized(HeckerGlassIcons.class){HOSTS.put(host,true);}
         String key = HeckerStudio.appKey(context, component, user) + ":"
                 + context.getResources().getConfiguration().densityDpi;
         Bitmap mask;
@@ -49,7 +51,7 @@ public final class HeckerGlassIcons {
             }
         }
         if (mask == null || mask.getWidth() == 1) return original;
-        return context.getPackageManager().getUserBadgedIcon(new Icon(original, mask, host), user);
+        return context.getPackageManager().getUserBadgedIcon(new Icon(context.getApplicationContext(),original, mask, host), user);
     }
     private static void load(Context context, ComponentName component, UserHandle user, String key) {
         Bitmap result = null;
@@ -77,12 +79,12 @@ public final class HeckerGlassIcons {
         if (callbacks != null) MAIN.post(() -> { for (Runnable callback : callbacks) callback.run(); });
     }
     private static final class Icon extends Drawable {
-        final Drawable original; final Bitmap glyph; final WeakReference<View> host;
+        final Context context; final Drawable original; final Bitmap glyph; final WeakReference<View> host;
         final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
-        final RectF destination = new RectF(); final Rect source = new Rect();
+        final RectF destination = new RectF(),plate=new RectF(),rim=new RectF(); final Rect source = new Rect();
         int alpha = 255; ColorFilter filter;
-        Icon(Drawable original, Bitmap glyph, View host) {
-            this.original = original; this.glyph = glyph; this.host = new WeakReference<>(host);
+        Icon(Context context,Drawable original, Bitmap glyph, View host) {
+            this.context=context; this.original = original; this.glyph = glyph; this.host = new WeakReference<>(host);
             int[] pixels = new int[glyph.getWidth() * glyph.getHeight()];
             glyph.getPixels(pixels, 0, glyph.getWidth(), 0, 0, glyph.getWidth(), glyph.getHeight());
             int[] box = GlassIconMask.bounds(pixels, glyph.getWidth(), glyph.getHeight());
@@ -92,17 +94,27 @@ public final class HeckerGlassIcons {
             Rect bounds = getBounds(); if (bounds.isEmpty() || alpha == 0) return;
             if (original.getColorFilter() != null) { original.setBounds(bounds); original.draw(canvas); return; }
             int save = canvas.saveLayerAlpha(bounds.left, bounds.top, bounds.right, bounds.bottom, alpha);
-            if (!HeckerLauncherGlass.drawIconPlate(host.get(), canvas, bounds)) {
+            boolean flow=HeckerStudio.number(context,"glass_icon_style",0,0,1)==1;
+            if(flow){
+                float radius=Math.min(bounds.width(),bounds.height())*.32f;
+                paint.setShader(null);paint.setColorFilter(null);paint.setStyle(Paint.Style.FILL);paint.setColor(0x73171928);
+                plate.set(bounds);canvas.drawRoundRect(plate,radius,radius,paint);
+                float inset=Math.max(1,Math.min(bounds.width(),bounds.height())/48f);
+                rim.set(bounds);rim.inset(inset/2,inset/2);
+                paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(inset);paint.setColor(0x78ffffff);
+                canvas.drawRoundRect(rim,radius,radius,paint);rim.inset(inset,inset);paint.setColor(0x1cffffff);
+                canvas.drawRoundRect(rim,Math.max(0,radius-inset),Math.max(0,radius-inset),paint);paint.setStyle(Paint.Style.FILL);
+            } else if (!HeckerLauncherGlass.drawIconPlate(host.get(), canvas, bounds)) {
                 paint.setColor(0xb8332632); paint.setColorFilter(null);
                 canvas.drawOval(new RectF(bounds), paint);
             }
-            float span = Math.min(bounds.width(), bounds.height()) * .68f;
+            float span = Math.min(bounds.width(), bounds.height()) * (flow?.56f:.68f);
             float scale = span / Math.max(source.width(), source.height());
             float width = source.width() * scale, height = source.height() * scale;
             destination.set(bounds.exactCenterX() - width / 2, bounds.exactCenterY() - height / 2,
                     bounds.exactCenterX() + width / 2, bounds.exactCenterY() + height / 2);
             paint.setColor(Color.WHITE); paint.setColorFilter(filter == null
-                    ? new PorterDuffColorFilter(0xffefdee5, PorterDuff.Mode.SRC_IN) : filter);
+                    ? new PorterDuffColorFilter(flow?Color.WHITE:0xffefdee5, PorterDuff.Mode.SRC_IN) : filter);
             canvas.drawBitmap(glyph, source, destination, paint); canvas.restoreToCount(save);
         }
         @Override public int getIntrinsicWidth() { return original.getIntrinsicWidth(); }

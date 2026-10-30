@@ -51,6 +51,7 @@ STUBS = {
  public static int getInt(android.content.ContentResolver r,String key,int fallback){String value=getString(r,key);return value==null?fallback:Integer.parseInt(value);}
  public static boolean putString(android.content.ContentResolver r,String key,String value){r.values.put(key,value);return true;}
  public static boolean putInt(android.content.ContentResolver r,String key,int value){return putString(r,key,String.valueOf(value));}}}''',
+'org/hecker/suite/HomeAppearance.java':'package org.hecker.suite;public class HomeAppearance{public static final String KEY="hecker_home_depth_wallpaper_id";}',
 'org/hecker/suite/DepthWallpaperProvider.java':'''package org.hecker.suite;public class DepthWallpaperProvider{public static final String ID="hecker_depth_wallpaper_id";}''',
 'DefaultAppearanceProbe.java':'''import org.hecker.suite.DefaultAppearance;import android.content.Context;import android.provider.Settings.Secure;
 class DefaultAppearanceProbe{

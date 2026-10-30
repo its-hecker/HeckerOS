@@ -1,0 +1,10 @@
+<resources>
+    <string name="hs_flow_preview_apply">应用 Living Flow 预览外观</string>
+    <string name="hs_glass_icon_style">内置玻璃图标外观</string>
+    <string name="hs_glass_icon_smoked">烟熏玻璃 · 当前</string>
+    <string name="hs_glass_icon_flow">Living Flow · 描边底板</string>
+    <string name="hs_dock_search_style">搜索栏外观</string>
+    <string name="hs_dock_search_full">完整搜索栏</string>
+    <string name="hs_dock_search_flow">Living Flow · 紧凑搜索胶囊</string>
+    <string name="hs_flow_search_hint">搜索应用</string>
+</resources>

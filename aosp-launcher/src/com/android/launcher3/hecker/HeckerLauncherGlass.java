@@ -52,7 +52,7 @@ public final class HeckerLauncherGlass {
         void restore(){for(Map.Entry<View,Drawable> e:new ArrayList<>(originals.entrySet())){View v=e.getKey();if(v!=null&&v.getBackground() instanceof Glass)v.setBackground(e.getValue());}originals.clear();}
         void invalidate(){for(View v:new ArrayList<>(originals.keySet()))if(v!=null)v.invalidate();for(View v:new ArrayList<>(panels.keySet()))if(v!=null)v.invalidate();}
         void schedule(){if(!stopped&&!queued){queued=true;MAIN.post(refresh);}}
-        @Override public void onSharedPreferenceChanged(SharedPreferences p,String key){if(key!=null&&key.startsWith("hecker_glass")){schedule();if(key.equals("hecker_glass_frost")){MAIN.removeCallbacks(refrost);MAIN.postDelayed(refrost,120);}}}
+        @Override public void onSharedPreferenceChanged(SharedPreferences p,String key){if(key!=null&&(key.startsWith("hecker_glass")||key.equals(HeckerStudio.PREFIX+"dock_search_style"))){schedule();if(key.equals("hecker_glass_frost")){MAIN.removeCallbacks(refrost);MAIN.postDelayed(refrost,120);}}}
         @Override public void onGlobalLayout(){
             if(stopped||mode()==0)return;
             // New folders/widgets are discovered after layout, not on every frame.
@@ -68,6 +68,7 @@ public final class HeckerLauncherGlass {
                     && ((android.appwidget.AppWidgetHostView)v).getAppWidgetInfo().provider.equals(new ComponentName(app,HeckerClockWidget.class))
                     && v instanceof ViewGroup && ((ViewGroup)v).getChildCount()>0 && ((ViewGroup)v).getChildAt(0) instanceof HeckerClockView
                     && !((HeckerClockView)((ViewGroup)v).getChildAt(0)).style().equals("glass"))target=null;
+            if(v instanceof HeckerDockBar&&((HeckerDockBar)v).compact())target=null;
             if(target!=null&&prefs.getBoolean("hecker_glass_"+target,!"dock".equals(target))&&!originals.containsKey(v)){
                 originals.put(v,v.getBackground());v.setBackground(new Glass(v,this));
             }

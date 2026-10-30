@@ -32,7 +32,8 @@
     "2c67840f2a4ea6d338ae9d754426190a8864550b",
     "38b52500e4794c63cf9ca3b70ff1cb08822e4b84",
     "0421aefd6b7a433c689847b630d248cc798fdb01",
-    "b5a92e44563ab23a2df3c2ce139d2c9c6d792c61"
+    "b5a92e44563ab23a2df3c2ce139d2c9c6d792c61",
+    "ec74da8abe7a35c6464ffaa4b91b604e528c6390"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerThemeAssets.kt": [
     "3c28bc60f5b84e5ad9625291968218c65467a780",
@@ -239,11 +240,13 @@
     "863770170b1a922e9f96d26edab2078c353917f8",
     "9a4cdc0d54208ae01e91f9a553bc38b320eaafb3",
     "537db14b82fe656af745908bf7081d8e5fe81146",
-    "54c74fecfd56d833f203eeb7e3cdef4d1c90aa03"
+    "54c74fecfd56d833f203eeb7e3cdef4d1c90aa03",
+    "f904ab72d2e336ec50e1a9c679dcf52d9769daea"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMediaCard.kt": [
     "4840b9bbb302caaf73dbcf7a2b7a286a4a58d62c",
-    "24fb361a338fa4fdfa9eec03f47ef6aa78b83738"
+    "24fb361a338fa4fdfa9eec03f47ef6aa78b83738",
+    "dcea9681cfaac148f86b5465e1ac06a2b961a293"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMotionIsland.java": [
     "b9e18585e75500f62a906a0a163c0c52df90c52d",
@@ -276,6 +279,13 @@
     "974cb8757e585e3c9701a363ba21f79d061fc847"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerDepthWallpaper.kt": [
-    "40bc5097ece2759120950ac95c8e423459b4895f"
+    "40bc5097ece2759120950ac95c8e423459b4895f",
+    "a80ad966b2582f08f73665a3ecb64741652b10d9"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerLivingFlow.kt": [
+    "859ab10b91e1498dcc0a752c5f2e72565b3d2573"
+  ],
+  "frameworks/base/packages/SystemUI/src/org/hecker/motion/FlowClockRenderer.java": [
+    "7912acb51f5b19445a877b33cdda7123c5e968df"
   ]
 }

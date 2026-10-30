@@ -18,7 +18,8 @@ public abstract class ContentProvider { public Context context=new Context(); pu
  public abstract int delete(android.net.Uri u,String s,String[]a); }''',
             'android/content/ContentValues.java':'package android.content;public class ContentValues{}',
             'android/database/Cursor.java':'package android.database;public interface Cursor{}',
-            'android/content/ContentResolver.java':'package android.content;public class ContentResolver {public String active;}',
+            'android/content/ContentResolver.java':'package android.content;public class ContentResolver {public String active,home;}',
+            'org/hecker/suite/HomeAppearance.java':'package org.hecker.suite;public class HomeAppearance{public static final String KEY="hecker_home_depth_wallpaper_id",ID="ca2aca3da00000000000000000000003";}',
             'android/content/Context.java':'''package android.content;
 public class Context {public java.io.File directory;public Context device;public int ownerUid=100;
  public Context createDeviceProtectedStorageContext(){return device;}public final ContentResolver resolver=new ContentResolver();
@@ -40,7 +41,7 @@ public class PackageManager{public static final int SIGNATURE_MATCH=0;public sta
             'android/net/Uri.java':'''package android.net;public class Uri {private final String raw;private Uri(String s){raw=s;}
  public static Uri parse(String s){return new Uri(s);}public java.util.List<String> getPathSegments(){return java.util.Arrays.asList(java.net.URI.create(raw).getPath().substring(1).split("/"));}}''',
             'android/provider/Settings.java':'''package android.provider;public class Settings{public static class Secure{
- public static String getString(android.content.ContentResolver r,String key){return r.active;} } }''',
+ public static String getString(android.content.ContentResolver r,String key){return key.equals("hecker_home_depth_wallpaper_id")?r.home:r.active;} } }''',
             'DepthReaderProbe.java':'''import org.hecker.suite.DepthWallpaperProvider;
 import android.os.Binder;import android.net.Uri;import java.io.File;
 public class DepthReaderProbe {
@@ -53,6 +54,9 @@ public class DepthReaderProbe {
   File layer=new File(p.context.directory,"depth/"+id+"/foreground.png");layer.getParentFile().mkdirs();layer.createNewFile();
   Uri uri=Uri.parse("content://org.hecker.suite.depth/"+id+"/foreground");
   if(!p.openFile(uri,"r").file.equals(layer))throw new AssertionError("Owner read");
+  String home="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";p.context.resolver.home=home;
+  File homeLayer=new File(p.context.directory,"depth/"+home+"/foreground.png");homeLayer.getParentFile().mkdirs();homeLayer.createNewFile();
+  if(!p.openFile(Uri.parse("content://org.hecker.suite.depth/"+home+"/foreground"),"r").file.equals(homeLayer))throw new AssertionError("Separate Home pair rejected");
   Binder.uid=300;denied(()->p.openFile(uri,"r"));denied(()->p.getType(uri));denied(()->p.query(uri,null,null,null,null));
   Binder.uid=200;android.content.pm.PackageManager.signed=false;denied(()->p.openFile(uri,"r"));
   android.content.pm.PackageManager.signed=true;

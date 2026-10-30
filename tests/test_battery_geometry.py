@@ -15,7 +15,7 @@ class BatteryGeometryTest(unittest.TestCase):
         constructor = constructor.replace('HeckerBatteryDrawable(', 'BatteryProbe(')
         constructor = constructor.replace('android.provider.Settings.Secure', 'Secure').replace('android.os.UserHandle.USER_CURRENT', '-2')
         program = '''public class BatteryProbe {
- final boolean oneUi,levelColors,horizontal,chargingAnimation,externalBolt;final Path chargingBolt;final Resources res;final String pkg;final int width,height;final Path perimeter,mask,bolt,saver;
+ final boolean oneUi,livingFlow,levelColors,horizontal,chargingAnimation,externalBolt;final Path chargingBolt;final Resources res;final String pkg;final int width,height;final Path perimeter,mask,bolt,saver;
  static class Context {Object getContentResolver(){return null;}}
  static class Secure {static int getIntForUser(Object resolver,String name,int fallback,int user){return 1;}}
  static class PathParser {static Path createPathFromPathData(String path){return new Path();}}
@@ -31,7 +31,7 @@ class BatteryGeometryTest(unittest.TestCase):
  static void check(boolean ok){if(!ok)throw new AssertionError();}
 ''' + constructor + '''
  public static void main(String[] args){
-  for(String pkg:new String[]{"com.android.systemui.battery.oneui7","another.battery"})for(boolean horizontal:new boolean[]{false,true}){
+  for(String pkg:new String[]{"com.android.systemui.battery.oneui7","another.battery","org.hecker.theme.battery.livingflow"})for(boolean horizontal:new boolean[]{false,true}){
    Resources res=new Resources(37,19,horizontal);BatteryProbe d=new BatteryProbe(new Context(),res,pkg);
    check(d.width==37&&d.height==19&&d.horizontal==horizontal&&d.levelColors);
    check(d.perimeter==res.paths.get("config_batterymeterPerimeterPath")&&d.perimeter.original);

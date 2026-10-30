@@ -11,10 +11,23 @@ import java.util.Locale;
 /** The same live glyph geometry on AOD, keyguard and Home; no image assets or touch surface. */
 public final class FlowClockRenderer {
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Typeface thin = Typeface.create("sans-serif-thin", Typeface.NORMAL);
-    private final Typeface regular = Typeface.create("sans-serif", Typeface.NORMAL);
-    private final Typeface bold = Typeface.create("sans-serif", Typeface.BOLD);
+    private Typeface thin = Typeface.create("sans-serif-thin", Typeface.NORMAL);
+    private Typeface regular = Typeface.create("sans-serif", Typeface.NORMAL);
+    private Typeface bold = Typeface.create("sans-serif", Typeface.BOLD);
     private static final int[] COLORS = {Color.WHITE, 0xffe6d5ff, 0xffffdebc, 0xffc3edeb, 0xffd2e5ff};
+    private boolean referenceMetrics;
+    public void setReferenceFaces(Typeface regular, Typeface bold) {
+        if (regular != null && bold != null) {
+            this.thin=regular; this.regular=regular; this.bold=bold; referenceMetrics=true;
+        }
+    }
+    /** One consistent native linear doze fraction, with zero endpoint velocity. */
+    public static float wake(float linearDoze) {
+        float t=1-unit(linearDoze); return t*t*(3-2*t);
+    }
+    public static float depthMask(float awake) {
+        float t=unit(awake); return t*t*(3-2*t);
+    }
     private Locale lastLocale;
     private NumberFormat numbers;
     private int lastHour = -1, lastMinute = -1;
@@ -47,6 +60,13 @@ public final class FlowClockRenderer {
         paint.reset(); paint.setAntiAlias(true); paint.setColor(color);
         paint.setAlpha(Math.round(255 * unit(opacity))); paint.setTypeface(face);
         paint.setTextSize(100); paint.setTextAlign(Paint.Align.CENTER);
+        if (referenceMetrics) {
+            // The approved host preview used these font-space proportions. Bundle that
+            // open font instead of stretching different Android OEM font metrics.
+            paint.setTextSize(Math.max(1,height));
+            paint.setTextScaleX(Math.min(stretch,maxWidth/Math.max(1,paint.measureText(text))));
+            canvas.drawText(text,center,top+height*.8f,paint); return;
+        }
         Paint.FontMetrics fm = paint.getFontMetrics();
         paint.setTextSize(Math.max(1, 100 * height / Math.max(1, fm.descent - fm.ascent)));
         paint.setTextScaleX(Math.min(stretch, maxWidth / Math.max(1, paint.measureText(text))));

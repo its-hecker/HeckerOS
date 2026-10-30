@@ -78,6 +78,7 @@ public final class DefaultAppearance {
         manager.setBitmap(wallpaper, null, true, WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
         boolean published = Settings.Secure.putInt(context.getContentResolver(), WALLPAPER_ID, wallpaperId(context))
                 && Settings.Secure.putInt(context.getContentResolver(), HOME_WALLPAPER_ID, manager.getWallpaperId(WallpaperManager.FLAG_SYSTEM))
+                && Settings.Secure.putString(context.getContentResolver(), HomeAppearance.KEY, ID)
                 && Settings.Secure.putInt(context.getContentResolver(), HOME_DEPTH,
                         !requested && updateBundled ? Settings.Secure.getInt(context.getContentResolver(), HOME_DEPTH, 1) : 1);
         if (requested || !updateBundled) published = published

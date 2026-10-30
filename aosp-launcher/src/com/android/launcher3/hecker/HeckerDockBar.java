@@ -46,9 +46,21 @@ public final class HeckerDockBar extends LinearLayout
         if (id != 0) setId(id);
         rebuild();
     }
+    boolean compact(){return !HeckerStudio.enabled(getContext(),"google_search",false)
+            && HeckerStudio.number(getContext(),"dock_search_style",0,0,1)==1;}
     private void rebuild() {
         removeAllViews(); Context context = getContext();
         boolean google = HeckerStudio.enabled(context, "google_search", false);
+        GradientDrawable plate=new GradientDrawable();plate.setColor(compact()?0xb8171928:0xb830232e);
+        plate.setCornerRadius(HeckerStudio.dp(context,28));plate.setStroke(HeckerStudio.dp(context,1),compact()?0x78ffffff:0x35efd6e2);
+        android.graphics.drawable.Drawable inset=new android.graphics.drawable.InsetDrawable(plate,0,compact()?HeckerStudio.dp(context,12):0,0,compact()?HeckerStudio.dp(context,12):0);
+        setBackground(new RippleDrawable(ColorStateList.valueOf(0x25ffffff),inset,null));
+        if(compact()){
+            TextView label=HeckerStudio.label(context,HeckerStudio.text(context,"flow_search_hint"),12);
+            label.setGravity(Gravity.CENTER);label.setTextColor(0xfff2f4fa);label.setSingleLine();
+            label.setEllipsize(android.text.TextUtils.TruncateAt.END);addView(label,new LayoutParams(-1,-1));
+            setContentDescription(HeckerStudio.text(context,"search_hint"));setOnClickListener(v->HeckerStudio.search(context));return;
+        }
         if (google) {
             TextView mark = new TextView(context); mark.setText("G"); mark.setTextSize(27);
             mark.setTextColor(0xffefdee5); mark.setTypeface(Typeface.create("sans-serif", Typeface.BOLD));
@@ -105,7 +117,7 @@ public final class HeckerDockBar extends LinearLayout
     @Override public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
         if ((HeckerStudio.PREFIX + "dock_search").equals(key)) {
             setVisibility(requestedVisibility); requestLayout();
-        } else if ((HeckerStudio.PREFIX + "google_search").equals(key)) {
+        } else if ((HeckerStudio.PREFIX + "google_search").equals(key) || (HeckerStudio.PREFIX + "dock_search_style").equals(key)) {
             rebuild(); requestLayout();
         }
     }

@@ -30,6 +30,15 @@ For Flame, use the [dedicated local manifest](https://github.com/its-hecker/Heck
 and [Flame build notes](docs/flame-bringup.md). Its shared hardware checkout remains
 at `device/google/coral`, with its own vendor at `vendor/google/flame`.
 
+## Coral Living Flow polish and upstream review
+
+The `feat/living-flow-polish-20261030` branch contains the screenshot-reference
+clock/launcher/media/blur updates and a pinned Coral-only PixelOS/Lineage update.
+See [Living Flow polish](docs/living-flow-polish.md) and the
+[30 October upstream review](docs/coral-upstream-review-2026-10-30.md).
+Use the matching root-manifest and Coral local-manifest branches together.
+Flame manifests and hardware pins are unchanged.
+
 ## Included source
 
 - The reference grouped Settings UI: retained caracal hero, maintainer row, coloured icons,
@@ -85,7 +94,7 @@ full ROM builds or boots. A full Soong build and coral hardware tests are requir
 Use a fresh Android source directory with the normal AOSP build prerequisites,
 Git LFS, Python 3, Pillow and numpy. `repo sync` also initializes the kernel's
 existing KernelSU submodule. The dedicated local manifest supplies exact hardware,
-plugin, Settings and framework revisions. The remaining 87 platform projects use
+plugin, Settings and framework revisions. The remaining 88 platform projects use
 their existing upstream repositories at exact commit pins. Forking them is
 optional and is not a build prerequisite.
 
@@ -179,7 +188,7 @@ PIF, game profile, keybox import and TrickyStore controls adapted to Android 17.
 The current [Spoofing hub](docs/spoofing-hub.md) uses Evolution X Android 17
 screens, Canary metadata discovery and an original Lottie animation.
 Photos retains the PixelOS implementation. Settings, frameworks/base,
-vendor/custom and vendor/lineage use owned `heckeros-17` branches. The other 87
+vendor/custom and vendor/lineage use owned `heckeros-17` branches. The other 88
 projects remain upstream and are pinned. Our customizations are retained without
 copying those repositories. PixelOS changes require an explicit pin update,
 review and rebuild. See [migration/README.md](migration/README.md) for optional

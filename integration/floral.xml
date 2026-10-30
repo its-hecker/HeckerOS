@@ -8,24 +8,24 @@
   <remove-project path="vendor/lunaris/dolby" optional="true" />
   <remove-project path="vendor/hecker/floral/motionsense" optional="true" />
   <remove-project path="vendor/hecker/floral/faceid" optional="true" />
-  <remove-project path="vendor/hecker/floral/suite" optional="true" />
+  <remove-project path="vendor/hecker/floral/suite" optional="true" upstream="refs/heads/feat/living-flow-polish-20261030" dest-branch="feat/living-flow-polish-20261030" revision="refs/heads/feat/living-flow-polish-20261030" />
   <project name="its-hecker/heckeros-floral-devicetree" path="device/google/coral" remote="floral-github" revision="4829092f7b7b988fc5fb2efe57c481f266364c71" upstream="refs/heads/test/floral-low-brightness-flicker-20261029" dest-branch="test/floral-low-brightness-flicker-20261029" />
   <project name="its-hecker/heckeros-coral-vendor" path="vendor/google/coral" remote="floral-github" revision="60b0c615e939cd09ce956e6fe6df5d5aa6ccbdd4" upstream="refs/heads/main" dest-branch="main" />
-  <project name="its-hecker/heckeros-floral-kernel" path="kernel/google/msm-4.14" remote="floral-github" revision="f6cb4c1720f523733679ad978264b0ebf15b71c5" upstream="refs/heads/test/coral-root-privacy-20261027" dest-branch="test/coral-root-privacy-20261027" sync-s="true" />
+  <project name="its-hecker/heckeros-floral-kernel" path="kernel/google/msm-4.14" remote="floral-github" revision="5303303fd0138a719c0077570975fdce6ace661f" upstream="refs/heads/feat/coral-upstream-20261030" dest-branch="feat/coral-upstream-20261030" sync-s="true" />
   <project name="LineageOS/android_packages_apps_ElmyraService" path="packages/apps/ElmyraService" remote="floral-github" revision="baab2beb7165caef27b4ee235641775e9d189acc" upstream="refs/heads/lineage-24.0" />
   <project name="its-hecker/vendor_lunaris_dolby" path="vendor/lunaris/dolby" remote="floral-github" revision="544e6271c955e2bf450c8481ac1e71551cb5a800" upstream="refs/heads/pixelos-compat" dest-branch="pixelos-compat" />
   <project name="its-hecker/floral-motionsense-plugin" path="vendor/hecker/floral/motionsense" remote="floral-github" revision="87b91ac74c46de0d00992f72c6fe115189a2e83e" upstream="refs/heads/test/coral-root-privacy-20261027" dest-branch="test/coral-root-privacy-20261027" />
   <project name="its-hecker/floral-3D-faceid-plugin" path="vendor/hecker/floral/faceid" remote="floral-github" revision="d998995e1452d2c3d9882bfdf659e1db760a99be" upstream="refs/heads/main" dest-branch="main" />
-  <project name="its-hecker/HeckerOS" path="vendor/hecker/floral/suite" remote="floral-github" revision="refs/heads/feat/statusbar-lyrics-dual-20261029" upstream="refs/heads/feat/statusbar-lyrics-dual-20261029" dest-branch="feat/statusbar-lyrics-dual-20261029" />
+  <project name="its-hecker/HeckerOS" path="vendor/hecker/floral/suite" remote="floral-github" revision="refs/heads/feat/living-flow-polish-20261030" upstream="refs/heads/feat/living-flow-polish-20261030" dest-branch="feat/living-flow-polish-20261030" />
   <remove-project path="packages/services/OmniJaws" optional="true" />
   <extend-project name="PixelOS-AOSP/android_packages_apps_DolbyAtmos" path="packages/apps/DolbyAtmos" revision="13bbe61cf3e1046e3a1f0bda4719c321c953ce50" upstream="refs/heads/seventeen" />
   <extend-project name="LineageOS/android_hardware_lineage_compat" path="hardware/lineage/compat" revision="590c94850e079642136a4577305d02e4174caabc" upstream="refs/heads/lineage-24.0" />
   <extend-project name="LineageOS/android_vendor_qcom_opensource_audioreach-graphservices" path="hardware/qcom-caf/sm8750/audio/graphservices" revision="62591b81ddb14cb1ddecf2a8e7162f2082456793" upstream="refs/heads/lineage-24.0-caf-sm8750" />
   <extend-project name="LineageOS/android_hardware_qcom-caf_common" path="hardware/qcom-caf/common" revision="5e84e6f8fc47530881fa8d95cf533617ff51e820" upstream="refs/heads/lineage-24.0" />
-  <extend-project name="its-hecker/heckeros_vendor_custom" path="vendor/custom" revision="302ac1f722258085326e38d45e2742a067316d59" upstream="refs/heads/feat/about-phone-official" />
-  <extend-project name="its-hecker/heckeros_vendor_lineage" path="vendor/lineage" revision="0d2ff0b8055eb745d36dfef3600a73f5185a4fff" upstream="refs/heads/heckeros-17" />
-  <extend-project name="its-hecker/heckeros_frameworks_base" path="frameworks/base" revision="f2091fa0550856c69e53afc5f58147acd48d0c52" upstream="refs/heads/test/floral-low-brightness-flicker-20261029" dest-branch="test/floral-low-brightness-flicker-20261029" />
-  <extend-project name="platform/hardware/google/camera" path="hardware/google/camera" revision="cd15337bd229dd521a860d88bca3e37c3ca845f7" upstream="refs/tags/android-17.0.0_r1" />
+  <extend-project name="its-hecker/heckeros_vendor_custom" path="vendor/custom" revision="82457873ad4f7c75195c21ddf9da35903a0d975f" upstream="refs/heads/feat/coral-upstream-20261030" />
+  <extend-project name="its-hecker/heckeros_vendor_lineage" path="vendor/lineage" revision="a8286e3a3edc3aed7e774ca57476477f178a0c46" upstream="refs/heads/feat/coral-upstream-20261030" />
+  <extend-project name="its-hecker/heckeros_frameworks_base" path="frameworks/base" revision="c72dce10290956bd3c4bfd23e787800d1340c46e" upstream="refs/heads/feat/coral-upstream-20261030" dest-branch="feat/coral-upstream-20261030" />
+  <extend-project name="platform/hardware/google/camera" path="hardware/google/camera" revision="cd15337bd229dd521a860d88bca3e37c3ca845f7" upstream="refs/heads/android-17.0.0_r1" />
   <extend-project name="PixelOS-AOSP/android_system_sepolicy" path="system/sepolicy" revision="99c58a7cc9a44fe33c93808452d018e756d84753" upstream="refs/heads/seventeen" />
   <extend-project name="PixelOS-AOSP/android_system_core" path="system/core" revision="a5313eaec0219b021aaa5e59cc10dd07cfa8504c" upstream="refs/heads/seventeen" />
   <extend-project name="its-hecker/heckeros_packages_apps_Settings" path="packages/apps/Settings" revision="3831282d93ecda4d52a6894077482fe01ecea903" upstream="refs/heads/feat/suite-polish" />

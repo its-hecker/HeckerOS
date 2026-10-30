@@ -1,9 +1,9 @@
 {
-  "checked_on": "2026-10-29",
+  "checked_on": "2026-10-30",
   "pixelos_manifest": {
     "repository": "PixelOS-AOSP/android_manifest",
     "branch": "seventeen",
-    "revision": "c16cfd0c95c5c3d7f5f2ef85b5b3140787db2035"
+    "revision": "1f53b335fdbf44bc04906248056f878eb52588fc"
   },
   "base_snapshots": {
     "device": {
@@ -61,8 +61,8 @@
     },
     "vendor/custom": {
       "repository": "its-hecker/heckeros_vendor_custom",
-      "branch": "feat/about-phone-official",
-      "revision": "302ac1f722258085326e38d45e2742a067316d59",
+      "branch": "feat/coral-upstream-20261030",
+      "revision": "82457873ad4f7c75195c21ddf9da35903a0d975f",
       "files": [
         "config/",
         "overlay/common/",
@@ -74,8 +74,8 @@
     },
     "vendor/lineage": {
       "repository": "its-hecker/heckeros_vendor_lineage",
-      "branch": "heckeros-17",
-      "revision": "0d2ff0b8055eb745d36dfef3600a73f5185a4fff",
+      "branch": "feat/coral-upstream-20261030",
+      "revision": "a8286e3a3edc3aed7e774ca57476477f178a0c46",
       "files": [
         "overlay/common/",
         "config/common_mobile_full.mk"
@@ -91,8 +91,8 @@
     },
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
-      "branch": "test/floral-low-brightness-flicker-20261029",
-      "revision": "f2091fa0550856c69e53afc5f58147acd48d0c52",
+      "branch": "feat/coral-upstream-20261030",
+      "revision": "c72dce10290956bd3c4bfd23e787800d1340c46e",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -247,8 +247,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "feat/statusbar-lyrics-dual-20261029",
-    "integration_branch": "feat/statusbar-lyrics-dual-20261029",
+    "source_branch": "feat/living-flow-polish-20261030",
+    "integration_branch": "feat/living-flow-polish-20261030",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required",
@@ -314,15 +314,15 @@
     },
     "kernel": {
       "repository": "its-hecker/heckeros-floral-kernel",
-      "branch": "test/coral-root-privacy-20261027",
-      "revision": "f6cb4c1720f523733679ad978264b0ebf15b71c5"
+      "branch": "feat/coral-upstream-20261030",
+      "revision": "5303303fd0138a719c0077570975fdce6ace661f"
     }
   },
   "platform_ownership": {
     "status": "pinned-upstream-with-owned-customizations",
     "owned_projects": 4,
-    "total_pixelos_projects": 91,
-    "remaining_projects": 87,
+    "total_pixelos_projects": 92,
+    "remaining_projects": 88,
     "migration": "migration/README.md",
     "updates": "Upstream changes require explicit pin updates, review and another build. No automatic merges or phone updates.",
     "bulk_migration_required": false,
@@ -394,5 +394,37 @@
     "insets": "Built-in signed framework RROs; native theme service mirrors the foreground choice into system-user resources without rewriting preferences.",
     "flame_framework_revision": "854e6dbf73ae1cd61095085a9655c8d9136104eb",
     "validation": "Source, SDK, native-adapter and host checks; full Soong/ROM builds and both phones remain required."
+  },
+  "coral_update_review": {
+    "checked_on": "2026-10-30",
+    "scope": [
+      "coral"
+    ],
+    "report": "docs/coral-upstream-review-2026-10-30.md",
+    "platform_security_patch": "2026-10-01",
+    "new_manifest_sources": [
+      {
+        "path": "external/conscrypt",
+        "repository": "LineageOS/android_external_conscrypt",
+        "branch": "lineage-24.0",
+        "revision": "98b5842746b92120e30ba3ddc8b1f975b8b7f897"
+      },
+      {
+        "path": "system/ca-certificates",
+        "repository": "LineageOS/android_system_ca-certificates",
+        "branch": "lineage-24.0",
+        "revision": "3eafa7527b96dee31eb8afd7586f3e4ca8c07de0"
+      },
+      {
+        "path": "system/memory/libmeminfo",
+        "repository": "PixelOS-AOSP/android_system_memory_libmeminfo",
+        "branch": "seventeen",
+        "revision": "e970d14536c482bc08f46b93ed2a6185f83a165c"
+      }
+    ],
+    "device_lineage_already_included": "6a4ad9f39145ba7c6ff927041b6e9ff453edc1f8",
+    "muppets_vendor_already_included": "c957fead4960a897ff75132f3acc5ec64d492ada",
+    "kernel_lineage_import": "bb17b7de4b570f2c0c32ddba0543cac03c58dd84",
+    "validation": "Source and host validation only; full ROM, kernel and phone tests required. Vendor/firmware security patch levels unchanged."
   }
 }

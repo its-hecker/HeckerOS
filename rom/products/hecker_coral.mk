@@ -6,6 +6,7 @@
 # HeckerOS inherits the pinned PixelOS Android 17 platform configuration.
 # The real IR hardware provider is supplied by the Floral Face ID plugin.
 TARGET_FACE_UNLOCK_SUPPORTED := false
+TARGET_PROVIDES_FACE_UNLOCK_HAL := true
 PRODUCT_NO_CAMERA := true
 TARGET_SCREEN_WIDTH := 1440
 TARGET_SCREEN_HEIGHT := 3040

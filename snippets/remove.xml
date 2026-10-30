@@ -72,4 +72,7 @@
   <remove-project name="platform/system/sepolicy" />
   <remove-project name="platform/system/update_engine" />
   <remove-project name="platform/system/vold" />
+  <remove-project name="platform/external/conscrypt" />
+  <remove-project name="platform/system/ca-certificates" />
+  <remove-project name="platform/system/memory/libmeminfo" />
 </manifest>

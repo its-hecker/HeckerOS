@@ -18,7 +18,7 @@ public final class AppearanceBootReceiver extends BroadcastReceiver {
         WORKER.execute(() -> {
             try {
                 if (Intent.ACTION_WALLPAPER_CHANGED.equals(action)) DefaultAppearance.reconcile(context);
-                else DefaultAppearance.apply(context, false);
+                else { DefaultAppearance.apply(context, false); HomeAppearance.apply(context, false); }
             } catch (Exception | OutOfMemoryError failure) {
                 android.util.Log.w("HeckerAppearance", "Default appearance unavailable; native wallpaper retained", failure);
             } finally { pending.finish(); }

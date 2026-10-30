@@ -122,7 +122,7 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
     val clock = clockText(context)
     val renderer = remember(context) { HeckerAmbientRenderer(context) }
     val reference = remember { HeckerLockscreenClockRenderer() }
-    val living = remember { FlowClockRenderer() }
+    val living = remember(context) { FlowClockRenderer().also { org.hecker.motion.FlowClockFonts.apply(context, it) } }
     val ambient = dozing(controller)
     val awake = heckerAwakeFraction(controller)
     var onKeyguard by remember(controller) { mutableStateOf(controller.state == 1) }

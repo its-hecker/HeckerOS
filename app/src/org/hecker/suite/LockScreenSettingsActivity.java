@@ -31,7 +31,7 @@ public final class LockScreenSettingsActivity extends Activity {
         Ui.actionCard(this, page, R.string.caracal_defaults_title, R.string.caracal_defaults_summary, v -> {
             AppearanceBootReceiver.WORKER.execute(() -> {
                 boolean applied;
-                try { applied = DefaultAppearance.apply(this, true); }
+                try { applied = DefaultAppearance.apply(this, true); if(applied)HomeAppearance.apply(this,true); }
                 catch (Exception | OutOfMemoryError failure) { applied = false; }
                 final boolean success = applied;
                 runOnUiThread(() -> { if (!isFinishing() && !isDestroyed()) {
@@ -40,6 +40,8 @@ public final class LockScreenSettingsActivity extends Activity {
                 } });
             });
         });
+        Ui.actionCard(this,page,R.string.home_depth_picker_title,R.string.home_depth_picker_summary,
+            v->startActivity(new Intent(this,DepthWallpaperActivity.class).putExtra("home_only",true)));
         Ui.actionCard(this,page,R.string.lockscreen_wallpaper_title,R.string.lockscreen_wallpaper_summary,v->SuitePages.wallpaper(this));
         LinearLayout clock = Ui.card(this);
         toggle(clock, R.string.custom_clock_title, R.string.custom_clock_summary,

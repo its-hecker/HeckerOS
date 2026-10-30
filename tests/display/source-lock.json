@@ -1,9 +1,9 @@
 {
   "framework": {
     "repository": "its-hecker/heckeros_frameworks_base",
-    "revision": "f2091fa0550856c69e53afc5f58147acd48d0c52",
+    "revision": "c72dce10290956bd3c4bfd23e787800d1340c46e",
     "files": {
-      "services/core/java/com/android/server/display/mode/DisplayModeDirector.java": "7a2279ad03258b314769cf4a21b9ea69af034a26527de3ec7ce64cec914200ca",
+      "services/core/java/com/android/server/display/mode/DisplayModeDirector.java": "09587ab15ea2bee3bbe0b0d8b8532193337b6c59cafef4cd5ee6dc29abdec60d",
       "services/core/java/com/android/server/display/mode/LowZoneBrightnessHysteresis.java": "a6df862808f36de09ed9aa9e63f085962ca6392030bc466eaa7ae498735028f9",
       "core/res/res/values/config.xml": "0d2ea94f248b1fd3a28b99a61e591a35d49fc69b956efcb0ecec6ead75f7a6be",
       "core/res/res/values/symbols.xml": "372e9aba16fb9ab8a8beb73425fe317ebab1415a14ddc18a225bdd5daa36de4f"

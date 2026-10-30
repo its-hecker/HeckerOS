@@ -17,18 +17,21 @@
     "84e86f9b117b6aadb7f3d3582d3f28679cc99a7d",
     "0612cdf6695a5b557e2936a0ea8099a82193a819",
     "f580f30188bff0a2662c8a3fd0b63cdc8b1c0e45",
-    "f48664626b53a35e4d8b1f721b498f1c6a8701c8"
+    "f48664626b53a35e4d8b1f721b498f1c6a8701c8",
+    "0306e8b2f96f27929d910f1e040f1dccbfa3bd4c"
   ],
   "src/com/android/launcher3/hecker/HeckerStudioActivity.java": [
     "4e1f752e60dee1876b4b25a86b4e3fa5ccf0eb93",
     "1c8e079d853fd5164899ae66107c80cab66fac8e",
     "fbc6d63747360dc6c9d2db88e95375dfabdf8eab",
-    "17b70d3f45be4364a7065e5568a491ea080555f2"
+    "17b70d3f45be4364a7065e5568a491ea080555f2",
+    "6cb299fa5d60a2455ab6dce09bdb62e28895a681"
   ],
   "src/com/android/launcher3/hecker/HeckerClockView.java": [
     "fc66b0dadc06aec42d9823d1b6fc757e9128d185",
     "31c853f6a9ae80fc0c80e78d1d89d09fc002051e",
-    "e7f0ee14b07e5a393b092a682c44804d42790bbc"
+    "e7f0ee14b07e5a393b092a682c44804d42790bbc",
+    "d4c1905463b1f237330b7a83e56072af318bae48"
   ],
   "generated/hecker-launcher/res/values/studio.xml": [
     "027dfae0d51492105a0cdc34ccac5206af9f9451",
@@ -38,7 +41,8 @@
   "src/com/android/launcher3/hecker/HeckerDockBar.java": [
     "986161c90f2b9e87232d3a49f6592a126249c6b4",
     "353838905cb4518694c67879c82d57fa4b70e066",
-    "dfbbb1c41ad511a8266219c1dda082ff72c9218c"
+    "dfbbb1c41ad511a8266219c1dda082ff72c9218c",
+    "698376990bd9e26049448cdf649d34f4245ae928"
   ],
   "src/com/android/launcher3/hecker/HeckerIconStudio.java": [
     "509ca22e0f2363a23f81a010d30497d54b532655"
@@ -53,6 +57,13 @@
     "d438f68d9e49f64444342249ea4d259e6e6a3b39"
   ],
   "src/com/android/launcher3/hecker/HeckerHomeDepth.java": [
-    "372a278ff980b81b88a3f2938fad3971166fa3a9"
+    "372a278ff980b81b88a3f2938fad3971166fa3a9",
+    "54aed4857953c00e6f7480ca6245e6a3d7ce5bbf"
+  ],
+  "src/com/android/launcher3/hecker/HeckerGlassIcons.java": [
+    "2c64a8fdda6d5f7748d3b9d6b17e1da1fb2fedf2"
+  ],
+  "src/org/hecker/motion/FlowClockRenderer.java": [
+    "7912acb51f5b19445a877b33cdda7123c5e968df"
   ]
 }

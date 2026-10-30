@@ -19,7 +19,7 @@ import java.util.concurrent.*;
 
 /** Draws below native launcher scrims/icons; only clock views redraw the subject above their text. */
 public final class HeckerHomeDepth {
-    private static final String ID="hecker_depth_wallpaper_id",ENABLED="hecker_home_depth_wallpaper",
+    private static final String ID="hecker_home_depth_wallpaper_id",LEGACY_ID="hecker_depth_wallpaper_id",ENABLED="hecker_home_depth_wallpaper",
             WALLPAPER="hecker_home_depth_wallpaper_wallpaper_id";
     private static final ExecutorService IO=Executors.newSingleThreadExecutor();
     private static final WeakHashMap<View,Scene> SCENES=new WeakHashMap<>();
@@ -48,7 +48,7 @@ public final class HeckerHomeDepth {
             context=root.getContext().getApplicationContext();this.root=new WeakReference<>(root);
             root.addOnAttachStateChangeListener(this);
             try {
-            for(String key:new String[]{ID,ENABLED,WALLPAPER}){context.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(key),false,observer);observerRegistered=true;}
+            for(String key:new String[]{ID,LEGACY_ID,ENABLED,WALLPAPER}){context.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(key),false,observer);observerRegistered=true;}
             IntentFilter filter=new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
             filter.addAction(Intent.ACTION_USER_UNLOCKED);filter.addAction(Intent.ACTION_SCREEN_ON);
             filter.addAction(Intent.ACTION_SCREEN_OFF);filter.addAction(Intent.ACTION_USER_PRESENT);
@@ -57,7 +57,7 @@ public final class HeckerHomeDepth {
             HeckerStudio.prefs(context).registerOnSharedPreferenceChangeListener(this);preferencesRegistered=true;refresh();
             } catch(RuntimeException unavailable) { onViewDetachedFromWindow(root); }
         }
-        private String id(){return Settings.Secure.getString(context.getContentResolver(),ID);}
+        private String id(){String value=Settings.Secure.getString(context.getContentResolver(),ID);return value==null?Settings.Secure.getString(context.getContentResolver(),LEGACY_ID):value;}
         private boolean enabled(){return HeckerStudio.enabled(context,"home_depth",true)
                 &&Settings.Secure.getInt(context.getContentResolver(),ENABLED,0)==1;}
         private Bitmap decode(String id,String layer)throws Exception{

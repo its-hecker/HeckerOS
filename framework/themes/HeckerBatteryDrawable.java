@@ -32,7 +32,7 @@ public final class HeckerBatteryDrawable extends Drawable implements Animatable,
     private final Path fillPath = new Path();
     private final RectF fillBounds = new RectF();
     private final int width, height;
-    private final boolean horizontal, oneUi;
+    private final boolean horizontal, oneUi, livingFlow;
     private final boolean levelColors;
     private final boolean chargingAnimation, externalBolt;
     private final Path chargingBolt;
@@ -44,6 +44,7 @@ public final class HeckerBatteryDrawable extends Drawable implements Animatable,
 
     private HeckerBatteryDrawable(Context context, Resources res, String pkg) {
         oneUi = "com.android.systemui.battery.oneui7".equals(pkg);
+        livingFlow = "org.hecker.theme.battery.livingflow".equals(pkg);
         levelColors = android.provider.Settings.Secure.getIntForUser(context.getContentResolver(), "hecker_battery_colors", 1, android.os.UserHandle.USER_CURRENT) != 0;
         chargingAnimation = setting(context, "hecker_battery_charging_animation", 1) != 0;
         externalBolt = oneUi && setting(context, "hecker_battery_bolt", 1) != 0;
@@ -85,7 +86,7 @@ public final class HeckerBatteryDrawable extends Drawable implements Animatable,
         if (!canAnimate()) stop();
     }
     private boolean canAnimate() {
-        return oneUi && chargingAnimation && charging && !powerSave && level > 0
+        return (oneUi || livingFlow) && chargingAnimation && charging && !powerSave && level > 0
                 && ValueAnimator.areAnimatorsEnabled();
     }
     @Override public void start() {
@@ -162,10 +163,10 @@ public final class HeckerBatteryDrawable extends Drawable implements Animatable,
         int save = canvas.save();
         canvas.translate(getBounds().left, getBounds().top);
         canvas.scale(getBounds().width() / (float) getIntrinsicWidth(), getBounds().height() / (float) height);
-        paint.setStyle(Paint.Style.FILL); paint.setColor(tint); paint.setAlpha(65); canvas.drawPath(perimeter, paint);
-        final int fillColor = charging ? (oneUi && levelColors ? 0xff64e4bd : color("config_batterymeterChargingFillColor", tint))
+        paint.setStyle(Paint.Style.FILL); paint.setColor(tint); paint.setAlpha(livingFlow ? 230 : 65); canvas.drawPath(perimeter, paint);
+        final int fillColor = charging ? ((oneUi || livingFlow) && levelColors ? 0xff64e4bd : color("config_batterymeterChargingFillColor", tint))
                 : powerSave ? 0xffffcc66 : level <= 15 ? 0xffff6175
-                : oneUi && levelColors ? (level <= 35 ? 0xffffc66b : level <= 70 ? 0xff76cfff : 0xff91e3c1) : tint;
+                : (oneUi || livingFlow) && levelColors ? (level <= 35 ? 0xffffc66b : level <= 70 ? 0xff76cfff : 0xff91e3c1) : tint;
         buildFillPath();
         int fill = canvas.save(); canvas.clipPath(mask); canvas.clipPath(fillPath);
         paint.setAlpha(255);

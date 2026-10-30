@@ -144,5 +144,9 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/StatusBarRowsPolicy.java": "framework/statusbar/StatusBarRowsPolicy.java",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerStatusBarRows.java": "framework/statusbar/HeckerStatusBarRows.java",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/StatusBarLyricsPolicy.java": "framework/lyrics/StatusBarLyricsPolicy.java",
-  "frameworks/base/services/core/java/com/android/server/theme/StatusBarHeightSync.java": "framework/themes/StatusBarHeightSync.java"
+  "frameworks/base/services/core/java/com/android/server/theme/StatusBarHeightSync.java": "framework/themes/StatusBarHeightSync.java",
+  "frameworks/base/packages/SystemUI/src/org/hecker/motion/FlowClockFonts.java": "aosp-launcher/src/org/hecker/motion/FlowClockFonts.java",
+  "frameworks/base/packages/SystemUI/res/font/hecker_living_flow_bold.ttf": "fonts/living-flow/hecker_living_flow_bold.ttf",
+  "frameworks/base/packages/SystemUI/res/font/hecker_living_flow_regular.ttf": "fonts/living-flow/hecker_living_flow_regular.ttf",
+  "frameworks/base/packages/SystemUI/res/raw/hecker_living_flow_font_notice.txt": "fonts/living-flow/LICENSE.txt"
 }

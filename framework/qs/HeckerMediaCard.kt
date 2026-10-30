@@ -3,6 +3,15 @@
 package com.android.systemui.hecker
 
 import android.media.session.PlaybackState
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import kotlin.math.sin
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,10 +60,12 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
         if (state != null) nativeFallback?.invoke()
         return
     }
+    val ambient by HeckerAmbientCharging.state.collectAsState()
+    val motion = heckerFlowMotionAllowed() && ambient.screenAwake
     var position by remember { mutableStateOf(0L) }
     var seeking by remember { mutableStateOf(false) }
-    LaunchedEffect(state, seeking) {
-        if (seeking) return@LaunchedEffect
+    LaunchedEffect(state, seeking, motion, ambient.screenAwake) {
+        if (seeking || !ambient.screenAwake) return@LaunchedEffect
         do {
             position = state?.positionNow() ?: 0
             if (state?.playing != true) break
@@ -66,9 +77,11 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
     val shape = RoundedCornerShape(if (square) 30.dp else 28.dp)
     Box(modifier.fillMaxWidth().clip(shape).background(if (flow) Color.White.copy(alpha = .10f) else Color(0xCC173C50))
         .border(1.dp, Color.White.copy(alpha = .16f), shape)) {
-        if (art != null) Image(art.asImageBitmap(), null, contentScale = ContentScale.Crop,
-            modifier = Modifier.matchParentSize().blur(32.dp))
-        Box(Modifier.matchParentSize().background(Brush.verticalGradient(if (flow) listOf(Color(0x18282838), Color(0x78201B2D)) else listOf(Color(0x9C213D55), Color(0xDC0A2639)))))
+        if (!flow) Crossfade(art, modifier=Modifier.matchParentSize(), animationSpec = if (motion) tween(320, easing = HeckerFlowEasing) else snap(), label = "mediaBackdrop") { image ->
+            if (image != null) Image(image.asImageBitmap(), null, contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize().blur(32.dp))
+        }
+        Box(Modifier.matchParentSize().background(Brush.verticalGradient(if (flow) listOf(Color(0x18FFFFFF), Color(0x08FFFFFF)) else listOf(Color(0x9C213D55), Color(0xDC0A2639)))))
         Column(Modifier.fillMaxWidth().padding(horizontal = if (square) 12.dp else 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(if (square) 8.dp else 4.dp)) {
             if (square) {
@@ -84,7 +97,7 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
                     Column(Modifier.weight(1f)) {
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             Box(Modifier.weight(1f)) { MediaTitles(state) }
-                            ReferenceIcon(R.drawable.hecker_qs_waveform, 18, Color.White.copy(alpha = .45f))
+                            MediaPulse(state?.playing == true, motion)
                         }
                         val duration = state?.duration ?: 0L
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -117,20 +130,47 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
 
 @Composable
 private fun MediaArtwork(art: android.graphics.Bitmap?, size: Int) {
-    Box(Modifier.size(size.dp).clip(RoundedCornerShape(11.dp)).background(Color.White.copy(alpha = .14f)), contentAlignment = Alignment.Center) {
-        if (art != null) Image(art.asImageBitmap(), null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-        else ReferenceIcon(R.drawable.hecker_qs_music, 24)
+    val ambient by HeckerAmbientCharging.state.collectAsState()
+    val motion=heckerFlowMotionAllowed() && ambient.screenAwake
+    val arrival=remember { Animatable(1f) }
+    LaunchedEffect(art,motion) {
+        if(motion){arrival.snapTo(.94f);arrival.animateTo(1f,spring(dampingRatio=.9f,stiffness=430f))}
+        else arrival.snapTo(1f)
+    }
+    Box(Modifier.size(size.dp).graphicsLayer { scaleX=arrival.value;scaleY=arrival.value }
+        .clip(RoundedCornerShape(11.dp)).background(Color.White.copy(alpha=.14f)), contentAlignment=Alignment.Center) {
+        Crossfade(art,animationSpec=if(motion)tween(320,easing=HeckerFlowEasing) else snap(),label="mediaArtwork") { image ->
+            if(image!=null) Image(image.asImageBitmap(),null,contentScale=ContentScale.Crop,modifier=Modifier.fillMaxSize())
+            else Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center){ReferenceIcon(R.drawable.hecker_qs_music,24)}
+        }
     }
 }
 
 @Composable
 private fun MediaTitles(state: HeckerQsMedia.Snapshot?, compact: Boolean = false) {
-    val context = LocalContext.current
-    Column {
-        Text(state?.title ?: context.getString(R.string.hecker_qs_play_last), color = Color.White,
-            fontSize = if (compact) 12.sp else 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        if (!state?.artist.isNullOrBlank()) Text(state!!.artist, color = Color.White.copy(alpha = .7f),
-            fontSize = if (compact) 10.sp else 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    val context=LocalContext.current
+    val ambient by HeckerAmbientCharging.state.collectAsState()
+    val motion=heckerFlowMotionAllowed()&&ambient.screenAwake
+    val caption=Pair(state?.title?:context.getString(R.string.hecker_qs_play_last),state?.artist.orEmpty())
+    // Metadata is the target, so the playback-position clock never restarts a title animation.
+    Crossfade(caption,animationSpec=if(motion)tween(280,easing=HeckerFlowEasing) else snap(),label="mediaTitles") { value ->
+        Column {
+            Text(value.first,color=Color.White,fontSize=if(compact)12.sp else 14.sp,fontWeight=FontWeight.SemiBold,maxLines=1,overflow=TextOverflow.Ellipsis)
+            if(value.second.isNotBlank())Text(value.second,color=Color.White.copy(alpha=.7f),fontSize=if(compact)10.sp else 12.sp,maxLines=1,overflow=TextOverflow.Ellipsis)
+        }
+    }
+}
+
+@Composable
+private fun MediaPulse(playing:Boolean,motion:Boolean) {
+    val activity by animateFloatAsState(if(playing&&motion)1f else .35f,
+        if(motion)spring(dampingRatio=.9f,stiffness=430f) else snap(),label="mediaPlaybackState")
+    Canvas(Modifier.size(18.dp).clearAndSetSemantics { }) {
+        repeat(5){i->
+            val amplitude=.35f+activity*.65f*(sin(i*1.1f)+1f)/2f
+            val x=size.width*(i+1)/6f;val h=size.height*.7f*amplitude
+            drawLine(Color.White.copy(alpha=.55f),Offset(x,(size.height-h)/2),Offset(x,(size.height+h)/2),strokeWidth=size.width/12,cap=StrokeCap.Round)
+        }
     }
 }
 
@@ -139,8 +179,15 @@ private fun mediaTime(value: Long): String = "%d:%02d".format(value / 60000, val
 @Composable
 private fun MediaButton(icon: Int, label: Int, enabled: Boolean = true, click: () -> Unit) {
     val context = LocalContext.current
-    Box(Modifier.size(44.dp).clip(CircleShape).semantics { contentDescription = context.getString(label); role = Role.Button }
-        .clickable(enabled = enabled, onClick = click), contentAlignment = Alignment.Center) {
-        ReferenceIcon(icon, 24, Color.White.copy(alpha = if (enabled) 1f else .3f))
+    val interactions=remember { MutableInteractionSource() }
+    val pressed by interactions.collectIsPressedAsState()
+    val ambient by HeckerAmbientCharging.state.collectAsState()
+    val motion=heckerFlowMotionAllowed()&&ambient.screenAwake
+    val scale by animateFloatAsState(if(pressed&&motion).90f else 1f,spring(dampingRatio=.86f,stiffness=650f),label="mediaPress")
+    Box(Modifier.size(44.dp).graphicsLayer { scaleX=scale;scaleY=scale }.clip(CircleShape).semantics { contentDescription = context.getString(label); role = Role.Button }
+        .clickable(enabled = enabled, interactionSource=interactions, indication=androidx.compose.foundation.LocalIndication.current, onClick = click), contentAlignment = Alignment.Center) {
+        Crossfade(icon,animationSpec=if(motion)tween(180,easing=HeckerFlowEasing) else snap(),label="mediaTransport") { value ->
+            ReferenceIcon(value,24,Color.White.copy(alpha=if(enabled)1f else .3f))
+        }
     }
 }

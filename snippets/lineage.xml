@@ -20,6 +20,8 @@
   <project path="prebuilts/extract-tools" name="LineageOS/android_prebuilts_extract-tools" clone-depth="1" remote="lineageos" />
   <project path="tools/extract-utils" name="LineageOS/android_tools_extract-utils" remote="lineageos" />
   <project path="vendor/apn" name="LineageOS/android_vendor_apn" revision="main" remote="lineageos" />
+  <project path="external/conscrypt" name="LineageOS/android_external_conscrypt" groups="pdk" remote="lineageos" revision="98b5842746b92120e30ba3ddc8b1f975b8b7f897" upstream="refs/heads/lineage-24.0" />
+  <project path="system/ca-certificates" name="LineageOS/android_system_ca-certificates" groups="pdk" remote="lineageos" revision="3eafa7527b96dee31eb8afd7586f3e4ca8c07de0" upstream="refs/heads/lineage-24.0" />
   <!-- Legacy AOSP additions -->
   <project path="external/tinyxml" name="platform/external/tinyxml" groups="pdk" remote="aosp" revision="refs/tags/android-11.0.0_r46" />
   <project path="hardware/knowles/athletico/sound_trigger_hal" name="LineageOS/android_hardware_knowles_athletico_sound_trigger_hal" groups="coral" remote="lineageos" />

@@ -521,6 +521,8 @@ def main():
                 subprocess.run([str(args.sdk_cache/'aapt2'),'link','-I',str(args.sdk_cache/'android.jar'),'--manifest',str(probe),'-o',str(output/'launcher-res.apk'),str(output/'res.zip')],check=True)
         print('AOSP Hecker Launcher HOME module, branding, preference/gesture wiring, permission, retained flag/TAPL libraries and unchanged Pixel Recents: PASS')
         if args.sdk_cache:
+            from check_shade_blur import check_shade_blur
+            check_shade_blur(folder, args.kotlin_cache.resolve())
             check_clock_plugins(folder, args.sdk_cache.resolve())
             check_pin_bouncer(folder, args.kotlin_cache.resolve())
             check_statusbar_dispatch(folder, args.kotlin_cache.resolve())

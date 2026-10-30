@@ -1,0 +1,10 @@
+<resources>
+    <string name="hs_flow_preview_apply">Apply Living Flow preview look</string>
+    <string name="hs_glass_icon_style">Built-in glass icon look</string>
+    <string name="hs_glass_icon_smoked">Smoked glass · current</string>
+    <string name="hs_glass_icon_flow">Living Flow · outline plates</string>
+    <string name="hs_dock_search_style">Search bar appearance</string>
+    <string name="hs_dock_search_full">Full search bar</string>
+    <string name="hs_dock_search_flow">Living Flow · compact search pill</string>
+    <string name="hs_flow_search_hint">Search apps</string>
+</resources>

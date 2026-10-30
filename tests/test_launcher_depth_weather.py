@@ -115,6 +115,7 @@ float[] finalCrop=new float[3];HomeDepthPolicy.crop(800,1600,720,1520,1,finalCro
 root.sx=.8f;fg=new Canvas();HeckerHomeDepth.foreground(clock,fg);check(fg.layers.isEmpty());root.sx=1;
 c.prefs.put(HeckerStudio.PREFIX+"home_depth",false);settle();check(draw(root).layers.isEmpty());
 c.prefs.put(HeckerStudio.PREFIX+"home_depth",true);settle();check(draw(root).layers.size()==2);
+c.resolver.values.put("hecker_home_depth_wallpaper_id",id);c.resolver.values.put("hecker_depth_wallpaper_id","abc00000000000000000000000000000");c.resolver.notifyChange();settle();check(draw(root).layers.size()==2);
 c.wallpaper.id=99;c.send(Intent.ACTION_WALLPAPER_CHANGED);settle();check(draw(root).layers.isEmpty());
 c.wallpaper.id=51;c.wallpaper.live=true;c.send(Intent.ACTION_WALLPAPER_CHANGED);settle();check(draw(root).layers.isEmpty());
 c.wallpaper.live=false;c.resolver.available=false;c.send(Intent.ACTION_USER_UNLOCKED);settle();check(draw(root).layers.isEmpty());

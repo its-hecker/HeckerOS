@@ -51,8 +51,8 @@ class PlatformMigrationTests(unittest.TestCase):
 
     def test_all_platform_entries_have_unique_owned_destinations(self):
         entries=migration.inventory(ROOT/'migration/platform-projects.json')
-        self.assertEqual(91,len(entries))
-        self.assertEqual(91,len({x['destination'] for x in entries}))
+        self.assertEqual(92,len(entries))
+        self.assertEqual(92,len({x['destination'] for x in entries}))
         self.assertEqual(7,sum(x['remote']=='gitlab' for x in entries))
 
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Deliberately use the global namespace, like other framework feature plugins.
 package {
-    default_applicable_licenses: ["hecker_suite_license"],
+    default_applicable_licenses: ["hecker_suite_license", "hecker_living_flow_font_license"],
 }
 
 license {
@@ -14,6 +14,12 @@ license {
     name: "hecker_netlab_registry_license",
     license_kinds: ["SPDX-license-identifier-BSD-2-Clause"],
     license_text: ["app/assets/netlab/NOTICE.txt"],
+}
+
+license {
+    name: "hecker_living_flow_font_license",
+    license_kinds: ["SPDX-license-identifier-Bitstream-Vera"],
+    license_text: ["fonts/living-flow/LICENSE.txt"],
 }
 
 android_app {

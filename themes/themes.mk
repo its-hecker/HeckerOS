@@ -23,3 +23,5 @@ PRODUCT_PACKAGES += \
     HeckerThemeWeedWiFiOverlay \
     HeckerThemeXperiaWiFiOverlay \
     HeckerThemeZigZagWiFiOverlay
+
+PRODUCT_PACKAGES += HeckerLivingFlowBattery

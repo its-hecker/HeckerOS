@@ -21,6 +21,31 @@ class FloralTargetTests(unittest.TestCase):
         return subprocess.run([sys.executable, "-c", code], env=env,
                               capture_output=True, text=True)
 
+    def test_coral_update_kernel_ref_is_not_accepted_for_flame(self):
+        import xml.etree.ElementTree as ET
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tree = ET.parse(INTEGRATION / "floral.xml")
+            for node in tree.getroot():
+                if node.get("path") == "vendor/google/coral":
+                    node.set("path", "vendor/google/flame")
+                    if node.tag == "project":
+                        node.set("name", "its-hecker/HeckerOs-Flame-vendor")
+            tree.write(root / "floral.xml")
+            result = self.probe("flame", """
+from pathlib import Path
+from validate import manifest
+try:
+    manifest(Path(%r))
+except ValueError as failure:
+    assert "Wrong HeckerOS kernel branch" in str(failure), str(failure)
+else:
+    raise AssertionError("Coral-only kernel ref accepted for Flame")
+""" % str(root))
+            self.assertEqual(result.returncode, 0, result.stderr)
+        result = self.probe("coral", "from validate import manifest; manifest()")
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_target_routes_vendor_product_and_last_overlay_together(self):
         for device in ("coral", "flame"):
             with self.subTest(device=device):

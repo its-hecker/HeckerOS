@@ -1,5 +1,5 @@
 {
-  "checked_on": "2026-10-21",
+  "checked_on": "2026-10-30",
   "policy": "Pinned upstream sources with owned HeckerOS customization forks; bulk migration is optional.",
   "projects": [
     {
@@ -610,6 +610,13 @@
       "remote": "gitlab",
       "branch": "seventeen",
       "revision": "28a194eb2eeddb8985723501a1688a9b71d3c356"
+    },
+    {
+      "path": "system/memory/libmeminfo",
+      "repository": "PixelOS-AOSP/android_system_memory_libmeminfo",
+      "remote": "github",
+      "branch": "seventeen",
+      "revision": "e970d14536c482bc08f46b93ed2a6185f83a165c"
     }
   ]
 }

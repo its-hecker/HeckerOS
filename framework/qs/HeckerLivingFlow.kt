@@ -16,7 +16,7 @@ fun heckerAwakeFraction(controller: StatusBarStateController): Float {
     var amount by remember(controller) { mutableFloatStateOf(FlowClockRenderer.unit(controller.dozeAmount)) }
     DisposableEffect(controller) {
         val listener = object : StatusBarStateController.StateListener {
-            override fun onDozeAmountChanged(linear: Float, eased: Float) { amount = FlowClockRenderer.unit(eased) }
+            override fun onDozeAmountChanged(linear: Float, eased: Float) { amount = FlowClockRenderer.unit(linear) }
             override fun onDozingChanged(value: Boolean) { amount = FlowClockRenderer.unit(controller.dozeAmount) }
         }
         controller.addCallback(listener)
@@ -25,7 +25,7 @@ fun heckerAwakeFraction(controller: StatusBarStateController): Float {
     val state by HeckerAmbientCharging.state.collectAsState()
     return if (!state.flow || state.powerSave || !ValueAnimator.areAnimatorsEnabled()) {
         if (controller.isDozing) 0f else 1f
-    } else 1f - amount
+    } else FlowClockRenderer.wake(amount)
 }
 
 @Composable

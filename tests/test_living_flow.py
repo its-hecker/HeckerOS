@@ -39,6 +39,15 @@ public class Canvas {
 public class ClockProbe{
  public static void main(String[]args){
  FlowClockRenderer r=new FlowClockRenderer(); int frames=0;
+ float wakeLast=1,maskLast=0;
+ for(int i=0;i<=10000;i++){
+  float p=i/10000f,w=FlowClockRenderer.wake(p),mask=FlowClockRenderer.depthMask(p);
+  if(w>wakeLast+.000001||mask<maskLast||mask<0||mask>1)throw new AssertionError("Wake/mask discontinuity");
+  wakeLast=w;maskLast=mask;
+  if(Math.abs(FlowClockRenderer.wake(1-p)-mask)>.00001)throw new AssertionError("Reversal mismatch");
+ }
+ if(FlowClockRenderer.depthMask(.0001f)>.000001f)throw new AssertionError("Depth mask pops at first wake frame");
+ r.setReferenceFaces(android.graphics.Typeface.create("DejaVu Sans",0),android.graphics.Typeface.create("DejaVu Sans",1));
  float last=-1;
  for(int i=0;i<=1000;i++){float t=FlowClockRenderer.settle(i/1000f);
   if(t<last||t<0||t>1.00001)throw new AssertionError("Discontinuous settle");last=t;}

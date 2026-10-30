@@ -88,6 +88,12 @@ public final class HeckerStudioActivity extends Activity {
         button("universal_search", v -> HeckerStudio.open(this, "search"));
     }
     private void appearance() {
+        button("flow_preview_apply",v->{HeckerStudio.prefs(this).edit()
+            .putBoolean(HeckerStudio.PREFIX+"glass_icons",true).putInt(HeckerStudio.PREFIX+"glass_icon_style",1)
+            .putBoolean(HeckerStudio.PREFIX+"dock_search",true).putBoolean(HeckerStudio.PREFIX+"google_search",false)
+            .putInt(HeckerStudio.PREFIX+"dock_search_style",1).putString("hecker_glass","1")
+            .putInt("hecker_glass_opacity",82).putInt("hecker_glass_frost",24).putInt("hecker_glass_tint",0xff232535)
+            .putInt("hecker_glass_border",2).apply();HeckerIconStudio.clear();});
         button("glass", v -> HeckerStudio.open(this, "glass")); button("icons", v -> HeckerStudio.open(this, "icons"));
     }
     private void glass() {
@@ -155,6 +161,7 @@ public final class HeckerStudioActivity extends Activity {
     }
     private void icons() {
         toggle("glass_icons", true);
+        choice("glass_icon_style",new String[]{t("glass_icon_smoked"),t("glass_icon_flow")},i->{HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX+"glass_icon_style",i).apply();HeckerIconStudio.clear();});
         page.addView(HeckerStudio.label(this, t("glass_icons_summary"), 14));
         button("icon_pack", v -> choosePack(pack -> { HeckerIconStudio.clear(); HeckerStudio.prefs(this).edit().putString(HeckerStudio.PREFIX + "icon_pack", pack).apply(); }));
         choice("icon_shape", new String[]{t("system"), t("circle"), t("squircle"), t("rounded_square")}, selected -> HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX + "icon_shape", selected).apply());
@@ -185,6 +192,7 @@ public final class HeckerStudioActivity extends Activity {
     }
     private void search() {
         toggle("dock_search", true); toggle("google_search", false);
+        choice("dock_search_style",new String[]{t("dock_search_full"),t("dock_search_flow")},i->HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX+"dock_search_style",i).apply());
         page.addView(HeckerStudio.label(this, t("google_search_summary"), 14));
         toggle("universal_search", true); toggle("search_shortcuts", true);
         page.addView(HeckerStudio.label(this, t("search_local"), 14)); button("try_search", v -> HeckerStudio.search(this));

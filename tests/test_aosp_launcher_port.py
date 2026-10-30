@@ -25,7 +25,8 @@ class AospLauncherPortTests(unittest.TestCase):
                 path.unlink()
             else:
                 path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(value)
+                if isinstance(value,bytes):path.write_bytes(value)
+                else:path.write_text(value)
 
     def test_fresh_upgrade_and_revert_retain_native_source(self):
         with tempfile.TemporaryDirectory() as directory:

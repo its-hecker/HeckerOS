@@ -1,0 +1,10 @@
+{
+  "family": "DejaVu Sans 2.37",
+  "source": "https://dejavu-fonts.github.io/",
+  "usage": "Subset of the preview font for clock text; Android font fallback supplies unsupported scripts.",
+  "license": "Bitstream Vera / DejaVu public-domain changes",
+  "files": {
+    "hecker_living_flow_bold.ttf": "32bab03da6840ae12a45ac2a6dbe6813dde93cf0bbe44e7bfacbe75ab76706d8",
+    "hecker_living_flow_regular.ttf": "f74e0ec6b8b81f8abdd5a713bc16075b72d7b7d95927cd9fb48d0a73baab51e3"
+  }
+}

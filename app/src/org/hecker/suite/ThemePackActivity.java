@@ -38,6 +38,13 @@ public final class ThemePackActivity extends Activity {
         try (java.io.InputStream stream = getAssets().open("theme_catalog.json")) {
             catalog = new JSONObject(new String(stream.readAllBytes(), StandardCharsets.UTF_8)).getJSONArray("themes");
         } catch (Exception missing) { Toast.makeText(this, R.string.themes_unavailable, Toast.LENGTH_LONG).show(); finish(); return; }
+        try {
+            catalog.put(new JSONObject().put("id","hecker_living_flow_battery")
+                .put("name",getString(R.string.flow_battery_title)).put("description",getString(R.string.flow_battery_summary))
+                .put("author","HeckerOS").put("category","battery_style")
+                .put("overlays",new JSONArray().put(new JSONObject().put("componentId","battery_style")
+                    .put("packageName","org.hecker.theme.battery.livingflow").put("enabled",true))));
+        } catch(org.json.JSONException impossible) { throw new IllegalStateException(impossible); }
         category = getIntent().getIntExtra("category", 1) == 3 ? 1 : 0;
         LinearLayout page = Ui.page(this, category == 0 ? R.string.theme_wifi : R.string.theme_battery);
         Ui.hero(this, page, R.raw.suite_status, R.string.status_styles_summary);

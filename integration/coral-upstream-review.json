@@ -1,0 +1,31 @@
+{
+  "checked_on": "2026-10-30",
+  "device": "coral",
+  "imports": [
+    {
+      "name": "framework",
+      "repository": "its-hecker/heckeros_frameworks_base",
+      "revision": "c72dce10290956bd3c4bfd23e787800d1340c46e",
+      "tree": "10dbf4d757c36f4f317425cb0ef04a6b060371b3"
+    },
+    {
+      "name": "vendor-custom",
+      "repository": "its-hecker/heckeros_vendor_custom",
+      "revision": "82457873ad4f7c75195c21ddf9da35903a0d975f",
+      "tree": "4c03abb1be2e993b3cfe17ef4bffb81840491823"
+    },
+    {
+      "name": "vendor-lineage",
+      "repository": "its-hecker/heckeros_vendor_lineage",
+      "revision": "a8286e3a3edc3aed7e774ca57476477f178a0c46",
+      "tree": "bc3bbd6e9589c80fe27f301157749b25962c159d"
+    },
+    {
+      "name": "kernel",
+      "repository": "its-hecker/heckeros-floral-kernel",
+      "revision": "5303303fd0138a719c0077570975fdce6ace661f",
+      "tree": "8c2bd92557e2f5bbfafbba6a10bbcb843cd5f3dd"
+    }
+  ],
+  "notes": "See docs/coral-upstream-review-2026-10-30.md; full ROM/kernel and phone validation pending."
+}
