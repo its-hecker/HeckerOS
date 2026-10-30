@@ -40,7 +40,8 @@ alpha, so they cannot intercept taps. The playback target remains at least 44 dp
 
 The native lockscreen-to-Gone scene now supplies its own dismissal progress to
 the existing live clock. Tall hour/minute groups converge toward the horizontal
-Home geometry; the date follows them. The lock depth scene stays opaque until
+Home geometry; the date fades during travel so it cannot overlap the moving
+digit groups. The lock depth scene stays opaque until
 the digits are near that destination, then hands over to the independent Home
 wallpaper. Native scene progress also handles interrupted/reversed transitions.
 A 500 ms ease-in/out curve replaces the fast-start dismissal curve for this path.

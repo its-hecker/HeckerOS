@@ -141,9 +141,10 @@ public final class FlowClockRenderer {
                     mix(ambientHeight, homeGlyph, handoff), mix(12, cw + 1, handoff), mix(1, fit, handoff), mixColor(Color.WHITE, tint, handoff),
                     Math.max(1 - p, handoff) * alpha, face);
             float dateTop = Math.max(4, top + 6);
+            float dateVisibility = 1 - depthMask(handoff / .18f) + depthMask((handoff - .78f) / .22f);
             glyph(canvas, date, mix(mix(center, width * .77f, p), center, handoff),
                     mix(mix(ambientTop + ambientHeight + 5, dateTop, p), homeTop + homeGlyph + 5, handoff), 16,
-                    mix(mix(width - padding * 2, width * .37f, p), width - padding * 2, handoff), 1, tint, alpha, regular);
+                    mix(mix(width - padding * 2, width * .37f, p), width - padding * 2, handoff), 1, tint, alpha * dateVisibility, regular);
             return;
         } else {
             glyph(canvas, h + ":" + m, center, top, glyphHeight, width - padding * 2,
