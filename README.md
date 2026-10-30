@@ -39,6 +39,11 @@ See [Living Flow polish](docs/living-flow-polish.md) and the
 Use the matching root-manifest and Coral local-manifest branches together.
 Flame manifests and hardware pins are unchanged.
 
+The same Coral branch now restores [Display double-tap to sleep](docs/double-tap-sleep.md)
+on the collapsed status bar and native lockscreen. Both follow the existing
+foreground user's Display switch, including live changes, while retaining AOD
+wake and native lockscreen state handling.
+
 ## Included source
 
 - The reference grouped Settings UI: retained caracal hero, maintainer row, coloured icons,

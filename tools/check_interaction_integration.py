@@ -89,11 +89,21 @@ def check_statusbar_dispatch(folder, cache):
     with tempfile.TemporaryDirectory(prefix='hecker-status-dispatch-') as temporary:
         out = Path(temporary)
         sources = {
-            'MotionEvent.java': 'package android.view; public class MotionEvent {}',
+            'MotionEvent.java': '''package android.view; public class MotionEvent {
+ public static final int ACTION_CANCEL=3; public int action;
+ public static MotionEvent obtain(MotionEvent source){return new MotionEvent();}
+ public void setAction(int action){this.action=action;} public void recycle(){}
+}''',
             'HeckerStatusBarPopup.java': '''package com.android.systemui.hecker;
 public class HeckerStatusBarPopup {
  public static int calls; public static boolean consume;
  public static boolean onTouch(Object view, android.view.MotionEvent event) {calls++; return consume;}
+}''',
+            'HeckerStatusBarSleepGesture.java': '''package com.android.systemui.hecker;
+public class HeckerStatusBarSleepGesture {
+ public static int calls,resets; public static boolean consume;
+ public static void reset(Object view){resets++;}
+ public static boolean onTouch(Object view,android.view.MotionEvent event){calls++;return consume;}
 }''',
             'PhoneStatusBarView.java': '''package com.android.systemui.statusbar.phone;
 import android.view.MotionEvent;
@@ -103,8 +113,8 @@ public class PhoneStatusBarView extends TouchParent {
 ''' + '\n'.join(methods) + '''
 }
 class TouchParent {
- public int nativeCalls; public boolean nativeResult;
- public boolean dispatchTouchEvent(MotionEvent event) {nativeCalls++; return nativeResult;}
+ public int nativeCalls,lastAction; public boolean nativeResult;
+ public boolean dispatchTouchEvent(MotionEvent event) {nativeCalls++;lastAction=event.action;return nativeResult;}
 }''',
             'ControllerProbe.kt': '''package com.android.systemui.statusbar.phone
 import android.view.MotionEvent
@@ -114,6 +124,7 @@ fun dispatchFromController(view: PhoneStatusBarView, event: MotionEvent): Boolea
             'DispatchProbe.java': '''package com.android.systemui.statusbar.phone;
 import android.view.MotionEvent;
 import com.android.systemui.hecker.HeckerStatusBarPopup;
+import com.android.systemui.hecker.HeckerStatusBarSleepGesture;
 public class DispatchProbe {
  static void check(boolean value) {if(!value) throw new AssertionError();}
  static boolean dispatch(PhoneStatusBarView view) {
@@ -132,6 +143,8 @@ public class DispatchProbe {
   check(dispatch(view) && HeckerStatusBarPopup.calls==0 && view.nativeCalls==3);
   view.nativeResult=false;
   check(!dispatch(view) && HeckerStatusBarPopup.calls==0 && view.nativeCalls==4);
+  HeckerStatusBarSleepGesture.consume=true;
+  check(dispatch(view) && view.nativeCalls==5 && view.lastAction==MotionEvent.ACTION_CANCEL);
  }
 }''',
         }
@@ -140,7 +153,8 @@ public class DispatchProbe {
         javac = ['java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '--release', '17']
         classes = out / 'classes'
         subprocess.run(javac + ['-d', str(classes)] + [str(out / name) for name in (
-            'MotionEvent.java', 'HeckerStatusBarPopup.java', 'PhoneStatusBarView.java')], check=True)
+            'MotionEvent.java', 'HeckerStatusBarPopup.java', 'HeckerStatusBarSleepGesture.java',
+            'PhoneStatusBarView.java')], check=True)
         assert len(methods) == 1, 'Duplicate native dispatch methods'
         classpath = os.pathsep.join([str(classes), str(cache / 'kotlin-stdlib.jar')])
         subprocess.run(['java', '-cp', os.pathsep.join(map(str, jars)),
@@ -151,4 +165,4 @@ public class DispatchProbe {
                                str(out / 'DispatchProbe.java')], check=True)
         subprocess.run(['java', '-cp', classpath,
                         'com.android.systemui.statusbar.phone.DispatchProbe'], check=True)
-    print('Native status-bar dispatch and Kotlin caller compile; interactivity and native touch dispatch without popup interception: PASS')
+    print('Native status-bar dispatch and Kotlin caller compile; interactivity, sleep cancellation and native touch dispatch without popup interception: PASS')

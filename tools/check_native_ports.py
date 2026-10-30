@@ -22,6 +22,7 @@ from check_pin_bouncer import PIN_INPUTS, check_pin_bouncer
 from check_game_mode_info import check_game_mode_info
 from check_ambient_charging import check_ambient_charging
 from check_interaction_integration import INPUTS as INTERACTION_INPUTS, check_service_bindings, check_statusbar_dispatch
+from check_double_tap_sleep import INPUTS as SLEEP_INPUTS, check_double_tap_sleep
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -403,6 +404,7 @@ def main():
     paths.update([STATUS_WINDOW, STATUS_UTILS])
     paths.update(PIN_INPUTS)
     paths.update(INTERACTION_INPUTS)
+    paths.update(SLEEP_INPUTS)
     paths.add('frameworks/base/core/java/android/view/WindowManager.java')
     paths.update('packages/apps/Launcher3/' + name for name in ('Android.bp', 'aconfig/Android.bp', 'AndroidManifest.xml', 'src/com/android/launcher3/LauncherFiles.java','src/com/android/launcher3/SessionCommitReceiver.java','src/com/android/launcher3/settings/SettingsActivity.java'))
     paths.update('packages/apps/Launcher3/' + name for name in json.loads((ROOT/'aosp-launcher/patches.json').read_text()))
@@ -482,6 +484,7 @@ def main():
         check_game_mode_info(folder)
         check_ambient_charging(folder)
         check_service_bindings(folder)
+        check_double_tap_sleep(folder, args.kotlin_cache)
         window_types = (folder / 'frameworks/base/core/java/android/view/WindowManager.java').read_text()
         assert re.search(r'TYPE_STATUS_BAR_ADDITIONAL\s*=\s*FIRST_SYSTEM_WINDOW\s*\+\s*41\s*;', window_types)
         assert 'public void setTrustedOverlay()' in window_types

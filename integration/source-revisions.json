@@ -187,7 +187,16 @@
         "services/core/java/com/android/server/display/mode/LowZoneBrightnessHysteresis.java",
         "core/res/res/values/symbols.xml",
         "packages/SystemUI/src/com/android/systemui/statusbar/window/StatusBarWindowControllerImpl.java",
-        "core/java/com/android/internal/policy/SystemBarUtils.java"
+        "core/java/com/android/internal/policy/SystemBarUtils.java",
+        "packages/SystemUI/src/com/android/systemui/keyguard/domain/interactor/KeyguardTouchHandlingInteractor.kt",
+        "packages/SystemUI/src/com/android/systemui/common/ui/view/TouchHandlingView.kt",
+        "packages/SystemUI/src/com/android/systemui/shade/QQSGestureListener.kt",
+        "packages/SystemUI/tests/utils/src/com/android/systemui/keyguard/domain/interactor/KeyguardLongPressInteractorKosmos.kt",
+        "packages/SystemUI/multivalentTests/src/com/android/systemui/keyguard/domain/interactor/KeyguardTouchHandlingInteractorTest.kt",
+        "packages/SystemUI/src/com/android/systemui/shade/NotificationPanelViewController.java",
+        "packages/SystemUI/customization/src/com/android/systemui/shared/settings/data/repository/SystemSettingsRepository.kt",
+        "packages/SystemUI/src/com/android/systemui/util/settings/repository/UserAwareSystemSettingsRepository.kt",
+        "packages/SystemUI/src/com/android/systemui/settings/UserSettingsRepositoryModule.kt"
       ]
     },
     "hardware/google/camera": {
