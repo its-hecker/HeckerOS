@@ -63,6 +63,14 @@ public class ClockProbe{
   if(locale.equals(Locale.US)&&!c.text.contains("12"))throw new AssertionError("12-hour midnight");
   frames++;
  }
+ // Native lock dismissal must remain bounded at every intermediate frame, including cancellation.
+ for(int style:new int[]{3,5})for(int width:new int[]{240,360,480})for(int height:new int[]{96,184,480})
+ for(int i=0;i<=1000;i++) {
+  Canvas c=new Canvas();c.width=width;c.height=height;
+  r.draw(c,22,30,true,"Fri, 30 Oct",Locale.US,width,height,style,1,false,false,.76f,0,100,0,0,i/1000f);
+  if(!c.text.contains("22")||!c.text.contains("30"))throw new AssertionError("Unlock lost a digit group");
+  frames++;
+ }
  System.out.println("Production living clock: "+frames+" bounded locale/AOD/wake/Home frames");
  }
 }"""

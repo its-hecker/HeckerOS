@@ -28,6 +28,7 @@ public final class FlowClockRenderer {
     public static float depthMask(float awake) {
         float t=unit(awake); return t*t*(3-2*t);
     }
+    public static float homeFade(float progress) { return unit((progress - .55f) / .45f); }
     private Locale lastLocale;
     private NumberFormat numbers;
     private int lastHour = -1, lastMinute = -1;
@@ -75,6 +76,13 @@ public final class FlowClockRenderer {
     public void draw(Canvas canvas, int hour, int minute, boolean twentyFour, String date,
             Locale locale, float width, float height, int style, float awake, boolean compact,
             boolean home, float opacity, int palette, int scalePercent, int positionX, int positionY) {
+        draw(canvas, hour, minute, twentyFour, date, locale, width, height, style, awake,
+                compact, home, opacity, palette, scalePercent, positionX, positionY, 0);
+    }
+    public void draw(Canvas canvas, int hour, int minute, boolean twentyFour, String date,
+            Locale locale, float width, float height, int style, float awake, boolean compact,
+            boolean home, float opacity, int palette, int scalePercent, int positionX, int positionY,
+            float homeHandoff) {
         if (width <= 0 || height <= 0) return;
         float p = unit(awake);
         if (!locale.equals(lastLocale)) {
@@ -110,13 +118,33 @@ public final class FlowClockRenderer {
         Typeface face = style == 5 ? bold : style == 4 ? regular : thin;
         if (stacked) {
             float x = mix(center, targetCenter, p);
+            // Reuse each live digit group instead of dissolving a tall clock into an AOD-sized Home clock.
+            float handoff = unit(homeHandoff / .68f);
+            handoff = handoff * handoff * (3 - 2 * handoff);
+            float homeHeight = Math.min(height, 160);
+            float homeGlyph = Math.min((homeHeight - 32) / 1.35f, width * .29f) * scale;
+            homeGlyph = Math.min(homeGlyph, (homeHeight - 32) / 1.35f);
+            float homeTop = Math.max(0, homeHeight - homeGlyph * 1.35f - 24) / 2;
+            float stretch = style == 3 ? .64f : 1;
+            paint.reset(); paint.setTypeface(face); paint.setTextSize(homeGlyph);
+            float fit = Math.min(stretch, (width - padding * 2) / Math.max(1, paint.measureText(h + ":" + m)));
+            float hw = paint.measureText(h) * fit, mw = paint.measureText(m) * fit;
+            float cw = paint.measureText(":") * fit, total = hw + cw + mw;
+            float hx = center - total / 2 + hw / 2, mx = center + total / 2 - mw / 2;
+            float movingHeight = mix(glyphHeight, homeGlyph, handoff);
             // Each group travels from its horizontal AOD position into its stacked destination.
-            glyph(canvas, h, mix(center - 36, x, p), top, glyphHeight,
-                    mix(54, half * 2, p), mix(1, .60f, p), tint, alpha, face);
-            glyph(canvas, m, mix(center + 36, x, p), top + p * targetHeight * .98f,
-                    glyphHeight, mix(54, half * 2, p), mix(1, .60f, p), tint, alpha, face);
-            glyph(canvas, ":", center, top, ambientHeight, 12, 1, Color.WHITE,
-                    (1 - p) * alpha, face);
+            glyph(canvas, h, mix(mix(center - 36, x, p), hx, handoff), mix(top, homeTop, handoff), movingHeight,
+                    mix(mix(54, half * 2, p), hw + 1, handoff), mix(mix(1, .60f, p), fit, handoff), tint, alpha, face);
+            glyph(canvas, m, mix(mix(center + 36, x, p), mx, handoff), mix(top + p * targetHeight * .98f, homeTop, handoff),
+                    movingHeight, mix(mix(54, half * 2, p), mw + 1, handoff), mix(mix(1, .60f, p), fit, handoff), tint, alpha, face);
+            glyph(canvas, ":", mix(center, center - total / 2 + hw + cw / 2, handoff), mix(top, homeTop, handoff),
+                    mix(ambientHeight, homeGlyph, handoff), mix(12, cw + 1, handoff), mix(1, fit, handoff), mixColor(Color.WHITE, tint, handoff),
+                    Math.max(1 - p, handoff) * alpha, face);
+            float dateTop = Math.max(4, top + 6);
+            glyph(canvas, date, mix(mix(center, width * .77f, p), center, handoff),
+                    mix(mix(ambientTop + ambientHeight + 5, dateTop, p), homeTop + homeGlyph + 5, handoff), 16,
+                    mix(mix(width - padding * 2, width * .37f, p), width - padding * 2, handoff), 1, tint, alpha, regular);
+            return;
         } else {
             glyph(canvas, h + ":" + m, center, top, glyphHeight, width - padding * 2,
                     style == 3 ? .64f : 1, tint, alpha, face);

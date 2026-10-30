@@ -102,5 +102,17 @@
   "collection-jvm.jar": {
     "url": "https://dl.google.com/dl/android/maven2/androidx/collection/collection-jvm/1.5.0/collection-jvm-1.5.0.jar",
     "sha256": "70b35924e4babcdffa37d0e575ee039c56a2d97123342624c48b603233704341"
+  },
+  "lifecycle-common-jvm.jar": {
+    "url": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-common-jvm/2.9.1/lifecycle-common-jvm-2.9.1.jar",
+    "sha256": "37d89b2101f074ac6c260917dabb185607645ee200aa3018c7c5bde70edcf184"
+  },
+  "lifecycle-runtime-android.aar": {
+    "url": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-runtime-android/2.9.1/lifecycle-runtime-android-2.9.1.aar",
+    "sha256": "0be059c58766504873090960538b7d5e955b63cdd5d3c02bb99530c7f40dbf73"
+  },
+  "lifecycle-runtime-compose-android.aar": {
+    "url": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-runtime-compose-android/2.9.1/lifecycle-runtime-compose-android-2.9.1.aar",
+    "sha256": "07226bf5315e0ac776b1aa8de208103902e09472cd3a576237e76394dc90755f"
   }
 }

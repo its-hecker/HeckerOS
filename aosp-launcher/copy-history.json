@@ -31,7 +31,8 @@
     "fc66b0dadc06aec42d9823d1b6fc757e9128d185",
     "31c853f6a9ae80fc0c80e78d1d89d09fc002051e",
     "e7f0ee14b07e5a393b092a682c44804d42790bbc",
-    "d4c1905463b1f237330b7a83e56072af318bae48"
+    "d4c1905463b1f237330b7a83e56072af318bae48",
+    "ae0d1a0a17eae0d077833e250b6be506ebfb7b99"
   ],
   "generated/hecker-launcher/res/values/studio.xml": [
     "027dfae0d51492105a0cdc34ccac5206af9f9451",
@@ -64,6 +65,7 @@
     "2c64a8fdda6d5f7748d3b9d6b17e1da1fb2fedf2"
   ],
   "src/org/hecker/motion/FlowClockRenderer.java": [
-    "7912acb51f5b19445a877b33cdda7123c5e968df"
+    "7912acb51f5b19445a877b33cdda7123c5e968df",
+    "33ed5a22e2de98ac53c3af4c9bc9dbdc9ded0bcd"
   ]
 }

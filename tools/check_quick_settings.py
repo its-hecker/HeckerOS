@@ -122,8 +122,37 @@ class BatteryColors(val fill: Color)
 import com.android.systemui.statusbar.pipeline.battery.shared.ui.BatteryGlyph
 class BatteryViewModel(val level: Int?,val attribution: BatteryGlyph?,val isCharging: Boolean,val glyphList: List<BatteryGlyph>)
 ''',
+    # Scene signatures verified against the manifest-pinned compose/scene source.
     'SceneKey.kt': '''package com.android.compose.animation.scene
+import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.ui.Modifier
+import com.android.compose.animation.scene.content.state.TransitionState
+@DslMarker annotation class ElementDsl
+open class ContentKey
 class ElementKey(val debugName: String)
+class ValueKey(val debugName: String)
+interface ElementMatcher { fun matches(key: ElementKey, content: ContentKey): Boolean }
+interface SceneTransitionLayoutState { val transitionState: TransitionState }
+@ElementDsl interface ContentScope {
+ val layoutState: SceneTransitionLayoutState
+ fun Modifier.element(key: ElementKey): Modifier
+ @Composable fun ElementWithValues(key: ElementKey, modifier: Modifier, content: @Composable ElementScope<ElementContentScope>.() -> Unit)
+}
+@ElementDsl interface ElementContentScope: ContentScope
+@ElementDsl interface ElementScope<T> { @Composable fun content(content: @Composable T.() -> Unit) }
+interface AnimatedState<T>: State<T>
+@Composable fun ElementScope<*>.animateElementFloatAsState(value: Float,key: ValueKey,canOverflow: Boolean = true): AnimatedState<Float> = error("compile only")
+''',
+    'SceneState.kt': '''package com.android.compose.animation.scene.content.state
+import com.android.compose.animation.scene.ContentKey
+sealed interface TransitionState {
+ abstract class Transition: TransitionState { abstract val fromContent: ContentKey; abstract val toContent: ContentKey; abstract val progress: Float }
+}
+''',
+    'Scenes.kt': '''package com.android.systemui.scene.shared.model
+import com.android.compose.animation.scene.ContentKey
+object Scenes { val Lockscreen = ContentKey(); val Gone = ContentKey() }
 ''',
     'CoreStartable.kt': '''package com.android.systemui
 interface CoreStartable { fun start() }
@@ -205,12 +234,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import com.android.systemui.res.R
+import com.android.compose.animation.scene.ContentScope
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import kotlinx.coroutines.flow.filterNotNull
 class Key { fun currentAlpha(): Float? = 1f }
 object Elements { val QuickSettingsContent=Key(); val QuickSettingsTiles=Key(); val BrightnessSlider=Key() }
 class TileGrid(val tileViewModels: List<TileViewModel>)
 class Container(val tileGridViewModel: TileGrid,val isBrightnessSliderVisible: Boolean,val brightnessSliderViewModel: Any)
+typealias QuickSettingsContainerViewModel = Container
 class ContainerColors(val background: Color,val mirrorBackground: Color)
 fun Modifier.element(key: Key): Modifier = this
 fun Modifier.sysuiResTag(tag: String): Modifier = this
@@ -221,8 +252,8 @@ class StartScope { fun onStopOrDispose(stop: () -> Unit) {} }
 @Composable fun Element(modifier: Modifier,key: Key,content: @Composable () -> Unit) { content() }
 @Composable fun GridAnchor() {}
 @Composable fun BrightnessSliderContainer(model: Any,containerColors: ContainerColors,modifier: Modifier) {}
-@Composable fun NativeReferenceRoute(viewModel: Container,modifier: Modifier) {
-''' + body + '\n}\n'
+@Composable
+''' + patches[path][0]['new'] + '\n' + body + '\n}\n'
 
 
 def brightness_track_probe():

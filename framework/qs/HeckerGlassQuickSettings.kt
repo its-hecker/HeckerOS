@@ -61,27 +61,27 @@ fun HeckerGlassQuickSettings(tiles: List<TileViewModel>, listening: () -> Boolea
     val pages = tiles.filter { it !in connections }.chunked(columns * 3).ifEmpty { listOf(emptyList()) }
     val pager = rememberPagerState(pageCount = { pages.size })
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        if (narrow) Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        if (narrow) Column(heckerQsElement(HeckerQsScene.Connections), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             connections.forEach { FlowConnection(it, Modifier.fillMaxWidth()) }
-        } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        } else Row(heckerQsElement(HeckerQsScene.Connections).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             connections.forEach { FlowConnection(it, Modifier.weight(1f)) }
         }
         if (narrow) {
             CompositionLocalProvider(LocalHeckerFlowGlass provides true) {
-                HeckerMediaCard(Modifier.heightIn(min = 154.dp), square = true)
+                HeckerQsMediaPlayer(Modifier.heightIn(min = 154.dp), square = true)
             }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            Row(heckerQsElement(HeckerQsScene.Brightness).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 FlowControls(brightness); HeckerAutoBrightnessButton()
             }
         } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(Modifier.weight(1f)) {
                 CompositionLocalProvider(LocalHeckerFlowGlass provides true) {
-                    HeckerMediaCard(Modifier.heightIn(min = 178.dp), square = true)
+                    HeckerQsMediaPlayer(Modifier.heightIn(min = 178.dp), square = true)
                 }
             }
-            FlowControls(brightness)
+            Row(heckerQsElement(HeckerQsScene.Brightness), horizontalArrangement = Arrangement.spacedBy(12.dp)) { FlowControls(brightness) }
         }
-        HorizontalPager(state = pager, modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) { page ->
+        HorizontalPager(state = pager, modifier = heckerQsElement(HeckerQsScene.Tiles).fillMaxWidth(), verticalAlignment = Alignment.Top) { page ->
             Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 pages[page].chunked(columns).forEach { row ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -100,7 +100,7 @@ fun HeckerGlassQuickSettings(tiles: List<TileViewModel>, listening: () -> Boolea
                     .background(Color.White.copy(alpha = if (index == pager.currentPage) .9f else .3f), CircleShape))
             }
         }
-        if (!narrow) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { HeckerAutoBrightnessButton() }
+        if (!narrow) Row(heckerQsElement(HeckerQsScene.Shortcuts).fillMaxWidth(), horizontalArrangement = Arrangement.End) { HeckerAutoBrightnessButton() }
     }
 }
 

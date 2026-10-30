@@ -14,13 +14,13 @@ product file, device variants and hardware pins are unchanged.
 | Search and icons | **Launcher Studio → Appearance → Apply Living Flow preview look** selects outline glass icon plates and the compact “Search apps” pill. Individual icon/search choices retain the older looks and Google search option. The 24 dp visual pill retains a 48 dp touch target. |
 | Hecker QS | Existing Living Flow connectivity pills, round controls, upright brightness/volume sliders and percentages are retained. The media tile uses neutral translucent glass with thumbnail artwork. |
 | Battery | **Hecker Suite → Themes → Battery style → Living Flow battery** adds a horizontal outlined shell, inset level fill, level colours and the existing optional charging ripple. Other battery choices remain available. |
-| Media | Shared lock/Hecker QS/One UI QS player crossfades artwork and metadata, springs artwork arrival and button presses, and transitions transport icons. Seek position never restarts metadata transitions. |
+| Media | Shared lock/Quick QS/Hecker QS/One UI QS renderer adds the reference blue/lavender glow, artwork/title/transport transitions and native shared bounds through expansion. Full One UI retains its compact row. See [media glow and handoffs](media-glow-handoff.md). |
 | QS blur | The native backdrop now uses one shade-strength floor through QQS → full QS for both layouts. Brightness mirror, unlock, app launch, scrim, window-blur support and display gates remain in the native calculation. |
 | Folders | Existing native clipped folder frosting and bounded settling animation remain. The compact search pill is excluded from full-height glass background replacement. |
 
 Media motion follows Living Flow, animator-scale, screen-awake and power-save
-settings. The progress timer remains at one second; playback decoration has no
-infinite frame loop. Original session capability checks, native media resumption
+settings. The progress timer remains at one second. Glow frames run only during
+playback in a resumed visible scene; paused/hidden/screen-off players are static. Original session capability checks, native media resumption
 and lock-screen visibility decisions are retained.
 
 ## Assets and licensing

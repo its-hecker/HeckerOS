@@ -148,5 +148,8 @@
   "frameworks/base/packages/SystemUI/src/org/hecker/motion/FlowClockFonts.java": "aosp-launcher/src/org/hecker/motion/FlowClockFonts.java",
   "frameworks/base/packages/SystemUI/res/font/hecker_living_flow_bold.ttf": "fonts/living-flow/hecker_living_flow_bold.ttf",
   "frameworks/base/packages/SystemUI/res/font/hecker_living_flow_regular.ttf": "fonts/living-flow/hecker_living_flow_regular.ttf",
-  "frameworks/base/packages/SystemUI/res/raw/hecker_living_flow_font_notice.txt": "fonts/living-flow/LICENSE.txt"
+  "frameworks/base/packages/SystemUI/res/raw/hecker_living_flow_font_notice.txt": "fonts/living-flow/LICENSE.txt",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMediaScene.kt": "framework/qs/HeckerMediaScene.kt",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MediaCardGeometry.java": "framework/qs/MediaCardGeometry.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerClockHandoff.kt": "framework/lockscreen/HeckerClockHandoff.kt"
 }

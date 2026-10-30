@@ -32,9 +32,6 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
     private boolean attached, running, sampling, screenAwake = true;
     private int generation;
     private ValueAnimator animator;
-    private ValueAnimator homeAnimator;
-    private float homeReveal = 1;
-    private boolean arrivalPending;
     private final FlowClockRenderer livingClock = new FlowClockRenderer();
     private final ContentObserver livingSettings = new ContentObserver(main) {
         @Override public void onChange(boolean self) { invalidate(); }
@@ -48,7 +45,6 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
         @Override public void onReceive(Context c, Intent intent) {
             if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) screenAwake = false;
             if (Intent.ACTION_SCREEN_ON.equals(intent.getAction()) || Intent.ACTION_USER_PRESENT.equals(intent.getAction())) screenAwake = true;
-            if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) arrivalPending = true;
             if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
                 battery = StudioPolicy.battery(intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1), intent.getIntExtra(BatteryManager.EXTRA_SCALE, 0));
                 int t = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Integer.MIN_VALUE);
@@ -93,32 +89,18 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
     private void syncVisibility() {
         if (main == null) return;
         boolean visible = attached && screenAwake && isShown() && getWindowVisibility() == VISIBLE;
-        if (visible == running) { if (visible && arrivalPending) homeArrival(); return; }
+        if (visible == running) return;
         if (!visible) { stop(); return; }
         running = true; messageSlot = -1;
-        restartMotion(); main.post(tick); if (arrivalPending) homeArrival();
+        restartMotion(); main.post(tick);
     }
     private void stop() {
         running = false; generation++; sampling = false; main.removeCallbacks(tick);
         if (animator != null) { animator.cancel(); animator = null; }
-        if (homeAnimator != null) { homeAnimator.cancel(); homeAnimator = null; }
-        homeReveal = 1;
         HeckerClockWeather.stop(this);
     }
-    private void homeArrival() {
-        arrivalPending = false;
-        if (homeAnimator != null) { homeAnimator.cancel(); homeAnimator = null; }
-        homeReveal = 1;
-        if (widgetId != -1 || !HeckerLauncherMotion.enabled(getContext())
-                || Settings.Secure.getInt(getContext().getContentResolver(), "hecker_living_clock_home", 1) == 0
-                || Settings.Secure.getInt(getContext().getContentResolver(), "hecker_custom_lockscreen_clock", 0) == 0) return;
-        int selected = Settings.Secure.getInt(getContext().getContentResolver(), "hecker_lockscreen_clock_style", 0);
-        if (!FlowClockRenderer.supportsDepth(selected)) return;
-        homeReveal = 0; homeAnimator = ValueAnimator.ofFloat(0, 1); homeAnimator.setDuration(520);
-        homeAnimator.setInterpolator(HeckerLauncherMotion.CURVE);
-        homeAnimator.addUpdateListener(a -> { homeReveal = (float) a.getAnimatedValue(); invalidate(); });
-        homeAnimator.start();
-    }
+    // Unlock uses native window/scene progress. The Home clock is already at its final
+    // geometry underneath keyguard; ACTION_USER_PRESENT must never replay an AOD reveal.
     private void restartMotion() {
         if (running && HeckerStudio.enabled(getContext(), "clock_weather", true)) HeckerClockWeather.start(this); else HeckerClockWeather.stop(this);
         if (animator != null) { animator.cancel(); animator = null; }
@@ -289,7 +271,7 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
         float height = getHeight() / density - (weather ? 24 : 0);
         livingClock.draw(canvas, now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE),
                 DateFormat.is24HourFormat(getContext()), date(), Locale.getDefault(), getWidth() / density,
-                height, selected == 2 ? 3 : selected, homeReveal, true, true, opacity, color, size, 0, 0);
+                height, selected == 2 ? 3 : selected, 1f, true, true, opacity, color, size, 0, 0);
         canvas.restoreToCount(saved);
         HeckerHomeDepth.foreground(this, canvas);
         if (weather) {

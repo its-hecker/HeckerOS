@@ -147,6 +147,7 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
         }
     }
     var origin by remember { mutableStateOf(Offset.Zero) }
+    val homeHandoff = LocalHeckerHomeHandoff.current
     val foreground = if (FlowClockRenderer.supportsDepth(style)) HeckerDepthScene.foreground(context, state) else null
     val height = if (small) { if (style == 1) 218.dp else 136.dp }
         else when (style) { 1 -> 310.dp; 2, 3, 5 -> 480.dp; 4 -> 240.dp; else -> 184.dp }
@@ -165,7 +166,7 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
                 2, 3, 4, 5 -> living.draw(c, hour, minute, DateFormat.is24HourFormat(context), clock.second,
                     Locale.getDefault(), size.width / density, size.height / density,
                     if (style == 2) 3 else style, awake, small, false, state.clockOpacity / 100f,
-                    state.clockColor, state.clockScale, state.clockX, state.clockY)
+                    state.clockColor, state.clockScale, state.clockX, state.clockY, homeHandoff())
                 else -> renderer.clock(c,clock.first,clock.second,size.width/density,if(small) 36f else 52f,
                     if(small) 52f else 72f)
             }

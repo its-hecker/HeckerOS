@@ -104,25 +104,21 @@ internal object HeckerDepthScene {
     fun backdrop(context: Context, controller: StatusBarStateController, modifier: Modifier) {
         DisposableEffect(context) { HeckerAmbientCharging.start(context); onDispose {} }
         val state by HeckerAmbientCharging.state.collectAsState()
-        var status by remember(controller) { mutableIntStateOf(controller.state) }
-        DisposableEffect(controller) {
-            val listener = object : StatusBarStateController.StateListener {
-                override fun onStateChanged(value: Int) { status = value }
-            }
-            controller.addCallback(listener)
-            onDispose { controller.removeCallback(listener) }
-        }
         val image = pair(context, state)
+        val homeHandoff = LocalHeckerHomeHandoff.current
         val awakeFraction = heckerAwakeFraction(controller)
         // Clock, subject crop, opacity and blur all follow the same reversible native doze frames.
         // Depth opt-out and reduced motion settle immediately; AOD never draws a wallpaper.
         val animated = state.flow && state.depthWake && !state.powerSave && ValueAnimator.areAnimatorsEnabled()
         reveal = if (animated) awakeFraction else 1f
-        if (status != 1 || image == null || awakeFraction <= 0f) return
+        if (image == null || awakeFraction <= 0f) return
         val fraction = reveal
         val blur = if (animated && awakeFraction < 1f) (1f - awakeFraction) * 18f else 0f
         val effect = remember(blur) { if (blur > .1f) BlurEffect(blur, blur, TileMode.Clamp) else null }
-        Canvas(modifier.fillMaxSize().graphicsLayer { alpha = awakeFraction; renderEffect = effect }
+        Canvas(modifier.fillMaxSize().graphicsLayer {
+            // Keep the new Home clock covered until the travelling lock digits nearly converge.
+            alpha = awakeFraction * (1f - FlowClockRenderer.homeFade(homeHandoff())); renderEffect = effect
+        }
             .clipToBounds().onGloballyPositioned {
             viewport = DepthViewport(it.positionInRoot(), it.size.width.toFloat(), it.size.height.toFloat())
         }) {

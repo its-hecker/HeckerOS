@@ -10,7 +10,15 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import android.os.SystemClock
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,7 +32,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -40,12 +47,14 @@ import com.android.systemui.res.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
-/** Compact real-session player. The native host still decides keyguard visibility. */
+/** One real-session renderer for keyguard, QQS and the two expanded dashboards. */
 @Composable
 fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hideWhenInactive: Boolean = false,
     nativeFallback: (@Composable () -> Unit)? = null,
     sessionToken: android.media.session.MediaSession.Token? = null, musicOnly: Boolean = false,
-    onInactive: (() -> Unit)? = null) {
+    onInactive: (() -> Unit)? = null, compactRow: Boolean = false,
+    squareWeight: () -> Float = { if (square) 1f else 0f },
+    rowWeight: () -> Float = { if (compactRow) 1f else 0f }) {
     val context = LocalContext.current
     var snapshot by remember { mutableStateOf<HeckerQsMedia.Snapshot?>(null) }
     val media = remember(context, sessionToken, musicOnly) {
@@ -55,8 +64,6 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
     val state = snapshot
     LaunchedEffect(state?.active) { if (state != null && !state.active) onInactive?.invoke() }
     if (hideWhenInactive && state?.active != true) {
-        // Native media resumption can outlive an active session. Keep its real
-        // resume action and dismissal behavior when there is no controller.
         if (state != null) nativeFallback?.invoke()
         return
     }
@@ -64,7 +71,7 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
     val motion = heckerFlowMotionAllowed() && ambient.screenAwake
     var position by remember { mutableStateOf(0L) }
     var seeking by remember { mutableStateOf(false) }
-    LaunchedEffect(state, seeking, motion, ambient.screenAwake) {
+    LaunchedEffect(state, seeking, ambient.screenAwake) {
         if (seeking || !ambient.screenAwake) return@LaunchedEffect
         do {
             position = state?.positionNow() ?: 0
@@ -74,62 +81,100 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
     }
     val art = state?.artwork
     val flow = LocalHeckerFlowGlass.current
-    val shape = RoundedCornerShape(if (square) 30.dp else 28.dp)
-    Box(modifier.fillMaxWidth().clip(shape).background(if (flow) Color.White.copy(alpha = .10f) else Color(0xCC173C50))
-        .border(1.dp, Color.White.copy(alpha = .16f), shape)) {
-        if (!flow) Crossfade(art, modifier=Modifier.matchParentSize(), animationSpec = if (motion) tween(320, easing = HeckerFlowEasing) else snap(), label = "mediaBackdrop") { image ->
-            if (image != null) Image(image.asImageBitmap(), null, contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().blur(32.dp))
-        }
-        Box(Modifier.matchParentSize().background(Brush.verticalGradient(if (flow) listOf(Color(0x18FFFFFF), Color(0x08FFFFFF)) else listOf(Color(0x9C213D55), Color(0xDC0A2639)))))
-        Column(Modifier.fillMaxWidth().padding(horizontal = if (square) 12.dp else 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(if (square) 8.dp else 4.dp)) {
-            if (square) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    MediaArtwork(art, 40)
-                    MediaButton(R.drawable.hecker_qs_headphones, R.string.hecker_qs_media_output) { media.output() }
-                }
-                MediaTitles(state, compact = true)
-            } else {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    MediaArtwork(art, 64)
-                    Column(Modifier.weight(1f)) {
-                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            Box(Modifier.weight(1f)) { MediaTitles(state) }
-                            MediaPulse(state?.playing == true, motion)
-                        }
-                        val duration = state?.duration ?: 0L
-                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(mediaTime(position), color = Color.White.copy(alpha = .6f), fontSize = 10.sp)
-                            Slider(value = position.toFloat().coerceIn(0f, duration.coerceAtLeast(1).toFloat()),
-                                valueRange = 0f..duration.coerceAtLeast(1).toFloat(),
-                                enabled = duration > 0 && state?.supports(PlaybackState.ACTION_SEEK_TO) == true,
-                                onValueChange = { seeking = true; position = it.toLong() },
-                                onValueChangeFinished = { media.seek(position); seeking = false }, thumb = {},
-                                track = { progress -> Box(Modifier.fillMaxWidth().height(3.dp).background(Color.White.copy(alpha = .23f), CircleShape)) {
-                                    Box(Modifier.fillMaxWidth((progress.value / duration.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f)).height(3.dp).background(Color.White, CircleShape))
-                                } }, modifier = Modifier.weight(1f).height(28.dp).semantics { contentDescription = context.getString(R.string.hecker_media_seek) })
-                            Text(if (duration > 0) "−${mediaTime((duration - position).coerceAtLeast(0))}" else "", color = Color.White.copy(alpha = .6f), fontSize = 10.sp)
-                        }
-                    }
-                }
+    val shape = RoundedCornerShape(28.dp)
+    val fontScale = LocalConfiguration.current.fontScale.coerceIn(1f, 2f)
+    val preferredHeight = (if (compactRow) 80f + (fontScale - 1) * 32
+        else if (square) 178f + (fontScale - 1) * 64 else 164f + (fontScale - 1) * 48).dp
+    Box(modifier.fillMaxWidth().clip(shape)
+        .background(if (flow) Color(0xB3191923) else Color(0xE0141721))
+        .border(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = .24f),
+            Color(0xFFB9CFFF).copy(alpha = .32f))), shape)) {
+        // Fixed-cost radial shaders provide the soft light; the text and icons are never blurred.
+        HeckerMediaGlow(state?.playing == true, motion, Modifier.matchParentSize())
+        Layout(modifier = Modifier.fillMaxWidth().heightIn(min = preferredHeight), content = {
+            MediaArtwork(art)
+            MediaTitles(state)
+            val duration = state?.duration ?: 0L
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(mediaTime(position), color = Color.White.copy(alpha = .65f), fontSize = 10.sp)
+                Slider(value = position.toFloat().coerceIn(0f, duration.coerceAtLeast(1).toFloat()),
+                    valueRange = 0f..duration.coerceAtLeast(1).toFloat(),
+                    enabled = !square && !compactRow && duration > 0 && state?.supports(PlaybackState.ACTION_SEEK_TO) == true,
+                    onValueChange = { seeking = true; position = it.toLong() },
+                    onValueChangeFinished = { media.seek(position); seeking = false }, thumb = {},
+                    track = { progress -> Box(Modifier.fillMaxWidth().height(3.dp).background(Color.White.copy(alpha = .23f), CircleShape)) {
+                        Box(Modifier.fillMaxWidth((progress.value / duration.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f))
+                            .height(3.dp).background(Color(0xFFD1F7FF), CircleShape))
+                    } }, modifier = Modifier.weight(1f).height(28.dp)
+                        .semantics { contentDescription = context.getString(R.string.hecker_media_seek) })
+                Text(if (duration > 0) "−${mediaTime((duration - position).coerceAtLeast(0))}" else "",
+                    color = Color.White.copy(alpha = .65f), fontSize = 10.sp)
             }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
-                MediaButton(R.drawable.hecker_qs_previous, R.string.hecker_media_previous,
-                    state?.supports(PlaybackState.ACTION_SKIP_TO_PREVIOUS) == true) { media.previous() }
-                MediaButton(if (state?.playing == true) R.drawable.hecker_qs_pause else R.drawable.hecker_qs_play,
-                    if (state?.playing == true) R.string.hecker_qs_pause else R.string.hecker_qs_play) { media.playPause() }
-                MediaButton(R.drawable.hecker_qs_next, R.string.hecker_media_next,
-                    state?.supports(PlaybackState.ACTION_SKIP_TO_NEXT) == true) { media.next() }
-                if (!square) MediaButton(R.drawable.hecker_qs_headphones, R.string.hecker_qs_media_output) { media.output() }
+            MediaButton(R.drawable.hecker_qs_previous, R.string.hecker_media_previous,
+                !compactRow && state?.supports(PlaybackState.ACTION_SKIP_TO_PREVIOUS) == true) { media.previous() }
+            MediaButton(if (state?.playing == true) R.drawable.hecker_qs_pause else R.drawable.hecker_qs_play,
+                if (state?.playing == true) R.string.hecker_qs_pause else R.string.hecker_qs_play) { media.playPause() }
+            MediaButton(R.drawable.hecker_qs_next, R.string.hecker_media_next,
+                !compactRow && state?.supports(PlaybackState.ACTION_SKIP_TO_NEXT) == true) { media.next() }
+            MediaButton(R.drawable.hecker_qs_headphones, R.string.hecker_qs_media_output) { media.output() }
+        }) { children, constraints ->
+            val width = constraints.maxWidth
+            val height = constraints.constrainHeight(preferredHeight.roundToPx())
+            // Shared values are read during measurement, after both native scene targets exist.
+            val tile = squareWeight(); val row = rowWeight()
+            val bounds = (0 until MediaCardGeometry.COUNT).map { index ->
+                MediaCardGeometry.bounds(index, width / density, height / density, tile, row, fontScale)
+            }
+            val items = children.mapIndexed { index, child ->
+                val b = bounds[index]
+                child.measure(Constraints.fixed((b[2] * density).roundToInt().coerceAtLeast(1),
+                    (b[3] * density).roundToInt().coerceAtLeast(1)))
+            }
+            layout(width, height) {
+                items.forEachIndexed { index, item ->
+                    val b = bounds[index]
+                    // Alpha-zero children are not placed, so hidden transport/seek targets cannot intercept input.
+                    if (b[4] > .001f) item.placeRelativeWithLayer((b[0] * density).roundToInt(),
+                        (b[1] * density).roundToInt()) { alpha = b[4] }
+                }
             }
         }
     }
 }
 
+/** The reference's drifting blue/lavender under-light, independent of metadata/seek updates. */
 @Composable
-private fun MediaArtwork(art: android.graphics.Bitmap?, size: Int) {
+private fun HeckerMediaGlow(playing: Boolean, motion: Boolean, modifier: Modifier) {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val frame = remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
+    val strength by animateFloatAsState(if (playing) 1f else .42f,
+        if (motion) tween(500, easing = HeckerFlowEasing) else snap(), label = "mediaGlowActivity")
+    LaunchedEffect(playing, motion, lifecycle) {
+        if (!playing || !motion) return@LaunchedEffect
+        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            while (isActive) withFrameNanos { frame.longValue = SystemClock.elapsedRealtime() }
+        }
+    }
+    Canvas(modifier.clearAndSetSemantics { }) {
+        val phase = MediaCardGeometry.glowPhase(frame.longValue)
+        val activity = strength
+        drawRect(Brush.verticalGradient(listOf(Color.Transparent, Color(0xFF131322).copy(alpha = .28f))))
+        val colors = listOf(Color(0xFF9A82FF), Color(0xFF88DFFF), Color(0xFFB1ADFF))
+        colors.forEachIndexed { index, tint ->
+            val offset = phase + index * 2.094395f
+            val center = Offset(size.width * (.50f + .29f * sin(offset)),
+                size.height * (.93f + .12f * sin(offset * 2f)))
+            val radius = size.width * (.48f + .04f * sin(offset))
+            drawRect(Brush.radialGradient(listOf(tint.copy(alpha = (.30f + .07f * index) * activity),
+                tint.copy(alpha = .10f * activity), Color.Transparent), center, radius.coerceAtLeast(1f)))
+        }
+        drawRect(Brush.verticalGradient(listOf(Color.Transparent, Color(0xFFB3DEFF).copy(alpha = .10f * activity))))
+    }
+}
+
+@Composable
+private fun MediaArtwork(art: android.graphics.Bitmap?) {
     val ambient by HeckerAmbientCharging.state.collectAsState()
     val motion=heckerFlowMotionAllowed() && ambient.screenAwake
     val arrival=remember { Animatable(1f) }
@@ -137,7 +182,7 @@ private fun MediaArtwork(art: android.graphics.Bitmap?, size: Int) {
         if(motion){arrival.snapTo(.94f);arrival.animateTo(1f,spring(dampingRatio=.9f,stiffness=430f))}
         else arrival.snapTo(1f)
     }
-    Box(Modifier.size(size.dp).graphicsLayer { scaleX=arrival.value;scaleY=arrival.value }
+    Box(Modifier.fillMaxSize().graphicsLayer { scaleX=arrival.value;scaleY=arrival.value }
         .clip(RoundedCornerShape(11.dp)).background(Color.White.copy(alpha=.14f)), contentAlignment=Alignment.Center) {
         Crossfade(art,animationSpec=if(motion)tween(320,easing=HeckerFlowEasing) else snap(),label="mediaArtwork") { image ->
             if(image!=null) Image(image.asImageBitmap(),null,contentScale=ContentScale.Crop,modifier=Modifier.fillMaxSize())
@@ -157,19 +202,6 @@ private fun MediaTitles(state: HeckerQsMedia.Snapshot?, compact: Boolean = false
         Column {
             Text(value.first,color=Color.White,fontSize=if(compact)12.sp else 14.sp,fontWeight=FontWeight.SemiBold,maxLines=1,overflow=TextOverflow.Ellipsis)
             if(value.second.isNotBlank())Text(value.second,color=Color.White.copy(alpha=.7f),fontSize=if(compact)10.sp else 12.sp,maxLines=1,overflow=TextOverflow.Ellipsis)
-        }
-    }
-}
-
-@Composable
-private fun MediaPulse(playing:Boolean,motion:Boolean) {
-    val activity by animateFloatAsState(if(playing&&motion)1f else .35f,
-        if(motion)spring(dampingRatio=.9f,stiffness=430f) else snap(),label="mediaPlaybackState")
-    Canvas(Modifier.size(18.dp).clearAndSetSemantics { }) {
-        repeat(5){i->
-            val amplitude=.35f+activity*.65f*(sin(i*1.1f)+1f)/2f
-            val x=size.width*(i+1)/6f;val h=size.height*.7f*amplitude
-            drawLine(Color.White.copy(alpha=.55f),Offset(x,(size.height-h)/2),Offset(x,(size.height+h)/2),strokeWidth=size.width/12,cap=StrokeCap.Round)
         }
     }
 }

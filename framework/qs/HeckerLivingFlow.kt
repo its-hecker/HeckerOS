@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 
 val HeckerFlowEasing = CubicBezierEasing(.22f, 1f, .36f, 1f)
+val HeckerHandoffEasing = CubicBezierEasing(.4f, 0f, .2f, 1f)
 
 /** Use the actual native doze frames, including reversal, instead of starting a second wake timer. */
 @Composable
