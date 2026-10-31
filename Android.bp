@@ -16,9 +16,16 @@ license {
     license_text: ["app/assets/netlab/NOTICE.txt"],
 }
 
+// The pinned Soong catalog has no Bitstream Vera license kind.
+license_kind {
+    name: "hecker_living_flow_bitstream_vera",
+    conditions: ["notice"],
+    url: "https://spdx.org/licenses/Bitstream-Vera.html",
+}
+
 license {
     name: "hecker_living_flow_font_license",
-    license_kinds: ["SPDX-license-identifier-Bitstream-Vera"],
+    license_kinds: ["hecker_living_flow_bitstream_vera"],
     license_text: ["fonts/living-flow/LICENSE.txt"],
 }
 
