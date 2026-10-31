@@ -1,0 +1,10 @@
+<resources>
+    <color name="hecker_about_background">#111115</color>
+    <color name="hecker_about_surface">#1D1D23</color>
+    <color name="hecker_about_hero_start">#30243E</color>
+    <color name="hecker_about_hero_end">#252536</color>
+    <color name="hecker_about_text">#F1EFF8</color>
+    <color name="hecker_about_secondary">#C3B7DA</color>
+    <color name="hecker_about_icon">#BDA9E0</color>
+    <color name="hecker_about_divider">#302D38</color>
+</resources>

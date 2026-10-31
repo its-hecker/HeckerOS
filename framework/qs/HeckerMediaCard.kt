@@ -2,6 +2,8 @@
 @file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 package com.android.systemui.hecker
 
+import org.hecker.motion.MediaGlowSpec
+
 import android.media.session.PlaybackState
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.*
@@ -19,7 +21,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import android.os.SystemClock
 import kotlin.math.roundToInt
-import kotlin.math.sin
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -157,19 +158,18 @@ private fun HeckerMediaGlow(playing: Boolean, motion: Boolean, modifier: Modifie
         }
     }
     Canvas(modifier.clearAndSetSemantics { }) {
-        val phase = MediaCardGeometry.glowPhase(frame.longValue)
+        val phase = MediaGlowSpec.phase(frame.longValue)
         val activity = strength
-        drawRect(Brush.verticalGradient(listOf(Color.Transparent, Color(0xFF131322).copy(alpha = .28f))))
-        val colors = listOf(Color(0xFF9A82FF), Color(0xFF88DFFF), Color(0xFFB1ADFF))
-        colors.forEachIndexed { index, tint ->
-            val offset = phase + index * 2.094395f
-            val center = Offset(size.width * (.50f + .29f * sin(offset)),
-                size.height * (.93f + .12f * sin(offset * 2f)))
-            val radius = size.width * (.48f + .04f * sin(offset))
-            drawRect(Brush.radialGradient(listOf(tint.copy(alpha = (.30f + .07f * index) * activity),
+        drawRect(Brush.verticalGradient(listOf(Color.Transparent, Color(MediaGlowSpec.UNDERLAY))))
+        repeat(MediaGlowSpec.COUNT) { index ->
+            val tint = Color(MediaGlowSpec.color(index))
+            val center = Offset(size.width * MediaGlowSpec.centerX(index, phase),
+                size.height * MediaGlowSpec.centerY(index, phase))
+            val radius = size.width * MediaGlowSpec.radius(index, phase)
+            drawRect(Brush.radialGradient(listOf(tint.copy(alpha = MediaGlowSpec.centerAlpha(index) * activity),
                 tint.copy(alpha = .10f * activity), Color.Transparent), center, radius.coerceAtLeast(1f)))
         }
-        drawRect(Brush.verticalGradient(listOf(Color.Transparent, Color(0xFFB3DEFF).copy(alpha = .10f * activity))))
+        drawRect(Brush.verticalGradient(listOf(Color.Transparent, Color(MediaGlowSpec.RIM).copy(alpha = .10f * activity))))
     }
 }
 

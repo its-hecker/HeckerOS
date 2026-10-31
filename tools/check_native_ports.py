@@ -23,6 +23,7 @@ from check_game_mode_info import check_game_mode_info
 from check_ambient_charging import check_ambient_charging
 from check_interaction_integration import INPUTS as INTERACTION_INPUTS, check_service_bindings, check_statusbar_dispatch
 from check_double_tap_sleep import INPUTS as SLEEP_INPUTS, check_double_tap_sleep
+from check_about_phone_navigation import check_about_navigation
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -485,6 +486,7 @@ def main():
         check_ambient_charging(folder)
         check_service_bindings(folder)
         check_double_tap_sleep(folder, args.kotlin_cache)
+        check_about_navigation(folder)
         window_types = (folder / 'frameworks/base/core/java/android/view/WindowManager.java').read_text()
         assert re.search(r'TYPE_STATUS_BAR_ADDITIONAL\s*=\s*FIRST_SYSTEM_WINDOW\s*\+\s*41\s*;', window_types)
         assert 'public void setTrustedOverlay()' in window_types

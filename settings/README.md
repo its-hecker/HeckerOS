@@ -16,7 +16,7 @@ reversible; the main activity/fragment names stay native.
 Suite retains its random offline Lottie greeting and the previously selected
 App Lock, Gaming, infrared camera and About pages alongside the new grid.
 
-The Suite dashboard and About UI are built as `HeckerSuiteSettingsUi`, a static
+The Suite dashboard and its own About UI are built as `HeckerSuiteSettingsUi`, a static
 library of the native `Settings` APK. The existing Motion Sense controls and
 their child pages are linked through `HeckerMotionSenseSettingsUi` in the plugin
 namespace. The separate Motion Sense settings APK and its package allowlist are
@@ -52,25 +52,29 @@ build remain part of coral validation. Resource compilation alone is not that te
 
 ## Native About Phone
 
-`MyDeviceInfoFragment` hosts one `HeckerAboutPhonePreference` above its original
-information categories. The previous account/avatar header stays hidden; device
-name editing, identifiers, legal/regulatory information, search and the build-number
-developer-options flow keep their native controllers, including the partial
-Catalyst hierarchy. The new card uses the same light/dark Hecker palette.
+`MyDeviceInfoFragment` hosts the reference About home: a rounded HeckerOS card,
+editable device name, Android/processor tiles, joined Software information and
+Device information rows, and a centred Credits & legal footer. Its compact native
+toolbar retains back and search. This page has its own light/dark palette; the
+Hecker Suite dashboard is unchanged.
 
-The square caracal emblem uses a native vector with tall ear tufts, sunglasses
-and a soft accent halo, replacing the tall phone outline and letter H. The mark
-uses the light/dark Settings palette and a small, bounded orbit/bob animation.
-It stops when hidden, detached or the page stops and respects the system
-animator setting. Model, codename, Android, processor, kernel, maintainer and ROM
-version come from this build. RAM and data-partition usage are queried off the UI
-thread; the battery value follows the battery broadcast only while the page is
-started. Unknown values are displayed as unavailable. Data storage means the
-data filesystem, not an invented retail storage capacity.
+The card uses the media player's shared `MediaGlowSpec`: three blue/lavender
+gradients with the same absolute-time 7.2-second cycle, geometry and colours.
+Only the light moves. It is clipped behind the card's text and small outline
+caracal. Drawing stops when hidden, unfocused or detached, when the page pauses,
+in battery saver, and with animations or Living Flow disabled.
 
-Artwork preview in dark and light mode (vector rendering, not a device screenshot):
+Native controllers still own device-name editing, Android and processor details,
+legal pages, identifiers, search and the build-number developer-options flow.
+Device information opens the original information categories, including the
+partial Catalyst hierarchy. Search results expose that native hierarchy so keys
+remain reachable. Model, Android, processor, maintainer and ROM version are read
+from the device/build; the reference screenshot's values are not product defaults.
 
-![Caracal emblem artwork preview](../docs/previews/about-phone-logo.png)
+See [the About reference implementation and validation notes](../docs/about-phone-reference.md).
+`python3 tools/render_about_phone.py` produces a short source preview and light/
+large-font stills. Its fonts and Canvas compositing are approximations; it is not
+a recording of Settings running on Coral.
 
 The Official badge and Suite About page both read `ro.heckeros.build_type`.
 Coral sets its release identity before inheriting platform configuration. The
@@ -78,4 +82,4 @@ vendor/custom adapter keeps HeckerOS away from the inherited PixelOS OTA channel
 an Official maintainer build does not imply an OTA feed or a certification verdict.
 
 Device validation still needs normal/large fonts, dark/light mode, TalkBack,
-page exit/return, rotation, live battery changes and the existing native controls.
+page exit/return, rotation, live device-name changes and the existing native controls.

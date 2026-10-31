@@ -1,59 +1,37 @@
 // SPDX-License-Identifier: Apache-2.0
 package com.android.settings.hecker;
 
-import android.app.ActivityManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.BatteryManager;
+import android.database.ContentObserver;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.StatFs;
 import android.os.SystemProperties;
-import android.text.format.Formatter;
+import android.provider.Settings;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.settings.R;
 
-import java.text.NumberFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.function.IntConsumer;
 
-/** One About Phone hero; native preferences below retain their original controllers. */
+/** Reference About home. Native controllers own editing and all detail destinations. */
 public final class HeckerAboutPhonePreference extends Preference {
     public static final String KEY = "hecker_about_phone";
-    private final Handler mMain = new Handler(Looper.getMainLooper());
-    private final Map<Integer, CharSequence> mValues = new HashMap<>();
+    public static final int NAME = 0, ANDROID = 1, PROCESSOR = 2, SOFTWARE = 3, DEVICE = 4, LEGAL = 5;
     private View mCard;
-    private ExecutorService mWorker;
-    private boolean mActive;
-    private boolean mRegistered;
-    private int mGeneration;
-    private final BroadcastReceiver mBattery = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
-            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-            int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-            int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-            CharSequence value = unavailable();
-            if (level >= 0 && scale > 0 && level <= scale) {
-                String percent = NumberFormat.getPercentInstance().format((double) level / scale);
-                value = status == BatteryManager.BATTERY_STATUS_CHARGING
-                        ? context.getString(R.string.hecker_about_battery_charging, percent) : percent;
-            }
-            mValues.put(R.id.hecker_about_battery, value);
-            render();
-        }
+    private IntConsumer mNavigate;
+    private boolean mActive, mObserving, mNameEditable = true;
+    private final ContentObserver mName = new ContentObserver(new Handler(Looper.getMainLooper())) {
+        @Override public void onChange(boolean selfChange) { render(); }
     };
 
     public HeckerAboutPhonePreference(Context context, AttributeSet attrs) {
@@ -61,41 +39,25 @@ public final class HeckerAboutPhonePreference extends Preference {
         setLayoutResource(R.layout.hecker_about_phone);
         setSelectable(false);
         setPersistent(false);
+        setIconSpaceReserved(false);
     }
 
-    /** Called by the native fragment so work and receivers stop when the page leaves. */
+    public void setNavigator(IntConsumer listener, boolean nameEditable) {
+        mNavigate = listener;
+        mNameEditable = nameEditable;
+        render();
+    }
+
     public void setActive(boolean active) {
-        if (mActive == active) return;
         mActive = active;
-        int generation = ++mGeneration;
-        if (!active) {
-            if (mRegistered) {
-                getContext().unregisterReceiver(mBattery);
-                mRegistered = false;
-            }
-            if (mWorker != null) {
-                mWorker.shutdownNow();
-                mWorker = null;
-            }
-            mMain.removeCallbacksAndMessages(null);
-            if (mCard != null) phoneArt().setActive(false);
-            return;
+        if (active && !mObserving) {
+            getContext().getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.DEVICE_NAME), false, mName);
+            mObserving = true;
+        } else if (!active && mObserving) {
+            getContext().getContentResolver().unregisterContentObserver(mName);
+            mObserving = false;
         }
-        // Storage and memory queries run off the UI thread. No synthetic capacity values.
-        Context context = getContext().getApplicationContext();
-        mWorker = Executors.newSingleThreadExecutor();
-        mWorker.execute(() -> {
-            Map<Integer, CharSequence> values = readDevice(context);
-            mMain.post(() -> {
-                if (!mActive || generation != mGeneration) return;
-                mValues.putAll(values);
-                render();
-            });
-        });
-        Intent sticky = getContext().registerReceiver(mBattery,
-                new IntentFilter(Intent.ACTION_BATTERY_CHANGED), Context.RECEIVER_NOT_EXPORTED);
-        mRegistered = true;
-        if (sticky != null) mBattery.onReceive(getContext(), sticky);
         render();
     }
 
@@ -103,80 +65,55 @@ public final class HeckerAboutPhonePreference extends Preference {
         super.onBindViewHolder(holder);
         holder.setDividerAllowedAbove(false);
         holder.setDividerAllowedBelow(false);
+        if (mCard != null && mCard != holder.itemView) glow().setActive(false);
         mCard = holder.itemView;
-        mCard.findViewById(R.id.hecker_about_community).setOnClickListener(view -> {
-            Intent about = new Intent().setClassName(getContext().getPackageName(),
-                    "org.hecker.suite.SuiteActivity").putExtra("org.hecker.suite.SHOW_ABOUT", true);
-            try {
-                getContext().startActivity(about);
-            } catch (android.content.ActivityNotFoundException | SecurityException unavailable) {
-                Toast.makeText(getContext(), R.string.hecker_suite_unavailable, Toast.LENGTH_LONG).show();
-            }
-        });
+        mCard.setBackgroundColor(getContext().getColor(R.color.hecker_about_background));
+        int[] ids = {R.id.hecker_about_name_action, R.id.hecker_about_android_action,
+                R.id.hecker_about_processor_action, R.id.hecker_about_software_action,
+                R.id.hecker_about_device_action, R.id.hecker_about_community};
+        for (int action = 0; action < ids.length; action++) {
+            final int destination = action;
+            mCard.findViewById(ids[action]).setOnClickListener(view -> {
+                if (mNavigate != null) mNavigate.accept(destination);
+            });
+        }
         render();
     }
 
     @Override public void onDetached() {
         setActive(false);
+        mNavigate = null;
         mCard = null;
         super.onDetached();
     }
 
-    private Map<Integer, CharSequence> readDevice(Context context) {
-        Map<Integer, CharSequence> values = new HashMap<>();
-        values.put(R.id.hecker_about_rom, context.getString(R.string.hecker_about_rom,
-                SystemProperties.get("ro.heckeros.version", unavailable())));
-        String type = SystemProperties.get("ro.heckeros.build_type", "");
-        values.put(R.id.hecker_about_build_type, context.getString("OFFICIAL".equals(type)
-                ? R.string.hecker_about_official : "UNOFFICIAL".equals(type)
-                ? R.string.hecker_about_unofficial : R.string.hecker_about_unspecified));
-        values.put(R.id.hecker_about_model, Build.MODEL);
-        values.put(R.id.hecker_about_codename, SystemProperties.get("ro.heckeros.device", Build.DEVICE));
-        values.put(R.id.hecker_about_android, Build.VERSION.RELEASE);
-        values.put(R.id.hecker_about_maintainer, context.getString(R.string.hecker_about_maintainer,
-                SystemProperties.get("ro.heckeros.maintainer", unavailable())));
-        values.put(R.id.hecker_about_processor, Build.UNKNOWN.equals(Build.SOC_MODEL)
-                ? Build.HARDWARE : Build.SOC_MODEL);
-        values.put(R.id.hecker_about_kernel, System.getProperty("os.version", unavailable()));
-        values.put(R.id.hecker_about_memory, unavailable());
-        values.put(R.id.hecker_about_storage, unavailable());
-        try {
-            ActivityManager manager = context.getSystemService(ActivityManager.class);
-            if (manager != null) {
-                ActivityManager.MemoryInfo memory = new ActivityManager.MemoryInfo();
-                manager.getMemoryInfo(memory);
-                if (memory.totalMem > 0) values.put(R.id.hecker_about_memory,
-                        Formatter.formatShortFileSize(context, memory.totalMem));
-            }
-        } catch (RuntimeException unavailable) { /* Leave an honest unavailable state. */ }
-        try {
-            StatFs data = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-            long total = data.getTotalBytes();
-            long used = Math.max(0, total - data.getAvailableBytes());
-            if (total > 0) values.put(R.id.hecker_about_storage,
-                    context.getString(R.string.hecker_about_storage_value,
-                            Formatter.formatShortFileSize(context, used),
-                            Formatter.formatShortFileSize(context, total)));
-        } catch (RuntimeException unavailable) { /* Not a fabricated advertised storage size. */ }
-        return values;
-    }
-
-    private String unavailable() {
-        return getContext().getString(R.string.hecker_about_unavailable);
-    }
-
-    private HeckerPhoneArtView phoneArt() {
-        return mCard.findViewById(R.id.hecker_about_phone_art);
-    }
+    private HeckerAboutGlowLayout glow() { return mCard.findViewById(R.id.hecker_about_glow); }
+    private String unavailable() { return getContext().getString(R.string.hecker_about_unavailable); }
+    private void value(int id, CharSequence text) { ((TextView) mCard.findViewById(id)).setText(text); }
 
     private void render() {
         if (mCard == null) return;
-        for (int id : new int[] {R.id.hecker_about_rom, R.id.hecker_about_build_type,
-                R.id.hecker_about_model, R.id.hecker_about_codename, R.id.hecker_about_android,
-                R.id.hecker_about_memory, R.id.hecker_about_storage, R.id.hecker_about_battery,
-                R.id.hecker_about_processor, R.id.hecker_about_kernel, R.id.hecker_about_maintainer}) {
-            ((TextView) mCard.findViewById(id)).setText(mValues.getOrDefault(id, unavailable()));
-        }
-        phoneArt().setActive(mActive);
+        Context context = getContext();
+        String name = Settings.Global.getString(context.getContentResolver(), Settings.Global.DEVICE_NAME);
+        value(R.id.hecker_about_model, name == null || name.isBlank() ? Build.MODEL : name);
+        value(R.id.hecker_about_version_line, context.getString(R.string.hecker_about_version_line,
+                SystemProperties.get("ro.heckeros.version", unavailable()), Build.VERSION.RELEASE));
+        value(R.id.hecker_about_android, Build.VERSION.RELEASE);
+        value(R.id.hecker_about_processor, HeckerAboutPhoneValues.processor(Build.SOC_MODEL, Build.HARDWARE));
+        SpannableString credits = new SpannableString("\uFFFC  " + context.getString(
+                R.string.hecker_about_credits, SystemProperties.get("ro.heckeros.maintainer", "Hecker")) + "  \uFFFC");
+        Drawable heart = context.getDrawable(R.drawable.hecker_about_heart).mutate();
+        Drawable external = context.getDrawable(R.drawable.hecker_about_external).mutate();
+        int icon = Math.round(16 * context.getResources().getDisplayMetrics().density);
+        heart.setBounds(0, 0, icon, icon);
+        external.setBounds(0, 0, icon, icon);
+        credits.setSpan(new ImageSpan(heart, ImageSpan.ALIGN_CENTER), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        credits.setSpan(new ImageSpan(external, ImageSpan.ALIGN_CENTER), credits.length() - 1,
+                credits.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        value(R.id.hecker_about_community, credits);
+        View rename = mCard.findViewById(R.id.hecker_about_name_action);
+        rename.setEnabled(mNameEditable);
+        rename.setAlpha(mNameEditable ? 1f : .5f);
+        glow().setActive(mActive);
     }
 }

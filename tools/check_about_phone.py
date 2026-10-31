@@ -101,11 +101,14 @@ def main():
             jars.append(jar)
     with tempfile.TemporaryDirectory(prefix="hecker-about-phone-") as directory:
         output = Path(directory)
-        for name in ("values/hecker_about.xml", "values/hecker_strings.xml",
+        resources = {"values/hecker_about.xml", "values/hecker_strings.xml",
                      "values/hecker_colors.xml", "values-night/hecker_colors.xml",
                      "drawable/hecker_about_badge.xml", "drawable/hecker_card_background.xml",
                      "drawable/hecker_caracal_mark.xml",
-                     "layout/hecker_about_phone.xml"):
+                     "layout/hecker_about_phone.xml"}
+        resources.update(str(p.relative_to(ROOT / "settings/res"))
+                         for p in (ROOT / "settings/res").rglob("hecker_about_*.xml"))
+        for name in sorted(resources):
             target = output / "res" / name
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / "settings/res" / name, target)
@@ -117,10 +120,36 @@ def main():
         run(cache / "aapt2", "link", "-I", cache / "android.jar", "--manifest", manifest,
             "--java", output / "generated", "-o", output / "resources.apk", output / "resources.zip")
         (output / "classes").mkdir()
+        # Settings already links Material's AppBar/CollapsingToolbar classes. Keep the
+        # host SDK probe narrow; a complete Settings build links their implementation.
+        stubs = {
+            "com/google/android/material/appbar/AppBarLayout.java": '''package com.google.android.material.appbar;
+public class AppBarLayout extends android.widget.FrameLayout {
+ public AppBarLayout(android.content.Context c){super(c);} public void setExpanded(boolean expanded,boolean animate){}
+ public static class LayoutParams extends android.widget.FrameLayout.LayoutParams {
+  public LayoutParams(int w,int h){super(w,h);} public int getScrollFlags(){return 0;}public void setScrollFlags(int flags){}
+ }
+}''',
+            "com/google/android/material/appbar/CollapsingToolbarLayout.java": '''package com.google.android.material.appbar;
+public class CollapsingToolbarLayout extends android.widget.FrameLayout {
+ public CollapsingToolbarLayout(android.content.Context c){super(c);}
+ public boolean isTitleEnabled(){return true;} public void setTitleEnabled(boolean enabled){}
+ public android.graphics.drawable.Drawable getContentScrim(){return null;}public android.graphics.drawable.Drawable getStatusBarScrim(){return null;}
+ public void setContentScrimColor(int color){}public void setStatusBarScrimColor(int color){}
+ public void setContentScrim(android.graphics.drawable.Drawable drawable){}public void setStatusBarScrim(android.graphics.drawable.Drawable drawable){}
+}''',
+        }
+        for name, content in stubs.items():
+            p = output / name; p.parent.mkdir(parents=True, exist_ok=True); p.write_text(content)
         run("java", "-m", "jdk.compiler/com.sun.tools.javac.Main", "-cp",
             os.pathsep.join(map(str, [cache / "android-system.jar", *jars])),
             "-d", output / "classes", output / "generated/com/android/settings/R.java",
+            *[output / name for name in stubs],
+            ROOT / "framework/qs/MediaGlowSpec.java",
             ROOT / "settings/src/com/android/settings/hecker/HeckerPhoneArtView.java",
+            ROOT / "settings/src/com/android/settings/hecker/HeckerAboutGlowLayout.java",
+            ROOT / "settings/src/com/android/settings/hecker/HeckerAboutPhoneUi.java",
+            ROOT / "settings/src/com/android/settings/hecker/HeckerAboutPhoneValues.java",
             ROOT / "settings/src/com/android/settings/hecker/HeckerAboutPhonePreference.java")
         print("Native About Phone resources and Java against Android/AndroidX APIs: PASS")
         vendor = args.vendor_source

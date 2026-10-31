@@ -17,18 +17,63 @@
     <string name="hecker_about_maintainer">Maintained by %1$s</string>
     <string name="hecker_about_community">Meet Hecker &amp; the community</string>
     <string name="hecker_about_unavailable">Unavailable</string>
-    <style name="HeckerAboutLabel">
+    <string name="hecker_about_brand">HeckerOS</string>
+    <string name="hecker_about_version_line">Version %1$s · Android %2$s</string>
+    <string name="hecker_about_device_name">Device name</string>
+    <string name="hecker_about_android_version">Android version</string>
+    <string name="hecker_about_software">Software information</string>
+    <string name="hecker_about_software_summary">Version and build details</string>
+    <string name="hecker_about_device">Device information</string>
+    <string name="hecker_about_device_summary">Hardware and specifications</string>
+    <string name="hecker_about_credits">Made by %1$s · Credits &amp; legal</string>
+    <string name="hecker_about_credits_title">Credits &amp; legal</string>
+    <style name="HeckerAboutReferenceTitle">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/hecker_secondary</item>
-        <item name="android:textSize">13sp</item>
-    </style>
-    <style name="HeckerAboutValue">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginTop">4dp</item>
-        <item name="android:textColor">@color/hecker_foreground</item>
-        <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@color/hecker_about_text</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:includeFontPadding">false</item>
         <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="HeckerAboutReferenceCaption">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/hecker_about_secondary</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="HeckerAboutReferenceIcon">
+        <item name="android:layout_width">16dp</item>
+        <item name="android:layout_height">16dp</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+    <style name="HeckerAboutReferenceTile">
+        <item name="android:minHeight">88dp</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">14dp</item>
+        <item name="android:background">@drawable/hecker_about_surface</item>
+        <item name="android:foreground">?android:attr/selectableItemBackground</item>
+        <item name="android:clipToOutline">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <style name="HeckerAboutReferenceRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">74dp</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <style name="HeckerAboutReferenceRowText">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginStart">14dp</item>
+        <item name="android:layout_marginEnd">12dp</item>
+        <item name="android:orientation">vertical</item>
     </style>
 </resources>

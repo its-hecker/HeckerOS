@@ -154,5 +154,22 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerClockHandoff.kt": "framework/lockscreen/HeckerClockHandoff.kt",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/DoubleTapSleepGesture.java": "framework/gestures/DoubleTapSleepGesture.java",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerDoubleTapSleep.java": "framework/gestures/HeckerDoubleTapSleep.java",
-  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerStatusBarSleepGesture.java": "framework/gestures/HeckerStatusBarSleepGesture.java"
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerStatusBarSleepGesture.java": "framework/gestures/HeckerStatusBarSleepGesture.java",
+  "packages/apps/Settings/res/values/hecker_about_colors.xml": "settings/res/values/hecker_about_colors.xml",
+  "packages/apps/Settings/res/drawable/hecker_about_chevron.xml": "settings/res/drawable/hecker_about_chevron.xml",
+  "packages/apps/Settings/res/drawable/hecker_about_external.xml": "settings/res/drawable/hecker_about_external.xml",
+  "packages/apps/Settings/res/drawable/hecker_about_heart.xml": "settings/res/drawable/hecker_about_heart.xml",
+  "packages/apps/Settings/res/drawable/hecker_about_device.xml": "settings/res/drawable/hecker_about_device.xml",
+  "packages/apps/Settings/res/drawable/hecker_about_hero.xml": "settings/res/drawable/hecker_about_hero.xml",
+  "packages/apps/Settings/res/drawable/hecker_about_processor_icon.xml": "settings/res/drawable/hecker_about_processor_icon.xml",
+  "packages/apps/Settings/res/drawable/hecker_about_android_icon.xml": "settings/res/drawable/hecker_about_android_icon.xml",
+  "packages/apps/Settings/res/drawable/hecker_about_surface.xml": "settings/res/drawable/hecker_about_surface.xml",
+  "packages/apps/Settings/res/drawable/hecker_about_caracal.xml": "settings/res/drawable/hecker_about_caracal.xml",
+  "packages/apps/Settings/res/drawable/hecker_about_info.xml": "settings/res/drawable/hecker_about_info.xml",
+  "packages/apps/Settings/res/values-night/hecker_about_colors.xml": "settings/res/values-night/hecker_about_colors.xml",
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutGlowLayout.java": "settings/src/com/android/settings/hecker/HeckerAboutGlowLayout.java",
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutPhoneValues.java": "settings/src/com/android/settings/hecker/HeckerAboutPhoneValues.java",
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutPhoneUi.java": "settings/src/com/android/settings/hecker/HeckerAboutPhoneUi.java",
+  "packages/apps/Settings/src/org/hecker/motion/MediaGlowSpec.java": "framework/qs/MediaGlowSpec.java",
+  "frameworks/base/packages/SystemUI/src/org/hecker/motion/MediaGlowSpec.java": "framework/qs/MediaGlowSpec.java"
 }

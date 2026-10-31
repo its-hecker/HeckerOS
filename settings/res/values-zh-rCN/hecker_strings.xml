@@ -30,4 +30,14 @@
     <string name="hecker_about_maintainer">由 %1$s 维护</string>
     <string name="hecker_about_community">认识 Hecker 与社区</string>
     <string name="hecker_about_unavailable">不可用</string>
+    <string name="hecker_about_brand">HeckerOS</string>
+    <string name="hecker_about_version_line">版本 %1$s · Android %2$s</string>
+    <string name="hecker_about_device_name">设备名称</string>
+    <string name="hecker_about_android_version">Android 版本</string>
+    <string name="hecker_about_software">软件信息</string>
+    <string name="hecker_about_software_summary">版本和构建详情</string>
+    <string name="hecker_about_device">设备信息</string>
+    <string name="hecker_about_device_summary">硬件和规格</string>
+    <string name="hecker_about_credits">由 %1$s 制作 · 致谢与法律信息</string>
+    <string name="hecker_about_credits_title">致谢与法律信息</string>
 </resources>

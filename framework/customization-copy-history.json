@@ -137,7 +137,8 @@
     "13ce12648574681cc80aef09c067d6fee26f2096"
   ],
   "packages/apps/Settings/res/layout/hecker_about_phone.xml": [
-    "5718081f197c2b5a8c0616fd55ce92f760ed6f16"
+    "5718081f197c2b5a8c0616fd55ce92f760ed6f16",
+    "0c3c6d39c6f3345b5038345bbdd679b57a0a51f3"
   ],
   "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutPhonePreference.java": [
     "19e0f05a03cb342192a98c411420f5572b8d0da9"
@@ -251,7 +252,8 @@
     "4840b9bbb302caaf73dbcf7a2b7a286a4a58d62c",
     "24fb361a338fa4fdfa9eec03f47ef6aa78b83738",
     "dcea9681cfaac148f86b5465e1ac06a2b961a293",
-    "0eb05b7913784c5f48827fd0595f48332a767abb"
+    "0eb05b7913784c5f48827fd0595f48332a767abb",
+    "6ee24d2d3e2796f6da1dbde55d07a4ecb00c762c"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMotionIsland.java": [
     "b9e18585e75500f62a906a0a163c0c52df90c52d",
@@ -296,5 +298,8 @@
     "7912acb51f5b19445a877b33cdda7123c5e968df",
     "33ed5a22e2de98ac53c3af4c9bc9dbdc9ded0bcd",
     "cb015f37b5c3f30c2c5b0086303ca85daab4a81b"
+  ],
+  "packages/apps/Settings/res/values-zh-rCN/hecker_strings.xml": [
+    "099dffcea066f7b3daec6c8a202f2e0d99b0688f"
   ]
 }

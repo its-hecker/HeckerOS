@@ -49,8 +49,8 @@ wake and native lockscreen state handling.
 - The reference grouped Settings UI: retained caracal hero, maintainer row, coloured icons,
   floating native Search, and grouped native
   categories, a two-column Hecker Suite dashboard, and Display & Personalization.
-- One native About Phone card with a small animated phone, live device details,
-  maintainer/community access and an Official badge tied to build properties.
+- A reference About Phone home with the shared media glow and live device details,
+  native software/device destinations and legal pages.
 - Native Quick Settings with large Wi-Fi/Bluetooth cards, round tiles, media,
   separate volume/brightness controls, and the optional HeckerOS dashboard layout.
 - Connection popups for Bluetooth, wired and USB headphones, including AirPods
