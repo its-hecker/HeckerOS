@@ -102,7 +102,7 @@ def build(offline=False,sdk_cache=None):
     if remote.removesuffix('.git')!=info['repository'].removesuffix('.git'):raise ValueError('Preserving an unfamiliar LibrePods source cache')
     present=subprocess.run(['git','-C',str(upstream),'cat-file','-e',revision+'^{commit}'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0
     if not present:git('fetch','--depth=1','origin',revision)
-    sdk=prepare_sdk(sdk_cache or env.get('ANDROID_HOME') or ROOT/'out/librepods-sdk')
+    sdk=prepare_sdk(sdk_cache or env.get('ANDROID_HOME') or ROOT/'out/librepods-sdk',env=env)
     work=ROOT/'out/librepods-work'/recipe[:16]
     if not work.exists():
         work.parent.mkdir(parents=True,exist_ok=True)

@@ -13,7 +13,7 @@ import zipfile
 # AGP 9.2.1 uses build-tools 36.0.0 with compileSdk 37.
 PACKAGES=('platforms;android-37.0','build-tools;36.0.0','ndk;30.0.14904198','cmake;3.22.1')
 
-def prepare_sdk(destination):
+def prepare_sdk(destination, *, env=None):
     sdk=Path(destination).resolve()
     manager=next(iter(sorted(sdk.glob('cmdline-tools/*/bin/sdkmanager'))),None)
     if manager is None:
@@ -43,8 +43,8 @@ def prepare_sdk(destination):
     missing=[p for p in PACKAGES if not (sdk/p.replace(';','/')/'source.properties').is_file()]
     if missing:
         print('Preparing Android SDK/NDK for LibrePods (cached after the first build)',flush=True)
-        subprocess.run([str(manager),'--sdk_root='+str(sdk),'--licenses'],input='y\n'*200,text=True,stdout=subprocess.DEVNULL,check=True)
-        subprocess.run([str(manager),'--sdk_root='+str(sdk),*missing],check=True)
+        subprocess.run([str(manager),'--sdk_root='+str(sdk),'--licenses'],input='y\n'*200,text=True,env=env,check=True)
+        subprocess.run([str(manager),'--sdk_root='+str(sdk),*missing],env=env,check=True)
     return sdk
 
 if __name__=='__main__':
