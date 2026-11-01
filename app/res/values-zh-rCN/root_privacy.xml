@@ -1,7 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="root_privacy_title">Root 管理器隐私</string>
-    <string name="root_privacy_summary">选择无法查询已安装 Root 管理器的应用</string>
-    <string name="root_privacy_body">所选应用无法查询受支持的 Root 管理器软件包。更改设置后，请关闭并重新打开应用。请勿向这些应用授予 Root 权限，并在 KernelSU 中为其启用“卸载模块”配置。这项设置不保证银行应用兼容。</string>
-    <string name="root_privacy_save_error">无法保存设置，请重试。</string>
+  <string name="root_privacy_title">应用兼容性</string>
+  <string name="root_privacy_summary">为每个已安装应用设置隐私和兼容性选项</string>
+  <string name="root_privacy_body">选择应用，设置 Root 管理器隐私、应用降级、开发者选项可见性和引导加载程序状态。各项设置相互独立，默认关闭。</string>
+  <string name="root_privacy_save_error">无法保存设置，请重试。</string>
+  <string name="compat_root_title">Root 管理器隐私</string>
+  <string name="compat_root_body">向此应用隐藏受支持的 Root 管理器软件包。Root 权限及 KernelSU 模块卸载需要另外设置。</string>
+  <string name="compat_downgrade_title">允许应用降级</string>
+  <string name="compat_downgrade_body">允许使用同一开发者签名的旧版本替换此应用。您仍需自行选择并安装 APK。旧版本可能无法读取现有数据。所有安装此应用的 Android 用户都必须允许降级。系统应用不能降至出厂版本以下。</string>
+  <string name="compat_developer_title">隐藏开发者选项</string>
+  <string name="compat_developer_body">通过 Android Settings API 向此应用报告开发者选项、USB 调试和无线调试已关闭。设备的实际设置保持不变。</string>
+  <string name="compat_bootloader_title">模拟已锁定引导加载程序</string>
+  <string name="compat_bootloader_body">在此应用进程内报告引导加载程序已锁定。这不会实际锁定引导加载程序或改变硬件认证，也不保证应用兼容。</string>
+  <string name="compat_restart_body">更改选项后，请使用下方按钮关闭应用，再重新打开。关闭可能中断下载或丢失未保存的内容。如果保留的进程仍在使用旧设置，请重启手机。</string>
+  <string name="compat_backend_unavailable">此系统尚未启用所需的兼容性支持。请安装匹配的 HeckerOS 版本后再使用这些选项。</string>
+  <string name="compat_protected_app">核心系统 UID 和 Hecker Suite 不支持这些选项。</string>
+  <string name="compat_loading">正在加载已安装应用…</string>
+  <string name="compat_load_error">无法加载应用。请重新打开此页面。</string>
+  <string name="compat_app_count">%1$d / %2$d 个应用</string>
+  <string name="compat_option_count">已启用 %1$d 个选项</string>
+  <string name="compat_close_app">关闭应用以应用设置</string>
+  <string name="compat_app_closed">应用已关闭。重新打开即可使用新设置。</string>
+  <string name="compat_close_failed">无法关闭应用。请手动关闭或重启手机。</string>
 </resources>

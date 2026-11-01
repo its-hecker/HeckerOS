@@ -587,9 +587,9 @@
     <string name="themes_title">Набор тем</string>
     <string name="themes_summary">Темы Lunaris, адаптированные для HeckerOS на Android 17.</string>
     <string name="themes_unavailable">Набор тем HeckerOS недоступен в этой сборке.</string>
-    <string name="root_privacy_title">Конфиденциальность root-менеджера</string>
-    <string name="root_privacy_summary">Выберите приложения, которым нельзя запрашивать установленные root-менеджеры</string>
-    <string name="root_privacy_body">Выбранные приложения не смогут запрашивать пакеты поддерживаемых root-менеджеров. После изменения закройте и откройте приложение. Оставьте root-доступ для этих приложений выключенным и включите для них профиль «Umount modules» в KernelSU. Настройка не гарантирует совместимость банковских приложений.</string>
+    <string name="root_privacy_title">Совместимость приложений</string>
+    <string name="root_privacy_summary">Параметры конфиденциальности и совместимости для каждого приложения</string>
+    <string name="root_privacy_body">Выберите приложение для настройки видимости root-менеджеров, установки старых версий, видимости параметров разработчика и состояния загрузчика. Все параметры независимы и по умолчанию выключены.</string>
     <string name="root_privacy_save_error">Не удалось сохранить настройку. Повторите попытку.</string>
     <string name="sensor_recovery_title">Восстановление датчика</string>
     <string name="sensor_recovery_summary">Восстановление зависшего подключения датчика приближения и проверка реакции</string>
@@ -802,4 +802,22 @@
     <string name="gaming_profile_fallback" formatted="false">Если разрешено, профили системы используют до 90 FPS при штатном разрешении для производительности или 30 FPS и масштаб рендеринга 80% для энергосбережения. Игры могут устанавливать меньшие пределы.</string>
     <string name="gaming_bypass_permission">Управление зарядкой найдено. Восстанавливается доступ; повторите через несколько секунд.</string>
     <string name="gaming_bypass_missing">Для приостановки зарядки требуется ядро HeckerOS для Coral.</string>
+    <string name="compat_root_title">Конфиденциальность root-менеджера</string>
+    <string name="compat_root_body">Скрывать от этого приложения пакеты поддерживаемых root-менеджеров. Root-доступ и отключение модулей в KernelSU настраиваются отдельно.</string>
+    <string name="compat_downgrade_title">Разрешить установку старых версий</string>
+    <string name="compat_downgrade_body">Разрешить замену приложения более старой версией с той же подписью разработчика. APK нужно выбрать и установить самостоятельно. Старая версия может не поддерживать существующие данные. Разрешение требуется от всех пользователей Android с этим приложением. Системные приложения нельзя откатить ниже заводской версии.</string>
+    <string name="compat_developer_title">Скрывать параметры разработчика</string>
+    <string name="compat_developer_body">Сообщать этому приложению через Android Settings, что параметры разработчика и отладка по USB или Wi-Fi выключены. Реальные настройки устройства не изменяются.</string>
+    <string name="compat_bootloader_title">Подмена состояния загрузчика</string>
+    <string name="compat_bootloader_body">Сообщать внутри процесса приложения, что загрузчик заблокирован. Это не блокирует загрузчик, не изменяет аппаратную аттестацию и не гарантирует совместимость.</string>
+    <string name="compat_restart_body">После изменения параметра закройте приложение кнопкой ниже и откройте снова. Закрытие может прервать загрузки и несохранённую работу. Если сохранившийся процесс использует прежние настройки, перезагрузите телефон.</string>
+    <string name="compat_backend_unavailable">В этой прошивке не включена необходимая системная поддержка. Для доступа к параметрам установите соответствующую сборку HeckerOS.</string>
+    <string name="compat_protected_app">Эти параметры недоступны для основных системных UID и Hecker Suite.</string>
+    <string name="compat_loading">Загрузка установленных приложений…</string>
+    <string name="compat_load_error">Не удалось загрузить приложения. Откройте страницу заново.</string>
+    <string name="compat_app_count">Приложения: %1$d из %2$d</string>
+    <string name="compat_option_count">Включено параметров: %1$d</string>
+    <string name="compat_close_app">Закрыть приложение и применить</string>
+    <string name="compat_app_closed">Приложение закрыто. Откройте его снова для применения настроек.</string>
+    <string name="compat_close_failed">Не удалось закрыть приложение. Закройте его вручную или перезагрузите телефон.</string>
 </resources>

@@ -1,5 +1,21 @@
 # HeckerOS · Android 17
 
+## App compatibility — 1 November 2026
+
+This `feat/app-compatibility-20261101` branch extends the published November 1
+Coral device-feedback source. **Hecker Suite → App compatibility** lists installed
+apps and provides four independent per-app options: root manager privacy, allow
+app downgrade, hide developer options and bootloader spoof. Existing privacy
+selections survive. See [scope, restart behavior and validation](docs/app-compatibility.md).
+
+The matching `HeckerOs-localmanifest:feat/app-compatibility-20261101` pins the
+Suite and framework together. All three repositories must be published before
+syncing this branch. Full ROM/SELinux build and phone tests remain pending. UBL's
+previously captured crash is not claimed fixed. Hardware attestation and actual
+bootloader state are unchanged. The older sections below retain inherited
+product and feature documentation.
+
+
 This experimental `feat/statusbar-lyrics-dual-20261029` branch adds
 [shared status-bar lyrics and optional dual rows](docs/statusbar-lyrics-dual.md)
 on top of [Living Flow clocks, wake blur, Hecker QS and native motion](docs/living-flow.md)

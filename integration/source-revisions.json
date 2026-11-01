@@ -91,8 +91,8 @@
     },
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
-      "branch": "feat/coral-upstream-20261030",
-      "revision": "c72dce10290956bd3c4bfd23e787800d1340c46e",
+      "branch": "feat/app-compatibility-20261101",
+      "revision": "cc977dce02b883f8440c240c79996167210a13a1",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -196,7 +196,13 @@
         "packages/SystemUI/src/com/android/systemui/shade/NotificationPanelViewController.java",
         "packages/SystemUI/customization/src/com/android/systemui/shared/settings/data/repository/SystemSettingsRepository.kt",
         "packages/SystemUI/src/com/android/systemui/util/settings/repository/UserAwareSystemSettingsRepository.kt",
-        "packages/SystemUI/src/com/android/systemui/settings/UserSettingsRepositoryModule.kt"
+        "packages/SystemUI/src/com/android/systemui/settings/UserSettingsRepositoryModule.kt",
+        "core/java/android/app/HeckerAppCompatibility.java",
+        "core/java/android/provider/Settings.java",
+        "core/java/com/android/internal/os/AppZygoteInit.java",
+        "services/core/java/com/android/server/pm/parsing/PackageInfoUtils.java",
+        "services/core/java/com/android/server/pm/InstallPackageHelper.java",
+        "tests/hecker/test_app_compatibility.py"
       ]
     },
     "hardware/google/camera": {
@@ -256,8 +262,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "feat/living-flow-polish-20261030",
-    "integration_branch": "feat/living-flow-polish-20261030",
+    "source_branch": "feat/app-compatibility-20261101",
+    "integration_branch": "feat/app-compatibility-20261101",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required",
@@ -435,5 +441,14 @@
     "muppets_vendor_already_included": "c957fead4960a897ff75132f3acc5ec64d492ada",
     "kernel_lineage_import": "bb17b7de4b570f2c0c32ddba0543cac03c58dd84",
     "validation": "Source and host validation only; full ROM, kernel and phone tests required. Vendor/firmware security patch levels unchanged."
+  },
+  "app_compatibility": {
+    "branch": "feat/app-compatibility-20261101",
+    "framework_revision": "cc977dce02b883f8440c240c79996167210a13a1",
+    "backend_version": 1,
+    "device": "coral",
+    "inherited_suite_revision": "f6f5c7af09752091d5dd671fa892eb35fca166d5",
+    "device_testing": "pending",
+    "source_validation": "host/SDK checked; full ROM and physical acceptance pending"
   }
 }

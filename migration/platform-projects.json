@@ -275,9 +275,9 @@
     "remote": "github",
     "destination": "its-hecker/heckeros_frameworks_base",
     "branch": "seventeen",
-    "destination_branch": "feat/coral-upstream-20261030",
+    "destination_branch": "feat/app-compatibility-20261101",
     "source_revision": "044b965aa2d30d056b930e5ff013ba5303cde9fa",
-    "destination_revision": "c72dce10290956bd3c4bfd23e787800d1340c46e"
+    "destination_revision": "cc977dce02b883f8440c240c79996167210a13a1"
   },
   {
     "path": "frameworks/native",

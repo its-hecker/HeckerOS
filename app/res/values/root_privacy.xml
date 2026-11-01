@@ -1,7 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="root_privacy_title">Root manager privacy</string>
-    <string name="root_privacy_summary">Choose apps that cannot query installed root managers</string>
-    <string name="root_privacy_body">Selected apps cannot query the supported root manager packages. Close and reopen an app after changing its setting. Keep root access disabled for these apps and enable their Umount modules profile in KernelSU. This setting does not guarantee banking app compatibility.</string>
-    <string name="root_privacy_save_error">Could not save the setting. Try again.</string>
+  <string name="root_privacy_title">App compatibility</string>
+  <string name="root_privacy_summary">Privacy and compatibility options for each installed app</string>
+  <string name="root_privacy_body">Choose an app to configure root manager privacy, downgrades, developer options visibility and bootloader reporting. Options are independent and off by default.</string>
+  <string name="root_privacy_save_error">Could not save the setting. Try again.</string>
+  <string name="compat_root_title">Root manager privacy</string>
+  <string name="compat_root_body">Hide supported root manager packages from this app. Root access and KernelSU module unmounting are configured separately.</string>
+  <string name="compat_downgrade_title">Allow app downgrade</string>
+  <string name="compat_downgrade_body">Allow an older version signed by the same developer to replace this app. You still choose and install the APK. Older versions may not understand existing app data. All Android users with this app must allow downgrades. System apps cannot go below their factory version.</string>
+  <string name="compat_developer_title">Hide developer options</string>
+  <string name="compat_developer_body">Report developer options and USB or wireless debugging as off through Android Settings APIs in this app. Your actual device settings stay enabled.</string>
+  <string name="compat_bootloader_title">Bootloader spoof</string>
+  <string name="compat_bootloader_body">Report locked bootloader properties inside this app process. This does not lock the bootloader or change hardware attestation and does not guarantee app compatibility.</string>
+  <string name="compat_restart_body">After changing an option, close the app below, then reopen it. Closing may interrupt downloads or unsaved work. Restart the phone if a retained app process still uses the previous settings.</string>
+  <string name="compat_backend_unavailable">This ROM does not have the required compatibility backend enabled. Options remain unavailable until you install a matching HeckerOS build.</string>
+  <string name="compat_protected_app">These options are unavailable for core system UIDs and Hecker Suite.</string>
+  <string name="compat_loading">Loading installed apps…</string>
+  <string name="compat_load_error">Could not load installed apps. Reopen this page to try again.</string>
+  <string name="compat_app_count">%1$d of %2$d apps</string>
+  <string name="compat_option_count">Enabled options: %1$d</string>
+  <string name="compat_close_app">Close app to apply</string>
+  <string name="compat_app_closed">App closed. Reopen it to use the new settings.</string>
+  <string name="compat_close_failed">Could not close the app. Close it manually or restart the phone.</string>
 </resources>
