@@ -11,6 +11,7 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.Toast;
 public final class LockScreenSettingsActivity extends Activity {
+    private Switch customClock;
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         LinearLayout page=Ui.page(this,R.string.lock_screen_title);
@@ -49,6 +50,11 @@ public final class LockScreenSettingsActivity extends Activity {
         choices(clock, "hecker_lockscreen_clock_style", 0,
                 new int[]{R.string.lock_clock_geometric, R.string.lock_clock_word, R.string.lock_clock_tall,
                         R.string.lock_clock_living_tall, R.string.lock_clock_living_wide, R.string.lock_clock_living_bold});
+        android.widget.Button applyClock = Ui.button(this); applyClock.setText(R.string.lock_clock_apply);
+        applyClock.setOnClickListener(v -> { if (put("hecker_custom_lockscreen_clock",1)) {
+            if(customClock!=null)customClock.setChecked(true);
+            Toast.makeText(this,R.string.lock_clock_applied,Toast.LENGTH_SHORT).show();
+        }}); clock.addView(applyClock);
         clock.addView(Ui.text(this, getString(R.string.lock_clock_living_help), 14, false));
         range(clock, R.string.lock_clock_size, "hecker_lockscreen_clock_scale", 70, 110, 100);
         range(clock, R.string.lock_clock_horizontal, "hecker_lockscreen_clock_x", -100, 100, 0);
@@ -73,6 +79,7 @@ public final class LockScreenSettingsActivity extends Activity {
                 "hecker_depth_wallpaper", 0);
         toggle(depth, R.string.depth_wallpaper_wake, R.string.depth_wallpaper_wake_summary,
                 "hecker_depth_wallpaper_wake", 1);
+        toggle(depth, R.string.depth_auto_title, R.string.depth_auto_summary, DepthWallpaperJob.AUTO, 0);
         page.addView(depth);
         Ui.actionCard(this, page, R.string.depth_wallpaper_import, R.string.depth_wallpaper_import_help,
                 v -> { imported = true; startActivity(new Intent(this, DepthWallpaperActivity.class)); });
@@ -130,8 +137,15 @@ public final class LockScreenSettingsActivity extends Activity {
         button.setText(title); button.setTextColor(getColor(R.color.hecker_foreground));
         button.setMinHeight(Ui.dp(this, 56));
         button.setChecked(Settings.Secure.getInt(getContentResolver(), key, fallback) != 0);
+        if ("hecker_custom_lockscreen_clock".equals(key)) customClock = button;
         button.setOnClickListener(v -> {
             if (!put(key, button.isChecked() ? 1 : 0)) button.setChecked(!button.isChecked());
+            if (DepthWallpaperJob.AUTO.equals(key) && button.isChecked()) {
+                put("hecker_depth_wallpaper",1); put("hecker_custom_lockscreen_clock",1);
+                if(customClock!=null)customClock.setChecked(true);
+                if(Settings.Secure.getInt(getContentResolver(),"hecker_lockscreen_clock_style",0)<2)put("hecker_lockscreen_clock_style",3);
+            }
+            if (DepthWallpaperJob.AUTO.equals(key) || "hecker_depth_wallpaper".equals(key)) DepthWallpaperJob.schedule(this);
         });
         card.addView(button);
         card.addView(Ui.text(this, getString(summary), 14, false));
@@ -149,6 +163,8 @@ public final class LockScreenSettingsActivity extends Activity {
         }
         group.setOnCheckedChangeListener((buttons, id) -> {
             RadioButton button = buttons.findViewById(id);
+            if (button != null && "hecker_lockscreen_clock_style".equals(key)
+                    && put("hecker_custom_lockscreen_clock", 1) && customClock != null) customClock.setChecked(true);
             if (button != null && !put(key, (Integer) button.getTag())) {
                 int stored = Settings.Secure.getInt(getContentResolver(), key, fallback);
                 group.setOnCheckedChangeListener(null);

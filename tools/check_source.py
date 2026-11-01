@@ -66,9 +66,11 @@ def main():
     assert manifest.find("permission[@"+A+"name='org.hecker.suite.permission.READ_GAME_LIBRARY']").get(A+"protectionLevel")=="signature"
     services = {node.get(A + "name"): node for node in app.findall("service")}
     tiles = {".SuiteTileService", ".MotionSenseTileService", ".FaceUnlockTileService", ".NetworkLabTileService"}
-    assert set(services) == {".GamingService", ".GamingRecordingService"} | tiles
+    assert set(services) == {".GamingService", ".GamingRecordingService", ".DepthWallpaperJob"} | tiles
     for name, node in services.items():
-        assert node.get(A + "exported") == ("true" if name in tiles else "false")
+        assert node.get(A + "exported") == ("true" if name in tiles or name == ".DepthWallpaperJob" else "false")
+        if name == ".DepthWallpaperJob":
+            assert node.get(A + "permission") == "android.permission.BIND_JOB_SERVICE"
         if name in tiles:
             assert node.get(A + "permission") == "android.permission.BIND_QUICK_SETTINGS_TILE"
             assert node.find("intent-filter/action").get(A + "name") == "android.service.quicksettings.action.QS_TILE"

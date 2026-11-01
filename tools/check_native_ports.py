@@ -406,8 +406,10 @@ def main():
     paths.update(PIN_INPUTS)
     paths.update(INTERACTION_INPUTS)
     paths.update(SLEEP_INPUTS)
+    paths.add('packages/apps/Settings/src/com/android/settings/widget/HomepagePreference.java')
     paths.add('frameworks/base/core/java/android/view/WindowManager.java')
     paths.update('packages/apps/Launcher3/' + name for name in ('Android.bp', 'aconfig/Android.bp', 'AndroidManifest.xml', 'src/com/android/launcher3/LauncherFiles.java','src/com/android/launcher3/SessionCommitReceiver.java','src/com/android/launcher3/settings/SettingsActivity.java'))
+    paths.update(['packages/apps/Launcher3/src/com/android/launcher3/model/ModelDbController.kt', 'packages/apps/Launcher3/src/com/android/launcher3/LauncherSettings.java'])
     paths.update('packages/apps/Launcher3/' + name for name in json.loads((ROOT/'aosp-launcher/patches.json').read_text()))
     paths.add('frameworks/base/core/java/android/content/res/Resources.java')
     paths.add('frameworks/base/core/res/AndroidManifest.xml')
@@ -512,12 +514,15 @@ def main():
                 fixture.parent.mkdir(parents=True,exist_ok=True)
                 fixture.write_text('package com.android.launcher3;public class LauncherFiles{public static final String SHARED_PREFERENCES_KEY="com.android.launcher3.prefs";}')
                 # This is the public contract of the pinned native receiver; the APK links the real implementation.
+                db_source = (launcher/'src/com/android/launcher3/model/ModelDbController.kt').read_text()
+                assert 'fun insert(initialValues: ContentValues?): Int' in db_source
+                assert 'fun generateNewItemId(): Int' in db_source and 'val newScreenId: Int' in db_source
                 install_source = (launcher/'src/com/android/launcher3/SessionCommitReceiver.java').read_text()
                 assert 'public static boolean isEnabled(Context context, UserHandle user)' in install_source
                 assert 'public static final String ADD_ICON_PREFERENCE_KEY = "pref_add_icon_to_home";' in install_source
                 install = output/'src/com/android/launcher3/SessionCommitReceiver.java'
                 install.write_text('package com.android.launcher3;public class SessionCommitReceiver{public static final String ADD_ICON_PREFERENCE_KEY="pref_add_icon_to_home";public static boolean isEnabled(android.content.Context c,android.os.UserHandle u){return true;}}')
-                subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',str(args.sdk_cache/'android.jar'),'-d',str(output/'classes'),str(fixture),str(install),*map(str,sorted((ROOT/'aosp-launcher/src').rglob('*.java')))],check=True)
+                subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',str(args.sdk_cache/'android.jar'),'-d',str(output/'classes'),str(fixture),str(install),*map(str,sorted((ROOT/'tests/launcher-api-stubs').rglob('*.java'))),*map(str,sorted((ROOT/'aosp-launcher/src').rglob('*.java')))],check=True)
                 from check_launcher_studio import check as check_launcher_studio
                 check_launcher_studio(launcher, args.sdk_cache.resolve(), output/'classes')
                 resources=launcher/'generated/hecker-launcher/res'

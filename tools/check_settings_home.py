@@ -13,6 +13,7 @@ import subprocess
 import tempfile
 import zipfile
 from prepare import replace_guarded
+from compile_sdk import fetch
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -33,13 +34,37 @@ def main():
         helper = native/'src/com/android/settings/widget/HomepagePreferenceLayoutHelper.java'
         text = helper.read_text()
         patches = json.loads((ROOT/'settings/patches.json').read_text())
+        active = json.loads((ROOT/'framework/customization-patches.json').read_text())
+        assert all(active.get(path) == pairs for path,pairs in patches.items()), 'Settings patches must be registered in the build preparation plan'
         for pair in patches['packages/apps/Settings/src/com/android/settings/widget/HomepagePreferenceLayoutHelper.java']:
             text = replace_guarded(text,pair['old'],pair['new'],str(helper),False)
+        adapter_path = 'packages/apps/Settings/src/com/android/settings/widget/HighlightableTopLevelPreferenceAdapter.java'
+        adapter = (native/'src/com/android/settings/widget/HighlightableTopLevelPreferenceAdapter.java').read_text()
+        for pair in patches[adapter_path]:
+            adapter = replace_guarded(adapter,pair['old'],pair['new'],adapter_path,False)
         generated = {
+            'com/android/settings/widget/HighlightableTopLevelPreferenceAdapter.java': adapter,
+            'com/android/settings/core/RoundCornerPreferenceAdapter.java': '''package com.android.settings.core;
+public class RoundCornerPreferenceAdapter extends androidx.preference.PreferenceGroupAdapter {
+ public RoundCornerPreferenceAdapter(androidx.preference.PreferenceGroup group){super(group);}
+ protected int getRoundCornerDrawableRes(int position,boolean selected){return 0;}
+}''',
+            'com/android/settings/homepage/SettingsHomepageActivity.java': '''package com.android.settings.homepage;
+public class SettingsHomepageActivity extends android.app.Activity {
+ public interface HomepageLoadedListener{void onHomepageLoaded();}
+ public boolean addHomepageLoadedListener(HomepageLoadedListener listener){return false;}
+}''',
+            'androidx/window/embedding/ActivityEmbeddingController.java': '''package androidx.window.embedding;
+public class ActivityEmbeddingController {
+ public static ActivityEmbeddingController getInstance(android.content.Context context){return null;}
+ public boolean isActivityEmbedded(android.app.Activity activity){return false;}
+}''',
+            'com/android/settingslib/widget/theme/R.java': '''package com.android.settingslib.widget.theme;
+public class R{public static class style{public static final int TextAppearance_SettingsLib_TitleMedium=1,TextAppearance_SettingsLib_TitleMedium_Emphasized=2;}}''',
             'com/android/settings/widget/HomepagePreferenceLayoutHelper.java':text,
             'com/android/settings/widget/HomepagePreference.java':(native/'src/com/android/settings/widget/HomepagePreference.java').read_text(),
             'com/android/settings/flags/Flags.java':'package com.android.settings.flags; public class Flags { public static boolean homepageTileAlert() { return true; } }',
-            'com/android/settingslib/widget/SettingsThemeHelper.java':'package com.android.settingslib.widget; public class SettingsThemeHelper {}',
+            'com/android/settingslib/widget/SettingsThemeHelper.java':'package com.android.settingslib.widget; public class SettingsThemeHelper {public static boolean isExpressiveTheme(android.content.Context c){return true;}}',
             'com/android/settingslib/drawer/EntriesProvider.java':'package com.android.settingslib.drawer; public class EntriesProvider { public static final String EXTRA_ALERT_VALUE="alert"; }',
             'android/app/settings/SettingsEnums.java':'package android.app.settings; public class SettingsEnums { public static final int SETTINGS_HOMEPAGE=1502; }',
             'com/android/settings/overlay/FeatureFactory.java':'''package com.android.settings.overlay;
@@ -56,13 +81,15 @@ public class FeatureFactory { public static FeatureFactory getFeatureFactory() {
             for kind,names in fields.items())+'}\n'
         for name,content in generated.items():
             path=work/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_text(content);sources.append(path)
-        jars=[sdk/'android-system.jar']
+        lock=json.loads((ROOT/'tests/compose-inputs.lock.json').read_text())
+        annotations=fetch(sdk,'annotation-jvm.jar',lock['annotation-jvm.jar'])
+        jars=[sdk/'android-system.jar',annotations]
         for name in ('core','preference','recyclerview'):
             target=work/(name+'.jar')
             with zipfile.ZipFile(sdk/(name+'.aar')) as archive:target.write_bytes(archive.read('classes.jar'))
             jars.append(target)
         subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',os.pathsep.join(map(str,jars)),
             '-d',str(work/'classes'),*map(str,sources)],check=True)
-    print('Settings homepage resources and adapters with pinned native preference/helper: PASS')
+    print('Settings homepage resources, native preference/helper and final rounded/highlight adapter hooks: PASS')
 
 if __name__=='__main__':main()

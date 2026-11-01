@@ -41,6 +41,7 @@ final class Ui {
     }
 
     static void content(Activity activity, View body) {
+        styleControls(activity, body);
         // A measured toolbar and scroll body are siblings. An overlay ActionBar
         // cannot cover the first setting, even with edge-to-edge or large fonts.
         activity.getWindow().setDecorFitsSystemWindows(false);
@@ -167,8 +168,7 @@ final class Ui {
         TypedValue value = new TypedValue();
         activity.getTheme().resolveAttribute(android.R.attr.colorBackgroundFloating, value, true);
         background.setColor(activity.getColor(R.color.hecker_card));
-        background.setStroke(dp(activity, 1), activity.getColor(R.color.hecker_border));
-        background.setCornerRadius(dp(activity, 24));
+        background.setCornerRadius(dp(activity, 26));
         card.setBackground(background);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -180,7 +180,7 @@ final class Ui {
     static void actionCard(Activity activity, LinearLayout page, int title, int summary,
             View.OnClickListener action) {
         LinearLayout card = card(activity);
-        TextView titleView = text(activity, activity.getString(title), 22, true);
+        TextView titleView = text(activity, activity.getString(title), 18, true);
         TextView summaryView = text(activity, activity.getString(summary), 15, false);
         // Theme-supplied TextView interaction must not consume the card's tap.
         for (TextView label : new TextView[] { titleView, summaryView }) {
@@ -199,5 +199,48 @@ final class Ui {
         card.setClickable(true);
         card.setOnClickListener(action);
         page.addView(card);
+    }
+
+    /** One native control treatment for every Suite page, including retained Lottie cards. */
+    static void styleControls(Activity activity, View view) {
+        int ink = activity.getColor(R.color.hecker_foreground);
+        int accent = activity.getColor(R.color.hecker_accent);
+        int muted = activity.getColor(R.color.hecker_border);
+        int[][] states = {{-android.R.attr.state_enabled}, {android.R.attr.state_checked}, {}};
+        ColorStateList colors = new ColorStateList(states, new int[]{muted, accent, activity.getColor(R.color.hecker_secondary)});
+        if (view instanceof android.widget.Switch) {
+            android.widget.Switch toggle = (android.widget.Switch) view;
+            toggle.setMinHeight(dp(activity, 56)); toggle.setTextSize(16); toggle.setTextColor(ink);
+            toggle.setSwitchMinWidth(dp(activity, 48)); toggle.setSwitchPadding(dp(activity, 18));
+            GradientDrawable thumb = new GradientDrawable(); thumb.setShape(GradientDrawable.OVAL);
+            thumb.setSize(dp(activity, 22), dp(activity, 22)); thumb.setColor(0xffffffff);
+            GradientDrawable track = new GradientDrawable(); track.setCornerRadius(dp(activity, 16));
+            track.setSize(dp(activity, 48), dp(activity, 30)); track.setColor(colors);
+            toggle.setThumbDrawable(new android.graphics.drawable.InsetDrawable(thumb, dp(activity, 4)));
+            toggle.setTrackDrawable(track); toggle.setSplitTrack(false); toggle.setShowText(false);
+            toggle.setPaddingRelative(0, dp(activity, 6), 0, dp(activity, 6));
+        } else if (view instanceof android.widget.CompoundButton) {
+            android.widget.CompoundButton toggle = (android.widget.CompoundButton) view;
+            toggle.setButtonTintList(colors); toggle.setTextColor(ink); toggle.setTextSize(16);
+            toggle.setMinHeight(dp(activity, 52));
+        } else if (view instanceof android.widget.SeekBar) {
+            android.widget.SeekBar slider = (android.widget.SeekBar) view;
+            slider.setProgressTintList(ColorStateList.valueOf(accent));
+            slider.setThumbTintList(ColorStateList.valueOf(accent)); slider.setMinimumHeight(dp(activity, 48));
+        } else if (view instanceof android.widget.Spinner) {
+            view.setMinimumHeight(dp(activity, 52));
+            GradientDrawable surface = new GradientDrawable(); surface.setCornerRadius(dp(activity, 16));
+            surface.setColor(activity.getColor(R.color.hecker_button)); view.setBackground(surface);
+            view.setPadding(dp(activity, 12), dp(activity, 4), dp(activity, 12), dp(activity, 4));
+        } else if (view instanceof Button) {
+            Button button = (Button) view; button.setAllCaps(false); button.setTextSize(14);
+            button.setMinHeight(dp(activity, 48)); button.setStateListAnimator(null);
+            button.setBackgroundTintList(ColorStateList.valueOf(activity.getColor(R.color.hecker_button)));
+            button.setTextColor(ink);
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) styleControls(activity, group.getChildAt(i));
+        }
     }
 }

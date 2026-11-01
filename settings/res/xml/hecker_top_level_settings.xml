@@ -18,9 +18,6 @@
     </com.android.settingslib.widget.UntitledPreferenceCategory>
     <com.android.settingslib.widget.UntitledPreferenceCategory android:key="top_level_personalize_category" android:order="-100">
         <com.android.settings.widget.RestrictedHomepagePreference android:icon="@drawable/ic_homepage_wallpaper" android:key="top_level_wallpaper" android:order="0" android:title="@string/wallpaper_settings_title" android:summary="@string/wallpaper_dashboard_summary" settings:highlightableMenuKey="@string/menu_key_wallpaper" settings:controller="com.android.settings.display.TopLevelWallpaperPreferenceController" />
-        <com.android.settings.hecker.HeckerFeaturePreference android:key="hecker_home_themes" android:title="@string/hecker_home_themes" android:icon="@drawable/hecker_palette" settings:searchable="false" android:order="1" />
-        <com.android.settings.hecker.HeckerFeaturePreference android:key="hecker_home_launcher" android:title="@string/hecker_home_launcher" android:icon="@drawable/ic_homepage_apps" settings:searchable="false" android:order="2" />
-        <com.android.settings.hecker.HeckerFeaturePreference android:key="hecker_home_lock" android:title="@string/hecker_home_lock" android:icon="@drawable/hecker_lock" settings:searchable="false" android:order="3" />
         <com.android.settings.widget.HomepagePreference android:fragment="com.android.settings.communal.CommunalDashboardFragment" android:icon="@drawable/ic_homepage_hub_mode" android:key="top_level_communal" android:order="4" android:title="@string/communal_settings_title" android:summary="@string/communal_settings_summary" settings:highlightableMenuKey="@string/menu_key_communal" settings:controller="com.android.settings.communal.CommunalPreferenceController" />
     </com.android.settingslib.widget.UntitledPreferenceCategory>
     <com.android.settingslib.widget.UntitledPreferenceCategory android:key="top_level_security_privacy_category" android:order="-90">

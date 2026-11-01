@@ -171,5 +171,6 @@
   "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutPhoneValues.java": "settings/src/com/android/settings/hecker/HeckerAboutPhoneValues.java",
   "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutPhoneUi.java": "settings/src/com/android/settings/hecker/HeckerAboutPhoneUi.java",
   "packages/apps/Settings/src/org/hecker/motion/MediaGlowSpec.java": "framework/qs/MediaGlowSpec.java",
-  "frameworks/base/packages/SystemUI/src/org/hecker/motion/MediaGlowSpec.java": "framework/qs/MediaGlowSpec.java"
+  "frameworks/base/packages/SystemUI/src/org/hecker/motion/MediaGlowSpec.java": "framework/qs/MediaGlowSpec.java",
+  "packages/apps/Settings/res/drawable/hecker_account.xml": "settings/res/drawable/hecker_account.xml"
 }

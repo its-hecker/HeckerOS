@@ -1,6 +1,6 @@
 <resources>
-    <color name="hecker_about_background">#111115</color>
-    <color name="hecker_about_surface">#1D1D23</color>
+    <color name="hecker_about_background">#000000</color>
+    <color name="hecker_about_surface">#19161D</color>
     <color name="hecker_about_hero_start">#30243E</color>
     <color name="hecker_about_hero_end">#252536</color>
     <color name="hecker_about_text">#F1EFF8</color>

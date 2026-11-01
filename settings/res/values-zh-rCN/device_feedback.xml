@@ -1,0 +1,7 @@
+<resources>
+    <string name="hecker_about_memory_title">内存</string>
+    <string name="hecker_about_storage_title">存储空间</string>
+    <string name="hecker_about_storage_free">共 %2$s，可用 %1$s</string>
+    <string name="hecker_about_patch_title">Android 安全更新</string>
+    <string name="hecker_about_build_title">版本号</string>
+</resources>

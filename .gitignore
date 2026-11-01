@@ -4,3 +4,7 @@ generated/
 out/*
 !out/.find-ignore
 /bootanimation/bootanimation.zip
+/app/assets/depth/subject.tflite
+/prebuilts/depth/litert.jar
+/prebuilts/depth/litert-api.jar
+/prebuilts/depth/libtensorflowlite_jni.so

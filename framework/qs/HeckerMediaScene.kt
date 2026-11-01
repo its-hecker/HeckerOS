@@ -4,11 +4,14 @@ package com.android.systemui.hecker
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateElementFloatAsState
+import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.systemui.scene.shared.model.Scenes
 
 /** A host is provided by both native QS paths, so scene progress owns the player bounds. */
 val LocalHeckerQsContentScope = staticCompositionLocalOf<ContentScope?> { null }
@@ -28,7 +31,16 @@ fun HeckerQsMediaPlayer(modifier: Modifier = Modifier, square: Boolean = false,
             val tile = animateElementFloatAsState(if (square) 1f else 0f, SquareWeight, canOverflow = false)
             val row = animateElementFloatAsState(if (compactRow) 1f else 0f, RowWeight, canOverflow = false)
             content {
-                HeckerMediaCard(square = square, compactRow = compactRow,
+                HeckerMediaCard(modifier = Modifier.graphicsLayer {
+                    val state = scope.layoutState.transitionState
+                    alpha = when {
+                        state is TransitionState.Transition && state.toContent == Scenes.Gone ->
+                            (1f - state.progress / .35f).coerceIn(0f, 1f)
+                        state is TransitionState.Transition && state.fromContent == Scenes.Gone ->
+                            (state.progress / .2f).coerceIn(0f, 1f)
+                        else -> 1f
+                    }
+                }, square = square, compactRow = compactRow,
                     hideWhenInactive = hideWhenInactive,
                     squareWeight = { tile.value }, rowWeight = { row.value })
             }

@@ -31,7 +31,8 @@ public final class DefaultAppearance {
     }
     public static void reconcile(Context context) {
         int expected = Settings.Secure.getInt(context.getContentResolver(), WALLPAPER_ID, Integer.MIN_VALUE);
-        if (expected != Integer.MIN_VALUE && expected != wallpaperId(context))
+        if (expected != Integer.MIN_VALUE && expected != wallpaperId(context)
+                && Settings.Secure.getInt(context.getContentResolver(), "hecker_depth_auto_extract", 0) == 0)
             Settings.Secure.putInt(context.getContentResolver(), "hecker_depth_wallpaper", 0);
         int home = Settings.Secure.getInt(context.getContentResolver(), HOME_WALLPAPER_ID, Integer.MIN_VALUE);
         if (home != Integer.MIN_VALUE && home != WallpaperManager.getInstance(context).getWallpaperId(WallpaperManager.FLAG_SYSTEM))

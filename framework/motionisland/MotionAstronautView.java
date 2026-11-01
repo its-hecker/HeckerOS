@@ -65,17 +65,16 @@ final class MotionAstronautView extends View {
         canvas.drawLine(0, 0, 0, rope + dp(2), paint);
         // Each source cell is selected directly from the transparent atlas. The raised gripping
         // hand is registered to the rope endpoint across poses, independent of the free waving arm.
-        int cell = atlas.getWidth() / 3;
         float size = dp(105);
-        float[] gripX = {.762f, .697f, .612f};
-        float gripY = .292f;
-        Rect source = new Rect(pose * cell, 0, (pose + 1) * cell, atlas.getHeight());
         canvas.translate(0, rope);
         if (animate) canvas.rotate(MotionIslandAnimation.bodyRock(age, action, direction));
-        RectF target = new RectF(-size * gripX[pose], -size * gripY,
-                size * (1 - gripX[pose]), size * (1 - gripY));
-        paint.setAlpha(Math.round(255 * alpha));
-        canvas.drawBitmap(atlas, source, target, paint);
+        if (animate && action == MotionIslandState.PLAY) {
+            float blend = MotionIslandAnimation.welcomePose(age);
+            int lower = (int) Math.floor(blend), upper = Math.min(2, lower + 1);
+            float fraction = blend - lower;
+            drawPose(canvas, lower, size, alpha * (1 - fraction));
+            if (fraction > 0) drawPose(canvas, upper, size, alpha * fraction);
+        } else drawPose(canvas, pose, size, alpha);
         if (animate && action == MotionIslandState.PLAY) {
             float glow = MotionIslandAnimation.welcomeSparkle(age);
             paint.setColor(0xffb3e9fa); paint.setAlpha(Math.round(255 * alpha * glow));
@@ -84,6 +83,14 @@ final class MotionAstronautView extends View {
             sparkle(canvas, dp(5), dp(10), dp(2));
         }
         canvas.restoreToCount(save);
+    }
+    private void drawPose(Canvas canvas, int pose, float size, float alpha) {
+        int cell = atlas.getWidth() / 3;
+        float[] gripX = {.762f, .697f, .612f}; float gripY = .292f;
+        Rect source = new Rect(pose * cell, 0, (pose + 1) * cell, atlas.getHeight());
+        RectF target = new RectF(-size * gripX[pose], -size * gripY,
+                size * (1 - gripX[pose]), size * (1 - gripY));
+        paint.setAlpha(Math.round(255 * alpha)); canvas.drawBitmap(atlas, source, target, paint);
     }
     private void sparkle(Canvas canvas, float x, float y, float radius) {
         canvas.drawLine(x - radius, y, x + radius, y, paint);

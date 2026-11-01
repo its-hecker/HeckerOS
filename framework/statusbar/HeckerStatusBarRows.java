@@ -23,7 +23,8 @@ public final class HeckerStatusBarRows {
     private static final String[] KEYS={"hecker_dual_statusbar","hecker_dual_statusbar_height",
         "hecker_dual_statusbar_layout","hecker_statusbar_row_gap","hecker_statusbar_icon_size",
         "hecker_statusbar_lyrics","hecker_statusbar_lyric_width","hecker_statusbar_lyric_size",
-        "hecker_statusbar_lyric_position","hecker_statusbar_lyric_color","hecker_statusbar_lyric_transition"};
+        "hecker_statusbar_lyric_position","hecker_statusbar_lyric_color","hecker_statusbar_lyric_transition",
+        "hecker_dual_statusbar_network_row"};
     public static void attach(View root) {
         if(root instanceof FrameLayout&&!HOSTS.containsKey(root)){
             Host host=new Host((FrameLayout)root);HOSTS.put(root,host);host.start();
@@ -70,7 +71,7 @@ public final class HeckerStatusBarRows {
         LyricsController subscription;
         LyricsController.Snapshot snapshot;
         boolean closed,awake,unlocked,saver,active,dual,lyricsEnabled,charging,observing,receiving,drawing;
-        int heightPreset,rowLayout,gap,icon,width,font,alignment,color,transition;
+        int heightPreset,rowLayout,gap,icon,width,font,alignment,color,transition,networkRow;
         int animationGeneration,lastInk;
         boolean tinted;
         float battery=Float.NaN;
@@ -107,6 +108,7 @@ public final class HeckerStatusBarRows {
             lyricsEnabled=value("hecker_statusbar_lyrics",0)!=0;
             heightPreset=bounded("hecker_dual_statusbar_height",0,0,2);
             rowLayout=bounded("hecker_dual_statusbar_layout",0,0,1);
+            networkRow=bounded("hecker_dual_statusbar_network_row",0,0,1);
             gap=bounded("hecker_statusbar_row_gap",2,0,8);
             icon=bounded("hecker_statusbar_icon_size",16,12,20);
             width=bounded("hecker_statusbar_lyric_width",160,80,360);
@@ -192,6 +194,16 @@ public final class HeckerStatusBarRows {
         TextView text(){FrameLayout root=reference.get();TextView view=new TextView(root.getContext());
             view.setClickable(false);view.setFocusable(false);view.setGravity(Gravity.CENTER_VERTICAL);
             view.setIncludeFontPadding(false);view.setEllipsize(TextUtils.TruncateAt.END);return view;}
+        View networkTraffic(View node) {
+            if (node.getClass().getSimpleName().contains("NetworkTraffic")) return node;
+            if (node instanceof ViewGroup) {
+                ViewGroup group=(ViewGroup)node;
+                for(int i=0;i<group.getChildCount();i++) {
+                    View match=networkTraffic(group.getChildAt(i));if(match!=null)return match;
+                }
+            }
+            return null;
+        }
         void requestLayout(){FrameLayout root=reference.get();if(!closed&&root!=null)root.requestLayout();}
         int dp(float value){FrameLayout root=reference.get();return Math.round(value*(root==null?1:root.getResources().getDisplayMetrics().density));}
         Rect bounds(View view){
@@ -260,10 +272,18 @@ public final class HeckerStatusBarRows {
             int iconY=rows.top;
             boolean lyricsRow=stacked&&rowLayout==1&&lyricsEnabled;
             if(stacked){
+                View traffic=networkTraffic(root);
+                Rect speed=traffic==null?null:bounds(traffic);
                 place(clock,c.left,rows.top+(rows.height-c.height())/2,c.width(),c.height());
                 place(system,s.left,rows.top+(rows.height-s.height())/2,s.width(),s.height());
                 float factor=Math.min(1f,Math.min(dp(icon),rows.height-2f)/Math.max(1,dp(20)));
                 scale(system,factor,true);scale(clock,Math.min(1f,rows.height/Math.max(1f,c.height())),false);
+                if(traffic!=null&&traffic.getVisibility()==View.VISIBLE){
+                    int row=networkRow==1&&!lyricsRow?rows.second:rows.top;
+                    int h=Math.min(speed.height(),rows.height);
+                    place(traffic,speed.left,row+(rows.height-h)/2,speed.width(),h);
+                    scale(traffic,Math.min(1f,rows.height/Math.max(1f,speed.height())),false);
+                }
                 if(lyricsRow){place(notifications,n.left,rows.top,n.width(),rows.height);date.setVisibility(View.GONE);info.setVisibility(View.GONE);}
                 else{
                     iconY=rows.second;
@@ -275,6 +295,8 @@ public final class HeckerStatusBarRows {
                     date.setGravity(Gravity.CENTER_VERTICAL|Gravity.START);
                     date.setVisibility(clock.getVisibility()==View.VISIBLE?View.VISIBLE:View.GONE);
                     int dateWidth=Math.max(0,(rtl?c.left-left.left:left.right-c.right)-dp(8));
+                    if(speed!=null&&networkRow==0&&speed.left>=c.right&&speed.left<left.right)
+                        dateWidth=Math.max(0,Math.min(dateWidth,speed.left-c.right-dp(8)));
                     place(date,rtl?c.left-dp(4)-dateWidth:c.right+dp(4),rows.top,dateWidth,rows.height);
                 }
                 if(nativeIcons!=null){Rect box=bounds(nativeIcons);place(nativeIcons,box.left,iconY+(rows.height-nativeIconHeight)/2,box.width(),nativeIconHeight);}

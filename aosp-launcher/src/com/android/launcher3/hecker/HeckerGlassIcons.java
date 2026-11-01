@@ -60,6 +60,10 @@ public final class HeckerGlassIcons {
             LauncherActivityInfo info = apps.resolveActivity(new Intent(Intent.ACTION_MAIN)
                     .addCategory(Intent.CATEGORY_LAUNCHER).setComponent(component), user);
             if (info != null) {
+                if (component.getPackageName().equals("com.google.android.GoogleCamera")
+                        || component.getPackageName().equals("com.android.camera2")) {
+                    result = cameraGlyph();
+                } else {
                 Drawable source = info.getIcon(context.getResources().getConfiguration().densityDpi);
                 Drawable glyph = source instanceof AdaptiveIconDrawable adaptive ? adaptive.getMonochrome() : null;
                 if (glyph == null && source instanceof AdaptiveIconDrawable adaptive) glyph = adaptive.getForeground();
@@ -71,12 +75,28 @@ public final class HeckerGlassIcons {
                 boolean ink = false;
                 for (int value : values) if ((value >>> 24) > 24) { ink = true; break; }
                 if (ink) { pixels.setPixels(values, 0, SIZE, 0, 0, SIZE, SIZE); result = pixels; }
+                }
             }
         } catch (RuntimeException unavailable) { /* Quiet/removed profile retains its native icon. */ }
         if (result == null) result = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
         List<Runnable> callbacks;
         synchronized (HeckerGlassIcons.class) { MASKS.put(key, result); callbacks = PENDING.remove(key); }
         if (callbacks != null) MAIN.post(() -> { for (Runnable callback : callbacks) callback.run(); });
+    }
+    /** A clean camera body and open lens, rather than flattening the app's opaque plate. */
+    private static Bitmap cameraGlyph() {
+        Bitmap bitmap = Bitmap.createBitmap(SIZE, SIZE, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap); Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.WHITE); paint.setStyle(Paint.Style.STROKE); paint.setStrokeWidth(7);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+        Path body = new Path(); body.moveTo(24, 43); body.lineTo(44, 43);
+        body.lineTo(53, 29); body.lineTo(91, 29); body.lineTo(100, 43); body.lineTo(120, 43);
+        body.quadTo(128, 43, 128, 51); body.lineTo(128, 107); body.quadTo(128, 115, 120, 115);
+        body.lineTo(24, 115); body.quadTo(16, 115, 16, 107); body.lineTo(16, 51);
+        body.quadTo(16, 43, 24, 43); body.close(); canvas.drawPath(body, paint);
+        canvas.drawCircle(72, 79, 24, paint);
+        paint.setStyle(Paint.Style.FILL); canvas.drawCircle(111, 58, 4, paint);
+        return bitmap;
     }
     private static final class Icon extends Drawable {
         final Context context; final Drawable original; final Bitmap glyph; final WeakReference<View> host;

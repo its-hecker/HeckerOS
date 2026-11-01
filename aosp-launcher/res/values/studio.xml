@@ -154,7 +154,7 @@
     <item name="android:navigationBarColor">#10161C</item>
     <item name="android:windowSoftInputMode">adjustResize</item>
   </style>
-  <string name="hs_dock_search">Hecker search below dock</string>
+  <string name="hs_dock_search">Show home screen search bar</string>
   <string name="hs_dock_search_brand">Hecker Search</string>
   <string name="hs_add_new_apps">Add new apps to Home screen</string>
   <string name="hs_glass_icons">Glass icons</string>
@@ -164,4 +164,12 @@
   <string name="hs_google_voice">Google voice search</string>
   <string name="hs_google_lens">Google Lens</string>
   <string name="hs_google_unavailable">Install or enable the Google app or a web browser to use Google search.</string>
+    <string name="hs_drawer_custom_icons">Custom icons in app drawer</string>
+    <string name="hs_drawer_custom_icons_summary">Turn off to use original app icons in the drawer and search, while keeping your Home screen icons.</string>
+    <string name="hs_search_back">Back</string>
+    <string name="hs_search_settings">Search settings</string>
+    <string name="hs_search_clear">Clear search</string>
+    <string name="hs_search_empty">No matching apps or shortcuts</string>
+    <string name="hs_search_results">Results</string>
+    <string name="hs_search_local_short">Apps and shortcuts · On-device search</string>
 </resources>

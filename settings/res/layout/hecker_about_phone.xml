@@ -62,6 +62,23 @@
         </LinearLayout>
     </LinearLayout>
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:layout_marginTop="12dp" android:baselineAligned="false">
+        <LinearLayout style="@style/HeckerAboutReferenceTile" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="5dp">
+            <TextView style="@style/HeckerAboutReferenceCaption" android:text="@string/hecker_about_memory_title" />
+            <TextView android:id="@+id/hecker_about_memory" style="@style/HeckerAboutReferenceTitle" android:layout_marginTop="8dp" />
+        </LinearLayout>
+        <LinearLayout style="@style/HeckerAboutReferenceTile" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="5dp">
+            <TextView style="@style/HeckerAboutReferenceCaption" android:text="@string/hecker_about_storage_title" />
+            <TextView android:id="@+id/hecker_about_storage" style="@style/HeckerAboutReferenceTitle" android:textSize="14sp" android:layout_marginTop="8dp" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="16dp" android:padding="18dp" android:background="@drawable/hecker_about_surface">
+        <TextView style="@style/HeckerAboutReferenceCaption" android:text="@string/hecker_about_patch_title" />
+        <TextView android:id="@+id/hecker_about_patch" style="@style/HeckerAboutReferenceTitle" android:layout_marginTop="6dp" />
+        <TextView style="@style/HeckerAboutReferenceCaption" android:text="@string/hecker_about_build_title" android:layout_marginTop="16dp" />
+        <TextView android:id="@+id/hecker_about_build" style="@style/HeckerAboutReferenceTitle" android:textSize="13sp" android:layout_marginTop="6dp" />
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
         android:orientation="vertical" android:background="@drawable/hecker_about_surface"
         android:clipToOutline="true" android:layout_marginTop="16dp">
         <LinearLayout android:id="@+id/hecker_about_software_action" style="@style/HeckerAboutReferenceRow">

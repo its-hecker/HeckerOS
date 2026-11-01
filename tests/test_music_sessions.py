@@ -33,7 +33,7 @@ STUBS = {
 }''',
 'android/media/session/MediaSession.java': '''package android.media.session;public class MediaSession {public static class Token{}}''',
 'android/media/session/PlaybackState.java': '''package android.media.session;public class PlaybackState{
- public static int STATE_PLAYING=3,STATE_PAUSED=2;public static long ACTION_SKIP_TO_NEXT=32,ACTION_SKIP_TO_PREVIOUS=16,ACTION_SEEK_TO=256;
+ public static int STATE_PLAYING=3,STATE_PAUSED=2,STATE_NONE=0,STATE_BUFFERING=6,STATE_CONNECTING=8,STATE_SKIPPING_TO_NEXT=10,STATE_SKIPPING_TO_PREVIOUS=9;public static long ACTION_SKIP_TO_NEXT=32,ACTION_SKIP_TO_PREVIOUS=16,ACTION_SEEK_TO=256;
  public int state=2;public int getState(){return state;}public long getPosition(){return 0;}public long getLastPositionUpdateTime(){return 0;}public float getPlaybackSpeed(){return 1;}public long getActions(){return 304;}public long getActiveQueueItemId(){return -1;}
 }''',
 'android/media/session/MediaController.java': '''package android.media.session;public class MediaController{
@@ -75,6 +75,7 @@ public class SessionTest {
   HeckerQsMedia m=new HeckerQsMedia(c,s->current=s,true,null);m.start();BroadcastReceiver userReceiver=c.receiver;
   check(current.active&&!current.playing&&current.token==a.token&&c.manager.requestedUser==10);
   check(a.callbacks.size()==1&&b.callbacks.size()==1&&v.callbacks.size()==1);
+  check(HeckerQsMedia.peek(c,true,null).active); // Media has geometry on the first composition.
   b.playback(3);check(current.playing&&current.token==b.token); // No membership change.
   b.attrs(3);check(current.token==a.token&&!current.playing); // Music -> movie cannot linger.
   b.attrs(2);check(current.playing&&current.token==b.token);

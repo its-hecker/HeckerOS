@@ -343,9 +343,9 @@ fun HeckerGlassTrack(fraction: Float, icon: Int, modifier: Modifier = Modifier, 
         Box(Modifier.align(if (vertical) Alignment.Center else Alignment.CenterEnd)
             .padding(end = if (vertical) 0.dp else 12.dp)
             .graphicsLayer { rotationZ = if (vertical) 90f else 0f }
-            .background(Ink.copy(alpha = .94f), RoundedCornerShape(10.dp))
-            .padding(horizontal = 5.dp, vertical = 2.dp).clearAndSetSemantics { }) {
-            Text(text, color = White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+            .padding(horizontal = 4.dp, vertical = 2.dp).clearAndSetSemantics { }) {
+            Text(text, color = if (vertical && progress >= .5f || !vertical && progress >= .9f) Ink else White.copy(alpha = .88f),
+                fontSize = 11.sp, fontWeight = FontWeight.Medium,
                 maxLines = 1, softWrap = false)
         }
     }

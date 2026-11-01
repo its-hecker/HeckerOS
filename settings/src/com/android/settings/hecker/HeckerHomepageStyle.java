@@ -17,6 +17,25 @@ public final class HeckerHomepageStyle {
     private HeckerHomepageStyle() {}
 
     public static void bind(PreferenceViewHolder holder, Preference preference) {
+        bind(holder, preference, false);
+    }
+    public static void bind(PreferenceViewHolder holder, Preference preference, boolean selected) {
+        if (preference == null || preference instanceof androidx.preference.PreferenceCategory
+                || preference instanceof HeckerBrandPreference) return;
+        View row = holder.itemView;
+        android.util.TypedValue selectable = new android.util.TypedValue();
+        preference.getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, selectable, true);
+        row.setBackgroundResource(selectable.resourceId);
+        if (selected) row.setBackground(new android.graphics.drawable.RippleDrawable(
+                android.content.res.ColorStateList.valueOf(0x287daaff),
+                new android.graphics.drawable.ColorDrawable(0x207daaff), null));
+        int inset = Math.round(16 * row.getResources().getDisplayMetrics().density);
+        row.setPaddingRelative(inset, 0, inset, 0);
+        View title = holder.findViewById(android.R.id.title);
+        if (title instanceof android.widget.TextView) {
+            ((android.widget.TextView) title).setTextSize(17);
+            ((android.widget.TextView) title).setTextColor(preference.getContext().getColor(R.color.hecker_home_foreground));
+        }
         View summary = holder.findViewById(android.R.id.summary);
         if (summary != null) summary.setVisibility(View.GONE);
         holder.setDividerAllowedAbove(false);
@@ -29,6 +48,9 @@ public final class HeckerHomepageStyle {
         disc.setColor(color(preference.getKey()));
         frame.setBackground(disc);
         Drawable glyph = preference.getIcon();
+        boolean account = preference.getParent() != null
+                && "top_level_account_category".equals(preference.getParent().getKey());
+        if (account) glyph = preference.getContext().getDrawable(R.drawable.hecker_account);
         if (glyph instanceof AdaptiveIconDrawable) {
             glyph = ((AdaptiveIconDrawable) glyph).getForeground();
         } else if (glyph instanceof LayerDrawable) {

@@ -76,4 +76,9 @@
         <item name="android:layout_marginEnd">12dp</item>
         <item name="android:orientation">vertical</item>
     </style>
+    <string name="hecker_about_memory_title">Memory</string>
+    <string name="hecker_about_storage_title">Storage</string>
+    <string name="hecker_about_storage_free">%1$s free of %2$s</string>
+    <string name="hecker_about_patch_title">Android security update</string>
+    <string name="hecker_about_build_title">Build</string>
 </resources>

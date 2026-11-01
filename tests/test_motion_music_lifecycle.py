@@ -77,7 +77,7 @@ public class LifecycleTest{
   Context c=new Context();MediaController m=new MediaController("player");m.state.state=3;c.manager.list=java.util.List.of(m);
   HeckerMotionIsland host=HeckerMotionIsland.create(c);check(host!=null&&c.windows.views.isEmpty());host.setAmbient(false);
   check(c.windows.views.size()==1);var params=c.windows.views.values().iterator().next();
-  check(params.width==148&&params.height==32&&(params.flags&WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)==0);
+  check(params.width==124&&params.height==32&&(params.flags&WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)==0);
   event(c,m,3,-1);check(c.windows.views.size()==2&&MotionAstronautView.direction==-1);
   check(c.windows.views.entrySet().stream().anyMatch(e->e.getKey() instanceof MotionAstronautView&&(e.getValue().flags&16)!=0&&e.getValue().y==29));
   SystemClock.now+=2500;Handler.due();check(c.windows.views.size()==1); // Capsule persists, companion expires.

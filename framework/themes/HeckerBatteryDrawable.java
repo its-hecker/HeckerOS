@@ -163,7 +163,7 @@ public final class HeckerBatteryDrawable extends Drawable implements Animatable,
         int save = canvas.save();
         canvas.translate(getBounds().left, getBounds().top);
         canvas.scale(getBounds().width() / (float) getIntrinsicWidth(), getBounds().height() / (float) height);
-        paint.setStyle(Paint.Style.FILL); paint.setColor(tint); paint.setAlpha(livingFlow ? 230 : 65); canvas.drawPath(perimeter, paint);
+        paint.setStyle(Paint.Style.FILL); paint.setColor(tint); paint.setAlpha(livingFlow ? 160 : 65); canvas.drawPath(perimeter, paint);
         final int fillColor = charging ? ((oneUi || livingFlow) && levelColors ? 0xff64e4bd : color("config_batterymeterChargingFillColor", tint))
                 : powerSave ? 0xffffcc66 : level <= 15 ? 0xffff6175
                 : (oneUi || livingFlow) && levelColors ? (level <= 35 ? 0xffffc66b : level <= 70 ? 0xff76cfff : 0xff91e3c1) : tint;

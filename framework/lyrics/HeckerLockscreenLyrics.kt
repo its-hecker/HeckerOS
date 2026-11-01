@@ -63,7 +63,7 @@ fun HeckerLockscreenLyrics(context: Context,
         } while (isActive)
     }
     val state = snapshot ?: return
-    if (!keyguard) return
+    if (!keyguard || !state.playing) return
     if (active !in state.lines.indices) return
     Column(
         modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 10.dp),

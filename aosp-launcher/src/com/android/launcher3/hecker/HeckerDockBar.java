@@ -53,11 +53,11 @@ public final class HeckerDockBar extends LinearLayout
         boolean google = HeckerStudio.enabled(context, "google_search", false);
         GradientDrawable plate=new GradientDrawable();plate.setColor(compact()?0xb8171928:0xb830232e);
         plate.setCornerRadius(HeckerStudio.dp(context,28));plate.setStroke(HeckerStudio.dp(context,1),compact()?0x78ffffff:0x35efd6e2);
-        android.graphics.drawable.Drawable inset=new android.graphics.drawable.InsetDrawable(plate,0,compact()?HeckerStudio.dp(context,12):0,0,compact()?HeckerStudio.dp(context,12):0);
-        setBackground(new RippleDrawable(ColorStateList.valueOf(0x25ffffff),inset,null));
+        setBackground(new RippleDrawable(ColorStateList.valueOf(0x25ffffff),plate,null));
         if(compact()){
             TextView label=HeckerStudio.label(context,HeckerStudio.text(context,"flow_search_hint"),12);
-            label.setGravity(Gravity.CENTER);label.setTextColor(0xfff2f4fa);label.setSingleLine();
+            label.setPadding(0,0,0,0); label.setIncludeFontPadding(false);
+            label.setGravity(Gravity.CENTER);label.setTextSize(14);label.setTextColor(0xfff2f4fa);label.setSingleLine();
             label.setEllipsize(android.text.TextUtils.TruncateAt.END);addView(label,new LayoutParams(-1,-1));
             setContentDescription(HeckerStudio.text(context,"search_hint"));setOnClickListener(v->HeckerStudio.search(context));return;
         }

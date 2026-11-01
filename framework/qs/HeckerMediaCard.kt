@@ -57,7 +57,9 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
     squareWeight: () -> Float = { if (square) 1f else 0f },
     rowWeight: () -> Float = { if (compactRow) 1f else 0f }) {
     val context = LocalContext.current
-    var snapshot by remember { mutableStateOf<HeckerQsMedia.Snapshot?>(null) }
+    var snapshot by remember(context, sessionToken, musicOnly) {
+        mutableStateOf<HeckerQsMedia.Snapshot?>(HeckerQsMedia.peek(context, musicOnly, sessionToken))
+    }
     val media = remember(context, sessionToken, musicOnly) {
         HeckerQsMedia(context, { snapshot = it }, musicOnly, sessionToken)
     }
@@ -84,8 +86,8 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
     val flow = LocalHeckerFlowGlass.current
     val shape = RoundedCornerShape(28.dp)
     val fontScale = LocalConfiguration.current.fontScale.coerceIn(1f, 2f)
-    val preferredHeight = (if (compactRow) 80f + (fontScale - 1) * 32
-        else if (square) 178f + (fontScale - 1) * 64 else 164f + (fontScale - 1) * 48).dp
+    val preferredHeight = (if (compactRow) 76f + (fontScale - 1) * 32
+        else if (square) 154f + (fontScale - 1) * 64 else 148f + (fontScale - 1) * 48).dp
     Box(modifier.fillMaxWidth().clip(shape)
         .background(if (flow) Color(0xB3191923) else Color(0xE0141721))
         .border(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = .24f),

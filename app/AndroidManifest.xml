@@ -52,10 +52,12 @@
             android:label="@string/motion_feedback_title" />
         <activity android:name=".LockScreenSettingsActivity" android:exported="false" android:label="@string/lock_screen_title" />
         <activity android:name=".DepthWallpaperActivity" android:exported="false" android:label="@string/depth_wallpaper_title" />
+        <service android:name=".DepthWallpaperJob" android:exported="true" android:permission="android.permission.BIND_JOB_SERVICE" />
         <provider android:name=".DepthWallpaperProvider" android:authorities="org.hecker.suite.depth" android:directBootAware="true"
             android:exported="true" android:grantUriPermissions="false"
             android:readPermission="android.permission.STATUS_BAR" android:writePermission="android.permission.STATUS_BAR" />
         <activity android:name=".StatusBarSettingsActivity" android:exported="false" android:label="@string/status_bar_title" />
+        <activity android:name=".StatusBarLayoutActivity" android:exported="false" android:label="@string/sb_options_title" />
         <activity android:name=".ThemePackActivity" android:exported="false" android:label="@string/themes_title" />
         <activity android:name=".CaptureSettingsActivity" android:exported="false" android:label="@string/capture_title" />
         <activity android:name=".QuickSettingsActivity" android:exported="false" android:label="@string/qs_title" />

@@ -109,12 +109,13 @@ public final class LyricsController implements AutoCloseable {
         };
         private final MediaSessionManager.OnActiveSessionsChangedListener sessions = this::chooseSession;
         private final MediaController.Callback callbacks = new MediaController.Callback() {
-            @Override public void onMetadataChanged(MediaMetadata metadata) { updateTrack(); }
-            @Override public void onPlaybackStateChanged(PlaybackState state) { publish(); }
+            @Override public void onMetadataChanged(MediaMetadata metadata) { refreshSessions(); }
+            @Override public void onPlaybackStateChanged(PlaybackState state) { refreshSessions(); }
             @Override public void onSessionDestroyed() { refreshSessions(); }
         };
         private MediaSessionManager manager;
         private MediaController controller;
+        private final java.util.Map<android.media.session.MediaSession.Token, MediaController> watching = new java.util.LinkedHashMap<>();
         private List<LyricsPolicy.Line> lines = Collections.emptyList();
         private String trackKey = "";
         private int userId, generation;
@@ -146,8 +147,7 @@ public final class LyricsController implements AutoCloseable {
             if (manager != null) manager.removeOnActiveSessionsChangedListener(sessions);
             detach();
             userId = ActivityManager.getCurrentUser();
-            manager = context.createContextAsUser(UserHandle.of(userId), 0)
-                    .getSystemService(MediaSessionManager.class);
+            manager = context.getSystemService(MediaSessionManager.class);
             refreshSessions();
         }
 
@@ -156,25 +156,42 @@ public final class LyricsController implements AutoCloseable {
             manager.removeOnActiveSessionsChangedListener(sessions);
             if (!enabled()) { detach(); return; }
             try {
-                manager.addOnActiveSessionsChangedListener(sessions, null, main);
-                chooseSession(manager.getActiveSessions(null));
-            } catch (SecurityException unavailable) { detach(); }
+                manager.addOnActiveSessionsChangedListener(null, UserHandle.of(userId),
+                        context.getMainExecutor(), sessions);
+                chooseSession(manager.getActiveSessionsForUser(null, UserHandle.of(userId)));
+            } catch (SecurityException unavailable) {
+                android.util.Log.w("HeckerLyrics", "Media session access unavailable", unavailable); detach();
+            }
         }
 
         private void chooseSession(List<MediaController> available) {
             if (!enabled()) { detach(); return; }
+            java.util.Set<android.media.session.MediaSession.Token> present = new java.util.HashSet<>();
+            if (available != null) for (MediaController item : available.subList(0, Math.min(32, available.size()))) {
+                present.add(item.getSessionToken());
+                if (!watching.containsKey(item.getSessionToken())) {
+                    item.registerCallback(callbacks, main); watching.put(item.getSessionToken(), item);
+                }
+            }
+            for (android.media.session.MediaSession.Token token : new ArrayList<>(watching.keySet()))
+                if (!present.contains(token)) watching.remove(token).unregisterCallback(callbacks);
             MediaController chosen = null;
             if (available != null) {
                 for (MediaController item : available) {
                     PlaybackState state = item.getPlaybackState();
                     if (state != null && state.getState() == PlaybackState.STATE_PLAYING) { chosen = item; break; }
                 }
+                if (chosen == null) for (MediaController item : available) {
+                    if (controller != null && item.getSessionToken().equals(controller.getSessionToken())) {
+                        chosen = item; break;
+                    }
+                    if (chosen == null && item.getMetadata() != null) chosen = item;
+                }
             }
             if (chosen == null) { detach(); return; }
             if (controller == null || !controller.getSessionToken().equals(chosen.getSessionToken())) {
-                detach();
+                cancel(); trackKey = ""; lines = Collections.emptyList();
                 controller = chosen;
-                controller.registerCallback(callbacks, main);
             }
             updateTrack();
         }
@@ -184,21 +201,37 @@ public final class LyricsController implements AutoCloseable {
             MediaMetadata metadata = controller.getMetadata();
             String title = metadata == null ? null : metadata.getString(MediaMetadata.METADATA_KEY_TITLE);
             String artist = metadata == null ? null : metadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
+            if (metadata != null) {
+                if (title == null || title.isBlank()) title = metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE);
+                if (artist == null || artist.isBlank()) artist = metadata.getString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST);
+                if (artist == null || artist.isBlank()) artist = metadata.getString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE);
+            }
             long duration = metadata == null ? 0 : metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
-            if (title == null || artist == null || title.isBlank() || artist.isBlank()) {
+            if (title == null || title.isBlank()) {
                 cancel(); trackKey = ""; lines = Collections.emptyList(); publish(); return;
             }
+            if (artist == null) artist = "";
             String key = userId + ":" + controller.getPackageName() + ":"
                     + LyricsPolicy.normalize(artist) + ":" + LyricsPolicy.normalize(title) + ":" + duration;
             if (key.equals(trackKey)) { publish(); return; }
-            cancel(); trackKey = key; lines = Collections.emptyList(); publish();
+            cancel(); trackKey = key; lines = Collections.emptyList();
+            if (metadata != null) for (String field : new String[]{"android.media.metadata.LYRICS",
+                    "android.media.metadata.LYRIC", "syncedLyrics", "lyrics"}) {
+                String embedded;
+                try { embedded = metadata.getString(field); } catch (RuntimeException invalid) { continue; }
+                List<LyricsPolicy.Line> parsed = LyricsPolicy.parse(embedded);
+                if (!parsed.isEmpty()) { lines = parsed; publish(); return; }
+            }
+            publish();
+            if (artist.isBlank()) return;
             Cached cached = CACHE.get(key);
             if (cached != null && (!cached.lines.isEmpty() || SystemClock.elapsedRealtime() - cached.at < 300_000)) {
                 lines = cached.lines; publish(); return;
             }
             int serial = generation;
+            final String lookupArtist = artist, lookupTitle = title;
             request = worker.submit(() -> {
-                List<LyricsPolicy.Line> found = lookup(artist, title, duration);
+                List<LyricsPolicy.Line> found = lookup(lookupArtist, lookupTitle, duration);
                 main.post(() -> {
                     if (closed || serial != generation || !enabled() || !key.equals(trackKey)) return;
                     CACHE.put(key, new Cached(found)); lines = found; publish();
@@ -209,7 +242,7 @@ public final class LyricsController implements AutoCloseable {
         private List<LyricsPolicy.Line> lookup(String artist, String title, long duration) {
             HttpURLConnection http = null;
             try {
-                String query = URLEncoder.encode(artist + " " + title, StandardCharsets.UTF_8);
+                String query = URLEncoder.encode(LyricsPolicy.searchArtist(artist) + " " + LyricsPolicy.searchTitle(title), StandardCharsets.UTF_8);
                 http = (HttpURLConnection) new URL("https://lrclib.net/api/search?q=" + query).openConnection();
                 connection = http;
                 http.setConnectTimeout(5000); http.setReadTimeout(5000); http.setInstanceFollowRedirects(false);
@@ -263,7 +296,8 @@ public final class LyricsController implements AutoCloseable {
 
         private void detach() {
             cancel();
-            if (controller != null) controller.unregisterCallback(callbacks);
+            for (MediaController item : watching.values()) item.unregisterCallback(callbacks);
+            watching.clear();
             controller = null; trackKey = ""; lines = Collections.emptyList(); publish();
         }
 

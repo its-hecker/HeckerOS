@@ -68,6 +68,13 @@ public final class HeckerAboutPhonePreference extends Preference {
         if (mCard != null && mCard != holder.itemView) glow().setActive(false);
         mCard = holder.itemView;
         mCard.setBackgroundColor(getContext().getColor(R.color.hecker_about_background));
+        mCard.post(() -> {
+            if (mCard != holder.itemView) return;
+            mCard.setBackgroundColor(getContext().getColor(R.color.hecker_about_background));
+            View parent = mCard.getParent() instanceof View ? (View)mCard.getParent() : null;
+            if (parent != null) mCard.setMinimumHeight(Math.max(0,
+                    parent.getHeight() - parent.getPaddingTop() - parent.getPaddingBottom()));
+        });
         int[] ids = {R.id.hecker_about_name_action, R.id.hecker_about_android_action,
                 R.id.hecker_about_processor_action, R.id.hecker_about_software_action,
                 R.id.hecker_about_device_action, R.id.hecker_about_community};
@@ -100,6 +107,15 @@ public final class HeckerAboutPhonePreference extends Preference {
                 SystemProperties.get("ro.heckeros.version", unavailable()), Build.VERSION.RELEASE));
         value(R.id.hecker_about_android, Build.VERSION.RELEASE);
         value(R.id.hecker_about_processor, HeckerAboutPhoneValues.processor(Build.SOC_MODEL, Build.HARDWARE));
+        android.app.ActivityManager.MemoryInfo memory = new android.app.ActivityManager.MemoryInfo();
+        context.getSystemService(android.app.ActivityManager.class).getMemoryInfo(memory);
+        value(R.id.hecker_about_memory, android.text.format.Formatter.formatShortFileSize(context, memory.totalMem));
+        android.os.StatFs disk = new android.os.StatFs(android.os.Environment.getDataDirectory().getAbsolutePath());
+        value(R.id.hecker_about_storage, context.getString(R.string.hecker_about_storage_free,
+                android.text.format.Formatter.formatShortFileSize(context, disk.getAvailableBytes()),
+                android.text.format.Formatter.formatShortFileSize(context, disk.getTotalBytes())));
+        value(R.id.hecker_about_patch, Build.VERSION.SECURITY_PATCH.isBlank() ? unavailable() : Build.VERSION.SECURITY_PATCH);
+        value(R.id.hecker_about_build, Build.DISPLAY);
         SpannableString credits = new SpannableString("\uFFFC  " + context.getString(
                 R.string.hecker_about_credits, SystemProperties.get("ro.heckeros.maintainer", "Hecker")) + "  \uFFFC");
         Drawable heart = context.getDrawable(R.drawable.hecker_about_heart).mutate();

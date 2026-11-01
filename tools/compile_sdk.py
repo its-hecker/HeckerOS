@@ -60,6 +60,8 @@ def main():
     parser.add_argument("--cache", type=Path, default=Path(os.environ.get(
         "HECKER_SUITE_SDK_CACHE", "/tmp/hecker-suite-sdk-check")))
     args = parser.parse_args()
+    from fetch_depth_assets import prepare as prepare_depth_assets
+    prepare_depth_assets()
     cache = args.cache.resolve()
     cache.mkdir(parents=True, exist_ok=True)
     lock = json.loads((ROOT / "tests/sdk-inputs.lock.json").read_text())
@@ -117,6 +119,7 @@ def main():
         (output / "classes").mkdir()
         classpath = os.pathsep.join(str(cache / name) for name in
                                   ("android-system.jar", "lottie.jar", "appcompat.jar", "core.jar"))
+        classpath += os.pathsep + os.pathsep.join(str(ROOT / "prebuilts/depth" / name) for name in ("litert.jar", "litert-api.jar"))
         run("java", "-m", "jdk.compiler/com.sun.tools.javac.Main", "-cp", classpath,
             "-d", output / "classes", output / "generated/org/hecker/suite/R.java",
             *sorted((ROOT / "tests/platform-api-stubs").rglob("*.java")),

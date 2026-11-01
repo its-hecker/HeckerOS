@@ -106,7 +106,7 @@ public final class FlowClockRenderer {
         float ambientTop = (height - ambientHeight * 1.8f) / 2;
         float freeY = Math.max(0, height - targetHeight * (stacked ? 2.05f : 1.35f) - 24);
         float y = freeY * (.5f + Math.max(-100, Math.min(100, positionY)) / 200f);
-        float targetTop = Math.max(0, Math.min(height - targetHeight * (stacked ? 2.05f : 1.35f), y));
+        float targetTop = Math.max(0, Math.min(height - targetHeight * (stacked ? 2.05f : 1f) - 24, y + (home ? 18 : 0)));
         float center = width / 2;
         float targetCenter = stacked ? width * .27f : center;
         float half = stacked ? Math.min(width * .25f, width / 2 - padding) : width / 2 - padding;
@@ -124,7 +124,8 @@ public final class FlowClockRenderer {
             float homeHeight = Math.min(height, 160);
             float homeGlyph = Math.min((homeHeight - 32) / 1.35f, width * .29f) * scale;
             homeGlyph = Math.min(homeGlyph, (homeHeight - 32) / 1.35f);
-            float homeTop = Math.max(0, homeHeight - homeGlyph * 1.35f - 24) / 2;
+            float homeTop = Math.min(Math.max(0, height - homeGlyph - 24),
+                    Math.max(0, homeHeight - homeGlyph * 1.35f - 24) / 2 + 18);
             float stretch = style == 3 ? .64f : 1;
             paint.reset(); paint.setTypeface(face); paint.setTextSize(homeGlyph);
             float fit = Math.min(stretch, (width - padding * 2) / Math.max(1, paint.measureText(h + ":" + m)));

@@ -16,10 +16,7 @@ final class MotionIslandAnimation {
         if (!active(age)) return 0;
         float enter = smooth(age / 320f);
         float retract = smooth((MotionIslandState.ACTION_DURATION - age) / 500f);
-        // Play gets a welcoming bounce; the origin remains pinned beneath the capsule.
-        double bounce = action == MotionIslandState.PLAY
-                ? 8 * Math.sin(age * Math.PI / 230) * Math.exp(-age / 650.0) : 0;
-        return (float) Math.max(0, (47 + bounce) * enter * retract);
+        return 47 * enter * retract;
     }
     static float angle(long age, int direction) {
         if (!active(age)) return 0;
@@ -30,7 +27,7 @@ final class MotionIslandAnimation {
         if (!active(age) || age < 180 || age >= 1800) return 0;
         if (action == MotionIslandState.PLAY) {
             // A single open-arm welcome held at the end of the soft entrance.
-            return age < 320 || age >= 1250 ? 1 : 2;
+            return Math.round(welcomePose(age));
         }
         if (action == MotionIslandState.PAUSE) {
             // A repeated bye-bye wave, distinct from the held welcome pose.
@@ -46,6 +43,12 @@ final class MotionIslandAnimation {
                     : age < 1020 ? 1 : age < 1280 ? 2 : age < 1500 ? 1 : 0;
         }
         return 0;
+    }
+    static float welcomePose(long age) {
+        if (!active(age)) return 0;
+        if (age < 440) return 2 * smooth((age - 180) / 260f);
+        if (age < 1450) return 2;
+        return 2 * (1 - smooth((age - 1450) / 400f));
     }
     static float bodyRock(long age, int action, int direction) {
         if (!active(age)) return 0;

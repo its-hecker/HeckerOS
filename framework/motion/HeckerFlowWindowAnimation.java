@@ -47,13 +47,14 @@ public final class HeckerFlowWindowAnimation {
         if (!eligibleTask(type, change) || !enabled(context)) return null;
         boolean home = change.getTaskInfo().getActivityType() == WindowConfiguration.ACTIVITY_TYPE_HOME;
         long duration = enter ? 460 : 330;
-        float from = enter ? (home ? 1.025f : .92f) : 1f;
-        float to = enter ? 1f : (openingType ? .975f : .91f);
+        // Home and gesture dismissal keep the native final bounds throughout the handoff.
+        float from = enter && !home ? .96f : 1f;
+        float to = !enter && openingType && !home ? .985f : 1f;
         AnimationSet result = new AnimationSet(false);
         ScaleAnimation scale = new ScaleAnimation(from, to, from, to,
                 Animation.RELATIVE_TO_SELF, .5f, Animation.RELATIVE_TO_SELF, .5f);
         scale.setDuration(duration); scale.setInterpolator(SETTLE); result.addAnimation(scale);
-        if (!home) {
+        if (!home && enter) {
             TranslateAnimation move = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0,
                     Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, enter ? .035f : 0,
                     Animation.RELATIVE_TO_SELF, enter ? 0 : .018f);

@@ -82,14 +82,30 @@ public final class LyricsPolicy {
     }
 
     public static int matchScore(String artist, String title, String resultArtist, String resultTitle) {
-        String a = normalize(artist), t = normalize(title);
-        String ra = normalize(resultArtist), rt = normalize(resultTitle);
+        String a = artist(artist), t = title(title);
+        String ra = artist(resultArtist), rt = title(resultTitle);
         if (a.isEmpty() || t.isEmpty()) return 0;
         if (ra.equals(a) && rt.equals(t)) return 100;
         if (rt.equals(t) && ra.contains(a)) return 90;
+        if (rt.equals(t) && !ra.isEmpty() && (" " + a + " ").contains(" " + ra + " ")) return 90;
         if (ra.equals(a) && rt.contains(t)) return 80;
         if (ra.contains(a) && rt.contains(t)) return 60;
         return 0;
+    }
+
+    public static String title(String text) {
+        return normalize(searchTitle(text));
+    }
+    public static String artist(String text) {
+        return normalize(searchArtist(text));
+    }
+    public static String searchTitle(String text) {
+        if (text == null) return "";
+        return text.replaceAll("(?i)\\s*[\\[(](?:official(?:\\s+(?:music|lyric))?\\s*(?:video|audio)?|lyrics?|audio|visuali[sz]er|hd|4k)[\\])]", "").trim();
+    }
+    public static String searchArtist(String text) {
+        if (text == null) return "";
+        return text.replaceAll("(?i)\\s*-\\s*topic$", "").replaceAll("(?i)\\s+(?:feat\\.?|ft\\.?|featuring)\\s+.*$", "").trim();
     }
 
     public static boolean usableRecording(int score, long duration, long resultDuration) {

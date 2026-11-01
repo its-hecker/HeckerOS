@@ -54,6 +54,7 @@ jobs:
       - name: Verify authorization, raw decoding, gaming, lyrics and patch safety
         run: |
           python3 -m pip install Pillow
+          python3 tools/fetch_depth_assets.py
           bash tests/run_host_tests.sh
       - name: Compile Suite Java and link Android resources with locked dependencies
         run: python3 tools/compile_sdk.py --cache generated/sdk
@@ -91,6 +92,7 @@ jobs:
         run: python3 tools/fetch_theme_assets.py
       - name: Compile Settings artwork and layouts
         run: |
+          python3 tools/check_settings_home.py --sdk-cache generated/sdk
           generated/sdk/aapt2 compile --dir settings/res -o /tmp/hecker-settings-resources.zip
           generated/sdk/aapt2 compile --dir motion/res -o /tmp/hecker-motion-resources.zip
   boot-assets:

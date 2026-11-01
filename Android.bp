@@ -43,11 +43,40 @@ android_app {
     certificate: "platform",
     privileged: true,
     system_ext_specific: true,
-    static_libs: ["lottie", "HeckerNetLabApi"],
+    static_libs: ["lottie", "HeckerNetLabApi", "HeckerDepthLiteRt"],
+    jni_libs: ["libhecker_depth_tflite"],
+    compile_multilib: "64",
     required: ["HeckerSuitePrivappPermissions", "HeckerSuiteFreeformFeature", "HeckerGameInit"],
     optimize: {
-        proguard_flags_files: ["app/proguard.flags"],
+        proguard_flags_files: ["app/proguard.flags", "prebuilts/depth/litert-proguard.flags", "prebuilts/depth/litert-api-proguard.flags"],
     },
+}
+
+// The extractor is private to Suite. The Settings dashboard has no inference dependency.
+java_import {
+    name: "HeckerDepthLiteRt",
+    jars: ["prebuilts/depth/litert.jar", "prebuilts/depth/litert-api.jar"],
+    sdk_version: "current",
+    licenses: ["hecker_depth_litert_license"],
+}
+
+cc_prebuilt_library_shared {
+    name: "libhecker_depth_tflite",
+    stem: "libtensorflowlite_jni",
+    arch: { arm64: { srcs: ["prebuilts/depth/libtensorflowlite_jni.so"] } },
+    compile_multilib: "64",
+    stl: "none",
+    shared_libs: ["liblog"],
+    system_shared_libs: ["libc", "libm", "libdl"],
+    strip: { none: true },
+    system_ext_specific: true,
+    licenses: ["hecker_depth_litert_license"],
+}
+
+license {
+    name: "hecker_depth_litert_license",
+    license_kinds: ["SPDX-license-identifier-Apache-2.0"],
+    license_text: ["prebuilts/depth/litert-LICENSE.txt", "prebuilts/depth/litert-api-LICENSE.txt"],
 }
 
 // Keep hotspot permissions out of Settings and the presentation package.

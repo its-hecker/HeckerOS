@@ -29,6 +29,7 @@ public static ContentResolver resolver=new ContentResolver();
 public static java.util.List<BroadcastReceiver> receivers=new java.util.ArrayList<>();
 public Context getApplicationContext(){return this;}public ContentResolver getContentResolver(){return resolver;}
 public Context createContextAsUser(android.os.UserHandle h,int f){Context c=new Context();c.user=h.id;return c;}
+public java.util.concurrent.Executor getMainExecutor(){return Runnable::run;}
 public <T>T getSystemService(Class<T> c){return c.cast(android.media.session.MediaSessionManager.forUser(user));}
 public Intent registerReceiver(BroadcastReceiver r,IntentFilter f,String p,android.os.Handler h,int flags){receivers.add(r);return null;}
 public void unregisterReceiver(BroadcastReceiver r){receivers.remove(r);}
@@ -41,7 +42,7 @@ public static int getIntForUser(android.content.ContentResolver r,String k,int d
 public static void set(int user,String k,int v){values.put(user+":"+k,v);android.content.Context.resolver.notifyKey(k);}
 }}""",
 "android/media/MediaMetadata.java":"""package android.media;public class MediaMetadata{
-public static final String METADATA_KEY_TITLE="title",METADATA_KEY_ARTIST="artist",METADATA_KEY_DURATION="duration";
+public static final String METADATA_KEY_TITLE="title",METADATA_KEY_ARTIST="artist",METADATA_KEY_DURATION="duration",METADATA_KEY_DISPLAY_TITLE="display_title",METADATA_KEY_ALBUM_ARTIST="album_artist",METADATA_KEY_DISPLAY_SUBTITLE="subtitle";
 public String title;public MediaMetadata(String t){title=t;}
 public String getString(String k){return k.equals("title")?title:"Artist";}public long getLong(String k){return 60000;}
 }""",
@@ -51,10 +52,10 @@ public PlaybackState(int s,long p){state=s;position=p;}
 public int getState(){return state;}public long getPosition(){return position;}public long getLastPositionUpdateTime(){return updated;}public float getPlaybackSpeed(){return speed;}
 }""",
 "android/media/session/MediaController.java":"""package android.media.session;public class MediaController{
-public String token;public android.media.MediaMetadata metadata;public PlaybackState state=new PlaybackState(3,0);
+public MediaSession.Token token;public android.media.MediaMetadata metadata;public PlaybackState state=new PlaybackState(3,0);
 public java.util.List<Callback> callbacks=new java.util.ArrayList<>();
-public MediaController(String t,String title){token=t;metadata=new android.media.MediaMetadata(title);}
-public String getSessionToken(){return token;}public String getPackageName(){return "test.player";}
+public MediaController(String t,String title){token=new MediaSession.Token(t);metadata=new android.media.MediaMetadata(title);}
+public MediaSession.Token getSessionToken(){return token;}public String getPackageName(){return "test.player";}
 public android.media.MediaMetadata getMetadata(){return metadata;}public PlaybackState getPlaybackState(){return state;}
 public void registerCallback(Callback c,android.os.Handler h){callbacks.add(c);}public void unregisterCallback(Callback c){callbacks.remove(c);}
 public static class Callback{public void onMetadataChanged(android.media.MediaMetadata m){}public void onPlaybackStateChanged(PlaybackState s){}public void onSessionDestroyed(){}}
@@ -68,9 +69,13 @@ public java.util.List<MediaController> controllers=new java.util.ArrayList<>();
 public java.util.Set<OnActiveSessionsChangedListener> listeners=new java.util.HashSet<>();
 public interface OnActiveSessionsChangedListener{void onActiveSessionsChanged(java.util.List<MediaController> a);}
 public void addOnActiveSessionsChangedListener(OnActiveSessionsChangedListener l,Object n,android.os.Handler h){listeners.add(l);}
-public void removeOnActiveSessionsChangedListener(OnActiveSessionsChangedListener l){listeners.remove(l);}
+public void addOnActiveSessionsChangedListener(Object n,android.os.UserHandle u,java.util.concurrent.Executor e,OnActiveSessionsChangedListener l){forUser(u.id).listeners.add(l);}
+public void removeOnActiveSessionsChangedListener(OnActiveSessionsChangedListener l){for(MediaSessionManager m:managers.values())m.listeners.remove(l);}
+public java.util.List<MediaController> getActiveSessionsForUser(Object n,android.os.UserHandle u){return forUser(u.id).controllers;}
 public java.util.List<MediaController> getActiveSessions(Object n){return controllers;}
 }""",
+"android/util/Log.java":"package android.util;public class Log{public static int w(String t,String m,Throwable e){return 0;}}",
+"android/media/session/MediaSession.java":"package android.media.session;public class MediaSession{public static final class Token{final String value;public Token(String value){this.value=value;}public boolean equals(Object other){return other instanceof Token&&value.equals(((Token)other).value);}public int hashCode(){return value.hashCode();}}}",
 "android/util/LruCache.java":"""package android.util;public class LruCache<K,V>{
 public java.util.LinkedHashMap<K,V> cache=new java.util.LinkedHashMap<>();final int max;
 public LruCache(int n){max=n;}public V get(K k){return cache.get(k);}public V put(K k,V v){V old=cache.put(k,v);while(cache.size()>max)cache.remove(cache.keySet().iterator().next());return old;}
@@ -156,6 +161,11 @@ public static void main(String[]args)throws Exception{
  check(requests.get()==noLyricsCount,"Negative cache refetched immediately");
  SystemClock.now+=300001;sb.setVisible(false);sb.setVisible(true);
  waitFor(()->requests.get()>noLyricsCount);
+ MediaController alternate=new MediaController("alternate","Other Player");alternate.seek(0,PlaybackState.STATE_PAUSED);manager.controllers.add(alternate);
+ for(MediaSessionManager.OnActiveSessionsChangedListener l:new ArrayList<>(manager.listeners))l.onActiveSessionsChanged(manager.controllers);
+ player.seek(0,PlaybackState.STATE_PAUSED);alternate.seek(0,PlaybackState.STATE_PLAYING);
+ waitFor(()->!status.lines.isEmpty()&&status.lines.get(0).text.startsWith("Other Player"));
+ check(!alternate.callbacks.isEmpty(),"Unselected media session was not watched");
  MediaSessionManager second=MediaSessionManager.forUser(1);second.controllers.add(new MediaController("u1","Other User"));
  Settings.Secure.set(1,LyricsController.STATUS_SETTING,1);
  android.app.ActivityManager.user=1;Context.switched();

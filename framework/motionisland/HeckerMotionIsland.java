@@ -38,6 +38,7 @@ public final class HeckerMotionIsland implements AutoCloseable {
     private HeckerQsMedia.Snapshot media = new HeckerQsMedia.Snapshot(null);
     private MediaSession.Token lastPlaying, feedbackToken, dialogToken;
     private long lastPlayingAt;
+    private long transientUntil;
     private String beforeIdentity;
     private MotionIslandView capsule;
     private MotionAstronautView astronaut;
@@ -146,8 +147,12 @@ public final class HeckerMotionIsland implements AutoCloseable {
                 music.stop(); media = new HeckerQsMedia.Snapshot(null); lastPlaying = null;
                 dismissDialog();
             }
-            state.environment(enabled, setting(CREATURE, 1, user), awake, media.playing, user);
-            if (!media.active) { state.clear(); feedbackToken = null; }
+            int action = state.current(now());
+            boolean skipping = action == MotionIslandState.NEXT || action == MotionIslandState.PREVIOUS;
+            if (media.playing) transientUntil = now() + 2500;
+            boolean holding = awake && skipping && lastPlaying != null && now() < transientUntil;
+            state.environment(enabled, setting(CREATURE, 1, user), awake, media.playing || holding, user);
+            if (!media.active && !holding) { state.clear(); feedbackToken = null; }
             if (dialog != null && (!awake || !enabled || dialogToken == null
                     || !music.snapshotFor(dialogToken).active)) dismissDialog();
             if (feedbackToken != null && state.current(now()) != MotionIslandState.NONE) {
@@ -169,7 +174,7 @@ public final class HeckerMotionIsland implements AutoCloseable {
         if (capsule == null) {
             MotionIslandView view = new MotionIslandView(context);
             view.setOnClickListener(v -> openPlayer());
-            if (!add(view, dp(148), dp(32), 0, false, "HeckerMotionIsland")) return;
+            if (!add(view, dp(124), dp(32), 0, false, "HeckerMotionIsland")) return;
             capsule = view;
         }
         String label = state.current(now()) == MotionIslandState.NONE

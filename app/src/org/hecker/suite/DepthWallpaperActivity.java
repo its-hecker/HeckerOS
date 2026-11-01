@@ -30,12 +30,14 @@ public final class DepthWallpaperActivity extends Activity {
     private android.widget.Switch home;
     private int generation;
     private boolean stopped,homeOnly;
+    private boolean extractSubject;
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         if (state != null) {
             String b = state.getString("background"), f = state.getString("foreground");
             if (b != null) background = Uri.parse(b);
             if (f != null) foreground = Uri.parse(f);
+            extractSubject = state.getBoolean("extract_subject", false);
         }
         homeOnly=getIntent().getBooleanExtra("home_only",false);
         LinearLayout page = Ui.page(this, homeOnly?R.string.home_depth_picker_title:R.string.depth_wallpaper_title);
@@ -43,6 +45,7 @@ public final class DepthWallpaperActivity extends Activity {
         home = new android.widget.Switch(this); home.setText(R.string.depth_apply_home);
         home.setChecked(homeOnly || state == null || state.getBoolean("apply_home", true)); home.setVisibility(homeOnly?android.view.View.GONE:android.view.View.VISIBLE); page.addView(home);
         Ui.actionCard(this, page, R.string.depth_pick_background, R.string.depth_background_summary, v -> pick(1));
+        Ui.actionCard(this, page, R.string.depth_extract_title, R.string.depth_extract_summary, v -> pick(3));
         Ui.actionCard(this, page, R.string.depth_pick_foreground, R.string.depth_foreground_summary, v -> pick(2));
         preview = new ImageView(this); preview.setScaleType(ImageView.ScaleType.FIT_CENTER);
         preview.setContentDescription(getString(R.string.depth_wallpaper_preview));
@@ -60,9 +63,10 @@ public final class DepthWallpaperActivity extends Activity {
     }
     @Override protected void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
-        if ((request != 1 && request != 2) || result != RESULT_OK || data == null || data.getData() == null) return;
+        if ((request != 1 && request != 2 && request != 3) || result != RESULT_OK || data == null || data.getData() == null) return;
         Uri uri = data.getData();
-        if (request == 1) background = uri; else foreground = uri;
+        if (request == 3) { background = uri; foreground = null; extractSubject = true; }
+        else { extractSubject = false; if (request == 1) background = uri; else foreground = uri; }
         prepare();
     }
     private Bitmap decode(Uri uri) throws IOException {
@@ -79,11 +83,12 @@ public final class DepthWallpaperActivity extends Activity {
     private void prepare() {
         int token = ++generation;
         back = null; front = null; apply.setEnabled(false); preview.setImageDrawable(null);
-        if (background == null || foreground == null) return;
+        if (background == null || !extractSubject && foreground == null) return;
         Uri b = background, f = foreground;
+        boolean automatic = extractSubject;
         worker.execute(() -> {
             try {
-                Bitmap bg = decode(b), fg = decode(f);
+                Bitmap bg = decode(b), fg = automatic ? DepthSubjectExtractor.extract(this, bg) : decode(f);
                 if (bg.getWidth() != fg.getWidth() || bg.getHeight() != fg.getHeight() || !fg.hasAlpha())
                     throw new IllegalArgumentException("The foreground must retain its background canvas");
                 int transparent = 0, opaque = 0;
@@ -98,7 +103,7 @@ public final class DepthWallpaperActivity extends Activity {
                 Canvas canvas = new Canvas(image); canvas.drawBitmap(bg, 0, 0, null); canvas.drawBitmap(fg, 0, 0, null);
                 runOnUiThread(() -> {
                     if (stopped || generation != token) return;
-                    back = bg; front = fg; preview.setImageBitmap(image); apply.setEnabled(true);
+                    back = bg; front = fg; preview.setImageBitmap(automatic ? fg : image); apply.setEnabled(true);
                 });
             } catch (IOException | RuntimeException | OutOfMemoryError invalid) {
                 runOnUiThread(() -> { if (!stopped && token == generation) error(R.string.depth_wallpaper_invalid); });
@@ -108,6 +113,7 @@ public final class DepthWallpaperActivity extends Activity {
     private void save() {
         if (back == null || front == null) return;
         apply.setEnabled(false);
+        if (!homeOnly) { Settings.Secure.putInt(getContentResolver(), DepthWallpaperJob.AUTO, 0); DepthWallpaperJob.schedule(this); }
         Bitmap bg = back, fg = front;
         boolean applyHome = home.isChecked();
         int token = ++generation;
@@ -166,6 +172,7 @@ public final class DepthWallpaperActivity extends Activity {
         if (background != null) state.putString("background", background.toString());
         if (foreground != null) state.putString("foreground", foreground.toString());
         state.putBoolean("apply_home", home.isChecked());
+        state.putBoolean("extract_subject", extractSubject);
         super.onSaveInstanceState(state);
     }
     @Override protected void onDestroy() {

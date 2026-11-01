@@ -64,5 +64,15 @@
       "old": "new BaseSearchIndexProvider(R.xml.display_settings)",
       "new": "new BaseSearchIndexProvider(R.xml.hecker_display_settings)"
     }
+  ],
+  "packages/apps/Settings/src/com/android/settings/widget/HighlightableTopLevelPreferenceAdapter.java": [
+    {
+      "old": "        updateBackground(holder, position);",
+      "new": "        updateBackground(holder, position);\n        com.android.settings.hecker.HeckerHomepageStyle.bind(holder, getItem(position),\n                isHighlightNeeded() && position == mHighlightPosition);"
+    },
+    {
+      "old": "    @Override\n    public void onBindViewHolder(PreferenceViewHolder holder, int position) {",
+      "new": "    @Override\n    public int getItemViewType(int position) {\n        androidx.preference.Preference item = getItem(position);\n        if (item != null && !(item instanceof androidx.preference.PreferenceCategory)\n                && !(item instanceof com.android.settings.hecker.HeckerBrandPreference)) {\n            if (item.getLayoutResource() != com.android.settings.R.layout.hecker_homepage_preference)\n                item.setLayoutResource(com.android.settings.R.layout.hecker_homepage_preference);\n        }\n        return super.getItemViewType(position);\n    }\n\n    @Override\n    public void onBindViewHolder(PreferenceViewHolder holder, int position) {"
+    }
   ]
 }

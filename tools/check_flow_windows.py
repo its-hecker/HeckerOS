@@ -26,10 +26,11 @@ static Animation create(int t,boolean enter,boolean opening){return HeckerFlowWi
 static void check(boolean b){if(!b)throw new AssertionError();}
 public static void main(String[]args){
  for(int type=1;type<=4;type++)for(boolean enter:new boolean[]{true,false})for(boolean opening:new boolean[]{true,false}){
-  AnimationSet set=(AnimationSet)create(type,enter,opening);check(set.children.size()==3);
+  AnimationSet set=(AnimationSet)create(type,enter,opening);check(set.children.size()==(enter?3:2));
   ScaleAnimation scale=(ScaleAnimation)set.children.get(0);check(enter?scale.to==1:scale.from==1);
-  AlphaAnimation alpha=(AlphaAnimation)set.children.get(2);check(alpha.to>=0&&alpha.to<=1);
+  AlphaAnimation alpha=(AlphaAnimation)set.children.get(set.children.size()-1);check(alpha.to>=0&&alpha.to<=1);
   float last=-1;for(int i=0;i<=1000;i++){float p=scale.curve.getInterpolation(i/1000f);check(p>=last&&p>=0&&p<=1);last=p;}
+  if(!enter&&!opening)check(scale.to==1); // Dismissal never shrinks then jumps back to final task bounds.
   check(scale.duration==(enter?460:330));check(alpha.duration==(enter?160:330));
  }
  AnimationSet clip=new AnimationSet(false);AlphaAnimation child=new AlphaAnimation(0,1);child.setDuration(80);clip.addAnimation(child);

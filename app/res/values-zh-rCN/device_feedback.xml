@@ -1,0 +1,13 @@
+<resources>
+    <string name="sb_options_title">状态栏布局与歌词</string>
+    <string name="sb_options_summary">双排布局、行高、网速位置和实时歌词</string>
+    <string name="sb_network_row">网速显示位置</string>
+    <string name="sb_first_row">第一行</string>
+    <string name="sb_second_row_label">第二行</string>
+    <string name="depth_auto_title">自动提取壁纸主体</string>
+    <string name="depth_auto_summary">锁屏壁纸更改后，在设备上提取主体。无法识别清晰主体时可手动导入。</string>
+    <string name="depth_extract_title">选择照片并提取主体</string>
+    <string name="depth_extract_summary">应用前预览提取的主体。也可以手动导入背景和透明主体图层。</string>
+    <string name="lock_clock_apply">应用所选时钟</string>
+    <string name="lock_clock_applied">已应用时钟</string>
+</resources>

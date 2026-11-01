@@ -74,6 +74,7 @@ public final class HeckerStudioActivity extends Activity {
     }
     private void home() {
         page.addView(HeckerStudio.label(this, t("layout_migration"), 14));
+        toggle("dock_search", true);
         toggle("home_depth", true); toggle("home_depth_wake", true);
         page.addView(HeckerStudio.label(this, t("home_depth_summary"), 14));
         slider("home_columns", 5, 3, 7, false); slider("home_rows", 5, 4, 9, false);
@@ -160,6 +161,8 @@ public final class HeckerStudioActivity extends Activity {
         });
     }
     private void icons() {
+        toggle("drawer_custom_icons", true);
+        page.addView(HeckerStudio.label(this, t("drawer_custom_icons_summary"), 14));
         toggle("glass_icons", true);
         choice("glass_icon_style",new String[]{t("glass_icon_smoked"),t("glass_icon_flow")},i->{HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX+"glass_icon_style",i).apply();HeckerIconStudio.clear();});
         page.addView(HeckerStudio.label(this, t("glass_icons_summary"), 14));

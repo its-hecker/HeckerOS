@@ -65,7 +65,12 @@ public final class HeckerIconStudio {
         view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, HeckerStudio.number(c, target + "_label_size", 13, 9, 20));
     }
     public static Drawable icon(Context c, ComponentName component, UserHandle user, Drawable original, Runnable refresh, android.view.View host) {
+        return icon(c, component, user, original, refresh, host, false);
+    }
+    public static Drawable icon(Context c, ComponentName component, UserHandle user, Drawable original,
+            Runnable refresh, android.view.View host, boolean drawer) {
         if (component == null || original == null) return original;
+        if (drawer && !HeckerStudio.enabled(c, "drawer_custom_icons", true)) return original;
         String selected = HeckerStudio.value(c, "icon_" + HeckerStudio.appKey(c, component, user), "");
         if (selected.equals("@system")) return shaped(c, original);
         String pack = selected.isEmpty() ? HeckerStudio.value(c, "icon_pack", "") : selected.split("\\|", 2)[0];

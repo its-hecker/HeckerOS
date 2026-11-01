@@ -131,7 +131,10 @@ object HeckerAmbientCharging {
             } catch (_: RuntimeException) { expectedWallpaper }
             if (actual != expectedWallpaper) {
                 depthEnabled = false
-                Settings.Secure.putIntForUser(c.contentResolver, DEPTH, 0, UserHandle.USER_CURRENT)
+                // Auto mode keeps its opt-in while a replacement mask is being prepared.
+                // The mismatched old pair remains hidden throughout extraction.
+                if (value("hecker_depth_auto_extract", 0) == 0)
+                    Settings.Secure.putIntForUser(c.contentResolver, DEPTH, 0, UserHandle.USER_CURRENT)
             }
         }
         val next = previous.copy(ambient = route,

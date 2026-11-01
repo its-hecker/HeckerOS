@@ -1,0 +1,39 @@
+{
+  "runtime_version": "LiteRT 1.4.0",
+  "source_repository": "Lunaris-AOSP/packages_apps_Singularity",
+  "source_revision": "0c892ebd04205889b230e986dd4194af4f4d0e24",
+  "upstream_model": "assets/mobile_bg_removal_mosaic_dm1_w_metadata.f16.tflite",
+  "files": {
+    "prebuilts/depth/litert-api.jar": "fcdbe3f4eec7a8632fb4793a95b6e585f297db40701b27e6c20bbdaead21f4de",
+    "prebuilts/depth/litert.jar": "c817a911a50d5c88f63ae6b31b131826198c96bedf72671cd32872d15a35d264",
+    "prebuilts/depth/libtensorflowlite_jni.so": "f9a6224f22f60426ae1b9d35f06ea040f2b108335932604a04c061d612f7f08f",
+    "app/assets/depth/subject.tflite": "3b250307f4cacb131602b34b2f58f6b882e0beb3928f3f3e0421a35c08ea3778"
+  },
+  "downloads": {
+    "litert.aar": {
+      "url": "https://dl.google.com/dl/android/maven2/com/google/ai/edge/litert/litert/1.4.0/litert-1.4.0.aar",
+      "size": 8264240,
+      "sha256": "54b567572cb2d1295571c785198f87597809cbf22d6cb8acfeac23869041887d",
+      "outputs": {
+        "classes.jar": "prebuilts/depth/litert.jar",
+        "jni/arm64-v8a/libtensorflowlite_jni.so": "prebuilts/depth/libtensorflowlite_jni.so"
+      }
+    },
+    "litert-api.aar": {
+      "url": "https://dl.google.com/dl/android/maven2/com/google/ai/edge/litert/litert-api/1.4.0/litert-api-1.4.0.aar",
+      "size": 23586,
+      "sha256": "6308d3789d7905d36f7aa98111295dde3e57f094f16b76794d5c41f1e1919865",
+      "outputs": {
+        "classes.jar": "prebuilts/depth/litert-api.jar"
+      }
+    },
+    "subject.tflite": {
+      "url": "https://raw.githubusercontent.com/Lunaris-AOSP/packages_apps_Singularity/0c892ebd04205889b230e986dd4194af4f4d0e24/assets/mobile_bg_removal_mosaic_dm1_w_metadata.f16.tflite",
+      "size": 14453962,
+      "sha256": "3b250307f4cacb131602b34b2f58f6b882e0beb3928f3f3e0421a35c08ea3778",
+      "outputs": {
+        "": "app/assets/depth/subject.tflite"
+      }
+    }
+  }
+}

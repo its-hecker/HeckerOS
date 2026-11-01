@@ -76,7 +76,7 @@ fun HeckerGlassQuickSettings(tiles: List<TileViewModel>, listening: () -> Boolea
         } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(Modifier.weight(1f)) {
                 CompositionLocalProvider(LocalHeckerFlowGlass provides true) {
-                    HeckerQsMediaPlayer(Modifier.heightIn(min = 178.dp), square = true)
+                    HeckerQsMediaPlayer(Modifier.heightIn(min = 154.dp), square = true)
                 }
             }
             Row(heckerQsElement(HeckerQsScene.Brightness), horizontalArrangement = Arrangement.spacedBy(12.dp)) { FlowControls(brightness) }

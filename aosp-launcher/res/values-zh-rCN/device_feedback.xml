@@ -1,0 +1,10 @@
+<resources>
+    <string name="hs_drawer_custom_icons">应用抽屉中的自定义图标</string>
+    <string name="hs_drawer_custom_icons_summary">关闭后，抽屉和搜索使用原始应用图标，主屏幕保留自定义图标。</string>
+    <string name="hs_search_back">返回</string>
+    <string name="hs_search_settings">搜索设置</string>
+    <string name="hs_search_clear">清除搜索</string>
+    <string name="hs_search_empty">没有匹配的应用或快捷方式</string>
+    <string name="hs_search_results">搜索结果</string>
+    <string name="hs_search_local_short">应用和快捷方式 · 设备内搜索</string>
+</resources>

@@ -28,6 +28,10 @@ public final class LyricsPolicyTest {
         check(LyricsPolicy.matchScore("Artist", "Song", "Artist", "Song Live") == 80);
         check(LyricsPolicy.matchScore("Artist", "Song", "Other", "Song") == 0);
         check(LyricsPolicy.matchScore("", "Song", "Artist", "Song") == 0);
+        check(LyricsPolicy.matchScore("Artist - Topic", "Song (Official Music Video)", "Artist", "Song") == 100);
+        check(LyricsPolicy.matchScore("Artist feat. Guest", "Song [Lyrics]", "Artist", "Song") == 100);
+        check(LyricsPolicy.matchScore("Artist & Guest", "Song", "Artist", "Song") == 90);
+        check(LyricsPolicy.matchScore("Artist", "Song Remix", "Artist", "Song") == 0);
         check(LyricsPolicy.usableRecording(100, 100000, 104999));
         check(!LyricsPolicy.usableRecording(100, 100000, 110000));
         check(!LyricsPolicy.usableRecording(60, 100000, 100000));

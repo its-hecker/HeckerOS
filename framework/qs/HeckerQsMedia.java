@@ -29,6 +29,31 @@ import java.util.Set;
 
 /** Current-user media session, with artwork and transport capabilities from the player. */
 public final class HeckerQsMedia {
+    private static List<MediaController> initialSessions;
+    private static int initialUser = -1;
+    private static long initialAt;
+    /** Resolve the first layout synchronously; scene targets must exist before their first frame. */
+    public static synchronized Snapshot peek(Context context, boolean musicOnly, MediaSession.Token pinned) {
+        int user = ActivityManager.getCurrentUser(); long now = SystemClock.elapsedRealtime();
+        try {
+            if (initialSessions == null || initialUser != user || now - initialAt > 250) {
+                MediaSessionManager manager = context.getSystemService(MediaSessionManager.class);
+                initialSessions = manager == null ? java.util.Collections.emptyList()
+                        : manager.getActiveSessionsForUser(null, UserHandle.of(user));
+                initialSessions = new ArrayList<>(initialSessions.subList(0, Math.min(32, initialSessions.size())));
+                initialUser = user; initialAt = now;
+            }
+            if (user != ActivityManager.getCurrentUser()) { initialSessions = null; return new Snapshot(null); }
+            MediaController chosen = null;
+            for (MediaController item : initialSessions) {
+                if (pinned != null && !pinned.equals(item.getSessionToken()) || musicOnly && !music(item)) continue;
+                if (chosen == null) chosen = item;
+                PlaybackState state = item.getPlaybackState();
+                if (state != null && state.getState() == PlaybackState.STATE_PLAYING) { chosen = item; break; }
+            }
+            return new Snapshot(chosen);
+        } catch (RuntimeException unavailable) { initialSessions = null; return new Snapshot(null); }
+    }
     public interface Listener { void changed(Snapshot snapshot); }
     public static final class Snapshot {
         public final String title, artist;
@@ -80,6 +105,7 @@ public final class HeckerQsMedia {
     private final MediaSession.Token pinned;
     private final Map<MediaSession.Token, Watch> watching = new LinkedHashMap<>();
     private final Set<MediaSession.Token> destroyed = new HashSet<>();
+    private final Map<MediaSession.Token, Long> knownMusic = new LinkedHashMap<>();
     private MediaController controller;
     private boolean started;
     private final MediaSessionManager.OnActiveSessionsChangedListener active = ignored -> refresh();
@@ -139,11 +165,12 @@ public final class HeckerQsMedia {
             for (MediaSession.Token token : new ArrayList<>(watching.keySet()))
                 if (!present.contains(token) || destroyed.contains(token)) watching.remove(token).close();
             destroyed.retainAll(present);
+            knownMusic.keySet().retainAll(watching.keySet());
             MediaController selected = null;
             for (MediaController candidate : available) {
                 if (!watching.containsKey(candidate.getSessionToken())
                         || pinned != null && !pinned.equals(candidate.getSessionToken())
-                        || musicOnly && !music(candidate)) continue;
+                        || musicOnly && !eligibleMusic(candidate)) continue;
                 if (selected == null) selected = candidate;
                 if (candidate.getPlaybackState() != null && candidate.getPlaybackState().getState() == PlaybackState.STATE_PLAYING) {
                     selected = candidate; break;
@@ -155,7 +182,18 @@ public final class HeckerQsMedia {
     }
     private void clear() {
         for (Watch watch : watching.values()) watch.close();
-        watching.clear(); destroyed.clear(); controller = null;
+        watching.clear(); destroyed.clear(); knownMusic.clear(); controller = null;
+    }
+    private boolean eligibleMusic(MediaController candidate) {
+        MediaSession.Token token = candidate.getSessionToken();
+        long now = SystemClock.elapsedRealtime();
+        if (music(candidate)) { knownMusic.put(token, now); return true; }
+        PlaybackState state = candidate.getPlaybackState();
+        int mode = state == null ? PlaybackState.STATE_NONE : state.getState();
+        // Metadata and audio attributes may disappear briefly during a real track skip.
+        return knownMusic.containsKey(token) && now - knownMusic.get(token) <= 2500
+                && (mode == PlaybackState.STATE_BUFFERING || mode == PlaybackState.STATE_CONNECTING
+                    || mode == PlaybackState.STATE_SKIPPING_TO_NEXT || mode == PlaybackState.STATE_SKIPPING_TO_PREVIOUS);
     }
     private static boolean music(MediaController media) {
         MediaController.PlaybackInfo info = media.getPlaybackInfo();
@@ -170,7 +208,7 @@ public final class HeckerQsMedia {
     private static String bounded(String value) { return value == null ? "" : value.substring(0, Math.min(192, value.length())); }
     public Snapshot snapshotFor(MediaSession.Token token) {
         Watch watch = watching.get(token);
-        try { return new Snapshot(watch != null && (!musicOnly || music(watch.media)) ? watch.media : null); }
+        try { return new Snapshot(watch != null && (!musicOnly || eligibleMusic(watch.media)) ? watch.media : null); }
         catch (RuntimeException unavailable) { return new Snapshot(null); }
     }
     private void update() { listener.changed(new Snapshot(controller)); }

@@ -23,7 +23,7 @@ public final class HeckerSearchActivity extends Activity {
     private LauncherApps launcher;
     private int generation;
     private Future<?> task;
-    private boolean ready, resumed;
+    private boolean ready, resumed, shortcutsAvailable;
     private Runnable stopGameLibrary;
 
     private static final class Entry {
@@ -33,44 +33,70 @@ public final class HeckerSearchActivity extends Activity {
             this.component = component; this.user = user; this.label = label; this.packageName = packageName; this.shortcut = shortcut;
         }
     }
+    private static final class ResultRow { ImageView icon; TextView title, kind; Entry entry; }
+    private int dp(int n) { return HeckerStudio.dp(this,n); }
+    private ImageButton iconButton(int icon,String label,Runnable click) {
+        ImageButton button=new ImageButton(this);button.setImageResource(icon);
+        button.setImageTintList(android.content.res.ColorStateList.valueOf(0xffc7bfce));
+        button.setBackgroundColor(0);button.setContentDescription(HeckerStudio.text(this,label));
+        button.setOnClickListener(v->click.run());return button;
+    }
     @Override public void onCreate(Bundle state) {
-        super.onCreate(state); launcher = getSystemService(LauncherApps.class);
-        LinearLayout page = HeckerStudio.column(this);
-        TextView back = HeckerStudio.label(this, "‹  " + HeckerStudio.text(this, "universal_search"), 25); back.setOnClickListener(v -> finish()); page.addView(back);
-        search = new EditText(this); search.setSingleLine(true); search.setTextColor(0xfff4f4ee);
-        search.setHintTextColor(0xffb8c6cc); search.setHint(HeckerStudio.text(this, "search_hint"));
-        page.addView(search); status = HeckerStudio.label(this, HeckerStudio.text(this, "loading"), 13); page.addView(status);
-        ListView list = new ListView(this); list.setDivider(null);
-        adapter = new BaseAdapter() {
-            public int getCount() { return results.size(); }
-            public Object getItem(int p) { return results.get(p); }
-            public long getItemId(int p) { return p; }
-            public View getView(int position, View convert, ViewGroup parent) {
-                Entry e = results.get(position);
-                LinearLayout row = new LinearLayout(HeckerSearchActivity.this); row.setGravity(Gravity.CENTER_VERTICAL);
-                row.setPadding(0, HeckerStudio.dp(HeckerSearchActivity.this, 8), 0, HeckerStudio.dp(HeckerSearchActivity.this, 8));
-                ImageView image = new ImageView(HeckerSearchActivity.this); image.setImageDrawable(e.icon);
-                row.addView(image, new LinearLayout.LayoutParams(HeckerStudio.dp(HeckerSearchActivity.this, 42), HeckerStudio.dp(HeckerSearchActivity.this, 42)));
-                TextView label = HeckerStudio.label(HeckerSearchActivity.this, e.label + "\n" + (e.shortcut == null ? HeckerStudio.text(HeckerSearchActivity.this, "app") : HeckerStudio.text(HeckerSearchActivity.this, "shortcut")), 16);
-                label.setPadding(HeckerStudio.dp(HeckerSearchActivity.this, 14), 0, 0, 0); row.addView(label); return row;
+        super.onCreate(state); launcher=getSystemService(LauncherApps.class);
+        LinearLayout page=HeckerStudio.column(this),header=new LinearLayout(this);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        header.addView(iconButton(HeckerStudio.res(this,"drawable","hs_search_back"),"search_back",this::finish),new LinearLayout.LayoutParams(dp(48),dp(56)));
+        TextView title=HeckerStudio.label(this,HeckerStudio.text(this,"universal_search"),22);
+        title.setAccessibilityHeading(true);header.addView(title,new LinearLayout.LayoutParams(0,-2,1));
+        header.addView(iconButton(android.R.drawable.ic_menu_preferences,"search_settings",()->HeckerStudio.open(this,"search")),new LinearLayout.LayoutParams(dp(48),dp(48)));
+        page.addView(header);
+        LinearLayout field=new LinearLayout(this);field.setGravity(Gravity.CENTER_VERTICAL);
+        field.setPadding(dp(16),0,dp(4),0);field.setBackground(HeckerStudio.panel(0xff29252f,dp(28),0x264b4452));
+        ImageView mark=new ImageView(this);mark.setImageResource(android.R.drawable.ic_menu_search);
+        mark.setImageTintList(android.content.res.ColorStateList.valueOf(0xffc7bfce));field.addView(mark,new LinearLayout.LayoutParams(dp(22),dp(22)));
+        search=new EditText(this);search.setSingleLine(true);search.setTextColor(0xfff5f0f7);search.setHintTextColor(0xffc7bfce);
+        search.setHint(HeckerStudio.text(this,"search_hint"));search.setTextSize(16);search.setBackgroundColor(0);search.setPadding(dp(12),0,0,0);
+        search.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);field.addView(search,new LinearLayout.LayoutParams(0,dp(54),1));
+        ImageButton clear=iconButton(android.R.drawable.ic_menu_close_clear_cancel,"search_clear",()->search.setText(""));
+        clear.setVisibility(View.INVISIBLE);field.addView(clear,new LinearLayout.LayoutParams(dp(48),dp(48)));page.addView(field);
+        status=HeckerStudio.label(this,HeckerStudio.text(this,"loading"),12);status.setTextColor(0xffc7bfce);page.addView(status);
+        ListView list=new ListView(this);list.setDivider(null);list.setVerticalScrollBarEnabled(false);
+        adapter=new BaseAdapter(){
+            public int getCount(){return results.size();}
+            public Object getItem(int p){return results.get(p);}
+            public long getItemId(int p){return p;}
+            public View getView(int position,View convert,ViewGroup parent){
+                Entry entry=results.get(position);LinearLayout row=convert instanceof LinearLayout?(LinearLayout)convert:null;
+                ResultRow holder;
+                if(row==null){
+                    row=new LinearLayout(HeckerSearchActivity.this);row.setGravity(Gravity.CENTER_VERTICAL);row.setPadding(dp(16),dp(12),dp(16),dp(12));
+                    row.setBackground(new android.graphics.drawable.InsetDrawable(HeckerStudio.panel(0xff19161d,dp(20),0),0,dp(3),0,dp(3)));
+                    holder=new ResultRow();holder.icon=new ImageView(HeckerSearchActivity.this);row.addView(holder.icon,new LinearLayout.LayoutParams(dp(40),dp(40)));
+                    LinearLayout labels=HeckerStudio.column(HeckerSearchActivity.this);labels.setPadding(dp(14),0,0,0);
+                    holder.title=HeckerStudio.label(HeckerSearchActivity.this,"",16);holder.title.setPadding(0,0,0,0);holder.title.setSingleLine();holder.title.setEllipsize(TextUtils.TruncateAt.END);
+                    holder.kind=HeckerStudio.label(HeckerSearchActivity.this,"",12);holder.kind.setTextColor(0xffc7bfce);holder.kind.setPadding(0,dp(3),0,0);
+                    labels.addView(holder.title);labels.addView(holder.kind);row.addView(labels,new LinearLayout.LayoutParams(0,-2,1));row.setTag(holder);
+                }else holder=(ResultRow)row.getTag();
+                holder.entry=entry;holder.title.setText(entry.label);holder.kind.setText(HeckerStudio.text(HeckerSearchActivity.this,entry.shortcut==null?"app":"shortcut"));
+                final ResultRow bound=holder;
+                holder.icon.setImageDrawable(entry.shortcut!=null?entry.icon:HeckerIconStudio.icon(HeckerSearchActivity.this,entry.component,entry.user,entry.icon,
+                        ()->{if(bound.entry==entry&&!isDestroyed())adapter.notifyDataSetChanged();},row,true));return row;
             }
         };
-        list.setAdapter(adapter); list.setOnItemClickListener((parent, view, p, id) -> launch(results.get(p)));
-        page.addView(list, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
-        // ListView owns scrolling; a second ScrollView would break list measurement.
-        page.setPadding(HeckerStudio.dp(this, 20), HeckerStudio.dp(this, 12), HeckerStudio.dp(this, 20), 0); page.setBackgroundColor(0xff10161c); setContentView(page);
-        page.setOnApplyWindowInsetsListener((v, insets) -> {
-            android.graphics.Insets i = insets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.ime());
-            v.setPadding(HeckerStudio.dp(this, 20) + i.left, i.top, HeckerStudio.dp(this, 20) + i.right, i.bottom); return insets;
+        list.setAdapter(adapter);list.setOnItemClickListener((parent,view,p,id)->launch(results.get(p)));
+        page.addView(list,new LinearLayout.LayoutParams(-1,0,1));page.setBackgroundColor(0xff000000);setContentView(page);
+        page.setOnApplyWindowInsetsListener((v,insets)->{
+            android.graphics.Insets i=insets.getInsets(WindowInsets.Type.systemBars()|WindowInsets.Type.ime()|WindowInsets.Type.displayCutout());
+            v.setPadding(dp(16)+i.left,i.top,dp(16)+i.right,i.bottom);return WindowInsets.CONSUMED;
         });
-        search.addTextChangedListener(new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int a, int count, int after) { }
-            public void onTextChanged(CharSequence s, int a, int before, int count) { if (ready) query(); }
-            public void afterTextChanged(Editable s) { }
+        search.addTextChangedListener(new TextWatcher(){
+            public void beforeTextChanged(CharSequence s,int a,int count,int after){}
+            public void onTextChanged(CharSequence s,int a,int before,int count){clear.setVisibility(s.length()==0?View.INVISIBLE:View.VISIBLE);if(ready)query();}
+            public void afterTextChanged(Editable s){}
         });
-        String initial = getIntent().getStringExtra("query");
-        if (initial != null && initial.length() <= 200) { search.setText(initial); search.setSelection(search.length()); }
-        search.requestFocus(); search.post(() -> getSystemService(InputMethodManager.class).showSoftInput(search, InputMethodManager.SHOW_IMPLICIT));
+        String initial=getIntent().getStringExtra("query");if(initial!=null&&initial.length()<=200){search.setText(initial);search.setSelection(search.length());}
+        search.setOnEditorActionListener((v,action,event)->{if(action==android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH&&!results.isEmpty()){launch(results.get(0));return true;}return false;});
+        search.requestFocus();search.post(()->getSystemService(InputMethodManager.class).showSoftInput(search,InputMethodManager.SHOW_IMPLICIT));
     }
     @Override protected void onResume() {
         super.onResume(); resumed=true;
@@ -104,7 +130,7 @@ public final class HeckerSearchActivity extends Activity {
             java.text.Collator collator = java.text.Collator.getInstance(); entries.sort((a, b) -> { int kind = Boolean.compare(a.shortcut != null, b.shortcut != null); return kind != 0 ? kind : collator.compare(a.label, b.label); });
             runOnUiThread(() -> {
                 if (isDestroyed() || request != generation) return;
-                index.clear(); index.addAll(entries); ready = true;
+                index.clear(); index.addAll(entries); ready = true; shortcutsAvailable = shortcutsAllowed;
                 status.setText(HeckerStudio.text(this, shortcutsAllowed ? "search_local" : "search_home_required")); query();
             });
         });
@@ -124,7 +150,14 @@ public final class HeckerSearchActivity extends Activity {
                 } catch (RuntimeException unavailable) { }
                 found.add(e); if (found.size() == 100) break;
             }
-            runOnUiThread(() -> { if (!isDestroyed() && request == generation) { results.clear(); results.addAll(found); adapter.notifyDataSetChanged(); } });
+            String normalized=query.trim().toLowerCase(Locale.getDefault());
+            found.sort(Comparator.comparingInt((Entry e)->e.label.toLowerCase(Locale.getDefault()).equals(normalized)?0:e.label.toLowerCase(Locale.getDefault()).startsWith(normalized)?1:2)
+                    .thenComparing(e->e.label,java.text.Collator.getInstance()));
+            runOnUiThread(() -> { if (!isDestroyed() && request == generation) {
+                results.clear(); results.addAll(found); adapter.notifyDataSetChanged();
+                if(!query.isBlank())status.setText(HeckerStudio.text(this,found.isEmpty()?"search_empty":"search_results"));
+                else status.setText(HeckerStudio.text(this,shortcutsAvailable?"search_local_short":"search_home_required"));
+            } });
         });
     }
     private void launch(Entry e) {
