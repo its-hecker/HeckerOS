@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gaming_hud_cpu">CPU %</string>
+    <string name="gaming_hud_gpu">GPU %</string>
+    <string name="gaming_hud_ram">内存 %</string>
+    <string name="gaming_hud_description">帧率 %1$s，CPU %2$s%%，GPU %3$s%%，内存 %4$s%%。电池温度 %5$s。</string>
+</resources>

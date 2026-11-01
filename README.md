@@ -46,6 +46,12 @@ wake and native lockscreen state handling.
 
 ## Included source
 
+- Russian translations for 1,120 custom UI resources across Suite, Hecker Launcher,
+  native Settings and SystemUI. Android's selected language controls the locale;
+  see [coverage and validation](docs/RUSSIAN_TRANSLATIONS_2026-11-01.md).
+- Manual [Sensor recovery](docs/GAME_PILL_SENSOR_RECOVERY_2026-11-01.md), available
+  from Suite and a QS tile, through a fixed system/init action without user root
+  access. This requires a new ROM build; physical recovery remains to be tested.
 - The reference grouped Settings UI: retained caracal hero, maintainer row, coloured icons,
   floating native Search, and grouped native
   categories, a two-column Hecker Suite dashboard, and Display & Personalization.

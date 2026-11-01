@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gaming_hud_cpu">CPU %</string>
+    <string name="gaming_hud_gpu">GPU %</string>
+    <string name="gaming_hud_ram">RAM %</string>
+    <string name="gaming_hud_description">FPS %1$s, CPU %2$s%%, GPU %3$s%%, RAM %4$s%%. Battery temperature %5$s.</string>
+</resources>

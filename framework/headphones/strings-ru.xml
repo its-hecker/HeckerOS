@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hecker_headphones">Наушники</string>
+    <string name="hecker_headphones_wired">Проводные наушники</string>
+    <string name="hecker_headphones_connected">Подключено</string>
+    <string name="hecker_headphones_settings">Сведения об устройстве</string>
+    <string name="hecker_headphones_battery">Батарея %1$d%%</string>
+    <string name="hecker_headphones_battery_unknown">Сведения о батарее недоступны</string>
+    <string name="hecker_headphones_left">Левый</string>
+    <string name="hecker_headphones_right">Правый</string>
+    <string name="hecker_headphones_case">Футляр</string>
+    <string name="hecker_headphones_sound_settings">Настройки звука</string>
+</resources>

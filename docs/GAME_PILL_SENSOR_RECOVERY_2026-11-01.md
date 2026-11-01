@@ -9,13 +9,24 @@ more inset. The existing large-font two-row layout, value auto-sizing, position
 controls and real telemetry are retained. No screenshot-after or on-phone
 rendering claim is made.
 
-Hecker Suite now has **Sensor recovery**, also available as a Quick Settings
-tile. It shows the actual default proximity reading and counts observed
-near/far transitions while its page is visible. Its manual action requests
-root and restarts only a supported, currently running Sensors HAL service.
-The tile opens this page after unlock; it does not silently reset on click,
-listening, boot, a constant reading or a timer. Recovery is not a calibration
-and does not bypass the proximity check used by Face Unlock.
+Hecker Suite has **Sensor recovery**, also available as a Quick Settings tile.
+The action is now root-free: a signed-UID-checked Binder service in system_server
+requests one of three fixed init restart actions. The app never launches su or
+executes a shell script. The service authenticates package UID, platform signature
+and foreground user on every app call; recovery additionally requires an awake,
+unlocked phone with no active call. Both the acceptance check and worker check
+run before the request. There is a global cooldown and one bounded operation.
+
+Only init reads the protected raw debug-PID properties. It publishes a private
+request-token receipt and before/after PID values. system_server reads that
+receipt, checks a changed PID and a running HAL, then reports service restart.
+The upstream init_svc_debug_prop read restriction is retained. The app has no
+property-write capability and receives a status rather than raw PID access.
+
+The page shows the default proximity reading and observed near/far transitions
+while visible. Sensor recovery is not calibration or a Face Unlock proximity
+bypass. Adding/listening to the tile, boot, a constant reading and timers never
+request a recovery. The tile opens the page after unlock for a manual action.
 
 ## Evidence and limits
 
@@ -50,45 +61,47 @@ Primary references:
 - https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/sensors/2.0/multihal/android.hardware.sensors@2.0-service-multihal.rc
 - Pinned HeckerOS device config: configs/sensors/sensors.hals.conf at device commit 4829092f7b7b988fc5fb2efe57c481f266364c71.
 
-## Try on the existing rooted PixelOS build
+## Availability and use
 
-Download app/assets/proximity-recover.sh from this source branch. The helper
-supports coral/flame and an exact allowlist of Sensors HAL 2.x init names. It
-refuses an unknown/stopped service and missing/ambiguous PIDs. It performs no
-persist, calibration, firmware, sensor-list or SELinux-mode changes.
+Root-free recovery needs a newly built/flashed HeckerOS containing the framework
+service, its AIDL, init actions and SELinux policy. Updating the Suite APK alone
+cannot add these platform components. An older PixelOS or stock image does not
+provide this service; no root fallback is attempted.
 
-Windows CMD:
+Open Hecker Suite → Sensor recovery, or add the Sensor recovery tile. End any
+call, unlock/wake the phone, leave the top uncovered and choose Restart sensor
+service. After a verified restart, uncover/cover/uncover and confirm live near/far
+changes, then retry Face Unlock. No root-manager grant is needed, including with
+a non-KernelSU boot image of the matching ROM build.
+
+An authorized ADB shell can use the same root-free broker:
 
 ```bat
-curl.exe -fL "https://raw.githubusercontent.com/its-hecker/HeckerOS/fix/device-ui-feedback-20261101/app/assets/proximity-recover.sh" -o proximity-recover.sh
-adb push proximity-recover.sh /data/local/tmp/proximity-recover.sh
-adb shell sh /data/local/tmp/proximity-recover.sh --status
-adb shell "su -c 'sh /data/local/tmp/proximity-recover.sh --recover'"
+adb shell cmd hecker_sensor_recovery recover
+adb shell cmd hecker_sensor_recovery status
 ```
 
-End any call, unlock the phone and keep the top uncovered before recovery.
-Root Manager must allow the Shell for the ADB command, or Hecker Suite for
-the built-in page. The helper checks for a running service with a changed PID
-within 20 seconds. RESULT=service_restarted confirms only that restart. Then
-physically uncover, cover and uncover; verify the live near/far changes and
-retry Face Unlock. A denied request, missing PID, timeout or unchanged PID is
-an explicit failure, not a success toast.
+The included app/assets/proximity-recover.sh is now only a root-free command
+client with bounded polling. Run it with sh after pushing it to the device;
+there is no su command. It requires the updated ROM service. Shell requests are
+restricted to the native shell/root UIDs and share the same foreground/unlock/
+call/cooldown checks. Recovery is asynchronous; RESULT=running means accepted,
+not yet verified. RESULT=service_restarted verifies the service restart only.
 
-The app runs the packaged script through a fixed su command on a worker, with
-a 45-second process timeout and a 30-second request cooldown. It blocks its
-action while locked or while AudioManager reports a call/communication mode.
-The shell helper has an atomic cross-caller lock. It is a manual root tool;
-it is not a service exposed to arbitrary apps. The Activity is private, its
-Settings router is signature-protected, and the tile requires the platform
-Quick Settings binding permission. Sensor listeners and UI polling stop when
-the page pauses.
+The private Activity uses an authenticated Binder client on a worker and polls
+for at most 25 seconds. Its sensor listener and UI polling stop while paused.
+The broker verifies results for up to 20 seconds. It rejects duplicate, stale,
+missing/same-PID and unsupported-service cases without claiming recovery.
+Calibration, firmware and persistent sensor settings are not changed.
 
 ## Validation
 
-- Complete Suite Java/resources/AIDL and independent native Settings dashboard compilation passed against locked SDK inputs.
-- 158 Python host tests passed, including 12 production shell-helper tests for successful restart/PID verification, non-root status, root denial, unsupported devices/services, concurrency, property failure, PID fallback, missing PID, timeout and argument handling. Mock commands send no hardware requests.
-- Resource/permission checks, Chinese translations/format arguments, shell syntax and git diff --check passed.
-- Full ROM build, physical UI alignment and sensor recovery on the affected device remain pending.
+- Production broker state machine and access checks passed 452 host assertions: signed UID/foreground ownership, shell restriction, locked/call readiness, one request, cooldown, request receipts, stale/same/missing PID, bounded timeout and failures.
+- The native broker and real generated AIDL compile against locked SDK inputs; hidden shell/Binder hooks are checked against two hash-locked platform source files.
+- Complete Suite SDK Java/resources/AIDL and independent Settings dashboard compilation passed.
+- 158 Python host tests passed, including the root-free shell client and Russian coverage tests. Mock tests send no hardware requests.
+- 127 locked native input files apply, upgrade, repeat and revert; the two registered Java Binder services pass the actual native fuzzer-bindings checker. Root-free startup is checked before system-services-ready.
+- SELinux/property/RC source constraints are checked, including no system_server read grant for raw debug-PID properties. Full platform SELinux/Soong compilation and physical phone testing remain pending.
 
 Only this sanitized finding summary is published. The supplied bugreports and
 videos remain outside the public source repository.

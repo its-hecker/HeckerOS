@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hs_home_depth">Обои с эффектом глубины</string>
+    <string name="hs_home_depth_wake">Анимация глубины при разблокировке</string>
+    <string name="hs_home_depth_summary">Подготовленные слои обоев располагаются за часами. Приложения и элементы управления остаются сверху. Изменить обои можно в Hecker Suite → Экран блокировки.</string>
+    <string name="hs_clock_weather">Показывать погоду</string>
+    <string name="hs_clock_weather_summary">Текущая погода Google отображается под часами любого стиля, если приложение Google предоставляет данные.</string>
+    <string name="hs_flow_preview_apply">Применить оформление Living Flow</string>
+    <string name="hs_glass_icon_style">Встроенный стиль стеклянных значков</string>
+    <string name="hs_glass_icon_smoked">Дымчатое стекло · текущий</string>
+    <string name="hs_glass_icon_flow">Living Flow · контурные подложки</string>
+    <string name="hs_dock_search_style">Оформление строки поиска</string>
+    <string name="hs_dock_search_full">Полная строка поиска</string>
+    <string name="hs_dock_search_flow">Living Flow · компактная строка поиска</string>
+    <string name="hs_flow_search_hint">Поиск приложений</string>
+    <string name="derived_app_name">Hecker Launcher</string>
+    <string name="hecker_double_tap_title">Двойное касание для выключения экрана</string>
+    <string name="hecker_double_tap_summary">Дважды коснитесь пустого места на главном экране, чтобы выключить дисплей</string>
+    <string name="hecker_swipe_title">Быстрые настройки свайпом вниз</string>
+    <string name="hecker_swipe_summary">Проведите вниз по пустому месту на главном экране, чтобы открыть уведомления и быстрые настройки</string>
+    <string name="hecker_glass_title">Стеклянное оформление</string>
+    <string name="hecker_glass_style">Стиль стекла</string>
+    <string name="hecker_glass_dock">Док-панель</string>
+    <string name="hecker_glass_folders">Папки</string>
+    <string name="hecker_glass_search">Строка поиска</string>
+    <string name="hecker_glass_widgets">Подложки виджетов</string>
+    <string name="hecker_glass_corner">Радиус скругления</string>
+    <string-array name="hecker_glass_styles">
+        <item>Выкл.</item>
+        <item>Матовое стекло</item>
+        <item>Жидкое стекло</item>
+    </string-array>
+    <string name="hecker_glass_corner_tl">Верхний левый угол</string>
+    <string name="hecker_glass_corner_tr">Верхний правый угол</string>
+    <string name="hecker_glass_corner_br">Нижний правый угол</string>
+    <string name="hecker_glass_corner_bl">Нижний левый угол</string>
+    <string name="hs_launcher_studio">Студия Hecker Launcher</string>
+    <string name="hs_studio_summary">Настройте главный экран под себя.</string>
+    <string name="hs_clock">Студия часов Hecker</string>
+    <string name="hs_clock_summary">Десять стилей часов, актуальные показатели и немного индивидуальности.</string>
+    <string name="hs_home">Главный экран</string>
+    <string name="hs_home_summary">Сетки, отступы, док-панель и жесты.</string>
+    <string name="hs_appearance">Внешний вид</string>
+    <string name="hs_appearance_summary">Стекло, наборы значков и подписи на ваш вкус.</string>
+    <string name="hs_privacy">Конфиденциальность</string>
+    <string name="hs_privacy_summary">Блокировка приложений и отдельные настройки скрытия.</string>
+    <string name="hs_universal_search">Универсальный поиск</string>
+    <string name="hs_native_settings">Другие настройки рабочего стола</string>
+    <string name="hs_layout_migration">Изменение сетки использует штатный перенос макета Launcher3. Элементы переставляются под новую сетку; данные приложений сохраняются.</string>
+    <string name="hs_home_columns">Столбцы главного экрана</string>
+    <string name="hs_home_rows">Строки главного экрана</string>
+    <string name="hs_drawer_columns">Столбцы меню приложений</string>
+    <string name="hs_drawer_rows">Строки меню приложений</string>
+    <string name="hs_home_spacing">Дополнительный отступ на главном экране (dp)</string>
+    <string name="hs_drawer_spacing">Дополнительный отступ в меню приложений (dp)</string>
+    <string name="hs_dock_count">Значки в док-панели</string>
+    <string name="hs_layout_lock">Закрепить макет главного экрана</string>
+    <string name="hs_layout_locked">Макет закреплён. Разблокируйте его в настройках главного экрана, чтобы перемещать элементы.</string>
+    <string name="hs_hecker_double_tap_sleep">Двойное касание для выключения экрана</string>
+    <string name="hs_hecker_swipe_down">Быстрые настройки свайпом вниз</string>
+    <string name="hs_glass">Студия стекла</string>
+    <string name="hs_live_preview">Предпросмотр</string>
+    <string name="hs_glass_presets">Наборы настроек стекла</string>
+    <string name="hs_glass_mode">Стиль стекла</string>
+    <string name="hs_clear">Прозрачное</string>
+    <string name="hs_frosted">Матовое</string>
+    <string name="hs_smoked">Дымчатое</string>
+    <string name="hs_violet">Фиолетовое</string>
+    <string name="hs_off">Выкл.</string>
+    <string name="hs_liquid">Жидкое стекло</string>
+    <string name="hs_opacity">Непрозрачность (%)</string>
+    <string name="hs_frost">Степень матирования</string>
+    <string name="hs_border">Толщина рамки (dp)</string>
+    <string name="hs_tint">Оттенок стекла</string>
+    <string name="hs_ice">Лёд</string>
+    <string name="hs_mint">Мята</string>
+    <string name="hs_warm">Тёплый</string>
+    <string name="hs_red">Оттенок · Красный</string>
+    <string name="hs_green">Оттенок · Зелёный</string>
+    <string name="hs_blue">Оттенок · Синий</string>
+    <string name="hs_hecker_glass_dock">Стеклянная док-панель</string>
+    <string name="hs_hecker_glass_folders">Стеклянные папки</string>
+    <string name="hs_hecker_glass_search">Стеклянная строка поиска</string>
+    <string name="hs_hecker_glass_widgets">Стеклянные подложки виджетов</string>
+    <string name="hs_corner_tl">Верхний левый угол (dp)</string>
+    <string name="hs_corner_tr">Верхний правый угол (dp)</string>
+    <string name="hs_corner_br">Нижний правый угол (dp)</string>
+    <string name="hs_corner_bl">Нижний левый угол (dp)</string>
+    <string name="hs_clock_glass">C · Стекло</string>
+    <string name="hs_clock_minimal">D · Минимализм</string>
+    <string name="hs_clock_mono">F · Моно</string>
+    <string name="hs_clock_signature">G · Фирменный</string>
+    <string name="hs_clock_compact">H · Компактный</string>
+    <string name="hs_clock_thermal">I · Температура · с анимацией</string>
+    <string name="hs_clock_digital">J · Цифровой</string>
+    <string name="hs_clock_analog">K · Аналоговый</string>
+    <string name="hs_clock_stacked">L · Вертикальный · с анимацией</string>
+    <string name="hs_clock_caracal">M · Каракал · с анимацией</string>
+    <string name="hs_clock_animation">Анимация часов и каракала</string>
+    <string name="hs_clock_messages">Смена сообщений</string>
+    <string name="hs_clock_home">Встроенные часы главного экрана</string>
+    <string name="hs_clock_home_summary">Постоянные часы над первой страницей главного экрана. Коснитесь для смены сообщения, удерживайте для открытия студии часов. Размещать виджет не нужно. Если места недостаточно, уменьшите число строк сетки главного экрана.</string>
+    <string name="hs_clock_applied">Часы главного экрана обновлены</string>
+    <string name="hs_clock_palette">Цвета часов</string>
+    <string name="hs_aurora">Сияние · мятный и сиреневый</string>
+    <string name="hs_sunrise">Рассвет · персиковый и золотой</string>
+    <string name="hs_lagoon">Лагуна · бирюзовый и синий</string>
+    <string name="hs_orchid">Орхидея · розовый и фиолетовый</string>
+    <string name="hs_classic">Классика · нежный цвет слоновой кости</string>
+    <string name="hs_clock_metrics">Температура и заряд батареи, а также использование ОЗУ показываются по данным устройства. Загрузка ЦП отображается только при доступности системных счётчиков. Анимация часов останавливается, когда они скрыты, и учитывает настройки анимации Android.</string>
+    <string name="hs_apply_clock">Применить часы</string>
+    <string name="hs_add_clock">Добавить часы на главный экран</string>
+    <string name="hs_widget_picker_hint">Откройте виджеты с главного экрана и выберите студию часов Hecker.</string>
+    <string name="hs_battery">Батарея</string>
+    <string name="hs_battery_temp">Температура батареи</string>
+    <string name="hs_cpu_load">Загрузка ЦП</string>
+    <string name="hs_ram">ОЗУ</string>
+    <string name="hs_alarm">Будильник</string>
+    <string name="hs_icons">Студия значков</string>
+    <string name="hs_icon_pack">Набор значков</string>
+    <string name="hs_icon_shape">Форма значков</string>
+    <string name="hs_system">Системная</string>
+    <string name="hs_circle">Круг</string>
+    <string name="hs_squircle">Суперэллипс</string>
+    <string name="hs_rounded_square">Скруглённый квадрат</string>
+    <string name="hs_icon_size">Размер значков (%)</string>
+    <string name="hs_home_labels">Подписи на главном экране</string>
+    <string name="hs_drawer_labels">Подписи в меню приложений</string>
+    <string name="hs_home_label_size">Размер подписей на главном экране (sp)</string>
+    <string name="hs_drawer_label_size">Размер подписей в меню приложений (sp)</string>
+    <string name="hs_badges">Счётчики уведомлений</string>
+    <string name="hs_badges_summary">Счётчики используют активные уведомления. Разрешите Hecker Launcher доступ к уведомлениям. При удалении уведомлений счётчики сбрасываются.</string>
+    <string name="hs_notification_access">Доступ к уведомлениям</string>
+    <string name="hs_individual_icons">Отдельные значки и подписи приложений</string>
+    <string name="hs_app_customization">Настроить приложение</string>
+    <string name="hs_renamed_label">Своя подпись (пустое поле — название приложения)</string>
+    <string name="hs_save_label">Сохранить подпись</string>
+    <string name="hs_choose_icon">Выбрать значок из набора</string>
+    <string name="hs_reset_app">Сбросить значок и подпись</string>
+    <string name="hs_search_icons">Поиск по названиям значков</string>
+    <string name="hs_pack_empty">В этом наборе нет совместимых значков appfilter.</string>
+    <string name="hs_app_lock">Блокировка приложений HeckerOS</string>
+    <string name="hs_app_lock_profile">Управляйте блокировкой приложений в соответствующем профиле Android.</string>
+    <string name="hs_app_lock_unavailable">Блокировка приложений HeckerOS недоступна в этой сборке.</string>
+    <string name="hs_hide_app">Скрыть приложение из меню и поиска</string>
+    <string name="hs_hide_summary">Скрытие убирает приложение из меню и поиска этого рабочего стола. Ярлыки на главном экране сохраняются. Блокировка приложений независимо защищает приложение средствами аутентификации Android.</string>
+    <string name="hs_hidden_apps">Скрытые приложения</string>
+    <string name="hs_search">Универсальный поиск</string>
+    <string name="hs_search_shortcuts">Включать ярлыки действий приложений</string>
+    <string name="hs_try_search">Открыть поиск</string>
+    <string name="hs_search_hint">Поиск приложений и ярлыков</string>
+    <string name="hs_search_local">Поиск выполняется на устройстве. Учитываются только доступные приложения и ярлыки в профилях, к которым есть доступ.</string>
+    <string name="hs_search_home_required">Выберите Hecker Launcher основным рабочим столом для поиска ярлыков действий приложений.</string>
+    <string name="hs_loading">Загрузка приложений и ярлыков…</string>
+    <string name="hs_app">Приложение</string>
+    <string name="hs_shortcut">Ярлык действия приложения</string>
+    <string name="hs_launch_unavailable">Это приложение или ярлык больше недоступны.</string>
+    <string-array name="hs_clock_messages">
+        <item>Немного ясности.</item>
+        <item>Всему своё время.</item>
+        <item>Не теряйте любопытства.</item>
+        <item>Пусть этот день будет вашим.</item>
+        <item>Не торопитесь.</item>
+        <item>Сохраняйте спокойствие.</item>
+        <item>Свежий взгляд.</item>
+        <item>Наслаждайтесь моментом.</item>
+        <item>Найдите свой ритм.</item>
+        <item>Сохраняйте любопытство. Оставайтесь с Hecker.</item>
+        <item>Задавайте свой темп.</item>
+        <item>Маленькие шаги. Новые возможности.</item>
+        <item>Ваша следующая идея начинается здесь.</item>
+        <item>Меньше спешки. Больше открытий.</item>
+        <item>Оставьте немного места для волшебства.</item>
+        <item>Храните искру вдохновения.</item>
+        <item>Освободите место для хорошего.</item>
+        <item>Этот день ещё удивит.</item>
+        <item>Вдохните. Найдите свой поток.</item>
+        <item>Мелочи тоже важны.</item>
+    </string-array>
+    <string name="hs_dock_search">Показывать поиск на главном экране</string>
+    <string name="hs_dock_search_brand">Поиск Hecker</string>
+    <string name="hs_add_new_apps">Добавлять новые приложения на главный экран</string>
+    <string name="hs_glass_icons">Стеклянные значки</string>
+    <string name="hs_glass_icons_summary">Мягкое размытие обоев и светлые монохромные символы приложений. Выбранные наборы значков и отдельные значки имеют приоритет.</string>
+    <string name="hs_google_search">Строка поиска Google</string>
+    <string name="hs_google_search_summary">Использовать поиск Google вместо поиска Hecker. Голосовой поиск и Объектив доступны при наличии соответствующих приложений.</string>
+    <string name="hs_google_voice">Голосовой поиск Google</string>
+    <string name="hs_google_lens">Google Объектив</string>
+    <string name="hs_google_unavailable">Для поиска Google установите или включите приложение Google либо веб-браузер.</string>
+    <string name="hs_drawer_custom_icons">Свои значки в меню приложений</string>
+    <string name="hs_drawer_custom_icons_summary">Выключите, чтобы использовать исходные значки приложений в меню и поиске, сохранив настроенные значки на главном экране.</string>
+    <string name="hs_search_back">Назад</string>
+    <string name="hs_search_settings">Настройки поиска</string>
+    <string name="hs_search_clear">Очистить поиск</string>
+    <string name="hs_search_empty">Подходящих приложений или ярлыков нет</string>
+    <string name="hs_search_results">Результаты</string>
+    <string name="hs_search_local_short">Приложения и ярлыки · Поиск на устройстве</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hecker_face_island_label">Распознавание лица</string>
+    <string name="hecker_face_island_scanning">Распознавание вашего лица</string>
+    <string name="hecker_face_island_unlocked">Разблокировано</string>
+</resources>

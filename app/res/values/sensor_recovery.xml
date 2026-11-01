@@ -3,7 +3,7 @@
     <string name="sensor_recovery_title">Sensor recovery</string>
     <string name="sensor_recovery_summary">Recover a stuck proximity connection and test near/far readings</string>
     <string name="sensor_recovery_tile_summary">Proximity diagnostics</string>
-    <string name="sensor_recovery_intro">If proximity is stuck, this tool can reconnect the sensor service without requesting a phone reboot. Root access is required. A successful service restart does not prove the sensor itself recovered.</string>
+    <string name="sensor_recovery_intro">If proximity is stuck, this tool reconnects the sensor service through HeckerOS. No root access is needed. A successful service restart does not prove the sensor itself recovered.</string>
     <string name="sensor_recovery_waiting">Waiting for a proximity reading…</string>
     <string name="sensor_recovery_reading">Proximity: %1$.2f cm · %2$s</string>
     <string name="sensor_recovery_near">Near</string>
@@ -11,13 +11,13 @@
     <string name="sensor_recovery_changes">Near/far changes observed: %1$d</string>
     <string name="sensor_recovery_test">Uncover the top of the phone, cover it, then uncover it again. The reading should switch between near and far. A steady reading alone does not mean the sensor is faulty.</string>
     <string name="sensor_recovery_action">Restart sensor service</string>
-    <string name="sensor_recovery_confirmation">Motion and light sensors will pause briefly. End any call first, and keep the top of the phone uncovered. Root Manager may ask you to grant access to Hecker Suite.</string>
+    <string name="sensor_recovery_confirmation">Motion and light sensors will pause briefly. End any call first, and keep the top of the phone uncovered.</string>
     <string name="sensor_recovery_idle">Manual recovery only. No background or automatic resets.</string>
-    <string name="sensor_recovery_running">Requesting root and restarting the sensor service…</string>
+    <string name="sensor_recovery_running">Restarting the sensor service…</string>
     <string name="sensor_recovery_restarted">Service restart verified. Test near/far changes above, then retry Face Unlock. If readings remain stuck, recovery of the sensor itself is not confirmed.</string>
-    <string name="sensor_recovery_root">Root access is required. Grant access to Hecker Suite in your root manager. A denied or unsupported restart cannot recover the sensor.</string>
+    <string name="sensor_recovery_unavailable">This ROM build does not provide the sensor-recovery service. Install the updated HeckerOS build; root access is not required.</string>
     <string name="sensor_recovery_unsupported">This recovery is available on Pixel 4 and Pixel 4 XL with a supported running sensor service.</string>
-    <string name="sensor_recovery_unverified">The service restart could not be verified. No sensor recovery is claimed. Check root access or use the shell helper to inspect service status.</string>
+    <string name="sensor_recovery_unverified">The service restart could not be verified. No sensor recovery is claimed. Retry the physical near/far test or inspect the built-in service status.</string>
     <string name="sensor_recovery_busy">Recovery is already running or was requested recently. Wait 30 seconds before trying again.</string>
     <string name="sensor_recovery_blocked">Unlock the phone and end any call before restarting the sensor service.</string>
 </resources>

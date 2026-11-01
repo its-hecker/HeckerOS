@@ -1,0 +1,10 @@
+{
+  "Binder.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/c72dce10290956bd3c4bfd23e787800d1340c46e/core/java/android/os/Binder.java",
+    "sha256": "502dcd0067b3603e321086917e8e2274a8fc7beae1e9a75b335c2a035707ea6e"
+  },
+  "ShellCommand.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/c72dce10290956bd3c4bfd23e787800d1340c46e/core/java/android/os/ShellCommand.java",
+    "sha256": "d16fac7fdeca6ce171ce3188bfe9212e6d0cf3cea3f08f233f1d421e501e13a9"
+  }
+}

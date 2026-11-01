@@ -13,23 +13,17 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/** Manual root recovery with a visible physical near/far test, never an automatic watchdog. */
+/** Manual recovery through the authenticated ROM broker, with a physical near/far test. */
 public final class SensorRecoveryActivity extends Activity implements SensorEventListener {
     private static final AtomicBoolean BUSY=new AtomicBoolean();
     private static final java.util.concurrent.ExecutorService WORKER=Executors.newSingleThreadExecutor();
     private static volatile String result="";
-    private static volatile long lastStart=-30000;
     private final Handler main=new Handler(Looper.getMainLooper());
     private SensorManager manager;
     private Sensor sensor;
@@ -89,39 +83,29 @@ public final class SensorRecoveryActivity extends Activity implements SensorEven
     }
     private void startRecovery(){
         if(!allowed()){status.setText(R.string.sensor_recovery_blocked);return;}
-        long now=SystemClock.elapsedRealtime();
-        if(now-lastStart<30000||!BUSY.compareAndSet(false,true)){status.setText(R.string.sensor_recovery_busy);return;}
-        lastStart=now;result="";
-        final android.content.Context app=getApplicationContext();
-        WORKER.execute(()->{
-            Process process=null;String outcome="root_required";
-            try{
-                // No caller-supplied shell text or writable script path enters the root process.
-                process=new ProcessBuilder("su","-c","exec /system/bin/sh -s -- --recover").redirectErrorStream(true).start();
-                try(InputStream script=app.getAssets().open("proximity-recover.sh");OutputStream input=process.getOutputStream()){
-                    script.transferTo(input);
-                }
-                if(process.waitFor(45,TimeUnit.SECONDS)){
-                    String output=new String(process.getInputStream().readNBytes(8192),StandardCharsets.UTF_8);
-                    for(String line:output.split("\\R"))if(line.startsWith("RESULT="))outcome=line.substring(7).trim();
-                    if(process.exitValue()!=0&&"service_restarted".equals(outcome))outcome="restart_not_verified";
-                }else outcome="restart_not_verified";
-            }catch(Exception unavailable){outcome="root_required";}
-            finally{
-                if(process!=null){if(process.isAlive())process.destroyForcibly();try{process.getInputStream().close();}catch(Exception ignored){}}
-                result=outcome;BUSY.set(false);
+        if(!BUSY.compareAndSet(false,true)){status.setText(R.string.sensor_recovery_busy);return;}
+        result="running";
+        WORKER.execute(()->monitor(SensorRecoveryClient.call(true)));
+    }
+    private static void monitor(Bundle state){
+        try{
+            for(int n=0;state.getBoolean("busy",false)&&n<50;n++){
+                result="running";Thread.sleep(500);state=SensorRecoveryClient.call(false);
             }
-        });
+            result=state.getBoolean("busy",false)?"restart_not_verified":state.getString("status","unavailable");
+        }catch(InterruptedException interrupted){Thread.currentThread().interrupt();result="restart_not_verified";}
+        finally{BUSY.set(false);}
     }
     private int message(String value){
         switch(value){
             case "running":return R.string.sensor_recovery_running;
-            case "busy":return R.string.sensor_recovery_busy;
+            case "busy":case "cooldown":return R.string.sensor_recovery_busy;
             case "service_restarted":return R.string.sensor_recovery_restarted;
             case "unsupported_device":case "unsupported_service":return R.string.sensor_recovery_unsupported;
-            case "root_required":case "restart_denied":return R.string.sensor_recovery_root;
+            case "unavailable":return R.string.sensor_recovery_unavailable;
+            case "blocked":case "wrong_user":return R.string.sensor_recovery_blocked;
             case "pid_unavailable":case "restart_not_verified":return R.string.sensor_recovery_unverified;
-            case "":return supported()&&sensor!=null?R.string.sensor_recovery_idle:R.string.sensor_recovery_unsupported;
+            case "idle":case "":return supported()&&sensor!=null?R.string.sensor_recovery_idle:R.string.sensor_recovery_unsupported;
             default:return R.string.sensor_recovery_unverified;
         }
     }
@@ -130,7 +114,7 @@ public final class SensorRecoveryActivity extends Activity implements SensorEven
         manager.unregisterListener(this);
         if(!manager.registerListener(this,sensor,SensorManager.SENSOR_DELAY_NORMAL))reading.setText(R.string.sensor_recovery_waiting);
     }
-    @Override protected void onResume(){super.onResume();resumed=true;subscribe();main.post(refresh);}
+    @Override protected void onResume(){super.onResume();resumed=true;subscribe();main.post(refresh);if(BUSY.compareAndSet(false,true))WORKER.execute(()->monitor(SensorRecoveryClient.call(false)));}
     @Override protected void onPause(){resumed=false;main.removeCallbacks(refresh);if(manager!=null)manager.unregisterListener(this);super.onPause();}
     @Override public void onSensorChanged(SensorEvent event){
         if(!resumed||event.values.length==0||!Float.isFinite(event.values[0]))return;

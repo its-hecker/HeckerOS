@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="netlab_controller_title">Контроллер Hecker NetLab</string>
+    <string name="netlab_active_rules">NetLab: ограничений точки доступа — %1$d</string>
+    <string name="netlab_restore_notification">Коснитесь для снятия всех ограничений точки доступа, созданных NetLab.</string>
+    <string name="netlab_restore_all">Восстановить всё</string>
+    <string name="netlab_lan_title">NetLab · управление IPv4 с root-доступом</string>
+    <string name="netlab_lan_active">Временный сеанс ARP. Коснитесь для остановки и восстановления.</string>
+    <string name="netlab_lan_stop">Остановить и восстановить</string>
+</resources>

@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: Apache-2.0
+# Only the authenticated system broker can request these fixed init actions.
+
+on property:sys.hecker.sensor_recovery.request=multihal20
+    setprop sys.hecker.sensor_recovery.ack_token 0
+    setprop sys.hecker.sensor_recovery.before 0
+    setprop sys.hecker.sensor_recovery.after 0
+    setprop sys.hecker.sensor_recovery.before ${init.svc_debug_pid.vendor.sensors-hal-2-0-multihal}
+    setprop sys.hecker.sensor_recovery.pending multihal20
+    setprop sys.hecker.sensor_recovery.ack_token ${sys.hecker.sensor_recovery.token}
+    restart vendor.sensors-hal-2-0-multihal
+
+on property:init.svc.vendor.sensors-hal-2-0-multihal=running && property:sys.hecker.sensor_recovery.pending=multihal20
+    setprop sys.hecker.sensor_recovery.after ${init.svc_debug_pid.vendor.sensors-hal-2-0-multihal}
+
+on property:sys.hecker.sensor_recovery.request=multihal21
+    setprop sys.hecker.sensor_recovery.ack_token 0
+    setprop sys.hecker.sensor_recovery.before 0
+    setprop sys.hecker.sensor_recovery.after 0
+    setprop sys.hecker.sensor_recovery.before ${init.svc_debug_pid.vendor.sensors-hal-2-1-multihal}
+    setprop sys.hecker.sensor_recovery.pending multihal21
+    setprop sys.hecker.sensor_recovery.ack_token ${sys.hecker.sensor_recovery.token}
+    restart vendor.sensors-hal-2-1-multihal
+
+on property:init.svc.vendor.sensors-hal-2-1-multihal=running && property:sys.hecker.sensor_recovery.pending=multihal21
+    setprop sys.hecker.sensor_recovery.after ${init.svc_debug_pid.vendor.sensors-hal-2-1-multihal}
+
+on property:sys.hecker.sensor_recovery.request=hal20
+    setprop sys.hecker.sensor_recovery.ack_token 0
+    setprop sys.hecker.sensor_recovery.before 0
+    setprop sys.hecker.sensor_recovery.after 0
+    setprop sys.hecker.sensor_recovery.before ${init.svc_debug_pid.vendor.sensors-hal-2-0}
+    setprop sys.hecker.sensor_recovery.pending hal20
+    setprop sys.hecker.sensor_recovery.ack_token ${sys.hecker.sensor_recovery.token}
+    restart vendor.sensors-hal-2-0
+
+on property:init.svc.vendor.sensors-hal-2-0=running && property:sys.hecker.sensor_recovery.pending=hal20
+    setprop sys.hecker.sensor_recovery.after ${init.svc_debug_pid.vendor.sensors-hal-2-0}
+
+on property:sys.hecker.sensor_recovery.request=clear
+    setprop sys.hecker.sensor_recovery.pending idle
+    setprop sys.hecker.sensor_recovery.request idle

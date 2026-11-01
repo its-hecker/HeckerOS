@@ -69,7 +69,7 @@ final class GamingBoosterUi {
         static int height(Context c){return dp(c,Math.max(40,(stacked(c)?2:1)*28*c.getResources().getConfiguration().fontScale+8));}
         MetricPill(Context c){
             super(c);setOrientation(VERTICAL);setGravity(Gravity.CENTER);setPadding(dp(c,10),dp(c,4),dp(c,10),dp(c,4));setBackground(glass(c,0xd9000914,24));
-            String[] labels={"FPS","CPU %","GPU %","RAM %",c.getString(R.string.gaming_hud_battery_temperature)};
+            String[] labels={"FPS",c.getString(R.string.gaming_hud_cpu),c.getString(R.string.gaming_hud_gpu),c.getString(R.string.gaming_hud_ram),c.getString(R.string.gaming_hud_battery_temperature)};
             LinearLayout row=null;
             for(int i=0;i<values.length;i++){
                 if(i==0||stacked(c)&&i==3){row=GamingUi.row(c);row.setGravity(Gravity.CENTER);row.setBaselineAligned(false);addView(row,new LinearLayout.LayoutParams(-1,0,1));}
@@ -89,8 +89,8 @@ final class GamingBoosterUi {
             if(thermal.isEmpty())thermal="—";
             String[] v={fps,number(cpu),number(gpu),number(ram),thermal};
             for(int i=0;i<values.length;i++)values[i].setText(v[i]);
-            setContentDescription("FPS "+fps+", CPU "+number(cpu)+"%, GPU "+number(gpu)+"%, RAM "+number(ram)+"%. "
-                    +getContext().getString(R.string.gaming_battery_temp)+" "+temperature+". "+getContext().getString(R.string.gaming_open_dashboard));
+            setContentDescription(getContext().getString(R.string.gaming_hud_description,fps,number(cpu),number(gpu),number(ram),temperature)
+                    +" "+getContext().getString(R.string.gaming_open_dashboard));
         }
         private String number(int n){return n<0?"—":Integer.toString(n);}
     }

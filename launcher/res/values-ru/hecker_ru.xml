@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Настройки Hecker</string>
+    <string name="about_category_summary">Hecker Launcher на основе Infinity-X</string>
+    <string name="about_version_title">Hecker Launcher</string>
+    <string name="about_version_developer">Hecker · на основе Infinity-X Android 17</string>
+    <string name="hecker_header_eyebrow">HECKER LAUNCHER</string>
+    <string name="hecker_header_title">Главный экран в вашем стиле.</string>
+    <string name="hecker_header_summary">Основа Infinity-X. Характер Hecker.</string>
+    <string name="hecker_suite_title">Hecker Suite</string>
+    <string name="hecker_suite_summary">Больше настроек, сообщество и сведения о проекте</string>
+    <string name="hecker_launcher_origin_title">Infinity-X · открытый код и авторы</string>
+    <string name="hecker_launcher_origin_summary">Основа рабочего стола и исходный код</string>
+</resources>

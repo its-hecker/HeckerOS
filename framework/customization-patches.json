@@ -145,7 +145,7 @@
     },
     {
       "old": "        t.traceBegin(\"StartBootPhaseSystemServicesReady\");",
-      "new": "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartHeckerGameService\");\n        mSystemServiceManager.startService(com.android.server.hecker.HeckerGameService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");",
+      "new": "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartHeckerGameService\");\n        mSystemServiceManager.startService(com.android.server.hecker.HeckerGameService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartHeckerSensorRecoveryService\");\n        mSystemServiceManager.startService(com.android.server.hecker.HeckerSensorRecoveryService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");",
       "previous": [
         "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartHeckerGameService\");\n        mSystemServiceManager.startService(com.android.server.hecker.HeckerGameService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartHeckerLauncherService\");\n        mSystemServiceManager.startService(com.android.server.hecker.HeckerLauncherService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");",
         "        t.traceBegin(\"StartHeckerThemeEngine\");\n        mSystemServiceManager.startService(com.android.server.theme.ThemeEngineManagerService.class);\n        t.traceEnd();\n\n        t.traceBegin(\"StartBootPhaseSystemServicesReady\");",
@@ -789,10 +789,11 @@
   "system/sepolicy/build/soong/service_fuzzer_bindings.go": [
     {
       "old": "var (\n\tServiceFuzzerBindings = map[string][]string{",
-      "new": "var (\n\tServiceFuzzerBindings = map[string][]string{\n\t\t// Java Binder services use the documented exception (b/287102710).\n\t\t\"hecker_game\":     EXCEPTION_NO_FUZZER,",
+      "new": "var (\n\tServiceFuzzerBindings = map[string][]string{\n\t\t// Java Binder services use the documented exception (b/287102710).\n\t\t\"hecker_game\":     EXCEPTION_NO_FUZZER,\n\t\t\"hecker_sensor_recovery\": EXCEPTION_NO_FUZZER,",
       "previous": [
         "var (\n\tServiceFuzzerBindings = map[string][]string{\n\t\t// Java Binder services use the documented exception (b/287102710).\n\t\t\"hecker_memory\":   EXCEPTION_NO_FUZZER,\n\t\t\"hecker_launcher\": EXCEPTION_NO_FUZZER,\n\t\t\"hecker_game\":     EXCEPTION_NO_FUZZER,",
-        "var (\n\tServiceFuzzerBindings = map[string][]string{\n\t\t// Java Binder services use the documented exception (b/287102710).\n\t\t\"hecker_memory\":   EXCEPTION_NO_FUZZER,\n\t\t\"hecker_game\":     EXCEPTION_NO_FUZZER,"
+        "var (\n\tServiceFuzzerBindings = map[string][]string{\n\t\t// Java Binder services use the documented exception (b/287102710).\n\t\t\"hecker_memory\":   EXCEPTION_NO_FUZZER,\n\t\t\"hecker_game\":     EXCEPTION_NO_FUZZER,",
+        "var (\n\tServiceFuzzerBindings = map[string][]string{\n\t\t// Java Binder services use the documented exception (b/287102710).\n\t\t\"hecker_game\":     EXCEPTION_NO_FUZZER,"
       ]
     }
   ],

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gaming_hud_cpu">ЦП %</string>
+    <string name="gaming_hud_gpu">ГП %</string>
+    <string name="gaming_hud_ram">ОЗУ %</string>
+    <string name="gaming_hud_description">FPS %1$s, ЦП %2$s%%, ГП %3$s%%, ОЗУ %4$s%%. Температура батареи %5$s.</string>
+</resources>

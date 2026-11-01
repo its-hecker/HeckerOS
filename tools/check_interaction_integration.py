@@ -52,7 +52,7 @@ def check_service_bindings(folder):
     declarations = context_declarations(policy / 'private/service_contexts')
     system_ext = context_declarations(ROOT / 'rom/sepolicy/private/service_contexts')
     services = [line.split()[0] for line in declarations + system_ext]
-    required = ('hecker_game',)
+    required = ('hecker_game','hecker_sensor_recovery')
     assert 'hecker_memory' not in services and 'hecker_memory' not in bindings
     for name in required:
         assert services.count(name) == 1, 'Missing or duplicate service context: ' + name
@@ -65,7 +65,8 @@ def check_service_bindings(folder):
         contexts = Path(temporary) / 'service_contexts'
         # Exercise the three new Java services with the real checker, including
         # gaming's system_ext declaration. Other Suite services are outside this probe.
-        contexts.write_text('\n'.join(declarations + game) + '\n')
+        owned=[line for line in system_ext if line.split()[0] in required]
+        contexts.write_text('\n'.join(declarations + owned) + '\n')
         command = [sys.executable, str(policy / 'tools/fuzzer_bindings_check.py'),
                    '-s', str(contexts), '-b', str(registry)]
         subprocess.run(command, check=True)
@@ -76,7 +77,7 @@ def check_service_bindings(folder):
             registry.write_text(json.dumps({k: v for k, v in bindings.items() if k != name}))
             missing = subprocess.run(command, capture_output=True, text=True)
             assert missing.returncode != 0 and "Service '" + name + "'" in missing.stderr, name
-    print('Merged gaming label is unique; native fuzzer checker accepts the gaming Java registration: PASS')
+    print('Gaming and sensor-recovery labels are unique; native fuzzer checker accepts both Java registrations: PASS')
 
 
 def check_statusbar_dispatch(folder, cache):

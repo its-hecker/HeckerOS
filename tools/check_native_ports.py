@@ -42,6 +42,10 @@ def snapshot(folder):
 
 
 def check_theme_broadcast(folder):
+    startup=(folder/'frameworks/base/services/java/com/android/server/SystemServer.java').read_text()
+    sensor='mSystemServiceManager.startService(com.android.server.hecker.HeckerSensorRecoveryService.class);'
+    phase='mSystemServiceManager.startBootPhase(t, SystemService.PHASE_SYSTEM_SERVICES_READY);'
+    assert startup.count(sensor)==1 and startup.index(sensor)<startup.index(phase)
     engine = (ROOT / 'framework/themes/ThemeEngine.java').read_text()
     action = re.search(r'ACTION_THEME_CHANGED\s*=\s*"([^"]+)"', engine).group(1)
     manifest = ET.parse(folder / 'frameworks/base/core/res/AndroidManifest.xml').getroot()

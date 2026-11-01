@@ -172,5 +172,15 @@
   "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutPhoneUi.java": "settings/src/com/android/settings/hecker/HeckerAboutPhoneUi.java",
   "packages/apps/Settings/src/org/hecker/motion/MediaGlowSpec.java": "framework/qs/MediaGlowSpec.java",
   "frameworks/base/packages/SystemUI/src/org/hecker/motion/MediaGlowSpec.java": "framework/qs/MediaGlowSpec.java",
-  "packages/apps/Settings/res/drawable/hecker_account.xml": "settings/res/drawable/hecker_account.xml"
+  "packages/apps/Settings/res/drawable/hecker_account.xml": "settings/res/drawable/hecker_account.xml",
+  "frameworks/base/services/core/java/com/android/server/hecker/HeckerSensorRecoveryService.java": "framework/sensors/HeckerSensorRecoveryService.java",
+  "frameworks/base/services/core/java/com/android/server/hecker/SensorRecoveryAccess.java": "framework/sensors/SensorRecoveryAccess.java",
+  "frameworks/base/services/core/java/com/android/server/hecker/SensorRecoveryEngine.java": "framework/sensors/SensorRecoveryEngine.java",
+  "frameworks/base/core/java/android/os/IHeckerSensorRecoveryService.aidl": "framework/sensors/IHeckerSensorRecoveryService.aidl",
+  "frameworks/base/packages/SystemUI/res/values-ru/hecker_strings.xml": "framework/qs/strings-ru.xml",
+  "frameworks/base/packages/SystemUI/res/values-ru/hecker_headphones.xml": "framework/headphones/strings-ru.xml",
+  "frameworks/base/packages/SystemUI/res/values-ru/hecker_face_island.xml": "framework/faceisland/strings-ru.xml",
+  "frameworks/base/packages/SystemUI/res/values-ru/hecker_ims.xml": "framework/ims/strings-ru.xml",
+  "frameworks/base/packages/SystemUI/res/values-ru/hecker_motion_island.xml": "framework/motionisland/strings-ru.xml",
+  "packages/apps/Settings/res/values-ru/hecker_ru.xml": "settings/res/values-ru/hecker_ru.xml"
 }

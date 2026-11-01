@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hecker_motion_ready">Motion Sense</string>
+    <string name="hecker_motion_play">Запрошено воспроизведение</string>
+    <string name="hecker_motion_playing">Воспроизведение</string>
+    <string name="hecker_motion_pause">Запрошена пауза</string>
+    <string name="hecker_motion_paused">На паузе</string>
+    <string name="hecker_motion_next">Следующий трек</string>
+    <string name="hecker_motion_skipped">Трек пропущен</string>
+    <string name="hecker_motion_previous">Предыдущий трек</string>
+    <string name="hecker_motion_previous_done">Трек изменён</string>
+    <string name="hecker_motion_volume">Громкость %1$d%%</string>
+    <string name="hecker_motion_volume_up">Увеличить громкость</string>
+    <string name="hecker_motion_volume_down">Уменьшить громкость</string>
+    <string name="hecker_motion_forward">Вперёд на 10 с</string>
+    <string name="hecker_motion_rewind">Назад на 10 с</string>
+    <string name="hecker_motion_track_mode">Режим треков</string>
+    <string name="hecker_motion_volume_mode">Режим громкости</string>
+    <string name="hecker_motion_seek_mode">Режим перемотки</string>
+    <string name="hecker_motion_open_player">Открыть музыкальный плеер</string>
+</resources>
