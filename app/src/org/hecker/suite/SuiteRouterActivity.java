@@ -30,6 +30,7 @@ public final class SuiteRouterActivity extends Activity {
         switch (page) {
             case "MotionFeedbackSettingsActivity": return MotionFeedbackSettingsActivity.class;
             case "RootPrivacyActivity": return RootPrivacyActivity.class;
+            case "SensorRecoveryActivity": return SensorRecoveryActivity.class;
             case "QuickSettingsActivity": return QuickSettingsActivity.class;
             case "LockScreenSettingsActivity": return LockScreenSettingsActivity.class;
             case "LyricsSettingsActivity": return LyricsSettingsActivity.class;

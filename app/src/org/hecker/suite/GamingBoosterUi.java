@@ -68,17 +68,21 @@ final class GamingBoosterUi {
         static boolean stacked(Context c){return c.getResources().getConfiguration().fontScale>1.3f;}
         static int height(Context c){return dp(c,Math.max(40,(stacked(c)?2:1)*28*c.getResources().getConfiguration().fontScale+8));}
         MetricPill(Context c){
-            super(c);setOrientation(VERTICAL);setGravity(Gravity.CENTER);setPadding(dp(c,5),dp(c,2),dp(c,5),dp(c,2));setBackground(glass(c,0xd9000914,24));
+            super(c);setOrientation(VERTICAL);setGravity(Gravity.CENTER);setPadding(dp(c,10),dp(c,4),dp(c,10),dp(c,4));setBackground(glass(c,0xd9000914,24));
             String[] labels={"FPS","CPU %","GPU %","RAM %",c.getString(R.string.gaming_hud_battery_temperature)};
             LinearLayout row=null;
             for(int i=0;i<values.length;i++){
-                if(i==0||stacked(c)&&i==3){row=GamingUi.row(c);row.setGravity(Gravity.CENTER);addView(row,new LinearLayout.LayoutParams(-1,0,1));}
-                LinearLayout col=GamingUi.column(c);col.setGravity(Gravity.CENTER);
-                TextView label=GamingUi.text(c,labels[i],8,MUTED,false);label.setSingleLine();col.addView(label);
+                if(i==0||stacked(c)&&i==3){row=GamingUi.row(c);row.setGravity(Gravity.CENTER);row.setBaselineAligned(false);addView(row,new LinearLayout.LayoutParams(-1,0,1));}
+                LinearLayout col=GamingUi.column(c);col.setGravity(Gravity.CENTER);col.setPadding(dp(c,2),0,dp(c,2),0);
+                TextView label=GamingUi.text(c,labels[i],8,MUTED,false);label.setSingleLine();centerMetric(label);col.addView(label,new LinearLayout.LayoutParams(-1,-2));
                 values[i]=GamingUi.text(c,"—",14,Color.WHITE,false);values[i].setSingleLine();
+                centerMetric(values[i]);
                 values[i].setAutoSizeTextTypeUniformWithConfiguration(9,14,1,android.util.TypedValue.COMPLEX_UNIT_SP);
-                col.addView(values[i]);row.addView(col,new LinearLayout.LayoutParams(0,-2,1));
+                col.addView(values[i],new LinearLayout.LayoutParams(-1,-2));row.addView(col,new LinearLayout.LayoutParams(0,-2,1));
             }
+        }
+        private static void centerMetric(TextView text){
+            text.setGravity(Gravity.CENTER);text.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);text.setIncludeFontPadding(false);
         }
         void update(String fps,int cpu,int gpu,int ram,String temperature){
             String thermal=temperature==null?"—":temperature.replace("°C","").trim();

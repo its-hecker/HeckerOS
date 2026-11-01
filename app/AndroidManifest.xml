@@ -116,6 +116,12 @@
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
         </service>
+        <activity android:name=".SensorRecoveryActivity" android:exported="false" android:label="@string/sensor_recovery_title" />
+        <service android:name=".SensorRecoveryTileService" android:exported="true"
+            android:label="@string/sensor_recovery_title" android:icon="@drawable/ic_face_unlock"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+        </service>
         <activity android:name=".NetworkLabActivity" android:exported="false" android:label="@string/netlab_title" />
         <service android:name=".NetworkLabTileService" android:exported="true"
             android:label="@string/netlab_title" android:icon="@drawable/ic_netlab"
