@@ -56,7 +56,7 @@
   },
   "framework": {
     "repository": "its-hecker/heckeros_frameworks_base",
-    "revision": "cc977dce02b883f8440c240c79996167210a13a1",
+    "revision": "4af276bc5ceea071ef0da5ea440cda4470c08df6",
     "files": {
       "core/java/android/app/ActivityThread.java": "b25d3de50aea1de7af68178e5aa7f45c72ab823b3c01dd4f54755b7e3f3395e5",
       "core/java/android/app/IActivityManager.aidl": "28ea763ad5aa2fe6344d89dd4207e70d31f0f999dca19d0e44962ec827a7da17",
@@ -70,7 +70,7 @@
       "core/java/android/security/trickystore/KeyBoxManager.java": "ccf4af9cabc6efc9403cdcc71ff7f86850b47b50d70f25562ca32f67433c96b6",
       "core/java/android/security/trickystore/TrickyStoreService.java": "26da87cffe6a93830470697fd5ae2a8f975539fefc5110f23663d07318827726",
       "core/java/com/android/internal/util/PropImitationHooks.java": "ebd6f44bf568389f0985944c7802b56fec2f4d9e8efba8680f3c73591248c2bf",
-      "core/jni/android_os_SystemProperties.cpp": "5d13b23f92800f87fc14e3e894fb5c40e5a1ee1df38c66b747b945c5ce5fa0c6",
+      "core/jni/android_os_SystemProperties.cpp": "07cf884fa7d6c92bba75c1658b452108fae571f6309a4dd0e5bed62a3887311b",
       "keystore/java/android/security/KeyStore2.java": "081b996b562408526dc4a6c7cb3c87e84487ef0edbb09863ef6700852ef2b692",
       "keystore/java/android/security/KeyStoreSecurityLevel.java": "8a3273b6301adcc83b4bc456842b58ae68db0ef71afa62f4d61301c0ff6ed243",
       "keystore/java/android/security/keystore2/AndroidKeyStoreKeyPairGeneratorSpi.java": "463523873c78f8f857e8dfe198e2d2f6484a93319a6a69214ce6c168c2c4710b",
@@ -82,14 +82,14 @@
       "tests/hecker/SpoofingConfigTest.java": "904c40c79b65c89547f82e8e70a6401af1f169e2fcfb7c88aaffb399e32fbbef",
       "services/core/java/com/android/server/pm/AppsFilterBase.java": "7ef6b6b3d4fe72e2e270c6efd9c7b98abbdee6ba20c9d0acb1e06eab2910870b",
       "services/core/java/com/android/server/pm/AppsFilterImpl.java": "9bf0abc259958f5b91b1d8e4c802965fdfe401fa4269080bc97b74fca9650e12",
-      "services/core/java/com/android/server/pm/HeckerRootVisibility.java": "debacf5f231652c26c2fbab7d0bb3c202989a3048975d4f0e104a4f3084bc5dd",
+      "services/core/java/com/android/server/pm/HeckerRootVisibility.java": "6a1238605a5edf363fd1b55b2550a54d55f7ec2fa6e19ee91f5520e778b58071",
       "tests/hecker/test_root_visibility.py": "613a01b4ae7bd5d023ba4aafd3eb1c5b19e3b85e80c864bd0c6060fccc4ad24e",
-      "core/java/android/app/HeckerAppCompatibility.java": "7aa0c5c37d1551c0b32a41d30a2095d65786fb94252942171bd54305f6775bca",
+      "core/java/android/app/HeckerAppCompatibility.java": "d97a3854eeed93e5f53ca45ce662c47831aba6b65d4c28503bef21d70a96f831",
       "core/java/android/provider/Settings.java": "41f818cc03970ad357ab18abea5b1199da398d227d8fef62a296f3c2e05b918d",
       "core/java/com/android/internal/os/AppZygoteInit.java": "a8137864a32d8fe2bc9b0e57e01335c02894a1f5f6c7c47b06a274aad6fe4a7e",
       "services/core/java/com/android/server/pm/parsing/PackageInfoUtils.java": "3a3a20ed163b39c12b6e8259aff623ffb5f0ff903b4f7fedf06c4b97ed571d1a",
       "services/core/java/com/android/server/pm/InstallPackageHelper.java": "9db3593f782c576165dee6fa660c8d8823ede31d337a2d32a0016d4581f5ebf2",
-      "tests/hecker/test_app_compatibility.py": "246b0f5d54123cc1bc10d6e0dd6cc1e371ecff44fee944734db773648b18c124"
+      "tests/hecker/test_app_compatibility.py": "928b9781f07af297dac220779f781226ebe206c1c93a02d20dfb12f4a269012c"
     }
   },
   "settings_java": [

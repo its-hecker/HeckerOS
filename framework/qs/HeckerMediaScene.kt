@@ -18,12 +18,31 @@ val LocalHeckerQsContentScope = staticCompositionLocalOf<ContentScope?> { null }
 private val SquareWeight = ValueKey("HeckerMediaSquareWeight")
 private val RowWeight = ValueKey("HeckerMediaRowWeight")
 
+/** Legacy QS closes outside its inner QQS/QS scene. Follow its native panel callbacks as well. */
+object HeckerQsPanelState {
+    private var legacy by mutableStateOf(false)
+    private var shown by mutableStateOf(false)
+    private var nativeExpansion by mutableFloatStateOf(0f)
+    @JvmStatic fun setVisible(visible: Boolean) { legacy = true; shown = visible }
+    @JvmStatic fun setExpansion(fraction: Float) { legacy = true; nativeExpansion = fraction }
+    fun alpha(scope: ContentScope?): Float {
+        val state = scope?.layoutState?.transitionState
+        val transition = state as? TransitionState.Transition
+        return MediaCardGeometry.shadeAlpha(legacy, shown, nativeExpansion,
+            state is TransitionState.Idle && state.currentScene == Scenes.Gone,
+            transition?.toContent == Scenes.Gone, transition?.fromContent == Scenes.Gone,
+            transition?.progress ?: 0f)
+    }
+}
+
 @Composable
 fun HeckerQsMediaPlayer(modifier: Modifier = Modifier, square: Boolean = false,
     compactRow: Boolean = false, hideWhenInactive: Boolean = false) {
     val scope = LocalHeckerQsContentScope.current
     if (scope == null) {
-        HeckerMediaCard(modifier, square, hideWhenInactive, compactRow = compactRow)
+        HeckerMediaCard(modifier.graphicsLayer { alpha = HeckerQsPanelState.alpha(null) },
+            square, hideWhenInactive, compactRow = compactRow,
+            visible = { HeckerQsPanelState.alpha(null) > 0f })
         return
     }
     with(scope) {
@@ -32,17 +51,11 @@ fun HeckerQsMediaPlayer(modifier: Modifier = Modifier, square: Boolean = false,
             val row = animateElementFloatAsState(if (compactRow) 1f else 0f, RowWeight, canOverflow = false)
             content {
                 HeckerMediaCard(modifier = Modifier.graphicsLayer {
-                    val state = scope.layoutState.transitionState
-                    alpha = when {
-                        state is TransitionState.Transition && state.toContent == Scenes.Gone ->
-                            (1f - state.progress / .35f).coerceIn(0f, 1f)
-                        state is TransitionState.Transition && state.fromContent == Scenes.Gone ->
-                            (state.progress / .2f).coerceIn(0f, 1f)
-                        else -> 1f
-                    }
+                    alpha = HeckerQsPanelState.alpha(scope)
                 }, square = square, compactRow = compactRow,
                     hideWhenInactive = hideWhenInactive,
-                    squareWeight = { tile.value }, rowWeight = { row.value })
+                    squareWeight = { tile.value }, rowWeight = { row.value },
+                    visible = { HeckerQsPanelState.alpha(scope) > 0f })
             }
         }
     }
@@ -63,7 +76,8 @@ fun ContentScope.HeckerQuickQsContent(modifier: Modifier = Modifier,
         Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(Modifier.element(HeckerQsScene.Compact)) { tiles() }
             CompositionLocalProvider(LocalHeckerFlowGlass provides heckerCustomizedLayout()) {
-                HeckerQsMediaPlayer(hideWhenInactive = true)
+                // Reserve the same immediate player target as expanded QS, including play-last.
+                HeckerQsMediaPlayer()
             }
         }
     }

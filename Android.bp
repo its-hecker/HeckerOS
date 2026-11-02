@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Deliberately use the global namespace, like other framework feature plugins.
 package {
-    default_applicable_licenses: ["hecker_suite_license", "hecker_living_flow_font_license"],
+    default_applicable_licenses: ["hecker_suite_license", "hecker_living_flow_font_license",
+        "hecker_google_sans_cyrillic_license"],
 }
 
 license {
@@ -27,6 +28,12 @@ license {
     name: "hecker_living_flow_font_license",
     license_kinds: ["hecker_living_flow_bitstream_vera"],
     license_text: ["fonts/living-flow/LICENSE.txt"],
+}
+
+license {
+    name: "hecker_google_sans_cyrillic_license",
+    license_kinds: ["SPDX-license-identifier-OFL-1.1"],
+    license_text: ["fonts/google-sans-cyrillic/OFL.txt"],
 }
 
 android_app {

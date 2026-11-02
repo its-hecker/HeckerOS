@@ -2,7 +2,7 @@
 <resources>
   <string name="root_privacy_title">应用兼容性</string>
   <string name="root_privacy_summary">为每个已安装应用设置隐私和兼容性选项</string>
-  <string name="root_privacy_body">选择应用，设置 Root 管理器隐私、应用降级、开发者选项可见性和引导加载程序状态。各项设置相互独立，默认关闭。</string>
+  <string name="root_privacy_body">选择应用，设置 Root 管理器隐私、应用降级、开发者选项可见性、引导加载程序状态和自定义 ROM 可见性。各项设置相互独立，默认关闭。</string>
   <string name="root_privacy_save_error">无法保存设置，请重试。</string>
   <string name="compat_root_title">Root 管理器隐私</string>
   <string name="compat_root_body">向此应用隐藏受支持的 Root 管理器软件包。Root 权限及 KernelSU 模块卸载需要另外设置。</string>

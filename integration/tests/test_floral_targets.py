@@ -92,6 +92,8 @@ print(json.dumps([DEVICE, VENDOR, PRODUCT, OVERLAY_ROOTS[-1]]))
                 capture = root / "vendor/hecker/floral/suite/rom/boot_diagnostics/boot_capture.mk"
                 capture.parent.mkdir(parents=True)
                 capture.write_bytes((SUITE / "rom/boot_diagnostics/boot_capture.mk").read_bytes())
+                addon = root / "vendor/hecker/floral/suite/rom/no_addon_d.mk"
+                addon.write_bytes((SUITE / "rom/no_addon_d.mk").read_bytes())
                 product = SUITE / "rom/products" / ("hecker_" + device + ".mk")
                 make = ("define inherit-product\n$(info INHERIT=$(1))\nendef\n"
                         + "include " + str(product) + "\n"

@@ -15,6 +15,7 @@ def check_shade_blur(folder, cache):
     source = (folder / 'frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/NotificationShadeDepthController.kt').read_text()
     method = source.split('    private fun computeBlurAndZoomOut()', 1)[1].split('    private fun blurRadiusToZoomOut', 1)[0]
     method = '    fun computeBlurAndZoomOut()' + method
+    method = method.replace('com.android.systemui.hecker.HeckerAmbientCharging', 'HeckerAmbientCharging')
     # Keep the production method, including all native suppression gates.
     fixture = '''import kotlin.math.max
 object MathUtils { fun constrain(v:Float,a:Float,b:Float)=v.coerceIn(a,b) }
@@ -27,6 +28,7 @@ class BlurUtils {
  fun blurRadiusOfRatio(v:Float)=v*100f
  fun supportsBlursOnWindows()=supported
 }
+object HeckerAmbientCharging { val state=Holder(); class Holder { val value=Value() }; class Value { var shadeBlurPercent=55 } }
 class Probe {
  val shadeAnimation=Animation();val brightnessMirrorSpring=Animation();val blurUtils=BlurUtils()
  var shadeExpansion=1f;var qsPanelExpansion=0f;var transitionToFullShadeProgress=0f
@@ -44,6 +46,11 @@ fun main() {
   val quick=p.computeBlurAndZoomOut()
   for(step in 0..100) {p.qsPanelExpansion=step/100f;check(p.computeBlurAndZoomOut()==quick)}
  }
+ for(strength in listOf(0,25,55,100)) {
+  HeckerAmbientCharging.state.value.shadeBlurPercent=strength;p.shadeAnimation.radius=100f;p.qsPanelExpansion=1f
+  check(p.computeBlurAndZoomOut().first==strength)
+ }
+ HeckerAmbientCharging.state.value.shadeBlurPercent=55
  p.brightnessMirrorSpring.ratio=1f;check(p.computeBlurAndZoomOut().first==0)
  p.brightnessMirrorSpring.ratio=0f;p.blursDisabledForUnlock=true;check(p.computeBlurAndZoomOut().first==0)
  p.blursDisabledForUnlock=false;p.areBlursDisabledForAppLaunch=true;check(p.computeBlurAndZoomOut().first==0)

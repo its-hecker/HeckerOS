@@ -15,9 +15,10 @@ object HeckerQsScene {
     val Brightness = ElementKey("HeckerQsBrightness")
     val Volume = ElementKey("HeckerQsVolume")
     val Shortcuts = ElementKey("HeckerQsShortcuts")
+    private val controlKeys = setOf(Connections, Tiles, Brightness, Volume, Shortcuts)
     val Controls = object : ElementMatcher {
         override fun matches(key: ElementKey, content: ContentKey): Boolean =
-            key in setOf(Connections, Tiles, Brightness, Volume, Shortcuts)
+            key in controlKeys
     }
     val Compact = ElementKey("HeckerCompactQuickSettings")
 }

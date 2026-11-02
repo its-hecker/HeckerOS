@@ -9,6 +9,36 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class MediaFlowTests(unittest.TestCase):
+    def test_reused_buffers_preserve_reviewed_media_positions(self):
+        baseline = (ROOT / 'tests/fixtures/media-geometry-6963155.snapshot').read_text()
+        probe = r'''import com.android.systemui.hecker.MediaCardGeometry;
+import com.android.systemui.hecker.BaselineMediaGeometry;
+public class MediaParity {
+ public static void main(String[] args) {
+  float[] reused=new float[5];int checks=0;
+  for(float font:new float[]{1,1.4f,2})for(float width:new float[]{240,324,420})
+  for(float height:new float[]{76,154,220})for(int step=0;step<=400;step++) {
+   float square=step/400f,row=(400-step)/400f;
+   for(int element=0;element<MediaCardGeometry.COUNT;element++) {
+    float[] expected=BaselineMediaGeometry.bounds(element,width,height,square,row,font);
+    MediaCardGeometry.boundsInto(reused,element,width,height,square,row,font);
+    for(int k=0;k<5;k++)if(Math.abs(expected[k]-reused[k])>.00001f)
+     throw new AssertionError("Optimized media changes reviewed placement");
+    checks++;
+   }
+  }
+  System.out.println("Reused media buffers match "+checks+" reviewed child placements PASS");
+ }
+}'''
+        with tempfile.TemporaryDirectory(prefix='hecker-media-parity-') as temporary:
+            folder = Path(temporary)
+            (folder / 'BaselineMediaGeometry.java').write_text(baseline.replace('MediaCardGeometry', 'BaselineMediaGeometry'))
+            (folder / 'MediaParity.java').write_text(probe)
+            subprocess.run(['java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-d', str(folder),
+                            str(folder / 'BaselineMediaGeometry.java'), str(folder / 'MediaParity.java'),
+                            str(ROOT / 'framework/qs/MediaCardGeometry.java')], check=True)
+            subprocess.run(['java', '-cp', str(folder), 'MediaParity'], check=True)
+
     def test_geometry_and_absolute_glow_phase(self):
         probe = r'''import com.android.systemui.hecker.MediaCardGeometry;
 public class MediaProbe {
@@ -44,6 +74,23 @@ public class MediaProbe {
      MediaCardGeometry.bounds(MediaCardGeometry.PREVIOUS,324,80,0,1)[4]!=0 ||
      MediaCardGeometry.bounds(MediaCardGeometry.NEXT,324,80,0,1)[4]!=0)
       throw new AssertionError("Hidden controls still placed");
+  // A quick close/reopen and a finishing scene animation cannot draw over Home.
+  for(int i=0;i<=1000;i++) {
+   float p=i/1000f;
+   for(boolean opening:new boolean[]{false,true})for(boolean closing:new boolean[]{false,true}) {
+    if(MediaCardGeometry.shadeAlpha(true,true,0,false,closing,opening,p)!=0 ||
+       MediaCardGeometry.shadeAlpha(true,false,1,false,closing,opening,p)!=0 ||
+       MediaCardGeometry.shadeAlpha(false,true,1,true,closing,opening,p)!=0)
+     throw new AssertionError("Collapsed player lingers over Home");
+   }
+   if(MediaCardGeometry.shadeAlpha(true,true,1,false,false,false,p)!=1)
+    throw new AssertionError("Visible legacy player waits for inner QS scene");
+   if(p>=.25f && MediaCardGeometry.shadeAlpha(false,true,1,false,true,false,p)!=0)
+    throw new AssertionError("Closing scene leaves a delayed player");
+  }
+  if(MediaCardGeometry.shadeAlpha(true,true,Float.NaN,false,false,false,0)!=0 ||
+     MediaCardGeometry.shadeAlpha(false,true,1,false,true,false,Float.NaN)!=0)
+   throw new AssertionError("Invalid visibility is not closed");
   for(long t=0;t<72000;t+=13) {
    float a=MediaCardGeometry.glowPhase(t),b=MediaCardGeometry.glowPhase(t+7200);
    if(Math.abs(a-b)>.00001) throw new AssertionError("Glow restarts across a scene handoff");

@@ -1,0 +1,10 @@
+<resources>
+    <color name="gamespace_launcher_background">#344581</color>
+    <string name="aod_clock_size">AOD clock size</string>
+    <string name="aod_clock_size_summary">Set the always-on clock size independently of the lock screen. Large sizes fit within the native clock area and retain burn-in protection.</string>
+    <string name="qs_blur_strength">Background blur strength</string>
+    <string name="qs_blur_strength_summary">Adjust the shade and Quick Settings blur. Lower values use a lighter backdrop; 0 turns blur off. Battery Saver and thermal limits still apply.</string>
+    <string name="compat_rom_title">Hide custom ROM</string>
+    <string name="compat_rom_body">Limit common custom ROM software properties, file checks and Hecker component visibility in this app. Close the app to apply. This does not change hardware attestation or guarantee app compatibility.</string>
+    <string name="compat_rom_requires_build">Requires the matching ROM build. Updating Hecker Suite alone cannot enable this option.</string>
+</resources>

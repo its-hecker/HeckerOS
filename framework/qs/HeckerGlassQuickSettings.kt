@@ -34,8 +34,12 @@ import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.toUiState
 
 /** One native backdrop blur behind this panel; all controls and labels remain sharp. */
-fun heckerLivingScrim(blurSupported: Boolean): Color =
-    if (blurSupported) Color(0xFF110E20).copy(alpha = .72f) else Color(0xFF211F2C)
+@Composable
+fun heckerLivingScrim(blurSupported: Boolean): Color {
+    val state by HeckerAmbientCharging.state.collectAsState()
+    return if (blurSupported && state.shadeBlurPercent > 0)
+        Color(0xFF110E20).copy(alpha = .72f) else Color(0xFF211F2C)
+}
 
 @Composable
 fun HeckerGlassCompact(tiles: List<TileViewModel>, listening: () -> Boolean, modifier: Modifier) {

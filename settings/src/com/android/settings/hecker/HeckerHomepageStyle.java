@@ -23,14 +23,20 @@ public final class HeckerHomepageStyle {
         if (preference == null || preference instanceof androidx.preference.PreferenceCategory
                 || preference instanceof HeckerBrandPreference) return;
         View row = holder.itemView;
-        android.util.TypedValue selectable = new android.util.TypedValue();
-        preference.getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, selectable, true);
-        row.setBackgroundResource(selectable.resourceId);
-        if (selected) row.setBackground(new android.graphics.drawable.RippleDrawable(
-                android.content.res.ColorStateList.valueOf(0x287daaff),
-                new android.graphics.drawable.ColorDrawable(0x207daaff), null));
+        // The decoration is the sole card background. The theme's selectable
+        // drawable includes its own inset material card and produced a second silhouette.
+        GradientDrawable mask = new GradientDrawable();
+        mask.setColor(Color.WHITE);
+        mask.setCornerRadius(26 * row.getResources().getDisplayMetrics().density);
         int inset = Math.round(16 * row.getResources().getDisplayMetrics().density);
-        row.setPaddingRelative(inset, 0, inset, 0);
+        GradientDrawable highlight = new GradientDrawable();
+        highlight.setColor(0x207daaff);
+        highlight.setCornerRadius(26 * row.getResources().getDisplayMetrics().density);
+        row.setBackground(new android.graphics.drawable.RippleDrawable(
+                android.content.res.ColorStateList.valueOf(0x287daaff),
+                selected ? new android.graphics.drawable.InsetDrawable(highlight, inset, 0, inset, 0) : null,
+                new android.graphics.drawable.InsetDrawable(mask, inset, 0, inset, 0)));
+        row.setPaddingRelative(inset * 2, 0, inset * 2, 0);
         View title = holder.findViewById(android.R.id.title);
         if (title instanceof android.widget.TextView) {
             ((android.widget.TextView) title).setTextSize(17);

@@ -1,0 +1,33 @@
+{
+  "projects": {
+    "bionic": {
+      "repository": "PixelOS-AOSP/android_bionic",
+      "revision": "5d705964bdc742639dd256871119209f1c65d688",
+      "files": {
+        "libc/bionic/open.cpp": "0e5bb93a2a5ab344716f8508e991f7e891f71042d0e601aa751e941d22cd780d",
+        "libc/bionic/faccessat.cpp": "83c39e349683d6cb5e93e2423a6383700eae034a621966965464ed1233b2d62e",
+        "libc/bionic/dirent.cpp": "2f4d9c0b1a4e9f63b92c531e3810732d3123450e2acd66381973fc09dcb1328b",
+        "libc/bionic/system_property_api.cpp": "2b198f02818627285e69e315d0981909f2a63c24997252880f7442922d23f30e",
+        "libc/Android.bp": "12bef6c4a8da7159e6e03e542e0067093101712e35f212aef04f897ab8f3effb",
+        "libc/libc.map.txt": "5831b40390f17a34536513c79735bc632aa3d3f4d81fc4ed5f5ea8ff6ed5107c",
+        "libc/SYSCALLS.TXT": "c00e3c8d61e83e4c1a1f206474edca23483ba845967fb936dea1d49e62311adf",
+        "libc/tools/gensyscalls.py": "6fd52651be8638c2b5079d654d631282bc7a482220d590e5428803a85494e187"
+      }
+    },
+    "frameworks/native": {
+      "repository": "PixelOS-AOSP/android_frameworks_native",
+      "revision": "fe64500f2fb0b0053667f3e1af3603122643e270",
+      "files": {
+        "cmds/servicemanager/ServiceManager.cpp": "c01c666a0f5bf21f5a2355f7e9b351af8fc4014e34e28b9098003cf2ca06ec86"
+      }
+    }
+  },
+  "voltage_sources": {
+    "base_hooks": "VoltageOS/bionic@6ba74937812263eb5b9b32037313ee080fb0bc13",
+    "performance": "VoltageOS/bionic@3cf4e28ca7d5717659e9326b7a10d8334a58d408",
+    "property_iteration": "VoltageOS/bionic@38a4fcf285f6ca7d420f371c3554a35a37488e60",
+    "crash_fixes": "VoltageOS/bionic@d977fa6c6aafd7137497e7f5597d8ad554f4aee2",
+    "service_visibility": "VoltageOS/frameworks_native@3faf24b5913616b2a4cfc73c0c9363fabf642a3f",
+    "addon_d": "VoltageOS/vendor_voltage@7ea378114338e4a3ee859fdaed4d8e0f35552d33"
+  }
+}

@@ -83,6 +83,13 @@ public final class FlowClockRenderer {
             Locale locale, float width, float height, int style, float awake, boolean compact,
             boolean home, float opacity, int palette, int scalePercent, int positionX, int positionY,
             float homeHandoff) {
+        draw(canvas, hour, minute, twentyFour, date, locale, width, height, style, awake,
+                compact, home, opacity, palette, scalePercent, positionX, positionY, homeHandoff, 140);
+    }
+    public void draw(Canvas canvas, int hour, int minute, boolean twentyFour, String date,
+            Locale locale, float width, float height, int style, float awake, boolean compact,
+            boolean home, float opacity, int palette, int scalePercent, int positionX, int positionY,
+            float homeHandoff, int aodScalePercent) {
         if (width <= 0 || height <= 0) return;
         float p = unit(awake);
         if (!locale.equals(lastLocale)) {
@@ -101,9 +108,13 @@ public final class FlowClockRenderer {
         float maxHeight = Math.max(1, height - 32);
         float targetHeight = Math.min(maxHeight / (stacked ? 2.05f : 1.35f), width * (stacked ? .62f : .29f)) * scale;
         targetHeight = Math.min(targetHeight, maxHeight / (stacked ? 2.05f : 1.35f));
-        float ambientHeight = Math.min(42, maxHeight / 2);
+        // AOD has its own user setting. Bound the entire time/date group, including
+        // both horizontal digit groups, to the allocation that retains native burn-in movement.
+        float ambientHeight = Math.max(1, Math.min(42 * Math.max(.7f, Math.min(2f, aodScalePercent / 100f)),
+                Math.min(Math.max(1, maxHeight - 21), (width - padding * 2) / 3)));
+        float ambientScale = ambientHeight / 42;
         float glyphHeight = mix(ambientHeight, targetHeight, p);
-        float ambientTop = (height - ambientHeight * 1.8f) / 2;
+        float ambientTop = Math.max(0, (height - ambientHeight - 21) / 2);
         float freeY = Math.max(0, height - targetHeight * (stacked ? 2.05f : 1.35f) - 24);
         float y = freeY * (.5f + Math.max(-100, Math.min(100, positionY)) / 200f);
         float targetTop = Math.max(0, Math.min(height - targetHeight * (stacked ? 2.05f : 1f) - 24, y + (home ? 18 : 0)));
@@ -134,12 +145,12 @@ public final class FlowClockRenderer {
             float hx = center - total / 2 + hw / 2, mx = center + total / 2 - mw / 2;
             float movingHeight = mix(glyphHeight, homeGlyph, handoff);
             // Each group travels from its horizontal AOD position into its stacked destination.
-            glyph(canvas, h, mix(mix(center - 36, x, p), hx, handoff), mix(top, homeTop, handoff), movingHeight,
-                    mix(mix(54, half * 2, p), hw + 1, handoff), mix(mix(1, .60f, p), fit, handoff), tint, alpha, face);
-            glyph(canvas, m, mix(mix(center + 36, x, p), mx, handoff), mix(top + p * targetHeight * .98f, homeTop, handoff),
-                    movingHeight, mix(mix(54, half * 2, p), mw + 1, handoff), mix(mix(1, .60f, p), fit, handoff), tint, alpha, face);
+            glyph(canvas, h, mix(mix(center - 36 * ambientScale, x, p), hx, handoff), mix(top, homeTop, handoff), movingHeight,
+                    mix(mix(54 * ambientScale, half * 2, p), hw + 1, handoff), mix(mix(1, .60f, p), fit, handoff), tint, alpha, face);
+            glyph(canvas, m, mix(mix(center + 36 * ambientScale, x, p), mx, handoff), mix(top + p * targetHeight * .98f, homeTop, handoff),
+                    movingHeight, mix(mix(54 * ambientScale, half * 2, p), mw + 1, handoff), mix(mix(1, .60f, p), fit, handoff), tint, alpha, face);
             glyph(canvas, ":", mix(center, center - total / 2 + hw + cw / 2, handoff), mix(top, homeTop, handoff),
-                    mix(ambientHeight, homeGlyph, handoff), mix(12, cw + 1, handoff), mix(1, fit, handoff), mixColor(Color.WHITE, tint, handoff),
+                    mix(ambientHeight, homeGlyph, handoff), mix(12 * ambientScale, cw + 1, handoff), mix(1, fit, handoff), mixColor(Color.WHITE, tint, handoff),
                     Math.max(1 - p, handoff) * alpha, face);
             float dateTop = Math.max(4, top + 6);
             float dateVisibility = 1 - depthMask(handoff / .18f) + depthMask((handoff - .78f) / .22f);

@@ -1,0 +1,122 @@
+{
+  "bionic/libc/bionic/open.cpp": [
+    {
+      "old": "return FDTRACK_CREATE(__openat(AT_FDCWD, pathname, force_O_LARGEFILE(flags), mode));",
+      "new": "return FDTRACK_CREATE(custom_rom_hide_post_open(__openat(AT_FDCWD, pathname, force_O_LARGEFILE(flags), mode), flags));"
+    },
+    {
+      "old": "return FDTRACK_CREATE_NAME(\"open\", __openat(AT_FDCWD, pathname, force_O_LARGEFILE(flags), 0));",
+      "new": "return FDTRACK_CREATE_NAME(\"open\", custom_rom_hide_post_open(__openat(AT_FDCWD, pathname, force_O_LARGEFILE(flags), 0), flags));"
+    },
+    {
+      "old": "return FDTRACK_CREATE_NAME(\"openat\", __openat(fd, pathname, force_O_LARGEFILE(flags), mode));",
+      "new": "return FDTRACK_CREATE_NAME(\"openat\", custom_rom_hide_post_open(__openat(fd, pathname, force_O_LARGEFILE(flags), mode), flags));"
+    },
+    {
+      "old": "return FDTRACK_CREATE_NAME(\"openat\", __openat(fd, pathname, force_O_LARGEFILE(flags), 0));",
+      "new": "return FDTRACK_CREATE_NAME(\"openat\", custom_rom_hide_post_open(__openat(fd, pathname, force_O_LARGEFILE(flags), 0), flags));"
+    },
+    {
+      "old": "#include \"private/bionic_fdtrack.h\"",
+      "new": "#include \"private/bionic_fdtrack.h\"\n#include \"custom_rom_hide.h\""
+    }
+  ],
+  "bionic/libc/bionic/faccessat.cpp": [
+    {
+      "old": "extern \"C\" int __faccessat(int, const char*, int);",
+      "new": "extern \"C\" int __faccessat(int, const char*, int);\n#include \"custom_rom_hide.h\""
+    },
+    {
+      "old": "  return __faccessat(dirfd, pathname, mode);",
+      "new": "  int result = __faccessat(dirfd, pathname, mode);\n  if (result == 0 && custom_rom_hide_should_block_at(dirfd, pathname)) {\n    errno = ENOENT;\n    return -1;\n  }\n  return result;"
+    }
+  ],
+  "bionic/libc/bionic/dirent.cpp": [
+    {
+      "old": "#include \"private/ScopedPthreadMutexLocker.h\"",
+      "new": "#include \"private/ScopedPthreadMutexLocker.h\"\n#include \"custom_rom_hide.h\""
+    },
+    {
+      "old": "static dirent* __readdir_locked(DIR* d) {\n  if (d->available_bytes_ == 0 && !__fill_DIR(d)) {\n    return nullptr;\n  }\n\n  dirent* entry = d->next_;\n  d->next_ = reinterpret_cast<dirent*>(reinterpret_cast<char*>(entry) + entry->d_reclen);\n  d->available_bytes_ -= entry->d_reclen;\n  // The directory entry offset uses 0, 1, 2 instead of real file offset,\n  // so the value range of long type is enough.\n  d->current_pos_ = static_cast<long>(entry->d_off);\n  return entry;\n}\n",
+      "new": "static dirent* __readdir_locked(DIR* d) {\n  while (true) {\n    if (d->available_bytes_ == 0 && !__fill_DIR(d)) return nullptr;\n    dirent* entry = d->next_;\n    d->next_ = reinterpret_cast<dirent*>(reinterpret_cast<char*>(entry) + entry->d_reclen);\n    d->available_bytes_ -= entry->d_reclen;\n    d->current_pos_ = static_cast<long>(entry->d_off);\n    if (!custom_rom_hide_should_filter_dirent(d->fd_, entry->d_name)) return entry;\n  }\n}\n"
+    }
+  ],
+  "bionic/libc/bionic/system_property_api.cpp": [
+    {
+      "old": "#include \"private/bionic_defs.h\"",
+      "new": "#include \"private/bionic_defs.h\"\n#include \"custom_rom_hide.h\""
+    },
+    {
+      "old": "__BIONIC_WEAK_FOR_NATIVE_BRIDGE\nconst prop_info* __system_property_find(const char* name) {\n  return system_properties.Find(name);\n}\n\n__BIONIC_WEAK_FOR_NATIVE_BRIDGE\nint __system_property_read(const prop_info* pi, char* name, char* value) {\n  return system_properties.Read(pi, name, value);\n}\n\n__BIONIC_WEAK_FOR_NATIVE_BRIDGE\nvoid __system_property_read_callback(const prop_info* pi,\n                                     void (*callback)(void* cookie, const char* name,\n                                                      const char* value, uint32_t serial),\n                                     void* cookie) {\n  return system_properties.ReadCallback(pi, callback, cookie);\n}\n\n__BIONIC_WEAK_FOR_NATIVE_BRIDGE\nint __system_property_get(const char* name, char* value) {\n  return system_properties.Get(name, value);\n}\n\n",
+      "new": "__BIONIC_WEAK_FOR_NATIVE_BRIDGE\nconst prop_info* __system_property_find(const char* name) {\n  const prop_info* pi = system_properties.Find(name);\n  return pi && custom_rom_hide_should_hide_prop(name) ? nullptr : pi;\n}\nstruct RomLegacyRead {\n  char* name;\n  char* value;\n  int length;\n};\nstatic void rom_legacy_read(void* cookie, const char* name, const char*, uint32_t) {\n  auto* ctx = static_cast<RomLegacyRead*>(cookie);\n  const char* override = custom_rom_hide_get_prop_override(name);\n  if (override && ctx->value) {\n    ctx->length = static_cast<int>(strlen(override));\n    memcpy(ctx->value, override, ctx->length + 1);\n  }\n  if (ctx->name && custom_rom_hide_should_hide_prop(name)) ctx->name[0] = 0;\n}\n__BIONIC_WEAK_FOR_NATIVE_BRIDGE\nint __system_property_read(const prop_info* pi, char* name, char* value) {\n  int length = system_properties.Read(pi, name, value);\n  if (!custom_rom_hide_enabled()) return length;\n  RomLegacyRead ctx{name, value, length};\n  system_properties.ReadCallback(pi, rom_legacy_read, &ctx);\n  return ctx.length;\n}\nstruct RomReadCallback {\n  void (*callback)(void*, const char*, const char*, uint32_t);\n  void* cookie;\n};\nstatic void rom_read_callback(void* cookie, const char* name, const char* value, uint32_t serial) {\n  auto* ctx = static_cast<RomReadCallback*>(cookie);\n  const char* override = custom_rom_hide_get_prop_override(name);\n  ctx->callback(ctx->cookie, custom_rom_hide_should_hide_prop(name) ? \"\" : name,\n                override ? override : value, serial);\n}\n__BIONIC_WEAK_FOR_NATIVE_BRIDGE\nvoid __system_property_read_callback(const prop_info* pi,\n                                     void (*callback)(void*, const char*, const char*, uint32_t),\n                                     void* cookie) {\n  if (!custom_rom_hide_enabled() || !callback) return system_properties.ReadCallback(pi, callback, cookie);\n  RomReadCallback ctx{callback, cookie};\n  return system_properties.ReadCallback(pi, rom_read_callback, &ctx);\n}\n__BIONIC_WEAK_FOR_NATIVE_BRIDGE\nint __system_property_get(const char* name, char* value) {\n  int length = system_properties.Get(name, value);\n  const char* override = custom_rom_hide_get_prop_override(name);\n  if (!override) return length;\n  size_t size = strlen(override);\n  memcpy(value, override, size + 1);\n  return static_cast<int>(size);\n}\n\n"
+    },
+    {
+      "old": "__BIONIC_WEAK_FOR_NATIVE_BRIDGE\nconst prop_info* __system_property_find_nth(unsigned n) {\n  return system_properties.FindNth(n);\n}\n\n__BIONIC_WEAK_FOR_NATIVE_BRIDGE\nint __system_property_foreach(void (*propfn)(const prop_info* pi, void* cookie), void* cookie) {\n  return system_properties.Foreach(propfn, cookie);\n}\n",
+      "new": "struct RomForeach {\n  void (*callback)(const prop_info*, void*);\n  void* cookie;\n  const prop_info* current;\n};\nstatic void rom_foreach_read(void* cookie, const char* name, const char*, uint32_t) {\n  auto* ctx = static_cast<RomForeach*>(cookie);\n  if (!custom_rom_hide_should_hide_prop(name)) ctx->callback(ctx->current, ctx->cookie);\n}\nstatic void rom_foreach_item(const prop_info* pi, void* cookie) {\n  auto* ctx = static_cast<RomForeach*>(cookie);\n  ctx->current = pi;\n  // ReadCallback handles long property names/values without obsolete PROP_NAME_MAX buffers.\n  system_properties.ReadCallback(pi, rom_foreach_read, ctx);\n}\n__BIONIC_WEAK_FOR_NATIVE_BRIDGE\nint __system_property_foreach(void (*callback)(const prop_info*, void*), void* cookie) {\n  if (!custom_rom_hide_enabled()) return system_properties.Foreach(callback, cookie);\n  if (!callback) return -1;\n  RomForeach ctx{callback, cookie, nullptr};\n  return system_properties.Foreach(rom_foreach_item, &ctx);\n}\n__BIONIC_WEAK_FOR_NATIVE_BRIDGE\nconst prop_info* __system_property_find_nth(unsigned n) {\n  if (!custom_rom_hide_enabled()) return system_properties.FindNth(n);\n  struct Nth { unsigned remaining; const prop_info* result; } ctx{n, nullptr};\n  __system_property_foreach([](const prop_info* pi, void* cookie) {\n    auto* nth = static_cast<Nth*>(cookie);\n    if (!nth->result && nth->remaining-- == 0) nth->result = pi;\n  }, &ctx);\n  return ctx.result;\n}\n"
+    }
+  ],
+  "bionic/libc/Android.bp": [
+    {
+      "old": "        \"bionic/readlink.cpp\",",
+      "new": "        \"bionic/readlink.cpp\",\n        \"bionic/custom_rom_hide.cpp\",\n        \"bionic/fstatat_compat.cpp\",\n        \"bionic/readlinkat_compat.cpp\",\n        \"bionic/statx_compat.cpp\","
+    }
+  ],
+  "bionic/libc/libc.map.txt": [
+    {
+      "old": "LIBC_PLATFORM {\n  global:",
+      "new": "LIBC_PLATFORM {\n  global:\n    __libc_hecker_set_rom_hide;"
+    }
+  ],
+  "bionic/libc/SYSCALLS.TXT": [
+    {
+      "old": "fstatat64|fstatat:fstatat64(int, const char*, struct stat*, int)   lp32",
+      "new": "__fstatat64:fstatat64(int, const char*, struct stat*, int)   lp32"
+    },
+    {
+      "old": "fstatat64|fstatat:newfstatat(int, const char*, struct stat*, int)  lp64",
+      "new": "__fstatat64:newfstatat(int, const char*, struct stat*, int)  lp64"
+    },
+    {
+      "old": "readlinkat(int, const char*, char*, size_t)  all",
+      "new": "__readlinkat:readlinkat(int, const char*, char*, size_t)  all"
+    },
+    {
+      "old": "statx(int, const char*, int, unsigned, struct statx*) all",
+      "new": "__statx:statx(int, const char*, int, unsigned, struct statx*) all"
+    }
+  ],
+  "frameworks/native/cmds/servicemanager/ServiceManager.cpp": [
+    {
+      "old": "#include \"ServiceManager.h\"",
+      "new": "#include \"ServiceManager.h\"\n#include \"HeckerRomServiceVisibility.h\""
+    },
+    {
+      "old": "os::ServiceWithMetadata ServiceManager::tryGetBinder(const std::string& name,\n                                                     bool startIfNotFound) {\n    SM_PERFETTO_TRACE_FUNC(PERFETTO_TE_PROTO_FIELDS(\n            PERFETTO_TE_PROTO_FIELD_CSTR(kProtoServiceName, name.c_str())));\n\n    auto ctx = mAccess->getCallingContext();",
+      "new": "os::ServiceWithMetadata ServiceManager::tryGetBinder(const std::string& name,\n                                                     bool startIfNotFound) {\n    SM_PERFETTO_TRACE_FUNC(PERFETTO_TE_PROTO_FIELDS(\n            PERFETTO_TE_PROTO_FIELD_CSTR(kProtoServiceName, name.c_str())));\n\n    auto ctx = mAccess->getCallingContext();\n    if (android::hecker::hideRomService(ctx.uid, ctx.sid, name)) { return os::ServiceWithMetadata(); }"
+    },
+    {
+      "old": "Status ServiceManager::isDeclared(const std::string& name, bool* outReturn) {\n    SM_PERFETTO_TRACE_FUNC(PERFETTO_TE_PROTO_FIELDS(\n            PERFETTO_TE_PROTO_FIELD_CSTR(kProtoServiceName, name.c_str())));\n\n    auto ctx = mAccess->getCallingContext();",
+      "new": "Status ServiceManager::isDeclared(const std::string& name, bool* outReturn) {\n    SM_PERFETTO_TRACE_FUNC(PERFETTO_TE_PROTO_FIELDS(\n            PERFETTO_TE_PROTO_FIELD_CSTR(kProtoServiceName, name.c_str())));\n\n    auto ctx = mAccess->getCallingContext();\n    if (android::hecker::hideRomService(ctx.uid, ctx.sid, name)) { *outReturn = false; return Status::ok(); }"
+    },
+    {
+      "old": "binder::Status ServiceManager::getDeclaredInstances(const std::string& interface, std::vector<std::string>* outReturn) {\n    SM_PERFETTO_TRACE_FUNC(PERFETTO_TE_PROTO_FIELDS(\n            PERFETTO_TE_PROTO_FIELD_CSTR(kProtoInterfaceName, interface.c_str())));\n\n    auto ctx = mAccess->getCallingContext();",
+      "new": "binder::Status ServiceManager::getDeclaredInstances(const std::string& interface, std::vector<std::string>* outReturn) {\n    SM_PERFETTO_TRACE_FUNC(PERFETTO_TE_PROTO_FIELDS(\n            PERFETTO_TE_PROTO_FIELD_CSTR(kProtoInterfaceName, interface.c_str())));\n\n    auto ctx = mAccess->getCallingContext();\n    if (android::hecker::hideRomService(ctx.uid, ctx.sid, interface)) { outReturn->clear(); return Status::ok(); }"
+    },
+    {
+      "old": "    CHECK(outList->empty());\n\n    outList->reserve(toReserve);",
+      "new": "    CHECK(outList->empty());\n    auto romCaller = mAccess->getCallingContext();\n    outList->reserve(toReserve);"
+    },
+    {
+      "old": "            outList->push_back(name);",
+      "new": "            if (android::hecker::hideRomService(romCaller.uid, romCaller.sid, name)) continue;\n            outList->push_back(name);"
+    },
+    {
+      "old": "    outReturn->reserve(mNameToService.size());",
+      "new": "    auto romCaller = mAccess->getCallingContext();\n    outReturn->reserve(mNameToService.size());"
+    },
+    {
+      "old": "    for (auto const& [name, service] : mNameToService) {\n        ServiceDebugInfo info;",
+      "new": "    for (auto const& [name, service] : mNameToService) {\n        if (android::hecker::hideRomService(romCaller.uid, romCaller.sid, name)) continue;\n        ServiceDebugInfo info;"
+    }
+  ]
+}

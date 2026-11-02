@@ -53,9 +53,22 @@ for floral_partition in system system_ext product vendor; do
     done
 done
 if find "$floral_product_out"/product/overlay -maxdepth 3 -iname '*HeckerLauncherRecents*' -print -quit 2>/dev/null | read -r; then floral_stale_app=true; fi
+for floral_addon_path in system/addon.d system/system/addon.d system_ext/addon.d product/addon.d vendor/addon.d; do
+    if [[ -e "$floral_product_out/$floral_addon_path" || -L "$floral_product_out/$floral_addon_path" ]]; then
+        floral_stale_app=true
+    fi
+done
 if [[ "$floral_stale_app" == true ]]; then
-    echo "Removing retired app installations from build outputs (installclean)."
+    echo "Removing retired apps or addon.d from build outputs (installclean)."
     m installclean
 fi
-m -j"${HECKER_BUILD_JOBS:-$(nproc)}" heckeros
+if [[ -n "${HECKER_BUILD_JOBS:-}" ]]; then
+    if [[ ! "$HECKER_BUILD_JOBS" =~ ^[1-9][0-9]*$ ]]; then
+        echo "HECKER_BUILD_JOBS must be a positive integer." >&2
+        exit 1
+    fi
+    m -j"$HECKER_BUILD_JOBS" heckeros
+else
+    m heckeros
+fi
 python3 "$floral_setup_dir/tools/check_built_output.py" "$floral_product_out"

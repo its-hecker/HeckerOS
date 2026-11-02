@@ -1,5 +1,5 @@
 {
-  "checked_on": "2026-10-30",
+  "checked_on": "2026-11-02",
   "pixelos_manifest": {
     "repository": "PixelOS-AOSP/android_manifest",
     "branch": "seventeen",
@@ -91,8 +91,8 @@
     },
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
-      "branch": "feat/app-compatibility-20261101",
-      "revision": "cc977dce02b883f8440c240c79996167210a13a1",
+      "branch": "fix/coral-ui-compatibility-20261102",
+      "revision": "4af276bc5ceea071ef0da5ea440cda4470c08df6",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -202,7 +202,8 @@
         "core/java/com/android/internal/os/AppZygoteInit.java",
         "services/core/java/com/android/server/pm/parsing/PackageInfoUtils.java",
         "services/core/java/com/android/server/pm/InstallPackageHelper.java",
-        "tests/hecker/test_app_compatibility.py"
+        "tests/hecker/test_app_compatibility.py",
+        "packages/SystemUI/src/com/android/systemui/qs/composefragment/QSFragmentCompose.kt"
       ]
     },
     "hardware/google/camera": {
@@ -262,8 +263,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "feat/app-compatibility-20261101",
-    "integration_branch": "feat/app-compatibility-20261101",
+    "source_branch": "fix/coral-ui-compatibility-20261102",
+    "integration_branch": "fix/coral-ui-compatibility-20261102",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required",
@@ -443,12 +444,29 @@
     "validation": "Source and host validation only; full ROM, kernel and phone tests required. Vendor/firmware security patch levels unchanged."
   },
   "app_compatibility": {
-    "branch": "feat/app-compatibility-20261101",
-    "framework_revision": "cc977dce02b883f8440c240c79996167210a13a1",
-    "backend_version": 1,
+    "branch": "fix/coral-ui-compatibility-20261102",
+    "framework_revision": "4af276bc5ceea071ef0da5ea440cda4470c08df6",
+    "backend_version": 2,
     "device": "coral",
-    "inherited_suite_revision": "f6f5c7af09752091d5dd671fa892eb35fca166d5",
+    "inherited_suite_revision": "6963155a0d449cf6a163c391c14c18fafd4cbd41",
     "device_testing": "pending",
-    "source_validation": "host/SDK checked; full ROM and physical acceptance pending"
+    "source_validation": "host/SDK checked; full ROM and physical acceptance pending",
+    "native_source_lock": "native-compat/source-lock.json"
+  },
+  "device_feedback_20261102": {
+    "branch": "fix/coral-ui-compatibility-20261102",
+    "device": "coral",
+    "changes": [
+      "independent AOD clock size",
+      "native QS media expansion and faster hiding",
+      "bounded media allocations and blur strength",
+      "single Settings card background",
+      "colored GameSpace launcher icon",
+      "OFL Google Sans Cyrillic fallback",
+      "opt-in ROM software visibility",
+      "build-time addon.d exclusion"
+    ],
+    "weather": "Pixel Launcher Google Smartspace requires device diagnostics",
+    "validation": "Host and SDK checks only; full Android build and device acceptance pending"
   }
 }

@@ -1,0 +1,8 @@
+{
+  "bionic/libc/bionic/custom_rom_hide.cpp": "native-compat/bionic/custom_rom_hide.cpp",
+  "bionic/libc/bionic/fstatat_compat.cpp": "native-compat/bionic/fstatat_compat.cpp",
+  "bionic/libc/bionic/readlinkat_compat.cpp": "native-compat/bionic/readlinkat_compat.cpp",
+  "bionic/libc/bionic/custom_rom_hide.h": "native-compat/bionic/custom_rom_hide.h",
+  "bionic/libc/bionic/statx_compat.cpp": "native-compat/bionic/statx_compat.cpp",
+  "frameworks/native/cmds/servicemanager/HeckerRomServiceVisibility.h": "native-compat/HeckerRomServiceVisibility.h"
+}

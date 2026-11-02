@@ -147,6 +147,7 @@ interface AnimatedState<T>: State<T>
     'SceneState.kt': '''package com.android.compose.animation.scene.content.state
 import com.android.compose.animation.scene.ContentKey
 sealed interface TransitionState {
+ class Idle(val currentScene: ContentKey): TransitionState
  abstract class Transition: TransitionState { abstract val fromContent: ContentKey; abstract val toContent: ContentKey; abstract val progress: Float }
 }
 ''',

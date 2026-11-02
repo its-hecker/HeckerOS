@@ -282,9 +282,10 @@
     },
     {
       "old": "        recyclerView.setHorizontalScrollBarEnabled(false);",
-      "new": "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_home_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));",
+      "new": "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_home_background));\n        setDivider(null);\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));",
       "previous": [
-        "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));"
+        "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));",
+        "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_home_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));"
       ]
     }
   ],
@@ -496,11 +497,12 @@
   "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/scene/ui/composable/transitions/FromShadeToQuickSettingsTransition.kt": [
     {
       "old": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n",
-      "new": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n\n    // The compact clock/status disappear with the first movement, not at scene completion.\n    fractionRange(end = 0.12f) {\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.Clock)\n    }\n\n    // Expanded controls appear once the compact status row has left.\n    fractionRange(start = 0.25f, end = 0.65f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n",
+      "new": "    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Controls, Elements.GridAnchor)\n    sharedElement(com.android.systemui.hecker.HeckerQsScene.Media, enabled = true)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n\n    // The compact clock/status disappear with the first movement, not at scene completion.\n    fractionRange(end = 0.12f) {\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.Clock)\n    }\n\n    // Expanded controls appear once the compact status row has left.\n    fractionRange(start = 0.25f, end = 0.65f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n",
       "previous": [
         "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n",
         "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n\n    // Reverse travel fades the expanded-only header in the first 20 percent.\n    fractionRange(start = 0.8f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n",
-        "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n\n    // The compact clock/status disappear with the first movement, not at scene completion.\n    fractionRange(end = 0.12f) {\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.Clock)\n    }\n\n    // Expanded controls appear once the compact status row has left.\n    fractionRange(start = 0.25f, end = 0.65f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n\n    // Reverse travel fades the expanded-only header in the first 20 percent.\n    fractionRange(start = 0.8f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n"
+        "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n\n    // The compact clock/status disappear with the first movement, not at scene completion.\n    fractionRange(end = 0.12f) {\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.Clock)\n    }\n\n    // Expanded controls appear once the compact status row has left.\n    fractionRange(start = 0.25f, end = 0.65f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n\n    // Reverse travel fades the expanded-only header in the first 20 percent.\n    fractionRange(start = 0.8f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n",
+        "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n\n    // The compact clock/status disappear with the first movement, not at scene completion.\n    fractionRange(end = 0.12f) {\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.Clock)\n    }\n\n    // Expanded controls appear once the compact status row has left.\n    fractionRange(start = 0.25f, end = 0.65f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n"
       ]
     },
     {
@@ -518,17 +520,21 @@
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/qs/composefragment/ui/FromQuickQuickSettingsToQuickSettings.kt": [
     {
-      "old": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n",
-      "new": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n\n    // The compact clock/status disappear with the first movement, not at scene completion.\n    fractionRange(end = 0.12f) {\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.Clock)\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.CollapsedContentStart)\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.CollapsedContentEnd)\n    }\n\n    // Expanded controls appear once the compact status row has left.\n    fractionRange(start = 0.25f, end = 0.65f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n",
+      "old": "    fractionRange(start = 0.43f) { fade(Elements.QuickSettingsContent) }",
+      "new": "    // Fade controls, never the ancestor of the shared player.\n    fractionRange(start = .12f, end = .70f) { fade(com.android.systemui.hecker.HeckerQsScene.Controls) }",
       "previous": [
+        "    fractionRange(start = 0.12f, end = 0.70f) { fade(com.android.systemui.hecker.HeckerQsScene.Controls) }"
+      ]
+    },
+    {
+      "old": "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n",
+      "new": "    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Controls, Elements.GridAnchor)\n    sharedElement(com.android.systemui.hecker.HeckerQsScene.Media, enabled = true)\n    fractionRange(end = .38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n    fractionRange(start = .25f, end = .65f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n    // Keep native compact status/clock exit timing while moving only controls.\n    fractionRange(end = .12f) {\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.Clock)\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.CollapsedContentStart)\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.CollapsedContentEnd)\n    }\n",
+      "previous": [
+        "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n\n    // The compact clock/status disappear with the first movement, not at scene completion.\n    fractionRange(end = 0.12f) {\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.Clock)\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.CollapsedContentStart)\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.CollapsedContentEnd)\n    }\n\n    // Expanded controls appear once the compact status row has left.\n    fractionRange(start = 0.25f, end = 0.65f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n",
         "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n",
         "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n\n    // Reverse travel fades the expanded-only header in the first 20 percent.\n    fractionRange(start = 0.8f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n",
         "    anchoredTranslate(Elements.QuickSettingsContent, Elements.GridAnchor)\n\n    // Both custom dashboards replace individual tile scene elements with one tray.\n    fractionRange(end = 0.38f) { fade(com.android.systemui.hecker.HeckerQsScene.Compact) }\n    anchoredTranslate(com.android.systemui.hecker.HeckerQsScene.Compact, Elements.GridAnchor)\n\n    // The compact clock/status disappear with the first movement, not at scene completion.\n    fractionRange(end = 0.12f) {\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.Clock)\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.CollapsedContentStart)\n        fade(com.android.systemui.shade.ui.composable.ShadeHeader.Elements.CollapsedContentEnd)\n    }\n\n    // Expanded controls appear once the compact status row has left.\n    fractionRange(start = 0.25f, end = 0.65f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n\n    // Reverse travel fades the expanded-only header in the first 20 percent.\n    fractionRange(start = 0.8f) { fade(com.android.systemui.hecker.HeckerQsScene.ExpandedHeader) }\n"
       ]
-    },
-    {
-      "old": "    fractionRange(start = 0.43f) { fade(Elements.QuickSettingsContent) }",
-      "new": "    fractionRange(start = 0.12f, end = 0.70f) { fade(com.android.systemui.hecker.HeckerQsScene.Controls) }"
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/ui/compose/WifiIcon.kt": [
@@ -1109,6 +1115,10 @@
     {
       "old": "        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(qsExpandedRatio))",
       "new": "        // QQS and full QS share one settled backdrop; later native launch, mirror,\n        // power, thermal and unlock gates retain ownership of whether blur is applied.\n        val heckerShadeRatio = ShadeInterpolation.getNotificationScrimAlpha(\n            if (shouldApplyShadeBlur()) shadeExpansion else 0f\n        )\n        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(max(qsExpandedRatio, heckerShadeRatio)))"
+    },
+    {
+      "old": "        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))",
+      "new": "        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))\n        // Scale shade work only; native wake/unlock blur remains independent.\n        combinedBlur *= com.android.systemui.hecker.HeckerAmbientCharging.state.value.shadeBlurPercent / 100f"
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/domain/interactor/KeyguardTouchHandlingInteractor.kt": [
@@ -1175,6 +1185,24 @@
     {
       "old": "    @Override\n    public void onBindViewHolder(PreferenceViewHolder holder, int position) {",
       "new": "    @Override\n    public int getItemViewType(int position) {\n        androidx.preference.Preference item = getItem(position);\n        if (item != null && !(item instanceof androidx.preference.PreferenceCategory)\n                && !(item instanceof com.android.settings.hecker.HeckerBrandPreference)) {\n            if (item.getLayoutResource() != com.android.settings.R.layout.hecker_homepage_preference)\n                item.setLayoutResource(com.android.settings.R.layout.hecker_homepage_preference);\n        }\n        return super.getItemViewType(position);\n    }\n\n    @Override\n    public void onBindViewHolder(PreferenceViewHolder holder, int position) {"
+    },
+    {
+      "old": "    private void addHighlightBackground(PreferenceViewHolder holder, int position) {\n        final View v = holder.itemView;\n        @DrawableRes int bgRes = getRoundCornerDrawableRes(position, true /*isSelected*/);\n        v.setBackgroundResource(bgRes);",
+      "new": "    private void addHighlightBackground(PreferenceViewHolder holder, int position) {\n        final View v = holder.itemView;\n        com.android.settings.hecker.HeckerHomepageStyle.bind(holder, getItem(position), true);"
+    },
+    {
+      "old": "    private void removeHighlightBackground(PreferenceViewHolder holder, int position) {\n        final View v = holder.itemView;\n        @DrawableRes int bgRes = getRoundCornerDrawableRes(position, false /*isSelected*/);\n        v.setBackgroundResource(bgRes);",
+      "new": "    private void removeHighlightBackground(PreferenceViewHolder holder, int position) {\n        final View v = holder.itemView;\n        com.android.settings.hecker.HeckerHomepageStyle.bind(holder, getItem(position), false);"
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/qs/composefragment/QSFragmentCompose.kt": [
+    {
+      "old": "    override fun setQsVisible(qsVisible: Boolean) {\n        containerView?.qsVisible = qsVisible",
+      "new": "    override fun setQsVisible(qsVisible: Boolean) {\n        com.android.systemui.hecker.HeckerQsPanelState.setVisible(qsVisible)\n        containerView?.qsVisible = qsVisible"
+    },
+    {
+      "old": "        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction",
+      "new": "        com.android.systemui.hecker.HeckerQsPanelState.setExpansion(panelExpansionFraction)\n        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction"
     }
   ]
 }

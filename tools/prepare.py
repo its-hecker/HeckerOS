@@ -11,6 +11,8 @@ import sys
 import xml.etree.ElementTree as ET
 from aosp_launcher_port import aosp_launcher_plan
 from customization_port import customization_plan
+from google_sans_cyrillic import google_sans_cyrillic_plan
+from native_rom_compat import native_rom_compat_plan
 from recovery_port import recovery_plan
 from pakistan_ims import pakistan_ims_plan
 from privapp_permissions import check_feature_privapp_permissions
@@ -340,6 +342,8 @@ def plan(rom, revert=False):
         changes[helper] = expected
     changes.update(motion_plan(rom, revert))
     changes.update(customization_plan(rom, replace_guarded, revert, pending_changes=changes))
+    changes.update(google_sans_cyrillic_plan(rom, revert))
+    changes.update(native_rom_compat_plan(rom, replace_guarded, revert))
     changes.update(aosp_launcher_plan(rom, replace_guarded, revert))
     changes.update(recovery_plan(rom, revert))
     changes.update(pakistan_ims_plan(rom, revert))

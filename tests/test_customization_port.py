@@ -155,7 +155,7 @@ class CustomizationPortTests(unittest.TestCase):
         for relative,pairs in patches.items():
             if not relative.endswith(('FromShadeToQuickSettingsTransition.kt','FromQuickQuickSettingsToQuickSettings.kt')):continue
             pair=pairs[0]
-            for previous in pair['previous']:
+            for previous in pair.get('previous', []):
                 with self.subTest(path=relative,previous=previous), tempfile.TemporaryDirectory() as temporary:
                     folder=Path(temporary);self.stage(folder)
                     path=folder/relative

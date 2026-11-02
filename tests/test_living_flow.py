@@ -25,14 +25,14 @@ public class Paint {
 }""",
             "android/graphics/Canvas.java": """package android.graphics;
 public class Canvas {
- public int draws;public float width,height; public boolean ambient; public String text="";
+ public int draws;public float width,height,firstSize; public boolean ambient; public String text="";
  public void drawText(String t,float x,float y,Paint p){
   if(p.alpha==0)return;
   float w=p.measureText(t),top=y-p.size*.8f,bottom=y+p.size*.2f;
   if(!Float.isFinite(x+y+w+top+bottom)||x-w/2 < -1 || x+w/2>width+1 || top < -1 || bottom>height+1)
     throw new AssertionError("Glyph outside native clock region: "+t+" "+width+"x"+height+" @"+x+","+top+".."+bottom);
   if(ambient&&p.color!=Color.WHITE)throw new AssertionError("Coloured AOD");
-  draws++;text+=t+" ";
+  if(draws==0)firstSize=p.size;draws++;text+=t+" ";
  }
 }""",
             "ClockProbe.java": """import org.hecker.motion.FlowClockRenderer; import android.graphics.Canvas; import java.util.Locale;
@@ -52,16 +52,29 @@ public class ClockProbe{
  for(int i=0;i<=1000;i++){float t=FlowClockRenderer.settle(i/1000f);
   if(t<last||t<0||t>1.00001)throw new AssertionError("Discontinuous settle");last=t;}
  if(FlowClockRenderer.settle(0)!=0||FlowClockRenderer.settle(1)!=1)throw new AssertionError("Endpoints");
- for(Locale locale:new Locale[]{Locale.US,Locale.forLanguageTag("ur-PK"),Locale.forLanguageTag("ar-EG")})
+ for(Locale locale:new Locale[]{Locale.US,Locale.forLanguageTag("ru-RU"),Locale.forLanguageTag("ur-PK"),Locale.forLanguageTag("ar-EG")})
  for(int style=3;style<=5;style++)for(int width:new int[]{240,360,480})for(int height:new int[]{96,184,480})
  for(boolean small:new boolean[]{true,false})for(boolean home:new boolean[]{true,false})
  for(float awake:new float[]{0,.001f,.25f,.5f,.75f,1})
+ for(int aodScale:new int[]{70,100,140,200})
  for(int scale:new int[]{70,100,110})for(int position:new int[]{-100,0,100}){
   Canvas c=new Canvas();c.width=width;c.height=height;c.ambient=awake==0&&!home;
-  r.draw(c,0,57,false,"Thu, 29 Oct",locale,width,height,style,awake,small,home,.76f,4,scale,position,position);
+  r.draw(c,0,57,false,"Пн, 2 нояб.",locale,width,height,style,awake,small,home,.76f,4,scale,position,position,0,aodScale);
   if(c.draws<2)throw new AssertionError("Clock/date disappeared");
   if(locale.equals(Locale.US)&&!c.text.contains("12"))throw new AssertionError("12-hour midnight");
   frames++;
+ }
+ for(int style=3;style<=5;style++)for(boolean compact:new boolean[]{false,true}){
+  float previous=0;
+  for(int aod:new int[]{70,100,140,200}){
+   Canvas c=new Canvas();c.width=360;c.height=480;c.ambient=true;
+   r.draw(c,22,30,true,"Пн, 2 нояб.",Locale.forLanguageTag("ru-RU"),360,480,style,0,compact,false,.76f,0,100,0,0,0,aod);
+   if(c.firstSize<=previous)throw new AssertionError("AOD size control is ignored");previous=c.firstSize;
+  }
+  Canvas a=new Canvas(),b=new Canvas();a.width=b.width=360;a.height=b.height=480;
+  r.draw(a,22,30,true,"Пн, 2 нояб.",Locale.US,360,480,style,1,compact,false,.76f,0,100,0,0,0,70);
+  r.draw(b,22,30,true,"Пн, 2 нояб.",Locale.US,360,480,style,1,compact,false,.76f,0,100,0,0,0,200);
+  if(a.firstSize!=b.firstSize)throw new AssertionError("AOD setting changes lockscreen glyph size");
  }
  // Native lock dismissal must remain bounded at every intermediate frame, including cancellation.
  for(int style:new int[]{3,5})for(int width:new int[]{240,360,480})for(int height:new int[]{96,184,480})

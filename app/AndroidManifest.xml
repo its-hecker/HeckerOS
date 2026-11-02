@@ -70,7 +70,7 @@
         <activity android:name=".GamingActivity" android:exported="false"
             android:label="@string/gaming_title" android:theme="@style/GamingTheme" />
         <activity-alias android:name=".GameSpaceLauncher" android:targetActivity=".GamingActivity"
-            android:exported="true" android:label="@string/gaming_title" android:icon="@drawable/ic_gaming">
+            android:exported="true" android:label="@string/gaming_title" android:icon="@mipmap/ic_gamespace">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <provider android:name=".GamingLibraryProvider" android:authorities="org.hecker.suite.games"

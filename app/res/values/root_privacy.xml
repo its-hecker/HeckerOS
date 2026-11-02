@@ -2,7 +2,7 @@
 <resources>
   <string name="root_privacy_title">App compatibility</string>
   <string name="root_privacy_summary">Privacy and compatibility options for each installed app</string>
-  <string name="root_privacy_body">Choose an app to configure root manager privacy, downgrades, developer options visibility and bootloader reporting. Options are independent and off by default.</string>
+  <string name="root_privacy_body">Choose an app to configure root manager privacy, downgrades, developer options visibility, bootloader reporting and custom ROM visibility. Options are independent and off by default.</string>
   <string name="root_privacy_save_error">Could not save the setting. Try again.</string>
   <string name="compat_root_title">Root manager privacy</string>
   <string name="compat_root_body">Hide supported root manager packages from this app. Root access and KernelSU module unmounting are configured separately.</string>

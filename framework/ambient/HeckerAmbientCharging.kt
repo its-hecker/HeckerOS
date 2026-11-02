@@ -53,7 +53,8 @@ object HeckerAmbientCharging {
         val depthWake: Boolean = true, val user: Int = -1, val screenAwake: Boolean = true,
         val powerSave: Boolean = false, val wakeGeneration: Long = 0,
         val flow: Boolean = true, val clockScale: Int = 100, val clockX: Int = 0,
-        val clockY: Int = 0, val clockColor: Int = 0,
+        val clockY: Int = 0, val clockColor: Int = 0, val aodClockScale: Int = 140,
+        val shadeBlurPercent: Int = 55,
     )
     private val mutable = MutableStateFlow(State())
     val state: StateFlow<State> = mutable
@@ -80,7 +81,7 @@ object HeckerAmbientCharging {
         }
         for (key in arrayOf(ROUTE, AOD_ROUTE, "doze_always_on", STYLE, CLOCK, ANIMATION, ART,
                 CLOCK_STYLE, CLOCK_OPACITY, DEPTH, DEPTH_ID, DEPTH_WAKE, DEPTH_WALLPAPER_ID,
-                FLOW, "hecker_lockscreen_clock_scale", "hecker_lockscreen_clock_x",
+                FLOW, "hecker_qs_blur_strength", "hecker_lockscreen_clock_scale", "hecker_aod_clock_scale", "hecker_lockscreen_clock_x",
                 "hecker_lockscreen_clock_y", "hecker_lockscreen_clock_color")) {
             c.contentResolver.registerContentObserver(Settings.Secure.getUriFor(key), false,
                 observer, UserHandle.USER_ALL)
@@ -143,6 +144,8 @@ object HeckerAmbientCharging {
             clockStyle = value(CLOCK_STYLE, 0).coerceIn(0, 5),
             flow = value(FLOW, 1) != 0,
             clockScale = value("hecker_lockscreen_clock_scale", 100).coerceIn(70, 110),
+            aodClockScale = value("hecker_aod_clock_scale", 140).coerceIn(70, 200),
+            shadeBlurPercent = value("hecker_qs_blur_strength", 55).coerceIn(0, 100),
             clockX = value("hecker_lockscreen_clock_x", 0).coerceIn(-100, 100),
             clockY = value("hecker_lockscreen_clock_y", 0).coerceIn(-100, 100),
             clockColor = value("hecker_lockscreen_clock_color", 0).coerceIn(0, 4),

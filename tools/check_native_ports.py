@@ -537,6 +537,8 @@ def main():
         if args.sdk_cache:
             from check_shade_blur import check_shade_blur
             check_shade_blur(folder, args.kotlin_cache.resolve())
+            from check_qs_panel_bridge import check_qs_panel_bridge
+            check_qs_panel_bridge(folder, args.kotlin_cache.resolve())
             check_clock_plugins(folder, args.sdk_cache.resolve())
             check_pin_bouncer(folder, args.kotlin_cache.resolve())
             check_statusbar_dispatch(folder, args.kotlin_cache.resolve())
@@ -546,7 +548,10 @@ def main():
             check_overlays(args.sdk_cache.resolve())
         for plan in reversed(plans):
             write(plan(folder, replace_guarded, True))
-        assert before == snapshot(folder), 'Revert changed upstream content'
+        after = snapshot(folder)
+        changed = sorted(name for name in before.keys() | after.keys()
+                         if before.get(name) != after.get(name))
+        assert not changed, 'Revert changed upstream content: ' + ', '.join(changed)
     print(f'{len(paths)} immutable upstream files checked; {count} source adapters/copies apply idempotently and revert exactly.')
     print('Full Android/Soong compilation and phone testing are still required.')
 

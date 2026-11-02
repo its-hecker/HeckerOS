@@ -34,13 +34,14 @@ import java.util.concurrent.Executors;
 /** App compatibility. Keep the old component name and root key for upgrades. */
 public final class RootPrivacyActivity extends Activity {
     static final String[] KEYS = {"hecker_root_private_apps", "hecker_allow_downgrade_apps",
-            "hecker_hide_developer_options_apps", "hecker_bootloader_spoof_apps"};
+            "hecker_hide_developer_options_apps", "hecker_bootloader_spoof_apps",
+            "hecker_hide_custom_rom_apps"};
     private static final int[] TITLES = {R.string.compat_root_title,
             R.string.compat_downgrade_title, R.string.compat_developer_title,
-            R.string.compat_bootloader_title};
+            R.string.compat_bootloader_title, R.string.compat_rom_title};
     private static final int[] BODIES = {R.string.compat_root_body,
             R.string.compat_downgrade_body, R.string.compat_developer_body,
-            R.string.compat_bootloader_body};
+            R.string.compat_bootloader_body, R.string.compat_rom_body};
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final List<Set<String>> selected = new ArrayList<>();
     private final List<App> apps = new ArrayList<>(), visible = new ArrayList<>();
@@ -48,6 +49,7 @@ public final class RootPrivacyActivity extends Activity {
     private EditText search;
     private TextView status;
     private boolean backendAvailable;
+    private boolean romBackendAvailable;
     private AlertDialog dialog;
 
     private static final class App {
@@ -62,6 +64,8 @@ public final class RootPrivacyActivity extends Activity {
         backendAvailable = "true".equals(android.os.SystemProperties.get(
                 "ro.hecker.coral_root_privacy", "false"))
                 && android.os.SystemProperties.getInt("ro.hecker.app_compatibility", 0) >= 1;
+        romBackendAvailable = backendAvailable
+                && android.os.SystemProperties.getInt("ro.hecker.app_compatibility", 0) >= 2;
         for (String key : KEYS) selected.add(new TreeSet<>());
         readSelections();
         LinearLayout header = Ui.page(this, R.string.root_privacy_title);
@@ -153,7 +157,11 @@ public final class RootPrivacyActivity extends Activity {
             toggle.setText(TITLES[i]);
             toggle.setContentDescription(getString(TITLES[i]));
             toggle.setChecked(selected.get(i).contains(app.info.packageName));
-            toggle.setEnabled(backendAvailable && eligible);
+            boolean romProtected = app.info.packageName.equals("com.android.systemui")
+                    || app.info.packageName.equals("com.android.settings")
+                    || app.info.packageName.equals("com.android.permissioncontroller");
+            toggle.setEnabled(backendAvailable && eligible
+                    && (i != 4 || romBackendAvailable && !romProtected));
             toggle.setOnCheckedChangeListener((button, checked) -> {
                 Set<String> names = new TreeSet<>(selected.get(option));
                 if (checked) names.add(app.info.packageName); else names.remove(app.info.packageName);
@@ -173,6 +181,10 @@ public final class RootPrivacyActivity extends Activity {
             });
             card.addView(toggle);
             card.addView(Ui.text(this, getString(BODIES[i]), 13, false));
+            if (i == 4 && !romBackendAvailable)
+                card.addView(Ui.text(this, getString(R.string.compat_rom_requires_build), 13, false));
+            if (i == 4 && romProtected)
+                card.addView(Ui.text(this, getString(R.string.compat_protected_app), 13, false));
             body.addView(card);
         }
         Ui.styleControls(this, body);

@@ -66,8 +66,12 @@ private val Disc = Color(0xFF092F4D).copy(alpha = .25f)
 private val White = Color(0xFFF2F8F8)
 
 /** Native blur capability includes power saver/thermal gates; keep a readable opaque fallback. */
-fun heckerReferenceScrim(blurSupported: Boolean): Color =
-    if (blurSupported) Color(0xFF08283F).copy(alpha = .22f) else Color(0xFF16384A)
+@Composable
+fun heckerReferenceScrim(blurSupported: Boolean): Color {
+    val state by HeckerAmbientCharging.state.collectAsState()
+    return if (blurSupported && state.shadeBlurPercent > 0)
+        Color(0xFF08283F).copy(alpha = .22f) else Color(0xFF16384A)
+}
 
 @Composable
 fun HeckerReferenceQuickSettings(

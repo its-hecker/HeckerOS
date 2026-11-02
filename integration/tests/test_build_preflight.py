@@ -127,6 +127,31 @@ class BuildPreflightTests(unittest.TestCase):
         self.assertEqual(calls.read_text().splitlines(),
                          ["installclean RBE=true", "-j8 heckeros RBE=true"])
 
+    def test_addon_d_is_cleaned_and_default_jobs_are_left_to_android(self):
+        binary = self.rom / "test-bin"
+        for name in ("git", "python3"):
+            command = binary / name
+            command.write_text("#!/bin/sh\nexit 0\n")
+            command.chmod(0o755)
+        (self.rom / "build/make/envsetup.sh").write_text(
+            'lunch() { :; }\n'
+            'get_build_var() { echo out/target/product/coral; }\n'
+            'm() { printf "%s RBE=%s\\n" "$*" "${USE_RBE-unset}" >> m-calls; }\n')
+        self.environment["USE_RBE"] = "true"
+        self.environment.pop("HECKER_BUILD_JOBS", None)
+        calls = self.rom / "m-calls"
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(calls.read_text().splitlines(), ["heckeros RBE=true"])
+        calls.unlink()
+        stale = self.rom / "out/target/product/coral/system/addon.d"
+        stale.parent.mkdir(parents=True)
+        stale.symlink_to("nonexistent-script-directory")
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(calls.read_text().splitlines(),
+                         ["installclean RBE=true", "heckeros RBE=true"])
+
 
 if __name__ == "__main__":
     unittest.main()

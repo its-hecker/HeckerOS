@@ -113,8 +113,12 @@ public final class HeckerQsMedia {
         final MediaController media;
         Watch(MediaController media) { this.media = media; }
         @Override public void onPlaybackStateChanged(PlaybackState state) { refresh(); }
-        @Override public void onMetadataChanged(MediaMetadata metadata) { refresh(); }
-        @Override public void onAudioInfoChanged(MediaController.PlaybackInfo info) { refresh(); }
+        @Override public void onMetadataChanged(MediaMetadata metadata) {
+            if (!musicOnly && controller == media) update(); else refresh();
+        }
+        @Override public void onAudioInfoChanged(MediaController.PlaybackInfo info) {
+            if (!musicOnly && controller == media) update(); else refresh();
+        }
         @Override public void onSessionDestroyed() { destroyed.add(media.getSessionToken()); refresh(); }
         void close() { try { media.unregisterCallback(this); } catch (RuntimeException ignored) { } }
     }

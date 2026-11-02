@@ -6,9 +6,10 @@
     },
     {
       "old": "        recyclerView.setHorizontalScrollBarEnabled(false);",
-      "new": "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_home_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));",
+      "new": "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_home_background));\n        setDivider(null);\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));",
       "previous": [
-        "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));"
+        "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));",
+        "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_home_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));"
       ]
     }
   ],
@@ -73,6 +74,14 @@
     {
       "old": "    @Override\n    public void onBindViewHolder(PreferenceViewHolder holder, int position) {",
       "new": "    @Override\n    public int getItemViewType(int position) {\n        androidx.preference.Preference item = getItem(position);\n        if (item != null && !(item instanceof androidx.preference.PreferenceCategory)\n                && !(item instanceof com.android.settings.hecker.HeckerBrandPreference)) {\n            if (item.getLayoutResource() != com.android.settings.R.layout.hecker_homepage_preference)\n                item.setLayoutResource(com.android.settings.R.layout.hecker_homepage_preference);\n        }\n        return super.getItemViewType(position);\n    }\n\n    @Override\n    public void onBindViewHolder(PreferenceViewHolder holder, int position) {"
+    },
+    {
+      "old": "    private void addHighlightBackground(PreferenceViewHolder holder, int position) {\n        final View v = holder.itemView;\n        @DrawableRes int bgRes = getRoundCornerDrawableRes(position, true /*isSelected*/);\n        v.setBackgroundResource(bgRes);",
+      "new": "    private void addHighlightBackground(PreferenceViewHolder holder, int position) {\n        final View v = holder.itemView;\n        com.android.settings.hecker.HeckerHomepageStyle.bind(holder, getItem(position), true);"
+    },
+    {
+      "old": "    private void removeHighlightBackground(PreferenceViewHolder holder, int position) {\n        final View v = holder.itemView;\n        @DrawableRes int bgRes = getRoundCornerDrawableRes(position, false /*isSelected*/);\n        v.setBackgroundResource(bgRes);",
+      "new": "    private void removeHighlightBackground(PreferenceViewHolder holder, int position) {\n        final View v = holder.itemView;\n        com.android.settings.hecker.HeckerHomepageStyle.bind(holder, getItem(position), false);"
     }
   ]
 }

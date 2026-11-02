@@ -69,7 +69,7 @@ PRODUCT_MANUFACTURER := Google
 PRODUCT_MODEL := Pixel 4 XL
 PRODUCT_NAME := hecker_coral
 PRODUCT_SYSTEM_EXT_PROPERTIES += ro.hecker.coral_root_privacy=true
-PRODUCT_SYSTEM_EXT_PROPERTIES += ro.hecker.app_compatibility=1
+PRODUCT_SYSTEM_EXT_PROPERTIES += ro.hecker.app_compatibility=2
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
     BuildDesc="coral-user 13 TP1A.221005.002.B2 9382335 release-keys" \
@@ -92,3 +92,6 @@ PRODUCT_PACKAGES += HeckerLibrePods
 include vendor/hecker/floral/suite/rom/boot_diagnostics/boot_capture.mk
 
 $(call inherit-product, vendor/hecker/floral/suite/rom/common.mk)
+
+# Apply after every inherited product so no later copy can restore an addon.d marker.
+include vendor/hecker/floral/suite/rom/no_addon_d.mk

@@ -55,10 +55,14 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
     sessionToken: android.media.session.MediaSession.Token? = null, musicOnly: Boolean = false,
     onInactive: (() -> Unit)? = null, compactRow: Boolean = false,
     squareWeight: () -> Float = { if (square) 1f else 0f },
-    rowWeight: () -> Float = { if (compactRow) 1f else 0f }) {
+    rowWeight: () -> Float = { if (compactRow) 1f else 0f },
+    visible: () -> Boolean = { true }) {
     val context = LocalContext.current
     var snapshot by remember(context, sessionToken, musicOnly) {
-        mutableStateOf<HeckerQsMedia.Snapshot?>(HeckerQsMedia.peek(context, musicOnly, sessionToken))
+        // QS reserves its geometry before metadata arrives. Avoid the duplicate synchronous
+        // active-session query on every QQS/full-QS composition; start() supplies the snapshot.
+        mutableStateOf<HeckerQsMedia.Snapshot?>(
+            if (hideWhenInactive) HeckerQsMedia.peek(context, musicOnly, sessionToken) else null)
     }
     val media = remember(context, sessionToken, musicOnly) {
         HeckerQsMedia(context, { snapshot = it }, musicOnly, sessionToken)
@@ -71,11 +75,12 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
         return
     }
     val ambient by HeckerAmbientCharging.state.collectAsState()
-    val motion = heckerFlowMotionAllowed() && ambient.screenAwake
+    val panelVisible by remember(visible) { derivedStateOf { visible() } }
+    val motion = heckerFlowMotionAllowed() && ambient.screenAwake && panelVisible
     var position by remember { mutableStateOf(0L) }
     var seeking by remember { mutableStateOf(false) }
-    LaunchedEffect(state, seeking, ambient.screenAwake) {
-        if (seeking || !ambient.screenAwake) return@LaunchedEffect
+    LaunchedEffect(state, seeking, ambient.screenAwake, panelVisible) {
+        if (seeking || !ambient.screenAwake || !panelVisible) return@LaunchedEffect
         do {
             position = state?.positionNow() ?: 0
             if (state?.playing != true) break
@@ -86,6 +91,7 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
     val flow = LocalHeckerFlowGlass.current
     val shape = RoundedCornerShape(28.dp)
     val fontScale = LocalConfiguration.current.fontScale.coerceIn(1f, 2f)
+    val bounds = remember { Array(MediaCardGeometry.COUNT) { FloatArray(5) } }
     val preferredHeight = (if (compactRow) 76f + (fontScale - 1) * 32
         else if (square) 154f + (fontScale - 1) * 64 else 148f + (fontScale - 1) * 48).dp
     Box(modifier.fillMaxWidth().clip(shape)
@@ -126,8 +132,8 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
             val height = constraints.constrainHeight(preferredHeight.roundToPx())
             // Shared values are read during measurement, after both native scene targets exist.
             val tile = squareWeight(); val row = rowWeight()
-            val bounds = (0 until MediaCardGeometry.COUNT).map { index ->
-                MediaCardGeometry.bounds(index, width / density, height / density, tile, row, fontScale)
+            for (index in 0 until MediaCardGeometry.COUNT) {
+                MediaCardGeometry.boundsInto(bounds[index], index, width / density, height / density, tile, row, fontScale)
             }
             val items = children.mapIndexed { index, child ->
                 val b = bounds[index]
@@ -156,7 +162,10 @@ private fun HeckerMediaGlow(playing: Boolean, motion: Boolean, modifier: Modifie
     LaunchedEffect(playing, motion, lifecycle) {
         if (!playing || !motion) return@LaunchedEffect
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            while (isActive) withFrameNanos { frame.longValue = SystemClock.elapsedRealtime() }
+            while (isActive) {
+                withFrameNanos { frame.longValue = SystemClock.elapsedRealtime() }
+                delay(32) // Decorative light needs no 60/90 Hz loop; phase remains absolute.
+            }
         }
     }
     Canvas(modifier.clearAndSetSemantics { }) {

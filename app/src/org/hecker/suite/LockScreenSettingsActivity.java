@@ -57,6 +57,8 @@ public final class LockScreenSettingsActivity extends Activity {
         }}); clock.addView(applyClock);
         clock.addView(Ui.text(this, getString(R.string.lock_clock_living_help), 14, false));
         range(clock, R.string.lock_clock_size, "hecker_lockscreen_clock_scale", 70, 110, 100);
+        range(clock, R.string.aod_clock_size, "hecker_aod_clock_scale", 70, 200, 140);
+        clock.addView(Ui.text(this, getString(R.string.aod_clock_size_summary), 14, false));
         range(clock, R.string.lock_clock_horizontal, "hecker_lockscreen_clock_x", -100, 100, 0);
         range(clock, R.string.lock_clock_vertical, "hecker_lockscreen_clock_y", -100, 100, 0);
         choices(clock, "hecker_lockscreen_clock_color", 0,
@@ -118,7 +120,9 @@ public final class LockScreenSettingsActivity extends Activity {
         card.addView(label);
         android.widget.SeekBar slider = new android.widget.SeekBar(this);
         slider.setMax(max - min);
-        slider.setProgress(Math.max(min, Math.min(max, Settings.Secure.getInt(getContentResolver(), key, fallback))) - min);
+        int initial = Math.max(min, Math.min(max, Settings.Secure.getInt(getContentResolver(), key, fallback)));
+        slider.setProgress(initial - min);
+        label.setText(getString(title) + " · " + initial);
         slider.setContentDescription(getString(title));
         slider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
             public void onStartTrackingTouch(android.widget.SeekBar bar) { }

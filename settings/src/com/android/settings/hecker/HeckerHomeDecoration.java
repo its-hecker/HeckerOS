@@ -17,11 +17,15 @@ import com.android.settings.R;
 public final class HeckerHomeDecoration extends RecyclerView.ItemDecoration {
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final int card, border;
-    private final float radius, stroke;
+    private final float radius, stroke, inset;
+    private final RectF bounds = new RectF();
+    private final Path path = new Path();
+    private final float[] corners = new float[8];
     public HeckerHomeDecoration(Context context) {
         card=context.getColor(R.color.hecker_home_card); border=context.getColor(R.color.hecker_home_separator);
         radius=context.getResources().getDisplayMetrics().density*26;
         stroke=context.getResources().getDisplayMetrics().density;
+        inset=16*stroke;
     }
     @Override public void onDraw(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
         if (!(parent.getAdapter() instanceof PreferenceGroupAdapter)) return;
@@ -36,8 +40,10 @@ public final class HeckerHomeDecoration extends RecyclerView.ItemDecoration {
             boolean first=before==null || before instanceof PreferenceCategory || before.getParent()!=item.getParent();
             boolean last=after==null || after instanceof PreferenceCategory || after.getParent()!=item.getParent();
             float top=first?radius:0,bottom=last?radius:0;
-            RectF bounds=new RectF(view.getLeft(),view.getTop()+view.getTranslationY(),view.getRight(),view.getBottom()+view.getTranslationY());
-            Path path=new Path();path.addRoundRect(bounds,new float[]{top,top,top,top,bottom,bottom,bottom,bottom},Path.Direction.CW);
+            bounds.set(view.getLeft()+inset,view.getTop()+view.getTranslationY(),
+                    view.getRight()-inset,view.getBottom()+view.getTranslationY());
+            for(int i=0;i<8;i++)corners[i]=i<4?top:bottom;
+            path.reset();path.addRoundRect(bounds,corners,Path.Direction.CW);
             paint.setStyle(Paint.Style.FILL);paint.setColor(card);canvas.drawPath(path,paint);
             // The reference has inset separators and a clean silhouette, without a card outline.
             paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(stroke*.6f);paint.setColor(border);

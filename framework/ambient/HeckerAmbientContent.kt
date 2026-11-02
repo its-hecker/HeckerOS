@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
@@ -62,11 +63,15 @@ private fun clockText(context: Context): Pair<String,String> {
             delay(60000 - now % 60000)
         }
     }
-    val date = Date(now)
-    val locale = Locale.getDefault()
-    val time = SimpleDateFormat(if(DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm", Locale.US).format(date)
-    val pattern = DateFormat.getBestDateTimePattern(locale,"EEEMMMd")
-    return Pair(time, SimpleDateFormat(pattern,locale).format(date))
+    val configuration = LocalConfiguration.current
+    // Wake frames must not allocate date formatters or repeatedly query the time-format setting.
+    return remember(now, configuration) {
+        val date = Date(now)
+        val locale = configuration.locales[0] ?: Locale.getDefault()
+        val time = SimpleDateFormat(if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm", Locale.US).format(date)
+        val pattern = DateFormat.getBestDateTimePattern(locale, "EEEMMMd")
+        Pair(time, SimpleDateFormat(pattern, locale).format(date))
+    }
 }
 
 /** Returns true only while owning the AOD upper region; stock UI is composed otherwise. */
@@ -135,7 +140,8 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
     }
     // Keep one selected clock throughout doze: swapping renderers caused the old wake jump.
     val style = if (ambient && state.clockStyle < 2) 0 else state.clockStyle
-    val parts = clock.first.split(':')
+    val parts = remember(clock.first) { clock.first.split(':') }
+    val twentyFour = remember(clock.first, LocalConfiguration.current) { DateFormat.is24HourFormat(context) }
     val hour = parts[0].toIntOrNull() ?: 0
     val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
     var rotation by remember { mutableFloatStateOf(0f) }
@@ -163,12 +169,17 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
             when (style) {
                 1 -> reference.word(c, hour, minute, clock.second.uppercase(Locale.getDefault()),
                     size.width / density, size.height / density, rotation, small)
-                2, 3, 4, 5 -> living.draw(c, hour, minute, DateFormat.is24HourFormat(context), clock.second,
+                2, 3, 4, 5 -> living.draw(c, hour, minute, twentyFour, clock.second,
                     Locale.getDefault(), size.width / density, size.height / density,
                     if (style == 2) 3 else style, awake, small, false, state.clockOpacity / 100f,
-                    state.clockColor, state.clockScale, state.clockX, state.clockY, homeHandoff())
-                else -> renderer.clock(c,clock.first,clock.second,size.width/density,if(small) 36f else 52f,
-                    if(small) 52f else 72f)
+                    state.clockColor, state.clockScale, state.clockX, state.clockY, homeHandoff(), state.aodClockScale)
+                else -> {
+                    val aodSize = minOf(42f * state.aodClockScale / 100f,
+                        (size.height / density - 32f).coerceAtLeast(1f) / 1.5f)
+                    val textSize = aodSize + ((if (small) 36f else 52f) - aodSize) * awake
+                    renderer.clock(c, clock.first, clock.second, size.width / density,
+                        textSize, textSize + 20f)
+                }
             }
             c.restore()
             if (awake > 0f) foreground?.invoke(c, origin)

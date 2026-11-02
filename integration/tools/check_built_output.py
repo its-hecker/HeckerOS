@@ -144,7 +144,18 @@ def check_removed_weather(output):
                 raise ValueError("Removed OmniJaws installation remains: " + str(directory))
 
 
+def check_no_addon_d(output):
+    for partition in ("system", "system_ext", "product", "vendor"):
+        candidates = [output / partition / "addon.d"]
+        if partition == "system":
+            candidates.append(output / partition / "system/addon.d")
+        for path in candidates:
+            if path.exists() or path.is_symlink():
+                raise ValueError("addon.d must be absent from the built image: " + str(path))
+
+
 def check(rom, output):
+    check_no_addon_d(output)
     check_removed_weather(output)
     filename = SERVICE + ".rc"
     original = rom / VENDOR / "proprietary/vendor/etc/init" / filename

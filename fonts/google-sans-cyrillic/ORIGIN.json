@@ -1,0 +1,42 @@
+{
+  "repository": "google/fonts",
+  "revision": "d4eb04601981780781306966afb88e876652bab4",
+  "path": "ofl/googlesans",
+  "license": "OFL-1.1",
+  "fonttools_version": "4.61.1",
+  "unicode_ranges": [
+    "U+0400-052F",
+    "U+2DE0-2DFF",
+    "U+A640-A69F"
+  ],
+  "inputs": {
+    "GoogleSans[GRAD,opsz,wght].ttf": {
+      "sha256": "d0a87d835a944b8b40d0e82a5651bb59ab97b936a2aeed5946eb57e7b2a3a90a",
+      "size": 4974940
+    },
+    "GoogleSans-Italic[GRAD,opsz,wght].ttf": {
+      "sha256": "b6662abd2131cad1b248750149a7f2b644f871ebcc9af7fe4cd1135cd290b6d1",
+      "size": 5079424
+    },
+    "OFL.txt": {
+      "sha256": "2b75ef20f13d83a7514aee452c4782c20cdc9ff2dee17600f44d37a06d4fb958",
+      "size": 4488
+    }
+  },
+  "files": {
+    "HeckerGoogleSansCyrillic-Regular.ttf": {
+      "sha256": "e2d74923e080dc4359aae1cb2330d3c06af5e74e0e1432734255d10dc69931da",
+      "size": 150764
+    },
+    "HeckerGoogleSansCyrillic-Italic.ttf": {
+      "sha256": "5fcae117e966ed58f8e2be3b5bf76e420eee6af7073d0ce0b1ae9655a03d19bb",
+      "size": 153020
+    }
+  },
+  "pixelos_input": {
+    "repository": "https://gitlab.com/PixelOS-AOSP/proprietary_vendor_pixel_gsans",
+    "revision": "704c1ad882d640d7052dbd59d40b79162d339bf5",
+    "path": "common/proprietary/product/etc/fonts_customization.xml",
+    "sha256": "6e7f076c6b513fd467243fe96f50f6626e30a702dd508b724ae1f65240c07256"
+  }
+}

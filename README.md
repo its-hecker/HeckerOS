@@ -1,19 +1,36 @@
 # HeckerOS · Android 17
 
-## App compatibility — 1 November 2026
+## Coral UI and compatibility — 2 November 2026
 
-This `feat/app-compatibility-20261101` branch extends the published November 1
-Coral device-feedback source. **Hecker Suite → App compatibility** lists installed
-apps and provides four independent per-app options: root manager privacy, allow
-app downgrade, hide developer options and bootloader spoof. Existing privacy
-selections survive. See [scope, restart behavior and validation](docs/app-compatibility.md).
+This `fix/coral-ui-compatibility-20261102` branch adds independent AOD clock size,
+lighter adjustable QS blur, native media visibility/expansion handling, reduced
+per-frame work, single Settings card backgrounds, a visible GameSpace icon and
+an OFL Google Sans Cyrillic fallback. See [changes and device acceptance](docs/coral-feedback-2026-11-02.md).
 
-The matching `HeckerOs-localmanifest:feat/app-compatibility-20261101` pins the
-Suite and framework together. All three repositories must be published before
-syncing this branch. Full ROM/SELinux build and phone tests remain pending. UBL's
-previously captured crash is not claimed fixed. Hardware attestation and actual
-bootloader state are unchanged. The older sections below retain inherited
-product and feature documentation.
+**Hecker Suite → App compatibility** retains the four existing switches and adds
+an independent **Hide custom ROM** option. The native hooks adapt the reviewed
+VoltageOS fixes to a per-app policy. Coral images exclude `addon.d` during the
+build, including old staged copies. This disables add-on preservation across ROM
+updates. See [coverage, restart behavior and limits](docs/app-compatibility.md).
+
+The matching `HeckerOs-localmanifest:fix/coral-ui-compatibility-20261102` pins the
+Suite and framework together. Full Android/SELinux builds and phone tests remain
+pending. Pixel Launcher weather still needs Smartspace diagnostics; UBL's crash
+and hardware attestation are not established as fixed. The older sections below
+retain inherited product and feature documentation.
+
+For an existing Coral checkout:
+
+```bash
+repo init -u https://github.com/its-hecker/HeckerOS.git -b fix/coral-ui-compatibility-20261102 --git-lfs &&
+git -C .repo/local_manifests fetch origin fix/coral-ui-compatibility-20261102 &&
+git -C .repo/local_manifests switch --detach FETCH_HEAD &&
+repo sync -c --fail-fast --no-clone-bundle --no-tags &&
+env -u HECKER_BUILD_JOBS HECKER_DEVICE=coral HECKER_BUILD_VARIANT=userdebug bash .repo/local_manifests/build.sh
+```
+
+With the job override unset, the helper calls `m heckeros` and Android chooses
+parallelism. Existing RBE variables are preserved.
 
 
 This experimental `feat/statusbar-lyrics-dual-20261029` branch adds
