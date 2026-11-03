@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/syscall.h>
+#include <sys/mman.h>
 #include <unistd.h>
 
 static bool g_enabled;
@@ -28,13 +29,56 @@ bool custom_rom_hide_enabled() {
 }
 
 static int raw_close(int fd) { return static_cast<int>(syscall(__NR_close, fd)); }
-static bool fd_path(int fd, char* out, size_t capacity) {
+// Bionic requires every stack frame to stay below 2 KiB. Common paths use a
+// small local buffer; long paths use a temporary mapping without reducing PATH_MAX
+// or entering allocator locks from access/stat/readlink paths.
+// Each call owns its scratch space, including nested calls and other threads.
+class PathBuffer {
+    char local_[256];
+    char* data_ = local_;
+    size_t capacity_ = sizeof(local_);
+public:
+    PathBuffer() = default;
+    PathBuffer(const PathBuffer&) = delete;
+    PathBuffer& operator=(const PathBuffer&) = delete;
+    ~PathBuffer() {
+        int saved = errno;
+        if (data_ != local_) syscall(__NR_munmap, data_, capacity_);
+        errno = saved;
+    }
+    char* data() { return data_; }
+    size_t capacity() const { return capacity_; }
+    // Callers overwrite the buffer after growth; no stale contents are retained.
+    bool reserve(size_t capacity) {
+        if (capacity <= capacity_) return true;
+        if (capacity > PATH_MAX) return false;
+        // mmap2 uses page units for the offset on 32-bit ARM; zero is valid for both ABIs.
+#if defined(__NR_mmap2)
+        constexpr long mapping = __NR_mmap2;
+#else
+        constexpr long mapping = __NR_mmap;
+#endif
+        void* memory = reinterpret_cast<void*>(syscall(mapping, nullptr, capacity,
+                PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0UL));
+        if (memory == MAP_FAILED) return false;
+        char* larger = static_cast<char*>(memory);
+        if (data_ != local_) syscall(__NR_munmap, data_, capacity_);
+        data_ = larger;
+        capacity_ = capacity;
+        return true;
+    }
+};
+static bool fd_path(int fd, PathBuffer& out) {
     if (fd < 0) return false;
     char link[64];
     snprintf(link, sizeof(link), "/proc/self/fd/%d", fd);
-    ssize_t size = syscall(__NR_readlinkat, AT_FDCWD, link, out, capacity - 1);
-    if (size <= 0 || static_cast<size_t>(size) >= capacity - 1) return false;
-    out[size] = 0;
+    ssize_t size = syscall(__NR_readlinkat, AT_FDCWD, link, out.data(), out.capacity() - 1);
+    if (size > 0 && static_cast<size_t>(size) >= out.capacity() - 1) {
+        if (!out.reserve(PATH_MAX)) return false;
+        size = syscall(__NR_readlinkat, AT_FDCWD, link, out.data(), out.capacity() - 1);
+    }
+    if (size <= 0 || static_cast<size_t>(size) >= out.capacity() - 1) return false;
+    out.data()[size] = 0;
     return true;
 }
 static bool normalize(const char* in, char* out, size_t capacity) {
@@ -62,6 +106,11 @@ static bool normalize(const char* in, char* out, size_t capacity) {
     out[used] = 0;
     return true;
 }
+static bool normalize_path(const char* in, PathBuffer& out) {
+    size_t length = strnlen(in, PATH_MAX);
+    return length < PATH_MAX && out.reserve(length + 1)
+            && normalize(in, out.data(), out.capacity());
+}
 static bool rom_path(const char* path) {
     static const char* const parents[] = {"/system", "/system/etc", "/system_ext",
         "/system_ext/etc", "/product", "/product/etc", "/vendor", "/vendor/etc",
@@ -81,24 +130,32 @@ static bool rom_path(const char* path) {
 bool custom_rom_hide_should_block_at(int dirfd, const char* path) {
     if (!custom_rom_hide_enabled() || !path || !*path) return false;
     int saved = errno;
-    char absolute[PATH_MAX], clean[PATH_MAX];
+    PathBuffer absolute, clean;
     bool valid = true;
     if (*path == '/') {
-        valid = normalize(path, clean, sizeof(clean));
+        valid = normalize_path(path, clean);
     } else {
-        char directory[PATH_MAX];
+        PathBuffer directory;
         if (dirfd == AT_FDCWD) {
-            valid = syscall(__NR_getcwd, directory, sizeof(directory)) > 0;
+            long result = syscall(__NR_getcwd, directory.data(), directory.capacity());
+            if (result < 0 && errno == ERANGE && directory.reserve(PATH_MAX)) {
+                result = syscall(__NR_getcwd, directory.data(), directory.capacity());
+            }
+            valid = result > 0;
         } else {
-            valid = fd_path(dirfd, directory, sizeof(directory));
+            valid = fd_path(dirfd, directory);
         }
         if (valid) {
-            int length = snprintf(absolute, sizeof(absolute), "%s/%s", directory, path);
-            valid = length > 0 && static_cast<size_t>(length) < sizeof(absolute)
-                    && normalize(absolute, clean, sizeof(clean));
+            size_t capacity = strlen(directory.data()) + 1 + strnlen(path, PATH_MAX) + 1;
+            valid = absolute.reserve(capacity);
+            if (valid) {
+                int length = snprintf(absolute.data(), absolute.capacity(), "%s/%s", directory.data(), path);
+                valid = length > 0 && static_cast<size_t>(length) < absolute.capacity()
+                        && normalize_path(absolute.data(), clean);
+            }
         }
     }
-    bool blocked = valid && rom_path(clean);
+    bool blocked = valid && rom_path(clean.data());
     errno = saved;
     return blocked;
 }
@@ -224,12 +281,12 @@ int custom_rom_hide_post_open(int fd, int flags) {
     if ((flags & O_ACCMODE) != O_RDONLY || (flags & (O_CREAT | O_TRUNC))
             || (flags & O_TMPFILE) == O_TMPFILE) return fd;
     int saved = errno;
-    char path[PATH_MAX], clean[PATH_MAX];
-    if (!fd_path(fd, path, sizeof(path)) || !normalize(path, clean, sizeof(clean))) { errno = saved; return fd; }
-    if (rom_path(clean)) { raw_close(fd); errno = ENOENT; return -1; }
+    PathBuffer path, clean;
+    if (!fd_path(fd, path) || !normalize_path(path.data(), clean)) { errno = saved; return fd; }
+    if (rom_path(clean.data())) { raw_close(fd); errno = ENOENT; return -1; }
     if (flags & O_PATH) { errno = saved; return fd; }
-    Filter type = filter_type(clean);
-    int replacement = type == NONE ? -1 : filtered_copy(clean, type, (flags & O_CLOEXEC) != 0);
+    Filter type = filter_type(clean.data());
+    int replacement = type == NONE ? -1 : filtered_copy(clean.data(), type, (flags & O_CLOEXEC) != 0);
     if (replacement >= 0) { raw_close(fd); fd = replacement; }
     errno = saved;
     return fd;
@@ -246,7 +303,8 @@ ssize_t custom_rom_hide_readlink_post(int dirfd, const char* path, char* buffer,
     // The caller's buffer may be too short to contain the encoded name. The kernel has
     // already validated it; read the complete link into scratch space before truncation.
     int saved = errno;
-    char target[PATH_MAX];
+    // memfd names have at most 248 bytes, plus the prefix and deleted suffix.
+    char target[sizeof("/memfd:") + 249 + sizeof(" (deleted)")];
     ssize_t count = syscall(__NR_readlinkat, dirfd, path, target, sizeof(target));
     errno = saved;
     if (count <= static_cast<ssize_t>(length) || memcmp(target, prefix, length)) return result;

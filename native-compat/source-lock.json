@@ -29,5 +29,14 @@
     "crash_fixes": "VoltageOS/bionic@d977fa6c6aafd7137497e7f5597d8ad554f4aee2",
     "service_visibility": "VoltageOS/frameworks_native@3faf24b5913616b2a4cfc73c0c9363fabf642a3f",
     "addon_d": "VoltageOS/vendor_voltage@7ea378114338e4a3ee859fdaed4d8e0f35552d33"
+  },
+  "regression_inputs": {
+    "published_custom_rom_hide": {
+      "repository": "its-hecker/HeckerOS",
+      "revision": "a3f0f41b94e67c4f961e2daa02f46f6d621d9660",
+      "path": "native-compat/bionic/custom_rom_hide.cpp",
+      "sha256": "9ff0b1499c663c47aad5d7c1c69dc15418ab1a33c4bbd495dd213243f60975dd",
+      "blob_sha": "f11b11f221b8c0ec12e4ecac746a0c2322e558dd"
+    }
   }
 }

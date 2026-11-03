@@ -468,5 +468,12 @@
     ],
     "weather": "Pixel Launcher Google Smartspace requires device diagnostics",
     "validation": "Host and SDK checks only; full Android build and device acceptance pending"
+  },
+  "build_fix_20261103": {
+    "branch": "fix/coral-ui-compatibility-20261102",
+    "device": "coral",
+    "parent_suite_revision": "a3f0f41b94e67c4f961e2daa02f46f6d621d9660",
+    "issue": "Bionic helper exceeds the 2048-byte stack-frame limit",
+    "validation": "Clang 18 ARM/ARM64 O2/Os platform/APEX object checks and executed native boundary/upgrade tests pass; full ServerHive build pending"
   }
 }

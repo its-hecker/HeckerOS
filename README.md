@@ -2,6 +2,10 @@
 
 ## Coral UI and compatibility — 2 November 2026
 
+**3 November build fix:** reduce the ROM-visibility helper's stack use to fit
+Bionic's 2 KiB limit, migrate the exact previously prepared copy, and add ARM/
+ARM64 platform/APEX cross-compilation checks. See [cause and validation](docs/coral-bionic-stack-fix-2026-11-03.md).
+
 This `fix/coral-ui-compatibility-20261102` branch adds independent AOD clock size,
 lighter adjustable QS blur, native media visibility/expansion handling, reduced
 per-frame work, single Settings card backgrounds, a visible GameSpace icon and

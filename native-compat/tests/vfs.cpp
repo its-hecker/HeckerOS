@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
+#include <string>
 #include <sys/syscall.h>
 #include <unistd.h>
 #include "custom_rom_hide.h"
@@ -18,6 +20,12 @@ static uid_t uid = 10101;
 static int kernelCalls, mapsFd = -1, artifactFd = -1;
 static bool failWrites;
 static const char* sample;
+static const char* linkAlias;
+extern "C" void probe_fail_allocations(bool);
+extern "C" size_t probe_allocation_calls();
+extern "C" size_t probe_outstanding_allocations();
+extern "C" void* probe_map(size_t);
+extern "C" int probe_unmap(void*, size_t);
 static bool invalid(const void* p) {
     return p == nullptr || p == reinterpret_cast<const void*>(0x800000u)
             || p == reinterpret_cast<const void*>(0x80000000u);
@@ -64,6 +72,18 @@ extern "C" long probe_syscall(long operation, ...) {
     va_start(args, operation);
     long result;
     switch (operation) {
+        case SYS_mmap: {
+            void* address = va_arg(args, void*); size_t size = va_arg(args, size_t);
+            int prot = va_arg(args, int), flags = va_arg(args, int), fd = va_arg(args, int);
+            unsigned long offset = va_arg(args, unsigned long);
+            assert(address == nullptr && prot == (PROT_READ | PROT_WRITE));
+            assert(flags == (MAP_PRIVATE | MAP_ANONYMOUS) && fd == -1 && offset == 0);
+            result = reinterpret_cast<long>(probe_map(size)); break;
+        }
+        case SYS_munmap: {
+            void* address = va_arg(args, void*); size_t size = va_arg(args, size_t);
+            result = probe_unmap(address, size); break;
+        }
         case SYS_openat: {
             int fd = va_arg(args, int); const char* path = va_arg(args, const char*);
             int flags = va_arg(args, int), mode = va_arg(args, int);
@@ -76,7 +96,7 @@ extern "C" long probe_syscall(long operation, ...) {
             char maps[64], artifact[64];
             snprintf(maps, sizeof(maps), "/proc/self/fd/%d", mapsFd);
             snprintf(artifact, sizeof(artifact), "/proc/self/fd/%d", artifactFd);
-            const char* alias = mapsFd >= 0 && !strcmp(path, maps) ? "/proc/self/maps"
+            const char* alias = mapsFd >= 0 && !strcmp(path, maps) ? (linkAlias ? linkAlias : "/proc/self/maps")
                     : artifactFd >= 0 && !strcmp(path, artifact) ? "/system/addon.d/50-lineage.sh" : nullptr;
             if (alias) {
                 size_t n = strlen(alias); if (n > capacity) n = capacity;
@@ -90,7 +110,14 @@ extern "C" long probe_syscall(long operation, ...) {
             else result = syscall(operation, fd, data, size);
             break;
         }
-        case SYS_close: result = syscall(operation, va_arg(args, int)); break;
+        case SYS_close: {
+            int fd = va_arg(args, int); result = syscall(operation, fd);
+            if (result == 0) {
+                if (mapsFd == fd) mapsFd = -1;
+                if (artifactFd == fd) artifactFd = -1;
+            }
+            break;
+        }
         case SYS_getcwd: {
             char* data = va_arg(args, char*); size_t size = va_arg(args, size_t);
             result = syscall(operation, data, size); break;
@@ -139,6 +166,55 @@ int main(int argc, char** argv) {
     errno = EDOM; assert(fstatat(AT_FDCWD, "/system/addon.dummy", &st, 0) == 0 && errno == EDOM);
     assert(open("/system/addon.d/50-lineage.sh", O_RDONLY) == -1 && errno == ENOENT);
     assert(open("/system/addon.d/50-lineage.sh", O_PATH) == -1 && errno == ENOENT);
+    size_t allocations = probe_allocation_calls();
+    errno = EDOM;
+    assert(fstatat(AT_FDCWD, "/system/addon.d/test", &st, 0) == -1 && errno == ENOENT);
+    assert(fstatat(AT_FDCWD, "/system/bin/app_process64", &st, 0) == 0 && errno == ENOENT);
+    assert(probe_allocation_calls() == allocations);  // Ordinary path checks do not allocate.
+    std::string stem = "/system/";
+    for (int i = 0; i < 12; ++i) stem += std::string(240, 'x') + "/";
+    for (int i = 0; i < 12; ++i) stem += "../";
+    std::string longPath = stem + "addon.d/test";
+    errno = EDOM;
+    assert(fstatat(AT_FDCWD, longPath.c_str(), &st, 0) == -1 && errno == ENOENT);
+    longPath = stem + "bin/app_process64";
+    errno = EDOM;
+    assert(fstatat(AT_FDCWD, longPath.c_str(), &st, 0) == 0 && errno == EDOM);
+    assert(probe_outstanding_allocations() == 0);
+    probe_fail_allocations(true); errno = EDOM;
+    assert(fstatat(AT_FDCWD, longPath.c_str(), &st, 0) == 0 && errno == EDOM);
+    probe_fail_allocations(false);
+
+    // Long relative paths and fd targets retain PATH_MAX handling and release scratch buffers.
+    errno = EDOM;
+    assert(fstatat(AT_FDCWD, longPath.c_str() + 1, &st, 0) == 0 && errno == EDOM);
+    int directory = static_cast<int>(syscall(SYS_openat, AT_FDCWD, "/system", O_PATH, 0));
+    if (directory < 0) directory = static_cast<int>(syscall(SYS_openat, AT_FDCWD, "/", O_PATH, 0));
+    assert(directory >= 0);
+    assert(fstatat(directory, longPath.c_str() + 1, &st, 0) == 0);
+    close(directory);
+    std::string parent(sample, static_cast<size_t>(strrchr(sample, '/') - sample));
+    std::string deep1 = parent + "/" + std::string(150, 'a');
+    std::string deep2 = deep1 + "/" + std::string(150, 'b');
+    assert(mkdir(deep1.c_str(), 0700) == 0 && mkdir(deep2.c_str(), 0700) == 0);
+    int cwd = static_cast<int>(syscall(SYS_openat, AT_FDCWD, ".", O_PATH, 0));
+    assert(cwd >= 0 && chdir(deep2.c_str()) == 0);
+    errno = EDOM;
+    assert(fstatat(AT_FDCWD, "child", &st, 0) == 0 && errno == EDOM);
+    probe_fail_allocations(true); errno = EDOM;
+    assert(fstatat(AT_FDCWD, "child", &st, 0) == 0 && errno == EDOM);
+    probe_fail_allocations(false);
+    assert(fchdir(cwd) == 0); close(cwd);
+    assert(rmdir(deep2.c_str()) == 0 && rmdir(deep1.c_str()) == 0);
+    linkAlias = longPath.c_str();
+    errno = EDOM;
+    int longFd = open("/proc/self/maps", O_RDONLY);
+    assert(longFd >= 0 && errno == EDOM); close(longFd);
+    probe_fail_allocations(true); errno = EDOM;
+    longFd = open("/proc/self/maps", O_RDONLY);
+    assert(longFd >= 0 && errno == EDOM); close(longFd);
+    probe_fail_allocations(false); linkAlias = nullptr;
+    assert(probe_outstanding_allocations() == 0);
 
     errno = EDOM;
     int fd = open("/proc/self/maps", O_RDONLY | O_CLOEXEC);
@@ -167,6 +243,7 @@ int main(int argc, char** argv) {
     fd = open("/proc/self/maps", O_RDWR); assert(fd >= 0);
     n = read(fd, bytes, sizeof(bytes) - 1); assert(n > 0); bytes[n] = 0;
     assert(strstr(bytes, "lineage")); close(fd);
+    assert(probe_outstanding_allocations() == 0);
     assert(__libc_hecker_set_rom_hide(false)); assert(!custom_rom_hide_enabled());
     assert(fstatat(AT_FDCWD, "/system/addon.d", &st, 0) == 0);
     fd = open("/proc/self/maps", O_RDONLY); assert(fd >= 0);

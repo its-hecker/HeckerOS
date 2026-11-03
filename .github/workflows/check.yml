@@ -79,7 +79,10 @@ jobs:
       - name: Check per-app compatibility and guarded downgrade policy
         run: python3 tools/check_app_compatibility.py
       - name: Check native ROM compatibility, syscall ABIs and service visibility
-        run: python3 tools/check_rom_compatibility.py
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y clang-18
+          python3 tools/check_rom_compatibility.py --android-compile --clang clang++-18
       - name: Check owned Pixel enrollment and Axion integrity adapters
         run: python3 tools/check_platform_features.py --sdk-cache generated/sdk
       - name: Check Android 17 keystore integration and private spoofing configuration
