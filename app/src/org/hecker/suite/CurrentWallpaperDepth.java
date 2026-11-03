@@ -14,7 +14,8 @@ import java.util.function.BooleanSupplier;
 
 /** Shared worker pipeline for automatic jobs and the explicit current-lock-wallpaper action. */
 final class CurrentWallpaperDepth {
-    static boolean extract(Context context, BooleanSupplier allowed, boolean force) throws IOException {
+    static final Object PUBLISH_LOCK = new Object();
+    static synchronized boolean extract(Context context, BooleanSupplier allowed, boolean force) throws IOException {
         WallpaperManager manager = WallpaperManager.getInstance(context);
         int wallpaper = DefaultAppearance.wallpaperId(context);
         if (!allowed.getAsBoolean()
@@ -30,6 +31,7 @@ final class CurrentWallpaperDepth {
             if (!current(context, allowed, wallpaper)) return false;
             foreground = DepthSubjectExtractor.extract(context, background);
             if (!current(context, allowed, wallpaper)) return false;
+            synchronized (PUBLISH_LOCK) {
             String id = UUID.randomUUID().toString().replace("-", "");
             directory = new File(new File(context.getFilesDir(), "depth"), id);
             if (!directory.mkdirs()) throw new IOException("Cannot stage depth layers");
@@ -49,6 +51,7 @@ final class CurrentWallpaperDepth {
                 if (!old.equals(directory) && old.getName().matches("[a-f0-9]{32}")
                         && !old.getName().equals(home)) erase(old);
             return true;
+            }
         } finally {
             background.recycle();
             if (foreground != null) foreground.recycle();

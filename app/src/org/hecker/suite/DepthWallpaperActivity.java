@@ -179,6 +179,7 @@ public final class DepthWallpaperActivity extends Activity {
             File directory = new File(new File(getFilesDir(), "depth"), id);
             boolean committed = false;
             try {
+                synchronized (CurrentWallpaperDepth.PUBLISH_LOCK) {
                 if (!directory.mkdirs()) throw new IOException("Cannot create depth pair");
                 write(new File(directory, "background.png"), bg);
                 write(new File(directory, "foreground.png"), fg);
@@ -206,6 +207,7 @@ public final class DepthWallpaperActivity extends Activity {
                     if (!old.equals(directory) && old.getName().matches("[a-f0-9]{32}")
                             && !old.getName().equals(Settings.Secure.getString(getContentResolver(),DepthWallpaperProvider.ID))
                             && !old.getName().equals(Settings.Secure.getString(getContentResolver(),HomeAppearance.KEY))) erase(old);
+                }
                 runOnUiThread(() -> { if (!stopped && generation == token) { error(R.string.depth_wallpaper_applied); finish(); } });
             } catch (IOException | RuntimeException failure) {
                 runOnUiThread(() -> { if (!stopped && generation == token) { error(R.string.depth_wallpaper_invalid); apply.setEnabled(true); } });
