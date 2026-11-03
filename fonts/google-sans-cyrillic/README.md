@@ -12,8 +12,20 @@ Pixel font families. These are Google Sans subsets, not redistributed Product Sa
 
 The preparation adapter adds a Cyrillic family before each named text family's
 existing faces. Existing named clock families and aliases are preserved. It
-accepts only the pinned Pixel font configuration or its own exact output, runs
-idempotently, and restores the original bytes when reverted.
+accepts the pinned Pixel font configuration, its own exact output, or the exact
+previously published output for upgrade/revert. It runs idempotently and restores
+the original bytes when reverted. Unfamiliar edits are preserved and rejected.
+
+Android 17 forbids `lang`, `variant` and `ignore` on named families and also
+forbids `name` on families inside a named `family-list`. The Cyrillic subsets'
+glyph coverage selects the script without a `lang` attribute. The old adapter's
+`lang="und-Cyrl"` caused Zygote to fail during Typeface preload; preparation now
+migrates that exact configuration automatically. Host tests run the pinned
+Android font parsers with host data/XML adapters to cover this boot failure.
+
+The final built-output check invokes the Suite's `tools/google_sans_cyrillic.py`
+with `--product-out out/target/product/coral` from the Android source root to
+verify the installed XML and both font payloads.
 
 With `fonttools==4.61.1`, `python3 tools/build_cyrillic_fonts.py` reproduces both
 payloads byte-for-byte. Source fonts are fetched only for this maintainer check;

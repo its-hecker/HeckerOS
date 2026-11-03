@@ -2,6 +2,13 @@
 
 ## Coral UI and compatibility — 2 November 2026
 
+**3 November boot fix:** the Cyrillic font adapter no longer emits a forbidden
+`lang` attribute inside named font lists. This was the Zygote/Typeface preload
+failure in the supplied boot logs. Existing prepared checkouts upgrade the exact
+old XML automatically. The pinned Android parsers reject the previous output and
+accept the correction in host tests; a rebuilt ROM and phone test are pending.
+See [boot cause, correction and rebuild](docs/coral-font-boot-fix-2026-11-03.md).
+
 **3 November build fix:** reduce the ROM-visibility helper's stack use to fit
 Bionic's 2 KiB limit, migrate the exact previously prepared copy, and add ARM/
 ARM64 platform/APEX cross-compilation checks. See [cause and validation](docs/coral-bionic-stack-fix-2026-11-03.md).
@@ -30,7 +37,7 @@ repo init -u https://github.com/its-hecker/HeckerOS.git -b fix/coral-ui-compatib
 git -C .repo/local_manifests fetch origin fix/coral-ui-compatibility-20261102 &&
 git -C .repo/local_manifests switch --detach FETCH_HEAD &&
 repo sync -c --fail-fast --no-clone-bundle --no-tags &&
-env -u HECKER_BUILD_JOBS HECKER_DEVICE=coral HECKER_BUILD_VARIANT=userdebug bash .repo/local_manifests/build.sh
+env -u HECKER_BUILD_JOBS USE_RBE=true HECKER_DEVICE=coral HECKER_BUILD_VARIANT=userdebug bash .repo/local_manifests/build.sh
 ```
 
 With the job override unset, the helper calls `m heckeros` and Android chooses

@@ -59,10 +59,12 @@ class BuiltOutputTests(unittest.TestCase):
             with patch("check_built_output.verify_installed") as apks, patch("check_built_output.check_suite"), \
                     patch("check_built_output.check_bootanimation"), \
                     patch("check_built_output.check_librepods"), \
+                    patch("check_built_output.check_font_customization") as fonts, \
                     patch("check_built_output.check_development_adb") as adb:
                 check(root, output)
                 apks.assert_called_once_with(root, output)
                 adb.assert_called_once()
+                fonts.assert_called_once_with(root, output)
                 self.assertEqual((output,), adb.call_args.args)
             init.write_text("service camera /wrong/binary\n")
             with self.assertRaisesRegex(ValueError, "exact camera provider init"):

@@ -469,6 +469,15 @@
     "weather": "Pixel Launcher Google Smartspace requires device diagnostics",
     "validation": "Host and SDK checks only; full Android build and device acceptance pending"
   },
+  "boot_fix_20261103": {
+    "branch": "fix/coral-ui-compatibility-20261102",
+    "device": "coral",
+    "parent_suite_revision": "335d398d9fe3a0e2f487424be667b1d8cad10f7f",
+    "parent_manifest_revision": "cd6bf7a5ece1739901546f43233bef91f900fde2",
+    "issue": "Cyrillic adapter emits forbidden lang attributes in named family-list children; Zygote fails during Typeface preload",
+    "legacy_config_sha256": "e606e8315cad959520194c7d23e5665065a96f2058b63fd96d6088b78467ce61",
+    "validation": "Pinned Android parser host execution reproduces the old exception and accepts the fixed XML; glyph, migration and built-output tests pass; full ROM build and phone acceptance pending"
+  },
   "build_fix_20261103": {
     "branch": "fix/coral-ui-compatibility-20261102",
     "device": "coral",

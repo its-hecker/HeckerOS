@@ -1,0 +1,12 @@
+{
+  "repository": "its-hecker/heckeros_frameworks_base",
+  "revision": "4af276bc5ceea071ef0da5ea440cda4470c08df6",
+  "source_paths": {
+    "FontListParser.java": "graphics/java/android/graphics/FontListParser.java",
+    "FontCustomizationParser.java": "graphics/java/android/graphics/fonts/FontCustomizationParser.java"
+  },
+  "files": {
+    "FontListParser.java": "7c97c01d0a7877d121977b691d93f9cbb14560c9aafe99ac58ddc81258dd2c8d",
+    "FontCustomizationParser.java": "eeb5003153b5b4efa7503ba48824cd601423c539698a82663930554829e9703c"
+  }
+}

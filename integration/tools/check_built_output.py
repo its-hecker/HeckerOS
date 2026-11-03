@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 import zipfile
 
@@ -154,6 +155,14 @@ def check_no_addon_d(output):
                 raise ValueError("addon.d must be absent from the built image: " + str(path))
 
 
+def check_font_customization(rom, output):
+    script = rom / "vendor/hecker/floral/suite/tools/google_sans_cyrillic.py"
+    result = subprocess.run([sys.executable, str(script), "--product-out", str(output)],
+                            capture_output=True, text=True)
+    if result.returncode:
+        raise ValueError("Built product font validation failed: " + result.stdout + result.stderr)
+
+
 def check(rom, output):
     check_no_addon_d(output)
     check_removed_weather(output)
@@ -172,10 +181,11 @@ def check(rom, output):
     check_suite(rom, output)
     check_bootanimation(rom, output)
     check_librepods(rom, output)
+    check_font_customization(rom, output)
     print("Built output: camera provider binary/init/VINTF, original ten-APK Google Camera set "
           "and Motion Sense country override, Hecker Suite APK/permissions/freeform; "
           "source-built LibrePods APK payload/permissions; exact HeckerOS boot animation; "
-          "development ADB mode/authentication; OmniJaws absent: PASS")
+          "development ADB mode/authentication; boot-safe font configuration/payloads; OmniJaws absent: PASS")
 
 
 if __name__ == "__main__":
