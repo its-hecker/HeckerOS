@@ -1227,5 +1227,15 @@
       "old": "        controllers.add(new CertifiedPropsPreferenceController(context));",
       "new": "        // Hecker Suite owns the certified profile and attestation configuration."
     }
+  ],
+  "frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/keyguard/ui/composable/elements/LockscreenElementFactoryImpl.kt": [
+    {
+      "old": "        with(scope) {\n            CompositionLocalProvider(LocalContext provides element.context) {",
+      "new": "        val depthModifier =\n            if (key == com.android.systemui.plugins.keyguard.ui.composable.elements.LockscreenElementKeys.Clock.Small ||\n                key == com.android.systemui.plugins.keyguard.ui.composable.elements.LockscreenElementKeys.Clock.Large) {\n                com.android.systemui.hecker.HeckerNativeClockDepthModifier(element.context)\n            } else Modifier\n        with(scope) {\n            CompositionLocalProvider(LocalContext provides element.context) {"
+    },
+    {
+      "old": "                    modifier.onGloballyPositioned { coordinates ->",
+      "new": "                    modifier.then(depthModifier).onGloballyPositioned { coordinates ->"
+    }
   ]
 }

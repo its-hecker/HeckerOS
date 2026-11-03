@@ -19,4 +19,21 @@ public final class DepthWallpaperGeometry {
     public static boolean validIdentity(String value) {
         return value != null && value.matches("[a-f0-9]{32}");
     }
+
+    /** Map root-space subject pixels into the current native clock's local coordinates. */
+    public static boolean rootToLocal(float[] result, float originX, float originY,
+            float rightX, float rightY, float downX, float downY, float basis) {
+        if (result == null || result.length < 9 || !Float.isFinite(basis) || basis <= 0
+                || !Float.isFinite(originX) || !Float.isFinite(originY)
+                || !Float.isFinite(rightX) || !Float.isFinite(rightY)
+                || !Float.isFinite(downX) || !Float.isFinite(downY)) return false;
+        float xx = (rightX - originX) / basis, xy = (downX - originX) / basis;
+        float yx = (rightY - originY) / basis, yy = (downY - originY) / basis;
+        float determinant = xx * yy - xy * yx;
+        if (!Float.isFinite(determinant) || Math.abs(determinant) < 0.000001f) return false;
+        result[0] = xx; result[1] = xy; result[2] = originX;
+        result[3] = yx; result[4] = yy; result[5] = originY;
+        result[6] = 0; result[7] = 0; result[8] = 1;
+        return true;
+    }
 }

@@ -313,7 +313,8 @@
     "40bc5097ece2759120950ac95c8e423459b4895f",
     "a80ad966b2582f08f73665a3ecb64741652b10d9",
     "8c0339e0c45d5cd6eac87e7e18fee093bdbed876",
-    "98663e466aa80ec052d03637f6b98c8889515960"
+    "98663e466aa80ec052d03637f6b98c8889515960",
+    "3143d5c215ad180fd30ce245c25cf5c8e8c58495"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerLivingFlow.kt": [
     "859ab10b91e1498dcc0a752c5f2e72565b3d2573",
@@ -348,5 +349,11 @@
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MediaCardGeometry.java": [
     "7257bf7b8e6cb946e85263629b4b1c3399a6001e"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/DepthWallpaperGeometry.java": [
+    "125b2820ec8829064ea723bfa236ef35a0db7433"
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerClockHandoff.kt": [
+    "de3c6c5387e93f00b10b301611dd01ece6ab5f84"
   ]
 }

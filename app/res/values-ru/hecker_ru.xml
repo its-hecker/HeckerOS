@@ -207,7 +207,7 @@
     <string name="lock_clock_word">Часы словами · английский</string>
     <string name="lock_clock_tall">Высокие часы с эффектом глубины</string>
     <string name="depth_wallpaper_title">Объёмные обои экрана блокировки</string>
-    <string name="depth_wallpaper_summary">Объект обоев отображается перед выбранными часами Hecker. Поддерживаются все стили часов Hecker.</string>
+    <string name="depth_wallpaper_summary">Объект обоев перекрывает выбранные часы экрана блокировки. Поддерживаются системные часы, установленные плагины и все стили Hecker. Для системных часов или плагина отключите «Собственные часы».</string>
     <string name="depth_wallpaper_wake">Анимация глубины при включении экрана</string>
     <string name="depth_wallpaper_wake_summary">Плавно показывать часы и слои глубины при включении экрана. Анимация приостанавливается на AOD и в режиме энергосбережения.</string>
     <string name="depth_wallpaper_import">Импорт объёмных обоев блокировки</string>

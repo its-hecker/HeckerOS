@@ -196,7 +196,6 @@ public final class DepthWallpaperActivity extends Activity {
                     &&Settings.Secure.putInt(getContentResolver(),DefaultAppearance.HOME_DEPTH,1)
                     &&Settings.Secure.putString(getContentResolver(),HomeAppearance.KEY,id);
                 if(!homeOnly)saved=saved&&Settings.Secure.putInt(getContentResolver(),DefaultAppearance.WALLPAPER_ID,DefaultAppearance.wallpaperId(this))
-                    &&Settings.Secure.putInt(getContentResolver(),"hecker_custom_lockscreen_clock",1)
                     &&Settings.Secure.putInt(getContentResolver(),"hecker_depth_wallpaper",1)
                     &&Settings.Secure.putString(getContentResolver(),DepthWallpaperProvider.ID,id);
                 else if(lockOwned)saved=saved&&Settings.Secure.putInt(getContentResolver(),DefaultAppearance.WALLPAPER_ID,DefaultAppearance.wallpaperId(this));

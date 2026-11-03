@@ -24,5 +24,6 @@ fun HeckerClockHandoff(layout: SceneTransitionLayoutState, content: @Composable 
             else 0f
         }
     }
-    CompositionLocalProvider(LocalHeckerHomeHandoff provides progress, content = content)
+    CompositionLocalProvider(LocalHeckerHomeHandoff provides progress,
+        LocalHeckerNativeClockDepth provides true, content = content)
 }

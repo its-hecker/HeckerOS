@@ -118,7 +118,7 @@ public final class LockScreenSettingsActivity extends Activity {
     }
     @Override protected void onResume() {
         super.onResume();
-        // Import can enable the selected clock. Refresh controls on return.
+        // Import can enable depth. Refresh controls while preserving the selected clock.
         if (imported) { imported = false; recreate(); }
     }
     private boolean imported;
@@ -153,8 +153,7 @@ public final class LockScreenSettingsActivity extends Activity {
         button.setOnClickListener(v -> {
             if (!put(key, button.isChecked() ? 1 : 0)) button.setChecked(!button.isChecked());
             if ((DepthWallpaperJob.AUTO.equals(key) || "hecker_depth_wallpaper".equals(key)) && button.isChecked()) {
-                put("hecker_depth_wallpaper",1); put("hecker_custom_lockscreen_clock",1);
-                if(customClock!=null)customClock.setChecked(true);
+                put("hecker_depth_wallpaper",1);
                 if(depthToggle!=null)depthToggle.setChecked(true);
             }
             if (DepthWallpaperJob.AUTO.equals(key) || "hecker_depth_wallpaper".equals(key)) DepthWallpaperJob.schedule(this);

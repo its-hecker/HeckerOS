@@ -271,6 +271,24 @@ data class NativeBrightnessFraction(val coercedValueAsFraction: Float)
 ''' + body + '\n}\n'
 
 
+def native_clock_depth_probe():
+    """Compile the exact new native factory binding against the production mask API."""
+    patches = json.loads((ROOT/'framework/customization-patches.json').read_text())
+    path = ('frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/'
+            'keyguard/ui/composable/elements/LockscreenElementFactoryImpl.kt')
+    binding = patches[path][0]['new'].split('        with(scope) {', 1)[0]
+    modifier = patches[path][1]['new'].strip().split(' { coordinates ->', 1)[0]
+    return '''package com.android.systemui.keyguard.ui.composable.elements
+import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+class NativeClockDepthElement(val context: Context)
+@Composable fun NativeClockDepthBindingProbe(key: Any, element: NativeClockDepthElement,
+        modifier: Modifier): Modifier {
+''' + binding + '\n return ' + modifier + ' { }\n}\n'
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--sdk-cache', type=Path, required=True)
@@ -308,6 +326,10 @@ object ComposeInitializer {
 }'''
         for name, content in {**KOTLIN, 'ReferenceRoute.kt': scene_probe(),
                               'NativeBrightnessTrackProbe.kt': brightness_track_probe(),
+                              'NativeClockDepthBindingProbe.kt': native_clock_depth_probe(),
+                              'NativeClockDepthKeys.kt': '''package com.android.systemui.plugins.keyguard.ui.composable.elements
+object LockscreenElementKeys { object Clock { val Small = Any(); val Large = Any() } }
+''',
                               'ComposeInitializer.kt': compose_initializer}.items():
             target = out / 'kotlin' / name
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)

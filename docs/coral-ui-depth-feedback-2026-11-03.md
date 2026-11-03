@@ -3,6 +3,11 @@
 This source update addresses the supplied launcher, wallpaper, Quick Settings
 and developer-options screenshots. It retains the preceding font boot fix.
 
+**4 November follow-up:** [native stock and plugin clock depth](stock-clock-depth-2026-11-04.md)
+now extends the support described below. The earlier custom-clock requirement in
+the 3 November change is superseded, and importing/extracting a depth wallpaper
+preserves the selected stock/plugin or Hecker clock mode.
+
 | Report | Change |
 | --- | --- |
 | PixelOS spoof controls in Developer options | Remove the certified-profile, keybox and PIF preferences and their certified-profile controller registration through guarded native Settings adapters. The pinned framework already skips the old PixelOS GMS/Play Store property path; its keystore entry points already use the Hecker implementation. No conflict was established merely by the old UI being visible. Existing configuration is not erased. |

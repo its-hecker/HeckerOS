@@ -39,6 +39,7 @@ internal data class DepthViewport(val origin: Offset = Offset.Zero, val width: F
 internal object HeckerDepthScene {
     var viewport by mutableStateOf(DepthViewport())
     var reveal by mutableFloatStateOf(1f)
+    var awakeFraction by mutableFloatStateOf(0f)
     private var cache: DepthPair? = null
     private val loadMutex = Mutex()
     private val imagePaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
@@ -48,7 +49,7 @@ internal object HeckerDepthScene {
 
     @Composable
     private fun pair(context: Context, state: HeckerAmbientCharging.State): DepthPair? {
-        if (!state.depth || !state.customClock ||
+        if (!state.depth ||
                 !DepthWallpaperGeometry.validIdentity(state.depthId)) return null
         val id = state.depthId ?: return null
         val image by produceState<DepthPair?>(null, state.user, id, state.wakeGeneration) {
@@ -106,18 +107,19 @@ internal object HeckerDepthScene {
         val state by HeckerAmbientCharging.state.collectAsState()
         val image = pair(context, state)
         val homeHandoff = LocalHeckerHomeHandoff.current
-        val awakeFraction = heckerAwakeFraction(controller)
+        val awake = heckerAwakeFraction(controller)
+        awakeFraction = awake
         // Clock, subject crop, opacity and blur all follow the same reversible native doze frames.
         // Depth opt-out and reduced motion settle immediately; AOD never draws a wallpaper.
         val animated = state.flow && state.depthWake && !state.powerSave && ValueAnimator.areAnimatorsEnabled()
-        reveal = if (animated) awakeFraction else 1f
-        if (image == null || awakeFraction <= 0f) return
+        reveal = if (animated) awake else 1f
+        if (image == null || awake <= 0f) return
         val fraction = reveal
-        val blur = if (animated && awakeFraction < 1f) (1f - awakeFraction) * 18f else 0f
+        val blur = if (animated && awake < 1f) (1f - awake) * 18f else 0f
         val effect = remember(blur) { if (blur > .1f) BlurEffect(blur, blur, TileMode.Clamp) else null }
         Canvas(modifier.fillMaxSize().graphicsLayer {
             // Keep the new Home clock covered until the travelling lock digits nearly converge.
-            alpha = awakeFraction * (1f - FlowClockRenderer.homeFade(homeHandoff())); renderEffect = effect
+            alpha = awake * (1f - FlowClockRenderer.homeFade(homeHandoff())); renderEffect = effect
         }
             .clipToBounds().onGloballyPositioned {
             viewport = DepthViewport(it.positionInRoot(), it.size.width.toFloat(), it.size.height.toFloat())

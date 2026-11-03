@@ -76,7 +76,18 @@ public class CurrentDepthProbe {
   DepthSubjectExtractor.change=true;check(!CurrentWallpaperDepth.extract(c,()->true,true));check(before.equals(active(c)));DepthSubjectExtractor.change=false;
   c.manager.saved=false;c.manager.wallpaper=0;c.manager.lock=-1;check(CurrentWallpaperDepth.extract(c,()->true,true));
   check(Settings.Secure.getInt(c.resolver,DefaultAppearance.WALLPAPER_ID,-99)==0);
-  System.out.println("Current wallpaper: bounded built-in/saved lock/system sources, cache/force, selected clock, Home retention and stale/cancel/live rejection PASS");
+  // Both native/plugin and Hecker selections survive fresh and cached extraction.
+  for(int custom:new int[]{0,1})for(String plugin:new String[]{"DEFAULT","DIGITAL","PLUGIN_CUSTOM"}){
+   Settings.Secure.putInt(c.resolver,"hecker_custom_lockscreen_clock",custom);
+   Settings.Secure.putInt(c.resolver,"hecker_lockscreen_clock_style",5);
+   Settings.Secure.putString(c.resolver,"lock_screen_custom_clock_face",plugin);
+   check(CurrentWallpaperDepth.extract(c,()->true,true));
+   check(CurrentWallpaperDepth.extract(c,()->true,false));
+   check(Settings.Secure.getInt(c.resolver,"hecker_custom_lockscreen_clock",-1)==custom);
+   check(Settings.Secure.getInt(c.resolver,"hecker_lockscreen_clock_style",-1)==5);
+   check(plugin.equals(Settings.Secure.getString(c.resolver,"lock_screen_custom_clock_face")));
+  }
+  System.out.println("Current wallpaper: bounded sources, cache/force, stock/plugin/Hecker selection retention, Home retention and stale/cancel/live rejection PASS");
  }
 }''',
         }

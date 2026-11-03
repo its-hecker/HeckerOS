@@ -2,6 +2,12 @@
 
 ## Coral UI and compatibility — 2 November 2026
 
+**4 November stock/plugin clock depth:** extend depth masking to the native small
+and large clock elements, preserving the selected stock or installed plugin clock.
+Depth controls and import/extraction no longer enable the Hecker custom clock.
+Only clock pixels are masked; AOD, Smartspace, notifications and controls retain
+their native rendering. See [implementation, checks and use](docs/stock-clock-depth-2026-11-04.md).
+
 **4 November Settings crash fix:** defer homepage divider configuration until
 `onViewCreated()`, after AndroidX initializes its list. The exact crashing and
 earlier prepared adapters upgrade automatically. The host regression reproduces

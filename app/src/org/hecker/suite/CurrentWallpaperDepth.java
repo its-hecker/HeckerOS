@@ -40,10 +40,9 @@ final class CurrentWallpaperDepth {
             if (!current(context, allowed, wallpaper)) return false;
             if (!Settings.Secure.putString(context.getContentResolver(), DepthWallpaperProvider.ID, id)
                     || !Settings.Secure.putInt(context.getContentResolver(), DefaultAppearance.WALLPAPER_ID, wallpaper)
-                    || !Settings.Secure.putInt(context.getContentResolver(), "hecker_custom_lockscreen_clock", 1)
                     || !Settings.Secure.putInt(context.getContentResolver(), "hecker_depth_wallpaper", 1))
                 throw new IOException("Cannot publish depth pair");
-            // Keep the selected geometric, word or Living Flow clock. Extraction never changes its style.
+            // Keep the selected stock/plugin or Hecker clock and its style.
             committed = true;
             String home = Settings.Secure.getString(context.getContentResolver(), HomeAppearance.KEY);
             File[] previous = directory.getParentFile().listFiles();

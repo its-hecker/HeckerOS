@@ -203,7 +203,8 @@
         "services/core/java/com/android/server/pm/parsing/PackageInfoUtils.java",
         "services/core/java/com/android/server/pm/InstallPackageHelper.java",
         "tests/hecker/test_app_compatibility.py",
-        "packages/SystemUI/src/com/android/systemui/qs/composefragment/QSFragmentCompose.kt"
+        "packages/SystemUI/src/com/android/systemui/qs/composefragment/QSFragmentCompose.kt",
+        "packages/SystemUI/compose/features/src/com/android/systemui/keyguard/ui/composable/elements/LockscreenElementFactoryImpl.kt"
       ]
     },
     "hardware/google/camera": {
@@ -515,5 +516,20 @@
     "issue": "TopLevelSettings calls setDivider during onCreateRecyclerView before AndroidX assigns mList",
     "fix": "Move divider suppression after super.onViewCreated; upgrade all published prepared homepage variants",
     "validation": "Host regression reproduces previous null-list crash and passes corrected native callbacks across view recreation; customization/preparation and Settings resource/adapter checks pass; full ROM build and Coral phone acceptance pending"
+  },
+  "native_clock_depth_20261104": {
+    "branch": "fix/coral-ui-compatibility-20261102",
+    "device": "coral",
+    "parent_suite_revision": "53caa8dc790b67da46fc98fd3908211c66cccb45",
+    "framework_revision": "4af276bc5ceea071ef0da5ea440cda4470c08df6",
+    "changes": [
+      "depth with stock and installed native clock plugins",
+      "mask only native small/large clock elements",
+      "draw-time root-to-local geometry",
+      "preserve stock/plugin/Hecker selection on toggles and both import routes",
+      "keep native AOD and non-clock lockscreen content",
+      "guarded upgrade of published depth adapters"
+    ],
+    "validation": "Locked SystemUI Compose/native-hook and complete Suite/Settings SDK compilation, 5184 affine registrations, production selection-retention pipeline, native adapter upgrade/revert and provider/layout/translation checks pass; full ROM/phone validation pending"
   }
 }

@@ -3,7 +3,7 @@
   <string name="lock_clock_word">Word clock · English</string>
   <string name="lock_clock_tall">Tall depth clock</string>
   <string name="depth_wallpaper_title">Lock screen depth wallpaper</string>
-  <string name="depth_wallpaper_summary">Place the wallpaper subject in front of your selected Hecker clock. All Hecker clock styles are supported.</string>
+  <string name="depth_wallpaper_summary">Place the wallpaper subject in front of your selected lock screen clock. Supports stock, installed clock plugins and all Hecker clock styles. Keep Custom clock off to use your stock or plugin clock.</string>
   <string name="depth_wallpaper_wake">Animate depth on wake</string>
   <string name="depth_wallpaper_wake_summary">Smoothly reveal the clock and depth layers when the screen turns on. Motion pauses on AOD and in Battery Saver.</string>
   <string name="depth_wallpaper_import">Import lock screen depth wallpaper</string>

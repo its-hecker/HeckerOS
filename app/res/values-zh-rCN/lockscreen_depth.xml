@@ -3,7 +3,7 @@
   <string name="lock_clock_word">文字时钟 · 英语</string>
   <string name="lock_clock_tall">纵向景深时钟</string>
   <string name="depth_wallpaper_title">锁屏景深壁纸</string>
-  <string name="depth_wallpaper_summary">将壁纸主体置于所选 Hecker 时钟前方。支持所有 Hecker 时钟样式。</string>
+  <string name="depth_wallpaper_summary">将壁纸主体置于所选锁屏时钟前方。支持系统时钟、已安装的时钟插件及所有 Hecker 时钟样式。使用系统或插件时钟时，请关闭自定义时钟。</string>
   <string name="depth_wallpaper_wake">亮屏时显示景深动画</string>
   <string name="depth_wallpaper_wake_summary">亮屏时平滑显示时钟和景深图层。息屏显示和省电模式下停止动画。</string>
   <string name="depth_wallpaper_import">导入锁屏景深壁纸</string>
