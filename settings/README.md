@@ -13,6 +13,14 @@ embedding IDs, badges, work-profile behavior, accessibility labels, display
 controls and policy handling remain in Settings. Source adapters are guarded and
 reversible; the main activity/fragment names stay native.
 
+Homepage divider suppression runs in `TopLevelSettings.onViewCreated()` after the
+parent callback. Calling `setDivider(null)` from `onCreateRecyclerView()` crashes
+because AndroidX has not assigned its internal list yet. The source plan upgrades
+the published early-call adapter without removing unrelated edits. The lifecycle
+probe runs the extracted native callbacks for first creation and recreation;
+it models the AndroidX list lifecycle and does not replace a phone test. See
+[the crash diagnosis and validation](../docs/settings-home-crash-2026-11-04.md).
+
 Suite retains its random offline Lottie greeting and the previously selected
 App Lock, Gaming, infrared camera and About pages alongside the new grid.
 

@@ -506,5 +506,14 @@
       "remove legacy PixelOS Developer options spoof controls"
     ],
     "validation": "Targeted host geometry, current-wallpaper pipeline, lifecycle/provider, permission, source-upgrade and font regression checks pass; full ROM build and physical Coral acceptance pending"
+  },
+  "settings_home_crash_20261104": {
+    "branch": "fix/coral-ui-compatibility-20261102",
+    "device": "coral",
+    "parent_suite_revision": "25642fbfcbd0762eefc213f7a93625e257b5722b",
+    "settings_revision": "3831282d93ecda4d52a6894077482fe01ecea903",
+    "issue": "TopLevelSettings calls setDivider during onCreateRecyclerView before AndroidX assigns mList",
+    "fix": "Move divider suppression after super.onViewCreated; upgrade all published prepared homepage variants",
+    "validation": "Host regression reproduces previous null-list crash and passes corrected native callbacks across view recreation; customization/preparation and Settings resource/adapter checks pass; full ROM build and Coral phone acceptance pending"
   }
 }

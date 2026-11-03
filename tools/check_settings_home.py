@@ -14,6 +14,7 @@ import tempfile
 import zipfile
 from prepare import replace_guarded
 from compile_sdk import fetch
+from settings_home_lifecycle import java_method, run_lifecycle_probe
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -36,6 +37,17 @@ def main():
         patches = json.loads((ROOT/'settings/patches.json').read_text())
         active = json.loads((ROOT/'framework/customization-patches.json').read_text())
         assert all(active.get(path) == pairs for path,pairs in patches.items()), 'Settings patches must be registered in the build preparation plan'
+        homepage_path = 'packages/apps/Settings/src/com/android/settings/homepage/TopLevelSettings.java'
+        homepage = (native/'src/com/android/settings/homepage/TopLevelSettings.java').read_text()
+        fixture = (ROOT/'tests/fixtures/settings-home-recyclerview-3831282.snapshot').read_text()
+        callback = 'public RecyclerView onCreateRecyclerView('
+        assert java_method(homepage, callback) == java_method(fixture, callback), 'Homepage lifecycle fixture differs from pinned native source'
+        for pair in patches[homepage_path]:
+            homepage = replace_guarded(homepage, pair['old'], pair['new'], homepage_path)
+        lifecycle = run_lifecycle_probe(homepage, work)
+        if lifecycle.returncode:
+            raise RuntimeError(lifecycle.stderr)
+        print(lifecycle.stdout.strip())
         for pair in patches['packages/apps/Settings/src/com/android/settings/widget/HomepagePreferenceLayoutHelper.java']:
             text = replace_guarded(text,pair['old'],pair['new'],str(helper),False)
         adapter_path = 'packages/apps/Settings/src/com/android/settings/widget/HighlightableTopLevelPreferenceAdapter.java'

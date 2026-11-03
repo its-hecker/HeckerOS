@@ -2,6 +2,13 @@
 
 ## Coral UI and compatibility — 2 November 2026
 
+**4 November Settings crash fix:** defer homepage divider configuration until
+`onViewCreated()`, after AndroidX initializes its list. The exact crashing and
+earlier prepared adapters upgrade automatically. The host regression reproduces
+the previous null-list failure and accepts the corrected callbacks across view
+recreation; Settings resource/adapter compilation passes. Rebuild and phone
+validation remain pending. See [cause and incremental rebuild](docs/settings-home-crash-2026-11-04.md).
+
 **3 November launcher and depth update:** fix the Launcher depth permission gate,
 support aligned manual imports and explicit extraction of the current lock
 wallpaper, preserve the selected clock, and enable depth for all built-in Hecker

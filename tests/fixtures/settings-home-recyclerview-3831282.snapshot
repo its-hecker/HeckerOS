@@ -1,0 +1,20 @@
+    @Override
+    public RecyclerView onCreateRecyclerView(LayoutInflater inflater, ViewGroup parent,
+            Bundle savedInstanceState) {
+        RecyclerView recyclerView = super.onCreateRecyclerView(inflater, parent,
+                savedInstanceState);
+        recyclerView.setVerticalScrollBarEnabled(false);
+        recyclerView.setHorizontalScrollBarEnabled(false);
+
+        recyclerView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View v) {
+                setPaddingHorizontal(mPaddingHorizontal);
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View v) {
+            }
+        });
+        return recyclerView;
+    }

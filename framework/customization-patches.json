@@ -282,11 +282,16 @@
     },
     {
       "old": "        recyclerView.setHorizontalScrollBarEnabled(false);",
-      "new": "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_home_background));\n        setDivider(null);\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));",
+      "new": "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_home_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));",
       "previous": [
+        "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_home_background));\n        setDivider(null);\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));",
         "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));",
         "        recyclerView.setHorizontalScrollBarEnabled(false);\n        recyclerView.setBackgroundColor(getContext().getColor(R.color.hecker_home_background));\n        recyclerView.addItemDecoration(new com.android.settings.hecker.HeckerHomeDecoration(getContext()));"
       ]
+    },
+    {
+      "old": "    @Override\n    public RecyclerView onCreateRecyclerView(LayoutInflater inflater, ViewGroup parent,",
+      "new": "    @Override\n    public void onViewCreated(View view, Bundle savedInstanceState) {\n        super.onViewCreated(view, savedInstanceState);\n        // PreferenceFragmentCompat assigns its list after onCreateRecyclerView returns.\n        setDivider(null);\n    }\n\n    @Override\n    public RecyclerView onCreateRecyclerView(LayoutInflater inflater, ViewGroup parent,"
     }
   ],
   "packages/apps/Settings/src/com/android/settings/widget/HomepagePreferenceLayoutHelper.java": [

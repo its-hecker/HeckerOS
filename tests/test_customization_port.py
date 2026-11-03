@@ -47,6 +47,29 @@ class CustomizationPortTests(unittest.TestCase):
             with self.assertRaises(ValueError):customization_plan(folder,replace_guarded)
             self.assertEqual(before,self.snapshot(folder))
 
+    def test_settings_divider_upgrades_all_published_homepage_variants(self):
+        relative = 'packages/apps/Settings/src/com/android/settings/homepage/TopLevelSettings.java'
+        settings = json.loads((ROOT/'settings/patches.json').read_text())
+        active = json.loads((ROOT/'framework/customization-patches.json').read_text())
+        self.assertEqual(settings[relative], active[relative])
+        pairs = settings[relative]
+        for initial in [pairs[1]['old'], *pairs[1]['previous']]:
+            with self.subTest(initial=initial), tempfile.TemporaryDirectory() as temporary:
+                folder = Path(temporary)
+                self.stage(folder)
+                path = folder/relative
+                original = path.read_text() + '\n// unrelated maintainer edit\n'
+                path.write_text(original.replace(pairs[1]['old'], initial))
+                self.write(customization_plan(folder, replace_guarded))
+                prepared = path.read_text()
+                self.assertEqual(prepared.count('setDivider(null);'), 1)
+                self.assertEqual(prepared.count('public void onViewCreated('), 1)
+                self.assertEqual(prepared.count('new com.android.settings.hecker.HeckerHomeDecoration('), 1)
+                self.assertIn('// unrelated maintainer edit', prepared)
+                self.assertEqual({}, customization_plan(folder, replace_guarded))
+                self.write(customization_plan(folder, replace_guarded, True))
+                self.assertEqual(path.read_text(), original)
+
     def test_gaming_context_is_unique_after_fresh_and_previously_prepared_upgrades(self):
         relative = 'system/sepolicy/private/service_contexts'
         pair = json.loads((ROOT/'framework/customization-patches.json').read_text())[relative][0]
