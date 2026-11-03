@@ -284,26 +284,34 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
         paint.reset(); paint.setAntiAlias(true); paint.setColor(0xa11a2630);
         canvas.drawRoundRect(0, 0, area[6], area[7], 18*d, 18*d, paint);
         float available = Math.max(1, area[6] - 20*d), center = area[6]/2;
-        float baseline = showMessage && showWeather ? area[7]*.40f : area[7]*.58f;
+        float weatherHeight = showWeather ? (showMessage ? Math.min(30*d, area[7]*.48f) : area[7]) : 0;
+        float messageHeight = area[7] - weatherHeight;
         if (showMessage) {
             android.text.TextPaint textPaint = new android.text.TextPaint(android.graphics.Paint.ANTI_ALIAS_FLAG);
-            textPaint.setColor(0xffe1e7ed); textPaint.setTextSize(12*d*font);
+            textPaint.setColor(0xffe1e7ed);
+            textPaint.setTextSize(Math.min(12*d*font, Math.max(1, messageHeight-8*d)));
             android.text.StaticLayout text = android.text.StaticLayout.Builder.obtain(message, 0, message.length(),
                     textPaint, Math.max(1, Math.round(available))).setAlignment(android.text.Layout.Alignment.ALIGN_CENTER)
-                    .setIncludePad(false).setMaxLines(2).setEllipsize(android.text.TextUtils.TruncateAt.END).build();
-            int block = canvas.save(); canvas.translate(10*d, Math.max(4*d, baseline-text.getHeight()));
+                    .setIncludePad(false).setMaxLines(messageHeight >= 30*d*font ? 2 : 1)
+                    .setEllipsize(android.text.TextUtils.TruncateAt.END).build();
+            int block = canvas.save(); canvas.clipRect(0, 0, area[6], messageHeight);
+            canvas.translate(10*d, Math.max(0, (messageHeight-text.getHeight())/2));
             text.draw(canvas); canvas.restoreToCount(block);
         }
         if (showWeather) {
-            paint.reset(); paint.setAntiAlias(true); paint.setTextSize(14*d*font); paint.setColor(0xffd1eee7);
+            int block = canvas.save(); canvas.clipRect(0, messageHeight, area[6], area[7]);
+            paint.reset(); paint.setAntiAlias(true);
+            paint.setTextSize(Math.min(14*d*font, Math.max(1, weatherHeight-6*d))); paint.setColor(0xffd1eee7);
             paint.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
             String weather = android.text.TextUtils.ellipsize(HeckerClockWeather.text(), new android.text.TextPaint(paint),
                     Math.max(1, available-25*d), android.text.TextUtils.TruncateAt.END).toString();
             android.graphics.drawable.Drawable icon = HeckerClockWeather.icon();
             float total = paint.measureText(weather) + (icon == null ? 0 : 24*d);
-            float x = center - total/2, y = showMessage ? area[7]*.79f : baseline;
+            Paint.FontMetrics metrics = paint.getFontMetrics();
+            float x = center - total/2, y = messageHeight + weatherHeight/2 - (metrics.ascent+metrics.descent)/2;
             if (icon != null) { icon.setBounds(Math.round(x), Math.round(y-16*d), Math.round(x+19*d), Math.round(y+3*d)); icon.draw(canvas); x+=24*d; }
             paint.setTextAlign(Paint.Align.LEFT); canvas.drawText(weather, x, y, paint);
+            canvas.restoreToCount(block);
         }
         canvas.restoreToCount(saved);
     }
