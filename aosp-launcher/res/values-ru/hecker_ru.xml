@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hs_home_depth">Обои с эффектом глубины</string>
+    <string name="hs_home_depth">Объёмные обои главного экрана</string>
     <string name="hs_home_depth_wake">Анимация глубины при разблокировке</string>
-    <string name="hs_home_depth_summary">Подготовленные слои обоев располагаются за часами. Приложения и элементы управления остаются сверху. Изменить обои можно в Hecker Suite → Экран блокировки.</string>
+    <string name="hs_home_depth_summary">Выберите отдельные слои в Hecker Suite. Опустите часы, чтобы они перекрывались с объектом. Приложения остаются спереди.</string>
     <string name="hs_clock_weather">Показывать погоду</string>
-    <string name="hs_clock_weather_summary">Текущая погода Google отображается под часами любого стиля, если приложение Google предоставляет данные.</string>
-    <string name="hs_flow_preview_apply">Применить оформление Living Flow</string>
+    <string name="hs_clock_weather_summary">Сообщение и погоду можно разместить сверху, снизу или сбоку от часов, перед объектом обоев. Погоду предоставляет приложение Google.</string>
+    <string name="hs_flow_preview_apply">Применить набор значков Hecker</string>
     <string name="hs_glass_icon_style">Встроенный стиль стеклянных значков</string>
     <string name="hs_glass_icon_smoked">Дымчатое стекло · текущий</string>
     <string name="hs_glass_icon_flow">Living Flow · контурные подложки</string>
@@ -46,7 +46,7 @@
     <string name="hs_privacy_summary">Блокировка приложений и отдельные настройки скрытия.</string>
     <string name="hs_universal_search">Универсальный поиск</string>
     <string name="hs_native_settings">Другие настройки рабочего стола</string>
-    <string name="hs_layout_migration">Изменение сетки использует штатный перенос макета Launcher3. Элементы переставляются под новую сетку; данные приложений сохраняются.</string>
+    <string name="hs_layout_migration">Разместите приложения, оставив место для часов и виджетов.</string>
     <string name="hs_home_columns">Столбцы главного экрана</string>
     <string name="hs_home_rows">Строки главного экрана</string>
     <string name="hs_drawer_columns">Столбцы меню приложений</string>

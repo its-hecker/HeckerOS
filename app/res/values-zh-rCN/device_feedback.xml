@@ -4,8 +4,8 @@
     <string name="sb_network_row">网速显示位置</string>
     <string name="sb_first_row">第一行</string>
     <string name="sb_second_row_label">第二行</string>
-    <string name="depth_auto_title">自动提取壁纸主体</string>
-    <string name="depth_auto_summary">锁屏壁纸更改后，在设备上提取主体。无法识别清晰主体时可手动导入。</string>
+    <string name="depth_auto_title">自动提取锁屏主体</string>
+    <string name="depth_auto_summary">处理当前静态锁屏壁纸，并在更换壁纸时更新主体。可使用下方操作立即重试。</string>
     <string name="depth_extract_title">选择照片并提取主体</string>
     <string name="depth_extract_summary">应用前预览提取的主体。也可以手动导入背景和透明主体图层。</string>
     <string name="lock_clock_apply">应用所选时钟</string>

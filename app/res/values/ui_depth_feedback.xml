@@ -1,0 +1,11 @@
+<resources>
+  <string name="home_depth_import_help">Choose a photo for automatic extraction, or import a background and transparent PNG subject. Adjust the subject in the preview. This changes only your home-screen wallpaper.</string>
+  <string name="depth_alignment_help">Different image sizes are supported. Adjust the subject size and position until it matches the background.</string>
+  <string name="depth_subject_size">Subject size (%)</string>
+  <string name="depth_subject_x">Subject horizontal position (%)</string>
+  <string name="depth_subject_y">Subject vertical position (%)</string>
+  <string name="depth_current_title">Extract current lock screen wallpaper</string>
+  <string name="depth_current_summary">Prepare the wallpaper already on your lock screen. Keep your selected clock style.</string>
+  <string name="depth_extract_working">Preparing the wallpaper subject…</string>
+  <string name="depth_current_failed">Could not extract a subject from this wallpaper. Use a static image with a clear subject, or import a photo.</string>
+</resources>

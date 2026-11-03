@@ -20,8 +20,16 @@ public final class QuickSettingsActivity extends Activity {
         for (int index = 0; index < choices.length; index++) {
             final int layout = index;
             LinearLayout card = Ui.card(this);
-            SuiteAnimation art = new SuiteAnimation(this, card);
-            art.show(previews[index], true);
+            if (index == 1) {
+                android.widget.ImageView art = new android.widget.ImageView(this);
+                art.setImageResource(R.drawable.qs_hecker_preview);
+                art.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
+                art.setImportantForAccessibility(android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+                card.addView(art, new LinearLayout.LayoutParams(-1, Ui.dp(this, 156)));
+            } else {
+                SuiteAnimation art = new SuiteAnimation(this, card);
+                art.show(previews[index], true);
+            }
             RadioButton button = new RadioButton(this);
             button.setText(names[index]); button.setTextSize(16);
             button.setTextColor(getColor(R.color.hecker_foreground));

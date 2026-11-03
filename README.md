@@ -2,6 +2,14 @@
 
 ## Coral UI and compatibility — 2 November 2026
 
+**3 November launcher and depth update:** fix the Launcher depth permission gate,
+support aligned manual imports and explicit extraction of the current lock
+wallpaper, preserve the selected clock, and enable depth for all built-in Hecker
+lock clocks. Launcher Studio has new controls for clock height/top spacing,
+message/weather position and search height. The settings UI is restyled, duplicate
+PixelOS spoof preferences and the Caracal Dawn action are removed, and the QS
+dashboard preview uses a reliable vector. See [changes and device checks](docs/coral-ui-depth-feedback-2026-11-03.md).
+
 **3 November boot fix:** the Cyrillic font adapter no longer emits a forbidden
 `lang` attribute inside named font lists. This was the Zygote/Typeface preload
 failure in the supplied boot logs. Existing prepared checkouts upgrade the exact

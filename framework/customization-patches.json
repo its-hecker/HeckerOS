@@ -1204,5 +1204,23 @@
       "old": "        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction",
       "new": "        com.android.systemui.hecker.HeckerQsPanelState.setExpansion(panelExpansionFraction)\n        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction"
     }
+  ],
+  "frameworks/base/packages/SystemUI/AndroidManifest.xml": [
+    {
+      "old": "    <uses-permission android:name=\"android.permission.STATUS_BAR\" />",
+      "new": "    <uses-permission android:name=\"android.permission.STATUS_BAR\" />\n    <uses-permission android:name=\"org.hecker.suite.permission.READ_DEPTH\" />"
+    }
+  ],
+  "packages/apps/Settings/res/xml/development_settings.xml": [
+    {
+      "old": "        <!-- Spoofing toggle -->\n        <SwitchPreferenceCompat\n            android:key=\"certified_props\"\n            android:title=\"@string/cert_overlay_title\"\n            android:summary=\"@string/cert_overlay_summary\" />\n\n        <com.android.settings.development.KeyboxDataPreference\n            android:key=\"keybox_data_setting\"\n            android:title=\"@string/keybox_data_title\"\n            android:summary=\"@string/keybox_data_summary\"\n            android:defaultValue=\"\"/>\n\n        <com.android.settings.development.PifDataPreference\n            android:key=\"pif_data_setting\"\n            android:title=\"@string/pif_data_title\"\n            android:summary=\"@string/pif_data_summary\"\n            android:defaultValue=\"\"/>\n\n",
+      "new": "        <!-- HeckerOS spoofing is configured exclusively in Hecker Suite. -->\n\n"
+    }
+  ],
+  "packages/apps/Settings/src/com/android/settings/development/DevelopmentSettingsDashboardFragment.java": [
+    {
+      "old": "        controllers.add(new CertifiedPropsPreferenceController(context));",
+      "new": "        // Hecker Suite owns the certified profile and attestation configuration."
+    }
   ]
 }

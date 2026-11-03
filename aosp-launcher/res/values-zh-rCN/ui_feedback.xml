@@ -1,0 +1,21 @@
+<resources>
+  <string name="hs_back">返回</string>
+  <string name="hs_studio_welcome">打造专属主屏幕</string>
+  <string name="hs_home_header">主屏幕与壁纸</string>
+  <string name="hs_drawer_header">应用抽屉</string>
+  <string name="hs_behavior_header">操作与手势</string>
+  <string name="hs_home_depth_open">选择主屏幕景深壁纸</string>
+  <string name="hs_depth_unavailable">Hecker Suite 壁纸设置不可用。</string>
+  <string name="hs_clock_style">时钟样式</string>
+  <string name="hs_clock_height">主屏幕时钟高度 (dp)</string>
+  <string name="hs_clock_offset">时钟顶部间距 (dp)</string>
+  <string name="hs_clock_height_summary">向下移动时钟，使其与壁纸主体重叠。高度受应用上方空间限制，可减少网格行数腾出空间。</string>
+  <string name="hs_clock_info_position">消息与天气位置</string>
+  <string name="hs_info_above">时钟上方</string>
+  <string name="hs_info_below">时钟下方</string>
+  <string name="hs_info_left">时钟左侧</string>
+  <string name="hs_info_right">时钟右侧</string>
+  <string name="hs_search_height">搜索栏高度 (dp)</string>
+  <string name="hs_search_height_summary">调整搜索栏可见高度，保留易于点击的触摸区域，以及与底座图标的间距。</string>
+  <string name="hs_icon_pack_applied">已应用 Hecker 图标包</string>
+</resources>

@@ -264,7 +264,8 @@
     "54c74fecfd56d833f203eeb7e3cdef4d1c90aa03",
     "f904ab72d2e336ec50e1a9c679dcf52d9769daea",
     "76e2fbf3fe474fba88b96d00fd46d6748e70b35e",
-    "eac2934dedcef28c8d1c7f0cd181d8f7d81be318"
+    "eac2934dedcef28c8d1c7f0cd181d8f7d81be318",
+    "613cb7978ee323f71c55191dd6d4f02d2a6b19b2"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMediaCard.kt": [
     "4840b9bbb302caaf73dbcf7a2b7a286a4a58d62c",
@@ -311,7 +312,8 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerDepthWallpaper.kt": [
     "40bc5097ece2759120950ac95c8e423459b4895f",
     "a80ad966b2582f08f73665a3ecb64741652b10d9",
-    "8c0339e0c45d5cd6eac87e7e18fee093bdbed876"
+    "8c0339e0c45d5cd6eac87e7e18fee093bdbed876",
+    "98663e466aa80ec052d03637f6b98c8889515960"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerLivingFlow.kt": [
     "859ab10b91e1498dcc0a752c5f2e72565b3d2573",

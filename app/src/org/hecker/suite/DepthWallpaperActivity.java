@@ -24,13 +24,14 @@ import java.util.concurrent.Executors;
 public final class DepthWallpaperActivity extends Activity {
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private Uri background, foreground;
-    private Bitmap back, front;
+    private Bitmap back, front, sourceFront;
     private ImageView preview;
     private Button apply;
     private android.widget.Switch home;
     private int generation;
     private boolean stopped,homeOnly;
     private boolean extractSubject;
+    private int subjectSize = 100, subjectX, subjectY;
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         if (state != null) {
@@ -38,18 +39,25 @@ public final class DepthWallpaperActivity extends Activity {
             if (b != null) background = Uri.parse(b);
             if (f != null) foreground = Uri.parse(f);
             extractSubject = state.getBoolean("extract_subject", false);
+            subjectSize = state.getInt("subject_size", 100);
+            subjectX = state.getInt("subject_x", 0); subjectY = state.getInt("subject_y", 0);
         }
         homeOnly=getIntent().getBooleanExtra("home_only",false);
         LinearLayout page = Ui.page(this, homeOnly?R.string.home_depth_picker_title:R.string.depth_wallpaper_title);
-        page.addView(Ui.text(this, getString(R.string.depth_wallpaper_import_help), 15, false));
+        page.addView(Ui.text(this, getString(homeOnly ? R.string.home_depth_import_help
+                : R.string.depth_wallpaper_import_help), 15, false));
         home = new android.widget.Switch(this); home.setText(R.string.depth_apply_home);
-        home.setChecked(homeOnly || state == null || state.getBoolean("apply_home", true)); home.setVisibility(homeOnly?android.view.View.GONE:android.view.View.VISIBLE); page.addView(home);
+        home.setChecked(homeOnly || state != null && state.getBoolean("apply_home", false)); home.setVisibility(homeOnly?android.view.View.GONE:android.view.View.VISIBLE); page.addView(home);
         Ui.actionCard(this, page, R.string.depth_pick_background, R.string.depth_background_summary, v -> pick(1));
         Ui.actionCard(this, page, R.string.depth_extract_title, R.string.depth_extract_summary, v -> pick(3));
         Ui.actionCard(this, page, R.string.depth_pick_foreground, R.string.depth_foreground_summary, v -> pick(2));
         preview = new ImageView(this); preview.setScaleType(ImageView.ScaleType.FIT_CENTER);
         preview.setContentDescription(getString(R.string.depth_wallpaper_preview));
         page.addView(preview, new LinearLayout.LayoutParams(-1, Ui.dp(this, 260)));
+        page.addView(Ui.text(this, getString(R.string.depth_alignment_help), 14, false));
+        alignment(page, R.string.depth_subject_size, 25, 200, subjectSize, value -> subjectSize = value);
+        alignment(page, R.string.depth_subject_x, -100, 100, subjectX, value -> subjectX = value);
+        alignment(page, R.string.depth_subject_y, -100, 100, subjectY, value -> subjectY = value);
         apply = new Button(this); apply.setText(R.string.depth_wallpaper_apply); apply.setEnabled(false);
         apply.setOnClickListener(v -> save()); page.addView(apply);
         Ui.scroll(this, page);
@@ -65,6 +73,9 @@ public final class DepthWallpaperActivity extends Activity {
         super.onActivityResult(request, result, data);
         if ((request != 1 && request != 2 && request != 3) || result != RESULT_OK || data == null || data.getData() == null) return;
         Uri uri = data.getData();
+        try { getContentResolver().takePersistableUriPermission(uri,
+                data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION); }
+        catch (SecurityException temporaryGrant) { /* The picker may supply a task-lifetime grant. */ }
         if (request == 3) { background = uri; foreground = null; extractSubject = true; }
         else { extractSubject = false; if (request == 1) background = uri; else foreground = uri; }
         prepare();
@@ -82,30 +93,76 @@ public final class DepthWallpaperActivity extends Activity {
     }
     private void prepare() {
         int token = ++generation;
-        back = null; front = null; apply.setEnabled(false); preview.setImageDrawable(null);
+        back = null; front = null; sourceFront = null; apply.setEnabled(false); preview.setImageDrawable(null);
         if (background == null || !extractSubject && foreground == null) return;
         Uri b = background, f = foreground;
         boolean automatic = extractSubject;
         worker.execute(() -> {
             try {
-                Bitmap bg = decode(b), fg = automatic ? DepthSubjectExtractor.extract(this, bg) : decode(f);
-                if (bg.getWidth() != fg.getWidth() || bg.getHeight() != fg.getHeight() || !fg.hasAlpha())
-                    throw new IllegalArgumentException("The foreground must retain its background canvas");
+                Bitmap bg = decode(b), raw = automatic ? DepthSubjectExtractor.extract(this, bg) : decode(f);
+                if (!raw.hasAlpha()) throw new IllegalArgumentException("Select a transparent subject PNG");
                 int transparent = 0, opaque = 0;
-                for (int y = 0; y < fg.getHeight(); y += Math.max(1, fg.getHeight() / 64))
-                    for (int x = 0; x < fg.getWidth(); x += Math.max(1, fg.getWidth() / 64)) {
-                        int alpha = fg.getPixel(x, y) >>> 24;
+                for (int y = 0; y < raw.getHeight(); y += Math.max(1, raw.getHeight() / 64))
+                    for (int x = 0; x < raw.getWidth(); x += Math.max(1, raw.getWidth() / 64)) {
+                        int alpha = raw.getPixel(x, y) >>> 24;
                         if (alpha < 32) transparent++;
                         if (alpha > 224) opaque++;
                     }
                 if (transparent < 16 || opaque < 16) throw new IllegalArgumentException("No usable subject mask");
+                Bitmap fg = aligned(bg, raw, 100, 0, 0);
                 Bitmap image = Bitmap.createBitmap(bg.getWidth(), bg.getHeight(), Bitmap.Config.ARGB_8888);
                 Canvas canvas = new Canvas(image); canvas.drawBitmap(bg, 0, 0, null); canvas.drawBitmap(fg, 0, 0, null);
                 runOnUiThread(() -> {
                     if (stopped || generation != token) return;
-                    back = bg; front = fg; preview.setImageBitmap(automatic ? fg : image); apply.setEnabled(true);
+                    back = bg; sourceFront = raw; front = fg; preview.setImageBitmap(image); apply.setEnabled(true);
+                    if (subjectSize != 100 || subjectX != 0 || subjectY != 0) align();
                 });
             } catch (IOException | RuntimeException | OutOfMemoryError invalid) {
+                android.util.Log.w("HeckerDepth", "Cannot prepare selected depth images", invalid);
+                runOnUiThread(() -> { if (!stopped && token == generation) error(R.string.depth_wallpaper_invalid); });
+            }
+        });
+    }
+    private interface AlignmentChange { void set(int value); }
+    private void alignment(LinearLayout page, int title, int min, int max, int initial, AlignmentChange changed) {
+        android.widget.TextView label = Ui.text(this, getString(title) + " · " + initial, 15, true);
+        page.addView(label);
+        android.widget.SeekBar slider = new android.widget.SeekBar(this);
+        slider.setMax(max - min); slider.setProgress(initial - min);
+        slider.setContentDescription(getString(title)); page.addView(slider);
+        slider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+            public void onStartTrackingTouch(android.widget.SeekBar bar) { }
+            public void onProgressChanged(android.widget.SeekBar bar, int progress, boolean user) {
+                label.setText(getString(title) + " · " + (progress + min));
+                if (user) changed.set(progress + min);
+            }
+            public void onStopTrackingTouch(android.widget.SeekBar bar) { align(); }
+        });
+    }
+    private static Bitmap aligned(Bitmap background, Bitmap source, int size, int x, int y) {
+        float[] transform = DepthLayerGeometry.fit(background.getWidth(), background.getHeight(),
+                source.getWidth(), source.getHeight(), size, x, y);
+        Bitmap result = Bitmap.createBitmap(background.getWidth(), background.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(result);
+        canvas.translate(transform[1], transform[2]); canvas.scale(transform[0], transform[0]);
+        canvas.drawBitmap(source, 0, 0, new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG
+                | android.graphics.Paint.FILTER_BITMAP_FLAG));
+        return result;
+    }
+    private void align() {
+        if (back == null || sourceFront == null) return;
+        int token = ++generation, size = subjectSize, x = subjectX, y = subjectY;
+        Bitmap bg = back, raw = sourceFront; apply.setEnabled(false);
+        worker.execute(() -> {
+            try {
+                if (stopped || token != generation) return;
+                Bitmap fg = aligned(bg, raw, size, x, y);
+                Bitmap image = Bitmap.createBitmap(bg.getWidth(), bg.getHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(image); canvas.drawBitmap(bg, 0, 0, null); canvas.drawBitmap(fg, 0, 0, null);
+                runOnUiThread(() -> { if (!stopped && token == generation) {
+                    front = fg; preview.setImageBitmap(image); apply.setEnabled(true);
+                } });
+            } catch (RuntimeException | OutOfMemoryError failure) {
                 runOnUiThread(() -> { if (!stopped && token == generation) error(R.string.depth_wallpaper_invalid); });
             }
         });
@@ -139,7 +196,6 @@ public final class DepthWallpaperActivity extends Activity {
                     &&Settings.Secure.putString(getContentResolver(),HomeAppearance.KEY,id);
                 if(!homeOnly)saved=saved&&Settings.Secure.putInt(getContentResolver(),DefaultAppearance.WALLPAPER_ID,DefaultAppearance.wallpaperId(this))
                     &&Settings.Secure.putInt(getContentResolver(),"hecker_custom_lockscreen_clock",1)
-                    &&Settings.Secure.putInt(getContentResolver(),"hecker_lockscreen_clock_style",3)
                     &&Settings.Secure.putInt(getContentResolver(),"hecker_depth_wallpaper",1)
                     &&Settings.Secure.putString(getContentResolver(),DepthWallpaperProvider.ID,id);
                 else if(lockOwned)saved=saved&&Settings.Secure.putInt(getContentResolver(),DefaultAppearance.WALLPAPER_ID,DefaultAppearance.wallpaperId(this));
@@ -173,11 +229,12 @@ public final class DepthWallpaperActivity extends Activity {
         if (foreground != null) state.putString("foreground", foreground.toString());
         state.putBoolean("apply_home", home.isChecked());
         state.putBoolean("extract_subject", extractSubject);
+        state.putInt("subject_size", subjectSize); state.putInt("subject_x", subjectX); state.putInt("subject_y", subjectY);
         super.onSaveInstanceState(state);
     }
     @Override protected void onDestroy() {
         stopped = true; generation++; worker.shutdownNow();
-        preview.setImageDrawable(null); back = null; front = null;
+        preview.setImageDrawable(null); back = null; front = null; sourceFront = null;
         super.onDestroy();
     }
 }

@@ -12,6 +12,19 @@ from prepare import replace_guarded
 
 
 class AospLauncherPortTests(unittest.TestCase):
+    def test_pre_depth_permission_manifest_upgrades_without_losing_existing_permissions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            rom = Path(directory)
+            self.stage(rom); self.apply(aosp_launcher_plan(rom, replace_guarded))
+            manifest = rom / SOURCE / 'generated/hecker-launcher/AndroidManifest.xml'
+            before = manifest.read_text()
+            old = before.replace('    <uses-permission android:name="org.hecker.suite.permission.READ_DEPTH" />\n', '')
+            self.assertNotEqual(old, before); manifest.write_text(old)
+            self.apply(aosp_launcher_plan(rom, replace_guarded))
+            self.assertEqual(manifest.read_text(), before)
+            self.assertIn('org.hecker.suite.permission.OPEN_FEATURE', before)
+            self.assertIn('org.hecker.suite.permission.READ_GAME_LIBRARY', before)
+
     def stage(self, rom):
         for name, pairs in json.loads((ROOT / 'aosp-launcher/patches.json').read_text()).items():
             path = rom / SOURCE / name

@@ -1,0 +1,21 @@
+<resources>
+  <string name="hs_back">Back</string>
+  <string name="hs_studio_welcome">Make home yours</string>
+  <string name="hs_home_header">HOME AND WALLPAPER</string>
+  <string name="hs_drawer_header">APP DRAWER</string>
+  <string name="hs_behavior_header">CONTROLS AND GESTURES</string>
+  <string name="hs_home_depth_open">Choose home screen depth wallpaper</string>
+  <string name="hs_depth_unavailable">Hecker Suite wallpaper controls are unavailable.</string>
+  <string name="hs_clock_style">Clock style</string>
+  <string name="hs_clock_height">Home clock height (dp)</string>
+  <string name="hs_clock_offset">Home clock top spacing (dp)</string>
+  <string name="hs_clock_height_summary">Lower the clock to overlap your wallpaper subject. Height is limited by the space above your apps; use fewer grid rows for more room.</string>
+  <string name="hs_clock_info_position">Message and weather position</string>
+  <string name="hs_info_above">Above the clock</string>
+  <string name="hs_info_below">Below the clock</string>
+  <string name="hs_info_left">Left of the clock</string>
+  <string name="hs_info_right">Right of the clock</string>
+  <string name="hs_search_height">Search bar height (dp)</string>
+  <string name="hs_search_height_summary">Adjust the visible pill height. Its touch area stays easy to tap, with room between search and dock icons.</string>
+  <string name="hs_icon_pack_applied">Hecker Icon Pack applied</string>
+</resources>

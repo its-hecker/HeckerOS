@@ -1,0 +1,11 @@
+<resources>
+  <string name="home_depth_import_help">选择照片提取主体，或导入背景与透明 PNG。在预览中调整主体，仅更改主屏幕壁纸。</string>
+  <string name="depth_alignment_help">支持不同尺寸的图像。请调整主体大小和位置，使其与背景匹配。</string>
+  <string name="depth_subject_size">主体大小 (%)</string>
+  <string name="depth_subject_x">主体水平位置 (%)</string>
+  <string name="depth_subject_y">主体垂直位置 (%)</string>
+  <string name="depth_current_title">提取当前锁屏壁纸主体</string>
+  <string name="depth_current_summary">处理已经应用的锁屏壁纸，保留所选时钟样式。</string>
+  <string name="depth_extract_working">正在准备壁纸主体…</string>
+  <string name="depth_current_failed">无法提取主体。请使用主体清晰的静态图片，或导入照片。</string>
+</resources>

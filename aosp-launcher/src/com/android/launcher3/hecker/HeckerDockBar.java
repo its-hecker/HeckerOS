@@ -25,7 +25,17 @@ public final class HeckerDockBar extends LinearLayout
     }
     public static int profileHeight(Context context, int nativeHeight, boolean vertical) {
         return available(context) && !vertical && HeckerStudio.enabled(context, "dock_search", true)
-                ? Math.max(nativeHeight, HeckerStudio.dp(context, 60)) : nativeHeight;
+                ? Math.max(nativeHeight, touchHeight(context) + HeckerStudio.dp(context, 12)) : nativeHeight;
+    }
+    public static int topGap(Context context) {
+        return HeckerStudio.prefs(context).getBoolean("hecker_glass_dock", false)
+                ? HeckerStudio.dp(context, 12) : 0;
+    }
+    public int visualHeight() {
+        return HeckerStudio.dp(getContext(), HeckerStudio.number(getContext(), "search_height", 48, 36, 64));
+    }
+    private static int touchHeight(Context context) {
+        return HeckerStudio.dp(context, Math.max(48, HeckerStudio.number(context, "search_height", 48, 36, 64)));
     }
     public static View create(ViewGroup container) {
         Context context = container.getContext();
@@ -53,7 +63,9 @@ public final class HeckerDockBar extends LinearLayout
         boolean google = HeckerStudio.enabled(context, "google_search", false);
         GradientDrawable plate=new GradientDrawable();plate.setColor(compact()?0xb8171928:0xb830232e);
         plate.setCornerRadius(HeckerStudio.dp(context,28));plate.setStroke(HeckerStudio.dp(context,1),compact()?0x78ffffff:0x35efd6e2);
-        setBackground(new RippleDrawable(ColorStateList.valueOf(0x25ffffff),plate,null));
+        int inset = Math.max(0, (touchHeight(context) - visualHeight()) / 2);
+        setBackground(new android.graphics.drawable.InsetDrawable(
+                new RippleDrawable(ColorStateList.valueOf(0x25ffffff),plate,null), 0, inset, 0, inset));
         if(compact()){
             TextView label=HeckerStudio.label(context,HeckerStudio.text(context,"flow_search_hint"),12);
             label.setPadding(0,0,0,0); label.setIncludeFontPadding(false);
@@ -117,7 +129,9 @@ public final class HeckerDockBar extends LinearLayout
     @Override public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
         if ((HeckerStudio.PREFIX + "dock_search").equals(key)) {
             setVisibility(requestedVisibility); requestLayout();
-        } else if ((HeckerStudio.PREFIX + "google_search").equals(key) || (HeckerStudio.PREFIX + "dock_search_style").equals(key)) {
+        } else if ((HeckerStudio.PREFIX + "google_search").equals(key)
+                || (HeckerStudio.PREFIX + "dock_search_style").equals(key)
+                || (HeckerStudio.PREFIX + "search_height").equals(key)) {
             rebuild(); requestLayout();
         }
     }
@@ -127,13 +141,13 @@ public final class HeckerDockBar extends LinearLayout
                 && HeckerStudio.enabled(bar.getContext(), "dock_search", true)
                 ? DockSearchLayout.extraHeight(nativeBottomPadding,
                         bottomOffset(bar, nativeOffset, navigationInset),
-                        HeckerStudio.dp(bar.getContext(), 48), HeckerStudio.dp(bar.getContext(), 12)) : 0;
+                        touchHeight(bar.getContext()), HeckerStudio.dp(bar.getContext(), 12)) : 0;
     }
     public static void measure(View bar, int width, int height, int availableWidth) {
         if (bar instanceof HeckerDockBar) {
             int safeWidth = Math.max(1, availableWidth - HeckerStudio.dp(bar.getContext(), 32));
             width = width > 0 ? Math.min(width, safeWidth) : safeWidth;
-            height = HeckerStudio.dp(bar.getContext(), 48);
+            height = touchHeight(bar.getContext());
         }
         bar.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));

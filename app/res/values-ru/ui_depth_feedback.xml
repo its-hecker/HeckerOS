@@ -1,0 +1,11 @@
+<resources>
+  <string name="home_depth_import_help">Выберите фото для выделения объекта или импортируйте фон и прозрачный PNG. Настройте объект в предпросмотре. Изменятся только обои главного экрана.</string>
+  <string name="depth_alignment_help">Поддерживаются изображения разных размеров. Настройте размер и положение объекта относительно фона.</string>
+  <string name="depth_subject_size">Размер объекта (%)</string>
+  <string name="depth_subject_x">Положение объекта по горизонтали (%)</string>
+  <string name="depth_subject_y">Положение объекта по вертикали (%)</string>
+  <string name="depth_current_title">Выделить объект текущих обоев блокировки</string>
+  <string name="depth_current_summary">Подготовить уже установленные обои блокировки, сохранив выбранный стиль часов.</string>
+  <string name="depth_extract_working">Подготовка объекта обоев…</string>
+  <string name="depth_current_failed">Не удалось выделить объект. Используйте статичное изображение с чётким объектом или импортируйте фото.</string>
+</resources>

@@ -115,13 +115,19 @@ public final class HeckerStudio {
     }
     public static void showPage(Activity activity, LinearLayout page) {
         page.setPadding(dp(activity, 20), dp(activity, 12), dp(activity, 20), dp(activity, 24));
-        ScrollView scroll = new ScrollView(activity); scroll.setFillViewport(true); scroll.setBackgroundColor(0xff10161c);
+        ScrollView scroll = new ScrollView(activity); scroll.setFillViewport(true);
+        scroll.setBackground(new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                new int[]{0xff101b28, 0xff0a1019}));
+        scroll.setClipToPadding(false); scroll.setVerticalScrollBarEnabled(false);
         scroll.addView(page); activity.setContentView(scroll);
         scroll.setOnApplyWindowInsetsListener((v, insets) -> {
             Insets i = insets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
             v.setPadding(i.left, i.top, i.right, i.bottom); return insets;
         });
         scroll.requestApplyInsets();
+        if (android.animation.ValueAnimator.areAnimatorsEnabled()) {
+            page.setAlpha(0); page.animate().alpha(1).setDuration(180).start();
+        }
     }
     private HeckerStudio() {}
 }

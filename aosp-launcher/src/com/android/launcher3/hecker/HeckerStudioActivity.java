@@ -41,7 +41,7 @@ public final class HeckerStudioActivity extends Activity {
     private void render() {
         page = HeckerStudio.column(this);
         String title = section.equals("root") ? "launcher_studio" : section.equals("app") ? "app_customization" : section;
-        TextView heading = HeckerStudio.label(this, "‹  " + t(title), 28); heading.setOnClickListener(v -> finish()); page.addView(heading);
+        page.addView(HeckerStudioUi.toolbar(this, t(title)));
         switch (section) {
             case "root": root(); break;
             case "home": home(); break;
@@ -57,7 +57,13 @@ public final class HeckerStudioActivity extends Activity {
         HeckerStudio.showPage(this, page);
     }
     private void root() {
-        page.addView(HeckerStudio.label(this, t("studio_summary"), 15));
+        LinearLayout intro = HeckerStudioUi.card(this);
+        intro.setBackground(new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                new int[]{0xff254349, 0xff282b49}));
+        ((android.graphics.drawable.GradientDrawable) intro.getBackground()).setCornerRadius(HeckerStudio.dp(this, 26));
+        intro.addView(HeckerStudioUi.label(this, t("studio_welcome"), 22, HeckerStudioUi.TEXT));
+        intro.addView(HeckerStudioUi.label(this, t("studio_summary"), 14, 0xffc4d7e4)); page.addView(intro);
         category("clock", "clock_summary"); category("home", "home_summary");
         category("appearance", "appearance_summary"); category("privacy", "privacy_summary");
         button("universal_search", v -> HeckerStudio.open(this, "search"));
@@ -73,28 +79,35 @@ public final class HeckerStudioActivity extends Activity {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2); params.bottomMargin = HeckerStudio.dp(this, 14); page.addView(row, params);
     }
     private void home() {
-        page.addView(HeckerStudio.label(this, t("layout_migration"), 14));
+        page.addView(HeckerStudioUi.label(this, t("layout_migration"), 14, HeckerStudioUi.MUTED));
+        HeckerStudioUi.section(this, page, t("home_header"));
         toggle("dock_search", true);
+        slider("search_height", 48, 36, 64, false);
         toggle("home_depth", true); toggle("home_depth_wake", true);
         page.addView(HeckerStudio.label(this, t("home_depth_summary"), 14));
+        button("home_depth_open", v -> openHomeDepth());
         slider("home_columns", 5, 3, 7, false); slider("home_rows", 5, 4, 9, false);
+        HeckerStudioUi.section(this, page, t("drawer_header"));
         slider("drawer_columns", 5, 3, 8, false); slider("drawer_rows", 6, 3, 9, false);
         slider("home_spacing", 0, 0, 18, false); slider("drawer_spacing", 0, 0, 18, false); slider("dock_count", 5, 3, 7, false);
-        Switch addApps = new Switch(this); addApps.setText(t("add_new_apps")); addApps.setTextColor(0xfff5f2e8);
-        addApps.setChecked(com.android.launcher3.SessionCommitReceiver.isEnabled(
-                this, android.os.Process.myUserHandle()));
-        addApps.setOnCheckedChangeListener((button, checked) -> HeckerStudio.prefs(this).edit()
-                .putBoolean(com.android.launcher3.SessionCommitReceiver.ADD_ICON_PREFERENCE_KEY, checked).apply()); page.addView(addApps);
+        HeckerStudioUi.section(this, page, t("behavior_header"));
+        HeckerStudioUi.toggle(this, page, t("add_new_apps"), com.android.launcher3.SessionCommitReceiver.isEnabled(
+                this, android.os.Process.myUserHandle()), (button, checked) -> HeckerStudio.prefs(this).edit()
+                .putBoolean(com.android.launcher3.SessionCommitReceiver.ADD_ICON_PREFERENCE_KEY, checked).apply());
         toggle("layout_lock", false); toggle("hecker_double_tap_sleep", true, false); toggle("hecker_swipe_down", true, false);
         button("universal_search", v -> HeckerStudio.open(this, "search"));
+    }
+    private void openHomeDepth() {
+        Intent intent = new Intent().setClassName("org.hecker.suite", "org.hecker.suite.SuiteRouterActivity")
+                .putExtra("org.hecker.suite.PAGE", "DepthWallpaperActivity").putExtra("home_only", true);
+        try { startActivity(intent); }
+        catch (ActivityNotFoundException | SecurityException unavailable) { Toast.makeText(this, t("depth_unavailable"), Toast.LENGTH_LONG).show(); }
     }
     private void appearance() {
         button("flow_preview_apply",v->{HeckerStudio.prefs(this).edit()
             .putBoolean(HeckerStudio.PREFIX+"glass_icons",true).putInt(HeckerStudio.PREFIX+"glass_icon_style",1)
-            .putBoolean(HeckerStudio.PREFIX+"dock_search",true).putBoolean(HeckerStudio.PREFIX+"google_search",false)
-            .putInt(HeckerStudio.PREFIX+"dock_search_style",1).putString("hecker_glass","1")
-            .putInt("hecker_glass_opacity",82).putInt("hecker_glass_frost",24).putInt("hecker_glass_tint",0xff232535)
-            .putInt("hecker_glass_border",2).apply();HeckerIconStudio.clear();});
+            .putString(HeckerStudio.PREFIX+"icon_pack", "")
+            .apply();HeckerIconStudio.clear();Toast.makeText(this,t("icon_pack_applied"),Toast.LENGTH_SHORT).show();});
         button("glass", v -> HeckerStudio.open(this, "glass")); button("icons", v -> HeckerStudio.open(this, "icons"));
     }
     private void glass() {
@@ -126,28 +139,33 @@ public final class HeckerStudioActivity extends Activity {
         }
     }
     private void clocks() {
-        clock = new HeckerClockView(this, widgetId);
-        Spinner picker = new Spinner(this); String[] names = new String[StudioPolicy.CLOCKS.length]; int selected = 0;
-        for (int i = 0; i < names.length; i++) { names[i] = t("clock_" + StudioPolicy.CLOCKS[i]); if (clock.style().equals(StudioPolicy.CLOCKS[i])) selected = i; }
-        ArrayAdapter<String> options = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, names);
-        picker.setAdapter(options); picker.setSelection(selected); picker.setContentDescription(t("clock")); page.addView(picker);
-        picker.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onNothingSelected(AdapterView<?> parent) { }
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String style = StudioPolicy.CLOCKS[position];
-                if (clock.style().equals(style)) return;
-                HeckerStudio.prefs(HeckerStudioActivity.this).edit().putString(HeckerStudio.PREFIX + (pickingWidget ? "clock_widget_" + widgetId : "clock_style"), style).apply();
-                clock.setStyle(style);
-            }
+        clock = new HeckerClockView(this, pickingWidget ? widgetId : -2);
+        String[] names = new String[StudioPolicy.CLOCKS.length];
+        for (int i = 0; i < names.length; i++) names[i] = t("clock_" + StudioPolicy.CLOCKS[i]);
+        button("clock_style", v -> {
+            int selected = java.util.Arrays.asList(StudioPolicy.CLOCKS).indexOf(clock.style());
+            HeckerStudioUi.show(new AlertDialog.Builder(this).setTitle(t("clock_style"))
+                    .setSingleChoiceItems(names, selected, (dialog, which) -> {
+                        String style = StudioPolicy.CLOCKS[which];
+                        HeckerStudio.prefs(this).edit().putString(HeckerStudio.PREFIX
+                                + (pickingWidget ? "clock_widget_" + widgetId : "clock_style"), style).apply();
+                        clock.setStyle(style); dialog.dismiss();
+                    }).setNegativeButton(android.R.string.cancel, null).create());
         });
-        page.addView(clock, new LinearLayout.LayoutParams(-1, HeckerStudio.dp(this, 240)));
+        LinearLayout preview = HeckerStudioUi.card(this);
+        preview.addView(clock, new LinearLayout.LayoutParams(-1, HeckerStudio.dp(this, 240))); page.addView(preview);
         if (!pickingWidget) {
             toggle("clock_home", true);
             page.addView(HeckerStudio.label(this, t("clock_home_summary"), 14));
+            slider("clock_height", 184, 112, 320, false);
+            slider("clock_offset", 0, 0, 120, false);
+            page.addView(HeckerStudioUi.label(this, t("clock_height_summary"), 13, HeckerStudioUi.MUTED));
         }
         choice("clock_palette", new String[]{t("aurora"), t("sunrise"), t("lagoon"), t("orchid"), t("classic")},
                 selectedPalette -> HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX + "clock_palette", selectedPalette).apply());
         toggle("clock_animation", true); toggle("clock_messages", true); toggle("clock_weather", true);
+        choice("clock_info_position", new String[]{t("info_above"), t("info_below"), t("info_left"), t("info_right")},
+                position -> HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX + "clock_info_position", position).apply());
         page.addView(HeckerStudio.label(this, t("clock_weather_summary"), 13));
         page.addView(HeckerStudio.label(this, t("clock_metrics"), 13));
         button("apply_clock", v -> {
@@ -195,6 +213,8 @@ public final class HeckerStudioActivity extends Activity {
     }
     private void search() {
         toggle("dock_search", true); toggle("google_search", false);
+        slider("search_height", 48, 36, 64, false);
+        page.addView(HeckerStudioUi.label(this, t("search_height_summary"), 13, HeckerStudioUi.MUTED));
         choice("dock_search_style",new String[]{t("dock_search_full"),t("dock_search_flow")},i->HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX+"dock_search_style",i).apply());
         page.addView(HeckerStudio.label(this, t("google_search_summary"), 14));
         toggle("universal_search", true); toggle("search_shortcuts", true);
@@ -252,7 +272,7 @@ public final class HeckerStudioActivity extends Activity {
         b.setGravity(Gravity.START | Gravity.CENTER_VERTICAL); b.setMaxLines(3); b.setStateListAnimator(null);
         int pad = HeckerStudio.dp(this, 18); b.setPadding(pad, HeckerStudio.dp(this, 14), pad, HeckerStudio.dp(this, 14));
         b.setBackground(new android.graphics.drawable.RippleDrawable(android.content.res.ColorStateList.valueOf(0x407db6ed),
-                HeckerStudio.panel(0xff203140, HeckerStudio.dp(this, 18), 0xff3c5267), null));
+                HeckerStudio.panel(0xff1c2d3d, HeckerStudio.dp(this, 22), 0xff395164), null));
         b.setOnClickListener(clicked);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2); params.bottomMargin = HeckerStudio.dp(this, 12);
         page.addView(b, params); return b;
@@ -260,26 +280,45 @@ public final class HeckerStudioActivity extends Activity {
     private void toggle(String key, boolean fallback) { toggle(key, fallback, true); }
     private void toggle(String key, boolean fallback, boolean studio) {
         String name = studio ? HeckerStudio.PREFIX + key : key;
-        Switch v = new Switch(this); v.setText(t(key)); v.setTextColor(0xfff5f2e8); v.setMinHeight(HeckerStudio.dp(this, 52));
-        v.setChecked(HeckerStudio.prefs(this).getBoolean(name, fallback));
-        v.setOnCheckedChangeListener((button, checked) -> HeckerStudio.prefs(this).edit().putBoolean(name, checked).apply()); page.addView(v);
+        HeckerStudioUi.toggle(this, page, t(key), HeckerStudio.prefs(this).getBoolean(name, fallback),
+                (button, checked) -> HeckerStudio.prefs(this).edit().putBoolean(name, checked).apply());
     }
     private interface NumberChange { void accept(int value); }
     private void choice(String key, String[] options, java.util.function.IntConsumer picked) {
-        button(key, v -> new AlertDialog.Builder(this).setTitle(t(key)).setItems(options, (dialog, which) -> picked.accept(which)).show());
+        button(key, v -> HeckerStudioUi.show(new AlertDialog.Builder(this).setTitle(t(key))
+                .setSingleChoiceItems(options, HeckerStudio.number(this, key, 0, 0, options.length-1),
+                        (dialog, which) -> { picked.accept(which); dialog.dismiss(); })
+                .setNegativeButton(android.R.string.cancel, null).create()));
     }
     private void slider(String key, int fallback, int min, int max, boolean live) {
-        rawSlider(key, HeckerStudio.number(this, key, fallback, min, max), min, max, value -> HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX + key, value).apply(), live);
+        rawSlider(key, HeckerStudio.number(this, key, fallback, min, max), min, max, value -> {
+            HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX + key, value).apply();
+            if (clock != null && "clock_height".equals(key)) {
+                android.view.ViewGroup.LayoutParams params = clock.getLayoutParams();
+                params.height = HeckerStudio.dp(this, value); clock.setLayoutParams(params);
+            }
+        }, live);
     }
     private void glassSlider(String key, int fallback, int min, int max) {
         rawSlider(key, HeckerStudio.prefs(this).getInt("hecker_glass_" + key, fallback), min, max, value -> HeckerStudio.prefs(this).edit().putInt("hecker_glass_" + key, value).apply(), true);
     }
     private void rawSlider(String key, int current, int min, int max, NumberChange changed, boolean live) {
-        TextView label = HeckerStudio.label(this, t(key) + " · " + current, 16); page.addView(label);
-        SeekBar bar = new SeekBar(this); bar.setMax(max - min); bar.setProgress(StudioPolicy.clamp(current, min, max) - min); bar.setContentDescription(t(key)); page.addView(bar);
+        LinearLayout card = HeckerStudioUi.card(this);
+        LinearLayout heading = new LinearLayout(this); heading.setGravity(Gravity.CENTER_VERTICAL);
+        TextView label = HeckerStudioUi.label(this, t(key), 15, HeckerStudioUi.TEXT);
+        heading.addView(label, new LinearLayout.LayoutParams(0, -2, 1));
+        TextView valueLabel = HeckerStudioUi.label(this, Integer.toString(current), 14, HeckerStudioUi.ACCENT);
+        valueLabel.setPadding(HeckerStudio.dp(this, 12), HeckerStudio.dp(this, 5), HeckerStudio.dp(this, 12), HeckerStudio.dp(this, 5));
+        valueLabel.setBackground(HeckerStudio.panel(0xff253e44, HeckerStudio.dp(this, 12), 0xff355356));
+        heading.addView(valueLabel); card.addView(heading);
+        SeekBar bar = new SeekBar(this); bar.setMax(max - min); bar.setProgress(StudioPolicy.clamp(current, min, max) - min); bar.setContentDescription(t(key));
+        bar.setProgressTintList(android.content.res.ColorStateList.valueOf(HeckerStudioUi.ACCENT));
+        bar.setThumbTintList(android.content.res.ColorStateList.valueOf(HeckerStudioUi.ACCENT));
+        bar.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff3b4d61));
+        card.addView(bar, new LinearLayout.LayoutParams(-1, HeckerStudio.dp(this, 48))); page.addView(card);
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             public void onStartTrackingTouch(SeekBar seek) { }
-            public void onProgressChanged(SeekBar seek, int value, boolean fromUser) { label.setText(t(key) + " · " + (value + min)); if (fromUser && live) changed.accept(value + min); }
+            public void onProgressChanged(SeekBar seek, int value, boolean fromUser) { valueLabel.setText(Integer.toString(value + min)); if (fromUser && live) changed.accept(value + min); }
             public void onStopTrackingTouch(SeekBar seek) { if (!live) changed.accept(seek.getProgress() + min); }
         });
     }

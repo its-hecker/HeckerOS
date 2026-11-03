@@ -159,7 +159,7 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
     private void updateDescription() {
         String weather = HeckerStudio.enabled(getContext(), "clock_weather", true) ? HeckerClockWeather.text() : null;
         setContentDescription(time() + ", " + date() + (battery >= 0 ? ", " + HeckerStudio.text(getContext(), "battery") + " " + percent(battery) : "")
-                + (weather == null || weather.isEmpty() ? "" : ", " + weather) + ". " + message);
+                + (weather == null || weather.isEmpty() ? "" : ", " + weather) + (HeckerStudio.enabled(getContext(), "clock_messages", true) ? ". " + message : ""));
     }
     private int[] palette() {
         int[][] colors = {{0xffb4f8d9,0xff8edbed,0xffc5acff}, {0xffffd59c,0xffffaaa4,0xffffcc74},
@@ -186,12 +186,18 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
     }
     @Override protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (drawLivingClock(canvas)) return;
+        boolean showMessage = HeckerStudio.enabled(getContext(), "clock_messages", true) && !message.isEmpty();
+        boolean showWeather = HeckerStudio.enabled(getContext(), "clock_weather", true)
+                && HeckerClockWeather.text() != null && !HeckerClockWeather.text().isEmpty();
+        float[] layout = ClockInfoLayout.bounds(getWidth(), getHeight(), getResources().getDisplayMetrics().density,
+                HeckerStudio.number(getContext(), "clock_info_position", 0, 0, 3), showMessage, showWeather);
+        int outer = canvas.save();
+        canvas.clipRect(layout[0], layout[1], layout[0] + layout[2], layout[1] + layout[3]);
+        canvas.translate(layout[0], layout[1]);
+        if (!drawLivingClock(canvas, layout[2], layout[3])) {
         float logicalHeight = style.equals("caracal") ? 230 : style.equals("analog") || style.equals("stacked") || style.equals("thermal") ? 220 : 180;
-        boolean weatherEnabled = HeckerStudio.enabled(getContext(), "clock_weather", true);
-        float scale = Math.min(getWidth() / 380f, getHeight() / (logicalHeight + (weatherEnabled ? 30 : 0)));
-        if (scale <= 0) return;
-        float originX = (getWidth() - 380 * scale) / 2, originY = (getHeight() - (logicalHeight + (weatherEnabled ? 30 : 0)) * scale) / 2;
+        float scale = Math.min(layout[2] / 380f, layout[3] / logicalHeight);
+        float originX = (layout[2] - 380 * scale) / 2, originY = (layout[3] - logicalHeight * scale) / 2;
         int save = canvas.save(); canvas.translate(originX, originY); canvas.scale(scale, scale);
         int[] colors = palette();
         final int ivory = colors[0], muted = 0xffcad7e4, mint = colors[1], accent = colors[2];
@@ -222,7 +228,6 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
             text(canvas, date, 260, 108, 18, muted, false, Paint.Align.CENTER);
             metric(canvas, 46, 135, temp(), "battery_temp", 0); metric(canvas, 142, 135, percent(cpu), "cpu_load", 2);
             metric(canvas, 237, 135, ram(), "ram", 2); metric(canvas, 333, 135, percent(battery), "battery", 1);
-            if (HeckerStudio.enabled(getContext(), "clock_messages", true)) text(canvas, message, 190, 216, 16, ivory, false, Paint.Align.CENTER);
         } else {
             int color = style.equals("mono") ? mint : ivory;
             boolean bold = !style.equals("minimal");
@@ -245,17 +250,14 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
                 if (alarm != null) text(canvas, HeckerStudio.text(getContext(), "alarm") + " " + DateFormat.getTimeFormat(getContext()).format(new Date(alarm.getTriggerTime())), 190, 137, 14, accent, false, Paint.Align.CENTER);
             }
         }
-        if (!style.equals("caracal") && HeckerStudio.enabled(getContext(), "clock_messages", true))
-            text(canvas, message, 190, logicalHeight - 6, 14, accent, false, Paint.Align.CENTER);
         canvas.restoreToCount(save);
-        HeckerHomeDepth.foreground(this, canvas);
-        // Keep current weather readable above the depth subject, in its own reserved row.
-        if (weatherEnabled) {
-            save = canvas.save(); canvas.translate(originX, originY); canvas.scale(scale, scale);
-            drawWeather(canvas, logicalHeight + 21); canvas.restoreToCount(save);
         }
+        canvas.restoreToCount(outer);
+        HeckerHomeDepth.foreground(this, canvas);
+        // Both pieces of information paint last, outside the clock's depth area.
+        drawInfo(canvas, layout, showMessage, showWeather);
     }
-    private boolean drawLivingClock(Canvas canvas) {
+    private boolean drawLivingClock(Canvas canvas, float widthPixels, float heightPixels) {
         // The built-in Home clock follows keyguard. Independently configured widgets/previews keep their style.
         if (widgetId != -1 || Settings.Secure.getInt(getContext().getContentResolver(), "hecker_living_clock_home", 1) == 0
                 || Settings.Secure.getInt(getContext().getContentResolver(), "hecker_custom_lockscreen_clock", 0) == 0) return false;
@@ -266,32 +268,44 @@ public final class HeckerClockView extends View implements SharedPreferences.OnS
         int size = Settings.Secure.getInt(getContext().getContentResolver(), "hecker_lockscreen_clock_scale", 100);
         float opacity = Settings.Secure.getInt(getContext().getContentResolver(), "hecker_lockscreen_clock_opacity", 76) / 100f;
         float density = getResources().getDisplayMetrics().density;
-        boolean weather = HeckerStudio.enabled(getContext(), "clock_weather", true);
         int saved = canvas.save(); canvas.scale(density, density);
-        float height = getHeight() / density - (weather ? 24 : 0);
+        float height = heightPixels / density;
         livingClock.draw(canvas, now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE),
-                DateFormat.is24HourFormat(getContext()), date(), Locale.getDefault(), getWidth() / density,
+                DateFormat.is24HourFormat(getContext()), date(), Locale.getDefault(), widthPixels / density,
                 height, selected == 2 ? 3 : selected, 1f, true, true, opacity, color, size, 0, 0);
         canvas.restoreToCount(saved);
-        HeckerHomeDepth.foreground(this, canvas);
-        if (weather) {
-            saved = canvas.save(); canvas.scale(density, density);
-            float scale = getWidth() / density / 380f;
-            canvas.translate(0, height); canvas.scale(scale, scale); drawWeather(canvas, 18);
-            canvas.restoreToCount(saved);
-        }
         return true;
     }
-    private void drawWeather(Canvas canvas, float baseline) {
-        String weather = HeckerClockWeather.text(); if (weather == null || weather.isEmpty()) return;
-        android.graphics.drawable.Drawable icon = HeckerClockWeather.icon();
-        paint.reset(); paint.setAntiAlias(true); paint.setColor(0xffe5edf5); paint.setTextSize(17);
-        paint.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
-        String label = android.text.TextUtils.ellipsize(weather, new android.text.TextPaint(paint),
-                icon == null ? 344 : 316, android.text.TextUtils.TruncateAt.END).toString();
-        float width = paint.measureText(label), start = (380 - width - (icon == null ? 0 : 28)) / 2;
-        if (icon != null) { icon.setBounds(Math.round(start), Math.round(baseline - 19), Math.round(start + 21), Math.round(baseline + 2)); icon.draw(canvas); start += 28; }
-        paint.setTextAlign(Paint.Align.LEFT); canvas.drawText(label, start, baseline, paint);
+    private void drawInfo(Canvas canvas, float[] area, boolean showMessage, boolean showWeather) {
+        if (area[6] <= 0 || area[7] <= 0) return;
+        float d = getResources().getDisplayMetrics().density;
+        float font = Math.min(1.4f, getResources().getConfiguration().fontScale);
+        int saved = canvas.save(); canvas.translate(area[4], area[5]); canvas.clipRect(0, 0, area[6], area[7]);
+        paint.reset(); paint.setAntiAlias(true); paint.setColor(0xa11a2630);
+        canvas.drawRoundRect(0, 0, area[6], area[7], 18*d, 18*d, paint);
+        float available = Math.max(1, area[6] - 20*d), center = area[6]/2;
+        float baseline = showMessage && showWeather ? area[7]*.40f : area[7]*.58f;
+        if (showMessage) {
+            android.text.TextPaint textPaint = new android.text.TextPaint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+            textPaint.setColor(0xffe1e7ed); textPaint.setTextSize(12*d*font);
+            android.text.StaticLayout text = android.text.StaticLayout.Builder.obtain(message, 0, message.length(),
+                    textPaint, Math.max(1, Math.round(available))).setAlignment(android.text.Layout.Alignment.ALIGN_CENTER)
+                    .setIncludePad(false).setMaxLines(2).setEllipsize(android.text.TextUtils.TruncateAt.END).build();
+            int block = canvas.save(); canvas.translate(10*d, Math.max(4*d, baseline-text.getHeight()));
+            text.draw(canvas); canvas.restoreToCount(block);
+        }
+        if (showWeather) {
+            paint.reset(); paint.setAntiAlias(true); paint.setTextSize(14*d*font); paint.setColor(0xffd1eee7);
+            paint.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+            String weather = android.text.TextUtils.ellipsize(HeckerClockWeather.text(), new android.text.TextPaint(paint),
+                    Math.max(1, available-25*d), android.text.TextUtils.TruncateAt.END).toString();
+            android.graphics.drawable.Drawable icon = HeckerClockWeather.icon();
+            float total = paint.measureText(weather) + (icon == null ? 0 : 24*d);
+            float x = center - total/2, y = showMessage ? area[7]*.79f : baseline;
+            if (icon != null) { icon.setBounds(Math.round(x), Math.round(y-16*d), Math.round(x+19*d), Math.round(y+3*d)); icon.draw(canvas); x+=24*d; }
+            paint.setTextAlign(Paint.Align.LEFT); canvas.drawText(weather, x, y, paint);
+        }
+        canvas.restoreToCount(saved);
     }
     private float fitTime(Canvas c, String value, float x, float y, float size, int color, boolean bold, float width) {
         paint.setTypeface(Typeface.create(style.equals("mono") ? "monospace" : "sans-serif", bold ? Typeface.BOLD : Typeface.NORMAL)); paint.setTextSize(size);

@@ -16,6 +16,9 @@ public final class SuiteRouterActivity extends Activity {
             if (target == ThemePackActivity.class) {
                 intent.putExtra("category", getIntent().getIntExtra("category", -1));
             }
+            if (target == DepthWallpaperActivity.class) {
+                intent.putExtra("home_only", getIntent().getBooleanExtra("home_only", false));
+            }
             if (target == AppLockActivity.class) {
                 intent.putExtra("org.hecker.suite.APP_PACKAGE",
                         getIntent().getStringExtra("org.hecker.suite.APP_PACKAGE"));
@@ -33,6 +36,7 @@ public final class SuiteRouterActivity extends Activity {
             case "SensorRecoveryActivity": return SensorRecoveryActivity.class;
             case "QuickSettingsActivity": return QuickSettingsActivity.class;
             case "LockScreenSettingsActivity": return LockScreenSettingsActivity.class;
+            case "DepthWallpaperActivity": return DepthWallpaperActivity.class;
             case "LyricsSettingsActivity": return LyricsSettingsActivity.class;
             case "StatusBarSettingsActivity": return StatusBarSettingsActivity.class;
             case "ThemePackActivity": return ThemePackActivity.class;

@@ -4,8 +4,8 @@
     <string name="sb_network_row">Network speed position</string>
     <string name="sb_first_row">First row</string>
     <string name="sb_second_row_label">Second row</string>
-    <string name="depth_auto_title">Auto-extract wallpaper subject</string>
-    <string name="depth_auto_summary">Prepare a subject on this device when the lock screen wallpaper changes. If no clear subject is found, use manual import.</string>
+    <string name="depth_auto_title">Auto-extract lock screen subject</string>
+    <string name="depth_auto_summary">Prepare the current static lock-screen wallpaper and update its subject when you change it. Use the action below to retry now.</string>
     <string name="depth_extract_title">Choose a photo and extract subject</string>
     <string name="depth_extract_summary">Preview the extracted subject before applying. You can also import a prepared background and transparent subject manually.</string>
     <string name="lock_clock_apply">Apply selected clock</string>

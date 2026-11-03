@@ -11,7 +11,7 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.Toast;
 public final class LockScreenSettingsActivity extends Activity {
-    private Switch customClock;
+    private Switch customClock, depthToggle;
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         LinearLayout page=Ui.page(this,R.string.lock_screen_title);
@@ -29,18 +29,6 @@ public final class LockScreenSettingsActivity extends Activity {
         faceCard.addView(Ui.text(this, getString(R.string.face_island_summary), 14, false));
         page.addView(faceCard);
         Ui.actionCard(this,page,R.string.lyrics_title,R.string.lyrics_summary,v->startActivity(new Intent(this,LyricsSettingsActivity.class)));
-        Ui.actionCard(this, page, R.string.caracal_defaults_title, R.string.caracal_defaults_summary, v -> {
-            AppearanceBootReceiver.WORKER.execute(() -> {
-                boolean applied;
-                try { applied = DefaultAppearance.apply(this, true); if(applied)HomeAppearance.apply(this,true); }
-                catch (Exception | OutOfMemoryError failure) { applied = false; }
-                final boolean success = applied;
-                runOnUiThread(() -> { if (!isFinishing() && !isDestroyed()) {
-                    Toast.makeText(this, success ? R.string.depth_wallpaper_applied : R.string.depth_wallpaper_invalid,
-                            Toast.LENGTH_LONG).show(); if (success) recreate();
-                } });
-            });
-        });
         Ui.actionCard(this,page,R.string.home_depth_picker_title,R.string.home_depth_picker_summary,
             v->startActivity(new Intent(this,DepthWallpaperActivity.class).putExtra("home_only",true)));
         Ui.actionCard(this,page,R.string.lockscreen_wallpaper_title,R.string.lockscreen_wallpaper_summary,v->SuitePages.wallpaper(this));
@@ -82,6 +70,25 @@ public final class LockScreenSettingsActivity extends Activity {
         toggle(depth, R.string.depth_wallpaper_wake, R.string.depth_wallpaper_wake_summary,
                 "hecker_depth_wallpaper_wake", 1);
         toggle(depth, R.string.depth_auto_title, R.string.depth_auto_summary, DepthWallpaperJob.AUTO, 0);
+        Ui.actionCard(this, depth, R.string.depth_current_title, R.string.depth_current_summary, v -> {
+            v.setEnabled(false);
+            Toast.makeText(this, R.string.depth_extract_working, Toast.LENGTH_SHORT).show();
+            AppearanceBootReceiver.WORKER.execute(() -> {
+                boolean success;
+                try { success = DepthWallpaperJob.extractCurrent(this); }
+                catch (Exception | OutOfMemoryError failure) {
+                    android.util.Log.w("HeckerDepth", "Current wallpaper extraction failed", failure);
+                    success = false;
+                }
+                final boolean applied = success;
+                runOnUiThread(() -> { if (!isFinishing() && !isDestroyed()) {
+                    v.setEnabled(true);
+                    Toast.makeText(this, applied ? R.string.depth_wallpaper_applied : R.string.depth_current_failed,
+                            Toast.LENGTH_LONG).show();
+                    if (applied) recreate();
+                } });
+            });
+        });
         page.addView(depth);
         Ui.actionCard(this, page, R.string.depth_wallpaper_import, R.string.depth_wallpaper_import_help,
                 v -> { imported = true; startActivity(new Intent(this, DepthWallpaperActivity.class)); });
@@ -111,7 +118,7 @@ public final class LockScreenSettingsActivity extends Activity {
     }
     @Override protected void onResume() {
         super.onResume();
-        // Import can enable the tall clock. Refresh controls when returning from that page.
+        // Import can enable the selected clock. Refresh controls on return.
         if (imported) { imported = false; recreate(); }
     }
     private boolean imported;
@@ -142,12 +149,13 @@ public final class LockScreenSettingsActivity extends Activity {
         button.setMinHeight(Ui.dp(this, 56));
         button.setChecked(Settings.Secure.getInt(getContentResolver(), key, fallback) != 0);
         if ("hecker_custom_lockscreen_clock".equals(key)) customClock = button;
+        if ("hecker_depth_wallpaper".equals(key)) depthToggle = button;
         button.setOnClickListener(v -> {
             if (!put(key, button.isChecked() ? 1 : 0)) button.setChecked(!button.isChecked());
-            if (DepthWallpaperJob.AUTO.equals(key) && button.isChecked()) {
+            if ((DepthWallpaperJob.AUTO.equals(key) || "hecker_depth_wallpaper".equals(key)) && button.isChecked()) {
                 put("hecker_depth_wallpaper",1); put("hecker_custom_lockscreen_clock",1);
                 if(customClock!=null)customClock.setChecked(true);
-                if(Settings.Secure.getInt(getContentResolver(),"hecker_lockscreen_clock_style",0)<2)put("hecker_lockscreen_clock_style",3);
+                if(depthToggle!=null)depthToggle.setChecked(true);
             }
             if (DepthWallpaperJob.AUTO.equals(key) || "hecker_depth_wallpaper".equals(key)) DepthWallpaperJob.schedule(this);
         });

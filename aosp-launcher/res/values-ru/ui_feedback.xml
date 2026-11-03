@@ -1,0 +1,21 @@
+<resources>
+  <string name="hs_back">Назад</string>
+  <string name="hs_studio_welcome">Ваш главный экран</string>
+  <string name="hs_home_header">ГЛАВНЫЙ ЭКРАН И ОБОИ</string>
+  <string name="hs_drawer_header">СПИСОК ПРИЛОЖЕНИЙ</string>
+  <string name="hs_behavior_header">УПРАВЛЕНИЕ И ЖЕСТЫ</string>
+  <string name="hs_home_depth_open">Выбрать объёмные обои главного экрана</string>
+  <string name="hs_depth_unavailable">Настройки обоев Hecker Suite недоступны.</string>
+  <string name="hs_clock_style">Стиль часов</string>
+  <string name="hs_clock_height">Высота часов на главном экране (dp)</string>
+  <string name="hs_clock_offset">Отступ часов сверху (dp)</string>
+  <string name="hs_clock_height_summary">Опустите часы, чтобы они перекрывались с объектом обоев. Высота ограничена местом над приложениями. Уменьшите число строк сетки для большего пространства.</string>
+  <string name="hs_clock_info_position">Положение сообщения и погоды</string>
+  <string name="hs_info_above">Над часами</string>
+  <string name="hs_info_below">Под часами</string>
+  <string name="hs_info_left">Слева от часов</string>
+  <string name="hs_info_right">Справа от часов</string>
+  <string name="hs_search_height">Высота строки поиска (dp)</string>
+  <string name="hs_search_height_summary">Настройте высоту строки. Область нажатия остаётся удобной, а значки дока не перекрывают поиск.</string>
+  <string name="hs_icon_pack_applied">Набор значков Hecker применён</string>
+</resources>

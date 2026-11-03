@@ -12,7 +12,7 @@
   <string name="hs_privacy_summary">App Lock and independent hidden-app controls.</string>
   <string name="hs_universal_search">Universal search</string>
   <string name="hs_native_settings">More launcher settings</string>
-  <string name="hs_layout_migration">Grid changes use Launcher3’s native layout migration. Items are rearranged to fit; no app data is removed.</string>
+  <string name="hs_layout_migration">Arrange your apps and leave space for your clock and widgets.</string>
   <string name="hs_home_columns">Home columns</string>
   <string name="hs_home_rows">Home rows</string>
   <string name="hs_drawer_columns">Drawer columns</string>

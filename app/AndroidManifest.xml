@@ -5,6 +5,7 @@
     <permission android:name="org.hecker.suite.permission.OPEN_FEATURE"
         android:protectionLevel="signature" />
     <permission android:name="org.hecker.suite.permission.READ_GAME_LIBRARY" android:protectionLevel="signature" />
+    <permission android:name="org.hecker.suite.permission.READ_DEPTH" android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.HECKER_SUITE_APP_LOCK" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
@@ -55,7 +56,8 @@
         <service android:name=".DepthWallpaperJob" android:exported="true" android:permission="android.permission.BIND_JOB_SERVICE" />
         <provider android:name=".DepthWallpaperProvider" android:authorities="org.hecker.suite.depth" android:directBootAware="true"
             android:exported="true" android:grantUriPermissions="false"
-            android:readPermission="android.permission.STATUS_BAR" android:writePermission="android.permission.STATUS_BAR" />
+            android:readPermission="org.hecker.suite.permission.READ_DEPTH"
+            android:writePermission="org.hecker.suite.permission.READ_DEPTH" />
         <activity android:name=".StatusBarSettingsActivity" android:exported="false" android:label="@string/status_bar_title" />
         <activity android:name=".StatusBarLayoutActivity" android:exported="false" android:label="@string/sb_options_title" />
         <activity android:name=".ThemePackActivity" android:exported="false" android:label="@string/themes_title" />

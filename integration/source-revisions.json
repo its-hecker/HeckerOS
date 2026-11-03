@@ -484,5 +484,27 @@
     "parent_suite_revision": "a3f0f41b94e67c4f961e2daa02f46f6d621d9660",
     "issue": "Bionic helper exceeds the 2048-byte stack-frame limit",
     "validation": "Clang 18 ARM/ARM64 O2/Os platform/APEX object checks and executed native boundary/upgrade tests pass; full ServerHive build pending"
+  },
+  "ui_depth_feedback_20261103": {
+    "branch": "fix/coral-ui-compatibility-20261102",
+    "device": "coral",
+    "parent_suite_revision": "faf6a3b37875b4cc0e5c6a162d31c220dee3ffe7",
+    "parent_manifest_revision": "273cfd57f284dc6544c613624cca69169d09d155",
+    "changes": [
+      "dedicated signature depth-provider permission",
+      "manual layer fit and alignment",
+      "current-lock wallpaper extraction with built-in fallback and retry",
+      "depth mask for all built-in Hecker lock clocks",
+      "Launcher Studio cards and controls",
+      "clock height and top spacing",
+      "message/weather position above depth",
+      "search pill height and glass dock padding",
+      "Hecker Icon Pack action",
+      "explicit home/lock depth labels and independent imports",
+      "native QS dashboard preview",
+      "remove Caracal Dawn action",
+      "remove legacy PixelOS Developer options spoof controls"
+    ],
+    "validation": "Targeted host geometry, current-wallpaper pipeline, lifecycle/provider, permission, source-upgrade and font regression checks pass; full ROM build and physical Coral acceptance pending"
   }
 }

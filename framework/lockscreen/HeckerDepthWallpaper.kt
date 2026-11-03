@@ -48,7 +48,7 @@ internal object HeckerDepthScene {
 
     @Composable
     private fun pair(context: Context, state: HeckerAmbientCharging.State): DepthPair? {
-        if (!state.depth || !state.customClock || !FlowClockRenderer.supportsDepth(state.clockStyle) ||
+        if (!state.depth || !state.customClock ||
                 !DepthWallpaperGeometry.validIdentity(state.depthId)) return null
         val id = state.depthId ?: return null
         val image by produceState<DepthPair?>(null, state.user, id, state.wakeGeneration) {

@@ -24,7 +24,15 @@ public final class HeckerHomeClock extends FrameLayout implements SharedPreferen
         int remaining = available - Math.max(1, rows) * (icon + label + HeckerStudio.dp(getContext(), 8))
                 - Math.max(0, rows - 1) * rowGap;
         return remaining < HeckerStudio.dp(getContext(), 112) ? 0
-                : Math.min(remaining, HeckerStudio.dp(getContext(), 184));
+                : Math.min(remaining, HeckerStudio.dp(getContext(),
+                        HeckerStudio.number(getContext(), "clock_height", 184, 112, 320)
+                        + HeckerStudio.number(getContext(), "clock_offset", 0, 0, 120)));
+    }
+    @Override protected void onMeasure(int widthSpec, int heightSpec) {
+        int room = Math.max(0, android.view.View.MeasureSpec.getSize(heightSpec) - HeckerStudio.dp(getContext(), 112));
+        int top = Math.min(room, HeckerStudio.dp(getContext(), HeckerStudio.number(getContext(), "clock_offset", 0, 0, 120)));
+        if (getPaddingTop() != top) setPadding(0, top, 0, 0);
+        super.onMeasure(widthSpec, heightSpec);
     }
     @Override protected void onAttachedToWindow() {
         super.onAttachedToWindow(); HeckerStudio.prefs(getContext()).registerOnSharedPreferenceChangeListener(this);

@@ -52,7 +52,7 @@ public final class HeckerLauncherGlass {
         void restore(){for(Map.Entry<View,Drawable> e:new ArrayList<>(originals.entrySet())){View v=e.getKey();if(v!=null&&v.getBackground() instanceof Glass)v.setBackground(e.getValue());}originals.clear();}
         void invalidate(){for(View v:new ArrayList<>(originals.keySet()))if(v!=null)v.invalidate();for(View v:new ArrayList<>(panels.keySet()))if(v!=null)v.invalidate();}
         void schedule(){if(!stopped&&!queued){queued=true;MAIN.post(refresh);}}
-        @Override public void onSharedPreferenceChanged(SharedPreferences p,String key){if(key!=null&&(key.startsWith("hecker_glass")||key.equals(HeckerStudio.PREFIX+"dock_search_style"))){schedule();if(key.equals("hecker_glass_frost")){MAIN.removeCallbacks(refrost);MAIN.postDelayed(refrost,120);}}}
+        @Override public void onSharedPreferenceChanged(SharedPreferences p,String key){if(key!=null&&(key.startsWith("hecker_glass")||key.startsWith(HeckerStudio.PREFIX+"dock_search")||key.equals(HeckerStudio.PREFIX+"google_search")||key.equals(HeckerStudio.PREFIX+"search_height"))){schedule();if(key.equals("hecker_glass_frost")){MAIN.removeCallbacks(refrost);MAIN.postDelayed(refrost,120);}}}
         @Override public void onGlobalLayout(){
             if(stopped||mode()==0)return;
             // New folders/widgets are discovered after layout, not on every frame.
@@ -184,6 +184,10 @@ public final class HeckerLauncherGlass {
         @Override public void draw(Canvas canvas) {
             View view = host.get(); if (view == null || alpha == 0) return;
             bounds.set(getBounds()); if (bounds.isEmpty()) return;
+            if (view instanceof HeckerDockBar) {
+                float inset = Math.max(0, (bounds.height() - ((HeckerDockBar) view).visualHeight()) / 2);
+                bounds.inset(0, inset);
+            }
             float density = view.getResources().getDisplayMetrics().density;
             float limit = Math.min(bounds.width(), bounds.height()) / 2;
             for (int i = 0; i < 4; i++) radii[i * 2] = radii[i * 2 + 1] = round ? limit

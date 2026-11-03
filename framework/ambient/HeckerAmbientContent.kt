@@ -154,7 +154,7 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
     }
     var origin by remember { mutableStateOf(Offset.Zero) }
     val homeHandoff = LocalHeckerHomeHandoff.current
-    val foreground = if (FlowClockRenderer.supportsDepth(style)) HeckerDepthScene.foreground(context, state) else null
+    val foreground = HeckerDepthScene.foreground(context, state)
     val height = if (small) { if (style == 1) 218.dp else 136.dp }
         else when (style) { 1 -> 310.dp; 2, 3, 5 -> 480.dp; 4 -> 240.dp; else -> 184.dp }
     Canvas(modifier.fillMaxWidth().height(height).clipToBounds()
