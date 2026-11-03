@@ -58,6 +58,8 @@ jobs:
           bash tests/run_host_tests.sh
       - name: Compile Suite Java and link Android resources with locked dependencies
         run: python3 tools/compile_sdk.py --cache generated/sdk
+      - name: Compile Launcher Studio Java and resources without upstream source downloads
+        run: python3 tools/check_launcher_helpers.py --sdk-cache generated/sdk
       - name: Compile root-free sensor broker and generated Binder API
         run: python3 tools/check_sensor_recovery.py --sdk-cache generated/sdk
       - name: Verify pinned native low-brightness refresh voting and device resources
