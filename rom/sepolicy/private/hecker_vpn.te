@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: Apache-2.0
+type hecker_vpnd, domain, coredomain;
+type hecker_vpnd_exec, exec_type, system_file_type, file_type;
+type hecker_vpn_tool_exec, exec_type, system_file_type, file_type;
+type hecker_vpn_socket, file_type, coredomain_socket, mlstrustedobject;
+type hecker_vpn_data_file, file_type, data_file_type, core_data_file_type;
+init_daemon_domain(hecker_vpnd)
+allow hecker_vpnd hecker_vpn_data_file:dir create_dir_perms;
+allow hecker_vpnd hecker_vpn_data_file:file create_file_perms;
+allow hecker_vpnd sysfs:dir { getattr search };
+
+# Android restricts netd/DnsResolver discovery to named trusted domains. Fixed helper
+# executables enter the existing netutils domain; no platform neverallow is weakened.
+domain_auto_trans(hecker_vpnd, hecker_vpn_tool_exec, netutils_wrapper)
+allow hecker_vpnd netutils_wrapper:process { signal sigkill };
+allow netutils_wrapper hecker_vpnd:fd use;
+allow netutils_wrapper hecker_vpnd:fifo_file rw_file_perms;
+allow netutils_wrapper hecker_vpn_tool_exec:file { rx_file_perms execute_no_trans };
+allow netutils_wrapper hecker_vpn_data_file:dir create_dir_perms;
+allow netutils_wrapper hecker_vpn_data_file:file create_file_perms;
+allow netutils_wrapper self:netlink_generic_socket create_socket_perms_no_ioctl;
+allowxperm netutils_wrapper self:netlink_route_socket nlmsg priv_route_socket_nlmsgs;
+allow netutils_wrapper shell_exec:file { rx_file_perms execute_no_trans };
+allow netutils_wrapper toolbox_exec:file { rx_file_perms execute_no_trans };
+allow netutils_wrapper system_data_file:dir search;
+allow netutils_wrapper packages_list_file:file r_file_perms;
+get_prop(netutils_wrapper, build_prop)
+
+# A unique domain authenticates the init socket; the APK separately authenticates Binder callers.
+type hecker_vpn_app, domain, coredomain;
+app_domain(hecker_vpn_app)
+net_domain(hecker_vpn_app)
+binder_use(hecker_vpn_app)
+binder_call(hecker_vpn_app, system_server)
+binder_call(platform_app, hecker_vpn_app)
+binder_call(hecker_vpn_app, platform_app)
+unix_socket_connect(hecker_vpn_app, hecker_vpn, hecker_vpnd)
+allow hecker_vpnd hecker_vpn_app:unix_stream_socket { read write getattr getopt setopt };

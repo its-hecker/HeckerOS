@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vpn_title">HeckerVPN</string>
+    <string name="vpn_disconnect">Отключить</string>
+    <string name="vpn_connecting">Подключение</string>
+    <string name="vpn_active">Активно</string>
+    <string name="vpn_idle">Ожидание · давно не было связи с узлом</string>
+    <string name="vpn_waiting_peer">Туннель настроен · ожидание узла</string>
+    <string name="vpn_waiting_network">Ожидание сети</string>
+    <string name="vpn_error">Соединение требует внимания</string>
+</resources>

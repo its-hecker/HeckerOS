@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: Apache-2.0
+java_library {
+    name: "HeckerVpnApi",
+    srcs: ["aidl/**/*.aidl", "common/**/*.java"],
+    sdk_version: "system_current",
+    aidl: { local_include_dirs: ["aidl"] },
+    installable: false,
+}
+android_app {
+    name: "HeckerVpnController",
+    manifest: "AndroidManifest.xml",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    static_libs: ["HeckerVpnApi"],
+    platform_apis: true,
+    certificate: "platform",
+    privileged: true,
+    system_ext_specific: true,
+    required: ["heckervpnd", "hecker-wg", "hecker-wg-quick", "HeckerVpnDefaultPermissions"],
+}
+cc_binary {
+    name: "heckervpnd",
+    srcs: ["native/daemon.cpp", "native/protocol.cpp"],
+    cpp_std: "c++17",
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+    shared_libs: ["libcutils"],
+    init_rc: ["heckervpnd.rc"],
+    system_ext_specific: true,
+}
+prebuilt_etc {
+    name: "HeckerVpnDefaultPermissions",
+    src: "default-permissions-heckervpn.xml",
+    filename_from_src: true,
+    sub_dir: "default-permissions",
+    system_ext_specific: true,
+}

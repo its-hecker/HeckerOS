@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vpn_title">HeckerVPN</string>
+    <string name="vpn_disconnect">断开连接</string>
+    <string name="vpn_connecting">正在连接</string>
+    <string name="vpn_active">已连接</string>
+    <string name="vpn_idle">空闲 · 最近未联系对端</string>
+    <string name="vpn_waiting_peer">隧道已配置 · 等待对端</string>
+    <string name="vpn_waiting_network">等待网络</string>
+    <string name="vpn_error">连接需要处理</string>
+</resources>

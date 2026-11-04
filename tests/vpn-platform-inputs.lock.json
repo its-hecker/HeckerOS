@@ -1,0 +1,41 @@
+{
+  "kernel-net-Kconfig": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros-floral-kernel/5303303fd0138a719c0077570975fdce6ace661f/net/Kconfig",
+    "sha256": "5fbf98aa1b83fe6084b165dac0199a9ef976865de2ec3407ca13e69107004ff2"
+  },
+  "kernel-net-Makefile": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros-floral-kernel/5303303fd0138a719c0077570975fdce6ace661f/net/Makefile",
+    "sha256": "7134b34a18f7573a022154dde95d0a39850c06513c38eefad4c9146361ad7243"
+  },
+  "kernel-wireguard-Kconfig": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros-floral-kernel/5303303fd0138a719c0077570975fdce6ace661f/net/wireguard/Kconfig",
+    "sha256": "791a6430d13f28c147a1146ebecc066cb6439c722f74e3156b99eb4f61710539"
+  },
+  "kernel-floral-defconfig": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros-floral-kernel/5303303fd0138a719c0077570975fdce6ace661f/arch/arm64/configs/floral_defconfig",
+    "sha256": "13ce41db855c5bece2c311fee36c14b8f9841dc8f7b8d9be19b5798e0bb2b44e"
+  },
+  "IDnsResolver.aidl": {
+    "url": "https://android.googlesource.com/platform/packages/modules/DnsResolver/+/refs/tags/android-17.0.0_r1/binder/android/net/IDnsResolver.aidl?format=TEXT",
+    "base64": true,
+    "sha256": "7d59eb3e1980feaf218f90f0ba2d0c66340dd2ec20d224a630663836c81c9dcb"
+  },
+  "NdcDispatcher.cpp": {
+    "url": "https://android.googlesource.com/platform/system/netd/+/refs/tags/android-17.0.0_r1/server/NdcDispatcher.cpp?format=TEXT",
+    "base64": true,
+    "sha256": "ba438065b993714289617cf4bbd70294d41f91e17c214de001c465a39865202b"
+  },
+  "sockets.h": {
+    "url": "https://android.googlesource.com/platform/system/core/+/refs/tags/android-17.0.0_r1/libcutils/include/cutils/sockets.h?format=TEXT",
+    "base64": true,
+    "sha256": "aebbb5e1205b0b9028ff1a18c91e2548d3dcef9bfbce01f1dd63ff02feecebf9"
+  },
+  "netd.te": {
+    "url": "https://raw.githubusercontent.com/PixelOS-AOSP/android_system_sepolicy/99c58a7cc9a44fe33c93808452d018e756d84753/private/netd.te",
+    "sha256": "728d402280235d9fb82228d270cc55e589441de13a463d84ef971c2f4ee76fd6"
+  },
+  "netutils_wrapper.te": {
+    "url": "https://raw.githubusercontent.com/PixelOS-AOSP/android_system_sepolicy/99c58a7cc9a44fe33c93808452d018e756d84753/private/netutils_wrapper.te",
+    "sha256": "7e6ec7baf99800847cc6d6c2c54aa2eb46cd0d931f72dc99e289589409340e45"
+  }
+}

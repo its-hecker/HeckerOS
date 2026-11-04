@@ -27,6 +27,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
     <uses-permission android:name="org.hecker.netlab.permission.CONTROL" />
+    <uses-permission android:name="org.hecker.vpn.permission.CONTROL" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -126,6 +127,12 @@
             <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
         </service>
         <activity android:name=".NetworkLabActivity" android:exported="false" android:label="@string/netlab_title" />
+        <activity android:name=".HeckerVpnActivity" android:exported="false" android:label="@string/vpn_title" />
+        <service android:name=".HeckerVpnTileService" android:exported="true"
+            android:label="@string/vpn_title" android:icon="@drawable/ic_vpn"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+        </service>
         <service android:name=".NetworkLabTileService" android:exported="true"
             android:label="@string/netlab_title" android:icon="@drawable/ic_netlab"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">

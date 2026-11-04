@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+on post-fs-data
+    mkdir /data/misc/heckervpn 0700 root root
+    restorecon_recursive /data/misc/heckervpn
+
+service heckervpnd /system_ext/bin/heckervpnd
+    class main
+    user root
+    group root system inet package_info
+    capabilities NET_ADMIN NET_RAW
+    socket heckervpnd stream 0666 root root
+    # MAC + SO_PEERSEC restrict the socket to the platform-signed owner-user controller.
+    restart_period 5

@@ -71,7 +71,8 @@ public final class SuiteActivity extends Activity {
                 tile(R.string.capture_title,R.string.capture_summary,R.drawable.ic_qs,v->open("CaptureSettingsActivity")));
         addRow(tile(R.string.launcher_title,R.string.launcher_summary,R.drawable.ic_launcher_enhanced,v->open("LauncherSettingsActivity")),
                 tile(R.string.netlab_title,R.string.netlab_summary,R.drawable.ic_netlab,v->open("NetworkLabActivity")));
-        content.addView(tile(R.string.spoofing_title,R.string.spoofing_summary,R.drawable.ic_spoofing,v->openSpoofing()));
+        addRow(tile(R.string.vpn_title,R.string.vpn_summary,R.drawable.ic_vpn,v->open("HeckerVpnActivity")),
+                tile(R.string.spoofing_title,R.string.spoofing_summary,R.drawable.ic_spoofing,v->openSpoofing()));
         if("coral".equals(android.os.Build.DEVICE)||"flame".equals(android.os.Build.DEVICE)){
             Ui.actionCard(this,content,R.string.sensor_recovery_title,R.string.sensor_recovery_summary,
                     v->open("SensorRecoveryActivity"));

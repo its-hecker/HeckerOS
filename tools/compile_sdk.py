@@ -96,6 +96,9 @@ def main():
         network_aidl.write_text((ROOT / "netlab/aidl/org/hecker/netlab/INetLabService.aidl").read_text())
         run(cache / "aidl", "--lang=java", "--out=" + str(output / "netlab-aidl"),
             "-I", output / "aidl", network_aidl, env=environment)
+        vpn_aidl = ROOT / "vpn/aidl/org/hecker/vpn/IHeckerVpnService.aidl"
+        run(cache / "aidl", "--lang=java", "--out=" + str(output / "vpn-aidl"),
+            "-I", output / "aidl", "-I", ROOT / "vpn/aidl", vpn_aidl, env=environment)
         generated = (output / "aidl-generated/suite/probe/IAccessProbe.java").read_text()
         assert "android.Manifest.permission.LOCK_APPS" in generated
         assert "android.Manifest.permission.HECKER_SUITE_APP_LOCK" in generated
@@ -130,6 +133,8 @@ def main():
             ROOT / "framework/sandbox/HeckerSandboxRules.java",
             *sorted((ROOT / "netlab/common").rglob("*.java")),
             *sorted((output / "netlab-aidl").rglob("*.java")),
+            *sorted((ROOT / "vpn/common").rglob("*.java")),
+            *sorted((output / "vpn-aidl").rglob("*.java")),
             *sorted((output / "feature-aidl").rglob("*.java")))
         run(aapt, "compile", "--dir", ROOT / "netlab/res", "-o", output / "netlab-resources.zip")
         run(aapt, "link", "-I", cache / "android.jar", "--manifest", ROOT / "netlab/AndroidManifest.xml",

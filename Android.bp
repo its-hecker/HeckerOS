@@ -50,7 +50,7 @@ android_app {
     certificate: "platform",
     privileged: true,
     system_ext_specific: true,
-    static_libs: ["lottie", "HeckerNetLabApi", "HeckerDepthLiteRt", "HeckerXMorphClock"],
+    static_libs: ["lottie", "HeckerNetLabApi", "HeckerDepthLiteRt", "HeckerXMorphClock", "HeckerVpnApi"],
     jni_libs: ["libhecker_depth_tflite"],
     compile_multilib: "64",
     required: ["HeckerSuitePrivappPermissions", "HeckerSuiteFreeformFeature", "HeckerGameInit", "HeckerSensorRecoveryInit"],

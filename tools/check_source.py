@@ -30,7 +30,7 @@ def main():
         "android.permission.SYSTEM_ALERT_WINDOW", "android.permission.KILL_BACKGROUND_PROCESSES",
         "android.permission.KILL_ALL_BACKGROUND_PROCESSES", "android.permission.FORCE_STOP_PACKAGES", "android.permission.CONTROL_DISPLAY_BRIGHTNESS",
         "android.permission.MODIFY_AUDIO_SETTINGS", "android.permission.MANAGE_GAME_MODE", "android.permission.ACCESS_NETWORK_STATE",
-        "android.permission.INTERNET", "android.permission.ACCESS_LOCAL_NETWORK", "org.hecker.netlab.permission.CONTROL",
+        "android.permission.INTERNET", "android.permission.ACCESS_LOCAL_NETWORK", "org.hecker.netlab.permission.CONTROL", "org.hecker.vpn.permission.CONTROL",
         "android.permission.ACCESS_NOTIFICATION_POLICY", "android.permission.READ_FRAME_BUFFER",
         "android.permission.POST_NOTIFICATIONS", "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_SPECIAL_USE", "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
@@ -65,7 +65,7 @@ def main():
     assert library.get(A+"writePermission")==library.get(A+"readPermission")
     assert manifest.find("permission[@"+A+"name='org.hecker.suite.permission.READ_GAME_LIBRARY']").get(A+"protectionLevel")=="signature"
     services = {node.get(A + "name"): node for node in app.findall("service")}
-    tiles = {".SuiteTileService", ".MotionSenseTileService", ".FaceUnlockTileService", ".NetworkLabTileService", ".SensorRecoveryTileService"}
+    tiles = {".SuiteTileService", ".MotionSenseTileService", ".FaceUnlockTileService", ".NetworkLabTileService", ".SensorRecoveryTileService", ".HeckerVpnTileService"}
     assert set(services) == {".GamingService", ".GamingRecordingService", ".DepthWallpaperJob"} | tiles
     for name, node in services.items():
         assert node.get(A + "exported") == ("true" if name in tiles or name == ".DepthWallpaperJob" else "false")

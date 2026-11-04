@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_title">HeckerVPN</string>
+    <string name="vpn_active">Active</string>
+    <string name="vpn_idle">Idle · no recent peer contact</string>
+    <string name="vpn_waiting_peer">Tunnel configured · waiting for peer</string>
+    <string name="vpn_waiting_network">Waiting for network</string>
+    <string name="vpn_error">Connection needs attention</string>
+    <string name="vpn_connecting">Connecting</string>
+    <string name="vpn_disconnect">Disconnect</string>
+</resources>

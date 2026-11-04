@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.hecker.vpn">
+    <uses-sdk android:minSdkVersion="37" android:targetSdkVersion="37" />
+    <permission android:name="org.hecker.vpn.permission.CONTROL" android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="org.hecker.suite.permission.OPEN_FEATURE" />
+    <application android:name=".VpnApplication" android:label="@string/vpn_title"
+        android:persistent="true" android:allowBackup="false" android:allowClearUserData="false"
+        android:usesCleartextTraffic="false">
+        <service android:name=".VpnService" android:exported="true" android:permission="org.hecker.vpn.permission.CONTROL" />
+    </application>
+</manifest>

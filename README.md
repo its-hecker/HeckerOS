@@ -1,5 +1,13 @@
 # HeckerOS · Android 17
 
+## HeckerVPN feature branch — 4 November 2026
+
+`feat/heckervpn-20261104` adds **HeckerLab → HeckerVPN** with provider countries,
+manual WireGuard imports, per-profile app routing, a QS tile and an init-owned
+kernel controller. Mullvad is the first optional account-based provider; no
+server hosting or separate WireGuard app is needed. Full ROM and phone validation
+remain required. See [implementation, controls and test scope](docs/heckervpn-2026-11-04.md).
+
 ## Coral UI and compatibility — 2 November 2026
 
 **4 November Launcher Kotlin build fix:** use the wallpaper action declared by

@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: Apache-2.0
+package { default_applicable_licenses: ["hecker_wireguard_tools_license"] }
+license {
+    name: "hecker_wireguard_tools_license",
+    license_kinds: ["SPDX-license-identifier-GPL-2.0"],
+    license_text: ["COPYING"],
+}
+cc_binary {
+    name: "hecker-wg",
+    srcs: ["src/*.c"],
+    local_include_dirs: ["src/uapi/linux"],
+    c_std: "gnu11",
+    cflags: ["-D_GNU_SOURCE", "-DRUNSTATEDIR=\"/data/misc/heckervpn\"", "-Wno-unused-parameter"],
+    system_ext_specific: true,
+}
+cc_binary {
+    name: "hecker-wg-quick",
+    srcs: ["src/wg-quick/android.c"],
+    c_std: "gnu11",
+    cflags: ["-DWG_PACKAGE_NAME=\"org.hecker.vpn\"", "-DWG_CONFIG_SEARCH_PATHS=\"/data/misc/heckervpn\"", "-Wno-sign-compare"],
+    shared_libs: ["libdl"],
+    system_ext_specific: true,
+}

@@ -9,6 +9,19 @@ concurrency:
   group: hecker-source-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  heckervpn:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Compile HeckerVPN, generated Binder API, HeckerLab UI and native WireGuard tools
+        run: python3 tools/check_vpn.py --sdk-cache generated/sdk
+      - name: Compile HeckerVPN with pinned platform SELinux policy and enforced neverallows
+        run: python3 tools/check_vpn_policy.py
   librepods:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
