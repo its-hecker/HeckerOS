@@ -10,7 +10,27 @@ import java.util.Set;
 
 final class GamingPrefs {
     static final String FILE = "gaming";
-    static SharedPreferences get(Context c) { return c.getSharedPreferences(FILE, Context.MODE_PRIVATE); }
+    private static SharedPreferences monitored;
+    private static SharedPreferences.OnSharedPreferenceChangeListener monitor;
+    static synchronized SharedPreferences get(Context c) {
+        SharedPreferences prefs=c.getSharedPreferences(FILE, Context.MODE_PRIVATE);
+        if(monitored==null){
+            Context app=c.getApplicationContext();monitored=prefs;
+            monitor=(values,key)->{if("enabled".equals(key)||"added".equals(key)||"excluded".equals(key)||"automatic".equals(key))publishMonitor(app,values);};
+            prefs.registerOnSharedPreferenceChangeListener(monitor);publishMonitor(app,prefs);
+        }
+        return prefs;
+    }
+    private static void publishMonitor(Context context,SharedPreferences prefs){
+        try{
+            org.json.JSONObject value=new org.json.JSONObject();
+            value.put("enabled",prefs.getBoolean("enabled",false));
+            value.put("automatic",prefs.getBoolean("automatic",true));
+            value.put("added",new org.json.JSONArray(new java.util.TreeSet<>(prefs.getStringSet("added",Set.of()))));
+            value.put("excluded",new org.json.JSONArray(new java.util.TreeSet<>(prefs.getStringSet("excluded",Set.of()))));
+            android.provider.Settings.Secure.putString(context.getContentResolver(),"hecker_game_monitor_config",value.toString());
+        }catch(org.json.JSONException|RuntimeException failure){android.util.Log.w("HeckerGaming","Cannot publish game monitor configuration",failure);}
+    }
     static boolean enabled(Context c) { return get(c).getBoolean("enabled", false); }
     static Set<String> added(Context c) { return new HashSet<>(get(c).getStringSet("added", Set.of())); }
     static Set<String> excluded(Context c) { return new HashSet<>(get(c).getStringSet("excluded", Set.of())); }

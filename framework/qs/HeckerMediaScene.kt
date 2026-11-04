@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
@@ -17,6 +18,27 @@ import com.android.systemui.scene.shared.model.Scenes
 val LocalHeckerQsContentScope = staticCompositionLocalOf<ContentScope?> { null }
 private val SquareWeight = ValueKey("HeckerMediaSquareWeight")
 private val RowWeight = ValueKey("HeckerMediaRowWeight")
+
+/** Shared across QQS/full-QS copies; a fresh playback event restores a dismissed card. */
+object HeckerMediaVisibility {
+    private var user by mutableIntStateOf(-1)
+    private var hidden by mutableStateOf(false)
+    private var token: android.media.session.MediaSession.Token? = null
+    private var updated = 0L
+    private var stopped = false
+    fun observe(snapshot: HeckerQsMedia.Snapshot?) {
+        val current = android.app.ActivityManager.getCurrentUser()
+        if (user != current) { user = current; hidden = false; token = null; stopped = false }
+        if (!hidden || snapshot == null) return
+        if (!snapshot.playing) stopped = true
+        if (snapshot.playing && (stopped || snapshot.token != token || snapshot.updated > updated)) hidden = false
+    }
+    fun dismiss(snapshot: HeckerQsMedia.Snapshot?) {
+        user = android.app.ActivityManager.getCurrentUser(); token = snapshot?.token
+        updated = snapshot?.updated ?: 0L; stopped = snapshot?.playing != true; hidden = true
+    }
+    fun isHidden(): Boolean = hidden && user == android.app.ActivityManager.getCurrentUser()
+}
 
 /** Legacy QS closes outside its inner QQS/QS scene. Follow its native panel callbacks as well. */
 object HeckerQsPanelState {
@@ -42,7 +64,7 @@ fun HeckerQsMediaPlayer(modifier: Modifier = Modifier, square: Boolean = false,
     if (scope == null) {
         HeckerMediaCard(modifier.graphicsLayer { alpha = HeckerQsPanelState.alpha(null) },
             square, hideWhenInactive, compactRow = compactRow,
-            visible = { HeckerQsPanelState.alpha(null) > 0f })
+            visible = { HeckerQsPanelState.alpha(null) > 0f }, dismissible = true)
         return
     }
     with(scope) {
@@ -50,12 +72,14 @@ fun HeckerQsMediaPlayer(modifier: Modifier = Modifier, square: Boolean = false,
             val tile = animateElementFloatAsState(if (square) 1f else 0f, SquareWeight, canOverflow = false)
             val row = animateElementFloatAsState(if (compactRow) 1f else 0f, RowWeight, canOverflow = false)
             content {
-                HeckerMediaCard(modifier = Modifier.graphicsLayer {
+                HeckerMediaCard(modifier = Modifier.drawWithContent {
+                    if (HeckerQsPanelState.alpha(scope) > .001f) drawContent()
+                }.graphicsLayer {
                     alpha = HeckerQsPanelState.alpha(scope)
                 }, square = square, compactRow = compactRow,
                     hideWhenInactive = hideWhenInactive,
                     squareWeight = { tile.value }, rowWeight = { row.value },
-                    visible = { HeckerQsPanelState.alpha(scope) > 0f })
+                    visible = { HeckerQsPanelState.alpha(scope) > 0f }, dismissible = true)
             }
         }
     }

@@ -33,8 +33,9 @@ public final class DepthWallpaperJob extends JobService {
                 .setMinimumLatency(600).setOverrideDeadline(5000).build());
     }
     private static boolean enabled(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),AUTO,0) == 1
-                && Settings.Secure.getInt(context.getContentResolver(),"hecker_depth_wallpaper",0) == 1;
+        // Auto extraction is its own opt-in. A newly applied wallpaper may have
+        // invalidated/disabled the old mask before this job is scheduled.
+        return Settings.Secure.getInt(context.getContentResolver(),AUTO,0) == 1;
     }
     @Override public boolean onStartJob(JobParameters params) {
         int serial = ++generation;

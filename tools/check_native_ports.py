@@ -11,6 +11,8 @@ import shutil
 import subprocess
 import tempfile
 import urllib.request
+import urllib.error
+import time
 import xml.etree.ElementTree as ET
 from check_launcher import COMPILER
 from compile_sdk import fetch
@@ -450,8 +452,14 @@ def main():
         else:
             url = 'https://raw.githubusercontent.com/{}/{}/{}'.format(
                 repository, origin['revision'], relative[len(project) + 1:])
-        with urllib.request.urlopen(url, timeout=45) as response:
-            content = response.read(8 * 1024 * 1024 + 1)
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(url, timeout=45) as response:
+                    content = response.read(8 * 1024 * 1024 + 1)
+                break
+            except urllib.error.HTTPError as error:
+                if error.code not in (429,500,502,503,504) or attempt == 2: raise
+                time.sleep(1 << attempt)
         if len(content) > 8 * 1024 * 1024:
             raise SystemExit('Unexpected source size: ' + relative)
         if googlesource:

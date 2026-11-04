@@ -42,8 +42,8 @@
     <string name="hecker_android_version">Android 17</string>
     <string name="hecker_maintained_by">Разработчик сборки</string>
     <string name="hecker_maintainer_name">Hecker</string>
-    <string name="hecker_suite_name">Hecker Suite</string>
-    <string name="hecker_suite_unavailable">Hecker Suite недоступен в этой сборке.</string>
+    <string name="hecker_suite_name">HeckerLab</string>
+    <string name="hecker_suite_unavailable">HeckerLab недоступен в этой сборке.</string>
     <string name="hecker_display_title">Экран и персонализация</string>
     <string name="hecker_display_hero_title">Пусть оформление\nотражает вас.</string>
     <string name="hecker_display_hero_summary">Ваше устройство. Ваш стиль.\nОткройте множество способов\nсделать его по-настоящему своим.</string>

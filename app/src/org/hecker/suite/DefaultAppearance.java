@@ -30,6 +30,7 @@ public final class DefaultAppearance {
         return lock > 0 ? lock : manager.getWallpaperId(WallpaperManager.FLAG_SYSTEM);
     }
     public static void reconcile(Context context) {
+        synchronized(CurrentWallpaperDepth.PUBLISH_LOCK){
         int expected = Settings.Secure.getInt(context.getContentResolver(), WALLPAPER_ID, Integer.MIN_VALUE);
         if (expected != Integer.MIN_VALUE && expected != wallpaperId(context)
                 && Settings.Secure.getInt(context.getContentResolver(), "hecker_depth_auto_extract", 0) == 0)
@@ -37,6 +38,7 @@ public final class DefaultAppearance {
         int home = Settings.Secure.getInt(context.getContentResolver(), HOME_WALLPAPER_ID, Integer.MIN_VALUE);
         if (home != Integer.MIN_VALUE && home != WallpaperManager.getInstance(context).getWallpaperId(WallpaperManager.FLAG_SYSTEM))
             Settings.Secure.putInt(context.getContentResolver(), HOME_DEPTH, 0);
+        }
     }
     public static boolean apply(Context context, boolean requested) throws IOException {
         Context device = context.createDeviceProtectedStorageContext();

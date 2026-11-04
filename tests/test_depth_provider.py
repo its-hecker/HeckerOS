@@ -10,9 +10,11 @@ ROOT=Path(__file__).resolve().parents[1]
 class DepthProviderTests(unittest.TestCase):
     def test_active_pair_and_reader_boundaries(self):
         sources={
+            'android/os/Bundle.java':'package android.os;public class Bundle{public static final Bundle EMPTY=new Bundle();}',
+            'org/hecker/suite/DepthWallpaperJob.java':'package org.hecker.suite;public class DepthWallpaperJob{public static int calls;public static void schedule(android.content.Context c){calls++;}}',
             'android/content/ContentProvider.java':'''package android.content;
 public abstract class ContentProvider { public Context context=new Context(); public Context getContext(){return context;}
- public abstract boolean onCreate(); public abstract android.os.ParcelFileDescriptor openFile(android.net.Uri uri,String mode) throws java.io.FileNotFoundException;
+ public android.os.Bundle call(String m,String arg,android.os.Bundle extras){return null;}public abstract boolean onCreate(); public abstract android.os.ParcelFileDescriptor openFile(android.net.Uri uri,String mode) throws java.io.FileNotFoundException;
  public abstract String getType(android.net.Uri uri); public abstract android.database.Cursor query(android.net.Uri u,String[]p,String s,String[]a,String sort);
  public abstract android.net.Uri insert(android.net.Uri u,ContentValues v); public abstract int update(android.net.Uri u,ContentValues v,String s,String[]a);
  public abstract int delete(android.net.Uri u,String s,String[]a); }''',
@@ -33,7 +35,7 @@ public class PackageManager{public static final int SIGNATURE_MATCH=0;public sta
  public ApplicationInfo getApplicationInfo(String name,int flags)throws NameNotFoundException{ApplicationInfo a=new ApplicationInfo();a.uid=launcherUid;a.flags=launcherFlags;return a;}public static class NameNotFoundException extends Exception{}
  public int checkSignatures(String a,String b){return signed?0:-1;} }''',
             'android/os/UserHandle.java':'package android.os;public record UserHandle(int id){public static UserHandle getUserHandleForUid(int uid){return new UserHandle(uid/100000);}}',
-            'android/os/Binder.java':'package android.os;public class Binder {public static int uid=100;public static int getCallingUid(){return uid;}}',
+            'android/os/Binder.java':'package android.os;public class Binder {public static int uid=100;public static long clearCallingIdentity(){return 0;}public static void restoreCallingIdentity(long id){}public static int getCallingUid(){return uid;}}',
             'android/os/ParcelFileDescriptor.java':'''package android.os;public class ParcelFileDescriptor{
  public static final int MODE_READ_ONLY=1; public java.io.File file;
  public static ParcelFileDescriptor open(java.io.File file,int mode)throws java.io.FileNotFoundException{if(!file.isFile())throw new java.io.FileNotFoundException();
@@ -50,6 +52,7 @@ public class DepthReaderProbe {
  catch(SecurityException|java.io.FileNotFoundException expected){}}
  public static void main(String[]args)throws Exception{
   DepthWallpaperProvider p=new DepthWallpaperProvider();p.context.directory=new File(args[0],"user0");
+  p.call("schedule_auto_extract",null,null);if(org.hecker.suite.DepthWallpaperJob.calls!=1)throw new AssertionError("Auto job not scheduled");
   String id="0123456789abcdef0123456789abcdef";p.context.resolver.active=id;
   File layer=new File(p.context.directory,"depth/"+id+"/foreground.png");layer.getParentFile().mkdirs();layer.createNewFile();
   Uri uri=Uri.parse("content://org.hecker.suite.depth/"+id+"/foreground");

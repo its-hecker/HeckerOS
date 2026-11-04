@@ -1,5 +1,5 @@
 {
-  "checked_on": "2026-11-02",
+  "checked_on": "2026-11-04",
   "pixelos_manifest": {
     "repository": "PixelOS-AOSP/android_manifest",
     "branch": "seventeen",
@@ -205,7 +205,8 @@
         "tests/hecker/test_app_compatibility.py",
         "packages/SystemUI/src/com/android/systemui/qs/composefragment/QSFragmentCompose.kt",
         "packages/SystemUI/compose/features/src/com/android/systemui/keyguard/ui/composable/elements/LockscreenElementFactoryImpl.kt",
-        "packages/SystemUI/Android.bp"
+        "packages/SystemUI/Android.bp",
+        "packages/SystemUI/src/com/android/systemui/window/domain/interactor/WindowRootViewBlurInteractor.kt"
       ]
     },
     "hardware/google/camera": {
@@ -546,5 +547,25 @@
     "license": "GPL-3.0-or-later",
     "source_manifest": "third_party/xmorphclock/upstream.lock.json",
     "validation": "Native library, full app/Settings dashboard and SystemUI Compose checks; 86 model round trips / 344 native states, original asset/font hashes, provider/depth and guarded preparation tests; full ROM and physical Coral acceptance pending"
+  },
+  "coral_heckerlab_feedback_20261104": {
+    "branch": "fix/coral-ui-compatibility-20261102",
+    "device": "coral",
+    "parent_suite_revision": "1206d50f61572d1fd60ea65c9133bcfb2385bd8c",
+    "changes": [
+      "HeckerLab visible branding",
+      "stable Home depth and affine clock masking",
+      "native-progress clock fade and consistent word-clock AOD",
+      "second-down workspace sleep and resolved wallpaper picker",
+      "colored unsupported icons and separate GameSpace masks",
+      "idle media Hide and current-user Close app",
+      "shared QQS/full-QS blur with 85 percent default",
+      "runtime-triggered automatic lock extraction",
+      "three reference-based Motion Island characters and adjustable height",
+      "skip/resume continuity and cold-start lyrics subscriptions",
+      "GameSpace foreground shutdown and native next-game launch monitor"
+    ],
+    "character_assets": "framework/motionisland/characters.json",
+    "validation": "187 host tests, locked Suite/Settings/SystemUI/Launcher compilation, 29799 character frames and pinned native source preparation/upgrade/revert checks; full ROM build and physical Coral acceptance pending"
   }
 }

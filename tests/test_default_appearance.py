@@ -8,6 +8,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 STUBS = {
+'org/hecker/suite/CurrentWallpaperDepth.java':'package org.hecker.suite;public class CurrentWallpaperDepth{public static final Object PUBLISH_LOCK=new Object();}',
 'android/content/ContentResolver.java':'''package android.content;public class ContentResolver{public final java.util.Map<String,String> values=new java.util.HashMap<>();}''',
 'android/content/SharedPreferences.java':'''package android.content;public class SharedPreferences{
  java.util.Map<String,Boolean> values=new java.util.HashMap<>();public boolean getBoolean(String key,boolean fallback){return values.getOrDefault(key,fallback);}

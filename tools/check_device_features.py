@@ -128,6 +128,9 @@ def main():
         (out / 'res/drawable-nodpi').mkdir()
         shutil.copyfile(ROOT / 'framework/motionisland/astronaut-wave.png',
                         out / 'res/drawable-nodpi/hecker_motion_astronaut.png')
+        for character in ('blue_monster','goblin','ninja'):
+            shutil.copyfile(ROOT / f'framework/motionisland/{character}.png',
+                out / f'res/drawable-nodpi/hecker_motion_{character}.png')
         manifest.write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android" '
                             'package="com.android.systemui.res"><application/></manifest>')
         run(sdk / 'aapt2', 'compile', '--dir', out / 'res', '-o', out / 'res.zip')

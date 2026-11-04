@@ -184,5 +184,10 @@
   "frameworks/base/packages/SystemUI/res/values-ru/hecker_motion_island.xml": "framework/motionisland/strings-ru.xml",
   "packages/apps/Settings/res/values-ru/hecker_ru.xml": "settings/res/values-ru/hecker_ru.xml",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerNativeClockDepth.kt": "framework/lockscreen/HeckerNativeClockDepth.kt",
-  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerXMorphClock.kt": "framework/lockscreen/HeckerXMorphClock.kt"
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerXMorphClock.kt": "framework/lockscreen/HeckerXMorphClock.kt",
+  "frameworks/base/packages/SystemUI/res/drawable-nodpi/hecker_motion_blue_monster.png": "framework/motionisland/blue_monster.png",
+  "frameworks/base/packages/SystemUI/res/drawable-nodpi/hecker_motion_goblin.png": "framework/motionisland/goblin.png",
+  "frameworks/base/packages/SystemUI/res/drawable-nodpi/hecker_motion_ninja.png": "framework/motionisland/ninja.png",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionCharacterPose.java": "framework/motionisland/MotionCharacterPose.java",
+  "frameworks/base/services/core/java/com/android/server/hecker/HeckerGameMonitor.java": "framework/gaming/HeckerGameMonitor.java"
 }

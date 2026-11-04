@@ -16,6 +16,8 @@ class LauncherDepthWeatherTests(unittest.TestCase):
         restart=method((ROOT/'aosp-launcher/src/com/android/launcher3/hecker/HeckerClockView.java').read_text(),'    private void restartMotion()')
         sources={
         'android/net/Uri.java':'package android.net;public record Uri(String value){public static Uri parse(String s){return new Uri(s);}}',
+        'android/os/SystemClock.java':'package android.os;public class SystemClock{public static long uptimeMillis(){return 10000;}}',
+        'android/graphics/Matrix.java':'''package android.graphics;public class Matrix{public java.awt.geom.AffineTransform v=new java.awt.geom.AffineTransform();public void reset(){v.setToIdentity();}public boolean invert(Matrix result){try{result.v=v.createInverse();return true;}catch(java.awt.geom.NoninvertibleTransformException e){return false;}}public void preConcat(Matrix other){v.concatenate(other.v);}}''',
         'android/os/Looper.java':'package android.os;public class Looper{public static Looper getMainLooper(){return new Looper();}}',
         'android/os/Handler.java':'''package android.os;public class Handler{
         static final java.util.Queue<Runnable> tasks=new java.util.concurrent.ConcurrentLinkedQueue<>();public Handler(Looper l){}
@@ -58,7 +60,7 @@ class LauncherDepthWeatherTests(unittest.TestCase):
         'android/graphics/Canvas.java':'''package android.graphics;public class Canvas{
         public final java.util.List<Integer> layers=new java.util.ArrayList<>();public final java.util.List<float[]> bounds=new java.util.ArrayList<>();public int depth,clips;public float dx,dy;
         public void drawBitmap(Bitmap image,Object src,RectF dst,Paint paint){layers.add(image.kind);bounds.add(new float[]{dst.l,dst.t,dst.r,dst.b});}
-        public int save(){return depth++;}public void restoreToCount(int value){depth=value;}public void clipRect(int l,int t,int r,int b){clips++;}public void translate(float x,float y){dx=x;dy=y;}}''',
+        public int save(){return depth++;}public void restoreToCount(int value){depth=value;}public void clipRect(int l,int t,int r,int b){clips++;}public void translate(float x,float y){dx=x;dy=y;}public void concat(Matrix m){dx=(float)m.v.getTranslateX();dy=(float)m.v.getTranslateY();}}''',
         'android/graphics/drawable/Drawable.java':'package android.graphics.drawable;public class Drawable{}',
         'android/view/ViewParent.java':'package android.view;public interface ViewParent{}',
         'android/view/View.java':'''package android.view;public class View implements ViewParent{
@@ -68,7 +70,7 @@ class LauncherDepthWeatherTests(unittest.TestCase):
         public void addOnAttachStateChangeListener(OnAttachStateChangeListener l){attaches.add(l);}public void removeOnAttachStateChangeListener(OnAttachStateChangeListener l){attaches.remove(l);}
         public boolean isAttachedToWindow(){return attached;}public boolean isShown(){return shown;}public int getWindowVisibility(){return 0;}public int getWidth(){return width;}public int getHeight(){return height;}
         public void invalidate(){invalidates++;}public ViewParent getParent(){return parent;}public float getScaleX(){return sx;}public float getScaleY(){return sy;}public float getRotation(){return rotation;}
-        public void getLocationInWindow(int[] location){location[0]=x;location[1]=y;}public void detach(){attached=false;for(var l:new java.util.ArrayList<>(attaches))l.onViewDetachedFromWindow(this);}}''',
+        public void transformMatrixToGlobal(android.graphics.Matrix m){if(parent instanceof View v)v.transformMatrixToGlobal(m);m.v.translate(x,y);m.v.rotate(Math.toRadians(rotation));m.v.scale(sx,sy);}public void getLocationInWindow(int[] location){location[0]=x;location[1]=y;}public void detach(){attached=false;for(var l:new java.util.ArrayList<>(attaches))l.onViewDetachedFromWindow(this);}}''',
         'android/view/animation/PathInterpolator.java':'package android.view.animation;public class PathInterpolator{public PathInterpolator(float a,float b,float c,float d){}}',
         'android/view/animation/LinearInterpolator.java':'package android.view.animation;public class LinearInterpolator{}',
         'android/animation/ValueAnimator.java':'''package android.animation;public class ValueAnimator{
@@ -107,22 +109,24 @@ for(int w:new int[]{320,720,1440})for(int h:new int[]{400,1520,3040})for(int i=0
 }
 Context c=new Context();c.resolver.values.put("hecker_living_flow","0");c.resolver.values.put("hecker_depth_wallpaper_id",id);c.resolver.values.put("hecker_home_depth_wallpaper","1");c.resolver.values.put("hecker_home_depth_wallpaper_wallpaper_id","51");
 View root=new View(c);check(draw(root).layers.isEmpty());settle();Canvas bg=draw(root);check(bg.layers.equals(List.of(0,1)));check(Arrays.equals(bg.bounds.get(0),bg.bounds.get(1)));
-check(ValueAnimator.active.size()==1&&ValueAnimator.active.get(0).duration==750);
+check(ValueAnimator.active.isEmpty()); // Native app/home motion owns the only transform.
 View clock=new View(c);clock.parent=root;clock.x=18;clock.y=80;clock.width=600;clock.height=220;Canvas fg=new Canvas();HeckerHomeDepth.foreground(clock,fg);
 check(fg.layers.equals(List.of(1))&&fg.clips==1&&fg.depth==0&&fg.dx==-18&&fg.dy==-80);
-int before=clock.invalidates;ValueAnimator.finish();check(clock.invalidates>before);bg=draw(root);
+int before=clock.invalidates;c.send(Intent.ACTION_USER_PRESENT);check(clock.invalidates>before);bg=draw(root);
 float[] finalCrop=new float[3];HomeDepthPolicy.crop(800,1600,720,1520,1,finalCrop);check(Math.abs(bg.bounds.get(0)[0]-finalCrop[1])<.001f);
-root.sx=.8f;fg=new Canvas();HeckerHomeDepth.foreground(clock,fg);check(fg.layers.isEmpty());root.sx=1;
+root.sx=.8f;fg=new Canvas();HeckerHomeDepth.foreground(clock,fg);check(fg.layers.equals(List.of(1))&&Math.abs(fg.dx+18)<.001f);root.sx=1;
+clock.sx=.7f;clock.sy=1.2f;clock.rotation=12;fg=new Canvas();HeckerHomeDepth.foreground(clock,fg);check(fg.layers.equals(List.of(1))&&Float.isFinite(fg.dx)&&Float.isFinite(fg.dy));clock.sx=1;clock.sy=1;clock.rotation=0;
 c.prefs.put(HeckerStudio.PREFIX+"home_depth",false);settle();check(draw(root).layers.isEmpty());
 c.prefs.put(HeckerStudio.PREFIX+"home_depth",true);settle();check(draw(root).layers.size()==2);
 c.resolver.values.put("hecker_home_depth_wallpaper_id",id);c.resolver.values.put("hecker_depth_wallpaper_id","abc00000000000000000000000000000");c.resolver.notifyChange();settle();check(draw(root).layers.size()==2);
+c.resolver.available=false;c.send(Intent.ACTION_USER_UNLOCKED);check(draw(root).layers.size()==2);settle();check(draw(root).layers.size()==2);c.resolver.available=true;
 c.wallpaper.id=99;c.send(Intent.ACTION_WALLPAPER_CHANGED);settle();check(draw(root).layers.isEmpty());
 c.wallpaper.id=51;c.wallpaper.live=true;c.send(Intent.ACTION_WALLPAPER_CHANGED);settle();check(draw(root).layers.isEmpty());
 c.wallpaper.live=false;c.resolver.available=false;c.send(Intent.ACTION_USER_UNLOCKED);settle();check(draw(root).layers.isEmpty());
 c.resolver.available=true;android.graphics.BitmapFactory.oversized=true;c.send(Intent.ACTION_USER_UNLOCKED);settle();check(draw(root).layers.isEmpty());android.graphics.BitmapFactory.oversized=false;
 c.resolver.onOpen=()->c.wallpaper.id=52;c.send(Intent.ACTION_USER_UNLOCKED);settle();check(draw(root).layers.isEmpty());c.wallpaper.id=51;
 c.power.save=true;c.send(Intent.ACTION_USER_UNLOCKED);settle();check(ValueAnimator.active.isEmpty()&&draw(root).layers.size()==2);
-c.power.save=false;c.keyguard.locked=true;c.send(Intent.ACTION_SCREEN_ON);check(ValueAnimator.active.isEmpty());c.keyguard.locked=false;c.send(Intent.ACTION_USER_PRESENT);check(ValueAnimator.active.size()==1);
+c.power.save=false;c.keyguard.locked=true;c.send(Intent.ACTION_SCREEN_ON);check(ValueAnimator.active.isEmpty());c.keyguard.locked=false;c.send(Intent.ACTION_USER_PRESENT);check(ValueAnimator.active.isEmpty());
 ValueAnimator.finish();c.resolver.values.put("hecker_living_flow","1");c.send(Intent.ACTION_USER_PRESENT);
 check(ValueAnimator.active.isEmpty());bg=draw(root);check(Math.abs(bg.bounds.get(0)[0]-finalCrop[1])<.001f);c.resolver.values.put("hecker_living_flow","0");
 c.power.interactive=false;c.send(Intent.ACTION_SCREEN_OFF);check(ValueAnimator.active.isEmpty());c.power.interactive=true;ValueAnimator.enabled=false;c.send(Intent.ACTION_USER_PRESENT);check(ValueAnimator.active.isEmpty());ValueAnimator.enabled=true;

@@ -42,7 +42,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
     private final Handler main=new Handler(Looper.getMainLooper());
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
     private final GamingSession session=new GamingSession();
-    private boolean sampling; private int sessionGeneration,bypass=-1;
+    private boolean sampling,catalogReady; private int sessionGeneration,bypass=-1;
     private final GamingPolicy.TaskObservation observation=new GamingPolicy.TaskObservation();
     private Set<String> games=new HashSet<>(),popups=new HashSet<>();
     private ActivityManager am;private WindowManager wm;private GamingOverlay overlay;
@@ -67,7 +67,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
     private final Runnable evaluate=this::evaluate;
     private final BroadcastReceiver state=new BroadcastReceiver(){@Override public void onReceive(Context c,Intent i){
         if(Intent.ACTION_BATTERY_CHANGED.equals(i.getAction())){battery=i;updateStatus();}
-        else if(Intent.ACTION_SCREEN_OFF.equals(i.getAction())){recordGrace=0;observation.clear();pause();}
+        else if(Intent.ACTION_SCREEN_OFF.equals(i.getAction())){recordGrace=0;observation.clear();pause();stopForeground(STOP_FOREGROUND_REMOVE);stopSelf();}
         else taskChanged();
     }};
     private final BroadcastReceiver packages=new BroadcastReceiver(){@Override public void onReceive(Context c,Intent i){loadCatalog();}};
@@ -100,7 +100,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
             GamingPrefs.get(this).edit().putBoolean("enabled",false).apply();stopSelf();return START_NOT_STICKY;
         }
         if(i!=null&&RECORD_STARTED.equals(i.getAction()))recordGrace=SystemClock.elapsedRealtime()+2500;
-        taskChanged();return START_STICKY;
+        taskChanged();return START_NOT_STICKY;
     }
     @Override public IBinder onBind(Intent i){return null;}
     private Notification notification(){
@@ -113,7 +113,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
     private void loadCatalog(){
         int request=++catalogGeneration;worker.execute(()->{
             Set<String> found=new HashSet<>();for(GamingCatalog.App app:GamingCatalog.load(this,true))found.add(app.info.packageName);
-            main.post(()->{if(destroyed||request!=catalogGeneration)return;games=found;taskChanged();});
+            main.post(()->{if(destroyed||request!=catalogGeneration)return;games=found;catalogReady=true;taskChanged();});
         });
     }
     private void schedule(long delay){if(destroyed)return;main.removeCallbacks(evaluate);main.postDelayed(evaluate,delay);}
@@ -126,6 +126,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
     private void evaluate(){
         if(destroyed)return;
         if(!GamingPrefs.enabled(this)){stopSelf();return;}
+        if(!catalogReady)return;
         if(!unlocked()||!Settings.canDrawOverlays(this)){pause();return;}
         try{
             List<ActivityManager.RunningTaskInfo> tasks=am.getRunningTasks(20);
@@ -143,7 +144,11 @@ public final class GamingService extends Service implements GamingOverlay.Action
                 if(changed){stopFps();popups.clear();sessionGeneration++;worker.execute(session::end);}
                 boolean restyle=changed&&active;gameTask=selected.id;gamePackage=selected.pkg;activate();if(restyle)overlay.restyle();
                 if(changed){if(restyle)loadModes();getSystemService(NotificationManager.class).notify(31,notification());}
-            }else{pause();if(!previousVisible){gameTask=-1;gamePackage=null;popups.clear();}}
+            }else{pause();if(!previousVisible){gameTask=-1;gamePackage=null;popups.clear();
+                // Native task monitoring starts the next session. No idle foreground
+                // service, notification, telemetry or game restrictions remain.
+                stopForeground(STOP_FOREGROUND_REMOVE);stopSelf();return;
+            }}
         }catch(RuntimeException e){Log.w("HeckerGaming","Task observation failed",e);pause();}
         long delay=observation.nextDelay(SystemClock.elapsedRealtime(),active,recordGrace);
         if(delay>=0)schedule(delay);

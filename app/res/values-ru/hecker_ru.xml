@@ -92,7 +92,7 @@
     <string name="gaming_fps_history">Недавняя частота кадров в игре</string>
     <string name="gaming_focus">Сосредоточенность</string>
     <string name="gaming_focus_summary">Использовать правило «Не беспокоить» игрового режима, пока игра активна.</string>
-    <string name="gaming_focus_access">Разрешите Hecker Suite доступ к режиму «Не беспокоить», затем включите сосредоточенность.</string>
+    <string name="gaming_focus_access">Разрешите HeckerLab доступ к режиму «Не беспокоить», затем включите сосредоточенность.</string>
     <string name="gaming_shortcuts">Ярлыки приложений</string>
     <string name="gaming_shortcuts_summary">Выберите до шести приложений для открытия в плавающих окнах.</string>
     <string name="gaming_shortcuts_count">Выбрано %1$d из 6</string>
@@ -113,7 +113,7 @@
     <string name="gaming_monitor_ready">Появится при запуске игры</string>
     <string name="gaming_monitor_active">Панель активна · %1$s</string>
     <string name="gaming_disable">Выключить</string>
-    <string name="gaming_overlay_access">Для игровой панели разрешите Hecker Suite отображение поверх других приложений.</string>
+    <string name="gaming_overlay_access">Для игровой панели разрешите HeckerLab отображение поверх других приложений.</string>
     <string name="gaming_unavailable">Игровые элементы управления недоступны в этой сборке.</string>
     <string name="gaming_open_dashboard">Открыть игровую панель</string>
     <string name="gaming_close_dashboard">Закрыть игровую панель</string>
@@ -253,7 +253,7 @@
     <string name="motion_feedback_summary">Музыкальная плашка с плеером экрана блокировки и космонавтом на верёвке.</string>
     <string name="motion_island_title">Музыкальная плашка</string>
     <string name="motion_island_summary">Показывать обложку альбома и тонкие анимированные полосы во время воспроизведения. Коснитесь для открытия плеера экрана блокировки.</string>
-    <string name="motion_creature_title">Персонаж-космонавт</string>
+    <string name="motion_creature_title">Анимированный персонаж</string>
     <string name="motion_creature_summary">Приветствие при воспроизведении, прощание при паузе и покачивания влево и вправо. Верёвка втягивается и исчезает под плашкой. Требуется музыкальная плашка.</string>
     <string name="motion_feedback_behavior">Оба переключателя применяются сразу. Плашка видна во время музыки даже без персонажа. Выключение плашки скрывает оба элемента, сохраняя выбор персонажа. При жесте паузы сначала завершается прощание. Выключенный и фоновый экран скрывают оба элемента. При энергосбережении и уменьшенной анимации используются неподвижная поза и статичные полосы.</string>
     <string name="motion_feedback_save_failed">Не удалось сохранить настройку.</string>
@@ -613,7 +613,7 @@
     <string name="sensor_recovery_blocked">Перед перезапуском службы датчиков разблокируйте телефон и завершите звонок.</string>
     <string name="spoofing_title">Центр подмены данных</string>
     <string name="spoofing_summary">Профили устройства, сертификаты keybox и целевые приложения</string>
-    <string name="suite_title">Hecker Suite</string>
+    <string name="suite_title">HeckerLab</string>
     <string name="suite_summary">Рабочий стол, блокировка приложений, Motion Sense, игровой режим и другие возможности</string>
     <string name="suite_intro">ВАШ PIXEL С ХАРАКТЕРОМ</string>
     <string name="app_lock_title">Блокировка приложений</string>
@@ -624,7 +624,7 @@
     <string name="ir_title">Инфракрасная камера</string>
     <string name="ir_summary">Посмотрите на мир через инфракрасные датчики Pixel.</string>
     <string name="credit">Создано Hecker</string>
-    <string name="authenticate_title">Hecker Suite</string>
+    <string name="authenticate_title">HeckerLab</string>
     <string name="authenticate_subtitle">Подтвердите личность для настройки блокировки приложений</string>
     <string name="search_apps">Поиск приложений</string>
     <string name="app_lock_loading">Загрузка приложений…</string>
@@ -812,7 +812,7 @@
     <string name="compat_bootloader_body">Сообщать внутри процесса приложения, что загрузчик заблокирован. Это не блокирует загрузчик, не изменяет аппаратную аттестацию и не гарантирует совместимость.</string>
     <string name="compat_restart_body">После изменения параметра закройте приложение кнопкой ниже и откройте снова. Закрытие может прервать загрузки и несохранённую работу. Если сохранившийся процесс использует прежние настройки, перезагрузите телефон.</string>
     <string name="compat_backend_unavailable">В этой прошивке не включена необходимая системная поддержка. Для доступа к параметрам установите соответствующую сборку HeckerOS.</string>
-    <string name="compat_protected_app">Эти параметры недоступны для основных системных UID и Hecker Suite.</string>
+    <string name="compat_protected_app">Эти параметры недоступны для основных системных UID и HeckerLab.</string>
     <string name="compat_loading">Загрузка установленных приложений…</string>
     <string name="compat_load_error">Не удалось загрузить приложения. Откройте страницу заново.</string>
     <string name="compat_app_count">Приложения: %1$d из %2$d</string>

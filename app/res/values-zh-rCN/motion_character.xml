@@ -1,0 +1,8 @@
+<resources>
+    <string name="motion_character">角色</string>
+    <string name="motion_astronaut">宇航员</string>
+    <string name="motion_blue_monster">蓝色怪兽</string>
+    <string name="motion_goblin">哥布林</string>
+    <string name="motion_ninja">忍者</string>
+    <string name="motion_bar_height">动感栏高度 · %1$d dp</string>
+</resources>

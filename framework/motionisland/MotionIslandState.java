@@ -8,7 +8,7 @@ final class MotionIslandState {
             MODE_TRACK = 9, MODE_VOLUME = 10, MODE_SEEK = 11;
     static final long MAX_EVENT_AGE = 1200, ACTION_DURATION = 2400;
     boolean island, creature, awake, music, confirmed;
-    int user = -1, action, volume = -1, direction;
+    int user = -1, action, volume = -1, direction, character;
     long sequence, when = -1, lastEvent = -1;
 
     void environment(boolean island, boolean creature, boolean awake, boolean music, int user) {

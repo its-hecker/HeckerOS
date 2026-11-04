@@ -1,0 +1,8 @@
+<resources>
+    <string name="motion_character">Персонаж</string>
+    <string name="motion_astronaut">Астронавт</string>
+    <string name="motion_blue_monster">Синий монстр</string>
+    <string name="motion_goblin">Гоблин</string>
+    <string name="motion_ninja">Ниндзя</string>
+    <string name="motion_bar_height">Высота панели · %1$d dp</string>
+</resources>

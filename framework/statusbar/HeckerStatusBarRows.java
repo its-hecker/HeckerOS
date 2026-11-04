@@ -73,6 +73,7 @@ public final class HeckerStatusBarRows {
         boolean closed,awake,unlocked,saver,active,dual,lyricsEnabled,charging,observing,receiving,drawing;
         int heightPreset,rowLayout,gap,icon,width,font,alignment,color,transition,networkRow;
         int animationGeneration,lastInk;
+        long lastLockCheck;
         boolean tinted;
         float battery=Float.NaN;
         String line="";
@@ -129,7 +130,10 @@ public final class HeckerStatusBarRows {
             FrameLayout root=reference.get();
             if(!dual&&!lyricsEnabled){active=false;if(subscription!=null){subscription.close();subscription=null;snapshot=null;}
                 if(layer!=null)layer.setVisibility(View.GONE);return;}
-            if(checkLock)unlocked=!locked();
+            long now=SystemClock.elapsedRealtime();
+            if(checkLock || awake && !unlocked && now-lastLockCheck>=250){
+                lastLockCheck=now;unlocked=!locked();
+            }
             boolean shown=root!=null&&root.isAttachedToWindow()&&root.isShown()
                     &&root.getWindowVisibility()==View.VISIBLE&&awake&&unlocked;
             View nativeStart=find("status_bar_start_side_except_heads_up");

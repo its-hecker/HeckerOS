@@ -54,7 +54,9 @@ public final class HeckerWorkspaceGestures {
                     if(e.getActionMasked()==MotionEvent.ACTION_CANCEL||e.getPointerCount()>1){armed=false;return false;}
                     if(e.getActionMasked()==MotionEvent.ACTION_MOVE&&Math.hypot(e.getX()-downX,e.getY()-downY)
                             >android.view.ViewConfiguration.get(app).getScaledTouchSlop()){armed=false;return false;}
-                    if(!armed||e.getActionMasked()!=MotionEvent.ACTION_UP)return false;
+                    // Empty-workspace double taps commit on the second down, without
+                    // waiting for finger-up or the native long-press cancellation path.
+                    if(!armed||e.getActionMasked()!=MotionEvent.ACTION_DOWN)return false;
                     armed=false;
                     try{
                         PowerManager power=app.getSystemService(PowerManager.class);

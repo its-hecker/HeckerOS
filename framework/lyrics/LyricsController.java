@@ -188,7 +188,12 @@ public final class LyricsController implements AutoCloseable {
                     if (chosen == null && item.getMetadata() != null) chosen = item;
                 }
             }
-            if (chosen == null) { detach(); return; }
+            if (chosen == null) {
+                // Retain candidate callbacks: an existing paused session can acquire its
+                // metadata/start playback without changing active-session membership.
+                cancel(); controller = null; trackKey = "";
+                lines = Collections.emptyList(); publish(); return;
+            }
             if (controller == null || !controller.getSessionToken().equals(chosen.getSessionToken())) {
                 cancel(); trackKey = ""; lines = Collections.emptyList();
                 controller = chosen;

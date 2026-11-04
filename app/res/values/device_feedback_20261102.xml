@@ -6,5 +6,5 @@
     <string name="qs_blur_strength_summary">Adjust the shade and Quick Settings blur. Lower values use a lighter backdrop; 0 turns blur off. Battery Saver and thermal limits still apply.</string>
     <string name="compat_rom_title">Hide custom ROM</string>
     <string name="compat_rom_body">Limit common custom ROM software properties, file checks and Hecker component visibility in this app. Close the app to apply. This does not change hardware attestation or guarantee app compatibility.</string>
-    <string name="compat_rom_requires_build">Requires the matching ROM build. Updating Hecker Suite alone cannot enable this option.</string>
+    <string name="compat_rom_requires_build">Requires the matching ROM build. Updating HeckerLab alone cannot enable this option.</string>
 </resources>

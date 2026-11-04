@@ -38,7 +38,8 @@ public final class HeckerMotionIsland implements AutoCloseable {
     private HeckerQsMedia.Snapshot media = new HeckerQsMedia.Snapshot(null);
     private MediaSession.Token lastPlaying, feedbackToken, dialogToken;
     private long lastPlayingAt;
-    private long transientUntil;
+    private long transientUntil,skipUntil;
+    private int renderedHeight=32;
     private String beforeIdentity;
     private MotionIslandView capsule;
     private MotionAstronautView astronaut;
@@ -62,12 +63,18 @@ public final class HeckerMotionIsland implements AutoCloseable {
         power = context.getSystemService(PowerManager.class);
         if (windows == null || power == null) throw new IllegalStateException("No window/power service");
         music = new HeckerQsMedia(context, snapshot -> {
+            boolean resumed=!media.playing&&snapshot.playing&&media.token!=null&&media.token.equals(snapshot.token);
             // A song may have played for minutes without a callback. Timestamp its transition
             // out of PLAYING, so a pause event arriving after that callback still gets a goodbye.
             if (media.playing) { lastPlaying = media.token; lastPlayingAt = now(); }
             media = snapshot;
             if (snapshot.playing) { lastPlaying = snapshot.token; lastPlayingAt = now(); }
             refresh();
+            if(resumed&&(state.current(now())==MotionIslandState.NONE||state.current(now())==MotionIslandState.PAUSE)
+                    &&state.accept(MotionIslandState.PLAY,ActivityManager.getCurrentUser(),now(),now())){
+                state.update(state.sequence,true,snapshot.volume);
+                main.removeCallbacks(expire);main.postDelayed(expire,MotionIslandState.ACTION_DURATION);refresh();
+            }
         }, true, null);
         try {
             context.registerReceiver(actions, new IntentFilter(ACTION),
@@ -80,7 +87,7 @@ public final class HeckerMotionIsland implements AutoCloseable {
             filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             context.registerReceiver(environment, filter, Context.RECEIVER_NOT_EXPORTED);
             environmentRegistered = true;
-            for (String key : new String[]{ISLAND, CREATURE, "aware_enabled"})
+            for (String key : new String[]{ISLAND, CREATURE, "aware_enabled", "hecker_motion_character", "hecker_motion_bar_height"})
                 context.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(key),
                         false, observer, UserHandle.USER_ALL);
         } catch (RuntimeException unavailable) { close(); throw unavailable; }
@@ -103,10 +110,13 @@ public final class HeckerMotionIsland implements AutoCloseable {
                 int action = intent.getIntExtra("action", 0);
                 // Keep a successful PLAY request pending while its callback catches up. Visibility
                 // still requires actual playback, so a rejected/delayed play cannot show an idle island.
-                if (target == null || !target.active || !(target.playing || recent || action == MotionIslandState.PLAY)
+                if (target == null || !target.active && !recent || !(target.playing || recent || action == MotionIslandState.PLAY)
                         || !state.accept(action, intent.getIntExtra("user", -1),
                                 intent.getLongExtra("when", -1), now())) return;
                 feedbackToken = token;
+                if(action==MotionIslandState.NEXT||action==MotionIslandState.PREVIOUS){skipUntil=now()+3500;
+                    main.removeCallbacks(settleSkip);main.postDelayed(settleSkip,3500);}
+                else if(action==MotionIslandState.PAUSE)skipUntil=0;
                 state.direction = Math.max(-1, Math.min(1, intent.getIntExtra("direction", 0)));
                 beforeIdentity = intent.getStringExtra("before_identity");
                 if (beforeIdentity != null && beforeIdentity.length() > 512) beforeIdentity = null;
@@ -150,8 +160,10 @@ public final class HeckerMotionIsland implements AutoCloseable {
             int action = state.current(now());
             boolean skipping = action == MotionIslandState.NEXT || action == MotionIslandState.PREVIOUS;
             if (media.playing) transientUntil = now() + 2500;
-            boolean holding = awake && skipping && lastPlaying != null && now() < transientUntil;
+            boolean holding = awake && lastPlaying != null && (now()<skipUntil
+                ||skipping&&now()<transientUntil);
             state.environment(enabled, setting(CREATURE, 1, user), awake, media.playing || holding, user);
+            state.character=Math.max(0,Math.min(3,Settings.Secure.getIntForUser(context.getContentResolver(),"hecker_motion_character",0,user)));
             if (!media.active && !holding) { state.clear(); feedbackToken = null; }
             if (dialog != null && (!awake || !enabled || dialogToken == null
                     || !music.snapshotFor(dialogToken).active)) dismissDialog();
@@ -170,11 +182,14 @@ public final class HeckerMotionIsland implements AutoCloseable {
     }
     private void render() {
         if (!state.visible(now())) { removeViews(); return; }
+        int height=Math.max(26,Math.min(56,Settings.Secure.getIntForUser(context.getContentResolver(),
+            "hecker_motion_bar_height",32,ActivityManager.getCurrentUser())));
+        if(height!=renderedHeight){removeViews();renderedHeight=height;}
         boolean animate = ValueAnimator.areAnimatorsEnabled() && !power.isPowerSaveMode();
         if (capsule == null) {
             MotionIslandView view = new MotionIslandView(context);
             view.setOnClickListener(v -> openPlayer());
-            if (!add(view, dp(124), dp(32), 0, false, "HeckerMotionIsland")) return;
+            if (!add(view, dp(124), dp(height), 0, false, "HeckerMotionIsland")) return;
             capsule = view;
         }
         String label = state.current(now()) == MotionIslandState.NONE
@@ -184,7 +199,7 @@ public final class HeckerMotionIsland implements AutoCloseable {
             if (astronaut == null) {
                 MotionAstronautView view = new MotionAstronautView(context);
                 // Match MotionIslandView's painted bottom, including density rounding.
-                if (add(view, dp(224), dp(150), dp(32) - dp(3), true, "HeckerMotionAstronaut")) astronaut = view;
+                if (add(view, dp(224 * height/32f), dp(150 * height/32f), dp(height) - dp(3), true, "HeckerMotionAstronaut")) astronaut = view;
             }
             if (astronaut != null) astronaut.update(state, animate);
         } else removeAstronaut();
@@ -242,6 +257,7 @@ public final class HeckerMotionIsland implements AutoCloseable {
         }
     }
     private final Runnable expire = () -> { state.clear(); feedbackToken = null; refresh(); };
+    private final Runnable settleSkip=()->{skipUntil=0;refresh();};
     private void removeAstronaut() {
         if (astronaut == null) return;
         astronaut.stop(); remove(astronaut); astronaut = null;

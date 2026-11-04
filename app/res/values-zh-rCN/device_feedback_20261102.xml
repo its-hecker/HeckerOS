@@ -5,5 +5,5 @@
     <string name="qs_blur_strength_summary">调整通知栏和快捷设置的模糊强度。数值越低，效果越轻；设为 0 可关闭模糊。仍遵守省电和温控限制。</string>
     <string name="compat_rom_title">隐藏自定义 ROM</string>
     <string name="compat_rom_body">限制此应用读取常见的自定义 ROM 软件属性、文件标记和 Hecker 组件。关闭应用后生效。不会改变硬件认证，也不保证应用兼容。</string>
-    <string name="compat_rom_requires_build">需要配套的 ROM 构建，仅更新 Hecker Suite 无法启用此选项。</string>
+    <string name="compat_rom_requires_build">需要配套的 ROM 构建，仅更新 HeckerLab 无法启用此选项。</string>
 </resources>

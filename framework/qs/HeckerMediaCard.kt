@@ -56,7 +56,7 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
     onInactive: (() -> Unit)? = null, compactRow: Boolean = false,
     squareWeight: () -> Float = { if (square) 1f else 0f },
     rowWeight: () -> Float = { if (compactRow) 1f else 0f },
-    visible: () -> Boolean = { true }) {
+    visible: () -> Boolean = { true }, dismissible: Boolean = false) {
     val context = LocalContext.current
     var snapshot by remember(context, sessionToken, musicOnly) {
         // QS reserves its geometry before metadata arrives. Avoid the duplicate synchronous
@@ -65,10 +65,11 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
             if (hideWhenInactive) HeckerQsMedia.peek(context, musicOnly, sessionToken) else null)
     }
     val media = remember(context, sessionToken, musicOnly) {
-        HeckerQsMedia(context, { snapshot = it }, musicOnly, sessionToken)
+        HeckerQsMedia(context, { if (dismissible) HeckerMediaVisibility.observe(it); snapshot = it }, musicOnly, sessionToken)
     }
     DisposableEffect(media) { media.start(); onDispose { media.stop() } }
     val state = snapshot
+    if (dismissible && HeckerMediaVisibility.isHidden()) return
     LaunchedEffect(state?.active) { if (state != null && !state.active) onInactive?.invoke() }
     if (hideWhenInactive && state?.active != true) {
         if (state != null) nativeFallback?.invoke()
@@ -100,6 +101,7 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
             Color(0xFFB9CFFF).copy(alpha = .32f))), shape)) {
         // Fixed-cost radial shaders provide the soft light; the text and icons are never blurred.
         HeckerMediaGlow(state?.playing == true, motion, Modifier.matchParentSize())
+        Column {
         Layout(modifier = Modifier.fillMaxWidth().heightIn(min = preferredHeight), content = {
             MediaArtwork(art)
             MediaTitles(state)
@@ -148,6 +150,20 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
                         (b[1] * density).roundToInt()) { alpha = b[4] }
                 }
             }
+        }
+        if (dismissible) Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.End) {
+            if (state?.playing != true) Text(context.getString(R.string.hecker_media_hide),
+                color = Color.White, fontSize = 12.sp,
+                modifier = Modifier.clickable { HeckerMediaVisibility.dismiss(state) }.padding(12.dp))
+            if (state?.active == true) Text(context.getString(R.string.hecker_media_stop_app),
+                color = Color.White, fontSize = 12.sp,
+                modifier = Modifier.clickable {
+                    if (media.stopApp()) HeckerMediaVisibility.dismiss(state)
+                    else android.widget.Toast.makeText(context, R.string.hecker_media_stop_failed,
+                        android.widget.Toast.LENGTH_SHORT).show()
+                }.padding(12.dp))
+        }
         }
     }
 }

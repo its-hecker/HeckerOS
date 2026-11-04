@@ -2,6 +2,15 @@
 
 ## Coral UI and compatibility — 2 November 2026
 
+**4 November HeckerLab and device feedback:** rename the visible feature hub,
+stabilize home depth through native Launcher transforms and reloads, retain the
+English word clock in AOD, and use native unlock progress for the clock fade.
+Add media Hide/Close app controls, common QQS/full-QS blur with an 85% default,
+automatic wallpaper extraction from runtime wallpaper events, reliable lyrics
+subscriptions, new GameSpace artwork and automatic session shutdown. Motion
+Island gains three reference-based characters and adjustable bar height.
+See [changes, validation and phone checks](docs/coral-heckerlab-feedback-2026-11-04.md).
+
 **4 November native XMorphClock catalog:** add the 86 upstream clock/date faces
 and 47 bundled fonts to Custom clocks, with a recycled picker and large/small/AOD
 previews. SystemUI hosts the original renderer directly, shares the existing depth

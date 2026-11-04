@@ -56,4 +56,7 @@
     <string name="hecker_charge_estimate">Estimate</string>
     <string name="hecker_charge_minutes">%1$d min</string>
     <string name="hecker_charge_connected">Charger connected</string>
+    <string name="hecker_media_hide">Hide</string>
+    <string name="hecker_media_stop_app">Close app</string>
+    <string name="hecker_media_stop_failed">Could not close the media app</string>
 </resources>

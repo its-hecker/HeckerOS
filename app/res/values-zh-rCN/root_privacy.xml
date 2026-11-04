@@ -14,7 +14,7 @@
   <string name="compat_bootloader_body">在此应用进程内报告引导加载程序已锁定。这不会实际锁定引导加载程序或改变硬件认证，也不保证应用兼容。</string>
   <string name="compat_restart_body">更改选项后，请使用下方按钮关闭应用，再重新打开。关闭可能中断下载或丢失未保存的内容。如果保留的进程仍在使用旧设置，请重启手机。</string>
   <string name="compat_backend_unavailable">此系统尚未启用所需的兼容性支持。请安装匹配的 HeckerOS 版本后再使用这些选项。</string>
-  <string name="compat_protected_app">核心系统 UID 和 Hecker Suite 不支持这些选项。</string>
+  <string name="compat_protected_app">核心系统 UID 和 HeckerLab 不支持这些选项。</string>
   <string name="compat_loading">正在加载已安装应用…</string>
   <string name="compat_load_error">无法加载应用。请重新打开此页面。</string>
   <string name="compat_app_count">%1$d / %2$d 个应用</string>

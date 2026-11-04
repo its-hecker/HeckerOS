@@ -1,0 +1,8 @@
+<resources>
+    <string name="motion_character">Character</string>
+    <string name="motion_astronaut">Astronaut</string>
+    <string name="motion_blue_monster">Blue monster</string>
+    <string name="motion_goblin">Goblin</string>
+    <string name="motion_ninja">Ninja</string>
+    <string name="motion_bar_height">Motion bar height · %1$d dp</string>
+</resources>

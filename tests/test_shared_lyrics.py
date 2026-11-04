@@ -177,6 +177,15 @@ public static void main(String[]args)throws Exception{
  for(LyricsController c:clients)c.close();Handler.drain();
  check(Context.receivers.isEmpty()&&Context.resolver.observers.isEmpty(),"Provider lifecycle leak");
  check(second.listeners.isEmpty(),"Session listener leak");
+ MediaSessionManager coldManager=MediaSessionManager.forUser(2);
+ MediaController cold=new MediaController("cold",null);cold.metadata=null;cold.seek(0,PlaybackState.STATE_PAUSED);coldManager.controllers.add(cold);
+ android.app.ActivityManager.user=2;Settings.Secure.set(2,LyricsController.STATUS_SETTING,1);
+ client(context,LyricsController.STATUS_BAR,true,s->status=s);
+ check(!cold.callbacks.isEmpty(),"Metadata-less paused candidate lost its subscription");
+ cold.track("Cold Start");cold.seek(0,PlaybackState.STATE_PLAYING);
+ waitFor(()->!status.lines.isEmpty()&&status.lines.get(0).text.startsWith("Cold Start"));
+ for(LyricsController c:clients)c.close();
+
  System.out.println("Shared production LRCLIB engine: opt-in independence, one fetch/snapshot, unlocked continuation, seek/pause/gap/end, visibility/cache, stale skip, negative TTL, user isolation and disposal PASS");
  }finally{release.countDown();for(LyricsController c:clients)c.close();}
 }

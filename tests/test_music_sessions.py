@@ -7,9 +7,11 @@ from test_motion_island import java_run
 ROOT = Path(__file__).resolve().parents[1]
 
 STUBS = {
-'android/app/ActivityManager.java': '''package android.app;public class ActivityManager {public static int user;public static int getCurrentUser(){return user;}}''',
+'android/app/ActivityManager.java': '''package android.app;public class ActivityManager {public static String stopped;public static int stoppedUser=-1;public void forceStopPackageAsUser(String pkg,int user){stopped=pkg;stoppedUser=user;}public static int user;public static int getCurrentUser(){return user;}}''',
+'android/content/pm/ApplicationInfo.java': 'package android.content.pm;public class ApplicationInfo{public int uid=android.app.ActivityManager.user*100000+12000;}',
+'android/content/pm/PackageManager.java': 'package android.content.pm;public class PackageManager{public static class NameNotFoundException extends Exception{}public ApplicationInfo getApplicationInfo(String pkg,int flags)throws NameNotFoundException{return new ApplicationInfo();}}',
 'android/os/Looper.java': '''package android.os;public class Looper {public static Looper getMainLooper(){return null;}}''',
-'android/os/Handler.java': '''package android.os;public class Handler {public Handler(Looper l){}}''',
+'android/os/Handler.java': '''package android.os;public class Handler {public Handler(Looper l){}public void postDelayed(Runnable r,long delay){}public void removeCallbacks(Runnable r){}}''',
 'android/os/SystemClock.java': '''package android.os;public class SystemClock {public static long elapsedRealtime(){return 10000;}}''',
 'android/os/UserHandle.java': '''package android.os;public class UserHandle {public int id;public static UserHandle ALL=new UserHandle(),SYSTEM=new UserHandle();public static UserHandle of(int id){UserHandle u=new UserHandle();u.id=id;return u;}}''',
 'android/content/BroadcastReceiver.java': '''package android.content;public abstract class BroadcastReceiver{public abstract void onReceive(Context c,Intent i);}''',
@@ -17,8 +19,9 @@ STUBS = {
 'android/content/Intent.java': '''package android.content;public class Intent{public static String ACTION_USER_SWITCHED="user";public Intent(String s){}public Intent setPackage(String p){return this;}public Intent putExtra(String k,Object o){return this;}}''',
 'android/content/Context.java': '''package android.content;public class Context {
  public static int RECEIVER_NOT_EXPORTED=4;public android.media.session.MediaSessionManager manager=new android.media.session.MediaSessionManager();
+ public Context createContextAsUser(android.os.UserHandle u,int flags){return this;}public android.content.pm.PackageManager getPackageManager(){return new android.content.pm.PackageManager();}
  public BroadcastReceiver receiver;public int registrations;
- public <T>T getSystemService(Class<T> c){return c.cast(manager);}public java.util.concurrent.Executor getMainExecutor(){return Runnable::run;}
+ public <T>T getSystemService(Class<T> c){return c.cast(c==android.app.ActivityManager.class?new android.app.ActivityManager():manager);}public java.util.concurrent.Executor getMainExecutor(){return Runnable::run;}
  public void registerReceiver(BroadcastReceiver r,IntentFilter f,int flags){receiver=r;registrations++;}
  public void unregisterReceiver(BroadcastReceiver r){registrations--;}
  public String getPackageName(){return "com.android.systemui";}public void sendBroadcastAsUser(Intent i,android.os.UserHandle u){}
@@ -91,6 +94,7 @@ public class SessionTest {
   b.playback(2);a.playback(3);check(current.token==a.token);
   HeckerQsMedia pinned=new HeckerQsMedia(c,s->{},true,b.token);pinned.start();pinned.playPause();
   check(b.plays==1&&a.plays==0); // Expanded paused player cannot control a different app.
+  check(pinned.stopApp()&&"player.b".equals(android.app.ActivityManager.stopped)&&android.app.ActivityManager.stoppedUser==10);
   pinned.stop();check(b.callbacks.size()==1);
   a.destroy();check(current.token==b.token&&a.callbacks.isEmpty());
   c.manager.list=List.of();c.manager.changed();

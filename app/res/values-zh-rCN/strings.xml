@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="suite_title">Hecker 套件</string>
+    <string name="suite_title">HeckerLab</string>
     <string name="suite_summary">启动器、应用锁、动态感应、游戏模式等</string>
     <string name="suite_intro">让你的 PIXEL 更有个性</string>
     <string name="suite_hero_summary">通过 HeckerOS 功能，自由定制并提升设备体验。</string>
@@ -12,7 +12,7 @@
     <string name="ir_title">红外相机</string>
     <string name="ir_summary">查看 Pixel 红外传感器捕捉的画面。</string>
     <string name="credit">由 Hecker 制作</string>
-    <string name="authenticate_title">Hecker 套件</string>
+    <string name="authenticate_title">HeckerLab</string>
     <string name="authenticate_subtitle">验证身份以管理应用锁</string>
     <string name="search_apps">搜索应用</string>
     <string name="app_lock_loading">正在加载应用…</string>

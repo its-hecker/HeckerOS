@@ -1,6 +1,7 @@
 {
   "src/com/android/launcher3/hecker/HeckerWorkspaceGestures.java": [
-    "691a1d7fdb130e47236c340b885e2df064bacf62"
+    "691a1d7fdb130e47236c340b885e2df064bacf62",
+    "36e7cd8296e6b386f801269502e4d569096ff459"
   ],
   "generated/hecker-launcher/res/values/strings.xml": [
     "a6ed14c93f6aff66751a044c7e6bca4b211294e3"
@@ -71,11 +72,13 @@
   ],
   "src/com/android/launcher3/hecker/HeckerHomeDepth.java": [
     "372a278ff980b81b88a3f2938fad3971166fa3a9",
-    "54aed4857953c00e6f7480ca6245e6a3d7ce5bbf"
+    "54aed4857953c00e6f7480ca6245e6a3d7ce5bbf",
+    "478e698e835aedeb966cb92f6711374cb189f724"
   ],
   "src/com/android/launcher3/hecker/HeckerGlassIcons.java": [
     "2c64a8fdda6d5f7748d3b9d6b17e1da1fb2fedf2",
-    "9d581e48e19a9a773e3256a92e9ca726c70574c9"
+    "9d581e48e19a9a773e3256a92e9ca726c70574c9",
+    "582a4e2df803563054575db74e4011ab430808ae"
   ],
   "src/org/hecker/motion/FlowClockRenderer.java": [
     "7912acb51f5b19445a877b33cdda7123c5e968df",

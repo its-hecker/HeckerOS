@@ -41,6 +41,7 @@ public final class ThemeEngine {
 }''',
     'android/content/ContentResolver.java': '''package android.content;
 public abstract class ContentResolver {
+ public final android.os.Bundle call(android.net.Uri uri,String method,String arg,android.os.Bundle extras) { return null; }
  public final java.io.InputStream openInputStream(android.net.Uri uri) throws java.io.FileNotFoundException { return null; }
  public final void registerContentObserver(android.net.Uri uri, boolean descendants, android.database.ContentObserver o, int user) {}
  public final void unregisterContentObserver(android.database.ContentObserver o) {}

@@ -108,6 +108,7 @@ public final class HeckerQsMedia {
     private final Map<MediaSession.Token, Long> knownMusic = new LinkedHashMap<>();
     private MediaController controller;
     private boolean started;
+    private final Runnable revalidate=this::refresh;
     private final MediaSessionManager.OnActiveSessionsChangedListener active = ignored -> refresh();
     private final class Watch extends MediaController.Callback {
         final MediaController media;
@@ -146,7 +147,7 @@ public final class HeckerQsMedia {
         if (!started) return;
         started = false; context.unregisterReceiver(users);
         if (sessions != null) sessions.removeOnActiveSessionsChangedListener(active);
-        clear();
+        handler.removeCallbacks(revalidate); clear();
     }
     private void refresh() {
         if (!started || sessions == null) return;
@@ -192,11 +193,16 @@ public final class HeckerQsMedia {
         MediaSession.Token token = candidate.getSessionToken();
         long now = SystemClock.elapsedRealtime();
         if (music(candidate)) { knownMusic.put(token, now); return true; }
+        MediaController.PlaybackInfo info=candidate.getPlaybackInfo();
+        AudioAttributes attrs=info==null?null:info.getAudioAttributes();
+        if(attrs!=null&&(attrs.getContentType()==1||attrs.getContentType()==3||attrs.getUsage()!=1))return false;
         PlaybackState state = candidate.getPlaybackState();
         int mode = state == null ? PlaybackState.STATE_NONE : state.getState();
         // Metadata and audio attributes may disappear briefly during a real track skip.
-        return knownMusic.containsKey(token) && now - knownMusic.get(token) <= 2500
-                && (mode == PlaybackState.STATE_BUFFERING || mode == PlaybackState.STATE_CONNECTING
+        boolean recent = knownMusic.containsKey(token) && now - knownMusic.get(token) <= 3500;
+        if(recent){handler.removeCallbacks(revalidate);handler.postDelayed(revalidate,Math.max(1,3501-(now-knownMusic.get(token))));}
+        return recent
+                && (mode == PlaybackState.STATE_PLAYING || mode == PlaybackState.STATE_PAUSED || mode == PlaybackState.STATE_NONE || mode == PlaybackState.STATE_BUFFERING || mode == PlaybackState.STATE_CONNECTING
                     || mode == PlaybackState.STATE_SKIPPING_TO_NEXT || mode == PlaybackState.STATE_SKIPPING_TO_PREVIOUS);
     }
     private static boolean music(MediaController media) {
@@ -230,6 +236,28 @@ public final class HeckerQsMedia {
         } catch (RuntimeException e) { Log.w("HeckerQsMedia", "Playback unavailable", e); }
     }
     public void previous() { transport(PlaybackState.ACTION_SKIP_TO_PREVIOUS, 0); }
+    /** Only the foreground user's selected, ordinary media application can be stopped. */
+    public boolean stopApp() {
+        MediaController selected = controller;
+        if (selected == null) return false;
+        int user = ActivityManager.getCurrentUser();
+        String pkg = selected.getPackageName();
+        if (pkg == null || pkg.equals(context.getPackageName()) || pkg.equals("android")) return false;
+        try {
+            Context foreground = context.createContextAsUser(UserHandle.of(user), 0);
+            int uid = foreground.getPackageManager().getApplicationInfo(pkg, 0).uid;
+            if (uid / 100000 != user || uid % 100000 < 10000) return false;
+            if (user != ActivityManager.getCurrentUser()) return false;
+            ActivityManager.class.getMethod("forceStopPackageAsUser", String.class, int.class)
+                .invoke(context.getSystemService(ActivityManager.class), pkg, user);
+            synchronized (HeckerQsMedia.class) { initialSessions = null; }
+            refresh();
+            return true;
+        } catch (ReflectiveOperationException | android.content.pm.PackageManager.NameNotFoundException
+                | RuntimeException failure) {
+            Log.w("HeckerQsMedia", "Cannot stop selected media app", failure); return false;
+        }
+    }
     public void next() { transport(PlaybackState.ACTION_SKIP_TO_NEXT, 0); }
     public void seek(long position) { transport(PlaybackState.ACTION_SEEK_TO, position); }
     private void transport(long action, long position) {

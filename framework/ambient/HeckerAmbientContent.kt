@@ -140,7 +140,7 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
         onDispose { controller.removeCallback(listener) }
     }
     // Keep one selected clock throughout doze: swapping renderers caused the old wake jump.
-    val style = if (ambient && state.clockStyle < 2) 0 else state.clockStyle
+    val style = state.clockStyle
     val parts = remember(clock.first) { clock.first.split(':') }
     val twentyFour = remember(clock.first, LocalConfiguration.current) { DateFormat.is24HourFormat(context) }
     val hour = parts[0].toIntOrNull() ?: 0
@@ -165,7 +165,9 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
             val c = canvas.nativeCanvas
             // Mask the clock with the subject alpha. This reveals the one background scene
             // without painting a second, differently faded/blurred subject over the digits.
-            val layer = if (foreground != null && awake > 0f) c.saveLayer(0f, 0f, size.width, size.height, null) else c.save()
+            val dismissal = FlowClockRenderer.unit(homeHandoff())
+            val fade = 1f - dismissal * dismissal * (3f - 2f * dismissal)
+            val layer = c.saveLayerAlpha(0f, 0f, size.width, size.height, (255 * fade).toInt())
             c.save(); c.scale(density,density)
             when (style) {
                 1 -> reference.word(c, hour, minute, clock.second.uppercase(Locale.getDefault()),
@@ -173,7 +175,7 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
                 2, 3, 4, 5 -> living.draw(c, hour, minute, twentyFour, clock.second,
                     Locale.getDefault(), size.width / density, size.height / density,
                     if (style == 2) 3 else style, awake, small, false, state.clockOpacity / 100f,
-                    state.clockColor, state.clockScale, state.clockX, state.clockY, homeHandoff(), state.aodClockScale)
+                    state.clockColor, state.clockScale, state.clockX, state.clockY, 0f, state.aodClockScale)
                 else -> {
                     val aodSize = minOf(42f * state.aodClockScale / 100f,
                         (size.height / density - 32f).coerceAtLeast(1f) / 1.5f)

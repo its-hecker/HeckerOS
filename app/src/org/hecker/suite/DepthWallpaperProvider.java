@@ -16,6 +16,13 @@ import java.util.List;
 public final class DepthWallpaperProvider extends ContentProvider {
     public static final String ID = "hecker_depth_wallpaper_id";
     @Override public boolean onCreate() { return true; }
+    @Override public android.os.Bundle call(String method,String argument,android.os.Bundle extras){
+        enforceReader();
+        if(!"schedule_auto_extract".equals(method))throw new IllegalArgumentException("Unknown depth operation");
+        long identity=Binder.clearCallingIdentity();
+        try{DepthWallpaperJob.schedule(getContext());return android.os.Bundle.EMPTY;}
+        finally{Binder.restoreCallingIdentity(identity);}
+    }
     private void enforceReader() {
         int caller = Binder.getCallingUid();
         if (caller == getContext().getApplicationInfo().uid) return;

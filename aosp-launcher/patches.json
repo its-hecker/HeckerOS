@@ -313,5 +313,11 @@
       "old": "        if (dbController.loadDefaultFavoritesIfNecessary()) {\n            mPrefs.put(PREF_MIGRATION_PENDING, true);",
       "new": "        if (dbController.loadDefaultFavoritesIfNecessary()) {\n            com.android.launcher3.hecker.HeckerDefaultWorkspace.seed(mContext, dbController, mIDP.numColumns, mIDP.numRows);\n            mPrefs.put(PREF_MIGRATION_PENDING, true);"
     }
+  ],
+  "src/com/android/launcher3/popup/WorkspaceLongPressOptions.kt": [
+    {
+      "old": "        if (!TextUtils.isEmpty(pickerPackage)) {\n            intent.setPackage(pickerPackage)\n        }",
+      "new": "        if (!TextUtils.isEmpty(pickerPackage)) {\n            intent.setPackage(pickerPackage)\n        }\n        // AOSP may name a picker that this product does not ship. Resolve the\n        // same installed wallpaper/settings entry before starting it.\n        if (intent.resolveActivity(launcher.packageManager) == null) {\n            intent.setPackage(null)\n            if (intent.resolveActivity(launcher.packageManager) == null) {\n                intent.action = android.provider.Settings.ACTION_WALLPAPER_SETTINGS\n                intent.setPackage(\"com.android.settings\")\n            }\n        }"
+    }
   ]
 }

@@ -3,8 +3,8 @@
     <string name="hecker_android_version">Android 17</string>
     <string name="hecker_maintained_by">Maintained by</string>
     <string name="hecker_maintainer_name">Hecker</string>
-    <string name="hecker_suite_name">Hecker Suite</string>
-    <string name="hecker_suite_unavailable">Hecker Suite is unavailable in this build.</string>
+    <string name="hecker_suite_name">HeckerLab</string>
+    <string name="hecker_suite_unavailable">HeckerLab is unavailable in this build.</string>
     <string name="hecker_display_title">Display &amp; Personalization</string>
     <string name="hecker_display_hero_title">Make it look\nlike you.</string>
     <string name="hecker_display_hero_summary">Your device. Your style.\nExplore endless ways to\nmake it feel like home.</string>

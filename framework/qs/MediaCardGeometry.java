@@ -16,7 +16,7 @@ public final class MediaCardGeometry {
             boolean idleGone, boolean closing, boolean opening, float progress) {
         if (idleGone || legacy && (!shown || !Float.isFinite(expansion) || expansion <= 0)) return 0;
         if ((closing || opening) && !Float.isFinite(progress)) return 0;
-        float panel = legacy ? unit(expansion * 10) : 1;
+        float panel = legacy ? unit(expansion) : 1;
         return panel * (closing ? unit(1 - progress / .25f) : opening ? unit(progress / .12f) : 1);
     }
     /** x, y, width, height, alpha. The two layout weights also work in reverse mid-gesture. */

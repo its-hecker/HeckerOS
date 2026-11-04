@@ -48,7 +48,7 @@ public final class QuickSettingsActivity extends Activity {
         android.widget.SeekBar strength = new android.widget.SeekBar(this);
         strength.setMax(100);
         strength.setProgress(Math.max(0, Math.min(100, Settings.Secure.getInt(
-                getContentResolver(), "hecker_qs_blur_strength", 55))));
+                getContentResolver(), "hecker_qs_blur_strength", 85))));
         label.setText(getString(R.string.qs_blur_strength) + " · " + strength.getProgress() + "%");
         strength.setContentDescription(getString(R.string.qs_blur_strength));
         strength.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
@@ -57,7 +57,7 @@ public final class QuickSettingsActivity extends Activity {
             public void onProgressChanged(android.widget.SeekBar bar, int value, boolean user) {
                 label.setText(getString(R.string.qs_blur_strength) + " · " + value + "%");
                 if (user && !Settings.Secure.putInt(getContentResolver(), "hecker_qs_blur_strength", value))
-                    bar.setProgress(Settings.Secure.getInt(getContentResolver(), "hecker_qs_blur_strength", 55));
+                    bar.setProgress(Settings.Secure.getInt(getContentResolver(), "hecker_qs_blur_strength", 85));
             }
         });
         blur.addView(strength);

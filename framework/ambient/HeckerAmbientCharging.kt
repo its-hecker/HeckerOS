@@ -55,7 +55,7 @@ object HeckerAmbientCharging {
         val powerSave: Boolean = false, val wakeGeneration: Long = 0,
         val flow: Boolean = true, val clockScale: Int = 100, val clockX: Int = 0,
         val clockY: Int = 0, val clockColor: Int = 0, val aodClockScale: Int = 140,
-        val shadeBlurPercent: Int = 55,
+        val shadeBlurPercent: Int = 85,
         val xmorphPreset: String? = null,
     )
     private val mutable = MutableStateFlow(State())
@@ -103,13 +103,25 @@ object HeckerAmbientCharging {
                             wakeGeneration = mutable.value.wakeGeneration + 1)
                     }
                     Intent.ACTION_SCREEN_OFF -> mutable.value = mutable.value.copy(screenAwake = false)
-                    Intent.ACTION_USER_UNLOCKED, Intent.ACTION_WALLPAPER_CHANGED, PowerManager.ACTION_POWER_SAVE_MODE_CHANGED -> readSettings()
+                    Intent.ACTION_USER_UNLOCKED, Intent.ACTION_WALLPAPER_CHANGED -> { readSettings(); scheduleDepth(c) }
+                    PowerManager.ACTION_POWER_SAVE_MODE_CHANGED -> readSettings()
                     Intent.ACTION_USER_SWITCHED -> { cancelPulse(); cancelIntro(); readSettings(); reconcileDoze() }
                 }
             }
         }, filter, null, main, Context.RECEIVER_EXPORTED)
         io.launch {
             state.map { ownsIndication(it) }.distinctUntilChanged().collect { indication?.run() }
+        }
+    }
+    private fun scheduleDepth(c: Context) {
+        val user = android.app.ActivityManager.getCurrentUser()
+        if (Settings.Secure.getIntForUser(c.contentResolver, "hecker_depth_auto_extract", 0, user) == 0) return
+        // Runtime wallpaper broadcasts reach SystemUI even while the feature app is stopped.
+        // The signature-checked provider only schedules the current user's debounced job.
+        io.launch {
+            try { c.createContextAsUser(UserHandle.of(user), 0).contentResolver.call(
+                android.net.Uri.parse("content://org.hecker.suite.depth"), "schedule_auto_extract", null, null) }
+            catch (failure: RuntimeException) { android.util.Log.w("HeckerDepth", "Cannot schedule automatic extraction", failure) }
         }
     }
     private fun interactive(c: Context) = c.getSystemService(PowerManager::class.java)?.isInteractive != false
@@ -148,7 +160,7 @@ object HeckerAmbientCharging {
             flow = value(FLOW, 1) != 0,
             clockScale = value("hecker_lockscreen_clock_scale", 100).coerceIn(70, 110),
             aodClockScale = value("hecker_aod_clock_scale", 140).coerceIn(70, 200),
-            shadeBlurPercent = value("hecker_qs_blur_strength", 55).coerceIn(0, 100),
+            shadeBlurPercent = value("hecker_qs_blur_strength", 85).coerceIn(0, 100),
             clockX = value("hecker_lockscreen_clock_x", 0).coerceIn(-100, 100),
             clockY = value("hecker_lockscreen_clock_y", 0).coerceIn(-100, 100),
             clockColor = value("hecker_lockscreen_clock_color", 0).coerceIn(0, 4),

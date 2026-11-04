@@ -1123,7 +1123,10 @@
     },
     {
       "old": "        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))",
-      "new": "        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))\n        // Scale shade work only; native wake/unlock blur remains independent.\n        combinedBlur *= com.android.systemui.hecker.HeckerAmbientCharging.state.value.shadeBlurPercent / 100f"
+      "new": "        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))\n        // Shade blur strength is applied once at the common window request boundary.",
+      "previous": [
+        "        combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))\n        // Scale shade work only; native wake/unlock blur remains independent.\n        combinedBlur *= com.android.systemui.hecker.HeckerAmbientCharging.state.value.shadeBlurPercent / 100f"
+      ]
     }
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/domain/interactor/KeyguardTouchHandlingInteractor.kt": [
@@ -1213,7 +1216,10 @@
   "frameworks/base/packages/SystemUI/AndroidManifest.xml": [
     {
       "old": "    <uses-permission android:name=\"android.permission.STATUS_BAR\" />",
-      "new": "    <uses-permission android:name=\"android.permission.STATUS_BAR\" />\n    <uses-permission android:name=\"org.hecker.suite.permission.READ_DEPTH\" />"
+      "new": "    <uses-permission android:name=\"android.permission.STATUS_BAR\" />\n    <uses-permission android:name=\"org.hecker.suite.permission.READ_DEPTH\" />\n    <uses-permission android:name=\"android.permission.FORCE_STOP_PACKAGES\" />",
+      "previous": [
+        "    <uses-permission android:name=\"android.permission.STATUS_BAR\" />\n    <uses-permission android:name=\"org.hecker.suite.permission.READ_DEPTH\" />"
+      ]
     }
   ],
   "packages/apps/Settings/res/xml/development_settings.xml": [
@@ -1242,6 +1248,24 @@
     {
       "old": "    defaults: [\"SystemUI-srcs-defaults\"],\n    static_libs: [\n        \"//frameworks/libs/systemui:compilelib\",",
       "new": "    defaults: [\"SystemUI-srcs-defaults\"],\n    static_libs: [\n        \"HeckerXMorphClock\",\n        \"//frameworks/libs/systemui:compilelib\","
+    }
+  ],
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/window/domain/interactor/WindowRootViewBlurInteractor.kt": [
+    {
+      "old": "    fun requestBlurForShade(blurRadius: Int, blurScale: Float): Boolean {",
+      "new": "    private var heckerNativeBlurRadius = 0\n    private var heckerNativeBlurScale = 1f\n    init {\n        applicationScope.launch {\n            com.android.systemui.hecker.HeckerAmbientCharging.state\n                .map { it.shadeBlurPercent }.distinctUntilChanged().collect {\n                    requestBlurForShade(heckerNativeBlurRadius, heckerNativeBlurScale)\n                }\n        }\n    }\n    fun requestBlurForShade(blurRadius: Int, blurScale: Float): Boolean {\n        heckerNativeBlurRadius = blurRadius\n        heckerNativeBlurScale = blurScale\n        val heckerRadius = blurRadius.toFloat() *\n            com.android.systemui.hecker.HeckerAmbientCharging.state.value.shadeBlurPercent / 100f"
+    },
+    {
+      "old": "import kotlinx.coroutines.CoroutineScope",
+      "new": "import kotlinx.coroutines.CoroutineScope\nimport kotlinx.coroutines.launch"
+    },
+    {
+      "old": "BlurEffect(blurRadius.toFloat(), blurScale)",
+      "new": "BlurEffect(heckerRadius, blurScale)"
+    },
+    {
+      "old": "repository.blurRequestedByShade.value = blurRadius.toFloat()",
+      "new": "repository.blurRequestedByShade.value = heckerRadius"
     }
   ]
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="suite_title">Hecker\'s Suite</string>
+    <string name="suite_title">HeckerLab</string>
     <string name="suite_summary">Launcher, App Lock, Motion Sense, Gaming mode and more</string>
     <string name="suite_intro">YOUR PIXEL, WITH PERSONALITY</string>
     <string name="app_lock_title">App Lock</string>
@@ -11,7 +11,7 @@
     <string name="ir_title">Infrared Camera</string>
     <string name="ir_summary">See through your Pixel\'s infrared sensors.</string>
     <string name="credit">Made by Hecker</string>
-    <string name="authenticate_title">Hecker\'s Suite</string>
+    <string name="authenticate_title">HeckerLab</string>
     <string name="authenticate_subtitle">Authenticate to manage App Lock</string>
     <string name="search_apps">Search apps</string>
     <string name="app_lock_loading">Loading your apps…</string>

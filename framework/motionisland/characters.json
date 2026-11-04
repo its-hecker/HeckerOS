@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "mode": "Built-in image generation, background extraction from user-supplied reference images",
+  "prompt": "Remove only the background and floor/shadow. Preserve the reference character identity, face, proportions, material, colors, clothing, pose and accessories. One full character centered with a clear margin on actual transparent background; no text, border or extra objects.",
+  "rendering": "Original transparent PNGs retained; bounded worker decoding; finite Android Canvas choreography.",
+  "characters": [
+    {
+      "character": "blue_monster",
+      "asset": "blue_monster.png",
+      "sha256": "5da0d2567a557d5c3c07805c8594f699601a710d9637c6b94a6eee21efb88ea4",
+      "reference_sha256": "604100e59996207c7b8a79137b7bb4c918702bb9c928e99b8517281dd04cad2e"
+    },
+    {
+      "character": "goblin",
+      "asset": "goblin.png",
+      "sha256": "062df1d83eb3ef1c04ae396fe7ffa6d743994824652b79eeb9665c72760af0a1",
+      "reference_sha256": "5f4268576e8a215ce2867c78fcdeb098cece31f143407795425d540547a94643"
+    },
+    {
+      "character": "ninja",
+      "asset": "ninja.png",
+      "sha256": "a65f90495f7a7793074d2990a81d4ce0b0102dde4990c91c14c7e43e5c3ac6e1",
+      "reference_sha256": "9e9a2a811c0a08958d21fa78775004f9a4cb55a7f089e6cd6411f90c768f2bcd"
+    }
+  ]
+}

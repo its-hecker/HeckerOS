@@ -24,6 +24,31 @@ public final class MotionFeedbackSettingsActivity extends Activity {
         options.addView(Ui.text(this, getString(R.string.motion_island_summary), 13, false));
         toggle(options, R.string.motion_creature_title, "hecker_motion_creature");
         options.addView(Ui.text(this, getString(R.string.motion_creature_summary), 13, false));
+        options.addView(Ui.text(this,getString(R.string.motion_character),16,true));
+        android.widget.RadioGroup characters=new android.widget.RadioGroup(this);
+        int[] labels={R.string.motion_astronaut,R.string.motion_blue_monster,R.string.motion_goblin,R.string.motion_ninja};
+        int current=Math.max(0,Math.min(3,Settings.Secure.getInt(getContentResolver(),"hecker_motion_character",0)));
+        for(int i=0;i<labels.length;i++){
+            android.widget.RadioButton choice=new android.widget.RadioButton(this);choice.setId(android.view.View.generateViewId());
+            choice.setTag(i);choice.setText(labels[i]);choice.setTextColor(getColor(R.color.hecker_foreground));
+            characters.addView(choice);if(i==current)characters.check(choice.getId());
+        }
+        characters.setOnCheckedChangeListener((group,id)->{android.view.View choice=group.findViewById(id);
+            if(choice!=null&&!Settings.Secure.putInt(getContentResolver(),"hecker_motion_character",(Integer)choice.getTag()))
+                Toast.makeText(this,R.string.motion_feedback_save_failed,Toast.LENGTH_SHORT).show();});
+        options.addView(characters);
+        int height=Math.max(26,Math.min(56,Settings.Secure.getInt(getContentResolver(),"hecker_motion_bar_height",32)));
+        android.widget.TextView size=Ui.text(this,getString(R.string.motion_bar_height,height),16,true);options.addView(size);
+        android.widget.SeekBar bar=new android.widget.SeekBar(this);bar.setMax(30);bar.setProgress(height-26);
+        bar.setContentDescription(getString(R.string.motion_bar_height,height));
+        bar.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
+            public void onProgressChanged(android.widget.SeekBar view,int progress,boolean user){
+                size.setText(getString(R.string.motion_bar_height,progress+26));
+                if(user)Settings.Secure.putInt(getContentResolver(),"hecker_motion_bar_height",progress+26);
+            }
+            public void onStartTrackingTouch(android.widget.SeekBar view){}
+            public void onStopTrackingTouch(android.widget.SeekBar view){}
+        });options.addView(bar);
         page.addView(options);
         LinearLayout behavior = Ui.card(this);
         behavior.addView(Ui.text(this, getString(R.string.motion_feedback_behavior), 14, false));

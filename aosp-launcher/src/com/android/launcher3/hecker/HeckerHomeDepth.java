@@ -24,8 +24,8 @@ public final class HeckerHomeDepth {
     private static final ExecutorService IO=Executors.newSingleThreadExecutor();
     private static final WeakHashMap<View,Scene> SCENES=new WeakHashMap<>();
     private static final class Pair {
-        final Bitmap back,front;
-        Pair(Bitmap back,Bitmap front){this.back=back;this.front=front;}
+        final Bitmap back,front;final String id;final int wallpaper;
+        Pair(Bitmap back,Bitmap front,String id,int wallpaper){this.back=back;this.front=front;this.id=id;this.wallpaper=wallpaper;}
     }
     private static final class Scene implements View.OnAttachStateChangeListener,
             SharedPreferences.OnSharedPreferenceChangeListener {
@@ -34,6 +34,7 @@ public final class HeckerHomeDepth {
         final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.FILTER_BITMAP_FLAG);
         final RectF bounds=new RectF();final float[] transform=new float[3];
         final int[] rootLocation=new int[2],clockLocation=new int[2];
+        final Matrix rootMatrix=new Matrix(),clockMatrix=new Matrix(),toClock=new Matrix();
         final WeakHashMap<View,Boolean> clocks=new WeakHashMap<>();
         final ContentObserver observer=new ContentObserver(main){@Override public void onChange(boolean self){refresh();}};
         final BroadcastReceiver receiver=new BroadcastReceiver(){@Override public void onReceive(Context c,Intent intent){
@@ -43,6 +44,7 @@ public final class HeckerHomeDepth {
             else if(pair==null)refresh();else reveal();
         }};
         Pair pair;ValueAnimator animator;float progress=1;volatile int generation;volatile boolean closed;
+        boolean loading;long retryAt;
         boolean observerRegistered,receiverRegistered,preferencesRegistered;
         Scene(View root){
             context=root.getContext().getApplicationContext();this.root=new WeakReference<>(root);
@@ -69,7 +71,14 @@ public final class HeckerHomeDepth {
             try(InputStream input=context.getContentResolver().openInputStream(uri)){return BitmapFactory.decodeStream(input,null,options);}
         }
         void refresh(){
-            if(closed)return;int token=++generation;pair=null;settle();invalidate();
+            if(closed)return;
+            String requested=id();
+            int requestedWallpaper=Settings.Secure.getInt(context.getContentResolver(),WALLPAPER,-1);
+            // Provider publication and wallpaper broadcasts can arrive in separate frames.
+            // Keep the current verified pair while re-reading that same selection.
+            if(pair!=null&&(!enabled()||WallpaperManager.getInstance(context).getWallpaperInfo()!=null||!pair.id.equals(requested)||pair.wallpaper!=requestedWallpaper
+                ||pair.wallpaper!=WallpaperManager.getInstance(context).getWallpaperId(WallpaperManager.FLAG_SYSTEM)))pair=null;
+            int token=++generation;loading=true;retryAt=SystemClock.uptimeMillis()+1000;settle();invalidate();
             IO.execute(()->{
                 if(closed||token!=generation)return;Pair next=null;
                 try{
@@ -78,10 +87,12 @@ public final class HeckerHomeDepth {
                     if(HomeDepthPolicy.eligible(enabled(),manager.getWallpaperInfo()!=null,selected,expected,manager.getWallpaperId(WallpaperManager.FLAG_SYSTEM))){
                         Bitmap back=decode(selected,"background"),front=decode(selected,"foreground");
                         if(back!=null&&front!=null&&back.getWidth()==front.getWidth()&&back.getHeight()==front.getHeight()
-                                &&selected.equals(id())&&enabled()&&expected==manager.getWallpaperId(WallpaperManager.FLAG_SYSTEM))next=new Pair(back,front);
+                                &&selected.equals(id())&&enabled()&&expected==manager.getWallpaperId(WallpaperManager.FLAG_SYSTEM))next=new Pair(back,front,selected,expected);
                     }
                 }catch(Exception|OutOfMemoryError unavailable){}
-                Pair loaded=next;main.post(()->{if(!closed&&token==generation){pair=loaded;reveal();invalidate();}});
+                Pair loaded=next;main.post(()->{if(!closed&&token==generation){loading=false;
+                    if(loaded!=null)pair=loaded;else if(pair!=null&&(!enabled()||!pair.id.equals(id())))pair=null;
+                    settle();invalidate();}});
             });
         }
         private boolean canAnimate(){
@@ -92,15 +103,7 @@ public final class HeckerHomeDepth {
                     &&(keyguard==null||!keyguard.isKeyguardLocked())&&ValueAnimator.areAnimatorsEnabled()
                     &&HeckerStudio.enabled(context,"home_depth_wake",true);
         }
-        void reveal(){
-            settle();if(pair==null||!canAnimate())return;
-            // Keyguard already finished the aligned wake crop. Re-starting a zoom here jumps
-            // the subject edge at the unlock handoff; Living Flow keeps that final crop.
-            if(Settings.Secure.getInt(context.getContentResolver(),"hecker_living_flow",1)!=0)return;
-            progress=0;animator=ValueAnimator.ofFloat(0,1);animator.setDuration(750);
-            animator.setInterpolator(new PathInterpolator(.4f,0,.2f,1));
-            animator.addUpdateListener(a->{progress=(float)a.getAnimatedValue();invalidate();});animator.start();
-        }
+        void reveal(){settle();invalidate();}
         void settle(){if(animator!=null){animator.cancel();animator=null;}progress=1;}
         void invalidate(){View view=root.get();if(view!=null)view.invalidate();for(View clock:new ArrayList<>(clocks.keySet()))if(clock!=null)clock.invalidate();}
         void draw(Canvas canvas,boolean foreground){
@@ -129,19 +132,22 @@ public final class HeckerHomeDepth {
         Scene scene=SCENES.get(root);
         if(scene==null){scene=new Scene(root);if(!scene.closed)SCENES.put(root,scene);}
         scene.draw(canvas,false);scene.draw(canvas,true);
+        if(scene.pair==null&&!scene.loading&&SystemClock.uptimeMillis()>=scene.retryAt&&scene.enabled())scene.refresh();
     }
     /** View-local clipping protects app icons, folders, weather and launcher interaction. */
     public static void foreground(View clock,Canvas canvas){
         ViewParent parent=clock.getParent();
-        if(Math.abs(clock.getScaleX()-1)>.001f||Math.abs(clock.getScaleY()-1)>.001f||clock.getRotation()!=0)return;
         while(parent instanceof View){
             View view=(View)parent;
-            if(Math.abs(view.getScaleX()-1)>.001f||Math.abs(view.getScaleY()-1)>.001f||view.getRotation()!=0)return;
             Scene scene=SCENES.get(view);
             if(scene!=null){
-                scene.clocks.put(clock,true);view.getLocationInWindow(scene.rootLocation);clock.getLocationInWindow(scene.clockLocation);
+                scene.clocks.put(clock,true);
+                scene.rootMatrix.reset();scene.clockMatrix.reset();
+                view.transformMatrixToGlobal(scene.rootMatrix);clock.transformMatrixToGlobal(scene.clockMatrix);
+                if(!scene.clockMatrix.invert(scene.toClock))return;
+                scene.toClock.preConcat(scene.rootMatrix);
                 int save=canvas.save();canvas.clipRect(0,0,clock.getWidth(),clock.getHeight());
-                canvas.translate(scene.rootLocation[0]-scene.clockLocation[0],scene.rootLocation[1]-scene.clockLocation[1]);
+                canvas.concat(scene.toClock);
                 scene.draw(canvas,true);canvas.restoreToCount(save);return;
             }
             parent=view.getParent();

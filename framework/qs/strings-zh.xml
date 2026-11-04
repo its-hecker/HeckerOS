@@ -55,4 +55,7 @@
     <string name="hecker_charge_estimate">预计时间</string>
     <string name="hecker_charge_minutes">%1$d 分钟</string>
     <string name="hecker_charge_connected">已连接充电器</string>
+    <string name="hecker_media_hide">隐藏</string>
+    <string name="hecker_media_stop_app">关闭应用</string>
+    <string name="hecker_media_stop_failed">无法关闭媒体应用</string>
 </resources>

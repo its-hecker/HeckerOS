@@ -37,6 +37,7 @@ public final class HeckerGameService extends SystemService {
     @Override public void onStart(){publishBinderService("hecker_game",binder);}
     @Override public void onBootPhase(int phase){
         if(phase!=PHASE_SYSTEM_SERVICES_READY)return;
+        new HeckerGameMonitor(getContext(),handler);
         synchronized(lock){restore();recoverBrightness(ActivityManager.getCurrentUser());}
         IntentFilter filter=new IntentFilter(Intent.ACTION_SCREEN_OFF);filter.addAction(Intent.ACTION_USER_SWITCHED);filter.addAction(Intent.ACTION_SHUTDOWN);
         getContext().registerReceiver(new BroadcastReceiver(){@Override public void onReceive(Context c,Intent i){synchronized(lock){restore();if(Intent.ACTION_USER_SWITCHED.equals(i.getAction()))recoverBrightness(ActivityManager.getCurrentUser());}}},filter,Context.RECEIVER_NOT_EXPORTED);
