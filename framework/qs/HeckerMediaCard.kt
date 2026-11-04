@@ -30,6 +30,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,7 +71,6 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
     }
     DisposableEffect(media) { media.start(); onDispose { media.stop() } }
     val state = snapshot
-    if (dismissible && HeckerMediaVisibility.isHidden()) return
     LaunchedEffect(state?.active) { if (state != null && !state.active) onInactive?.invoke() }
     if (hideWhenInactive && state?.active != true) {
         if (state != null) nativeFallback?.invoke()
@@ -94,14 +95,13 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
     val fontScale = LocalConfiguration.current.fontScale.coerceIn(1f, 2f)
     val bounds = remember { Array(MediaCardGeometry.COUNT) { FloatArray(5) } }
     val preferredHeight = (if (compactRow) 76f + (fontScale - 1) * 32
-        else if (square) 154f + (fontScale - 1) * 64 else 148f + (fontScale - 1) * 48).dp
+        else if (square) 166f + (fontScale - 1) * 64 else 148f + (fontScale - 1) * 48).dp
     Box(modifier.fillMaxWidth().clip(shape)
         .background(if (flow) Color(0xB3191923) else Color(0xE0141721))
         .border(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = .24f),
             Color(0xFFB9CFFF).copy(alpha = .32f))), shape)) {
         // Fixed-cost radial shaders provide the soft light; the text and icons are never blurred.
         HeckerMediaGlow(state?.playing == true, motion, Modifier.matchParentSize())
-        Column {
         Layout(modifier = Modifier.fillMaxWidth().heightIn(min = preferredHeight), content = {
             MediaArtwork(art)
             MediaTitles(state)
@@ -151,19 +151,22 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
                 }
             }
         }
-        if (dismissible) Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.End) {
-            if (state?.playing != true) Text(context.getString(R.string.hecker_media_hide),
-                color = Color.White, fontSize = 12.sp,
-                modifier = Modifier.clickable { HeckerMediaVisibility.dismiss(state) }.padding(12.dp))
-            if (state?.active == true) Text(context.getString(R.string.hecker_media_stop_app),
-                color = Color.White, fontSize = 12.sp,
-                modifier = Modifier.clickable {
-                    if (media.stopApp()) HeckerMediaVisibility.dismiss(state)
-                    else android.widget.Toast.makeText(context, R.string.hecker_media_stop_failed,
-                        android.widget.Toast.LENGTH_SHORT).show()
-                }.padding(12.dp))
-        }
+        if (dismissible) Box(Modifier.align(Alignment.TopEnd).padding(4.dp)) {
+            var menu by remember { mutableStateOf(false) }
+            Text("⋮", color = Color.White, fontSize = 22.sp,
+                modifier = Modifier.size(40.dp).clickable { menu = true }
+                    .wrapContentSize().semantics { contentDescription = context.getString(R.string.hecker_media_hide) })
+            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                DropdownMenuItem(text = { Text(context.getString(R.string.hecker_media_hide)) },
+                    onClick = { menu = false; HeckerMediaVisibility.dismiss(state) })
+                if (state?.active == true) DropdownMenuItem(
+                    text = { Text(context.getString(R.string.hecker_media_stop_app)) }, onClick = {
+                        menu = false
+                        if (media.stopApp()) HeckerMediaVisibility.dismiss(state)
+                        else android.widget.Toast.makeText(context, R.string.hecker_media_stop_failed,
+                            android.widget.Toast.LENGTH_SHORT).show()
+                    })
+            }
         }
     }
 }
@@ -227,8 +230,8 @@ private fun MediaTitles(state: HeckerQsMedia.Snapshot?, compact: Boolean = false
     // Metadata is the target, so the playback-position clock never restarts a title animation.
     Crossfade(caption,animationSpec=if(motion)tween(280,easing=HeckerFlowEasing) else snap(),label="mediaTitles") { value ->
         Column {
-            Text(value.first,color=Color.White,fontSize=if(compact)12.sp else 14.sp,fontWeight=FontWeight.SemiBold,maxLines=1,overflow=TextOverflow.Ellipsis)
-            if(value.second.isNotBlank())Text(value.second,color=Color.White.copy(alpha=.7f),fontSize=if(compact)10.sp else 12.sp,maxLines=1,overflow=TextOverflow.Ellipsis)
+            Text(value.first,color=Color.White,fontSize=if(compact)12.sp else 14.sp,lineHeight=18.sp,fontWeight=FontWeight.SemiBold,maxLines=1,overflow=TextOverflow.Ellipsis)
+            if(value.second.isNotBlank())Text(value.second,color=Color.White.copy(alpha=.7f),fontSize=if(compact)10.sp else 12.sp,lineHeight=16.sp,maxLines=1,overflow=TextOverflow.Ellipsis)
         }
     }
 }

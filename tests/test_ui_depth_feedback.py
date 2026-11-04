@@ -15,6 +15,7 @@ from aosp_launcher_port import EXTRA_PERMISSIONS
 class UiDepthFeedbackTests(unittest.TestCase):
     def test_layer_alignment_information_rectangles_and_search_clearance(self):
         program = '''import org.hecker.suite.DepthLayerGeometry;
+import com.android.systemui.hecker.LockscreenClockLayout;
 import com.android.launcher3.hecker.ClockInfoLayout;
 import com.android.launcher3.hecker.DockSearchLayout;
 public class FeedbackGeometryProbe {
@@ -44,12 +45,20 @@ public class FeedbackGeometryProbe {
    int extra=DockSearchLayout.extraHeight(padding,offset,touch,gap);
    check(padding+extra>=offset+touch+gap);
   }
+  for(int screen:new int[]{640,720,848,960})for(int natural:new int[]{120,218,310,480,520})
+  for(float scale:new float[]{.7f,1f,1.1f,1.43f})for(int media:new int[]{0,180,220})for(int y=-100;y<=100;y+=5) {
+   var p=LockscreenClockLayout.place(screen-96,natural,screen,96,72,media,y,scale);
+   int footprint=Math.min(screen-96-72-media,(int)Math.ceil(natural*Math.max(1f,scale)*p.fit));
+   check(p.fit>0&&p.fit<=1&&p.top>=-96&&p.height<=screen-96-72-media);
+   check(p.height>=footprint&&96+p.height+media<=screen-72);
+   if(y==100)check(96+p.height+media==screen-72);
+  }
   System.out.println(cases+" clock/info layouts remain disjoint; scaled/cropped subject registration and variable search sizes PASS");
  }
 }'''
         with tempfile.TemporaryDirectory() as folder:
             work = Path(folder); probe = work / 'FeedbackGeometryProbe.java'; probe.write_text(program)
-            files = [ROOT / 'app/src/org/hecker/suite/DepthLayerGeometry.java',
+            files = [ROOT / 'app/src/org/hecker/suite/DepthLayerGeometry.java', ROOT/'framework/lockscreen/LockscreenClockLayout.java',
                      ROOT / 'aosp-launcher/src/com/android/launcher3/hecker/ClockInfoLayout.java',
                      ROOT / 'aosp-launcher/src/com/android/launcher3/hecker/DockSearchLayout.java', probe]
             subprocess.run(['java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-d', folder,

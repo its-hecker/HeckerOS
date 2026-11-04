@@ -39,3 +39,15 @@ built. Those features are not required by these 86 clock/date presets.
 Full licenses are packaged in `assets/xmorph_license` and `assets/xmorph_licenses`;
 the Soong license metadata retains the GPL and font notices. Corresponding native
 source and build wiring are published in the HeckerOS repository and manifest.
+
+
+## Home integration — 5 November 2026
+
+`nativehost/XMorphHomeView.kt` hosts the same renderer in Hecker Launcher and its
+widgets. Catalog loading and wallpaper decoding run on a worker; the view bounds
+fit the preset's natural layout inside the reserved clock region. Home samples
+its own system wallpaper through `XMorphWallpaper.loadHome`; lockscreen clients
+retain `load`. Selections remain launcher/widget-local. The library now uses the
+public `current` SDK and is compiled against that API in host validation, keeping
+its SDK link type compatible with Launcher. Original face/font assets and their
+license notices remain unchanged.

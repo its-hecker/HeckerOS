@@ -35,10 +35,11 @@ public final class LockScreenSettingsActivity extends Activity {
         LinearLayout clock = Ui.card(this);
         toggle(clock, R.string.custom_clock_title, R.string.custom_clock_summary,
                 "hecker_custom_lockscreen_clock", 0);
+        int previousStyle = Settings.Secure.getInt(getContentResolver(), "hecker_lockscreen_clock_style", 0);
+        if (previousStyle >= 2 && previousStyle <= 4) put("hecker_lockscreen_clock_style", 6);
         choices(clock, "hecker_lockscreen_clock_style", 0,
-                new int[]{R.string.lock_clock_geometric, R.string.lock_clock_word, R.string.lock_clock_tall,
-                        R.string.lock_clock_living_tall, R.string.lock_clock_living_wide, R.string.lock_clock_living_bold,
-                        R.string.xmorph_title});
+                new int[]{R.string.lock_clock_geometric, R.string.lock_clock_word,
+                        R.string.lock_clock_living_bold, R.string.xmorph_title}, new int[]{0, 1, 5, 6});
         Ui.actionCard(this, clock, R.string.xmorph_title, R.string.xmorph_summary,
                 v -> { imported = true; startActivity(new Intent(this, XMorphClockActivity.class)); });
         android.widget.Button applyClock = Ui.button(this); applyClock.setText(R.string.lock_clock_apply);
@@ -54,7 +55,6 @@ public final class LockScreenSettingsActivity extends Activity {
         range(clock, R.string.lock_clock_vertical, "hecker_lockscreen_clock_y", -100, 100, 0);
         choices(clock, "hecker_lockscreen_clock_color", 0,
                 new int[]{R.string.flow_white, R.string.flow_lilac, R.string.flow_sand, R.string.flow_mint, R.string.flow_blue});
-        toggle(clock, R.string.lock_clock_home, R.string.lock_clock_home_help, "hecker_living_clock_home", 1);
         android.widget.SeekBar opacity = new android.widget.SeekBar(this); opacity.setMin(15); opacity.setMax(100);
         opacity.setProgress(Settings.Secure.getInt(getContentResolver(), "hecker_lockscreen_clock_opacity", 76));
         clock.addView(Ui.text(this, getString(R.string.lock_clock_opacity), 16, true));
@@ -165,15 +165,19 @@ public final class LockScreenSettingsActivity extends Activity {
         card.addView(Ui.text(this, getString(summary), 14, false));
     }
     private void choices(LinearLayout card, String key, int fallback, int[] labels) {
+        int[] values = new int[labels.length]; for (int i = 0; i < values.length; i++) values[i] = i;
+        choices(card, key, fallback, labels, values);
+    }
+    private void choices(LinearLayout card, String key, int fallback, int[] labels, int[] values) {
         RadioGroup group = new RadioGroup(this);
         int selected = Settings.Secure.getInt(getContentResolver(), key, fallback);
-        if (selected < 0 || selected >= labels.length) selected = fallback;
+
         for (int i = 0; i < labels.length; i++) {
             RadioButton button = new RadioButton(this);
-            button.setId(android.view.View.generateViewId()); button.setTag(i);
+            button.setId(android.view.View.generateViewId()); button.setTag(values[i]);
             button.setText(labels[i]); button.setTextColor(getColor(R.color.hecker_foreground));
             button.setMinHeight(Ui.dp(this, 48)); group.addView(button);
-            if (i == selected) group.check(button.getId());
+            if (values[i] == selected) group.check(button.getId());
         }
         group.setOnCheckedChangeListener((buttons, id) -> {
             RadioButton button = buttons.findViewById(id);
@@ -182,7 +186,7 @@ public final class LockScreenSettingsActivity extends Activity {
             if (button != null && !put(key, (Integer) button.getTag())) {
                 int stored = Settings.Secure.getInt(getContentResolver(), key, fallback);
                 group.setOnCheckedChangeListener(null);
-                group.check(group.getChildAt(Math.max(0, Math.min(labels.length-1, stored))).getId());
+                for (int i = 0; i < values.length; i++) if (values[i] == stored) group.check(group.getChildAt(i).getId());
                 recreate();
             }
         });

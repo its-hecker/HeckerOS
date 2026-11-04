@@ -155,7 +155,7 @@ object HeckerAmbientCharging {
         val next = previous.copy(ambient = route,
             style = value(STYLE, 1).coerceIn(0, 2), customClock = value(CLOCK, 0) != 0,
             animation = value(ANIMATION, 1) != 0, art = value(ART, 0).coerceIn(0, 2),
-            clockStyle = value(CLOCK_STYLE, 0).coerceIn(0, 6),
+            clockStyle = value(CLOCK_STYLE, 0).coerceIn(0, 6).let { if (it in 2..4) 6 else it },
             xmorphPreset = Settings.Secure.getStringForUser(c.contentResolver, XMORPH_PRESET, UserHandle.USER_CURRENT),
             flow = value(FLOW, 1) != 0,
             clockScale = value("hecker_lockscreen_clock_scale", 100).coerceIn(70, 110),

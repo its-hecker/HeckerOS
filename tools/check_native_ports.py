@@ -365,6 +365,34 @@ class CaptureUserProbe {
     print('Actual WindowManager secure-capture setting: default off, per-user changes, switch isolation and live surface refresh PASS')
 
 
+def check_rom_wide_policy(folder):
+    from check_launcher_studio import method
+    native = (folder/'frameworks/base/services/core/java/com/android/server/pm/HeckerRootVisibility.java').read_text()
+    protected = re.search(r'private static final Set<String> ROM_PROTECTED = Set.of\(.*?\);', native, re.S).group()
+    flags = method(native, '    public static int getCompatibilityFlags(')
+    program = 'import java.util.*;public class RomWidePolicyProbe {' + protected + '''
+    static Map<Integer,Map<String,Integer>> sCompatibility = Map.of(0,
+        Map.of("org.example.bank",5,"org.hecker.suite",31));
+    ''' + flags + '''
+    static void check(boolean value){if(!value)throw new AssertionError("ROM-wide policy regression");}
+    public static void main(String[] args){
+      check(getCompatibilityFlags(null,0)==0);
+      check(getCompatibilityFlags("org.example.bank",0)==21);
+      check(getCompatibilityFlags("org.example.bank",10)==16);
+      check(getCompatibilityFlags("org.example.newapp",0)==16);
+      for(String pkg:ROM_PROTECTED)for(int user:new int[]{0,10})
+        check((getCompatibilityFlags(pkg,user)&16)==0);
+      check(getCompatibilityFlags("org.hecker.suite",0)==15);
+      check(ROM_PROTECTED.contains("org.hecker.vpn")&&ROM_PROTECTED.contains("com.android.launcher3")
+        &&ROM_PROTECTED.contains("com.google.android.apps.nexuslauncher"));
+      System.out.println("Actual ROM-wide compatibility policy: new/unselected apps, users, retained independent flags and native component exceptions PASS");
+    }}'''
+    with tempfile.TemporaryDirectory(prefix='hecker-rom-wide-') as temporary:
+        output=Path(temporary); source=output/'RomWidePolicyProbe.java';source.write_text(program)
+        subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-d',str(output),str(source)],check=True)
+        subprocess.run(['java','-cp',str(output),'RomWidePolicyProbe'],check=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cache', type=Path, default=ROOT / 'out/native-source-cache')
@@ -497,6 +525,7 @@ def main():
         check_bootanimation_owner(folder)
         check_bootanimation_selection(folder)
         check_secure_capture(folder)
+        check_rom_wide_policy(folder)
         check_game_mode_info(folder)
         check_ambient_charging(folder)
         check_service_bindings(folder)
@@ -535,7 +564,10 @@ def main():
                 assert 'public static final String ADD_ICON_PREFERENCE_KEY = "pref_add_icon_to_home";' in install_source
                 install = output/'src/com/android/launcher3/SessionCommitReceiver.java'
                 install.write_text('package com.android.launcher3;public class SessionCommitReceiver{public static final String ADD_ICON_PREFERENCE_KEY="pref_add_icon_to_home";public static boolean isEnabled(android.content.Context c,android.os.UserHandle u){return true;}}')
-                subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',str(args.sdk_cache/'android.jar'),'-d',str(output/'classes'),str(fixture),str(install),*map(str,sorted((ROOT/'tests/launcher-api-stubs').rglob('*.java'))),*map(str,sorted((ROOT/'aosp-launcher/src').rglob('*.java')))],check=True)
+                from check_xmorph_clock import build as build_xmorph
+                xmorph_classes, xmorph_resources = build_xmorph(args.sdk_cache.resolve(), ROOT/'generated/compose-check', output/'xmorph')
+                launcher_cp = os.pathsep.join(map(str, [args.sdk_cache/'android.jar', xmorph_classes, ROOT/'generated/compose-check/kotlin-stdlib.jar']))
+                subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',launcher_cp,'-d',str(output/'classes'),str(fixture),str(install),*map(str,sorted((ROOT/'tests/launcher-api-stubs').rglob('*.java'))),*map(str,sorted((ROOT/'aosp-launcher/src').rglob('*.java')))],check=True)
                 from check_launcher_studio import check as check_launcher_studio
                 check_launcher_studio(launcher, args.sdk_cache.resolve(), output/'classes')
                 from check_launcher_wallpaper import check_wallpaper_picker

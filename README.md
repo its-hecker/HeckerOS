@@ -1,5 +1,16 @@
 # HeckerOS · Android 17
 
+## Coral device feedback — 5 November 2026
+
+`fix/device-feedback-20261105` carries the latest HeckerVPN base plus the QS/media,
+XMorph Home clocks, shared lock-clock motion/position, launcher glass/icons,
+Motion Island, status-bar and compatibility corrections. See the
+[complete changes and phone checks](docs/device-feedback-2026-11-05.md).
+Use the same branch in `HeckerOs-localmanifest`; keep RBE enabled and leave
+`HECKER_BUILD_JOBS` unset for the provider's default parallelism. Full ROM and
+phone validation remain pending.
+
+
 ## HeckerVPN feature branch — 4 November 2026
 
 `feat/heckervpn-20261104` adds **HeckerLab → HeckerVPN** with provider countries,

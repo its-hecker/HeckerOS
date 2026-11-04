@@ -20,7 +20,7 @@ android_library {
     srcs: ["src/**/*.kt"],
     resource_dirs: ["res"],
     asset_dirs: ["assets"],
-    sdk_version: "system_current",
+    sdk_version: "current",
     min_sdk_version: "31",
     static_libs: ["androidx.core_core-ktx"],
     visibility: ["//visibility:public"],

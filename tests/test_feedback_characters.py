@@ -23,6 +23,16 @@ public class PoseProbe{public static void main(String[]args){
  signatures[character-1]+=Math.abs(value[0])+Math.abs(value[1])+Math.abs(value[2]);checks++;
  }
  if(signatures[0]==signatures[1]||signatures[1]==signatures[2]||signatures[0]==signatures[2])throw new AssertionError("Identical characters");
+ if(MotionIslandState.mediaAction(true,true,false,true,false)!=MotionIslandState.PAUSE)throw new AssertionError("Missing manual pause");
+ if(MotionIslandState.mediaAction(true,false,true,false,false)!=MotionIslandState.PLAY)throw new AssertionError("Missing manual resume");
+ if(MotionIslandState.mediaAction(false,false,true,false,false)!=MotionIslandState.PLAY)throw new AssertionError("Missing first play");
+ if(MotionIslandState.mediaAction(true,true,true,false,true)!=MotionIslandState.NEXT)throw new AssertionError("Missing automatic track");
+ if(MotionIslandState.mediaAction(true,true,true,false,false)!=MotionIslandState.NONE)throw new AssertionError("Repeated playing callbacks react");
+ if(MotionIslandState.mediaAction(true,true,false,false,false)!=MotionIslandState.NONE)throw new AssertionError("Buffering reacts as pause");
+ for(int character=1;character<=3;character++)for(int action=1;action<=11;action++)for(long age=0;age<=2400;age+=8){
+  float[] joints=new float[3];MotionCharacterPose.joints(joints,character,action,age);
+  for(float v:joints)if(!Float.isFinite(v)||Math.abs(v)>60)throw new AssertionError("Invalid head or arm pose");
+ }
  System.out.println(checks+" finite, bounded character/action/direction frames PASS");}}
 '''}
         java_run(sources,[ROOT/'framework/motionisland/MotionIslandState.java',ROOT/'framework/motionisland/MotionCharacterPose.java'],'com.android.systemui.hecker.PoseProbe')

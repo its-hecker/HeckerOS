@@ -1,10 +1,11 @@
 # App compatibility — Coral source track
 
-Hecker Suite → App compatibility replaces the Root manager privacy page. The old
+HeckerLab → App compatibility replaces the Root manager privacy page. The old
 activity component and `hecker_root_private_apps` storage key remain intact so
 existing selections survive an upgrade. The current Android user's full installed
 app list is searchable by name or package, includes system apps, and opens an
-individual app's five independent options. New options default to off.
+individual app's four independent options. These per-app options default to off.
+Custom ROM visibility protection applies across app processes in backend version 3.
 
 | Option | Effect |
 | --- | --- |
@@ -12,7 +13,7 @@ individual app's five independent options. New options default to off.
 | Allow app downgrade | Permit a lower APK version for the selected package through normal installation. Signature, installer permission, SDK, shared-UID and other validation remains in place. It does not fetch or install an APK. |
 | Hide developer options | Report `development_settings_enabled`, `adb_enabled` and `adb_wifi_enabled` as `0` through Android Settings read APIs in that app. Actual device settings stay unchanged. |
 | Bootloader spoof | In that app's process, report `ro.boot.verifiedbootstate=green`, `ro.boot.flash.locked=1` and `ro.boot.vbmeta.device_state=locked` using the existing guarded private property-mapping engine. |
-| Hide custom ROM | For the selected app, filter common ROM software properties, align cached `Build.TYPE` and `Build.TAGS`, hide selected ROM file/directory markers and proc/SELinux text lines through Bionic, and restrict visibility of the Suite/NetLab packages. Requires backend version 2. |
+| ROM-wide visibility protection | Enabled by default in backend version 3: filter common ROM software properties, align cached `Build.TYPE` and `Build.TAGS`, filter the reviewed file/directory and proc/SELinux markers, and restrict ROM-component package visibility for app processes. There is no per-app switch. |
 
 ## Scope and application lifecycle
 
@@ -27,17 +28,17 @@ boot property virtualization uses fixed keys and private process mappings; no
 system property write, bootloader operation or keystore modification is involved.
 
 The old root key plus `hecker_allow_downgrade_apps`,
-`hecker_hide_developer_options_apps`, `hecker_bootloader_spoof_apps` and
-`hecker_hide_custom_rom_apps` are stored
+`hecker_hide_developer_options_apps` and `hecker_bootloader_spoof_apps` are stored
 independently for each Android user. APK code is shared across users: downgrade
 consent is required for every installed user. System apps retain the factory
 version floor even on a userdebug image. APEX uses its unchanged separate path.
 Core system UIDs and Suite itself are visible in the list but cannot be configured.
-The custom ROM option is also excluded for SystemUI, Settings and the permission
-controller, which need the real ROM configuration.
+ROM visibility exceptions cover native Settings/SystemUI, the permission controller,
+both bundled launchers and Hecker services, which need the real ROM configuration.
 
-The native ROM policy starts disabled. The framework explicitly sets or clears
-it before package code runs, including app-zygote children. Property access does
+The framework enables the native ROM policy for app processes by default, and
+clears it for native component exceptions before package code runs, including
+app-zygote children. Property access does
 not read Settings or a policy file. File wrappers run the original kernel check
 first so bad pointers retain `EFAULT` and existing permission errors. Filtered
 read-only views preserve close-on-exec and readlink truncation; a failed copy
@@ -59,8 +60,9 @@ have independently different process-local answers within that same process.
 
 ## Limits
 
-The current ROM advertises `ro.hecker.app_compatibility=2`. Version 1 provides
-the original four options; version 2 adds Hide custom ROM. An APK-only update
+The current Coral track advertises `ro.hecker.app_compatibility=3`. Version 1
+provides the four independent options; version 2 used a per-app ROM switch;
+version 3 makes that ROM policy global and removes its per-app control. An APK-only update
 cannot supply the framework, parcel or installer changes. The page is read-only
 when that backend version is missing. This source track updates Coral; it does not
 advance Flame's separately pinned manifest.
@@ -69,7 +71,8 @@ The ROM hooks adapt the reviewed VoltageOS Bionic and service-manager work,
 including its property-iteration, performance and crash-fix commits. Immutable
 upstream inputs and attribution are recorded in
 [`native-compat/source-lock.json`](../native-compat/source-lock.json). Hecker's
-process flag replaces VoltageOS's global app policy and package allowlist file.
+process flag is now enabled by the global framework policy, retaining explicit
+exceptions for native components without a package allowlist file on hot paths.
 The hard-coded partition-device spoofing and its extra SELinux file permissions
 are not included.
 
@@ -101,9 +104,9 @@ boundary fakes, executes their policies and checks exact reversion. It also runs
 Bionic's real syscall generator for arm, arm64, x86, x86_64 and riscv64 to verify
 that public wrappers and private syscall stubs have distinct ownership.
 
-On a matched Coral ROM test all five switches independently and in combinations;
+On a matched Coral ROM test the four switches independently and in combinations, plus the global ROM policy;
 profile persistence, search, disabled/system apps, large fonts and Russian/Chinese;
 same-signature downgrade and wrong-signature rejection; factory floor and a second
-Android user; native/Java property reads in selected and unselected apps plus ADB;
+Android user; native/Java property reads in existing and newly installed apps plus ADB;
 developer options and actual USB debugging remaining enabled; app process and app
 zygote restart, profile disable and reboot. Retest UBL and retain its real result.

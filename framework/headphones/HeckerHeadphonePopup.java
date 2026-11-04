@@ -214,6 +214,13 @@ public final class HeckerHeadphonePopup {
         Window window = dialog.getWindow();
         if (window != null) {
             window.setBackgroundDrawableResource(android.R.color.transparent);
+            boolean glass = Settings.Secure.getIntForUser(context.getContentResolver(), "hecker_headphone_glass", 0, visibleUser) != 0;
+            android.os.PowerManager power = context.getSystemService(android.os.PowerManager.class);
+            WindowManager manager = context.getSystemService(WindowManager.class);
+            if (glass && manager.isCrossWindowBlurEnabled() && (power == null || !power.isPowerSaveMode())) {
+                background.setColors(new int[]{0x771C3144, 0x880B1725});
+                panel.setBackground(null); window.setBackgroundDrawable(background); window.setBackgroundBlurRadius(dp(28));
+            }
             window.setGravity(Gravity.BOTTOM);
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
             window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE

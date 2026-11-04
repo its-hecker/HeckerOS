@@ -154,7 +154,6 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
         }
     }
     var origin by remember { mutableStateOf(Offset.Zero) }
-    val homeHandoff = LocalHeckerHomeHandoff.current
     val foreground = HeckerDepthScene.foreground(context, state)
     val height = if (small) { if (style == 1) 218.dp else 136.dp }
         else when (style) { 1 -> 310.dp; 2, 3, 5 -> 480.dp; 4 -> 240.dp; else -> 184.dp }
@@ -165,9 +164,7 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
             val c = canvas.nativeCanvas
             // Mask the clock with the subject alpha. This reveals the one background scene
             // without painting a second, differently faded/blurred subject over the digits.
-            val dismissal = FlowClockRenderer.unit(homeHandoff())
-            val fade = 1f - dismissal * dismissal * (3f - 2f * dismissal)
-            val layer = c.saveLayerAlpha(0f, 0f, size.width, size.height, (255 * fade).toInt())
+            val layer = c.saveLayerAlpha(0f, 0f, size.width, size.height, 255)
             c.save(); c.scale(density,density)
             when (style) {
                 1 -> reference.word(c, hour, minute, clock.second.uppercase(Locale.getDefault()),
@@ -175,7 +172,7 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
                 2, 3, 4, 5 -> living.draw(c, hour, minute, twentyFour, clock.second,
                     Locale.getDefault(), size.width / density, size.height / density,
                     if (style == 2) 3 else style, awake, small, false, state.clockOpacity / 100f,
-                    state.clockColor, state.clockScale, state.clockX, state.clockY, 0f, state.aodClockScale)
+                    state.clockColor, 100, 0, 0, 0f, 140)
                 else -> {
                     val aodSize = minOf(42f * state.aodClockScale / 100f,
                         (size.height / density - 32f).coerceAtLeast(1f) / 1.5f)

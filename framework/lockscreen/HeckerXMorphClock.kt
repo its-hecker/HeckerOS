@@ -62,19 +62,12 @@ fun HeckerXMorphLockscreenClock(context: Context, small: Boolean,
     val moving = keyguard && state.screenAwake && !state.powerSave && awake > 0f &&
         state.flow && ValueAnimator.areAnimatorsEnabled()
     val depth = HeckerNativeClockDepthModifier(context, customRenderer = true)
-    val handoff = LocalHeckerHomeHandoff.current
     var backdropFrame by remember { mutableStateOf(RectF()) }
     key(state.user) { AndroidView(
         factory = { ClockFaceView(userContext, face.face) },
         modifier = modifier.fillMaxWidth().heightIn(max = if (small) 218.dp else 520.dp)
             .graphicsLayer {
-                val scale = if (awake <= 0f) state.aodClockScale / 140f else state.clockScale / 100f
-                scaleX = scale; scaleY = scale
-                val dismiss = org.hecker.motion.FlowClockRenderer.unit(handoff())
-                alpha = (if (awake <= 0f) 1f else state.clockOpacity / 100f) *
-                    (1f - dismiss * dismiss * (3f - 2f * dismiss))
-                translationX = size.width * state.clockX / 300f
-                translationY = size.height * state.clockY / 300f
+                alpha = if (awake <= 0f) 1f else state.clockOpacity / 100f
             }.then(depth).layout { measurable, constraints ->
                 val width = constraints.maxWidth
                 val natural = measurable.measure(Constraints.fixedWidth(width))

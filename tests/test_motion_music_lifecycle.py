@@ -57,13 +57,13 @@ class MotionMusicLifecycleTests(unittest.TestCase):
 'android/graphics/PixelFormat.java': 'package android.graphics;public class PixelFormat{public static int TRANSLUCENT=-3;}',
 'android/view/WindowManager.java': '''package android.view;public class WindowManager{
  public final java.util.Map<View,LayoutParams> views=new java.util.LinkedHashMap<>();public void addView(View v,LayoutParams p){views.put(v,p);}public void removeViewImmediate(View v){views.remove(v);}
- public Metrics getCurrentWindowMetrics(){return new Metrics();}public static class Metrics{public Metrics getBounds(){return this;}public int width(){return 1080;}}
- public static class LayoutParams{public static int FLAG_NOT_FOCUSABLE=8,FLAG_NOT_TOUCHABLE=16,FLAG_NOT_TOUCH_MODAL=32,FLAG_LAYOUT_IN_SCREEN=256,LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER=2;public int width,height,flags,gravity,y,layoutInDisplayCutoutMode;public LayoutParams(int w,int h,int type,int flags,int format){width=w;height=h;this.flags=flags;}public void setFitInsetsTypes(int t){}public void setTitle(String s){}public void setTrustedOverlay(){}}
+ public Metrics getCurrentWindowMetrics(){return new Metrics();}public static class Metrics{public Metrics getBounds(){return this;}public int width(){return 1080;}public int height(){return 2400;}}
+ public static class LayoutParams{public static int FLAG_NOT_FOCUSABLE=8,FLAG_NOT_TOUCHABLE=16,FLAG_NOT_TOUCH_MODAL=32,FLAG_LAYOUT_IN_SCREEN=256,LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER=2;public int width,height,flags,gravity,x,y,layoutInDisplayCutoutMode;public LayoutParams(int w,int h,int type,int flags,int format){width=w;height=h;this.flags=flags;}public void setFitInsetsTypes(int t){}public void setTitle(String s){}public void setTrustedOverlay(){}}
 }''',
 'android/app/Dialog.java': 'package android.app;public class Dialog{public boolean showing=true;public Runnable dismissed;public void dismiss(){showing=false;if(dismissed!=null)dismissed.run();}}',
 'com/android/systemui/hecker/HeckerMotionMediaDialog.java': 'package com.android.systemui.hecker;public class HeckerMotionMediaDialog{public static android.app.Dialog last;public static android.app.Dialog show(android.content.Context c,android.media.session.MediaSession.Token t,Runnable r){last=new android.app.Dialog();last.dismissed=r;return last;}}',
 'com/android/systemui/hecker/MotionIslandView.java': 'package com.android.systemui.hecker;public class MotionIslandView extends android.view.View{public static MotionIslandView last;public MotionIslandView(android.content.Context c){last=this;}public void update(HeckerQsMedia.Snapshot m,String l,boolean a){}public void stop(){}}',
-'com/android/systemui/hecker/MotionAstronautView.java': 'package com.android.systemui.hecker;public class MotionAstronautView extends android.view.View{public static int direction,action,character;public MotionAstronautView(android.content.Context c){}public void update(MotionIslandState s,boolean animate){direction=s.direction;action=s.action;character=s.character;}public void stop(){}}',
+'com/android/systemui/hecker/MotionAstronautView.java': 'package com.android.systemui.hecker;public class MotionAstronautView extends android.view.View{public static int anchor,direction,action,character;public MotionAstronautView(android.content.Context c){}public void setAnchorOffset(int x){anchor=x;}public void update(MotionIslandState s,boolean animate){direction=s.direction;action=s.action;character=s.character;}public void stop(){}}',
         })
         sources['android/os/UserHandle.java'] = sources['android/os/UserHandle.java'].replace('public int id;', 'public static int USER_ALL=-1;public int id;')
         names = ('playing play paused pause skipped next previous_done previous volume volume_up volume_down forward rewind track_mode volume_mode seek_mode').split()
@@ -85,15 +85,15 @@ public class LifecycleTest{
   c.manager.list=java.util.List.of(m);c.manager.changed();
   m.playback(6);m.playback(3);check(MotionAstronautView.action==3&&MotionAstronautView.direction==-1); // Buffering must preserve the skip gesture.
   SystemClock.now+=2500;Handler.due();check(c.windows.views.size()==1); // Capsule persists, companion expires.
-  SystemClock.now=600000;m.playback(2);check(c.windows.views.isEmpty()); // Long playback, callback before event.
+  SystemClock.now=600000;m.playback(2);check(c.windows.views.size()==2&&MotionAstronautView.action==2); // Manual pause also gets a farewell.
   event(c,m,2,0);check(c.windows.views.size()==2&&MotionAstronautView.action==2);
   SystemClock.now+=2500;Handler.due();check(c.windows.views.isEmpty());
   SystemClock.now+=60000;event(c,m,1,0);check(c.windows.views.isEmpty()); // Pending PLAY never shows paused music.
   m.playback(3);check(c.windows.views.size()==2&&MotionAstronautView.action==1);
   MotionIslandView.last.performClick();check(c.windows.views.size()==1&&HeckerMotionMediaDialog.last.showing);
-  m.playback(2);check(c.windows.views.isEmpty()&&HeckerMotionMediaDialog.last.showing); // Expanded resume remains usable.
+  SystemClock.now++;m.playback(2);check(c.windows.views.size()==1&&HeckerMotionMediaDialog.last.showing); // Expanded resume remains usable.
   c.emit(new Intent(Intent.ACTION_SCREEN_OFF));check(c.windows.views.isEmpty()&&!HeckerMotionMediaDialog.last.showing&&m.callbacks.isEmpty());
-  c.emit(new Intent(Intent.ACTION_SCREEN_ON));m.playback(3);check(c.windows.views.size()==1);
+  c.emit(new Intent(Intent.ACTION_SCREEN_ON));m.playback(3);check(c.windows.views.size()==2&&MotionAstronautView.action==1);
   event(c,m,3,1);check(c.windows.views.size()==2);
   android.provider.Settings.Secure.putInt(c.getContentResolver(),"hecker_motion_creature",0);
   check(c.windows.views.size()==1&&m.callbacks.size()==1); // Character off keeps the playing capsule.
@@ -109,6 +109,16 @@ public class LifecycleTest{
   check(MotionAstronautView.character==3&&c.windows.views.entrySet().stream().anyMatch(e->e.getKey() instanceof MotionAstronautView&&e.getValue().y==53));
   check(c.windows.views.entrySet().stream().anyMatch(e->e.getKey() instanceof MotionIslandView&&e.getValue().height==56));
   SystemClock.now+=4000;Handler.due();m.playback(2);m.playback(3);check(c.windows.views.size()==2&&MotionAstronautView.action==1); // Resume without an Oslo command.
+  SystemClock.now+=4000;Handler.due();
+  android.provider.Settings.Secure.putInt(c.getContentResolver(),"hecker_motion_media_events",0);
+  m.playback(2);check(c.windows.views.isEmpty());SystemClock.now++;m.playback(3);check(c.windows.views.size()==1);
+  event(c,m,2,0);check(c.windows.views.size()==2); // Motion Sense still works when manual/automatic reactions are off.
+  android.provider.Settings.Secure.putInt(c.getContentResolver(),"hecker_motion_bar_x",70);
+  android.provider.Settings.Secure.putInt(c.getContentResolver(),"hecker_motion_bar_y",42);
+  check(c.windows.views.entrySet().stream().anyMatch(e->e.getKey() instanceof MotionIslandView&&e.getValue().x==70));
+  check(MotionAstronautView.anchor==70);
+  check(c.windows.views.entrySet().stream().anyMatch(e->e.getKey() instanceof MotionIslandView&&e.getValue().y==42));
+  check(c.windows.views.entrySet().stream().anyMatch(e->e.getKey() instanceof MotionAstronautView&&e.getValue().y==95));
   host.close();check(c.windows.views.isEmpty()&&m.callbacks.isEmpty()&&c.receivers.isEmpty()&&c.manager.listeners.isEmpty()&&c.resolver.observers.isEmpty());
   SystemClock.now+=10000;Handler.due();check(c.windows.views.isEmpty());
   System.out.println("Motion music coordinator: "+checks+" checks PASS");

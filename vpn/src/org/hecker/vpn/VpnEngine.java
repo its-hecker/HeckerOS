@@ -31,7 +31,7 @@ final class VpnEngine {
     private final KernelChannel kernel = new KernelChannel();
     private VpnStore store;
     private String status = "disconnected", error = "";
-    private boolean desired, configured, supported, cleanupRequired;
+    private boolean desired, configured, supported, cleanupRequired, probed;
     private long rx, tx, handshake, catalogTime;
     private Network underlying;
     private List<JSONObject> catalog = List.of();
@@ -185,6 +185,7 @@ final class VpnEngine {
         worker.removeCallbacks(poll); notifyState();
     }
     private void snapshot(JSONObject data) {
+        probed = true;
         cleanupRequired = false;
         supported = data.optBoolean("kernel"); configured = data.optBoolean("configured");
         rx = data.optLong("rx"); tx = data.optLong("tx"); handshake = data.optLong("handshake");
@@ -260,7 +261,7 @@ final class VpnEngine {
     }
     private Bundle state() {
         Bundle result = new Bundle(); result.putString("status", status); result.putString("error", error);
-        result.putString("backend", "WireGuard kernel"); result.putBoolean("kernel", supported);
+        result.putString("backend", "WireGuard kernel"); if (probed) result.putBoolean("kernel", supported);
         result.putBoolean("configured", configured); result.putBoolean("desired", desired);
         result.putBoolean("cleanup_required", cleanupRequired);
         result.putLong("rx", rx); result.putLong("tx", tx); result.putLong("handshake", handshake);

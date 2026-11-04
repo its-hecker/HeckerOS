@@ -134,7 +134,7 @@ fun HeckerReferenceQuickSettings(
 
 /** Observe the native per-user mode, including changes from Display and game mode. */
 @Composable
-fun HeckerAutoBrightnessButton() {
+fun HeckerAutoBrightnessButton(modifier: Modifier = Modifier, embedded: Boolean = false) {
     val context = LocalContext.current
     val resolver = context.contentResolver
     var automatic by remember(context) { mutableStateOf(false) }
@@ -157,8 +157,8 @@ fun HeckerAutoBrightnessButton() {
         read()
         onDispose { resolver.unregisterContentObserver(observer); context.unregisterReceiver(users) }
     }
-    Box(Modifier.size(48.dp).clip(CircleShape)
-        .background(if (automatic) White.copy(alpha = .88f) else Disc)
+    Box(modifier.size(if (embedded) 36.dp else 48.dp).clip(CircleShape)
+        .background(if (embedded) Color.Transparent else if (automatic) White.copy(alpha = .88f) else Disc)
         .semantics {
             contentDescription = context.getString(R.string.hecker_qs_auto_brightness)
             role = Role.Switch
@@ -176,7 +176,10 @@ fun HeckerAutoBrightnessButton() {
                 read()
             } catch (_: SecurityException) { HeckerQsActions.settings(Settings.ACTION_DISPLAY_SETTINGS) }
         }, contentAlignment = Alignment.Center) {
-        Text("A", color = if (automatic) Ink else White, fontSize = 19.sp, fontWeight = FontWeight.Bold)
+        androidx.compose.animation.Crossfade(automatic, label = "brightnessMode") { auto ->
+            if (auto) Text("A", color = if (embedded || automatic) Ink else White, fontSize = 19.sp, fontWeight = FontWeight.Bold)
+            else ReferenceIcon(R.drawable.hecker_qs_sun, 23, if (embedded) Ink else White)
+        }
     }
 }
 
@@ -341,7 +344,10 @@ fun HeckerGlassTrack(fraction: Float, icon: Int, modifier: Modifier = Modifier, 
             drawRoundRect(White.copy(alpha = .88f), size = androidx.compose.ui.geometry.Size(
                 (size.width * progress).coerceAtLeast(size.height).coerceAtMost(size.width), size.height), cornerRadius = corner)
         }
-        Box(Modifier.padding(start = 15.dp).graphicsLayer { rotationZ = if (vertical) 90f else 0f }) { ReferenceIcon(icon, 23, Ink) }
+        Box(Modifier.padding(start = 8.dp).graphicsLayer { rotationZ = if (vertical) 90f else 0f }) {
+            if (icon == R.drawable.hecker_qs_sun && LocalHeckerFlowGlass.current) HeckerAutoBrightnessButton(embedded = true)
+            else Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) { ReferenceIcon(icon, 23, Ink) }
+        }
         // The vertical control rotates its child. Counter-rotate the entire badge
         // so numbers and localized percent signs remain upright in both layouts.
         Box(Modifier.align(if (vertical) Alignment.Center else Alignment.CenterEnd)

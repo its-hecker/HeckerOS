@@ -20,8 +20,8 @@ final class MotionAstronautView extends View {
     private final Bitmap atlas;
     private final float density;
     private Bitmap characterBitmap;
-    private int character;
-    private final float[] characterPose=new float[5];
+    private int character, anchorOffset;
+    private final float[] characterPose=new float[5], joints=new float[3], mesh=new float[21*21*2];
     private final RectF characterBounds=new RectF();
     private long when = -1, sequence = -1;
     private int direction, action;
@@ -40,6 +40,7 @@ final class MotionAstronautView extends View {
         atlas = BitmapFactory.decodeResource(getResources(), R.drawable.hecker_motion_astronaut, options);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
+    void setAnchorOffset(int value) { anchorOffset = value; invalidate(); }
     private float dp(float n) { return n * density; }
     void update(MotionIslandState state, boolean animate) {
         if(character!=state.character){character=state.character;characterBitmap=null;
@@ -80,7 +81,7 @@ final class MotionAstronautView extends View {
         // The window starts exactly at the painted capsule's bottom. Clip before all
         // transforms, including on the host preview, so no rope/body/sparkle can draw over it.
         canvas.clipRect(0, 0, getWidth(), getHeight());
-        canvas.translate(getWidth() / 2f, dp(.4f));
+        canvas.translate(getWidth() / 2f + anchorOffset, dp(.4f));
         if (animate) canvas.rotate(MotionIslandAnimation.angle(age, direction));
         float rope = dp(animate ? MotionIslandAnimation.ropeLength(age, action) : 47)*getHeight()/dp(150);
         paint.setColor(0xffe7edf2); paint.setAlpha(Math.round(235 * alpha));
@@ -108,14 +109,35 @@ final class MotionAstronautView extends View {
     }
     private void drawCharacter(Canvas canvas,long age,float alpha){
         float[] pose=characterPose;
-        MotionCharacterPose.sample(pose,character,action,direction,age);
+        MotionCharacterPose.sample(pose,character,action,direction,animate?age:0);
+        MotionCharacterPose.joints(joints,character,action,animate?age:0);
         int save=canvas.save();canvas.clipRect(0,0,getWidth(),getHeight());
-        float size=Math.min(getHeight()*.82f,getWidth()*.62f);
-        canvas.translate(getWidth()/2f+size*pose[0],getHeight()*.55f+size*pose[1]);
-        canvas.rotate(pose[2]);canvas.scale(pose[3],pose[4]);
-        paint.setAlpha(Math.round(alpha*255));
-        characterBounds.set(-size/2,-size/2,size/2,size/2);
-        canvas.drawBitmap(characterBitmap,null,characterBounds,paint);
+        float size=Math.min(getHeight()*.65f,getWidth()*.62f);
+        canvas.translate(getWidth()/2f+anchorOffset,0);
+        if(animate)canvas.rotate(MotionIslandAnimation.angle(age,direction)*.65f);
+        float center=getHeight()*.51f+size*pose[1];
+        // Every companion hangs from the same capsule edge; the tether moves with its body.
+        paint.setColor(0xffe7edf2);paint.setAlpha(Math.round(alpha*235));paint.setStrokeWidth(dp(.8f));
+        canvas.drawLine(0,0,size*pose[0],center-size*.45f,paint);
+        canvas.translate(size*pose[0],center);canvas.rotate(pose[2]);canvas.scale(pose[3],pose[4]);
+        float hx=character==3?.60f:.5f,hy=character==1?.29f:.27f;
+        float lx=character==1?.16f:character==2?.28f:.28f;
+        float rx=character==1?.84f:character==2?.72f:.64f;
+        for(int y=0;y<=20;y++)for(int x=0;x<=20;x++){
+            float u=x/20f,v=y/20f,dx=0,dy=0;
+            for(int part=0;part<3;part++){
+                float px=part==0?hx:part==1?lx:rx, py=part==0?hy:character==3?.51f:.60f;
+                float radiusX=part==0?.31f:.13f,radiusY=part==0?.23f:.24f;
+                float weight=(float)Math.exp(-2*((u-px)*(u-px)/(radiusX*radiusX)+(v-py)*(v-py)/(radiusY*radiusY)));
+                float angle=(float)Math.toRadians(joints[part])*weight;
+                dx+=(float)(Math.cos(angle)*(u-px)-Math.sin(angle)*(v-py)-(u-px));
+                dy+=(float)(Math.sin(angle)*(u-px)+Math.cos(angle)*(v-py)-(v-py));
+            }
+            int i=(y*21+x)*2;mesh[i]=(u+dx-.5f)*size;mesh[i+1]=(v+dy-.5f)*size;
+        }
+        paint.setColor(0xffffffff);paint.setAlpha(Math.round(alpha*255));
+        // A continuous mesh articulates hands/head without seams or duplicate painted limbs.
+        canvas.drawBitmapMesh(characterBitmap,20,20,mesh,0,null,0,paint);
         canvas.restoreToCount(save);
     }
     private void drawPose(Canvas canvas, int pose, float size, float alpha) {

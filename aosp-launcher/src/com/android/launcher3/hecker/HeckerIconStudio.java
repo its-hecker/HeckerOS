@@ -106,7 +106,7 @@ public final class HeckerIconStudio {
                 }
             }
         }
-        if (cached == null || cached.getWidth() == 1) return shaped(c, original);
+        if (cached == null || cached.getWidth() == 1) return HeckerGlassIcons.icon(c, component, user, shaped(c, original), refresh, host);
         return c.getPackageManager().getUserBadgedIcon(shaped(c, new BitmapDrawable(c.getResources(), cached)), user);
     }
     private static Drawable shaped(Context c, Drawable original) {

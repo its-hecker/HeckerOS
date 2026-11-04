@@ -40,7 +40,7 @@ public final class HeckerCategoryArt extends View {
             c.drawRoundRect(20, 43, 80, 91, 12, 12, paint); paint.setShader(null); paint.setColor(0xff182c35);
             c.drawCircle(50, 63, 6, paint); c.drawRoundRect(47, 65, 53, 79, 3, 3, paint);
         } else if ("clock".equals(kind)) {
-            HeckerClockView.drawCaracal(c, 5, 5, 90, phase, animator != null);
+            drawCaracal(c, 5, 5, 90, phase, animator != null);
         } else {
             paint.setColor(0x506dbac3); c.drawRoundRect(10, 10, 74, 76, 16, 16, paint);
             paint.setShader(new LinearGradient(28, 28, 94, 94, 0xbbaa9fea, 0x60b4f4ec, Shader.TileMode.CLAMP));
@@ -49,6 +49,20 @@ public final class HeckerCategoryArt extends View {
             paint.setColor(0xffbca4ea); c.drawRoundRect(65, 43, 83, 61, 7 - wave * 3, 7 - wave * 3, paint);
             paint.setColor(0x80ffffff); c.drawRoundRect(39, 73, 80, 77, 2, 2, paint);
         }
+        c.restoreToCount(save);
+    }
+    public static void drawCaracal(Canvas c, float x, float y, float size, float phase, boolean animate) {
+        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG); p.setColor(0xfff0f1e9); p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(1.7f); p.setStrokeJoin(Paint.Join.ROUND);
+        int save = c.save(); c.translate(x, y); c.scale(size / 100, size / 100);
+        float wave = animate ? (float) Math.sin(phase * Math.PI * 2) : 0; c.rotate(wave * 3, 50, 65);
+        Path head = new Path(); head.moveTo(16, 54); head.cubicTo(8, 70, 17, 87, 50, 98); head.cubicTo(83, 87, 92, 70, 84, 54); head.cubicTo(73, 40, 27, 40, 16, 54); c.drawPath(head, p);
+        for (int side = 0; side < 2; side++) { int ear = c.save(); if (side == 1) c.scale(-1, 1, 50, 50); c.rotate(wave * (side == 0 ? 2 : -3), 21, 55);
+            Path shape = new Path(); shape.moveTo(17, 57); shape.lineTo(6, 8); shape.quadTo(26, 18, 39, 43); c.drawPath(shape, p);
+            p.setColor(0xff687780); Path inside = new Path(); inside.moveTo(20, 48); inside.lineTo(13, 22); inside.lineTo(29, 43); c.drawPath(inside, p); p.setColor(0xfff0f1e9);
+            c.drawLine(6, 8, 3, 0, p); c.drawLine(6, 8, 7, -3, p); c.drawLine(9, 12, 11, -1, p); c.restoreToCount(ear); }
+        p.setStyle(Paint.Style.FILL); p.setColor(0x995e6b73); c.drawRoundRect(17, 56, 44, 73, 6, 6, p); c.drawRoundRect(56, 56, 83, 73, 6, 6, p);
+        p.setColor(0xfff0f1e9); p.setStyle(Paint.Style.STROKE); c.drawRoundRect(17, 56, 44, 73, 6, 6, p); c.drawRoundRect(56, 56, 83, 73, 6, 6, p); c.drawLine(44, 60, 56, 60, p);
+        Path nose = new Path(); nose.moveTo(46, 79); nose.quadTo(50, 75, 54, 79); nose.lineTo(50, 83); nose.close(); c.drawPath(nose, p); c.drawArc(41, 78, 50, 89, 0, 180, false, p); c.drawArc(50, 78, 59, 89, 0, 180, false, p);
         c.restoreToCount(save);
     }
 }

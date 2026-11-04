@@ -42,6 +42,7 @@ public final class HeckerVpnActivity extends Activity {
     private Button connect, countries, profiles;
     private boolean countriesTab = true, busy, started;
     private long catalogTime;
+    private android.net.Uri pendingImport;
 
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved); getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
@@ -52,7 +53,13 @@ public final class HeckerVpnActivity extends Activity {
         detail = Ui.text(this, "", 13, false); hero.addView(detail);
         warning = Ui.text(this, "", 13, false); hero.addView(warning);
         connect = Ui.button(this); connect.setText(R.string.vpn_connect);
-        connect.setOnClickListener(v -> operation(HeckerVpnClient.request(state.getBoolean("desired") || state.getBoolean("cleanup_required") ? "disconnect" : "connect"), true));
+        connect.setOnClickListener(v -> {
+            if (!state.getBoolean("desired") && !state.getBoolean("cleanup_required")
+                    && state.getString("selected", "").isEmpty()) {
+                countriesTab = false; renderBody();
+                Toast.makeText(this, R.string.vpn_no_profiles, Toast.LENGTH_LONG).show();
+            } else operation(HeckerVpnClient.request(state.getBoolean("desired") || state.getBoolean("cleanup_required") ? "disconnect" : "connect"), true);
+        });
         hero.addView(connect); page.addView(hero);
         countries = Ui.button(this); countries.setText(R.string.vpn_countries);
         profiles = Ui.button(this); profiles.setText(R.string.vpn_profiles);
@@ -64,7 +71,16 @@ public final class HeckerVpnActivity extends Activity {
     }
     @Override protected void onStart() {
         super.onStart(); started = true; client = new HeckerVpnClient(this);
-        operation(HeckerVpnClient.request("probe"), true); main.postDelayed(poll, 3000);
+        // Opening Settings must not wait on the privileged kernel socket. Connect probes it
+        // when required; profile import and provider setup remain usable independently.
+        operation(HeckerVpnClient.request("state"), true); main.postDelayed(poll, 3000);
+    }
+    @Override protected void onResume() {
+        super.onResume(); consumeImport();
+    }
+    private void consumeImport() {
+        if (!started || pendingImport == null) return;
+        android.net.Uri uri = pendingImport; pendingImport = null; readImport(uri);
     }
     @Override protected void onStop() {
         started = false; main.removeCallbacks(poll); if (client != null) client.close(); client = null; busy = false; super.onStop();
@@ -78,12 +94,14 @@ public final class HeckerVpnActivity extends Activity {
         }
     };
     private void operation(Bundle request, boolean rebuild) {
-        if (client == null || busy) return;
-        busy = true; renderState(); setEnabled(body, false);
+        if (client == null || busy) {
+            Toast.makeText(this, R.string.vpn_busy, Toast.LENGTH_SHORT).show(); return;
+        }
+        busy = true; renderState();
         client.call(request, result -> {
             busy = false; state = result;
             if (result.containsKey("servers")) { servers = result.getParcelableArrayList("servers", Bundle.class); catalogTime = result.getLong("catalog_time"); }
-            renderState(); if (rebuild) renderBody(); else setEnabled(body, true);
+            renderState(); if (rebuild) renderBody();
         });
     }
     private void renderState() {
@@ -98,7 +116,7 @@ public final class HeckerVpnActivity extends Activity {
         String error = state.getString("error", "");
         warning.setText(error.isEmpty() && state.containsKey("kernel") && !state.getBoolean("kernel") ? getString(R.string.vpn_kernel_missing) : error);
         connect.setText(state.getBoolean("desired") || state.getBoolean("cleanup_required") ? R.string.vpn_disconnect : R.string.vpn_connect);
-        connect.setEnabled(!busy && (state.getBoolean("desired") || state.getBoolean("cleanup_required") || !state.getString("selected", "").isEmpty()));
+        connect.setEnabled(!busy);
     }
     static int statusLabel(String value) {
         switch (value) {
@@ -123,7 +141,7 @@ public final class HeckerVpnActivity extends Activity {
         LinearLayout note = Ui.card(this);
         note.addView(Ui.text(this, getString(R.string.vpn_routing_scope), 13, false));
         note.addView(Ui.text(this, getString(R.string.vpn_session_note), 13, false)); body.addView(note);
-        Ui.styleControls(this, body); setEnabled(body, !busy);
+        Ui.styleControls(this, body);
     }
     private void renderCountries() {
         LinearLayout provider = Ui.card(this); provider.addView(Ui.text(this, getString(R.string.vpn_mullvad), 20, true));
@@ -241,7 +259,9 @@ public final class HeckerVpnActivity extends Activity {
     @Override protected void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
         if (request != 784 || result != RESULT_OK || data == null || data.getData() == null) return;
-        android.net.Uri uri = data.getData();
+        pendingImport = data.getData(); consumeImport();
+    }
+    private void readImport(android.net.Uri uri) {
         new Thread(() -> {
             try {
                 String name = "VPN profile";

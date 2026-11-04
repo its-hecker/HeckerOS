@@ -5,10 +5,18 @@
         <item name="android:windowBackground">@color/hecker_background</item>
         <item name="android:colorBackground">@color/hecker_background</item>
         <item name="android:colorAccent">@color/hecker_accent</item>
+        <item name="android:alertDialogTheme">@style/HeckerDialog</item>
         <item name="android:textColorPrimary">@color/hecker_foreground</item>
         <item name="android:textColorSecondary">@color/hecker_secondary</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:windowLightNavigationBar">false</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+    <style name="HeckerDialog" parent="android:style/Theme.Material.Dialog.Alert">
+        <item name="android:colorAccent">@color/hecker_accent</item>
+        <item name="android:textColorPrimary">@color/hecker_foreground</item>
+        <item name="android:textColorSecondary">@color/hecker_secondary</item>
+        <item name="android:colorBackground">@color/hecker_card</item>
+        <item name="android:windowBackground">@drawable/hecker_dialog_background</item>
     </style>
 </resources>

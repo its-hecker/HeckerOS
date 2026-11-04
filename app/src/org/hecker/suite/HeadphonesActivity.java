@@ -24,7 +24,11 @@ public final class HeadphonesActivity extends Activity {
         enabled.setChecked(Settings.Secure.getInt(getContentResolver(), "hecker_headphone_popup", 1) != 0);
         enabled.setOnCheckedChangeListener((view, checked) -> Settings.Secure.putInt(
                 getContentResolver(), "hecker_headphone_popup", checked ? 1 : 0));
-        card.addView(enabled); page.addView(card);
+        card.addView(enabled);
+        Switch glass = new Switch(this); glass.setText(R.string.headphones_glass);
+        glass.setChecked(Settings.Secure.getInt(getContentResolver(), "hecker_headphone_glass", 0) != 0);
+        glass.setOnCheckedChangeListener((view, checked) -> Settings.Secure.putInt(getContentResolver(), "hecker_headphone_glass", checked ? 1 : 0));
+        card.addView(glass); page.addView(card);
         Ui.actionCard(this, page, R.string.headphones_airpods, R.string.headphones_airpods_summary,
                 view -> {
                     Intent intent = getPackageManager().getLaunchIntentForPackage("org.hecker.librepods");

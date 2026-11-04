@@ -42,7 +42,7 @@ def build(sdk, cache, output):
     classes = output/'classes'
     run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-d', classes,
         *sorted((output/'java').rglob('*.java')))
-    classpath = os.pathsep.join(map(str, [classes, sdk/'android-system.jar', core,
+    classpath = os.pathsep.join(map(str, [classes, sdk/'android.jar', core,
         cache/'core-ktx-1.13.1.jar', cache/'annotation-jvm.jar', cache/'kotlin-stdlib.jar']))
     # Annotation declarations are provided by the same checksum-locked Compose inputs.
     fetch(cache, 'annotation-jvm.jar', lock['annotation-jvm.jar'])

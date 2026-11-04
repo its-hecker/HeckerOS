@@ -29,7 +29,8 @@
     "17b70d3f45be4364a7065e5568a491ea080555f2",
     "6cb299fa5d60a2455ab6dce09bdb62e28895a681",
     "6d707d2baedffaa217da504c78c32915f3833c7d",
-    "8032682730735c2b152a20bec422bc6856709aef"
+    "8032682730735c2b152a20bec422bc6856709aef",
+    "7921f721d086c414639a47412738468524e0750e"
   ],
   "src/com/android/launcher3/hecker/HeckerClockView.java": [
     "fc66b0dadc06aec42d9823d1b6fc757e9128d185",
@@ -38,14 +39,16 @@
     "d4c1905463b1f237330b7a83e56072af318bae48",
     "ae0d1a0a17eae0d077833e250b6be506ebfb7b99",
     "af5e35017c78b2fb7bd1fe85c0563e2a2346e57f",
-    "4d555f472e0d11d6b088acb4251f0cdc045041b7"
+    "4d555f472e0d11d6b088acb4251f0cdc045041b7",
+    "046197e74876c9168fc397a1fdc5c7c2f6c61dc0"
   ],
   "generated/hecker-launcher/res/values/studio.xml": [
     "027dfae0d51492105a0cdc34ccac5206af9f9451",
     "72d15ee58bef398d767d148b7aab06bce7bb7acf",
     "a4b4058fca8aa8928b05832b7fa91a9dcc94f66d",
     "9fe9a5a9ea8f80319886fde3a4141e41b7bbe2da",
-    "71e36f9f127463867fef53ee631be1dabb11d09f"
+    "71e36f9f127463867fef53ee631be1dabb11d09f",
+    "22fd9575850ddc31f4145ef6ce9786e665b529db"
   ],
   "src/com/android/launcher3/hecker/HeckerDockBar.java": [
     "986161c90f2b9e87232d3a49f6592a126249c6b4",
@@ -57,11 +60,13 @@
   ],
   "src/com/android/launcher3/hecker/HeckerIconStudio.java": [
     "509ca22e0f2363a23f81a010d30497d54b532655",
-    "41b2ce64c0796d12372ba1521c9123856ee8a8c3"
+    "41b2ce64c0796d12372ba1521c9123856ee8a8c3",
+    "5c1fa33e7cd0f30e16457791c964a646b50b741e"
   ],
   "src/com/android/launcher3/hecker/HeckerStudio.java": [
     "9d4bd88f3347f68af8540e6b094c18fe8dc84949",
-    "2ef8e4cc9d96108e825e387360c6080a6c66ff6f"
+    "2ef8e4cc9d96108e825e387360c6080a6c66ff6f",
+    "2f0295605534aef5f72e238877f8b5ab3b8aab16"
   ],
   "src/com/android/launcher3/hecker/HeckerSearchActivity.java": [
     "2721ac854b3948254a6e6f050eecaebeedd6d30f",
@@ -78,7 +83,8 @@
   "src/com/android/launcher3/hecker/HeckerGlassIcons.java": [
     "2c64a8fdda6d5f7748d3b9d6b17e1da1fb2fedf2",
     "9d581e48e19a9a773e3256a92e9ca726c70574c9",
-    "582a4e2df803563054575db74e4011ab430808ae"
+    "582a4e2df803563054575db74e4011ab430808ae",
+    "13fbdbbbca44ad846b31f47e3e8a9f52fb3997b5"
   ],
   "src/org/hecker/motion/FlowClockRenderer.java": [
     "7912acb51f5b19445a877b33cdda7123c5e968df",
@@ -104,5 +110,17 @@
   ],
   "generated/hecker-launcher/res/values-ru/hecker_ru.xml": [
     "96be94c0545863d3a2b304fe52b3e84eadf2b5a4"
+  ],
+  "src/com/android/launcher3/hecker/GlassIconMask.java": [
+    "4a02589417dc2947591c097fa8c5b981f0d09619"
+  ],
+  "src/com/android/launcher3/hecker/StudioPolicy.java": [
+    "3f02f00245e0d42c8a9b3e0308170ec0792c96f1"
+  ],
+  "src/com/android/launcher3/hecker/HeckerCategoryArt.java": [
+    "05810f9a5adb7f717b2969be885341734ce5f777"
+  ],
+  "src/com/android/launcher3/hecker/HeckerLauncherMotion.java": [
+    "a65b9d199ecb53276c8b22488f1fd4974c05caac"
   ]
 }

@@ -38,7 +38,7 @@ final class StatusBarCustomization {
         choice(layout,R.string.sb_second_row,"hecker_dual_statusbar_layout",0,
                 new int[]{R.string.sb_row_notifications,R.string.sb_row_lyrics});
         range(layout,R.string.sb_row_gap,"hecker_statusbar_row_gap",2,0,8,"dp");
-        range(layout,R.string.sb_icon_size,"hecker_statusbar_icon_size",16,12,20,"dp");
+        range(layout,R.string.sb_icon_size,"hecker_statusbar_icon_size",20,12,24,"dp");
         choice(layout,R.string.sb_network_row,"hecker_dual_statusbar_network_row",0,
                 new int[]{R.string.sb_first_row,R.string.sb_second_row_label});
         page.addView(layout);

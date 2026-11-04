@@ -17,6 +17,13 @@ public final class GlassIconMask {
             pixels[i] = (alpha << 24) | 0xffffff;
         }
     }
+    public static void harmonize(int[] pixels) {
+        for (int i = 0; i < pixels.length; i++) {
+            int color = pixels[i], level = 56 + light(color) * 199 / 255;
+            pixels[i] = (color & 0xff000000) | (level * 239 / 255 << 16)
+                    | (level * 222 / 255 << 8) | level * 229 / 255;
+        }
+    }
     private static int light(int color) { return ((color >> 16 & 255) * 54 + (color >> 8 & 255) * 183 + (color & 255) * 19) >> 8; }
     public static int[] bounds(int[] pixels, int width, int height) {
         int left = width, top = height, right = 0, bottom = 0;

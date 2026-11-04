@@ -13,7 +13,7 @@ from check_launcher_studio import method
 
 class LauncherDepthWeatherTests(unittest.TestCase):
     def test_controller_ownership_aligned_layers_lifecycle_and_all_clock_subscriptions(self):
-        restart=method((ROOT/'aosp-launcher/src/com/android/launcher3/hecker/HeckerClockView.java').read_text(),'    private void restartMotion()')
+        restart=method((ROOT/'aosp-launcher/src/com/android/launcher3/hecker/HeckerClockView.java').read_text(),'    private void sync()')
         sources={
         'android/net/Uri.java':'package android.net;public record Uri(String value){public static Uri parse(String s){return new Uri(s);}}',
         'android/os/SystemClock.java':'package android.os;public class SystemClock{public static long uptimeMillis(){return 10000;}}',
@@ -21,7 +21,7 @@ class LauncherDepthWeatherTests(unittest.TestCase):
         'android/os/Looper.java':'package android.os;public class Looper{public static Looper getMainLooper(){return new Looper();}}',
         'android/os/Handler.java':'''package android.os;public class Handler{
         static final java.util.Queue<Runnable> tasks=new java.util.concurrent.ConcurrentLinkedQueue<>();public Handler(Looper l){}
-        public boolean post(Runnable r){tasks.add(r);return true;}public void removeCallbacksAndMessages(Object token){tasks.clear();}
+        public boolean post(Runnable r){tasks.add(r);return true;}public void removeCallbacks(Runnable r){tasks.remove(r);}public boolean postDelayed(Runnable r,long delay){return true;}public void removeCallbacksAndMessages(Object token){tasks.clear();}
         public static void drain(){Runnable r;while((r=tasks.poll())!=null)r.run();}}''',
         'android/os/PowerManager.java':'package android.os;public class PowerManager{public static final String ACTION_POWER_SAVE_MODE_CHANGED="power";public boolean interactive=true,save;public boolean isInteractive(){return interactive;}public boolean isPowerSaveMode(){return save;}}',
         'android/app/KeyguardManager.java':'package android.app;public class KeyguardManager{public boolean locked;public boolean isKeyguardLocked(){return locked;}}',
@@ -88,8 +88,8 @@ class LauncherDepthWeatherTests(unittest.TestCase):
         public HeckerWeather(android.content.Context c,Runnable changed){this.changed=changed;current=this;}public void start(){starts++;}public void stop(){stops++;}
         public String text(){return value;}public android.graphics.drawable.Drawable icon(){return null;}public void emit(String text){value=text;changed.run();}}''',
         'ClockSubscription.java':'''import com.android.launcher3.hecker.*;import android.animation.ValueAnimator;
-        class ClockSubscription extends android.view.View{boolean running;String style;ValueAnimator animator;float phase;
-        ClockSubscription(android.content.Context c){super(c);}void restart(){restartMotion();}
+        class ClockSubscription extends android.view.View{boolean attached,watching;String style;ValueAnimator animator;float phase;final android.os.Handler main=new android.os.Handler(android.os.Looper.getMainLooper());final Runnable tick=()->{};static class Face{void setMotionEnabled(boolean v){}}final Face face=new Face();
+        ClockSubscription(android.content.Context c){super(c);}void restart(){sync();}
         '''+restart+'}',
         'HomeDepthProbe.java':r'''import android.content.*;import android.view.View;import android.graphics.Canvas;import android.os.Handler;import android.animation.ValueAnimator;
 import com.android.launcher3.hecker.*;import java.util.*;import java.util.concurrent.*;
@@ -138,9 +138,9 @@ Context weather=new Context();HeckerClockView a=new HeckerClockView(weather),b=n
 HeckerWeather.current.emit("Islamabad 29°C");check("Islamabad 29°C".equals(HeckerClockWeather.text())&&a.updates==1&&b.updates==1);
 HeckerClockWeather.stop(a);check(HeckerWeather.stops==0);HeckerWeather.current.emit(null);check(HeckerClockWeather.text()==null&&b.updates==2);HeckerClockWeather.stop(b);check(HeckerWeather.stops==1);
 ValueAnimator.enabled=false;
-for(String style:StudioPolicy.CLOCKS){ClockSubscription probe=new ClockSubscription(weather);probe.style=style;probe.running=true;probe.restart();HeckerWeather.current.emit("29°C");check("29°C".equals(HeckerClockWeather.text()));
-weather.prefs.put(HeckerStudio.PREFIX+"clock_weather",false);probe.restart();check(HeckerClockWeather.text()==null);weather.prefs.put(HeckerStudio.PREFIX+"clock_weather",true);probe.restart();probe.running=false;probe.restart();}
-io().shutdownNow();System.out.println("Home depth: 909 crop parity cases, identity/photo/live safeguards, aligned clipping, invalid/oversized loads, stale result, unlock/power/reduced-motion/detach; weather: shared lifecycle and all ten clock styles PASS");
+for(String style:StudioPolicy.CLOCKS){ClockSubscription probe=new ClockSubscription(weather);probe.style=style;probe.attached=true;probe.restart();HeckerWeather.current.emit("29°C");check("29°C".equals(HeckerClockWeather.text()));
+weather.prefs.put(HeckerStudio.PREFIX+"clock_weather",false);probe.restart();check(HeckerClockWeather.text()==null);weather.prefs.put(HeckerStudio.PREFIX+"clock_weather",true);probe.restart();probe.attached=false;probe.restart();}
+io().shutdownNow();System.out.println("Home depth: 909 crop parity cases, identity/photo/live safeguards, aligned clipping, invalid/oversized loads, stale result, unlock/power/reduced-motion/detach; weather: shared lifecycle and all 86 native clock styles PASS");
 }finally{io().shutdownNow();}}}'''
         }
         with tempfile.TemporaryDirectory(prefix='hecker-home-depth-') as temporary:

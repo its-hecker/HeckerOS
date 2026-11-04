@@ -72,9 +72,9 @@
         <activity android:name=".InfraredCameraActivity" android:exported="false"
             android:label="@string/ir_title" android:excludeFromRecents="true" />
         <activity android:name=".GamingActivity" android:exported="false"
-            android:label="@string/gaming_title" android:theme="@style/GamingTheme" />
+            android:label="@string/gaming_title" android:icon="@mipmap/ic_gamespace" android:roundIcon="@mipmap/ic_gamespace" android:theme="@style/GamingTheme" />
         <activity-alias android:name=".GameSpaceLauncher" android:targetActivity=".GamingActivity"
-            android:exported="true" android:label="@string/gaming_title" android:icon="@mipmap/ic_gamespace">
+            android:exported="true" android:label="@string/gaming_title" android:icon="@mipmap/ic_gamespace" android:roundIcon="@mipmap/ic_gamespace">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <provider android:name=".GamingLibraryProvider" android:authorities="org.hecker.suite.games"

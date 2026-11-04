@@ -24,9 +24,18 @@ final class MotionIslandState {
         if (!awake || !island || this.user != user || action < PLAY
                 || action > MODE_SEEK || when < 0 || when > now
                 || now - when > MAX_EVENT_AGE || when <= lastEvent) return false;
+        begin(action, when); return true;
+    }
+    private void begin(int action, long when) {
         this.action = action; this.when = when; lastEvent = when;
         confirmed = false; volume = -1; sequence++;
-        return true;
+    }
+    boolean acceptMedia(int action, int user, long now) {
+        // Ordered callbacks may pause/resume in one millisecond. The latest native session wins;
+        // broadcast replay protection in accept() remains strict.
+        if (awake && island && this.user == user && now == lastEvent && action != this.action
+                && action >= PLAY && action <= PREVIOUS) { begin(action, now); return true; }
+        return accept(action, user, now, now);
     }
 
     int current(long now) {
@@ -42,6 +51,14 @@ final class MotionIslandState {
         this.confirmed = confirmed;
         this.volume = volume >= 0 && volume <= 100 ? volume : -1;
         return true;
+    }
+
+    static int mediaAction(boolean same, boolean wasPlaying,
+            boolean playing, boolean paused, boolean trackChanged) {
+        if (same && wasPlaying && paused) return PAUSE;
+        if (playing && (!wasPlaying || !same)) return PLAY;
+        if (same && wasPlaying && playing && trackChanged) return NEXT;
+        return NONE;
     }
 
     static int volumePercent(int current, int max) {

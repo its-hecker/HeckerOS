@@ -3,7 +3,7 @@
   <string name="hs_launcher_studio">Hecker Launcher Studio</string>
   <string name="hs_studio_summary">Make your home screen feel like yours.</string>
   <string name="hs_clock">Hecker Clock Studio</string>
-  <string name="hs_clock_summary">Ten clocks, live readings and a little personality.</string>
+  <string name="hs_clock_summary">86 native XMorphClock styles for Home and widgets.</string>
   <string name="hs_home">Home screen</string>
   <string name="hs_home_summary">Grids, spacing, dock and gesture controls.</string>
   <string name="hs_appearance">Appearance</string>
@@ -62,7 +62,7 @@
   <string name="hs_clock_analog">K · Analog</string>
   <string name="hs_clock_stacked">L · Stacked · animated</string>
   <string name="hs_clock_caracal">M · Caracal · animated</string>
-  <string name="hs_clock_animation">Animate clocks and Caracal</string>
+  <string name="hs_clock_animation">Animate clocks</string>
   <string name="hs_clock_messages">Rotating messages</string>
   <string name="hs_clock_home">Built-in home clock</string>
   <string name="hs_clock_home_summary">A permanent clock above the first home page. Tap for a new message; hold to open Clock Studio. No widget placement is needed. Reduce the home grid rows if there is not enough room.</string>
@@ -146,6 +146,7 @@
   <style name="HeckerStudioTheme" parent="android:style/Theme.Material.NoActionBar">
     <item name="android:fontFamily">sans</item>
     <item name="android:colorAccent">#A8DFD5</item>
+    <item name="android:alertDialogTheme">@style/HeckerStudioDialog</item>
     <item name="android:windowLightStatusBar">false</item>
     <item name="android:windowLightNavigationBar">false</item>
     <item name="android:windowActionModeOverlay">true</item>
@@ -172,4 +173,11 @@
     <string name="hs_search_empty">No matching apps or shortcuts</string>
     <string name="hs_search_results">Results</string>
     <string name="hs_search_local_short">Apps and shortcuts · On-device search</string>
+  <style name="HeckerStudioDialog" parent="android:style/Theme.Material.Dialog.Alert">
+    <item name="android:colorAccent">#A0E8D7</item>
+    <item name="android:textColorPrimary">#EFF4FA</item>
+    <item name="android:textColorSecondary">#A4B5C8</item>
+    <item name="android:colorBackground">#1B2938</item>
+    <item name="android:windowBackground">@drawable/hs_dialog_background</item>
+  </style>
 </resources>

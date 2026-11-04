@@ -39,13 +39,18 @@ public final class HeckerStudio {
         return app.flattenToString() + "@" + manager.getSerialNumberForUser(user);
     }
     public static boolean hidden(Context c, ComponentName app, UserHandle user) {
-        return HeckerGameLibrary.hidden(c,app,user)
-                || app != null && prefs(c).getStringSet(PREFIX + "hidden", Collections.emptySet()).contains(appKey(c, app, user));
+        if (app == null) return false;
+        String key = appKey(c, app, user);
+        if (prefs(c).getStringSet(PREFIX + "hidden", Collections.emptySet()).contains(key)) return true;
+        return !prefs(c).getStringSet(PREFIX + "visible", Collections.emptySet()).contains(key)
+                && HeckerGameLibrary.hidden(c, app, user);
     }
     public static void hide(Context c, ComponentName app, UserHandle user, boolean hidden) {
         Set<String> next = new HashSet<>(prefs(c).getStringSet(PREFIX + "hidden", Collections.emptySet()));
-        if (hidden) next.add(appKey(c, app, user)); else next.remove(appKey(c, app, user));
-        prefs(c).edit().putStringSet(PREFIX + "hidden", next).apply();
+        String key = appKey(c, app, user);
+        Set<String> visible = new HashSet<>(prefs(c).getStringSet(PREFIX + "visible", Collections.emptySet()));
+        if (hidden) { next.add(key); visible.remove(key); } else { next.remove(key); visible.add(key); }
+        prefs(c).edit().putStringSet(PREFIX + "hidden", next).putStringSet(PREFIX + "visible", visible).apply();
     }
     public static boolean locked(Context c) { return enabled(c, "layout_lock", false); }
     public static boolean customGridMetrics(Context c) {

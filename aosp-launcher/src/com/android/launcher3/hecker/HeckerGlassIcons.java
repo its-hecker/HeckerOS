@@ -67,13 +67,14 @@ public final class HeckerGlassIcons {
                 Drawable source = info.getIcon(context.getResources().getConfiguration().densityDpi);
                 Drawable glyph = source instanceof AdaptiveIconDrawable adaptive ? adaptive.getMonochrome() : null;
                 tinted = glyph != null;
-                // Unsupported apps keep their real artwork and colors. Flattening an
-                // opaque foreground into white turned bank logos into featureless discs.
-                if (glyph == null) glyph = source;
+                // Legacy art keeps its luminance detail in the same cool accent family.
+                // Its opaque pixels must not be flattened into a solid white disc.
+                if (glyph == null) glyph = source instanceof AdaptiveIconDrawable adaptive ? adaptive.getForeground() : source;
                 Bitmap pixels = Bitmap.createBitmap(SIZE, SIZE, Bitmap.Config.ARGB_8888);
                 glyph.setBounds(0, 0, SIZE, SIZE); glyph.draw(new Canvas(pixels));
                 int[] values = new int[SIZE * SIZE]; pixels.getPixels(values, 0, SIZE, 0, 0, SIZE, SIZE);
                 if (tinted) GlassIconMask.extract(values, SIZE, SIZE);
+                else GlassIconMask.harmonize(values);
                 boolean ink = false;
                 for (int value : values) if ((value >>> 24) > 24) { ink = true; break; }
                 if (ink) { pixels.setPixels(values, 0, SIZE, 0, 0, SIZE, SIZE); result = pixels; }

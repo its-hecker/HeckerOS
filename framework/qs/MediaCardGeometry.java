@@ -32,7 +32,7 @@ public final class MediaCardGeometry {
     public static void boundsInto(float[] result, int element, float width, float height,
             float square, float row, float fontScale) {
         float r = unit(row), s = unit(square) * (1 - r), w = 1 - s - r;
-        float titleHeight = Math.min(height - 16, 38 * Math.max(1, Math.min(2, fontScale)));
+        float titleHeight = Math.min(height - 16, 46 * Math.max(1, Math.min(2, fontScale)));
         float seekY = Math.max(70, 24 + titleHeight);
         switch (element) {
             case ART -> blend(result, w, s, r, 16, 14, 48, 48, 1,
@@ -48,7 +48,7 @@ public final class MediaCardGeometry {
             case NEXT -> blend(result, w, s, r, (width-44)/2+(width-68)/6, height-52, 44, 44, 1,
                     width-48, height-50, 44, 44, 1, width-56, (height-44)/2, 44, 44, 0);
             case OUTPUT -> blend(result, w, s, r, width-56, height-52, 44, 44, 1,
-                    width-50, 8, 44, 44, 1, width-56, (height-44)/2, 44, 44, 1);
+                    width-94, 8, 44, 44, 1, width-56, (height-44)/2, 44, 44, 1);
             default -> throw new IllegalArgumentException("Unknown media element: " + element);
         }
         if (element == TITLES) {
@@ -56,11 +56,12 @@ public final class MediaCardGeometry {
             // room on the right before the playback button travels into that row.
             float squareX = 76 + (12 - 76) * smooth((s - .28f) / .72f);
             float squareY = 16 + (62 - 16) * smooth(s / .55f);
-            float arch = 28 + .32f * Math.max(0, width - 240);
+            float arch = 44 + .32f * Math.max(0, width - 240);
             float rowX = 76 + 26 * r + arch * (float) Math.sin(Math.PI * r);
             result[0] = squareX * (1 - r) + (rowX - 76) + 76 * r;
             result[1] = squareY * (1 - r) + (height - titleHeight) / 2 * r;
-            float right = width - 16 - 48 * ((float) Math.sin(Math.PI * s) * (1 - r) + smooth(r / .4f));
+            float right = width - 16 - 36 * (1 - smooth(s / .55f)) * (1 - r)
+                    - 80 * ((float) Math.sin(Math.PI * s) * (1 - r) + smooth(r / .4f));
             result[2] = Math.max(1, right - result[0]);
         } else if (element == OUTPUT) {
             result[1] = (height - 52 + (8 - (height - 52)) * smooth(s / .8f)) * (1 - r)

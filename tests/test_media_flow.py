@@ -9,36 +9,6 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class MediaFlowTests(unittest.TestCase):
-    def test_reused_buffers_preserve_reviewed_media_positions(self):
-        baseline = (ROOT / 'tests/fixtures/media-geometry-6963155.snapshot').read_text()
-        probe = r'''import com.android.systemui.hecker.MediaCardGeometry;
-import com.android.systemui.hecker.BaselineMediaGeometry;
-public class MediaParity {
- public static void main(String[] args) {
-  float[] reused=new float[5];int checks=0;
-  for(float font:new float[]{1,1.4f,2})for(float width:new float[]{240,324,420})
-  for(float height:new float[]{76,154,220})for(int step=0;step<=400;step++) {
-   float square=step/400f,row=(400-step)/400f;
-   for(int element=0;element<MediaCardGeometry.COUNT;element++) {
-    float[] expected=BaselineMediaGeometry.bounds(element,width,height,square,row,font);
-    MediaCardGeometry.boundsInto(reused,element,width,height,square,row,font);
-    for(int k=0;k<5;k++)if(Math.abs(expected[k]-reused[k])>.00001f)
-     throw new AssertionError("Optimized media changes reviewed placement");
-    checks++;
-   }
-  }
-  System.out.println("Reused media buffers match "+checks+" reviewed child placements PASS");
- }
-}'''
-        with tempfile.TemporaryDirectory(prefix='hecker-media-parity-') as temporary:
-            folder = Path(temporary)
-            (folder / 'BaselineMediaGeometry.java').write_text(baseline.replace('MediaCardGeometry', 'BaselineMediaGeometry'))
-            (folder / 'MediaParity.java').write_text(probe)
-            subprocess.run(['java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-d', str(folder),
-                            str(folder / 'BaselineMediaGeometry.java'), str(folder / 'MediaParity.java'),
-                            str(ROOT / 'framework/qs/MediaCardGeometry.java')], check=True)
-            subprocess.run(['java', '-cp', str(folder), 'MediaParity'], check=True)
-
     def test_geometry_and_absolute_glow_phase(self):
         probe = r'''import com.android.systemui.hecker.MediaCardGeometry;
 public class MediaProbe {

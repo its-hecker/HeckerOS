@@ -75,7 +75,7 @@ fun HeckerGlassQuickSettings(tiles: List<TileViewModel>, listening: () -> Boolea
                 HeckerQsMediaPlayer(Modifier.heightIn(min = 154.dp), square = true)
             }
             Row(heckerQsElement(HeckerQsScene.Brightness).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                FlowControls(brightness); HeckerAutoBrightnessButton()
+                FlowControls(brightness)
             }
         } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(Modifier.weight(1f)) {
@@ -104,14 +104,13 @@ fun HeckerGlassQuickSettings(tiles: List<TileViewModel>, listening: () -> Boolea
                     .background(Color.White.copy(alpha = if (index == pager.currentPage) .9f else .3f), CircleShape))
             }
         }
-        if (!narrow) Row(heckerQsElement(HeckerQsScene.Shortcuts).fillMaxWidth(), horizontalArrangement = Arrangement.End) { HeckerAutoBrightnessButton() }
     }
 }
 
 @Composable
 private fun RowScope.FlowControls(brightness: (@Composable () -> Unit)?) {
     if (brightness != null) GlassVerticalControl {
-        CompositionLocalProvider(LocalHeckerVerticalBrightness provides true, LocalHeckerReferenceGlass provides true) { brightness() }
+        CompositionLocalProvider(LocalHeckerVerticalBrightness provides true, LocalHeckerReferenceGlass provides true, LocalHeckerFlowGlass provides true) { brightness() }
     }
     GlassVerticalControl {
         CompositionLocalProvider(LocalHeckerVerticalBrightness provides true, LocalHeckerReferenceGlass provides true) { HeckerVolumeSlider() }

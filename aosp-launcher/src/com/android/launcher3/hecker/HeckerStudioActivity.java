@@ -112,16 +112,16 @@ public final class HeckerStudioActivity extends Activity {
     }
     private void glass() {
         HeckerGlassPreview preview = new HeckerGlassPreview(this); page.addView(preview, new LinearLayout.LayoutParams(-1, HeckerStudio.dp(this, 160)));
-        choice("glass_presets", new String[]{t("clear"), t("frosted"), t("smoked"), t("violet")}, selected -> {
+        choice("glass_presets", new String[]{t("clear"), t("frosted"), t("smoked"), t("violet")}, () -> HeckerStudio.prefs(this).getInt("hecker_glass_preset", 1), selected -> {
             int[] opacity = {25, 72, 82, 66}, frost = {0, 18, 22, 18}, tint = {0xff30232e, 0xff30232e, 0xff19151e, 0xff49303f};
             HeckerStudio.prefs(this).edit().putString("hecker_glass", "1").putInt("hecker_glass_opacity", opacity[selected])
-                    .putInt("hecker_glass_frost", frost[selected]).putInt("hecker_glass_tint", tint[selected]).putInt("hecker_glass_border", 1).apply(); render();
+                    .putInt("hecker_glass_preset", selected).putInt("hecker_glass_frost", frost[selected]).putInt("hecker_glass_tint", tint[selected]).putInt("hecker_glass_border", 1).apply(); render();
         });
-        choice("glass_mode", new String[]{t("off"), t("frosted"), t("liquid")}, selected -> HeckerStudio.prefs(this).edit().putString("hecker_glass", Integer.toString(selected)).apply());
+        choice("glass_mode", new String[]{t("off"), t("frosted"), t("liquid")}, () -> Integer.parseInt(HeckerStudio.prefs(this).getString("hecker_glass", "1")), selected -> { HeckerStudio.prefs(this).edit().putString("hecker_glass", Integer.toString(selected)).apply(); render(); });
         glassSlider("opacity", 72, 0, 100); glassSlider("frost", 18, 0, 32); glassSlider("border", 1, 0, 4);
-        choice("tint", new String[]{t("ice"), t("mint"), t("violet"), t("smoked"), t("warm")}, selected -> {
+        choice("tint", new String[]{t("ice"), t("mint"), t("violet"), t("smoked"), t("warm")}, () -> HeckerStudio.prefs(this).getInt("hecker_glass_tint_preset", -1), selected -> {
             int[] colors = {0xffaac8da, 0xff86c9b2, 0xff8974b7, 0xff15232f, 0xffd9bba0};
-            HeckerStudio.prefs(this).edit().putInt("hecker_glass_tint", colors[selected]).apply();
+            HeckerStudio.prefs(this).edit().putInt("hecker_glass_tint_preset", selected).putInt("hecker_glass_tint", colors[selected]).apply(); render();
         });
         // Full RGB tint control also allows colors outside the presets.
         int tint = HeckerStudio.prefs(this).getInt("hecker_glass_tint", 0xff30232e);
@@ -129,10 +129,11 @@ public final class HeckerStudioActivity extends Activity {
             final int shift = (2 - channel) * 8; final String name = new String[]{"red", "green", "blue"}[channel];
             rawSlider(name, tint >> shift & 255, 0, 255, value -> {
                 int color = HeckerStudio.prefs(this).getInt("hecker_glass_tint", 0xff30232e);
-                HeckerStudio.prefs(this).edit().putInt("hecker_glass_tint", (color & ~(255 << shift)) | value << shift | 0xff000000).apply();
+                HeckerStudio.prefs(this).edit().remove("hecker_glass_tint_preset").putInt("hecker_glass_tint", (color & ~(255 << shift)) | value << shift | 0xff000000).apply();
             }, true);
         }
         for (String target : new String[]{"dock", "folders", "search", "widgets"}) toggle("hecker_glass_" + target, !target.equals("dock"), false);
+        toggle("dock_bounce", true);
         for (String position : new String[]{"tl", "tr", "br", "bl"}) {
             int current; try { current = Integer.parseInt(HeckerStudio.prefs(this).getString("hecker_glass_corner_" + position, "28")); } catch (RuntimeException bad) { current = 28; }
             rawSlider("corner_" + position, current, 0, 48, value -> HeckerStudio.prefs(this).edit().putString("hecker_glass_corner_" + position, Integer.toString(value)).apply(), true);
@@ -141,7 +142,7 @@ public final class HeckerStudioActivity extends Activity {
     private void clocks() {
         clock = new HeckerClockView(this, pickingWidget ? widgetId : -2);
         String[] names = new String[StudioPolicy.CLOCKS.length];
-        for (int i = 0; i < names.length; i++) names[i] = t("clock_" + StudioPolicy.CLOCKS[i]);
+        for (int i = 0; i < names.length; i++) names[i] = StudioPolicy.CLOCKS[i].replace(".json", "").replace("_", " · ");
         button("clock_style", v -> {
             int selected = java.util.Arrays.asList(StudioPolicy.CLOCKS).indexOf(clock.style());
             HeckerStudioUi.show(new AlertDialog.Builder(this).setTitle(t("clock_style"))
@@ -161,13 +162,11 @@ public final class HeckerStudioActivity extends Activity {
             slider("clock_offset", 0, 0, 120, false);
             page.addView(HeckerStudioUi.label(this, t("clock_height_summary"), 13, HeckerStudioUi.MUTED));
         }
-        choice("clock_palette", new String[]{t("aurora"), t("sunrise"), t("lagoon"), t("orchid"), t("classic")},
-                selectedPalette -> HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX + "clock_palette", selectedPalette).apply());
         toggle("clock_animation", true); toggle("clock_messages", true); toggle("clock_weather", true);
         choice("clock_info_position", new String[]{t("info_above"), t("info_below"), t("info_left"), t("info_right")},
                 position -> HeckerStudio.prefs(this).edit().putInt(HeckerStudio.PREFIX + "clock_info_position", position).apply());
         page.addView(HeckerStudio.label(this, t("clock_weather_summary"), 13));
-        page.addView(HeckerStudio.label(this, t("clock_metrics"), 13));
+        page.addView(HeckerStudio.label(this, "XMorphClock · Mahmud0808 / DrDisagree · GPL-3.0", 13));
         button("apply_clock", v -> {
             if (pickingWidget) {
                 new HeckerClockWidget().onUpdate(this, AppWidgetManager.getInstance(this), new int[]{widgetId});
@@ -203,8 +202,8 @@ public final class HeckerStudioActivity extends Activity {
         button("choose_icon", v -> choosePack(pack -> { if (pack.isEmpty()) HeckerStudio.prefs(this).edit().putString(HeckerStudio.PREFIX + "icon_" + key, "@system").apply(); else chooseDrawable(pack, key); }));
         button("reset_app", v -> { HeckerStudio.prefs(this).edit().remove(HeckerStudio.PREFIX + "label_" + key).remove(HeckerStudio.PREFIX + "icon_" + key).apply(); render(); });
         button("app_lock", v -> HeckerStudio.appLock(this, component, user));
-        Switch hidden = new Switch(this); hidden.setText(t("hide_app")); hidden.setTextColor(0xfff5f2e8); hidden.setChecked(HeckerStudio.hidden(this, component, user));
-        hidden.setOnCheckedChangeListener((button, checked) -> HeckerStudio.hide(this, component, user, checked)); page.addView(hidden);
+        HeckerStudioUi.toggle(this, page, t("hide_app"), HeckerStudio.hidden(this, component, user),
+                (button, checked) -> HeckerStudio.hide(this, component, user, checked));
         page.addView(HeckerStudio.label(this, t("hide_summary"), 13));
     }
     private void privacy() {
@@ -225,7 +224,7 @@ public final class HeckerStudioActivity extends Activity {
         worker.execute(() -> {
             List<ResolveInfo> packs = HeckerIconStudio.packs(this); String[] names = new String[packs.size() + 1]; names[0] = t("system");
             for (int i = 0; i < packs.size(); i++) names[i + 1] = packs.get(i).loadLabel(getPackageManager()).toString();
-            runOnUiThread(() -> { if (!isFinishing() && !isDestroyed()) new AlertDialog.Builder(this).setTitle(t("icon_pack")).setItems(names, (d, which) -> chosen.accept(which == 0 ? "" : packs.get(which - 1).activityInfo.packageName)).show(); });
+            runOnUiThread(() -> { if (!isFinishing() && !isDestroyed()) HeckerStudioUi.show(new AlertDialog.Builder(this).setTitle(t("icon_pack")).setItems(names, (d, which) -> chosen.accept(which == 0 ? "" : packs.get(which - 1).activityInfo.packageName)).create()); });
         });
     }
     private void chooseDrawable(String pack, String appKey) {
@@ -250,19 +249,57 @@ public final class HeckerStudioActivity extends Activity {
                 content.addView(list, new LinearLayout.LayoutParams(-1, HeckerStudio.dp(this, 380)));
                 AlertDialog dialog = new AlertDialog.Builder(this).setTitle(t("choose_icon")).setView(content).setNegativeButton(android.R.string.cancel, null).create();
                 filter.addTextChangedListener(new android.text.TextWatcher() { public void beforeTextChanged(CharSequence s, int a, int b, int c) {} public void afterTextChanged(android.text.Editable e) {} public void onTextChanged(CharSequence s, int a, int b, int c) { adapter.getFilter().filter(s); } });
-                list.setOnItemClickListener((parent, view, position, id) -> { HeckerIconStudio.clear(); HeckerStudio.prefs(this).edit().putString(HeckerStudio.PREFIX + "icon_" + appKey, pack + "|" + adapter.getItem(position)).apply(); dialog.dismiss(); }); dialog.show();
+                list.setOnItemClickListener((parent, view, position, id) -> { HeckerIconStudio.clear(); HeckerStudio.prefs(this).edit().putString(HeckerStudio.PREFIX + "icon_" + appKey, pack + "|" + adapter.getItem(position)).apply(); dialog.dismiss(); }); HeckerStudioUi.show(dialog);
             });
         });
     }
-    private void chooseApp(boolean onlyHidden) {
+    private void chooseApp(boolean manageHidden) {
         worker.execute(() -> {
             List<LauncherActivityInfo> apps = new ArrayList<>(); LauncherApps launcher = getSystemService(LauncherApps.class);
-            for (UserHandle profile : launcher.getProfiles()) try { for (LauncherActivityInfo app : launcher.getActivityList(null, profile)) if (!onlyHidden || HeckerStudio.hidden(this, app.getComponentName(), profile)) apps.add(app); } catch (RuntimeException ignored) { }
+            for (UserHandle profile : launcher.getProfiles()) try { apps.addAll(launcher.getActivityList(null, profile)); } catch (RuntimeException ignored) { }
             apps.sort((a, b) -> java.text.Collator.getInstance().compare(a.getLabel().toString(), b.getLabel().toString()));
-            String[] names = new String[apps.size()]; for (int i = 0; i < names.length; i++) names[i] = apps.get(i).getLabel() + " · " + apps.get(i).getComponentName().getPackageName();
             runOnUiThread(() -> {
                 if (isFinishing() || isDestroyed()) return;
-                new AlertDialog.Builder(this).setTitle(t(onlyHidden ? "hidden_apps" : "individual_icons")).setItems(names, (d, which) -> HeckerStudio.editIcon(this, apps.get(which).getComponentName(), apps.get(which).getUser())).setNegativeButton(android.R.string.cancel, null).show();
+                LinearLayout content = HeckerStudio.column(this);
+                EditText filter = new EditText(this); filter.setSingleLine(true); filter.setHint(t("search_apps")); filter.setTextColor(HeckerStudioUi.TEXT); content.addView(filter);
+                ListView list = new ListView(this); list.setDivider(null);
+                ArrayList<LauncherActivityInfo> visible = new ArrayList<>(apps);
+                BaseAdapter adapter = new BaseAdapter() {
+                    public int getCount() { return visible.size(); }
+                    public Object getItem(int p) { return visible.get(p); }
+                    public long getItemId(int p) { return p; }
+                    public View getView(int p, View old, ViewGroup parent) {
+                        LauncherActivityInfo app = visible.get(p);
+                        LinearLayout row = HeckerStudioUi.card(HeckerStudioActivity.this); row.setOrientation(LinearLayout.HORIZONTAL); row.setGravity(Gravity.CENTER_VERTICAL);
+                        ImageView icon = new ImageView(HeckerStudioActivity.this); icon.setTag(app.getComponentName());
+                        row.addView(icon, new LinearLayout.LayoutParams(HeckerStudio.dp(HeckerStudioActivity.this, 40), HeckerStudio.dp(HeckerStudioActivity.this, 40)));
+                        worker.execute(() -> { android.graphics.drawable.Drawable art = app.getBadgedIcon(0);
+                            runOnUiThread(() -> { if (!isDestroyed() && app.getComponentName().equals(icon.getTag())) icon.setImageDrawable(art); }); });
+                        TextView name = HeckerStudioUi.label(HeckerStudioActivity.this, app.getLabel().toString(), 16, HeckerStudioUi.TEXT);
+                        name.setPadding(HeckerStudio.dp(HeckerStudioActivity.this, 12), 0, HeckerStudio.dp(HeckerStudioActivity.this, 8), 0);
+                        row.addView(name, new LinearLayout.LayoutParams(0, -2, 1));
+                        if (manageHidden) {
+                            Switch toggle = new Switch(HeckerStudioActivity.this); toggle.setChecked(HeckerStudio.hidden(HeckerStudioActivity.this, app.getComponentName(), app.getUser()));
+                            toggle.setContentDescription(app.getLabel()); toggle.setThumbTintList(android.content.res.ColorStateList.valueOf(HeckerStudioUi.ACCENT));
+                            toggle.setOnCheckedChangeListener((b, checked) -> HeckerStudio.hide(HeckerStudioActivity.this, app.getComponentName(), app.getUser(), checked));
+                            row.addView(toggle); row.setOnClickListener(v -> toggle.performClick());
+                        } else row.setOnClickListener(v -> HeckerStudio.editIcon(HeckerStudioActivity.this, app.getComponentName(), app.getUser()));
+                        return row;
+                    }
+                };
+                list.setAdapter(adapter); content.addView(list, new LinearLayout.LayoutParams(-1, HeckerStudio.dp(this, 400)));
+                filter.addTextChangedListener(new android.text.TextWatcher() {
+                    public void beforeTextChanged(CharSequence s, int a, int b, int c) { }
+                    public void afterTextChanged(android.text.Editable e) { }
+                    public void onTextChanged(CharSequence s, int a, int b, int c) {
+                        String query = s.toString().toLowerCase(Locale.ROOT); visible.clear();
+                        for (LauncherActivityInfo app : apps) if (app.getLabel().toString().toLowerCase(Locale.ROOT).contains(query)
+                                || app.getComponentName().getPackageName().toLowerCase(Locale.ROOT).contains(query)) visible.add(app);
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+                HeckerStudioUi.show(new AlertDialog.Builder(this).setTitle(t(manageHidden ? "hidden_apps" : "individual_icons"))
+                        .setView(content).setNegativeButton(android.R.string.cancel, null).create());
             });
         });
     }
@@ -285,10 +322,17 @@ public final class HeckerStudioActivity extends Activity {
     }
     private interface NumberChange { void accept(int value); }
     private void choice(String key, String[] options, java.util.function.IntConsumer picked) {
-        button(key, v -> HeckerStudioUi.show(new AlertDialog.Builder(this).setTitle(t(key))
-                .setSingleChoiceItems(options, HeckerStudio.number(this, key, 0, 0, options.length-1),
-                        (dialog, which) -> { picked.accept(which); dialog.dismiss(); })
-                .setNegativeButton(android.R.string.cancel, null).create()));
+        choice(key, options, () -> HeckerStudio.number(this, key, 0, 0, options.length - 1), picked);
+    }
+    private void choice(String key, String[] options, java.util.function.IntSupplier selected,
+            java.util.function.IntConsumer picked) {
+        int current = selected.getAsInt();
+        Button control = button(key, v -> HeckerStudioUi.show(new AlertDialog.Builder(this).setTitle(t(key))
+                .setSingleChoiceItems(options, selected.getAsInt(), (dialog, which) -> {
+                    picked.accept(which); dialog.dismiss();
+                    ((Button) v).setText(t(key) + " · " + options[which]);
+                }).setNegativeButton(android.R.string.cancel, null).create()));
+        if (current >= 0 && current < options.length) control.setText(t(key) + " · " + options[current]);
     }
     private void slider(String key, int fallback, int min, int max, boolean live) {
         rawSlider(key, HeckerStudio.number(this, key, fallback, min, max), min, max, value -> {

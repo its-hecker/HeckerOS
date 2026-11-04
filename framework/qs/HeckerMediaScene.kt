@@ -25,17 +25,18 @@ object HeckerMediaVisibility {
     private var hidden by mutableStateOf(false)
     private var token: android.media.session.MediaSession.Token? = null
     private var updated = 0L
+    private var identity: String? = null
     private var stopped = false
     fun observe(snapshot: HeckerQsMedia.Snapshot?) {
         val current = android.app.ActivityManager.getCurrentUser()
         if (user != current) { user = current; hidden = false; token = null; stopped = false }
         if (!hidden || snapshot == null) return
         if (!snapshot.playing) stopped = true
-        if (snapshot.playing && (stopped || snapshot.token != token || snapshot.updated > updated)) hidden = false
+        if (snapshot.playing && (stopped || snapshot.token != token || snapshot.updated > updated || snapshot.identity != identity)) hidden = false
     }
     fun dismiss(snapshot: HeckerQsMedia.Snapshot?) {
         user = android.app.ActivityManager.getCurrentUser(); token = snapshot?.token
-        updated = snapshot?.updated ?: 0L; stopped = snapshot?.playing != true; hidden = true
+        identity = snapshot?.identity; updated = snapshot?.updated ?: 0L; stopped = snapshot?.playing != true; hidden = true
     }
     fun isHidden(): Boolean = hidden && user == android.app.ActivityManager.getCurrentUser()
 }
@@ -59,7 +60,16 @@ object HeckerQsPanelState {
 
 @Composable
 fun HeckerQsMediaPlayer(modifier: Modifier = Modifier, square: Boolean = false,
-    compactRow: Boolean = false, hideWhenInactive: Boolean = false) {
+    compactRow: Boolean = false, hideWhenInactive: Boolean = false, quickQs: Boolean = false) {
+    if (quickQs && HeckerMediaVisibility.isHidden()) {
+        val context = androidx.compose.ui.platform.LocalContext.current
+        // Dismissal removes the compact layout, while this small subscription watches for resume.
+        DisposableEffect(context) {
+            val media = HeckerQsMedia(context, { HeckerMediaVisibility.observe(it) })
+            media.start(); onDispose { media.stop() }
+        }
+        return
+    }
     val scope = LocalHeckerQsContentScope.current
     if (scope == null) {
         HeckerMediaCard(modifier.graphicsLayer { alpha = HeckerQsPanelState.alpha(null) },
@@ -101,7 +111,7 @@ fun ContentScope.HeckerQuickQsContent(modifier: Modifier = Modifier,
             Box(Modifier.element(HeckerQsScene.Compact)) { tiles() }
             CompositionLocalProvider(LocalHeckerFlowGlass provides heckerCustomizedLayout()) {
                 // Reserve the same immediate player target as expanded QS, including play-last.
-                HeckerQsMediaPlayer()
+                HeckerQsMediaPlayer(quickQs = true)
             }
         }
     }

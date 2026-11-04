@@ -39,7 +39,8 @@ public final class HeckerMotionIsland implements AutoCloseable {
     private MediaSession.Token lastPlaying, feedbackToken, dialogToken;
     private long lastPlayingAt;
     private long transientUntil,skipUntil;
-    private int renderedHeight=32;
+    private int renderedHeight=32, renderedX, renderedY;
+    private boolean mediaObserved;
     private String beforeIdentity;
     private MotionIslandView capsule;
     private MotionAstronautView astronaut;
@@ -63,17 +64,25 @@ public final class HeckerMotionIsland implements AutoCloseable {
         power = context.getSystemService(PowerManager.class);
         if (windows == null || power == null) throw new IllegalStateException("No window/power service");
         music = new HeckerQsMedia(context, snapshot -> {
-            boolean resumed=!media.playing&&snapshot.playing&&media.token!=null&&media.token.equals(snapshot.token);
-            // A song may have played for minutes without a callback. Timestamp its transition
-            // out of PLAYING, so a pause event arriving after that callback still gets a goodbye.
+            HeckerQsMedia.Snapshot previous = media;
+            boolean same = previous.token != null && previous.token.equals(snapshot.token);
+            int mediaAction = mediaObserved ? MotionIslandState.mediaAction(same,
+                    previous.playing, snapshot.playing, snapshot.paused, previous.identity != null
+                        && snapshot.identity != null && !previous.identity.equals(snapshot.identity)) : MotionIslandState.NONE;
+            mediaObserved = true;
             if (media.playing) { lastPlaying = media.token; lastPlayingAt = now(); }
             media = snapshot;
             if (snapshot.playing) { lastPlaying = snapshot.token; lastPlayingAt = now(); }
             refresh();
-            if(resumed&&(state.current(now())==MotionIslandState.NONE||state.current(now())==MotionIslandState.PAUSE)
-                    &&state.accept(MotionIslandState.PLAY,ActivityManager.getCurrentUser(),now(),now())){
-                state.update(state.sequence,true,snapshot.volume);
-                main.removeCallbacks(expire);main.postDelayed(expire,MotionIslandState.ACTION_DURATION);refresh();
+            int currentAction = state.current(now());
+            boolean gestureInFlight = currentAction != MotionIslandState.NONE && currentAction != MotionIslandState.PLAY && currentAction != MotionIslandState.PAUSE;
+            if (mediaAction != MotionIslandState.NONE && (mediaAction == MotionIslandState.PAUSE || !gestureInFlight) && setting("hecker_motion_media_events", 1, ActivityManager.getCurrentUser())
+                    && !(state.current(now()) == mediaAction && now() - state.when < 700)
+                    && state.acceptMedia(mediaAction, ActivityManager.getCurrentUser(), now())) {
+                feedbackToken = snapshot.token; state.update(state.sequence, true, snapshot.volume);
+                if (mediaAction == MotionIslandState.PAUSE) skipUntil = 0;
+                state.direction = mediaAction == MotionIslandState.NEXT ? 1 : 0;
+                main.removeCallbacks(expire); main.postDelayed(expire, MotionIslandState.ACTION_DURATION); refresh();
             }
         }, true, null);
         try {
@@ -87,7 +96,7 @@ public final class HeckerMotionIsland implements AutoCloseable {
             filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             context.registerReceiver(environment, filter, Context.RECEIVER_NOT_EXPORTED);
             environmentRegistered = true;
-            for (String key : new String[]{ISLAND, CREATURE, "aware_enabled", "hecker_motion_character", "hecker_motion_bar_height"})
+            for (String key : new String[]{ISLAND, CREATURE, "aware_enabled", "hecker_motion_character", "hecker_motion_bar_height", "hecker_motion_bar_x", "hecker_motion_bar_y", "hecker_motion_media_events"})
                 context.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(key),
                         false, observer, UserHandle.USER_ALL);
         } catch (RuntimeException unavailable) { close(); throw unavailable; }
@@ -136,7 +145,7 @@ public final class HeckerMotionIsland implements AutoCloseable {
             if (Intent.ACTION_SCREEN_ON.equals(action)) screenOff = false;
             if (Intent.ACTION_USER_SWITCHED.equals(action) || Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 state.clear(); lastPlaying = null; feedbackToken = null;
-                music.stop(); media = new HeckerQsMedia.Snapshot(null);
+                music.stop(); media = new HeckerQsMedia.Snapshot(null); mediaObserved = false;
                 removeViews(); dismissDialog();
             }
             refresh();
@@ -154,7 +163,7 @@ public final class HeckerMotionIsland implements AutoCloseable {
             boolean enabled = setting(ISLAND, 1, user) && setting("aware_enabled", 0, user);
             if (awake && enabled) music.start();
             else {
-                music.stop(); media = new HeckerQsMedia.Snapshot(null); lastPlaying = null;
+                music.stop(); media = new HeckerQsMedia.Snapshot(null); mediaObserved = false; lastPlaying = null;
                 dismissDialog();
             }
             int action = state.current(now());
@@ -184,7 +193,10 @@ public final class HeckerMotionIsland implements AutoCloseable {
         if (!state.visible(now())) { removeViews(); return; }
         int height=Math.max(26,Math.min(56,Settings.Secure.getIntForUser(context.getContentResolver(),
             "hecker_motion_bar_height",32,ActivityManager.getCurrentUser())));
-        if(height!=renderedHeight){removeViews();renderedHeight=height;}
+        int x=Settings.Secure.getIntForUser(context.getContentResolver(),"hecker_motion_bar_x",0,ActivityManager.getCurrentUser());
+        int y=Settings.Secure.getIntForUser(context.getContentResolver(),"hecker_motion_bar_y",0,ActivityManager.getCurrentUser());
+        x=Math.max(-160,Math.min(160,x));y=Math.max(0,Math.min(160,y));
+        if(height!=renderedHeight||x!=renderedX||y!=renderedY){removeViews();renderedHeight=height;renderedX=x;renderedY=y;}
         boolean animate = ValueAnimator.areAnimatorsEnabled() && !power.isPowerSaveMode();
         if (capsule == null) {
             MotionIslandView view = new MotionIslandView(context);
@@ -206,12 +218,19 @@ public final class HeckerMotionIsland implements AutoCloseable {
     }
     private boolean add(View view, int width, int height, int y, boolean decoration, String title) {
         int available = windows.getCurrentWindowMetrics().getBounds().width();
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(Math.min(width, available - dp(24)),
+        int capsuleWidth = Math.min(dp(124), available - dp(24));
+        int anchorX = Math.max(-(available-capsuleWidth)/2, Math.min((available-capsuleWidth)/2, dp(renderedX)));
+        if (view instanceof MotionAstronautView) ((MotionAstronautView) view).setAnchorOffset(anchorX);
+        // The non-touchable decoration spans the display. Its rope stays under the capsule
+        // even near an edge; WindowManager cannot independently clamp the wider companion.
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(decoration ? available : Math.min(width, available - dp(24)),
                 height, 2041, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | (decoration ? WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE : 0), PixelFormat.TRANSLUCENT);
-        params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL; params.y = y;
+        params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+        params.x = decoration ? 0 : anchorX;
+        params.y = Math.min(y + dp(renderedY), Math.max(0, windows.getCurrentWindowMetrics().getBounds().height()-height));
         params.setFitInsetsTypes(0);
         params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
         params.setTitle(title);

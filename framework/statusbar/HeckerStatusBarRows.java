@@ -111,7 +111,7 @@ public final class HeckerStatusBarRows {
             rowLayout=bounded("hecker_dual_statusbar_layout",0,0,1);
             networkRow=bounded("hecker_dual_statusbar_network_row",0,0,1);
             gap=bounded("hecker_statusbar_row_gap",2,0,8);
-            icon=bounded("hecker_statusbar_icon_size",16,12,20);
+            icon=bounded("hecker_statusbar_icon_size",20,12,24);
             width=bounded("hecker_statusbar_lyric_width",160,80,360);
             font=bounded("hecker_statusbar_lyric_size",11,9,18);
             alignment=bounded("hecker_statusbar_lyric_position",2,0,2);
@@ -280,13 +280,13 @@ public final class HeckerStatusBarRows {
                 Rect speed=traffic==null?null:bounds(traffic);
                 place(clock,c.left,rows.top+(rows.height-c.height())/2,c.width(),c.height());
                 place(system,s.left,rows.top+(rows.height-s.height())/2,s.width(),s.height());
-                float factor=Math.min(1f,Math.min(dp(icon),rows.height-2f)/Math.max(1,dp(20)));
-                scale(system,factor,true);scale(clock,Math.min(1f,rows.height/Math.max(1f,c.height())),false);
+                float factor=dp(icon)/(float)Math.max(1,dp(20));
+                scale(system,factor,true);
                 if(traffic!=null&&traffic.getVisibility()==View.VISIBLE){
                     int row=networkRow==1&&!lyricsRow?rows.second:rows.top;
                     int h=Math.min(speed.height(),rows.height);
-                    place(traffic,speed.left,row+(rows.height-h)/2,speed.width(),h);
-                    scale(traffic,Math.min(1f,rows.height/Math.max(1f,speed.height())),false);
+                    int x=rtl?s.right+dp(4):s.left-dp(4)-speed.width();
+                    place(traffic,x,row+(rows.height-h)/2,speed.width(),h);
                 }
                 if(lyricsRow){place(notifications,n.left,rows.top,n.width(),rows.height);date.setVisibility(View.GONE);info.setVisibility(View.GONE);}
                 else{
@@ -320,7 +320,7 @@ public final class HeckerStatusBarRows {
                 }else lyric.setVisibility(View.GONE);
             }else lyric.setVisibility(View.GONE);
             View icons=find("notificationIcons");
-            if(stacked)scale(icons,Math.min(1f,Math.min(dp(icon),rows.height-2f)/Math.max(1,dp(20))),false);
+            if(stacked)scale(icons,dp(icon)/(float)Math.max(1,dp(20)),false);
             if(icons instanceof ViewGroup){ViewGroup group=(ViewGroup)icons;
                 clipping.computeIfAbsent(group,k->new boolean[]{k.getClipChildren(),k.getClipToPadding()});
                 group.setClipChildren(true);group.setClipToPadding(true);}

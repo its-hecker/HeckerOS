@@ -189,5 +189,6 @@
   "frameworks/base/packages/SystemUI/res/drawable-nodpi/hecker_motion_goblin.png": "framework/motionisland/goblin.png",
   "frameworks/base/packages/SystemUI/res/drawable-nodpi/hecker_motion_ninja.png": "framework/motionisland/ninja.png",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionCharacterPose.java": "framework/motionisland/MotionCharacterPose.java",
-  "frameworks/base/services/core/java/com/android/server/hecker/HeckerGameMonitor.java": "framework/gaming/HeckerGameMonitor.java"
+  "frameworks/base/services/core/java/com/android/server/hecker/HeckerGameMonitor.java": "framework/gaming/HeckerGameMonitor.java",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/LockscreenClockLayout.java": "framework/lockscreen/LockscreenClockLayout.java"
 }

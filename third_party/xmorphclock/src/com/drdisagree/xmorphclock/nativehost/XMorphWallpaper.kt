@@ -12,16 +12,18 @@ import kotlin.math.roundToInt
 
 /** Bounded static wallpaper source for the glass faces. Call from a worker thread. */
 object XMorphWallpaper {
-    private data class Cached(val user: Int, val wallpaper: Int, val bitmap: Bitmap)
+    private data class Cached(val user: Int, val wallpaper: Int, val flag: Int, val bitmap: Bitmap)
     private var cached: Cached? = null
 
-    @JvmStatic @Synchronized fun load(context: Context, user: Int): Bitmap? = try {
+    @JvmStatic fun load(context: Context, user: Int): Bitmap? = loadFor(context, user, false)
+    @JvmStatic fun loadHome(context: Context, user: Int): Bitmap? = loadFor(context, user, true)
+    @Synchronized private fun loadFor(context: Context, user: Int, home: Boolean): Bitmap? = try {
         val manager = WallpaperManager.getInstance(context)
         val lock = manager.getWallpaperId(WallpaperManager.FLAG_LOCK)
-        val flag = if (lock > 0) WallpaperManager.FLAG_LOCK else WallpaperManager.FLAG_SYSTEM
+        val flag = if (!home && lock > 0) WallpaperManager.FLAG_LOCK else WallpaperManager.FLAG_SYSTEM
         val id = manager.getWallpaperId(flag)
         if (manager.getWallpaperInfo(flag) != null) null
-        else cached?.takeIf { it.user == user && it.wallpaper == id }?.bitmap ?: run {
+        else cached?.takeIf { it.user == user && it.wallpaper == id && it.flag == flag }?.bitmap ?: run {
             val bitmap = manager.getWallpaperFile(flag)?.use { descriptor ->
                 val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                 BitmapFactory.decodeFileDescriptor(descriptor.fileDescriptor, null, options)
@@ -40,7 +42,7 @@ object XMorphWallpaper {
                     drawable.setBounds(0, 0, it.width, it.height); drawable.draw(Canvas(it))
                 }
             }
-            bitmap?.also { BackdropCache.prepare(it); cached = Cached(user, id, it) }
+            bitmap?.also { BackdropCache.prepare(it); cached = Cached(user, id, flag, it) }
         }
     } catch (_: Exception) { null } catch (_: OutOfMemoryError) { null }
 }

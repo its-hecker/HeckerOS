@@ -993,9 +993,10 @@
     },
     {
       "old": "        protected fun TransitionBuilder.configureClockCenteringTransition() {",
-      "new": "        @Composable\n        protected fun LockscreenScope<ContentScope>.HeckerClockRegion(small: Boolean) {\n            val androidContext = this@LockscreenUpperRegionElementProvider.context\n            if (com.android.systemui.hecker.HeckerCustomClockEnabled(androidContext)) {\n                MovableElement(if (small) Clock.Small else Clock.Large,\n                        Modifier.burnInAware(isClock = true).nonAuthUI()) {\n                    content {\n                        com.android.systemui.hecker.HeckerCustomLockscreenClock(androidContext, small, heckerStatusBarState)\n                    }\n                }\n            } else {\n                LockscreenElement(if (small) Region.Clock.Small else Region.Clock.Large)\n            }\n        }\n\n        protected fun TransitionBuilder.configureClockCenteringTransition() {",
+      "new": "        @Composable\n        protected fun LockscreenScope<ContentScope>.HeckerClockRegion(small: Boolean) {\n            val androidContext = this@LockscreenUpperRegionElementProvider.context\n            if (com.android.systemui.hecker.HeckerCustomClockEnabled(androidContext)) {\n                MovableElement(if (small) Clock.Small else Clock.Large,\n                        Modifier.burnInAware(isClock = true).nonAuthUI()\n                            .then(com.android.systemui.hecker.HeckerClockPlacementModifier(androidContext))) {\n                    content {\n                        com.android.systemui.hecker.HeckerCustomLockscreenClock(androidContext, small, heckerStatusBarState)\n                    }\n                }\n            } else {\n                LockscreenElement(if (small) Region.Clock.Small else Region.Clock.Large)\n            }\n        }\n\n        protected fun TransitionBuilder.configureClockCenteringTransition() {",
       "previous": [
-        "        @Composable\n        protected fun LockscreenScope<ContentScope>.HeckerClockRegion(small: Boolean) {\n            val androidContext = this@LockscreenUpperRegionElementProvider.context\n            if (com.android.systemui.hecker.HeckerCustomClockEnabled(androidContext)) {\n                MovableElement(if (small) Clock.Small else Clock.Large,\n                        Modifier.burnInAware(isClock = false).nonAuthUI()) {\n                    content {\n                        com.android.systemui.hecker.HeckerCustomLockscreenClock(androidContext, small)\n                    }\n                }\n            } else {\n                LockscreenElement(if (small) Region.Clock.Small else Region.Clock.Large)\n            }\n        }\n\n        protected fun TransitionBuilder.configureClockCenteringTransition() {"
+        "        @Composable\n        protected fun LockscreenScope<ContentScope>.HeckerClockRegion(small: Boolean) {\n            val androidContext = this@LockscreenUpperRegionElementProvider.context\n            if (com.android.systemui.hecker.HeckerCustomClockEnabled(androidContext)) {\n                MovableElement(if (small) Clock.Small else Clock.Large,\n                        Modifier.burnInAware(isClock = false).nonAuthUI()) {\n                    content {\n                        com.android.systemui.hecker.HeckerCustomLockscreenClock(androidContext, small)\n                    }\n                }\n            } else {\n                LockscreenElement(if (small) Region.Clock.Small else Region.Clock.Large)\n            }\n        }\n\n        protected fun TransitionBuilder.configureClockCenteringTransition() {",
+        "        @Composable\n        protected fun LockscreenScope<ContentScope>.HeckerClockRegion(small: Boolean) {\n            val androidContext = this@LockscreenUpperRegionElementProvider.context\n            if (com.android.systemui.hecker.HeckerCustomClockEnabled(androidContext)) {\n                MovableElement(if (small) Clock.Small else Clock.Large,\n                        Modifier.burnInAware(isClock = true).nonAuthUI()) {\n                    content {\n                        com.android.systemui.hecker.HeckerCustomLockscreenClock(androidContext, small, heckerStatusBarState)\n                    }\n                }\n            } else {\n                LockscreenElement(if (small) Region.Clock.Small else Region.Clock.Large)\n            }\n        }\n\n        protected fun TransitionBuilder.configureClockCenteringTransition() {"
       ]
     },
     {
@@ -1211,6 +1212,18 @@
     {
       "old": "        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction",
       "new": "        com.android.systemui.hecker.HeckerQsPanelState.setExpansion(panelExpansionFraction)\n        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction"
+    },
+    {
+      "old": "import androidx.compose.ui.Modifier",
+      "new": "import androidx.compose.ui.Modifier\nimport androidx.compose.ui.draw.drawWithContent"
+    },
+    {
+      "old": "            modifier = Modifier.fillMaxSize(),\n            debugName = \"QuickSettings\",",
+      "new": "            modifier = Modifier.fillMaxSize().drawWithContent {\n                // Gate the entire shared-element layer, including a settling full-QS copy.\n                if (viewModel.isQsVisibleAndAnyShadeExpanded) drawContent()\n            },\n            debugName = \"QuickSettings\","
+    },
+    {
+      "old": "    override fun hideImmediately() {",
+      "new": "    override fun hideImmediately() {\n        com.android.systemui.hecker.HeckerQsPanelState.setVisible(false)"
     }
   ],
   "frameworks/base/packages/SystemUI/AndroidManifest.xml": [
@@ -1266,6 +1279,20 @@
     {
       "old": "repository.blurRequestedByShade.value = blurRadius.toFloat()",
       "new": "repository.blurRequestedByShade.value = heckerRadius"
+    }
+  ],
+  "frameworks/base/services/core/java/com/android/server/pm/HeckerRootVisibility.java": [
+    {
+      "old": "            \"hecker_hide_developer_options_apps\", \"hecker_bootloader_spoof_apps\",\n            \"hecker_hide_custom_rom_apps\"};",
+      "new": "            \"hecker_hide_developer_options_apps\", \"hecker_bootloader_spoof_apps\"};"
+    },
+    {
+      "old": "            \"com.android.settings\", \"com.android.permissioncontroller\", \"org.hecker.suite\");",
+      "new": "            \"com.android.settings\", \"com.android.permissioncontroller\", \"org.hecker.suite\",\n            \"com.android.launcher3\", \"com.google.android.apps.nexuslauncher\", \"org.hecker.vpn\", \"org.hecker.netlab\", \"org.hecker.librepods\");"
+    },
+    {
+      "old": "return ROM_PROTECTED.contains(packageName) ? flags & ~16 : flags;",
+      "new": "// ROM visibility is the device-wide default for app processes.\n        // Native OS/Hecker components retain their real feature properties and service access.\n        return ROM_PROTECTED.contains(packageName) ? flags & ~16 : flags | 16;"
     }
   ]
 }
