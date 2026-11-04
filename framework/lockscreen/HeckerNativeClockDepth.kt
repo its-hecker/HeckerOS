@@ -19,12 +19,12 @@ internal val LocalHeckerNativeClockDepth = staticCompositionLocalOf { false }
 
 /** Mask only the native clock element, including clocks provided by a loaded plugin. */
 @Composable
-fun HeckerNativeClockDepthModifier(context: Context): Modifier {
+fun HeckerNativeClockDepthModifier(context: Context, customRenderer: Boolean = false): Modifier {
     // The same factory can host previews without a depth backdrop.
     if (!LocalHeckerNativeClockDepth.current) return Modifier
     val state by HeckerAmbientCharging.state.collectAsState()
     // Custom clocks own their existing Canvas mask. AOD keeps the unmodified native clock.
-    if (state.customClock || HeckerDepthScene.awakeFraction <= 0f) return Modifier
+    if ((state.customClock && !customRenderer) || HeckerDepthScene.awakeFraction <= 0f) return Modifier
     val foreground = HeckerDepthScene.foreground(context, state) ?: return Modifier
     var coordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
     val transform = remember { Matrix() }

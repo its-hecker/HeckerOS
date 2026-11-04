@@ -37,7 +37,10 @@ public final class LockScreenSettingsActivity extends Activity {
                 "hecker_custom_lockscreen_clock", 0);
         choices(clock, "hecker_lockscreen_clock_style", 0,
                 new int[]{R.string.lock_clock_geometric, R.string.lock_clock_word, R.string.lock_clock_tall,
-                        R.string.lock_clock_living_tall, R.string.lock_clock_living_wide, R.string.lock_clock_living_bold});
+                        R.string.lock_clock_living_tall, R.string.lock_clock_living_wide, R.string.lock_clock_living_bold,
+                        R.string.xmorph_title});
+        Ui.actionCard(this, clock, R.string.xmorph_title, R.string.xmorph_summary,
+                v -> { imported = true; startActivity(new Intent(this, XMorphClockActivity.class)); });
         android.widget.Button applyClock = Ui.button(this); applyClock.setText(R.string.lock_clock_apply);
         applyClock.setOnClickListener(v -> { if (put("hecker_custom_lockscreen_clock",1)) {
             if(customClock!=null)customClock.setChecked(true);

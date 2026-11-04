@@ -1,0 +1,10 @@
+<resources>
+    <string name="xmorph_title">XMorphClock 时钟样式</string>
+    <string name="xmorph_summary">86 款原生时钟，保留原始字体、布局和息屏样式。点按即可应用，支持锁屏景深壁纸。</string>
+    <string name="xmorph_credit">时钟设计与渲染器：DrDisagree（Mahmudul Hasan Khan）· XMorphClock · GPLv3+</string>
+    <string name="xmorph_large">大时钟</string>
+    <string name="xmorph_small">小时钟</string>
+    <string name="xmorph_aod">息屏</string>
+    <string name="xmorph_apply">应用时钟</string>
+    <string name="xmorph_failed">无法加载或应用此时钟。</string>
+</resources>

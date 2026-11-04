@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="xmorph_words_language" comment="ISO 639-1 code of this translation; numbers in fuzzy phrases are spelled in this language">en</string>
+    <string name="xmorph_words_hundred" comment="Said after a whole 24-hour time, e.g. sixteen hundred">hundred</string>
+    <string name="xmorph_fuzzy_oclock" comment="%1$s = hour in words">%1$s o\'clock</string>
+    <string name="xmorph_fuzzy_past" comment="%1$s = minutes in words, %2$s = hour in words">%1$s past %2$s</string>
+    <string name="xmorph_fuzzy_to" comment="%1$s = minutes in words, %2$s = next hour in words">%1$s to %2$s</string>
+    <string name="xmorph_fuzzy_quarter_past" comment="%1$s = hour in words">quarter past %1$s</string>
+    <string name="xmorph_fuzzy_half_past" comment="%1$s = hour in words">half past %1$s</string>
+    <string name="xmorph_fuzzy_quarter_to" comment="%1$s = next hour in words">quarter to %1$s</string>
+    <string name="xmorph_fuzzy_lead_past" comment="%1$s = minutes in words">%1$s past</string>
+    <string name="xmorph_fuzzy_lead_to" comment="%1$s = minutes in words">%1$s to</string>
+    <string name="xmorph_fuzzy_lead_quarter_past">quarter past</string>
+    <string name="xmorph_fuzzy_lead_half_past">half past</string>
+    <string name="xmorph_fuzzy_lead_quarter_to">quarter to</string>
+    <string name="xmorph_data_charging">Charging</string>
+    <string name="xmorph_data_charged">Charged</string>
+    <string name="xmorph_data_charging_left" comment="%1$s = time until full, e.g. 1 h 20 min">Charging · %1$s left</string>
+    <string name="xmorph_data_hours_minutes" comment="%1$d = hours, %2$d = minutes">%1$d h %2$d min</string>
+    <string name="xmorph_data_minutes" comment="%1$d = minutes">%1$d min</string>
+    <string name="xmorph_data_no_alarm">No alarm</string>
+    <string name="xmorph_data_not_charging">Not charging</string>
+    <string name="xmorph_data_sunrise">Sunrise</string>
+    <string name="xmorph_data_sunset">Sunset</string>
+    <string name="xmorph_data_uv" comment="%1$s = UV index number">UV %1$s</string>
+    <string name="xmorph_data_no_media">Nothing playing</string>
+    <string name="xmorph_data_no_events">No upcoming events</string>
+    <string name="xmorph_data_all_day">All day</string>
+    <string name="xmorph_data_happening_now">Now</string>
+    <string name="xmorph_data_in_minutes" comment="%1$d = minutes until the event starts">In %1$d min</string>
+    <string name="xmorph_data_tomorrow" comment="%1$s = time or All day">Tomorrow %1$s</string>
+</resources>

@@ -1,0 +1,10 @@
+<resources>
+    <string name="xmorph_title">Стили XMorphClock</string>
+    <string name="xmorph_summary">86 встроенных циферблатов с исходными шрифтами, расположением и стилями AOD. Нажмите для применения. Поддерживают обои с глубиной на экране блокировки.</string>
+    <string name="xmorph_credit">Дизайн и отрисовка часов: DrDisagree (Mahmudul Hasan Khan) · XMorphClock · GPLv3+</string>
+    <string name="xmorph_large">Большие</string>
+    <string name="xmorph_small">Маленькие</string>
+    <string name="xmorph_aod">AOD</string>
+    <string name="xmorph_apply">Применить часы</string>
+    <string name="xmorph_failed">Не удалось загрузить или применить часы.</string>
+</resources>

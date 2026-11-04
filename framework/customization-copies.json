@@ -183,5 +183,6 @@
   "frameworks/base/packages/SystemUI/res/values-ru/hecker_ims.xml": "framework/ims/strings-ru.xml",
   "frameworks/base/packages/SystemUI/res/values-ru/hecker_motion_island.xml": "framework/motionisland/strings-ru.xml",
   "packages/apps/Settings/res/values-ru/hecker_ru.xml": "settings/res/values-ru/hecker_ru.xml",
-  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerNativeClockDepth.kt": "framework/lockscreen/HeckerNativeClockDepth.kt"
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerNativeClockDepth.kt": "framework/lockscreen/HeckerNativeClockDepth.kt",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerXMorphClock.kt": "framework/lockscreen/HeckerXMorphClock.kt"
 }

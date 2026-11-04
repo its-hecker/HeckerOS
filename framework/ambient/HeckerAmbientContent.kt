@@ -124,6 +124,7 @@ fun HeckerCustomLockscreenClock(context: Context, small: Boolean, controller: St
     DisposableEffect(context) { HeckerAmbientCharging.start(context); onDispose {} }
     val state by HeckerAmbientCharging.state.collectAsState()
     if (!state.customClock) return false
+    if (state.clockStyle == 6 && HeckerXMorphLockscreenClock(context, small, controller, modifier)) return true
     val clock = clockText(context)
     val renderer = remember(context) { HeckerAmbientRenderer(context) }
     val reference = remember { HeckerLockscreenClockRenderer() }

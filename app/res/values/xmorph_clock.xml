@@ -1,0 +1,10 @@
+<resources>
+    <string name="xmorph_title">XMorphClock styles</string>
+    <string name="xmorph_summary">86 native clock faces with their original fonts, layouts and AOD styles. Tap a face to apply. Compatible with lock screen depth wallpaper.</string>
+    <string name="xmorph_credit">Clock designs and renderer by DrDisagree (Mahmudul Hasan Khan) · XMorphClock · GPLv3+</string>
+    <string name="xmorph_large">Large</string>
+    <string name="xmorph_small">Small</string>
+    <string name="xmorph_aod">AOD</string>
+    <string name="xmorph_apply">Apply clock</string>
+    <string name="xmorph_failed">Could not load or apply this clock.</string>
+</resources>

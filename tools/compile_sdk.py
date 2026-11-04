@@ -75,6 +75,8 @@ def main():
         aapt.chmod(0o755)
     with tempfile.TemporaryDirectory() as temporary:
         output = Path(temporary)
+        from check_xmorph_clock import build as build_xmorph
+        xmorph_classes, xmorph_resources = build_xmorph(cache, ROOT/'generated/compose-check', output/'xmorph')
         from prepare import AIDL_NEW, MANIFEST_NEW
         probe = output / "aidl/suite/probe/IAccessProbe.aidl"
         probe.parent.mkdir(parents=True)
@@ -100,8 +102,8 @@ def main():
         assert "mEnforcer.enforcePermissionAnyOf" in generated
         run(aapt, "compile", "--dir", ROOT / "app/res", "-o", output / "resources.zip")
         run(aapt, "link", "-I", cache / "android.jar", "--manifest", ROOT / "app/AndroidManifest.xml",
-            "-A", ROOT / "app/assets", "--auto-add-overlay", "--java", output / "generated", "-o", output / "resources.apk",
-            output / "resources.zip")
+            "-A", ROOT / "app/assets", "-A", ROOT/'third_party/xmorphclock/assets', "--auto-add-overlay", "--java", output / "generated", "-o", output / "resources.apk",
+            output / "resources.zip", xmorph_resources)
         # Exercise aapt's real permission-Java generation. Inserting a permission between
         # another permission and its documentation would silently lose @FlaggedApi metadata.
         permission_manifest = output / "permission-manifest.xml"
@@ -120,6 +122,7 @@ def main():
         classpath = os.pathsep.join(str(cache / name) for name in
                                   ("android-system.jar", "lottie.jar", "appcompat.jar", "core.jar"))
         classpath += os.pathsep + os.pathsep.join(str(ROOT / "prebuilts/depth" / name) for name in ("litert.jar", "litert-api.jar"))
+        classpath += os.pathsep + os.pathsep.join(map(str, [xmorph_classes, ROOT/'generated/compose-check/kotlin-stdlib.jar']))
         run("java", "-m", "jdk.compiler/com.sun.tools.javac.Main", "-cp", classpath,
             "-d", output / "classes", output / "generated/org/hecker/suite/R.java",
             *sorted((ROOT / "tests/platform-api-stubs").rglob("*.java")),

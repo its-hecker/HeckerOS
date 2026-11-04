@@ -38,7 +38,7 @@ license {
 
 android_app {
     name: "HeckerSuite",
-    licenses: ["hecker_suite_license", "hecker_netlab_registry_license"],
+    licenses: ["hecker_suite_license", "hecker_netlab_registry_license", "hecker_xmorph_license"],
     manifest: "app/AndroidManifest.xml",
     srcs: ["app/src/**/*.java"],
     exclude_srcs: ["app/src/org/hecker/suite/SuiteActivity.java",
@@ -50,7 +50,7 @@ android_app {
     certificate: "platform",
     privileged: true,
     system_ext_specific: true,
-    static_libs: ["lottie", "HeckerNetLabApi", "HeckerDepthLiteRt"],
+    static_libs: ["lottie", "HeckerNetLabApi", "HeckerDepthLiteRt", "HeckerXMorphClock"],
     jni_libs: ["libhecker_depth_tflite"],
     compile_multilib: "64",
     required: ["HeckerSuitePrivappPermissions", "HeckerSuiteFreeformFeature", "HeckerGameInit", "HeckerSensorRecoveryInit"],

@@ -304,6 +304,8 @@ def main():
     def run(*cmd): subprocess.run([str(v) for v in cmd], check=True)
     with tempfile.TemporaryDirectory(prefix='hecker-qs-check-') as temp:
         out = Path(temp)
+        from check_xmorph_clock import build as build_xmorph
+        xmorph_classes, xmorph_resources = build_xmorph(sdk, cache, out/'xmorph')
         for folder, resource in [('values', 'strings.xml'), ('values-zh-rCN', 'strings-zh.xml')]:
             dest = out / 'res' / folder / 'hecker_strings.xml'
             dest.parent.mkdir(parents=True, exist_ok=True)
@@ -315,7 +317,8 @@ def main():
                             'package="com.android.systemui.res"><application/></manifest>')
         run(sdk / 'aapt2', 'compile', '--dir', out / 'res', '-o', out / 'res.zip')
         run(sdk / 'aapt2', 'link', '-I', sdk / 'android.jar', '--manifest', manifest,
-            '--java', out / 'java', '-o', out / 'res.apk', out / 'res.zip')
+            '-A', ROOT/'third_party/xmorphclock/assets',
+            '--java', out / 'java', '-o', out / 'res.apk', out / 'res.zip', xmorph_resources)
         for name, content in JAVA.items():
             target = out / 'java' / name
             target.parent.mkdir(parents=True, exist_ok=True); target.write_text(content)
@@ -355,7 +358,7 @@ object LockscreenElementKeys { object Clock { val Small = Any(); val Large = Any
         run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', sdk / 'android-system.jar',
             '-d', out / 'classes', *java_sources)
         jars = sorted(cache.glob('*.jar'))
-        classpath = os.pathsep.join(map(str, [out / 'classes', sdk / 'android-system.jar', *jars]))
+        classpath = os.pathsep.join(map(str, [out / 'classes', sdk / 'android-system.jar', xmorph_classes, sdk/'core.jar', *jars]))
         run('java', '-cp', os.pathsep.join(map(str, jars)), 'org.jetbrains.kotlin.cli.jvm.K2JVMCompiler',
             '-no-stdlib', '-no-reflect', '-jvm-target', '17', '-classpath', classpath,
             '-Xplugin=' + str(cache / 'kotlin-compose-compiler-plugin-embeddable.jar'),

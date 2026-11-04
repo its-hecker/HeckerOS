@@ -2,6 +2,12 @@
 
 ## Coral UI and compatibility — 2 November 2026
 
+**4 November native XMorphClock catalog:** add the 86 upstream clock/date faces
+and 47 bundled fonts to Custom clocks, with a recycled picker and large/small/AOD
+previews. SystemUI hosts the original renderer directly, shares the existing depth
+mask, and uses native lifecycle/settings controls. GPL/source and font notices
+are retained. See [implementation and validation](docs/xmorph-clock-native-2026-11-04.md).
+
 **4 November stock/plugin clock depth:** extend depth masking to the native small
 and large clock elements, preserving the selected stock or installed plugin clock.
 Depth controls and import/extraction no longer enable the Hecker custom clock.

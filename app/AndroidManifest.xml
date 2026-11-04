@@ -52,6 +52,7 @@
         <activity android:name=".MotionFeedbackSettingsActivity" android:exported="false"
             android:label="@string/motion_feedback_title" />
         <activity android:name=".LockScreenSettingsActivity" android:exported="false" android:label="@string/lock_screen_title" />
+        <activity android:name=".XMorphClockActivity" android:exported="false" android:label="@string/xmorph_title" />
         <activity android:name=".DepthWallpaperActivity" android:exported="false" android:label="@string/depth_wallpaper_title" />
         <service android:name=".DepthWallpaperJob" android:exported="true" android:permission="android.permission.BIND_JOB_SERVICE" />
         <provider android:name=".DepthWallpaperProvider" android:authorities="org.hecker.suite.depth" android:directBootAware="true"

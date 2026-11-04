@@ -1,0 +1,16 @@
+XMorphClock native clock renderer and 86 clock presets
+Copyright (C) 2026 Mahmudul Hasan Khan (DrDisagree)
+https://github.com/Mahmud0808/XMorphClock
+Upstream revision: a88005252636f9ac89cd4b8727ee04a57dae2224
+
+The imported renderer, models and presets are licensed under GPL version 3 or,
+at your option, any later version. The complete license is in LICENSE.
+HeckerOS native integration changes are distributed under the same terms.
+
+Corresponding source and build integration:
+https://github.com/its-hecker/HeckerOS
+third_party/xmorphclock, framework/lockscreen/HeckerXMorphClock.kt,
+app/src/org/hecker/suite/XMorphClockActivity.java and the pinned manifest.
+
+Bundled fonts retain their original OFL/Apache notices in assets/xmorph_licenses.
+This library contains no Xposed hooks, root shell, module manager or network client.

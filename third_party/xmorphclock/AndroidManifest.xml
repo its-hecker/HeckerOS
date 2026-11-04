@@ -1,0 +1,4 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.drdisagree.xmorphclock">
+    <uses-sdk android:minSdkVersion="31" />
+</manifest>

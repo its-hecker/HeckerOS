@@ -1,0 +1,27 @@
+package {
+    default_applicable_licenses: ["hecker_xmorph_license", "hecker_xmorph_fonts_license"],
+}
+
+license {
+    name: "hecker_xmorph_license",
+    license_kinds: ["SPDX-license-identifier-GPL-3.0"],
+    license_text: ["LICENSE", "NOTICE"],
+}
+
+license {
+    name: "hecker_xmorph_fonts_license",
+    license_kinds: ["SPDX-license-identifier-OFL-1.1", "SPDX-license-identifier-Apache-2.0"],
+    license_text: ["assets/xmorph_licenses/*.txt"],
+}
+
+android_library {
+    name: "HeckerXMorphClock",
+    manifest: "AndroidManifest.xml",
+    srcs: ["src/**/*.kt"],
+    resource_dirs: ["res"],
+    asset_dirs: ["assets"],
+    sdk_version: "system_current",
+    min_sdk_version: "31",
+    static_libs: ["androidx.core_core-ktx"],
+    visibility: ["//visibility:public"],
+}

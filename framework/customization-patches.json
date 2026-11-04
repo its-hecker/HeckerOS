@@ -1237,5 +1237,11 @@
       "old": "                    modifier.onGloballyPositioned { coordinates ->",
       "new": "                    modifier.then(depthModifier).onGloballyPositioned { coordinates ->"
     }
+  ],
+  "frameworks/base/packages/SystemUI/Android.bp": [
+    {
+      "old": "    defaults: [\"SystemUI-srcs-defaults\"],\n    static_libs: [\n        \"//frameworks/libs/systemui:compilelib\",",
+      "new": "    defaults: [\"SystemUI-srcs-defaults\"],\n    static_libs: [\n        \"HeckerXMorphClock\",\n        \"//frameworks/libs/systemui:compilelib\","
+    }
   ]
 }

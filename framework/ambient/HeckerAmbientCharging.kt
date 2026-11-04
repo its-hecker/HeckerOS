@@ -33,6 +33,7 @@ object HeckerAmbientCharging {
     const val STYLE = "hecker_aod_charging_style"
     const val CLOCK = "hecker_custom_lockscreen_clock"
     const val CLOCK_STYLE = "hecker_lockscreen_clock_style"
+    const val XMORPH_PRESET = "hecker_xmorph_clock_preset"
     const val CLOCK_OPACITY = "hecker_lockscreen_clock_opacity"
     const val DEPTH_WALLPAPER_ID = "hecker_depth_wallpaper_wallpaper_id"
     const val DEPTH = "hecker_depth_wallpaper"
@@ -55,6 +56,7 @@ object HeckerAmbientCharging {
         val flow: Boolean = true, val clockScale: Int = 100, val clockX: Int = 0,
         val clockY: Int = 0, val clockColor: Int = 0, val aodClockScale: Int = 140,
         val shadeBlurPercent: Int = 55,
+        val xmorphPreset: String? = null,
     )
     private val mutable = MutableStateFlow(State())
     val state: StateFlow<State> = mutable
@@ -80,7 +82,7 @@ object HeckerAmbientCharging {
             override fun onChange(selfChange: Boolean) { readSettings(); reconcileDoze() }
         }
         for (key in arrayOf(ROUTE, AOD_ROUTE, "doze_always_on", STYLE, CLOCK, ANIMATION, ART,
-                CLOCK_STYLE, CLOCK_OPACITY, DEPTH, DEPTH_ID, DEPTH_WAKE, DEPTH_WALLPAPER_ID,
+                CLOCK_STYLE, XMORPH_PRESET, CLOCK_OPACITY, DEPTH, DEPTH_ID, DEPTH_WAKE, DEPTH_WALLPAPER_ID,
                 FLOW, "hecker_qs_blur_strength", "hecker_lockscreen_clock_scale", "hecker_aod_clock_scale", "hecker_lockscreen_clock_x",
                 "hecker_lockscreen_clock_y", "hecker_lockscreen_clock_color")) {
             c.contentResolver.registerContentObserver(Settings.Secure.getUriFor(key), false,
@@ -141,7 +143,8 @@ object HeckerAmbientCharging {
         val next = previous.copy(ambient = route,
             style = value(STYLE, 1).coerceIn(0, 2), customClock = value(CLOCK, 0) != 0,
             animation = value(ANIMATION, 1) != 0, art = value(ART, 0).coerceIn(0, 2),
-            clockStyle = value(CLOCK_STYLE, 0).coerceIn(0, 5),
+            clockStyle = value(CLOCK_STYLE, 0).coerceIn(0, 6),
+            xmorphPreset = Settings.Secure.getStringForUser(c.contentResolver, XMORPH_PRESET, UserHandle.USER_CURRENT),
             flow = value(FLOW, 1) != 0,
             clockScale = value("hecker_lockscreen_clock_scale", 100).coerceIn(70, 110),
             aodClockScale = value("hecker_aod_clock_scale", 140).coerceIn(70, 200),
