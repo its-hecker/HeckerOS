@@ -13,9 +13,5 @@
     "url": "https://android.googlesource.com/platform/prebuilts/build-tools/+/9b6c8c6a2f582a9d7817fd8275c8014959c60cc4/linux-x86/bin/flex?format=TEXT",
     "base64": true,
     "sha256": "23d535dad2209521f6dea198061f1bc4893aeaf925a20b258cd3eb7bc6df7975"
-  },
-  "bison-data.tar.gz": {
-    "url": "https://android.googlesource.com/platform/prebuilts/build-tools/+archive/9b6c8c6a2f582a9d7817fd8275c8014959c60cc4/common/bison.tar.gz",
-    "sha256": "c61f302879d011fde10ede6f9ad836a2979fc5f846e1379b0fe8992a0892ac2b"
   }
 }

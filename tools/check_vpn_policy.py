@@ -5,14 +5,51 @@
 This is a standalone platform-policy smoke check, not the complete device/Soong policy.
 Release feature flags are enabled for a consistent, fully-declared platform type set.
 """
-import argparse, json, os, re, subprocess, tarfile
-from pathlib import Path
+import argparse, hashlib, io, json, os, re, subprocess, tarfile, time
+import urllib.error, urllib.request
+from pathlib import Path, PurePosixPath
 from compile_sdk import fetch
 
 ROOT=Path(__file__).resolve().parents[1]
 POLICY_SHA='99c58a7cc9a44fe33c93808452d018e756d84753'
 COMPILER_SHA='a8c5e74f85f869bf236a01ba24181b78f5e39a52'
 def run(*args,**kw):subprocess.run(list(map(str,args)),check=True,**kw)
+def verified_bison_files(raw,expected):
+    """Gitiles may recompress an archive; authenticate every file's pinned bytes."""
+    files={}
+    with tarfile.open(fileobj=io.BytesIO(raw),mode='r:gz') as archive:
+        for member in archive:
+            path=PurePosixPath(member.name)
+            if path.is_absolute() or '..' in path.parts:raise ValueError('Unsafe Bison archive path')
+            if member.isdir():continue
+            name=str(path)
+            if not member.isfile() or name not in expected or name in files:raise ValueError('Unexpected Bison archive entry')
+            if member.size>4*1024*1024:raise ValueError('Oversized Bison data file')
+            content=archive.extractfile(member).read()
+            if hashlib.sha256(content).hexdigest()!=expected[name]:raise ValueError('Bison data differs: '+name)
+            files[name]=content
+    if set(files)!=set(expected):raise ValueError('Incomplete Bison archive')
+    return files
+def prepare_bison_data(tools):
+    lock=json.loads((ROOT/'tests/vpn-policy-bison.lock.json').read_text());expected=lock['files']
+    data=tools/'share/bison';data.mkdir(parents=True,exist_ok=True)
+    paths=list(data.rglob('*'))
+    if data.is_symlink() or any(p.is_symlink() for p in paths):raise ValueError('Unexpected Bison cache symlink')
+    existing={str(p.relative_to(data)):p for p in paths if p.is_file()}
+    if set(existing)-set(expected):raise ValueError('Unexpected Bison cache files')
+    if set(existing)==set(expected) and all(hashlib.sha256(p.read_bytes()).hexdigest()==expected[n] for n,p in existing.items()):return data
+    for attempt in range(4):
+        try:
+            request=urllib.request.Request(lock['archive_url'],headers={'User-Agent':'HeckerVPN-policy-check/1'})
+            with urllib.request.urlopen(request,timeout=60) as response:raw=response.read(4*1024*1024+1)
+            break
+        except (urllib.error.URLError,TimeoutError) as failure:
+            if attempt==3 or isinstance(failure,urllib.error.HTTPError) and failure.code not in {408,429,500,502,503,504}:raise
+            time.sleep(2**attempt)
+    if len(raw)>4*1024*1024:raise ValueError('Oversized Bison archive')
+    for name,content in verified_bison_files(raw,expected).items():
+        path=data/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(content)
+    return data
 def checkout(path,url,revision):
     if not (path/'.git').exists():
         path.mkdir(parents=True,exist_ok=True)
@@ -29,8 +66,7 @@ def main():
     tools=(args.tool_dir or cache/'tools').resolve();tools.mkdir(parents=True,exist_ok=True)
     for name,item in json.loads((ROOT/'tests/vpn-policy-tools.lock.json').read_text()).items():fetch(tools,name,item)
     for name in ['m4','bison','flex']:(tools/name).chmod(0o755)
-    data=tools/'share/bison';data.mkdir(parents=True,exist_ok=True)
-    with tarfile.open(tools/'bison-data.tar.gz','r:gz') as archive:archive.extractall(data,filter='data')
+    data=prepare_bison_data(tools)
     policy=(args.sepolicy_source or cache/'sepolicy-source').resolve()
     compiler=(args.selinux_source or cache/'selinux-source').resolve()
     checkout(policy,'https://github.com/PixelOS-AOSP/android_system_sepolicy.git',POLICY_SHA)
