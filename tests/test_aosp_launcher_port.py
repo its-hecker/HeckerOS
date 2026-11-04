@@ -12,6 +12,22 @@ from prepare import replace_guarded
 
 
 class AospLauncherPortTests(unittest.TestCase):
+    def test_published_wallpaper_fallback_upgrades_and_reverts_preserving_local_edits(self):
+        relative = 'src/com/android/launcher3/popup/WorkspaceLongPressOptions.kt'
+        pair = json.loads((ROOT / 'aosp-launcher/patches.json').read_text())[relative][0]
+        with tempfile.TemporaryDirectory() as directory:
+            rom = Path(directory)
+            self.stage(rom)
+            source = rom / SOURCE / relative
+            source.write_text(pair['previous'][0] + '\n// retained local wallpaper note\n')
+            self.apply(aosp_launcher_plan(rom, replace_guarded))
+            self.assertIn(pair['new'], source.read_text())
+            self.assertNotIn('Settings.ACTION_WALLPAPER_SETTINGS', source.read_text())
+            self.assertIn('retained local wallpaper note', source.read_text())
+            self.assertFalse(aosp_launcher_plan(rom, replace_guarded))
+            self.apply(aosp_launcher_plan(rom, replace_guarded, True))
+            self.assertEqual(source.read_text(), pair['old'] + '\n// retained local wallpaper note\n')
+
     def test_pre_depth_permission_manifest_upgrades_without_losing_existing_permissions(self):
         with tempfile.TemporaryDirectory() as directory:
             rom = Path(directory)

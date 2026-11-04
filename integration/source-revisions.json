@@ -252,7 +252,8 @@
         "src/com/android/settings/homepage/SettingsHomepageActivity.java",
         "Android.bp",
         "src/com/android/settings/deviceinfo/aboutphone/MyDeviceInfoFragment.java",
-        "res/xml/my_device_info.xml"
+        "res/xml/my_device_info.xml",
+        "AndroidManifest.xml"
       ]
     },
     "packages/apps/Launcher3": {
@@ -567,5 +568,13 @@
     ],
     "character_assets": "framework/motionisland/characters.json",
     "validation": "187 host tests, locked Suite/Settings/SystemUI/Launcher compilation, 29799 character frames and pinned native source preparation/upgrade/revert checks; full ROM build and physical Coral acceptance pending"
+  },
+  "launcher_wallpaper_build_fix_20261104": {
+    "branch": "fix/coral-ui-compatibility-20261102",
+    "device": "coral",
+    "parent_suite_revision": "96508ad689e6bc281a842fc86a1f8f48c6e2d330",
+    "issue": "HeckerLauncher Kotlin cannot resolve Settings.ACTION_WALLPAPER_SETTINGS",
+    "fix": "Use the action string advertised by the pinned exported Settings wallpaper activity and migrate the exact previously prepared fallback",
+    "validation": "Compile the actual prepared native Kotlin method against the locked Android SDK, verify the pinned Settings intent filter, and check prepared-source upgrade/idempotence/revert; full ROM build and physical Coral acceptance pending"
   }
 }

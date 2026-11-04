@@ -2,6 +2,12 @@
 
 ## Coral UI and compatibility — 2 November 2026
 
+**4 November Launcher Kotlin build fix:** use the wallpaper action declared by
+pinned Settings instead of the nonexistent `Settings.ACTION_WALLPAPER_SETTINGS`
+constant. Previously prepared Launcher sources upgrade in place. The native
+wallpaper method now compiles against the locked Android SDK in CI. See
+[cause, regression coverage and incremental rebuild](docs/coral-launcher-wallpaper-build-fix-2026-11-04.md).
+
 **4 November HeckerLab and device feedback:** rename the visible feature hub,
 stabilize home depth through native Launcher transforms and reloads, retain the
 English word clock in AOD, and use native unlock progress for the clock fade.
