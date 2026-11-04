@@ -76,6 +76,9 @@ def main():
         run('make','-C',compiler/'libsepol/src','libsepol.a','DISABLE_CIL=y',env=env,stdout=log,stderr=subprocess.STDOUT)
         run('make','-C',compiler/'checkpolicy','checkpolicy','LEX='+str(tools/'flex'),'YACC='+str(tools/'bison')+' -y',
             'CPPFLAGS=-I../libsepol/include','LIBSEPOLA='+str(compiler/'libsepol/src/libsepol.a'),env=env,stdout=log,stderr=subprocess.STDOUT)
+    probe=cache/'policy-access'
+    run('cc','-Wall','-Wextra','-Werror','-I'+str(compiler/'libsepol/include'),
+        ROOT/'tests/vpn_policy_access.c',compiler/'libsepol/src/libsepol.a','-o',probe)
     order=['security_classes','initial_sids','access_vectors','global_macros','neverallow_macros','mls_macros','mls_decl','mls','policy_capabilities',
         'te_macros','ioctl_defines','ioctl_macros','nlmsg_defines','nlmsg_macros','te','roles_decl','roles','users','initial_sid_contexts','fs_use','genfs_contexts','port_contexts']
     paths=[policy/'flagging/flagging_macros']
@@ -96,6 +99,7 @@ def main():
         defs['target_build_variant']=variant;conf=cache/(variant+'.conf')
         with conf.open('w') as target:run(tools/'m4','--fatal-warnings',*[f'-D{k}={v}' for k,v in defs.items()],'-s',source,stdout=target)
         run(compiler/'checkpolicy/checkpolicy','-M','-c','30','-o',cache/(variant+'.bin'),conf)
+        run(probe,cache/(variant+'.bin'))
         print('HeckerVPN + pinned platform SELinux policy, '+variant+', neverallows enforced: PASS',flush=True)
     print('Standalone policy checks do not replace a full device policy build or enforcing phone validation.')
 if __name__=='__main__':main()

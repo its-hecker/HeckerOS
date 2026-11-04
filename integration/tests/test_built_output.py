@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from floral_target import VENDOR
-from check_built_output import check, check_bootanimation, check_development_adb, check_motion_sense, check_suite, check_librepods, SERVICE
+from check_built_output import check, check_bootanimation, check_development_adb, check_motion_sense, check_suite, check_librepods, check_vpn, SERVICE
 
 
 class BuiltOutputTests(unittest.TestCase):
@@ -233,7 +233,32 @@ class BuiltOutputTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Launcher permission"):
                 check_suite(root, output)
             launcher_allowlist.write_bytes(launcher_source.read_bytes())
-            check_suite(root, output)
+            with patch("check_built_output.check_vpn"):
+                check_suite(root, output)
+
+    def test_vpn_requires_the_controller_and_all_runtime_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); output = root / "output"
+            with self.assertRaisesRegex(ValueError, "HeckerVpnController.apk"):
+                check_vpn(root, output)
+            controller = output / "system_ext/priv-app/HeckerVpnController/HeckerVpnController.apk"
+            controller.parent.mkdir(parents=True); controller.write_bytes(b"apk")
+            for name in ("heckervpnd", "hecker-wg", "hecker-wg-quick"):
+                with self.assertRaisesRegex(ValueError, name):
+                    check_vpn(root, output)
+                binary = output / "system_ext/bin" / name
+                binary.parent.mkdir(parents=True, exist_ok=True); binary.write_bytes(b"binary"); binary.chmod(0o755)
+            source = root / "vendor/hecker/floral/suite/vpn"; source.mkdir(parents=True)
+            for name, folder in (("heckervpnd.rc", "init"), ("default-permissions-heckervpn.xml", "default-permissions")):
+                (source / name).write_text("runtime configuration")
+                with self.assertRaisesRegex(ValueError, name):
+                    check_vpn(root, output)
+                installed = output / "system_ext/etc" / folder / name
+                installed.parent.mkdir(parents=True, exist_ok=True); installed.write_text("stale")
+                with self.assertRaisesRegex(ValueError, name):
+                    check_vpn(root, output)
+                installed.write_bytes((source / name).read_bytes())
+            check_vpn(root, output)
 
     def test_librepods_accepts_rom_signing_but_requires_source_payload_and_permissions(self):
         with tempfile.TemporaryDirectory() as directory:

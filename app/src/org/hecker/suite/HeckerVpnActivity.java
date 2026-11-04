@@ -22,9 +22,8 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import org.hecker.vpn.VpnInput;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -54,7 +53,9 @@ public final class HeckerVpnActivity extends Activity {
         warning = Ui.text(this, "", 13, false); hero.addView(warning);
         connect = Ui.button(this); connect.setText(R.string.vpn_connect);
         connect.setOnClickListener(v -> {
-            if (!state.getBoolean("desired") && !state.getBoolean("cleanup_required")
+            if (!state.getBoolean("controller_available", true)) {
+                operation(HeckerVpnClient.request("state"), true);
+            } else if (!state.getBoolean("desired") && !state.getBoolean("cleanup_required")
                     && state.getString("selected", "").isEmpty()) {
                 countriesTab = false; renderBody();
                 Toast.makeText(this, R.string.vpn_no_profiles, Toast.LENGTH_LONG).show();
@@ -73,7 +74,9 @@ public final class HeckerVpnActivity extends Activity {
         super.onStart(); started = true; client = new HeckerVpnClient(this);
         // Opening Settings must not wait on the privileged kernel socket. Connect probes it
         // when required; profile import and provider setup remain usable independently.
-        operation(HeckerVpnClient.request("state"), true); main.postDelayed(poll, 3000);
+        operation(HeckerVpnClient.request("state"), true, result -> {
+            if (countriesTab && servers.isEmpty()) refreshAfterAccount(result);
+        }); main.postDelayed(poll, 3000);
     }
     @Override protected void onResume() {
         super.onResume(); consumeImport();
@@ -89,20 +92,33 @@ public final class HeckerVpnActivity extends Activity {
     private final Runnable poll = new Runnable() {
         @Override public void run() {
             if (!started) return;
-            if (!busy && client != null) client.call(HeckerVpnClient.request("state"), result -> { state = result; renderState(); });
+            if (!busy && client != null) client.call(HeckerVpnClient.request("state"), result -> {
+                boolean recovered = !state.getBoolean("controller_available", true) && result.getBoolean("controller_available");
+                acceptState(result); renderState(); if (recovered) renderBody();
+            });
             main.postDelayed(this, 3000);
         }
     };
     private void operation(Bundle request, boolean rebuild) {
+        operation(request, rebuild, null);
+    }
+    private boolean operation(Bundle request, boolean rebuild, java.util.function.Consumer<Bundle> completed) {
         if (client == null || busy) {
-            Toast.makeText(this, R.string.vpn_busy, Toast.LENGTH_SHORT).show(); return;
+            Toast.makeText(this, R.string.vpn_busy, Toast.LENGTH_SHORT).show(); return false;
         }
         busy = true; renderState();
         client.call(request, result -> {
-            busy = false; state = result;
+            busy = false; acceptState(result);
             if (result.containsKey("servers")) { servers = result.getParcelableArrayList("servers", Bundle.class); catalogTime = result.getLong("catalog_time"); }
             renderState(); if (rebuild) renderBody();
+            if (completed != null) completed.accept(result);
         });
+        return true;
+    }
+    private void acceptState(Bundle result) {
+        // A transport failure or worker timeout says nothing about saved account/profile data.
+        if (result.containsKey("profiles")) state = result;
+        else { Bundle retained = new Bundle(state); retained.putAll(result); state = retained; }
     }
     private void renderState() {
         String label = getString(statusLabel(state.getString("status", "disconnected")));
@@ -115,8 +131,10 @@ public final class HeckerVpnActivity extends Activity {
         detail.setText(text);
         String error = state.getString("error", "");
         warning.setText(error.isEmpty() && state.containsKey("kernel") && !state.getBoolean("kernel") ? getString(R.string.vpn_kernel_missing) : error);
-        connect.setText(state.getBoolean("desired") || state.getBoolean("cleanup_required") ? R.string.vpn_disconnect : R.string.vpn_connect);
+        connect.setText(!state.getBoolean("controller_available", true) ? R.string.vpn_retry
+                : state.getBoolean("desired") || state.getBoolean("cleanup_required") ? R.string.vpn_disconnect : R.string.vpn_connect);
         connect.setEnabled(!busy);
+        setEnabled(body, !busy);
     }
     static int statusLabel(String value) {
         switch (value) {
@@ -142,12 +160,15 @@ public final class HeckerVpnActivity extends Activity {
         note.addView(Ui.text(this, getString(R.string.vpn_routing_scope), 13, false));
         note.addView(Ui.text(this, getString(R.string.vpn_session_note), 13, false)); body.addView(note);
         Ui.styleControls(this, body);
+        setEnabled(body, !busy);
     }
     private void renderCountries() {
         LinearLayout provider = Ui.card(this); provider.addView(Ui.text(this, getString(R.string.vpn_mullvad), 20, true));
         provider.addView(Ui.text(this, getString(R.string.vpn_provider_summary), 14, false));
-        if (state.getBoolean("account")) {
-            provider.addView(Ui.text(this, getString(R.string.vpn_account_saved), 15, true));
+        if (state.getBoolean("account") || state.getBoolean("account_pending")) {
+            provider.addView(Ui.text(this, getString(state.getBoolean("account") ? R.string.vpn_account_saved : R.string.vpn_account_pending), 15, true));
+            if (!state.getBoolean("account")) action(provider, R.string.vpn_account_retry, () ->
+                    operation(HeckerVpnClient.request("retry_account"), true, this::refreshAfterAccount));
             action(provider, R.string.vpn_remove_account, () -> new AlertDialog.Builder(this)
                     .setMessage(R.string.vpn_remove_account_confirm).setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(R.string.vpn_remove_account, (d, w) -> operation(HeckerVpnClient.request("logout"), true)).show());
@@ -177,11 +198,24 @@ public final class HeckerVpnActivity extends Activity {
         number.setTextColor(getColor(R.color.hecker_foreground));
         number.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         number.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);
-        number.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(16)}); page.addView(number);
-        new AlertDialog.Builder(this).setTitle(R.string.vpn_add_account).setView(page).setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.vpn_add_account, (d, w) -> {
-                    Bundle request = HeckerVpnClient.request("account"); request.putString("account", number.getText().toString()); number.setText(""); operation(request, true);
-                }).show();
+        // Pasted account numbers often contain four groups, spaces or dashes. Do not truncate them.
+        number.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(64)}); page.addView(number);
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.vpn_add_account).setView(page)
+                .setNegativeButton(android.R.string.cancel, null).setPositiveButton(R.string.vpn_add_account, null).create();
+        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String account;
+            try { account = VpnInput.accountNumber(number.getText().toString()); }
+            catch (IllegalArgumentException invalid) { number.setError(getString(R.string.vpn_account_invalid)); return; }
+            Bundle request = HeckerVpnClient.request("account"); request.putString("account", account);
+            operation(request, true, result -> {
+                if (!result.getString("error", "").isEmpty()) { number.setError(result.getString("error")); return; }
+                number.setText(""); dialog.dismiss(); refreshAfterAccount(result);
+            });
+        })); dialog.show();
+    }
+    private void refreshAfterAccount(Bundle result) {
+        if (result.getBoolean("account") && result.getString("error", "").isEmpty())
+            operation(HeckerVpnClient.request("catalog"), true);
     }
     private void renderProfiles() {
         LinearLayout header = Ui.card(this); action(header, R.string.vpn_import, () -> startActivityForResult(
@@ -259,31 +293,48 @@ public final class HeckerVpnActivity extends Activity {
     @Override protected void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
         if (request != 784 || result != RESULT_OK || data == null || data.getData() == null) return;
-        pendingImport = data.getData(); consumeImport();
+        pendingImport = data.getData();
+        try {
+            int readGrant = data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION;
+            if (readGrant != 0) getContentResolver().takePersistableUriPermission(pendingImport, readGrant);
+        } catch (SecurityException | IllegalArgumentException unsupported) { /* Some providers only offer the activity grant. */ }
+        // The picker result can arrive before onStart; wait for onResume and the new Binder client.
     }
     private void readImport(android.net.Uri uri) {
         new Thread(() -> {
             try {
-                String name = "VPN profile";
+                String name = null;
                 try (android.database.Cursor cursor = getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
-                    if (cursor != null && cursor.moveToFirst()) name = cursor.getString(0).replaceFirst("(?i)\\.conf$", "");
-                }
+                    if (cursor != null && cursor.moveToFirst()) {
+                        int column = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                        if (column >= 0) name = cursor.getString(column);
+                    }
+                } catch (Exception metadataUnavailable) { /* A readable stream need not have a display name. */ }
                 String config;
-                try (InputStream input = getContentResolver().openInputStream(uri); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-                    if (input == null) throw new Exception(); byte[] buffer = new byte[4096]; int length;
-                    while ((length = input.read(buffer)) != -1) { if (output.size() + length > 65536) throw new Exception(); output.write(buffer, 0, length); }
-                    config = output.toString(StandardCharsets.UTF_8);
+                try (InputStream input = getContentResolver().openInputStream(uri)) {
+                    config = VpnInput.configuration(input);
                 }
-                String suggested = name;
+                String suggested = VpnInput.profileName(name);
                 main.post(() -> { if (started) importDialog(suggested, config); });
-            } catch (Exception failure) { main.post(() -> { if (started) Toast.makeText(this, R.string.vpn_import_error, Toast.LENGTH_LONG).show(); }); }
+            } catch (Exception failure) { main.post(() -> {
+                if (!started) return;
+                String error = failure instanceof IllegalArgumentException ? failure.getMessage() : getString(R.string.vpn_import_access);
+                warning.setText(error); Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+            }); }
         }, "HeckerVPN-import").start();
     }
     private void importDialog(String name, String config) {
         EditText input = new EditText(this); input.setText(name.length() > 80 ? name.substring(0, 80) : name);
         input.setHint(R.string.vpn_name); input.setTextColor(getColor(R.color.hecker_foreground));
-        new AlertDialog.Builder(this).setTitle(R.string.vpn_import).setView(input).setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.vpn_save, (d, w) -> { Bundle request = HeckerVpnClient.request("import"); request.putString("name", input.getText().toString()); request.putString("config", config); operation(request, true); }).show();
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.vpn_import).setView(input)
+                .setNegativeButton(android.R.string.cancel, null).setPositiveButton(R.string.vpn_save, null).create();
+        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            Bundle request = HeckerVpnClient.request("import"); request.putString("name", input.getText().toString()); request.putString("config", config);
+            operation(request, true, result -> {
+                if (result.getString("error", "").isEmpty()) dialog.dismiss();
+                else input.setError(result.getString("error"));
+            });
+        })); dialog.show();
     }
     private static void setEnabled(View view, boolean enabled) {
         view.setEnabled(enabled);

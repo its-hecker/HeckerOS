@@ -1211,7 +1211,10 @@
     },
     {
       "old": "        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction",
-      "new": "        com.android.systemui.hecker.HeckerQsPanelState.setExpansion(panelExpansionFraction)\n        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction"
+      "new": "        com.android.systemui.hecker.HeckerQsPanelState.setExpansion(panelExpansionFraction)\n        containerView?.heckerShadeExpansion = panelExpansionFraction\n        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction",
+      "previous": [
+        "        com.android.systemui.hecker.HeckerQsPanelState.setExpansion(panelExpansionFraction)\n        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction"
+      ]
     },
     {
       "old": "import androidx.compose.ui.Modifier",
@@ -1223,7 +1226,18 @@
     },
     {
       "old": "    override fun hideImmediately() {",
-      "new": "    override fun hideImmediately() {\n        com.android.systemui.hecker.HeckerQsPanelState.setVisible(false)"
+      "new": "    override fun hideImmediately() {\n        com.android.systemui.hecker.HeckerQsPanelState.setVisible(false)\n        containerView?.qsVisible = false\n        containerView?.heckerShadeExpansion = 0f",
+      "previous": [
+        "    override fun hideImmediately() {\n        com.android.systemui.hecker.HeckerQsPanelState.setVisible(false)"
+      ]
+    },
+    {
+      "old": "    var qsVisible: Boolean = false\n",
+      "new": "    // The outer notification shade can finish before the inner QQS/QS scene settles.\n    // Invalidate the Android View directly; cached Compose layers must not draw over Home.\n    var heckerShadeExpansion: Float = 0f\n        set(value) {\n            if (value != field) {\n                field = value\n                invalidate()\n            }\n        }\n\n    var qsVisible: Boolean = false\n"
+    },
+    {
+      "old": "        if (qsVisible) {\n            // If QS should not be visible",
+      "new": "        if (qsVisible && heckerShadeExpansion.isFinite() && heckerShadeExpansion > 0f) {\n            // If QS should not be visible"
     }
   ],
   "frameworks/base/packages/SystemUI/AndroidManifest.xml": [

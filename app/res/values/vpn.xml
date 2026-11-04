@@ -46,6 +46,14 @@
     <string name="vpn_updated">Updated %1$s</string>
     <string name="vpn_busy">Working…</string>
     <string name="vpn_unavailable">HeckerVPN controller is unavailable in this build.</string>
+    <string name="vpn_controller_timeout">HeckerVPN could not start its controller. Try again.</string>
+    <string name="vpn_retry">Retry controller</string>
+    <string name="vpn_controller_failed">The HeckerVPN controller disconnected. Try again.</string>
+    <string name="vpn_controller_denied">This build denied access to the HeckerVPN controller.</string>
+    <string name="vpn_account_invalid">Enter your complete 16-digit Mullvad account number.</string>
+    <string name="vpn_account_pending">Mullvad registration is incomplete. Retry using the saved account.</string>
+    <string name="vpn_account_retry">Retry Mullvad setup</string>
+    <string name="vpn_import_access">Could not open the selected file. Select it again from Files.</string>
     <string name="vpn_owner_only">HeckerVPN currently supports the main user only.</string>
     <string name="vpn_kernel_missing">WireGuard kernel support has not been confirmed on this build.</string>
     <string name="vpn_session_note">Starts disconnected after a reboot. Disconnecting restores normal routing. A kill switch and Android always-on control are not enabled in this release.</string>

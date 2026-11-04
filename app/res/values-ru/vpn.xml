@@ -49,4 +49,12 @@
     <string name="vpn_owner_only">HeckerVPN пока поддерживает только основного пользователя.</string>
     <string name="vpn_kernel_missing">Поддержка WireGuard в ядре этой сборки ещё не подтверждена.</string>
     <string name="vpn_session_note">После перезагрузки VPN отключён. Отключение восстанавливает обычные маршруты. Блокировка трафика без VPN и постоянное подключение Android в этой версии не включены.</string>
+    <string name="vpn_controller_timeout">Не удалось запустить контроллер HeckerVPN. Повторите попытку.</string>
+    <string name="vpn_retry">Повторить подключение к контроллеру</string>
+    <string name="vpn_controller_failed">Соединение с контроллером HeckerVPN прервано. Повторите попытку.</string>
+    <string name="vpn_controller_denied">В этой сборке запрещён доступ к контроллеру HeckerVPN.</string>
+    <string name="vpn_account_invalid">Введите полный 16-значный номер аккаунта Mullvad.</string>
+    <string name="vpn_account_pending">Регистрация Mullvad не завершена. Повторите настройку с сохранённым аккаунтом.</string>
+    <string name="vpn_account_retry">Повторить настройку Mullvad</string>
+    <string name="vpn_import_access">Не удалось открыть выбранный файл. Выберите его снова в приложении «Файлы».</string>
 </resources>

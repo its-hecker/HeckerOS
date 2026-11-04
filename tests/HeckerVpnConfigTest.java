@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 import org.hecker.vpn.VpnConfig;
 import java.util.List;
+import org.hecker.vpn.VpnInput;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 public final class HeckerVpnConfigTest {
     private static final String KEY = "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=";
     private static final String CONFIG = "[Interface]\nPrivateKey=" + KEY + "\nAddress=10.1.0.2/32,fd00::2/128\nDNS=10.1.0.1,fd00::1\n[Peer]\nPublicKey=" + KEY
@@ -9,7 +12,29 @@ public final class HeckerVpnConfigTest {
         try { VpnConfig.parse(config); throw new AssertionError("Accepted an invalid configuration"); }
         catch (IllegalArgumentException expected) {}
     }
-    public static void main(String[] arguments) {
+    public static void main(String[] arguments) throws Exception {
+        if (!VpnInput.accountNumber("0000 0000-0000\u00a00000").equals("0000000000000000"))
+            throw new AssertionError("Formatted Mullvad account was truncated");
+        for (String invalid : List.of("000000000000000", "00000000000000000", "000000000000000a")) {
+            try { VpnInput.accountNumber(invalid); throw new AssertionError("Invalid account accepted"); }
+            catch (IllegalArgumentException expected) {}
+        }
+        if (!VpnInput.profileName(null).equals("VPN profile") || !VpnInput.profileName("test.CONF").equals("test"))
+            throw new AssertionError("Missing document metadata prevents import");
+        for (String encoding : List.of("UTF-8", "UTF-16", "UTF-16LE", "UTF-16BE")) {
+            byte[] bytes = CONFIG.replace("\n", "\r\n").getBytes(encoding);
+            if (encoding.equals("UTF-16LE") || encoding.equals("UTF-16BE")) {
+                byte[] withBom = new byte[bytes.length + 2];
+                withBom[0] = (byte) (encoding.endsWith("LE") ? 0xff : 0xfe);
+                withBom[1] = (byte) (encoding.endsWith("LE") ? 0xfe : 0xff);
+                System.arraycopy(bytes, 0, withBom, 2, bytes.length); bytes = withBom;
+            }
+            VpnConfig.parse(VpnInput.configuration(new ByteArrayInputStream(bytes)));
+        }
+        for (byte[] invalid : List.of(new byte[]{(byte) 0xff, 0, 1}, new byte[65537], "not a config".getBytes(StandardCharsets.UTF_8))) {
+            try { VpnInput.configuration(new ByteArrayInputStream(invalid)); throw new AssertionError("Bad document accepted"); }
+            catch (IllegalArgumentException expected) {}
+        }
         VpnConfig parsed = VpnConfig.parse(CONFIG);
         if (!parsed.render("all", List.of()).equals(VpnConfig.parse(parsed.render("all", List.of())).render("all", List.of()))) throw new AssertionError("Unstable normalization");
         String selected = parsed.render("include", List.of("org.telegram.messenger", "com.android.chrome"));

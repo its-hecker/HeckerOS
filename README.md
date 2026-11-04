@@ -1,5 +1,14 @@
 # HeckerOS · Android 17
 
+## VPN startup and fast QS close — 5 November 2026
+
+The same `fix/device-feedback-20261105` branch now corrects the VPN controller's
+missing platform-app SELinux service access, retries failed bindings, accepts
+formatted Mullvad account numbers, refreshes countries after registration, and
+imports readable configurations even when document metadata is unavailable.
+The native QS container also stops drawing at the outer shade's zero expansion,
+including while its inner media scene is settling. See [cause and validation](docs/vpn-qs-repair-2026-11-05.md).
+
 ## Coral device feedback — 5 November 2026
 
 `fix/device-feedback-20261105` carries the latest HeckerVPN base plus the QS/media,

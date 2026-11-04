@@ -50,6 +50,23 @@ def check_suite(rom, output):
     installed = output / "system_ext/etc/permissions" / name
     if not original.is_file() or not installed.is_file() or installed.read_bytes() != original.read_bytes():
         raise ValueError("Built system_ext image is missing the exact Launcher permission allowlist")
+    check_vpn(rom, output)
+
+
+def check_vpn(rom, output):
+    source = rom / "vendor/hecker/floral/suite/vpn"
+    controller = output / "system_ext/priv-app/HeckerVpnController/HeckerVpnController.apk"
+    if not controller.is_file() or controller.stat().st_size == 0:
+        raise ValueError("Built system_ext image is missing HeckerVpnController.apk")
+    for name in ("heckervpnd", "hecker-wg", "hecker-wg-quick"):
+        binary = output / "system_ext/bin" / name
+        if not binary.is_file() or binary.stat().st_size == 0 or not os.access(binary, os.X_OK):
+            raise ValueError("Built system_ext image is missing executable " + name)
+    for name, directory in (("heckervpnd.rc", "init"),
+                             ("default-permissions-heckervpn.xml", "default-permissions")):
+        installed = output / "system_ext/etc" / directory / name
+        if not installed.is_file() or installed.read_bytes() != (source / name).read_bytes():
+            raise ValueError("Built system_ext image is missing the exact HeckerVPN runtime file: " + name)
 
 
 def check_motion_sense(output):

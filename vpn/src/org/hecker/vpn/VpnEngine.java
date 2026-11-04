@@ -93,7 +93,11 @@ final class VpnEngine {
                 case "disconnect": disconnect(); break;
                 case "policy": policy(request); break;
                 case "catalog": catalog = MullvadProvider.servers(); catalogTime = System.currentTimeMillis(); break;
-                case "account": account(request.getString("account", "").replaceAll("[ -]", "")); break;
+                case "account": account(VpnInput.accountNumber(request.getString("account", ""))); break;
+                case "retry_account":
+                    JSONObject savedAccount = store.data.optJSONObject("mullvad");
+                    if (savedAccount == null) throw new IllegalArgumentException("Add your Mullvad account first");
+                    account(savedAccount.getString("account")); break;
                 case "logout": logout(); break;
                 case "provider_connect": providerConnect(request.getString("host", "")); break;
                 default: throw new IllegalArgumentException("Unsupported HeckerVPN operation");
@@ -117,6 +121,12 @@ final class VpnEngine {
         return result;
     }
     private static String message(Exception failure) {
+        if (failure instanceof java.net.UnknownHostException)
+            return "Could not resolve the VPN provider. Check your internet connection and DNS, then retry.";
+        if (failure instanceof java.net.SocketTimeoutException)
+            return "The VPN provider did not respond in time. Try again.";
+        if (failure instanceof javax.net.ssl.SSLException)
+            return "Could not establish a secure connection to the VPN provider. Check the phone's date and network.";
         return failure instanceof IllegalArgumentException ? failure.getMessage()
                 : "Operation failed. Check network access and saved profile availability, then try again.";
     }
@@ -269,6 +279,7 @@ final class VpnEngine {
         if (store != null) {
             result.putString("selected", store.data.optString("selected"));
             JSONObject identity = store.data.optJSONObject("mullvad"); result.putBoolean("account", identity != null && identity.has("device"));
+            result.putBoolean("account_pending", identity != null && !identity.has("device"));
             JSONArray values = store.data.optJSONArray("profiles");
             if (values != null) for (int i = 0; i < values.length(); i++) {
                 JSONObject profile = values.optJSONObject(i); if (profile == null) continue;

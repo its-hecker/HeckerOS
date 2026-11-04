@@ -29,6 +29,7 @@ get_prop(netutils_wrapper, build_prop)
 # A unique domain authenticates the init socket; the APK separately authenticates Binder callers.
 type hecker_vpn_app, domain, coredomain;
 app_domain(hecker_vpn_app)
+platform_app_domain(hecker_vpn_app)
 net_domain(hecker_vpn_app)
 binder_use(hecker_vpn_app)
 binder_call(hecker_vpn_app, system_server)

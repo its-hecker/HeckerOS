@@ -49,4 +49,12 @@
     <string name="vpn_owner_only">HeckerVPN 目前仅支持主用户。</string>
     <string name="vpn_kernel_missing">尚未确认此版本支持 WireGuard 内核。</string>
     <string name="vpn_session_note">重启后默认不连接。断开连接会恢复正常路由。本版本未启用断网保护和 Android 始终开启 VPN。</string>
+    <string name="vpn_controller_timeout">无法启动 HeckerVPN 控制器，请重试。</string>
+    <string name="vpn_retry">重试控制器连接</string>
+    <string name="vpn_controller_failed">HeckerVPN 控制器已断开连接，请重试。</string>
+    <string name="vpn_controller_denied">此版本拒绝访问 HeckerVPN 控制器。</string>
+    <string name="vpn_account_invalid">请输入完整的 16 位 Mullvad 账户号码。</string>
+    <string name="vpn_account_pending">Mullvad 注册尚未完成，请使用已保存的账户重试。</string>
+    <string name="vpn_account_retry">重试 Mullvad 设置</string>
+    <string name="vpn_import_access">无法打开所选文件，请在“文件”应用中重新选择。</string>
 </resources>

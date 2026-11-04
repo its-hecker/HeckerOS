@@ -16,15 +16,31 @@ def check_qs_panel_bridge(folder, cache):
     native = folder / 'frameworks/base/packages/SystemUI/src/com/android/systemui/qs/composefragment'
     source = (native / 'QSFragmentCompose.kt').read_text()
     methods = '\n'.join(re.search(r'(?ms)^    override fun ' + name + r'\(.*?^    }', source).group(0)
-                        for name in ['setQsVisible', 'setQsExpansion'])
+                        for name in ['setQsVisible', 'setQsExpansion', 'hideImmediately'])
+    container_properties = re.search(r'(?ms)^    // The outer notification shade.*?^    private var dirtyClipData', source).group(0)
+    container_properties = container_properties.rsplit('    private var dirtyClipData', 1)[0]
+    container_draw = re.search(r'(?ms)^    override fun dispatchDraw\(.*?^    }', source).group(0)
     files = {
         'NativePanel.kt': '''package probe
 import com.android.systemui.hecker.HeckerQsPanelState
 interface Panel {
  fun setQsVisible(qsVisible:Boolean)
  fun setQsExpansion(qsExpansionFraction:Float,panelExpansionFraction:Float,headerTranslation:Float,squishinessFraction:Float)
+ fun hideImmediately()
 }
-class Container { var qsVisible=false }
+class Canvas {
+ fun translate(x:Float,y:Float){};fun clipOutPath(path:Path){}
+}
+class Path { val isEmpty=true }
+open class Parent {
+ var drawn=0;fun invalidate(){}
+ open fun dispatchDraw(canvas:Canvas){drawn++}
+}
+class Container:Parent() {
+ var dirtyClipData=false;val currentClippingPath=Path();val translationY=0f
+ fun updateClippingPath(){}
+''' + container_properties + container_draw + '''
+}
 class Model {
  var isQsVisible=false;var panelExpansionFraction=0f;var squishinessFraction=0f;var proposedTranslation=0f;var qs=0f
  fun setQsExpansionValue(value:Float){qs=value}
@@ -84,7 +100,23 @@ fun main(){
  for(step in 100 downTo 0){
   panel.setQsExpansion(1f,step/100f,0f,1f)
   check((HeckerQsPanelState.alpha()>0)==(step>0))
+  val container=panel.containerView!!;val drawn=container.drawn
+  container.dispatchDraw(probe.Canvas())
+  check(container.drawn==drawn+(if(step>0)1 else 0))
  }
+ // Simulate a settling inner scene/cached layer for two seconds after the real shade closed.
+ val container=panel.containerView!!;val drawn=container.drawn
+ panel.viewModel.panelExpansionFraction=1f
+ repeat(120){container.dispatchDraw(probe.Canvas())}
+ check(container.drawn==drawn)
+ panel.setQsExpansion(1f,Float.NaN,0f,1f);container.dispatchDraw(probe.Canvas())
+ check(container.drawn==drawn)
+ panel.setQsExpansion(1f,1f,0f,1f);container.dispatchDraw(probe.Canvas())
+ check(container.drawn==drawn+1)
+ panel.hideImmediately();container.dispatchDraw(probe.Canvas())
+ check(container.drawn==drawn+1 && HeckerQsPanelState.alpha()==0f)
+ panel.setQsVisible(true);panel.setQsExpansion(1f,1f,0f,1f);container.dispatchDraw(probe.Canvas())
+ check(container.drawn==drawn+2)
  panel.setQsExpansion(1f,1f,0f,1f);panel.setQsVisible(false)
  check(HeckerQsPanelState.alpha()==0f && panel.containerView?.qsVisible==false)
  panel.setQsVisible(true);panel.setQsExpansion(0f,0f,0f,1f);check(HeckerQsPanelState.alpha()==0f)

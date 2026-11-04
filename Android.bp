@@ -53,7 +53,7 @@ android_app {
     static_libs: ["lottie", "HeckerNetLabApi", "HeckerDepthLiteRt", "HeckerXMorphClock", "HeckerVpnApi"],
     jni_libs: ["libhecker_depth_tflite"],
     compile_multilib: "64",
-    required: ["HeckerSuitePrivappPermissions", "HeckerSuiteFreeformFeature", "HeckerGameInit", "HeckerSensorRecoveryInit"],
+    required: ["HeckerSuitePrivappPermissions", "HeckerSuiteFreeformFeature", "HeckerGameInit", "HeckerSensorRecoveryInit", "HeckerVpnController"],
     optimize: {
         proguard_flags_files: ["app/proguard.flags", "prebuilts/depth/litert-proguard.flags", "prebuilts/depth/litert-api-proguard.flags"],
     },
