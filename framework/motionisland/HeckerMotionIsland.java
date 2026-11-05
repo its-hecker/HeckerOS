@@ -39,7 +39,7 @@ public final class HeckerMotionIsland implements AutoCloseable {
     private MediaSession.Token lastPlaying, feedbackToken, dialogToken;
     private long lastPlayingAt;
     private long transientUntil,skipUntil;
-    private int renderedHeight=32, renderedX, renderedY;
+    private int renderedHeight=32, renderedWidth=124, renderedX, renderedY;
     private boolean mediaObserved;
     private String beforeIdentity;
     private MotionIslandView capsule;
@@ -96,7 +96,7 @@ public final class HeckerMotionIsland implements AutoCloseable {
             filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             context.registerReceiver(environment, filter, Context.RECEIVER_NOT_EXPORTED);
             environmentRegistered = true;
-            for (String key : new String[]{ISLAND, CREATURE, "aware_enabled", "hecker_motion_character", "hecker_motion_bar_height", "hecker_motion_bar_x", "hecker_motion_bar_y", "hecker_motion_media_events"})
+            for (String key : new String[]{ISLAND, CREATURE, "aware_enabled", "hecker_motion_character", "hecker_motion_bar_height", "hecker_motion_bar_width", "hecker_motion_bar_x", "hecker_motion_bar_y", "hecker_motion_media_events"})
                 context.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(key),
                         false, observer, UserHandle.USER_ALL);
         } catch (RuntimeException unavailable) { close(); throw unavailable; }
@@ -193,15 +193,19 @@ public final class HeckerMotionIsland implements AutoCloseable {
         if (!state.visible(now())) { removeViews(); return; }
         int height=Math.max(26,Math.min(56,Settings.Secure.getIntForUser(context.getContentResolver(),
             "hecker_motion_bar_height",32,ActivityManager.getCurrentUser())));
+        int width=Math.max(92,Math.min(220,Settings.Secure.getIntForUser(context.getContentResolver(),
+            "hecker_motion_bar_width",124,ActivityManager.getCurrentUser())));
         int x=Settings.Secure.getIntForUser(context.getContentResolver(),"hecker_motion_bar_x",0,ActivityManager.getCurrentUser());
         int y=Settings.Secure.getIntForUser(context.getContentResolver(),"hecker_motion_bar_y",0,ActivityManager.getCurrentUser());
         x=Math.max(-160,Math.min(160,x));y=Math.max(0,Math.min(160,y));
-        if(height!=renderedHeight||x!=renderedX||y!=renderedY){removeViews();renderedHeight=height;renderedX=x;renderedY=y;}
+        if(height!=renderedHeight||width!=renderedWidth||x!=renderedX||y!=renderedY){
+            removeViews();renderedHeight=height;renderedWidth=width;renderedX=x;renderedY=y;
+        }
         boolean animate = ValueAnimator.areAnimatorsEnabled() && !power.isPowerSaveMode();
         if (capsule == null) {
             MotionIslandView view = new MotionIslandView(context);
             view.setOnClickListener(v -> openPlayer());
-            if (!add(view, dp(124), dp(height), 0, false, "HeckerMotionIsland")) return;
+            if (!add(view, dp(width), dp(height), 0, false, "HeckerMotionIsland")) return;
             capsule = view;
         }
         String label = state.current(now()) == MotionIslandState.NONE
@@ -218,7 +222,7 @@ public final class HeckerMotionIsland implements AutoCloseable {
     }
     private boolean add(View view, int width, int height, int y, boolean decoration, String title) {
         int available = windows.getCurrentWindowMetrics().getBounds().width();
-        int capsuleWidth = Math.min(dp(124), available - dp(24));
+        int capsuleWidth = Math.min(dp(renderedWidth), available - dp(24));
         int anchorX = Math.max(-(available-capsuleWidth)/2, Math.min((available-capsuleWidth)/2, dp(renderedX)));
         if (view instanceof MotionAstronautView) ((MotionAstronautView) view).setAnchorOffset(anchorX);
         // The non-touchable decoration spans the display. Its rope stays under the capsule

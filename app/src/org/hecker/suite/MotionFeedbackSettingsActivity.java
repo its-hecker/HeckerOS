@@ -49,6 +49,23 @@ public final class MotionFeedbackSettingsActivity extends Activity {
             public void onStartTrackingTouch(android.widget.SeekBar view){}
             public void onStopTrackingTouch(android.widget.SeekBar view){}
         });options.addView(bar);
+        int width=Math.max(92,Math.min(220,Settings.Secure.getInt(getContentResolver(),"hecker_motion_bar_width",124)));
+        android.widget.TextView widthLabel=Ui.text(this,getString(R.string.motion_bar_width,width),16,true);
+        options.addView(widthLabel);
+        android.widget.SeekBar widthBar=new android.widget.SeekBar(this);
+        widthBar.setMax(128);widthBar.setProgress(width-92);
+        widthBar.setContentDescription(getString(R.string.motion_bar_width,width));
+        widthBar.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
+            public void onProgressChanged(android.widget.SeekBar view,int progress,boolean user){
+                int newWidth=progress+92;
+                widthLabel.setText(getString(R.string.motion_bar_width,newWidth));
+                if(user&&!Settings.Secure.putInt(getContentResolver(),"hecker_motion_bar_width",newWidth))
+                    Toast.makeText(MotionFeedbackSettingsActivity.this,R.string.motion_feedback_save_failed,
+                            Toast.LENGTH_SHORT).show();
+            }
+            public void onStartTrackingTouch(android.widget.SeekBar view){}
+            public void onStopTrackingTouch(android.widget.SeekBar view){}
+        });options.addView(widthBar);
         position(options, R.string.motion_bar_horizontal, "hecker_motion_bar_x", -160, 160);
         position(options, R.string.motion_bar_vertical, "hecker_motion_bar_y", 0, 160);
         toggle(options, R.string.motion_media_events, "hecker_motion_media_events");

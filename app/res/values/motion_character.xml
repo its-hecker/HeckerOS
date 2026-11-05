@@ -5,4 +5,5 @@
     <string name="motion_goblin">Goblin</string>
     <string name="motion_ninja">Ninja</string>
     <string name="motion_bar_height">Motion bar height · %1$d dp</string>
+    <string name="motion_bar_width">Motion bar width · %1$d dp</string>
 </resources>

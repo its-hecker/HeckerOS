@@ -105,6 +105,8 @@ public class LifecycleTest{
   android.provider.Settings.Secure.putInt(c.getContentResolver(),"hecker_motion_creature",1);
   check(c.windows.views.size()==2&&m.plays==0&&m.pauses==0); // Visual switches never send playback commands.
   android.provider.Settings.Secure.putInt(c.getContentResolver(),"hecker_motion_bar_height",56);
+  android.provider.Settings.Secure.putInt(c.getContentResolver(),"hecker_motion_bar_width",174);
+  check(c.windows.views.entrySet().stream().anyMatch(e->e.getKey() instanceof MotionIslandView&&e.getValue().width==174));
   android.provider.Settings.Secure.putInt(c.getContentResolver(),"hecker_motion_character",3);
   check(MotionAstronautView.character==3&&c.windows.views.entrySet().stream().anyMatch(e->e.getKey() instanceof MotionAstronautView&&e.getValue().y==53));
   check(c.windows.views.entrySet().stream().anyMatch(e->e.getKey() instanceof MotionIslandView&&e.getValue().height==56));
