@@ -71,6 +71,10 @@ fun HeckerQsMediaPlayer(modifier: Modifier = Modifier, square: Boolean = false,
         return
     }
     val scope = LocalHeckerQsContentScope.current
+    // A zero-alpha shared element may remain drawn by a cached scene overlay.
+    // Tear down the element itself as soon as the outer shade is closed, even
+    // if QQS/full-QS transition settlement is still active.
+    if (HeckerQsPanelState.alpha(scope) <= .001f) return
     if (scope == null) {
         HeckerMediaCard(modifier.graphicsLayer { alpha = HeckerQsPanelState.alpha(null) },
             square, hideWhenInactive, compactRow = compactRow,

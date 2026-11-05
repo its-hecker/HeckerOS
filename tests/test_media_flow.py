@@ -9,6 +9,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class MediaFlowTests(unittest.TestCase):
+    def test_shared_media_element_detaches_on_shade_close(self):
+        scene = (ROOT / "framework/qs/HeckerMediaScene.kt").read_text()
+        detach = scene.index("if (HeckerQsPanelState.alpha(scope) <= .001f) return")
+        mount = scene.index("ElementWithValues(HeckerQsScene.Media")
+        self.assertLess(detach, mount, "closing the outer shade must unmount media")
+
     def test_geometry_and_absolute_glow_phase(self):
         probe = r'''import com.android.systemui.hecker.MediaCardGeometry;
 public class MediaProbe {

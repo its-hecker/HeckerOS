@@ -219,7 +219,11 @@ public final class HeckerVpnActivity extends Activity {
     }
     private void renderProfiles() {
         LinearLayout header = Ui.card(this); action(header, R.string.vpn_import, () -> startActivityForResult(
-                new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*"), 784)); body.addView(header);
+                new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*"), 784));
+        action(header, R.string.vpn_paste, this::pasteConfigDialog);
+        action(header, R.string.vpn_proton_free, () -> startActivity(new Intent(Intent.ACTION_VIEW,
+                android.net.Uri.parse("https://protonvpn.com/support/wireguard-configurations"))));
+        body.addView(header);
         ArrayList<Bundle> items = state.getParcelableArrayList("profiles", Bundle.class);
         if (items == null || items.isEmpty()) { body.addView(Ui.text(this, getString(R.string.vpn_no_profiles), 15, false)); return; }
         for (Bundle profile : items) {
@@ -323,6 +327,41 @@ public final class HeckerVpnActivity extends Activity {
             }); }
         }, "HeckerVPN-import").start();
     }
+    /** Paste configuration locally; never place WireGuard private keys in logs or saved UI state. */
+    private void pasteConfigDialog() {
+        EditText input = new EditText(this);
+        input.setHint(R.string.vpn_paste_hint);
+        input.setTextColor(getColor(R.color.hecker_foreground));
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT
+                | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                | android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        input.setMinLines(8);
+        input.setMaxLines(16);
+        input.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(input);
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.vpn_paste)
+                .setView(scroll)
+                .setNegativeButton(android.R.string.cancel, (d, which) -> input.setText(""))
+                .setPositiveButton(R.string.vpn_continue, null).create();
+        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String config;
+            try {
+                byte[] bytes = input.getText().toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                try (java.io.ByteArrayInputStream stream = new java.io.ByteArrayInputStream(bytes)) {
+                    config = VpnInput.configuration(stream);
+                } finally { java.util.Arrays.fill(bytes, (byte) 0); }
+            } catch (java.io.IOException | IllegalArgumentException invalid) {
+                input.setError(getString(R.string.vpn_import_error));
+                return;
+            }
+            input.setText("");
+            dialog.dismiss();
+            importDialog(getString(R.string.vpn_pasted_name), config);
+        }));
+        dialog.show();
+    }
+
     private void importDialog(String name, String config) {
         EditText input = new EditText(this); input.setText(name.length() > 80 ? name.substring(0, 80) : name);
         input.setHint(R.string.vpn_name); input.setTextColor(getColor(R.color.hecker_foreground));

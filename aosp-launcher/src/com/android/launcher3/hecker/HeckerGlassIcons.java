@@ -56,6 +56,11 @@ public final class HeckerGlassIcons {
     private static void load(Context context, ComponentName component, UserHandle user, String key) {
         Bitmap result = null; boolean tinted = false;
         try {
+            // Drive's adaptive icon does not consistently publish a monochrome
+            // layer on Coral. Do not depend on LauncherApps resolving that layer.
+            if ("com.google.android.apps.docs".equals(component.getPackageName())) {
+                result = driveGlyph(); tinted = true;
+            } else {
             LauncherApps apps = context.getSystemService(LauncherApps.class);
             LauncherActivityInfo info = apps.resolveActivity(new Intent(Intent.ACTION_MAIN)
                     .addCategory(Intent.CATEGORY_LAUNCHER).setComponent(component), user);
@@ -80,11 +85,29 @@ public final class HeckerGlassIcons {
                 if (ink) { pixels.setPixels(values, 0, SIZE, 0, 0, SIZE, SIZE); result = pixels; }
                 }
             }
+            }
         } catch (RuntimeException unavailable) { /* Quiet/removed profile retains its native icon. */ }
         if (result == null) result = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
         List<Runnable> callbacks;
         synchronized (HeckerGlassIcons.class) { MASKS.put(key, new Glyph(result,tinted)); callbacks = PENDING.remove(key); }
         if (callbacks != null) MAIN.post(() -> { for (Runnable callback : callbacks) callback.run(); });
+    }
+    /** White, transparent Drive triangle that inherits the user's glass icon tint. */
+    private static Bitmap driveGlyph() {
+        Bitmap bitmap = Bitmap.createBitmap(SIZE, SIZE, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.WHITE);
+        Path left = new Path();
+        left.moveTo(55, 20); left.lineTo(80, 20); left.lineTo(41, 113);
+        left.lineTo(14, 113); left.close(); canvas.drawPath(left, paint);
+        Path right = new Path();
+        right.moveTo(80, 20); right.lineTo(132, 104); right.lineTo(107, 116);
+        right.lineTo(55, 29); right.close(); canvas.drawPath(right, paint);
+        Path base = new Path();
+        base.moveTo(41, 91); base.lineTo(116, 91); base.lineTo(132, 114);
+        base.lineTo(14, 114); base.close(); canvas.drawPath(base, paint);
+        return bitmap;
     }
     /** A clean camera body and open lens, rather than flattening the app's opaque plate. */
     private static Bitmap cameraGlyph() {
