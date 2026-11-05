@@ -16,4 +16,7 @@
   <string name="depth_wallpaper_apply">Apply depth wallpaper</string>
   <string name="depth_wallpaper_invalid">Could not prepare these layers. Use a transparent PNG subject, or extract a subject from a photo, and check the preview.</string>
   <string name="depth_wallpaper_applied">Depth wallpaper applied</string>
+  <string name="depth_wallpaper_picker_failed">Could not read that photo. Select it again in Files or Photos.</string>
+  <string name="depth_wallpaper_extract_failed">Could not extract a clear subject. Try a different photo or import a transparent PNG foreground.</string>
+  <string name="depth_wallpaper_subject_needs_alpha">A manual subject needs a transparent PNG cutout. Alternatively use automatic extraction.</string>
 </resources>

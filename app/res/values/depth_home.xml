@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="depth_apply_home">Use depth wallpaper on Home screen too</string>
+    <string name="depth_apply_home">Also set this imported photo as Home wallpaper (replaces current Home wallpaper)</string>
 </resources>

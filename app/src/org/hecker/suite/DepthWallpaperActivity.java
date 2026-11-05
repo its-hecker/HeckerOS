@@ -16,6 +16,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,8 +29,9 @@ public final class DepthWallpaperActivity extends Activity {
     private ImageView preview;
     private Button apply;
     private android.widget.Switch home;
-    private int generation;
-    private boolean stopped,homeOnly;
+    private volatile int generation;
+    private volatile boolean stopped;
+    private boolean homeOnly;
     private boolean extractSubject;
     private int subjectSize = 100, subjectX, subjectY;
     @Override public void onCreate(Bundle state) {
@@ -71,14 +73,54 @@ public final class DepthWallpaperActivity extends Activity {
     }
     @Override protected void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
-        if ((request != 1 && request != 2 && request != 3) || result != RESULT_OK || data == null || data.getData() == null) return;
-        Uri uri = data.getData();
-        try { getContentResolver().takePersistableUriPermission(uri,
-                data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION); }
-        catch (SecurityException temporaryGrant) { /* The picker may supply a task-lifetime grant. */ }
-        if (request == 3) { background = uri; foreground = null; extractSubject = true; }
-        else { extractSubject = false; if (request == 1) background = uri; else foreground = uri; }
-        prepare();
+        if ((request != 1 && request != 2 && request != 3)
+                || result != RESULT_OK || data == null || data.getData() == null) return;
+        // Not every document picker gives a persistent grant. Snapshot while its
+        // temporary grant is active; decoding can safely continue after return.
+        final Uri selected = data.getData();
+        final int token = ++generation;
+        apply.setEnabled(false);
+        worker.execute(() -> {
+            Uri staged = null;
+            try {
+                staged = stageSelectedImage(selected);
+                final Uri local = staged;
+                runOnUiThread(() -> {
+                    if (stopped || generation != token) { discardStaged(local); return; }
+                    if (request == 3) {
+                        background = local; foreground = null; extractSubject = true;
+                    } else {
+                        extractSubject = false;
+                        if (request == 1) background = local; else foreground = local;
+                    }
+                    prepare();
+                });
+            } catch (IOException | RuntimeException failure) {
+                if (staged != null) discardStaged(staged);
+                android.util.Log.w("HeckerDepth", "Document picker image preparation failed", failure);
+                runOnUiThread(() -> {
+                    if (!stopped && generation == token) error(R.string.depth_wallpaper_picker_failed);
+                });
+            }
+        });
+    }
+    private Uri stageSelectedImage(Uri selected) throws IOException {
+        File folder = new File(getCacheDir(), "hecker-depth-picker");
+        if (!folder.isDirectory() && !folder.mkdirs())
+            throw new IOException("Cannot prepare private image storage");
+        File staged = File.createTempFile("selected-", ".img", folder);
+        try (InputStream input = getContentResolver().openInputStream(selected)) {
+            DepthPickerCopy.copy(input, staged, 64L * 1024 * 1024);
+            if (Thread.currentThread().isInterrupted()) throw new IOException("Selection cancelled");
+            return Uri.fromFile(staged);
+        } catch (IOException | RuntimeException failure) {
+            staged.delete();
+            throw failure;
+        }
+    }
+    private static void discardStaged(Uri uri) {
+        if (uri != null && "file".equals(uri.getScheme()) && uri.getPath() != null)
+            new File(uri.getPath()).delete();
     }
     private Bitmap decode(Uri uri) throws IOException {
         return ImageDecoder.decodeBitmap(ImageDecoder.createSource(getContentResolver(), uri),
@@ -108,7 +150,7 @@ public final class DepthWallpaperActivity extends Activity {
                         if (alpha < 32) transparent++;
                         if (alpha > 224) opaque++;
                     }
-                if (transparent < 16 || opaque < 16) throw new IllegalArgumentException("No usable subject mask");
+                if (transparent == 0 || opaque == 0) throw new IllegalArgumentException("No usable subject mask");
                 Bitmap fg = aligned(bg, raw, 100, 0, 0);
                 Bitmap image = Bitmap.createBitmap(bg.getWidth(), bg.getHeight(), Bitmap.Config.ARGB_8888);
                 Canvas canvas = new Canvas(image); canvas.drawBitmap(bg, 0, 0, null); canvas.drawBitmap(fg, 0, 0, null);
@@ -119,7 +161,13 @@ public final class DepthWallpaperActivity extends Activity {
                 });
             } catch (IOException | RuntimeException | OutOfMemoryError invalid) {
                 android.util.Log.w("HeckerDepth", "Cannot prepare selected depth images", invalid);
-                runOnUiThread(() -> { if (!stopped && token == generation) error(R.string.depth_wallpaper_invalid); });
+                runOnUiThread(() -> {
+                    if (!stopped && token == generation) error(automatic
+                            ? R.string.depth_wallpaper_extract_failed
+                            : invalid instanceof IllegalArgumentException
+                                    ? R.string.depth_wallpaper_subject_needs_alpha
+                                    : R.string.depth_wallpaper_invalid);
+                });
             }
         });
     }
