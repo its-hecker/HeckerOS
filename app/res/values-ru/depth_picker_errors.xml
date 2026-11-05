@@ -1,0 +1,5 @@
+<resources>
+  <string name="depth_wallpaper_picker_failed">Не удалось прочитать выбранное фото. Выберите его снова в приложении «Файлы» или «Фото».</string>
+  <string name="depth_wallpaper_extract_failed">Не удалось выделить объект. Попробуйте другое фото или импортируйте передний план PNG с прозрачностью.</string>
+  <string name="depth_wallpaper_subject_needs_alpha">Для ручного импорта нужен вырезанный объект в PNG с прозрачным фоном. Можно использовать автоматическое выделение.</string>
+</resources>

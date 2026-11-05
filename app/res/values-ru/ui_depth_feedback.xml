@@ -8,7 +8,4 @@
   <string name="depth_current_summary">Подготовить уже установленные обои блокировки, сохранив выбранный стиль часов.</string>
   <string name="depth_extract_working">Подготовка объекта обоев…</string>
   <string name="depth_current_failed">Не удалось выделить объект. Используйте статичное изображение с чётким объектом или импортируйте фото.</string>
-  <string name="depth_wallpaper_picker_failed">Не удалось прочитать выбранное фото. Выберите его снова в приложении «Файлы» или «Фото».</string>
-  <string name="depth_wallpaper_extract_failed">Не удалось выделить объект. Попробуйте другое фото или импортируйте передний план PNG с прозрачностью.</string>
-  <string name="depth_wallpaper_subject_needs_alpha">Для ручного импорта нужен вырезанный объект в PNG с прозрачным фоном. Можно использовать автоматическое выделение.</string>
 </resources>
