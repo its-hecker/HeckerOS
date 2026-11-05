@@ -442,6 +442,7 @@ def main():
     paths.update(SLEEP_INPUTS)
     paths.add('packages/apps/Settings/src/com/android/settings/widget/HomepagePreference.java')
     paths.add('packages/apps/Settings/AndroidManifest.xml')
+    paths.add('frameworks/base/services/core/java/com/android/server/pm/HeckerRootVisibility.java')
     paths.add('frameworks/base/core/java/android/view/WindowManager.java')
     paths.update('packages/apps/Launcher3/' + name for name in ('Android.bp', 'aconfig/Android.bp', 'AndroidManifest.xml', 'src/com/android/launcher3/LauncherFiles.java','src/com/android/launcher3/SessionCommitReceiver.java','src/com/android/launcher3/settings/SettingsActivity.java'))
     paths.update(['packages/apps/Launcher3/src/com/android/launcher3/model/ModelDbController.kt', 'packages/apps/Launcher3/src/com/android/launcher3/LauncherSettings.java'])

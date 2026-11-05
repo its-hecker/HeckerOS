@@ -111,7 +111,7 @@ public final class SuiteActivity extends Activity {
         }
     }
     private void openSpoofing(){
-        try{startActivity(new Intent().setClassName("com.android.settings","com.android.settings.hecker.HeckerSpoofingHubActivity"));}
+        try{startActivity(new Intent().setClassName("com.android.settings","com.android.settings.hecker.HeckerIntegrityActivity"));}
         catch(ActivityNotFoundException|SecurityException unavailable){Toast.makeText(this,R.string.native_page_unavailable,Toast.LENGTH_LONG).show();}
     }
     private void openFace(){settings("android.settings.FACE_SETTINGS");}

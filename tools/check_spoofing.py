@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Type-check the Evolution X port against Android 17 and test private configuration/crypto.
+"""Type-check the Penguin integrity port against Android 17 and test private configuration/crypto.
 
 This is a javac/host check, not a Soong build or an attestation verdict.
 """
@@ -43,18 +43,19 @@ def main():
         # Flags and the pre-existing PixelOS keybox hooks absent from AOSP's jar.
         stubs = sorted((ROOT/'tests/spoofing/type-stubs').rglob('*.java'))
         run(args.java, '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', jar,
-            '-d', out/'types', *java, *keystore, store,
-            framework/'core/java/com/android/internal/util/PropImitationHooks.java', *stubs)
+            '-d', out/'types', *java, *keystore, store, *stubs)
 
         aidl = (framework/'core/java/android/app/IActivityManager.aidl').read_text()
         ams = (framework/'services/core/java/com/android/server/am/ActivityManagerService.java').read_text()
         for name in ['getSpoofGamePropsConfig','getSpoofTrickyStoreTarget','getSpoofTrickyStoreKeyBox',
                      'getSpoofTrickyStorePatch','getHeckerSpoofConfig','setHeckerSpoofConfig']:
             assert aidl.count(name+'(') == 1 and ams.count(name+'(') == 1, name
-        props = (framework/'core/java/com/android/internal/util/PropImitationHooks.java').read_text()
-        assert 'if (sIsGms || sIsFinsky) return;' in props
-        assert 'sPixelOneProps.forEach((PropImitationHooks::setPropValue))' in props
-        assert 'setPlayIntegrityProps(' not in props and 'onEngineGetCertificateChain(' not in props
+        assert not (framework/'core/java/com/android/internal/util/PropImitationHooks.java').exists()
+        instrumentation = (framework/'core/java/android/app/Instrumentation.java').read_text()
+        assert 'PropImitationHooks' not in instrumentation
+        pif = (framework/'core/java/android/security/pif/PlayIntegritySpoofService.java').read_text()
+        assert 'public void initialize(Context context, String packageName, String processName)' in pif
+        assert 'getSpoofPifConfig(' not in pif, 'PIF must use the existing Hecker store'
         for file in ['keystore/java/android/security/KeyStore2.java',
                      'keystore/java/android/security/KeyStoreSecurityLevel.java']:
             assert 'KeyboxImitationHooks' not in (framework/file).read_text()
@@ -80,6 +81,13 @@ def main():
             '-d', out/'runtime', *logic, store, *runtime, framework/'tests/hecker/SpoofingConfigTest.java')
         run(args.java, '-cp', str(out/'runtime')+os.pathsep+str(jar),
             'com.android.server.spoof.SpoofingConfigTest', out/'data-system')
+        pif_runtime = [p for p in runtime if '/security/pif/' not in str(p)]
+        run(args.java, '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', jar,
+            '-d', out/'pif', *pif_runtime,
+            framework/'core/java/android/security/pif/PlayIntegritySpoofService.java',
+            ROOT/'tests/spoofing/PenguinPifTest.java')
+        run(args.java, '-cp', str(out/'pif')+os.pathsep+str(jar),
+            'android.security.pif.PenguinPifTest')
     print('Android 17 keystore/crypto type checks and scoped configuration regressions: PASS')
     print('Full Android/Soong build and on-device attestation/enrollment testing remain required.')
 

@@ -91,8 +91,8 @@
     },
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
-      "branch": "fix/coral-ui-compatibility-20261102",
-      "revision": "4af276bc5ceea071ef0da5ea440cda4470c08df6",
+      "branch": "feat/penguin-integrity-20261105",
+      "revision": "db2d4435d1d2cce17d35f6fdc0efb303becfc2c5",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -206,7 +206,11 @@
         "packages/SystemUI/src/com/android/systemui/qs/composefragment/QSFragmentCompose.kt",
         "packages/SystemUI/compose/features/src/com/android/systemui/keyguard/ui/composable/elements/LockscreenElementFactoryImpl.kt",
         "packages/SystemUI/Android.bp",
-        "packages/SystemUI/src/com/android/systemui/window/domain/interactor/WindowRootViewBlurInteractor.kt"
+        "packages/SystemUI/src/com/android/systemui/window/domain/interactor/WindowRootViewBlurInteractor.kt",
+        "core/java/android/app/Instrumentation.java",
+        "core/java/android/app/ApplicationPackageManager.java",
+        "services/core/java/com/android/server/wm/ActivityTaskManagerService.java",
+        "tests/hecker/test_penguin_visibility.py"
       ]
     },
     "hardware/google/camera": {
@@ -240,8 +244,8 @@
     },
     "packages/apps/Settings": {
       "repository": "its-hecker/heckeros_packages_apps_Settings",
-      "branch": "feat/suite-polish",
-      "revision": "3831282d93ecda4d52a6894077482fe01ecea903",
+      "branch": "feat/penguin-integrity-20261105",
+      "revision": "1cc575774ca85cf5ca5a8cf6a164a4583238c9c5",
       "files": [
         "src/com/android/settings/homepage/",
         "src/com/android/settings/DisplaySettings.java",
@@ -448,9 +452,9 @@
     "validation": "Source and host validation only; full ROM, kernel and phone tests required. Vendor/firmware security patch levels unchanged."
   },
   "app_compatibility": {
-    "branch": "fix/coral-ui-compatibility-20261102",
-    "framework_revision": "4af276bc5ceea071ef0da5ea440cda4470c08df6",
-    "backend_version": 2,
+    "branch": "feat/penguin-integrity-20261105",
+    "framework_revision": "db2d4435d1d2cce17d35f6fdc0efb303becfc2c5",
+    "backend_version": 3,
     "device": "coral",
     "inherited_suite_revision": "6963155a0d449cf6a163c391c14c18fafd4cbd41",
     "device_testing": "pending",
@@ -515,7 +519,7 @@
     "branch": "fix/coral-ui-compatibility-20261102",
     "device": "coral",
     "parent_suite_revision": "25642fbfcbd0762eefc213f7a93625e257b5722b",
-    "settings_revision": "3831282d93ecda4d52a6894077482fe01ecea903",
+    "settings_revision": "1cc575774ca85cf5ca5a8cf6a164a4583238c9c5",
     "issue": "TopLevelSettings calls setDivider during onCreateRecyclerView before AndroidX assigns mList",
     "fix": "Move divider suppression after super.onViewCreated; upgrade all published prepared homepage variants",
     "validation": "Host regression reproduces previous null-list crash and passes corrected native callbacks across view recreation; customization/preparation and Settings resource/adapter checks pass; full ROM build and Coral phone acceptance pending"
@@ -524,7 +528,7 @@
     "branch": "fix/coral-ui-compatibility-20261102",
     "device": "coral",
     "parent_suite_revision": "53caa8dc790b67da46fc98fd3908211c66cccb45",
-    "framework_revision": "4af276bc5ceea071ef0da5ea440cda4470c08df6",
+    "framework_revision": "db2d4435d1d2cce17d35f6fdc0efb303becfc2c5",
     "changes": [
       "depth with stock and installed native clock plugins",
       "mask only native small/large clock elements",
@@ -576,5 +580,15 @@
     "issue": "HeckerLauncher Kotlin cannot resolve Settings.ACTION_WALLPAPER_SETTINGS",
     "fix": "Use the action string advertised by the pinned exported Settings wallpaper activity and migrate the exact previously prepared fallback",
     "validation": "Compile the actual prepared native Kotlin method against the locked Android SDK, verify the pinned Settings intent filter, and check prepared-source upgrade/idempotence/revert; full ROM build and physical Coral acceptance pending"
+  },
+  "penguin_integrity_20261105": {
+    "branch": "feat/penguin-integrity-20261105",
+    "framework_revision": "db2d4435d1d2cce17d35f6fdc0efb303becfc2c5",
+    "settings_revision": "1cc575774ca85cf5ca5a8cf6a164a4583238c9c5",
+    "upstream_repository": "Project-PenguinOS/frameworks_base",
+    "upstream_revision": "947644f88d63b82179deec4d9149a1e4332584a3",
+    "status": "source integrated; full Coral build and physical validation pending",
+    "configuration": "existing Hecker private/Global stores retained; no bundled keys",
+    "documentation": "docs/penguin-integrity-2026-11-05.md"
   }
 }

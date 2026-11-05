@@ -1,5 +1,18 @@
 # HeckerOS · Android 17
 
+## Penguin integrity integration — 5 November 2026
+
+The current fix/device-feedback-20261105 build track includes the completed
+Penguin PIF, TrickyStore, GameProps and ROM visibility source integration, with
+matching native Settings. HeckerLab opens one Play Integrity page; the former
+hub component remains a private upgrade redirect. Existing configuration is
+preserved, and PropImitationHooks is removed.
+
+See [changes, validation and the required incremental rebuild sequence](docs/penguin-integrity-2026-11-05.md).
+Source/SDK/host checks pass. Full Coral ROM compilation and phone validation
+remain required; no attestation verdict is claimed.
+
+
 ## VPN startup and fast QS close — 5 November 2026
 
 The same `fix/device-feedback-20261105` branch now corrects the VPN controller's

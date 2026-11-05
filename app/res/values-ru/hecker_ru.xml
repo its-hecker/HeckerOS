@@ -611,7 +611,7 @@
     <string name="sensor_recovery_unverified">Не удалось подтвердить перезапуск службы. Восстановление датчика не подтверждается. Повторите проверку приближения или проверьте состояние встроенной службы.</string>
     <string name="sensor_recovery_busy">Восстановление уже выполняется или было запрошено недавно. Подождите 30 секунд перед повторной попыткой.</string>
     <string name="sensor_recovery_blocked">Перед перезапуском службы датчиков разблокируйте телефон и завершите звонок.</string>
-    <string name="spoofing_title">Центр подмены данных</string>
+    <string name="spoofing_title">Play Integrity</string>
     <string name="spoofing_summary">Профили устройства, сертификаты keybox и целевые приложения</string>
     <string name="suite_title">HeckerLab</string>
     <string name="suite_summary">Рабочий стол, блокировка приложений, Motion Sense, игровой режим и другие возможности</string>

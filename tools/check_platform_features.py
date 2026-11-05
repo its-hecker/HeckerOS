@@ -14,6 +14,7 @@ import subprocess
 import tempfile
 import urllib.request
 import zipfile
+from compile_sdk import fetch
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -133,7 +134,10 @@ def main():
             '-d',out/'framework-classes',*sorted(stubs.rglob('*.java')),
             framework/'core/java/android/security/pif/PlayIntegritySpoofService.java',
             framework/'tests/hecker/PlayIntegrityScopeTest.java')
-        run('java','-cp',str(out/'framework-classes')+os.pathsep+str(sdk/'android-system.jar'),
+        runtime_lock = json.loads((ROOT/'tests/spoof-dependencies.lock.json').read_text())
+        runtime_name, runtime_spec = next(iter(runtime_lock.items()))
+        runtime_jar = fetch(sdk, runtime_name, runtime_spec)
+        run('java','-cp',str(out/'framework-classes')+os.pathsep+str(runtime_jar),
             'android.security.pif.PlayIntegrityScopeTest')
         cpp = (framework/'core/jni/android_os_SystemProperties.cpp').read_text()
         start = cpp.index('namespace pif_prop_virt {')
@@ -170,7 +174,7 @@ extern "C" int __system_property_get(const char*,char*);
         run(out/'native-test')
         assert 'FindClass("android/security/pif/PlayIntegritySpoofService")' in cpp
         assert '"([Ljava/lang/String;[Ljava/lang/String;Z)Z"' in cpp
-    print('Owned Settings UI Java/resource checks and Evolution X PIF host regressions: PASS')
+    print('Owned Settings UI Java/resource checks and Penguin PIF host regressions: PASS')
     print('Full Settings/platform build, Pixel 4 enrollment and Play Integrity verdict testing remain required.')
 
 

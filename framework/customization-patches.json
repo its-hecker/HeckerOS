@@ -1294,19 +1294,5 @@
       "old": "repository.blurRequestedByShade.value = blurRadius.toFloat()",
       "new": "repository.blurRequestedByShade.value = heckerRadius"
     }
-  ],
-  "frameworks/base/services/core/java/com/android/server/pm/HeckerRootVisibility.java": [
-    {
-      "old": "            \"hecker_hide_developer_options_apps\", \"hecker_bootloader_spoof_apps\",\n            \"hecker_hide_custom_rom_apps\"};",
-      "new": "            \"hecker_hide_developer_options_apps\", \"hecker_bootloader_spoof_apps\"};"
-    },
-    {
-      "old": "            \"com.android.settings\", \"com.android.permissioncontroller\", \"org.hecker.suite\");",
-      "new": "            \"com.android.settings\", \"com.android.permissioncontroller\", \"org.hecker.suite\",\n            \"com.android.launcher3\", \"com.google.android.apps.nexuslauncher\", \"org.hecker.vpn\", \"org.hecker.netlab\", \"org.hecker.librepods\");"
-    },
-    {
-      "old": "return ROM_PROTECTED.contains(packageName) ? flags & ~16 : flags;",
-      "new": "// ROM visibility is the device-wide default for app processes.\n        // Native OS/Hecker components retain their real feature properties and service access.\n        return ROM_PROTECTED.contains(packageName) ? flags & ~16 : flags | 16;"
-    }
   ]
 }

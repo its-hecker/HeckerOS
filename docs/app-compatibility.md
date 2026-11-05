@@ -9,7 +9,7 @@ Custom ROM visibility protection applies across app processes in backend version
 
 | Option | Effect |
 | --- | --- |
-| Root manager privacy | Existing native PackageManager filtering for the four supported manager packages; applies before visibility caches and query-all permission. |
+| Root manager privacy | Penguin root-manager and framework package catalog, including KernelSU Next; applies before visibility caches and query-all permission. |
 | Allow app downgrade | Permit a lower APK version for the selected package through normal installation. Signature, installer permission, SDK, shared-UID and other validation remains in place. It does not fetch or install an APK. |
 | Hide developer options | Report `development_settings_enabled`, `adb_enabled` and `adb_wifi_enabled` as `0` through Android Settings read APIs in that app. Actual device settings stay unchanged. |
 | Bootloader spoof | In that app's process, report `ro.boot.verifiedbootstate=green`, `ro.boot.flash.locked=1` and `ro.boot.vbmeta.device_state=locked` using the existing guarded private property-mapping engine. |
@@ -49,7 +49,8 @@ Separately, the build restricts Lineage/profile service discovery for untrusted
 app SELinux domains. That small service policy applies to all untrusted apps;
 it does not read a per-app setting. System, shell, platform-app and native service
 callers keep their existing access. Root-manager package filtering remains its
-own option.
+own option. Penguin visibility also preserves trusted system/shared-UID callers,
+self access and each user's current default launcher.
 
 Use **Close app to apply**, then reopen it, after changing a profile. This explicit
 action uses the existing privileged force-stop permission for that package and

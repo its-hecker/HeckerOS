@@ -1,4 +1,7 @@
-# Spoofing hub
+# Earlier Spoofing hub integration
+
+The current Play Integrity page and Penguin backend supersede this earlier
+implementation. See [current integration and rebuild](penguin-integrity-2026-11-05.md).
 
 Settings > Hecker's Suite > **Spoofing hub** replaces the old Play Integrity
 entry. The private native Settings host contains the grouped TrickyStore and

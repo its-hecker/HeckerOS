@@ -20,7 +20,7 @@ def main():
     import hashlib
     for name,digest in lock['files'].items():
         assert hashlib.sha256((framework/name).read_bytes()).hexdigest()==digest,name
-    for test in ['test_root_visibility.py','test_app_compatibility.py']:
+    for test in ['test_root_visibility.py','test_app_compatibility.py','test_penguin_visibility.py']:
         subprocess.run(['python3',str(framework/'tests/hecker'/test)],check=True)
     print('Pinned app compatibility source and production policy checks: PASS')
     print('Full Android/SELinux build and on-phone app compatibility remain pending.')
