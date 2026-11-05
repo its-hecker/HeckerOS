@@ -16,4 +16,7 @@
   <string name="depth_wallpaper_apply">应用景深壁纸</string>
   <string name="depth_wallpaper_invalid">无法准备图层。请选择透明 PNG 主体或从照片中提取主体，然后检查预览。</string>
   <string name="depth_wallpaper_applied">已应用景深壁纸</string>
+  <string name="depth_wallpaper_picker_failed">无法读取所选照片。请在“文件”或“照片”中重新选择。</string>
+  <string name="depth_wallpaper_extract_failed">无法提取清晰的主体。请尝试其他照片，或导入透明背景的 PNG 前景图。</string>
+  <string name="depth_wallpaper_subject_needs_alpha">手动导入主体需要透明背景的 PNG 图像。也可以使用自动提取功能。</string>
 </resources>
