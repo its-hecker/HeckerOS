@@ -314,7 +314,7 @@
         "notes": "Current PIF Java behavior adapted to HeckerOS Settings/process-scoped native property bridge; overlapping PixelOS PIF/keybox call paths removed."
       }
     },
-    "functional_revision": "1315d8caae615514b351929769339d7238758f1d"
+    "functional_revision": "ffd227eda1a15dc49b3cde9383c677a9b7f8585c"
   },
   "heckeros": {
     "version": "1.5",
