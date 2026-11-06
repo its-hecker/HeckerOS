@@ -9,11 +9,11 @@ Custom ROM visibility protection applies across app processes in backend version
 
 | Option | Effect |
 | --- | --- |
-| Root manager privacy | Penguin root-manager and framework package catalog, including KernelSU Next; applies before visibility caches and query-all permission. |
+| Root manager privacy | Root-manager/terminal catalog plus verified KernelSU Next signer lineage, so randomized package names are covered; applies before visibility caches and query-all permission. |
 | Allow app downgrade | Permit a lower APK version for the selected package through normal installation. Signature, installer permission, SDK, shared-UID and other validation remains in place. It does not fetch or install an APK. |
-| Hide developer options | Report `development_settings_enabled`, `adb_enabled` and `adb_wifi_enabled` as `0` through Android Settings read APIs in that app. Actual device settings stay unchanged. |
-| Bootloader spoof | In that app's process, report `ro.boot.verifiedbootstate=green`, `ro.boot.flash.locked=1` and `ro.boot.vbmeta.device_state=locked` using the existing guarded private property-mapping engine. |
-| ROM-wide visibility protection | Enabled by default in backend version 3: filter common ROM software properties, align cached `Build.TYPE` and `Build.TAGS`, filter the reviewed file/directory and proc/SELinux markers, and restrict ROM-component package visibility for app processes. There is no per-app switch. |
+| Hide developer options | Report Settings debugging values as `0`; adapt common native ADB properties and socket listing. The matched kernel refuses that app's exact abstract JDWP connect probe and hides adbd stat without disabling device debugging. |
+| Bootloader and attestation compatibility | In that app's process, report `ro.boot.verifiedbootstate=green`, `ro.boot.flash.locked=1` and `ro.boot.vbmeta.device_state=locked` using the existing guarded private property-mapping engine. The same selection authorizes the private TrickyStore backend if enabled and a valid keybox is imported. An explicit Skip wins; keybox access remains limited to selected primary-user UIDs. |
+| ROM-wide visibility protection | Enabled by default in backend version 3: filter common ROM software properties, align partition fingerprints/type/tags with the ROM's main device profile and cached `Build.TYPE`/`Build.TAGS`, filter the reviewed file/directory and proc/SELinux markers, and restrict ROM-component package visibility for app processes. There is no per-app switch. |
 
 ## Scope and application lifecycle
 
@@ -25,7 +25,7 @@ app binding and package-specific app-zygote preload initialize the policy before
 app code. The global zygote, system server, shell and root UIDs are excluded.
 Settings reads apply the override before their per-process value cache. Native
 boot property virtualization uses fixed keys and private process mappings; no
-system property write, bootloader operation or keystore modification is involved.
+system property write or bootloader locking is involved. The optional, separately enabled TrickyStore backend can generate/import an attested key only under its scoped configuration.
 
 The old root key plus `hecker_allow_downgrade_apps`,
 `hecker_hide_developer_options_apps` and `hecker_bootloader_spoof_apps` are stored
@@ -77,16 +77,31 @@ exceptions for native components without a package allowlist file on hot paths.
 The hard-coded partition-device spoofing and its extra SELinux file permissions
 are not included.
 
-Developer visibility covers Settings APIs, not arbitrary direct provider queries,
-other debugging signals or instrumentation. Boot property overrides do not change
-the bootloader, hardware-backed Key Attestation, Play Integrity, boot partitions,
-`/proc` or sysfs evidence, or fresh executables started with exec. Native mapping
-failure is logged and does not crash app initialization. No attestation key or
-banking-app patch is included. UBL compatibility and the previously captured
-obfuscated NullPointerException are not established as fixed by these controls.
-The ROM option reduces common software signals; raw syscalls, direct property
-area access, fresh executables and other unhandled probes can still identify the
-base ROM. It does not provide hardware attestation or a Play Integrity result.
+Debugging privacy is scoped to the selected process. A non-privileged, self-only
+kernel handshake stores the debugging bit in copy-on-write SELinux credentials;
+threads, forks and exec retain it until a new application bind resets it. It adds
+no capability or SELinux allow rule. Core UIDs, other UNIX sockets and opt-out
+apps retain their normal behavior. The actual developer/USB settings and init
+service remain enabled. Direct Binder/USB state and other unhandled instrumentation
+can still reveal debugging. Libc property flags do not survive fresh exec.
+
+Boot properties do not lock the bootloader, alter the trusted hardware boot state,
+repair an expired certificate or guarantee Play Integrity/Wallet acceptance.
+An enabled TrickyStore configuration with valid imported private keys is required
+for certificate adaptation. The reported vendor `-10003` and standard unavailable
+KeyMint/provisioning errors can fall back only for selected ordinary RSA/EC
+attestations. Authentication-bound/device-encryption-critical keys, device IDs,
+explicit attestation-key aliases, unsupported algorithms and probe aliases stay
+native. Explicit Skip, missing keyboxes, unrelated errors and unselected UIDs
+cannot trigger fallback. Healthy native generation stays on the native path.
+The availability cache uses elapsed time; this is not a hardware-damage diagnosis.
+
+No private attestation key or banking-app patch ships. UBL's obfuscated
+NullPointerException still needs a fresh device crash report. Raw syscalls,
+direct policy-file/property-area access, native symbol inspection (including the
+reported stagefright symbol), fresh executables and other unhandled probes can
+still identify this ROM. The scoped views reduce specific signals; they are not
+a claim that the device is undetectably stock.
 
 A downgrade can retain data that an older application cannot read. Use a matching,
 trusted APK and an appropriate data backup. The setting does not bypass Android's
@@ -111,3 +126,9 @@ same-signature downgrade and wrong-signature rejection; factory floor and a seco
 Android user; native/Java property reads in existing and newly installed apps plus ADB;
 developer options and actual USB debugging remaining enabled; app process and app
 zygote restart, profile disable and reboot. Retest UBL and retain its real result.
+
+`tools/check_kernel_privacy.py` hash-locks the selected kernel and KernelSU files,
+executes their actual context parser and debugging helpers with boundary fakes
+under ASan/UBSan, and checks LSM ordering and hookup. It covers app/isolated/user
+UIDs, manager/root/admin bypass, bounded user copies, exact socket addresses,
+credential reset/allocation failure and unsupported flags. It is not a kernel build.

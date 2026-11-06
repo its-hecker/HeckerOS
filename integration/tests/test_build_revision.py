@@ -6,7 +6,7 @@ import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from check_build_revision import check, head, CORE
+from check_build_revision import check, head, CORE, KERNEL
 
 class BuildRevisionTests(unittest.TestCase):
     def test_matching_source_and_rejecting_stale_or_edited_suite(self):
@@ -22,9 +22,19 @@ class BuildRevisionTests(unittest.TestCase):
             xml=ET.Element('manifest')
             for name in sorted(CORE):
                 repo(root/name)
+                if name == KERNEL:
+                    repo(root/name/'KernelSU')
+                    subprocess.run(['git','-C',str(root/name),'update-index','--add','--cacheinfo','160000,'+head(root/name/'KernelSU')+',KernelSU'],check=True)
+                    subprocess.run(['git','-C',str(root/name),'-c','user.name=Test','-c','user.email=test@example.invalid','commit','-qm','pin KernelSU'],check=True)
                 ET.SubElement(xml,'project',path=name,revision=head(root/name))
             ET.ElementTree(xml).write(manifest/'floral.xml')
             check(root,manifest)
+            ksu=root/KERNEL/'KernelSU';original=head(ksu)
+            (ksu/'source.txt').write_text('different submodule')
+            subprocess.run(['git','-C',str(ksu),'add','.'],check=True)
+            subprocess.run(['git','-C',str(ksu),'-c','user.name=Test','-c','user.email=test@example.invalid','commit','-qm','different'],check=True)
+            with self.assertRaisesRegex(ValueError,'KernelSU revision mismatch'):check(root,manifest)
+            subprocess.run(['git','-C',str(ksu),'checkout','-q','--detach',original],check=True)
             suite=root/'vendor/hecker/floral/suite'
             (suite/'source.txt').write_text('edited')
             with self.assertRaisesRegex(ValueError,'local source changes'):

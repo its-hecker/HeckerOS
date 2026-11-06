@@ -1,8 +1,8 @@
 # Coral feedback fixes — 6 November 2026
 
 Use `fix/device-feedback-20261105` in HeckerOS and HeckerOs-localmanifest.
-The active local manifest pins Suite, framework and Settings by commit. Before
-preparation, the build helper refuses mismatched heads and edited Suite sources.
+The active local manifest pins Suite, framework, Settings and kernel by commit, with a KernelSU gitlink. Before
+preparation, the build helper refuses mismatched heads, an outdated KernelSU submodule and edited Suite sources.
 The generated system_ext build.prop includes `ro.heckeros.suite_revision` and
 `ro.heckeros.manifest_revision`; the final output check rejects stale stamps.
 Read them on the phone with `adb shell getprop ro.heckeros.suite_revision` and
@@ -42,8 +42,7 @@ Read them on the phone with `adb shell getprop ro.heckeros.suite_revision` and
 
 The supplied public certificate has `deviceLocked=false` and
 `verifiedBootState=Unverified (2)` in the StrongBox-enforced root of trust.
-The App Compatibility switch changes software properties, not this certificate;
-its label now says Bootloader software properties. A checker showing Strong
+The software bootloader switch cannot alter that hardware state. Its selected app can now use the existing enabled TrickyStore backend with a valid imported keybox; it does not rewrite the supplied public certificate or lock the bootloader. A checker showing Strong
 Integrity does not establish Wallet or UBL compatibility.
 
 The previous UBL evidence was package `app.com.brd`, version 3.52.2 (1660), with
@@ -53,6 +52,36 @@ root/ROM/bootloader probe as the cause. Neither banking app is claimed fixed.
 installed revision, service labels/status and a new UBL crash/exit report. It
 opens UBL without logging in and does not clear app data or device logs. Review
 captured logs before sharing. No supplied certificates or VPN keys are committed.
+
+## Detector report follow-up
+
+* Root privacy recognizes the official KernelSU Next signer through Android's
+  APK-verified `SigningDetails`, including verified signing rotation. It covers
+  randomized package names without trusting labels/library names. Added supported
+  forks and Termux to the selected-app tool privacy catalog. Unknown signers do
+  not become hidden merely by copying a label or package prefix.
+* Debugging privacy now reaches libc property access/iteration, adbd directory
+  listings and native socket-file views. The matched kernel carries a self-only
+  per-app debugging bit and returns absent adbd stat / refused exact abstract
+  JDWP connect probes. Other apps and real device debugging remain enabled.
+* Native ROM views cover the reported LineageBlackTheme path, build flavor and
+  partition fingerprint/type/tags, using the main device profile rather than
+  invented SDK or patch levels. The existing filtered read-only CIL/context
+  views remain; raw syscall policy reads and native symbol inspection are limits.
+* The existing KSU SELinux-hide view now covers the app-zygote procattr path as
+  well as selinuxfs. Keep original permission-denial ordering; bounded copies
+  avoid reading beyond write size. Manager, root-granted apps and core UIDs keep
+  actual policy access. Real enforcement and administrative policy stay intact.
+* The primary-user per-app bootloader option now authorizes scoped keybox access
+  through system_server. Explicit Skip takes priority. Selected ordinary
+  attestation can recover from the reported vendor failure and specific unavailable
+  KeyMint errors. Missing/disabled keyboxes, unrelated/input/auth errors and
+  protected key requests remain native. No keybox is bundled.
+
+The report's empty attestation chain is not evidence that certificate signatures
+were checked and failed. Its detector commit is not the installed ROM revision.
+The earlier public certificate and this separate failed request are different
+observations. Neither proves the cause of UBL's crash or Wallet's rejection.
 
 ## Validation boundary
 
@@ -64,3 +93,11 @@ state regression covers stale inner-QS callbacks and native host alpha. These
 checks do not substitute for a complete ServerHive build or the
 physical tests: fast QS close/reopen, dock toggle after resume, GameSpace artwork,
 Bluetooth with glass on/off, WireGuard handshake/traffic/DNS and the banking apps.
+
+The detector follow-up additionally passes the real Android 17 package/signing
+and keystore API compile checks, 114 configuration/crypto checks, 16 PIF lifecycle
+checks, 2658 app/installer assertions, ASan/UBSan kernel-helper checks, and ARM plus
+ARM64 Bionic platform/APEX compiles at O2/Os with the 2 KiB frame budget enforced.
+Fresh native apply, upgrade from the prior published Suite, repeat and exact
+revert are checked. These results do not establish a complete kernel/Soong build
+or a successful banking login, payment or physical detector rescan.

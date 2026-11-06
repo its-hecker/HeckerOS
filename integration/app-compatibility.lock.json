@@ -1,21 +1,21 @@
 {
   "repository": "its-hecker/heckeros_frameworks_base",
-  "revision": "db2d4435d1d2cce17d35f6fdc0efb303becfc2c5",
+  "revision": "4ff5e646649ad99adb3eeb19133189c811ea1212",
   "files": {
-    "core/java/android/app/HeckerAppCompatibility.java": "d97a3854eeed93e5f53ca45ce662c47831aba6b65d4c28503bef21d70a96f831",
+    "core/java/android/app/HeckerAppCompatibility.java": "1b46789aa32d304c40717f8a2a861042fba23afabeed7138099a439c002d2095",
     "core/java/android/provider/Settings.java": "41f818cc03970ad357ab18abea5b1199da398d227d8fef62a296f3c2e05b918d",
     "core/java/com/android/internal/os/AppZygoteInit.java": "a8137864a32d8fe2bc9b0e57e01335c02894a1f5f6c7c47b06a274aad6fe4a7e",
     "services/core/java/com/android/server/pm/parsing/PackageInfoUtils.java": "3a3a20ed163b39c12b6e8259aff623ffb5f0ff903b4f7fedf06c4b97ed571d1a",
     "services/core/java/com/android/server/pm/InstallPackageHelper.java": "9db3593f782c576165dee6fa660c8d8823ede31d337a2d32a0016d4581f5ebf2",
-    "services/core/java/com/android/server/pm/HeckerRootVisibility.java": "f8409bcd9b9e13f0ffe0dad1bfbc38526126fd360991fdd10765b49b4e075f07",
-    "tests/hecker/test_app_compatibility.py": "5b14a206c3597c84881213b4127e979cd72e7b0a4a55d7b39dbd05207f0f6358",
-    "tests/hecker/test_root_visibility.py": "e73330eb31fd2c19f1558a514c6086b7d7644efa7177a7a0a5babba9b6a44838",
+    "services/core/java/com/android/server/pm/HeckerRootVisibility.java": "da09ae2dbc8d46ac8c7b87661d9e0de01a846552b0b96e582bd98a8bac3238e5",
+    "tests/hecker/test_app_compatibility.py": "528c05af5bbca675c89607e53f3ef1488e510d7df1abf0f5e1abcbb65ca2a1fe",
+    "tests/hecker/test_root_visibility.py": "85361ff0b0a37639e2645d9fc4f99ace986151d3002b1aa0dbd0bfb3badd11b7",
     "core/java/android/app/ActivityThread.java": "1358818961d7af385f8671f5fe3c79be3952addec4aae867a932eccaa7ff6ab9",
     "core/java/android/content/pm/ApplicationInfo.java": "6a4a20d7512a9c0600b5e3783a07b0914be215fa697d4ec851017af4cce6645e",
-    "core/jni/android_os_SystemProperties.cpp": "07cf884fa7d6c92bba75c1658b452108fae571f6309a4dd0e5bed62a3887311b",
+    "core/jni/android_os_SystemProperties.cpp": "6331555270ebe9da44192dd9c6d2b1bb58bead1a4f903876feb4ef99a778b400",
     "services/core/java/com/android/server/pm/AppsFilterBase.java": "93baf9340c52e712aaedec9344524b0326c29dd7ae032a94269559f4e424ff50",
     "services/core/java/com/android/server/pm/AppsFilterImpl.java": "9bf0abc259958f5b91b1d8e4c802965fdfe401fa4269080bc97b74fca9650e12",
-    "services/core/java/com/android/server/pm/ComputerEngine.java": "6c0e99f0d37cf792e9802798b4926e684c4f60171a592544c119385da05379e5",
-    "tests/hecker/test_penguin_visibility.py": "6aec61e76106880572d544db7487087a58e3bbbc396dc61f9c42b1b6e4b4c6b3"
+    "services/core/java/com/android/server/pm/ComputerEngine.java": "7b443f1ce13e2cd805236cca2369ad6245d847aa0e1e5d55e97371242ac8dcce",
+    "tests/hecker/test_penguin_visibility.py": "3d977e1932392103feab97a64739163f82e81f716098698ccffbbc18fb4757aa"
   }
 }

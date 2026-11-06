@@ -4,6 +4,7 @@
 import argparse
 import concurrent.futures
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import subprocess
@@ -104,6 +105,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cache', type=Path, default=ROOT / 'out/rom-compat-sources')
     parser.add_argument('--source-root', type=Path)
+    parser.add_argument('--upgrade-from', type=Path, help='Also upgrade a previously published Suite native adapter set')
     parser.add_argument('--android-compile', action='store_true',
                         help='Also compile ARM/ARM64 platform and APEX variants with real Bionic headers')
     parser.add_argument('--bionic-source', type=Path, help='Reuse an unmodified pinned Bionic checkout')
@@ -141,6 +143,21 @@ def main():
         before = {str(path.relative_to(rom)): path.read_bytes() for path in rom.rglob('*') if path.is_file()}
         write(native_rom_compat_plan(rom, replace_guarded))
         assert native_rom_compat_plan(rom, replace_guarded) == {}
+        if args.upgrade_from:
+            previous_path=args.upgrade_from.resolve()/'tools/native_rom_compat.py'
+            spec=importlib.util.spec_from_file_location('previous_native_rom_compat',previous_path)
+            previous=importlib.util.module_from_spec(spec);spec.loader.exec_module(previous)
+            legacy=out/'legacy-rom'
+            for relative,content in inputs:
+                target=legacy/relative;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(content)
+            write(previous.native_rom_compat_plan(legacy,replace_guarded))
+            write(native_rom_compat_plan(legacy,replace_guarded))
+            assert native_rom_compat_plan(legacy,replace_guarded)=={}
+            snapshot=lambda folder:{str(p.relative_to(folder)):p.read_bytes() for p in folder.rglob('*') if p.is_file()}
+            assert snapshot(legacy)==snapshot(rom), 'Prior published native blocks/copies must upgrade exactly'
+            write(native_rom_compat_plan(legacy,replace_guarded,revert=True))
+            assert snapshot(legacy)==before
+            print('Previous published native adapters: guarded block/copy upgrade and exact revert PASS')
         native_checks(rom, out)
         if args.android_compile:
             from check_bionic_rom_compile import bionic_headers, android_compile_checks

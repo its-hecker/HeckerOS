@@ -72,6 +72,11 @@ extern "C" long probe_syscall(long operation, ...) {
     va_start(args, operation);
     long result;
     switch (operation) {
+        case SYS_prctl: {
+            int option = va_arg(args, int); unsigned long flags = va_arg(args, unsigned long);
+            assert(option == 0x484b4350 && !(flags & ~4u));
+            result = 0; break;
+        }
         case SYS_mmap: {
             void* address = va_arg(args, void*); size_t size = va_arg(args, size_t);
             int prot = va_arg(args, int), flags = va_arg(args, int), fd = va_arg(args, int);
@@ -127,7 +132,7 @@ extern "C" long probe_syscall(long operation, ...) {
             result = syscall(operation, fd, at, whence); break;
         }
         case SYS_memfd_create: {
-            const char* name = va_arg(args, const char*); unsigned flags = va_arg(args, unsigned);
+            const char* name = va_arg(args, const char*); unsigned long flags = va_arg(args, unsigned long);
             result = syscall(operation, name, flags); break;
         }
         default: errno = ENOSYS; result = -1;
@@ -142,7 +147,17 @@ int main(int argc, char** argv) {
     for (auto core : {0u, 1000u, 2000u, 1001000u}) {
         uid = core; assert(!__libc_hecker_set_rom_hide(true)); assert(!custom_rom_hide_enabled());
     }
-    uid = 10101; assert(__libc_hecker_set_rom_hide(true));
+    uid = 10101;
+    assert(!custom_rom_hide_should_block_at(AT_FDCWD,"/dev/socket/adbd"));
+    assert(__libc_hecker_set_compatibility_flags(4));
+    assert(custom_rom_hide_should_block_at(AT_FDCWD,"/dev/socket/adbd"));
+    assert(!custom_rom_hide_should_block_at(AT_FDCWD,"/dev/socket/adbdoesnotexist"));
+    assert(!custom_rom_hide_should_block_at(AT_FDCWD,"/product/overlay/LineageBlackTheme"));
+    assert(__libc_hecker_set_compatibility_flags(0));
+    assert(__libc_hecker_set_rom_hide(true));
+    assert(custom_rom_hide_should_block_at(AT_FDCWD,"/product/overlay/LineageBlackTheme"));
+    assert(custom_rom_hide_should_block_at(AT_FDCWD,"/product/overlay/LineageBlackTheme/theme.apk"));
+    assert(!custom_rom_hide_should_block_at(AT_FDCWD,"/product/overlay/LineageBlackThemeOther"));
     assert(custom_rom_hide_enabled());
     struct stat st; struct statx sx; char bytes[2048];
     for (auto bad : {static_cast<const char*>(nullptr), reinterpret_cast<const char*>(0x800000u),

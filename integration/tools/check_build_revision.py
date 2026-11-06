@@ -7,7 +7,8 @@ import re
 import subprocess
 import xml.etree.ElementTree as ET
 
-CORE = {"vendor/hecker/floral/suite", "frameworks/base", "packages/apps/Settings"}
+KERNEL = "kernel/google/msm-4.14"
+CORE = {"vendor/hecker/floral/suite", "frameworks/base", "packages/apps/Settings", KERNEL}
 
 
 def head(path):
@@ -26,6 +27,13 @@ def check(rom, manifest):
         if actual != expected:
             raise ValueError(f"Revision mismatch for {path}: selected {expected}, synced {actual}. Run repo sync before building.")
         print(f"Build source: {path} = {actual}")
+    kernel = rom / KERNEL
+    entry = subprocess.check_output(["git", "-C", str(kernel), "ls-tree", "HEAD", "KernelSU"], text=True).split()
+    if len(entry) < 4 or entry[0] != "160000":
+        raise ValueError("The pinned kernel must contain the KernelSU gitlink")
+    if head(kernel / "KernelSU") != entry[2]:
+        raise ValueError("KernelSU revision mismatch. Run repo sync with submodules before building.")
+    print("Build source: KernelSU = " + entry[2])
     suite = rom / "vendor/hecker/floral/suite"
     dirty = subprocess.check_output(["git", "-C", str(suite), "status", "--porcelain", "--untracked-files=normal"], text=True)
     if dirty:

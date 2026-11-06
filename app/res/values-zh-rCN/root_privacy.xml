@@ -2,16 +2,16 @@
 <resources>
   <string name="root_privacy_title">应用兼容性</string>
   <string name="root_privacy_summary">为每个已安装应用设置隐私和兼容性选项</string>
-  <string name="root_privacy_body">选择应用，设置 Root 管理器隐私、应用降级、开发者选项可见性、引导加载程序状态和自定义 ROM 可见性。各项设置相互独立，默认关闭。</string>
+  <string name="root_privacy_body">选择应用，设置 Root 管理器隐私、应用降级、调试可见性，以及引导加载程序和认证兼容性。各项设置相互独立，默认关闭。</string>
   <string name="root_privacy_save_error">无法保存设置，请重试。</string>
   <string name="compat_root_title">Root 管理器隐私</string>
-  <string name="compat_root_body">向此应用隐藏受支持的 Root 管理器软件包。Root 权限及 KernelSU 模块卸载需要另外设置。</string>
+  <string name="compat_root_body">向此应用隐藏受支持的 Root 管理器和终端工具，包括通过签名证书验证的改名 KernelSU Next。Root 权限及 KernelSU 模块卸载需要另外设置。</string>
   <string name="compat_downgrade_title">允许应用降级</string>
   <string name="compat_downgrade_body">允许使用同一开发者签名的旧版本替换此应用。您仍需自行选择并安装 APK。旧版本可能无法读取现有数据。所有安装此应用的 Android 用户都必须允许降级。系统应用不能降至出厂版本以下。</string>
   <string name="compat_developer_title">隐藏开发者选项</string>
-  <string name="compat_developer_body">通过 Android Settings API 向此应用报告开发者选项、USB 调试和无线调试已关闭。设备的实际设置保持不变。</string>
+  <string name="compat_developer_body">向此应用报告开发者选项和调试已关闭，同时隐藏常见原生 ADB 属性及 adbd/JDWP 套接字探测。设备的实际设置保持不变。</string>
   <string name="compat_bootloader_title">引导加载程序软件属性</string>
-  <string name="compat_bootloader_body">在此应用进程内报告引导加载程序已锁定。这不会实际锁定引导加载程序或改变硬件认证，也不保证应用兼容。</string>
+  <string name="compat_bootloader_body">通过软件属性向此应用报告引导加载程序已锁定。如果已启用 TrickyStore 并导入有效 keybox，也使用其认证兼容后端。显式 Skip 设置保持有效。这不会实际锁定引导加载程序，也不保证应用兼容。</string>
   <string name="compat_restart_body">更改选项后，请使用下方按钮关闭应用，再重新打开。关闭可能中断下载或丢失未保存的内容。如果保留的进程仍在使用旧设置，请重启手机。</string>
   <string name="compat_backend_unavailable">此系统尚未启用所需的兼容性支持。请安装匹配的 HeckerOS 版本后再使用这些选项。</string>
   <string name="compat_protected_app">核心系统 UID 和 HeckerLab 不支持这些选项。</string>

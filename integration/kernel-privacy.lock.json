@@ -1,0 +1,18 @@
+{
+  "kernel": {
+    "repository": "its-hecker/heckeros-floral-kernel",
+    "revision": "e1d6f9ada81bd9bbe040c5fe369f2607b6bd5a64",
+    "files": {
+      "security/selinux/hooks.c": "05737ca4e564060d43be1195b75cb426b0180e323dc710ed460219413ebe8554",
+      "security/selinux/include/objsec.h": "5bf823d3a86741f1abe3b4190c8de9e2895264d12f32fd8124af8a9179a9e41e"
+    }
+  },
+  "kernelsu": {
+    "repository": "its-hecker/KernelSU-Next",
+    "revision": "fa03b73617de0598e564139cf53f520a8c88a342",
+    "files": {
+      "kernel/feature/selinux_hide.c": "198a09572ade6857e6479ae06cac26db5eacece4ac0ee30d4452931c86dafbda",
+      "kernel/feature/selinux_hide.h": "1cc399a4092a06c917f799f6582b59d8765b090a8162d07bae2d365493e0b2b5"
+    }
+  }
+}

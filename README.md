@@ -122,13 +122,13 @@ per-frame work, single Settings card backgrounds, a visible GameSpace icon and
 an OFL Google Sans Cyrillic fallback. See [changes and device acceptance](docs/coral-feedback-2026-11-02.md).
 
 **Hecker Suite → App compatibility** retains the four existing switches and adds
-an independent **Hide custom ROM** option. The native hooks adapt the reviewed
+the default ROM visibility policy. The native hooks adapt the reviewed
 VoltageOS fixes to a per-app policy. Coral images exclude `addon.d` during the
 build, including old staged copies. This disables add-on preservation across ROM
 updates. See [coverage, restart behavior and limits](docs/app-compatibility.md).
 
 The matching `HeckerOs-localmanifest:fix/device-feedback-20261105` pins the
-Suite and framework together. Full Android/SELinux builds and phone tests remain
+Suite, framework, kernel and KernelSU together. The detector follow-up covers renamed managers, scoped native debugging probes and configured attestation failure recovery. See [coverage and remaining limits](docs/app-compatibility.md). Full Android/SELinux builds and phone tests remain
 pending. Pixel Launcher weather still needs Smartspace diagnostics; UBL's crash
 and hardware attestation are not established as fixed. The older sections below
 retain inherited product and feature documentation.

@@ -2,16 +2,16 @@
 <resources>
   <string name="root_privacy_title">App compatibility</string>
   <string name="root_privacy_summary">Privacy and compatibility options for each installed app</string>
-  <string name="root_privacy_body">Choose an app to configure root manager privacy, downgrades, developer options visibility, bootloader reporting and custom ROM visibility. Options are independent and off by default.</string>
+  <string name="root_privacy_body">Choose an app to configure root manager privacy, downgrades, developer options visibility, bootloader and attestation compatibility. Options are independent and off by default.</string>
   <string name="root_privacy_save_error">Could not save the setting. Try again.</string>
   <string name="compat_root_title">Root manager privacy</string>
-  <string name="compat_root_body">Hide supported root manager packages from this app. Root access and KernelSU module unmounting are configured separately.</string>
+  <string name="compat_root_body">Hide supported root managers and terminal tools from this app, including renamed KernelSU Next managers verified by their signing certificate. Root access and KernelSU module unmounting are configured separately.</string>
   <string name="compat_downgrade_title">Allow app downgrade</string>
   <string name="compat_downgrade_body">Allow an older version signed by the same developer to replace this app. You still choose and install the APK. Older versions may not understand existing app data. All Android users with this app must allow downgrades. System apps cannot go below their factory version.</string>
   <string name="compat_developer_title">Hide developer options</string>
-  <string name="compat_developer_body">Report developer options and USB or wireless debugging as off through Android Settings APIs in this app. Your actual device settings stay enabled.</string>
+  <string name="compat_developer_body">Report developer options and debugging as off in this app. Hide its common native ADB properties, adbd socket checks and JDWP connection probes too. Your device settings stay enabled.</string>
   <string name="compat_bootloader_title">Bootloader software properties</string>
-  <string name="compat_bootloader_body">Report locked bootloader properties inside this app process. This does not lock the bootloader or change hardware attestation and does not guarantee app compatibility.</string>
+  <string name="compat_bootloader_body">Report locked bootloader software properties in this app. If TrickyStore is enabled with a valid imported keybox, use its attestation compatibility backend too. Explicit Skip targets stay native. This does not lock the bootloader or guarantee app compatibility.</string>
   <string name="compat_restart_body">After changing an option, close the app below, then reopen it. Closing may interrupt downloads or unsaved work. Restart the phone if a retained app process still uses the previous settings.</string>
   <string name="compat_backend_unavailable">This ROM does not have the required compatibility backend enabled. Options remain unavailable until you install a matching HeckerOS build.</string>
   <string name="compat_protected_app">These options are unavailable for core system UIDs and HeckerLab.</string>

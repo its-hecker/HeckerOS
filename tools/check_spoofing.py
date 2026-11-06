@@ -43,7 +43,7 @@ def main():
         # Flags and the pre-existing PixelOS keybox hooks absent from AOSP's jar.
         stubs = sorted((ROOT/'tests/spoofing/type-stubs').rglob('*.java'))
         run(args.java, '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', jar,
-            '-d', out/'types', *java, *keystore, store, *stubs)
+            '-d', out/'types', *java, *keystore, store, framework/'core/java/android/app/HeckerAppCompatibility.java', framework/'services/core/java/com/android/server/pm/HeckerRootVisibility.java', *stubs)
 
         aidl = (framework/'core/java/android/app/IActivityManager.aidl').read_text()
         ams = (framework/'services/core/java/com/android/server/am/ActivityManagerService.java').read_text()

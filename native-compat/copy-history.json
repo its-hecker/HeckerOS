@@ -1,5 +1,9 @@
 {
   "bionic/libc/bionic/custom_rom_hide.cpp": [
-    "f11b11f221b8c0ec12e4ecac746a0c2322e558dd"
+    "f11b11f221b8c0ec12e4ecac746a0c2322e558dd",
+    "d8cb7707f4f13019695f2ab4fc55ddf490bea164"
+  ],
+  "bionic/libc/bionic/custom_rom_hide.h": [
+    "097208ee3701d6f2663c0ab3fe085552884bc515"
   ]
 }

@@ -18,8 +18,50 @@
 #include <unistd.h>
 
 static bool g_enabled;
+static unsigned g_compatibility_flags;
+static char g_stock_fingerprint[92];
+static char g_stock_flavor[96];
+struct prop_info;
+extern "C" const prop_info* __system_property_find(const char*) __attribute__((weak));
+extern "C" void __system_property_read_callback(const prop_info*,
+        void (*)(void*, const char*, const char*, uint32_t), void*) __attribute__((weak));
+struct ProfileValue { char* target; size_t capacity; };
+static void capture_profile_value(void* cookie, const char*, const char* value, uint32_t) {
+    auto* out = static_cast<ProfileValue*>(cookie);
+    size_t length = strnlen(value, out->capacity);
+    if (length < out->capacity) memcpy(out->target, value, length + 1);
+}
+static void capture_stock_profile() {
+    g_stock_fingerprint[0] = 0;
+    g_stock_flavor[0] = 0;
+    if (!__system_property_find || !__system_property_read_callback) return;
+    ProfileValue fingerprint{g_stock_fingerprint, sizeof(g_stock_fingerprint)};
+    const prop_info* fp = __system_property_find("ro.build.fingerprint");
+    if (fp) __system_property_read_callback(fp, capture_profile_value, &fingerprint);
+    char device[80] = {};
+    ProfileValue product{device, sizeof(device)};
+    const prop_info* name = __system_property_find("ro.product.device");
+    if (name) __system_property_read_callback(name, capture_profile_value, &product);
+    if (device[0]) snprintf(g_stock_flavor, sizeof(g_stock_flavor), "%s-user", device);
+}
+bool __libc_hecker_set_compatibility_flags(unsigned flags) {
+    bool app = getuid() % 100000 >= 10000;
+    // The matched Coral kernel stores only this self-scoped, non-privileged bit
+    // in copy-on-write credentials. Threads/forks inherit it, including exec.
+    // Older kernels keep the libc/Settings protection if the private call is absent.
+    int saved = errno;
+    syscall(__NR_prctl, 0x484b4350, static_cast<unsigned long>(app ? flags & 4u : 0u), 0UL, 0UL, 0UL);
+    errno = saved;
+    __atomic_store_n(&g_compatibility_flags, app ? flags & 31u : 0u, __ATOMIC_RELAXED);
+    return app;
+}
+bool custom_rom_hide_debugging() {
+    return getuid() % 100000 >= 10000
+            && (__atomic_load_n(&g_compatibility_flags, __ATOMIC_RELAXED) & 4u) != 0;
+}
 bool __libc_hecker_set_rom_hide(bool enabled) {
     bool app = getuid() % 100000 >= 10000;
+    if (app && enabled) capture_stock_profile();
     __atomic_store_n(&g_enabled, app && enabled, __ATOMIC_RELAXED);
     return app;
 }
@@ -112,6 +154,11 @@ static bool normalize_path(const char* in, PathBuffer& out) {
             && normalize(in, out.data(), out.capacity());
 }
 static bool rom_path(const char* path) {
+    if (custom_rom_hide_debugging() && !strcmp(path, "/dev/socket/adbd")) return true;
+    if (!custom_rom_hide_enabled()) return false;
+    static constexpr char overlay[] = "/product/overlay/LineageBlackTheme";
+    constexpr size_t length = sizeof(overlay) - 1;
+    if (!strncmp(path, overlay, length) && (!path[length] || path[length] == '/')) return true;
     static const char* const parents[] = {"/system", "/system/etc", "/system_ext",
         "/system_ext/etc", "/product", "/product/etc", "/vendor", "/vendor/etc",
         "/sdcard", "/data/media/0", nullptr};
@@ -128,7 +175,7 @@ static bool rom_path(const char* path) {
     return false;
 }
 bool custom_rom_hide_should_block_at(int dirfd, const char* path) {
-    if (!custom_rom_hide_enabled() || !path || !*path) return false;
+    if ((!custom_rom_hide_enabled() && !custom_rom_hide_debugging()) || !path || !*path) return false;
     int saved = errno;
     PathBuffer absolute, clean;
     bool valid = true;
@@ -160,13 +207,19 @@ bool custom_rom_hide_should_block_at(int dirfd, const char* path) {
     return blocked;
 }
 bool custom_rom_hide_should_filter_dirent(int dirfd, const char* name) {
-    if (!custom_rom_hide_enabled() || !name) return false;
-    if (strcmp(name, "addon.d") && strcmp(name, "init.d") && strcmp(name, "TWRP")) return false;
+    if ((!custom_rom_hide_enabled() && !custom_rom_hide_debugging()) || !name) return false;
+    if (strcmp(name, "addon.d") && strcmp(name, "init.d") && strcmp(name, "TWRP")
+            && strcmp(name, "LineageBlackTheme") && strcmp(name, "adbd")) return false;
     return custom_rom_hide_should_block_at(dirfd, name);
 }
 
-enum Filter { NONE, MAPS, MOUNTS, FILESYSTEMS, CONTEXTS };
+enum Filter { NONE, MAPS, MOUNTS, FILESYSTEMS, CONTEXTS, UNIX_SOCKETS };
 static Filter filter_type(const char* path) {
+    if (custom_rom_hide_debugging() && !strncmp(path, "/proc/", 6)) {
+        const char* net = strstr(path + 6, "/net/unix");
+        if (!strcmp(path, "/proc/net/unix") || (net && !net[9])) return UNIX_SOCKETS;
+    }
+    if (!custom_rom_hide_enabled()) return NONE;
     if (!strcmp(path, "/proc/filesystems")) return FILESYSTEMS;
     if (!strncmp(path, "/proc/", 6)) {
         const char* leaf = strrchr(path, '/');
@@ -188,6 +241,8 @@ static Filter filter_type(const char* path) {
     return NONE;
 }
 static bool drop_line(Filter type, const char* line) {
+    if (type == UNIX_SOCKETS)
+        return strstr(line, "@jdwp-control") || strstr(line, "/dev/socket/adbd");
     static const char* const roms[] = {"lineage", "Lineage", "voltage", "VoltageOS",
         "hecker", "Hecker", "omnirom", "aospa", nullptr};
     static const char* const mounts[] = {"/debug_ramdisk", "overlay", "magisk", "ksu",
@@ -276,7 +331,7 @@ static int filtered_copy(const char* path, Filter type, bool cloexec) {
     return readonly;
 }
 int custom_rom_hide_post_open(int fd, int flags) {
-    if (fd < 0 || !custom_rom_hide_enabled()) return fd;
+    if (fd < 0 || (!custom_rom_hide_enabled() && !custom_rom_hide_debugging())) return fd;
     // Never replace writable or creation handles. Keep errno and the original fd on failure.
     if ((flags & O_ACCMODE) != O_RDONLY || (flags & (O_CREAT | O_TRUNC))
             || (flags & O_TMPFILE) == O_TMPFILE) return fd;
@@ -322,7 +377,10 @@ ssize_t custom_rom_hide_readlink_post(int dirfd, const char* path, char* buffer,
     return static_cast<ssize_t>(used);
 }
 bool custom_rom_hide_should_hide_prop(const char* name) {
-    if (!custom_rom_hide_enabled() || !name) return false;
+    if (!name) return false;
+    if (custom_rom_hide_debugging() && (!strcmp(name, "init.svc_debug_pid.adbd")
+            || !strcmp(name, "init.svc_debug_pid.adb_root"))) return true;
+    if (!custom_rom_hide_enabled()) return false;
     static const char* const prefixes[] = {"ro.heckeros.", "ro.hecker.", "ro.lineage.",
         "org.lineageos.", "ro.voltage.", "org.voltage.", nullptr};
     for (const char* const* prefix = prefixes; *prefix; ++prefix)
@@ -331,11 +389,31 @@ bool custom_rom_hide_should_hide_prop(const char* name) {
             || !strcmp(name, "init.svc.adb_root") || !strcmp(name, "service.adb.root");
 }
 const char* custom_rom_hide_get_prop_override(const char* name) {
-    if (!custom_rom_hide_enabled() || !name) return nullptr;
+    if (!name) return nullptr;
+    if (custom_rom_hide_debugging()) {
+        if (custom_rom_hide_should_hide_prop(name)) return "";
+        if (!strcmp(name, "init.svc.adbd")) return "stopped";
+        if (!strcmp(name, "persist.sys.usb.config") || !strcmp(name, "sys.usb.config")
+                || !strcmp(name, "sys.usb.state")) return "mtp";
+        if (!strcmp(name, "service.adb.tcp.port") || !strcmp(name, "persist.adb.tcp.port")) return "-1";
+        if (!strcmp(name, "persist.adb.wifi.enabled")) return "0";
+    }
+    if (!custom_rom_hide_enabled()) return nullptr;
     if (custom_rom_hide_should_hide_prop(name)) return "";
     if (!strcmp(name, "ro.debuggable")) return "0";
     if (!strcmp(name, "ro.build.type")) return "user";
     if (!strcmp(name, "ro.build.tags")) return "release-keys";
     if (!strcmp(name, "ro.secure") || !strcmp(name, "ro.adb.secure")) return "1";
+    if (!strcmp(name, "ro.build.flavor") && g_stock_flavor[0]) return g_stock_flavor;
+    static const char* const partitions[] = {"ro.system.build.", "ro.system_ext.build.",
+        "ro.product.build.", "ro.vendor.build.", "ro.odm.build.", "ro.bootimage.build.", nullptr};
+    for (const char* const* p = partitions; *p; ++p) {
+        size_t length = strlen(*p);
+        if (strncmp(name, *p, length)) continue;
+        const char* field = name + length;
+        if (!strcmp(field, "fingerprint") && g_stock_fingerprint[0]) return g_stock_fingerprint;
+        if (!strcmp(field, "type")) return "user";
+        if (!strcmp(field, "tags")) return "release-keys";
+    }
     return nullptr;
 }

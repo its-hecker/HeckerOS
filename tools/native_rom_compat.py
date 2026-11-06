@@ -18,6 +18,11 @@ def native_rom_compat_plan(rom, replace, revert=False):
         current = path.read_text()
         target = current
         for pair in reversed(pairs) if revert else pairs:
+            # Accept only exact reviewed previous generated blocks when upgrading.
+            for previous in pair.get('previous', []):
+                if previous in target and pair['new'] not in target:
+                    target = target.replace(previous, pair['new'])
+                    break
             target = replace(target, pair['old'], pair['new'], str(path), revert)
         if target != current:
             changes[path] = target

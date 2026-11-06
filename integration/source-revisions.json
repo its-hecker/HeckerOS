@@ -91,8 +91,8 @@
     },
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
-      "branch": "feat/penguin-integrity-20261105",
-      "revision": "52b48def74719b328b3704be72f7c3745299f18a",
+      "branch": "fix/device-feedback-20261105",
+      "revision": "4ff5e646649ad99adb3eeb19133189c811ea1212",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -338,8 +338,8 @@
     },
     "kernel": {
       "repository": "its-hecker/heckeros-floral-kernel",
-      "branch": "feat/coral-upstream-20261030",
-      "revision": "5303303fd0138a719c0077570975fdce6ace661f"
+      "branch": "fix/device-feedback-20261105",
+      "revision": "e1d6f9ada81bd9bbe040c5fe369f2607b6bd5a64"
     }
   },
   "platform_ownership": {
@@ -590,5 +590,20 @@
     "status": "source integrated; full Coral build and physical validation pending",
     "configuration": "existing Hecker private/Global stores retained; no bundled keys",
     "documentation": "docs/penguin-integrity-2026-11-05.md"
+  },
+  "detection_feedback_20261106": {
+    "framework_revision": "4ff5e646649ad99adb3eeb19133189c811ea1212",
+    "kernel_revision": "e1d6f9ada81bd9bbe040c5fe369f2607b6bd5a64",
+    "kernelsu_revision": "fa03b73617de0598e564139cf53f520a8c88a342",
+    "branch": "fix/device-feedback-20261105",
+    "evidence": "duck_detector_report_Pixel_4_XL_20261106_010123.txt (private report, not committed)",
+    "scope": [
+      "verified renamed KSU Next signer privacy",
+      "app-local debugging properties and opt-in kernel adbd/JDWP probes",
+      "partition software property alignment and LineageBlackTheme path",
+      "scoped configured-keybox recovery for attestation generation failure",
+      "matching kernel/submodule build preflight"
+    ],
+    "limits": "Full ROM/kernel and device Wallet/UBL tests required. No private keybox bundled, bootloader locking or guaranteed absence of all raw ROM/integrity signals."
   }
 }

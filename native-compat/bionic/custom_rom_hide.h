@@ -9,6 +9,8 @@
 __BEGIN_DECLS
 /* Platform-private handshake, reset before package code; not an NDK API. */
 __attribute__((visibility("default"))) bool __libc_hecker_set_rom_hide(bool enabled);
+__attribute__((visibility("default"))) bool __libc_hecker_set_compatibility_flags(unsigned flags);
+__attribute__((visibility("hidden"))) bool custom_rom_hide_debugging(void);
 __attribute__((visibility("hidden"))) bool custom_rom_hide_enabled(void);
 __attribute__((visibility("hidden"))) bool custom_rom_hide_should_block_at(int dirfd, const char* path);
 __attribute__((visibility("hidden"))) bool custom_rom_hide_should_filter_dirent(int dirfd, const char* name);
