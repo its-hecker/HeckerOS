@@ -19,10 +19,10 @@ public class SensorRecoveryEngineTest {
         final List<String> writes=new ArrayList<>();
         long clock=1000;int polls;String ready="ready",after="2222";
         boolean deny,stale,stopped,noReceipt;
-        Platform(){values.put("init.svc.vendor.sensors-hal-2-0-multihal","running");}
+        Platform(){values.put(P+"state.multihal20","running");}
         public String readiness(int user){return ready;}
         public String get(String name){
-            check(!name.startsWith("init.svc_debug_pid."));
+            check(name.startsWith(P));
             return values.getOrDefault(name,"");
         }
         public void set(String key,String value){
@@ -38,7 +38,7 @@ public class SensorRecoveryEngineTest {
         public void pause(){
             polls++;clock+=1000;
             if(!noReceipt)values.put(P+"after",after);
-            if(stopped)values.put("init.svc.vendor.sensors-hal-2-0-multihal","stopped");
+            if(stopped)values.put(P+"state.multihal20","stopped");
         }
         long restartRequests(){return writes.stream().filter(s->s.startsWith(P+"request=")&&!s.endsWith("clear")).count();}
     }
@@ -77,10 +77,13 @@ public class SensorRecoveryEngineTest {
         check(e.state(0).status.equals("unavailable"));check(!e.state(0).busy);
         p=new Platform();e=new SensorRecoveryEngine(p,job->{throw new IllegalStateException();});
         check(e.request(0).status.equals("unavailable"));check(p.writes.isEmpty());
-        p=new Platform();p.values.clear();p.values.put("init.svc.vendor.sensors-hal-2-1-multihal","running");
-        q=new Queue();e=make(p,q);e.request(0);q.run();
-        check(p.writes.contains(P+"request=multihal21"));check(e.state(0).status.equals("service_restarted"));
-        check(e.state(1).request==0);
+        for(String action:new String[]{"multihal21","hal20"}) {
+            p=new Platform();p.values.put(P+"state.multihal20","restarting");
+            p.values.put(P+"state."+action,"running");
+            q=new Queue();e=make(p,q);e.request(0);q.run();
+            check(p.writes.contains(P+"request="+action));check(e.state(0).status.equals("service_restarted"));
+            check(e.state(1).request==0);
+        }
 
         check(SensorRecoveryAccess.suite(10123,0,10123,true));
         check(!SensorRecoveryAccess.suite(10123,0,10123,false));

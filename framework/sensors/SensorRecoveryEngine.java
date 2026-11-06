@@ -6,8 +6,6 @@ import java.util.concurrent.Executor;
 /** Fixed init requests, bounded polling and per-user results. No su or arbitrary shell command. */
 public final class SensorRecoveryEngine {
     public static final String PREFIX="sys.hecker.sensor_recovery.";
-    private static final String[] SERVICES={"vendor.sensors-hal-2-0-multihal",
-            "vendor.sensors-hal-2-1-multihal","vendor.sensors-hal-2-0"};
     private static final String[] ACTIONS={"multihal20","multihal21","hal20"};
     public interface Platform {
         String readiness(int user);
@@ -32,6 +30,9 @@ public final class SensorRecoveryEngine {
     public SensorRecoveryEngine(Platform platform,Executor worker){this.platform=platform;this.worker=worker;}
     public synchronized State state(int user){return state.user==user?state:new State("idle",0,false,user);}
     private static State reply(String status,int user){return new State(status,0,false,user);}
+    private boolean isRunning(int target) {
+        return "running".equals(platform.get(PREFIX + "state." + ACTIONS[target]));
+    }
     public synchronized State request(int user){
         String readiness=platform.readiness(user);
         if(!"ready".equals(readiness))return reply(readiness,user);
@@ -39,7 +40,7 @@ public final class SensorRecoveryEngine {
         long now=platform.now();
         if(lastStart!=Long.MIN_VALUE&&now-lastStart<30000)return reply("cooldown",user);
         int target=-1;
-        for(int i=0;i<SERVICES.length;i++)if("running".equals(platform.get("init.svc."+SERVICES[i]))){target=i;break;}
+        for(int i=0;i<ACTIONS.length;i++)if(isRunning(i)){target=i;break;}
         if(target<0)return reply("unsupported_service",user);
         long id=Math.max(++sequence,now+1);sequence=id;
         state=new State("running",id,true,user);lastStart=now;
@@ -54,7 +55,7 @@ public final class SensorRecoveryEngine {
         try{
             String ready=platform.readiness(user);
             if(!"ready".equals(ready)){outcome=ready;return;}
-            if(!"running".equals(platform.get("init.svc."+SERVICES[target]))){outcome="unsupported_service";return;}
+            if(!isRunning(target)){outcome="unsupported_service";return;}
             platform.set(PREFIX+"token",Long.toString(id));
             platform.set(PREFIX+"request",ACTIONS[target]);requested=true;
             for(int n=0;n<20;n++){
@@ -62,8 +63,7 @@ public final class SensorRecoveryEngine {
                 // Init alone reads its protected debug-PID properties and publishes a private receipt.
                 long receipt=number(platform.get(PREFIX+"ack_token"));
                 long before=number(platform.get(PREFIX+"before")),after=number(platform.get(PREFIX+"after"));
-                if(receipt==id&&before>1&&after>1&&after!=before
-                        &&"running".equals(platform.get("init.svc."+SERVICES[target]))){
+                if(receipt==id&&before>1&&after>1&&after!=before&&isRunning(target)){
                     outcome="service_restarted";break;
                 }
             }

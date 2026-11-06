@@ -8,9 +8,8 @@ system_internal_prop(hecker_sensor_recovery_request_prop)
 system_internal_prop(hecker_sensor_recovery_status_prop)
 set_prop(system_server, hecker_sensor_recovery_request_prop)
 get_prop(system_server, hecker_sensor_recovery_status_prop)
-get_prop(system_server, init_service_status_private_prop)
 
-# Init alone reads the protected init.svc_debug_pid properties and writes the diagnostic receipt.
+# Init reads the vendor service states and protected debug PIDs for the broker.
 # In particular, do not grant system_server access to init_svc_debug_prop (upstream neverallow).
 neverallow { domain -init -system_server } hecker_sensor_recovery_request_prop:property_service set;
 neverallow { domain -init } hecker_sensor_recovery_status_prop:property_service set;
