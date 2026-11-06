@@ -7,43 +7,15 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.SystemProperties;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/** Maintainer, build identity, community and credits for HeckerOS. */
+/** Device information, community and credits below HeckerLab's shared header. */
 final class SuiteAbout {
     private SuiteAbout() {}
 
     static void populate(Activity activity, LinearLayout page) {
-        LinearLayout profile = Ui.card(activity);
-        profile.setPadding(Ui.dp(activity,24),Ui.dp(activity,24),Ui.dp(activity,24),Ui.dp(activity,24));
-        android.graphics.drawable.GradientDrawable hero = new android.graphics.drawable.GradientDrawable(
-                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
-                new int[]{0xff283658,0xff28223e,0xff18243b});
-        hero.setCornerRadius(Ui.dp(activity,28));
-        hero.setStroke(Ui.dp(activity,1),0x666b8ac4); profile.setBackground(hero);
-        LinearLayout identity = new LinearLayout(activity); identity.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        LinearLayout title = new LinearLayout(activity); title.setOrientation(LinearLayout.VERTICAL);
-        TextView brand=Ui.text(activity,"HeckerOS",24,true);brand.setTextColor(0xfff4f7ff);title.addView(brand);
-        TextView version=Ui.text(activity,SystemProperties.get("ro.heckeros.version", "1.5"),48,true);
-        version.setTextColor(0xfff4f7ff);title.addView(version);
-        identity.addView(title,new LinearLayout.LayoutParams(0,-2,1));
-        android.widget.ImageView mascot = new android.widget.ImageView(activity);
-        mascot.setImageResource(R.drawable.hecker_mascot);mascot.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
-        mascot.setImportantForAccessibility(android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        if (activity.getResources().getConfiguration().screenWidthDp >= 360
-                && activity.getResources().getConfiguration().fontScale <= 1.3f)
-            identity.addView(mascot,new LinearLayout.LayoutParams(Ui.dp(activity,112),Ui.dp(activity,128)));
-        profile.addView(identity);
-        TextView maintainer=Ui.text(activity,activity.getString(R.string.about_maintainer),15,true);
-        maintainer.setTextColor(0xffdce5ff);profile.addView(maintainer);
-        String type = SystemProperties.get("ro.heckeros.build_type", "");
-        int label = "OFFICIAL".equals(type) ? R.string.about_build_official
-                : "UNOFFICIAL".equals(type) ? R.string.about_build_unofficial : R.string.about_build_unspecified;
-        TextView badge=Ui.text(activity,activity.getString(label),12,true);
-        badge.setTextColor(0xffa9cdff);profile.addView(badge);page.addView(profile);
         LinearLayout device=Ui.card(activity);
         detail(activity,device,R.string.about_device,android.os.Build.MODEL);
         detail(activity,device,R.string.about_android,android.os.Build.VERSION.RELEASE);
