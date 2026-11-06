@@ -28,7 +28,7 @@ still affects only quick QS and resumes automatically on a new playback event.
   dock motion follows the native launcher timing. The saved obsolete preference
   is ignored, without resetting launcher data.
 - Fit GameSpace foreground and monochrome art inside the adaptive safe zone,
-  provide circular round artwork, and bump the Suite APK to version code 150 /
+  provide circular round and legacy fallback artwork, and bump the Suite APK to version code 150 /
   version name 1.5. Launcher icon databases can invalidate the old package-version
   rows during a dirty-flash upgrade without clearing home layouts.
 - Remove the GameSpace early return that bypassed the selected icon pack.
