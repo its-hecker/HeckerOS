@@ -36,6 +36,17 @@ public final class HeckerVpnConfigTest {
             catch (IllegalArgumentException expected) {}
         }
         VpnConfig parsed = VpnConfig.parse(CONFIG);
+        String imported = parsed.render("all", List.of());
+        VpnConfig session = VpnConfig.parse(parsed.forConnection("include", List.of("com.android.chrome")));
+        if (!"25".equals(session.peers.get(0).get("PersistentKeepalive")) || !session.mode.equals("include")
+                || !session.applications.equals(List.of("com.android.chrome")))
+            throw new AssertionError("Idle app-only connection cannot initiate peer contact");
+        if (!imported.equals(parsed.render("all", List.of()))) throw new AssertionError("Connection rewrote the saved profile");
+        for (String keepalive : List.of("0", "120")) {
+            VpnConfig explicit = VpnConfig.parse(CONFIG + "PersistentKeepalive=" + keepalive + "\n");
+            if (!keepalive.equals(VpnConfig.parse(explicit.forConnection("all", List.of())).peers.get(0).get("PersistentKeepalive")))
+                throw new AssertionError("Explicit keepalive preference was changed");
+        }
         if (!parsed.render("all", List.of()).equals(VpnConfig.parse(parsed.render("all", List.of())).render("all", List.of()))) throw new AssertionError("Unstable normalization");
         String selected = parsed.render("include", List.of("org.telegram.messenger", "com.android.chrome"));
         if (!selected.contains("IncludedApplications=org.telegram.messenger,com.android.chrome\n")) throw new AssertionError("Missing selected-app policy");
@@ -62,6 +73,13 @@ public final class HeckerVpnConfigTest {
                 || !org.hecker.vpn.VpnConnectionState.classify(true, 0, 110).equals("waiting_peer")
                 || !org.hecker.vpn.VpnConnectionState.classify(true, 100, 110).equals("active")
                 || !org.hecker.vpn.VpnConnectionState.classify(true, 100, 300).equals("idle")) throw new AssertionError("Handshake freshness semantics");
+        if (!org.hecker.vpn.VpnConnectionState.classify(true, 0, 100, 44999).equals("waiting_peer")
+                || !org.hecker.vpn.VpnConnectionState.classify(true, 0, 100, 45000).equals("peer_timeout")
+                || !org.hecker.vpn.VpnConnectionState.classify(false, 0, 100, 45000).equals("disconnected")
+                || !org.hecker.vpn.VpnConnectionState.classify(true, 100, 110, 60000).equals("active")
+                || !org.hecker.vpn.VpnConnectionState.classify(true, 100, 300, 60000).equals("idle")
+                || !org.hecker.vpn.VpnConnectionState.classify(true, 0, -50000, 45000).equals("peer_timeout"))
+            throw new AssertionError("First-contact timeout or late-handshake recovery is incorrect");
         System.out.println("HeckerVPN config, dual-stack import, app selection and privilege-boundary regressions: PASS");
     }
 }

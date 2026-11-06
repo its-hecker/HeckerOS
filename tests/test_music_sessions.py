@@ -65,7 +65,7 @@ public ApplicationInfo getApplicationInfo(String pkg,int flags)throws NameNotFou
  public java.util.List<MediaController> getActiveSessionsForUser(Object n,android.os.UserHandle u){requestedUser=u.id;if(switchDuringRead){switchDuringRead=false;android.app.ActivityManager.user++;}return list;}
 }''',
 'android/view/KeyEvent.java': '''package android.view;public class KeyEvent{public static int ACTION_DOWN=0,ACTION_UP=1,KEYCODE_MEDIA_PLAY=126;public KeyEvent(int a,int k){}}''',
-'android/util/Log.java': '''package android.util;public class Log{public static int w(String a,String b,Throwable t){return 0;}}''',
+'android/util/Log.java': '''package android.util;public class Log{public static int d(String a,String b){return 0;}public static int w(String a,String b,Throwable t){return 0;}}''',
 }
 
 class MusicSessionTests(unittest.TestCase):

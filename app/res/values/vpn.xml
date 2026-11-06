@@ -11,6 +11,9 @@
     <string name="vpn_active">Active</string>
     <string name="vpn_idle">Idle · no recent peer contact</string>
     <string name="vpn_waiting_peer">Tunnel configured · waiting for peer</string>
+    <string name="vpn_peer_timeout">No response from VPN server</string>
+    <string name="vpn_retry_peer">Retry connection</string>
+    <string name="vpn_peer_help">No WireGuard handshake after 45 seconds. Apps using this profile have no confirmed VPN connection. Check that your profile is current, then try another server or network. Keep this tunnel on to continue retrying, or disconnect to restore normal routing.</string>
     <string name="vpn_waiting_network">Waiting for network</string>
     <string name="vpn_error">Connection needs attention</string>
     <string name="vpn_status">%1$s\nReceived %2$s · Sent %3$s</string>
@@ -21,6 +24,7 @@
     <string name="vpn_continue">Continue</string>
     <string name="vpn_pasted_name">Pasted WireGuard profile</string>
     <string name="vpn_get_free_profile">Get a free WireGuard profile</string>
+    <string name="vpn_free_mirror">Open VPNBook mirror</string>
     <string name="vpn_name">Profile name</string>
     <string name="vpn_save">Save profile</string>
     <string name="vpn_select">Select profile</string>
@@ -63,5 +67,5 @@
     <string name="vpn_kernel_missing">WireGuard kernel support has not been confirmed on this build.</string>
     <string name="vpn_session_note">Starts disconnected after a reboot. Disconnecting restores normal routing. A kill switch and Android always-on control are not enabled in this release.</string>
     <string name="vpn_free_title">VPNBook · Free WireGuard</string>
-    <string name="vpn_free_summary">Generate a WireGuard profile with no account or payment, then import it here. Each profile is for one device and expires after 7 days. VPNBook records connection IP addresses and times; see its privacy policy.</string>
+    <string name="vpn_free_summary">Generate a WireGuard profile with no account or payment, then import it here. If the site cannot be reached, try its mirror or download the profile on another network. Each profile is for one device and expires after 7 days. For a blocked UDP port, generate a fresh profile on UDP 443 or 123. VPNBook records connection IP addresses and times; see its privacy policy.</string>
 </resources>

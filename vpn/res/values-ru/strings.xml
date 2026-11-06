@@ -8,4 +8,5 @@
     <string name="vpn_waiting_peer">Туннель настроен · ожидание узла</string>
     <string name="vpn_waiting_network">Ожидание сети</string>
     <string name="vpn_error">Соединение требует внимания</string>
+    <string name="vpn_peer_timeout">Нет ответа от VPN-сервера</string>
 </resources>

@@ -9,14 +9,15 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class MediaFlowTests(unittest.TestCase):
-    def test_media_stays_local_and_detaches_on_shade_close(self):
+    def test_shared_media_handoff_and_outer_shade_teardown(self):
         scene = (ROOT / "framework/qs/HeckerMediaScene.kt").read_text()
         detach = scene.index("if (HeckerQsPanelState.alpha(scope) <= .001f) return")
-        player = scene.split("fun HeckerQsMediaPlayer(",1)[1].split("/** Controls fade",1)[0]
-        self.assertNotIn("ElementWithValues(", player, "media must not escape to the scene overlay")
-        self.assertNotIn(".element(", player)
-        mount = scene.index("HeckerMediaCard(modifier = modifier.drawWithContent")
-        self.assertLess(detach, mount, "closing the outer shade must unmount local media")
+        mount = scene.index("ElementWithValues(HeckerQsScene.Media")
+        self.assertLess(detach, mount, "closing the outer shade must unmount shared media")
+        for value in ("SquareWeight", "RowWeight"):
+            self.assertIn("canOverflow = false", scene)
+            self.assertIn(value, scene)
+        self.assertIn("squareWeight = { tile.value }, rowWeight = { row.value }", scene)
 
     def test_geometry_and_absolute_glow_phase(self):
         probe = r'''import com.android.systemui.hecker.MediaCardGeometry;

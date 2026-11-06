@@ -123,6 +123,8 @@ public final class HeckerMotionIsland implements AutoCloseable {
                         || !state.accept(action, intent.getIntExtra("user", -1),
                                 intent.getLongExtra("when", -1), now())) return;
                 feedbackToken = token;
+                Log.d(TAG, "Gesture accepted: action=" + action + " creature="
+                        + setting(CREATURE, 1, ActivityManager.getCurrentUser()));
                 if(action==MotionIslandState.NEXT||action==MotionIslandState.PREVIOUS){skipUntil=now()+3500;
                     main.removeCallbacks(settleSkip);main.postDelayed(settleSkip,3500);}
                 else if(action==MotionIslandState.PAUSE)skipUntil=0;

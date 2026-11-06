@@ -15,6 +15,8 @@ import android.net.Network;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.SystemClock;
+import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.ArrayList;
@@ -33,6 +35,8 @@ final class VpnEngine {
     private String status = "disconnected", error = "";
     private boolean desired, configured, supported, cleanupRequired, probed;
     private long rx, tx, handshake, catalogTime;
+    private long attemptStarted;
+    private String loggedStatus = "";
     private Network underlying;
     private List<JSONObject> catalog = List.of();
 
@@ -90,6 +94,7 @@ final class VpnEngine {
                     store.data.put("selected", request.getString("id")); store.save(); break;
                 case "delete": delete(request.getString("id", "")); break;
                 case "connect": connect(); break;
+                case "reconnect": reconnect(); break;
                 case "disconnect": disconnect(); break;
                 case "policy": policy(request); break;
                 case "catalog": catalog = MullvadProvider.servers(); catalogTime = System.currentTimeMillis(); break;
@@ -103,6 +108,8 @@ final class VpnEngine {
                 default: throw new IllegalArgumentException("Unsupported HeckerVPN operation");
             }
         } catch (Exception failure) {
+            // Never log config, account, endpoint, package selection or exception text.
+            Log.w("HeckerVPN", "Operation failed: " + failure.getClass().getSimpleName());
             if (failure instanceof KernelChannel.Failure) cleanupRequired |= ((KernelChannel.Failure) failure).cleanupRequired;
             error = message(failure);
             if (cleanupRequired) { status = "error"; notifyState(); }
@@ -164,7 +171,7 @@ final class VpnEngine {
     }
     private void connect() throws Exception {
         JSONObject profile = selected();
-        String config = VpnConfig.parse(profile.getString("config")).render(profile.getString("mode"), apps(profile));
+        String config = VpnConfig.parse(profile.getString("config")).forConnection(profile.getString("mode"), apps(profile));
         android.net.NetworkCapabilities capabilities = connectivity.getNetworkCapabilities(connectivity.getActiveNetwork());
         if (capabilities != null && capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_VPN))
             throw new IllegalArgumentException("Disconnect the other Android VPN before connecting HeckerVPN");
@@ -172,6 +179,7 @@ final class VpnEngine {
         if (!supported) throw new IllegalArgumentException("This kernel does not expose WireGuard support");
         desired = true; underlying = connectivity.getActiveNetwork();
         if (underlying == null) { status = "waiting_network"; notifyState(); schedulePoll(); return; }
+        attemptStarted = SystemClock.elapsedRealtime();
         status = "connecting"; notifyState();
         try { snapshot(kernel.call("UP\n" + config)); error = ""; }
         catch (Exception failure) { failed(failure); throw failure; }
@@ -199,7 +207,8 @@ final class VpnEngine {
         cleanupRequired = false;
         supported = data.optBoolean("kernel"); configured = data.optBoolean("configured");
         rx = data.optLong("rx"); tx = data.optLong("tx"); handshake = data.optLong("handshake");
-        if (configured) status = VpnConnectionState.classify(true, handshake, System.currentTimeMillis() / 1000);
+        if (configured) status = VpnConnectionState.classify(true, handshake, System.currentTimeMillis() / 1000,
+                Math.max(0, SystemClock.elapsedRealtime() - attemptStarted));
         else if (!desired) status = "disconnected";
     }
     private final Runnable poll = this::pollOnce;
@@ -214,7 +223,7 @@ final class VpnEngine {
             notifyState(); schedulePoll();
         } catch (Exception failure) { failed(failure); }
     }
-    private void schedulePoll() { worker.removeCallbacks(poll); worker.postDelayed(poll, 10000); }
+    private void schedulePoll() { worker.removeCallbacks(poll); worker.postDelayed(poll, configured && handshake <= 0 ? 3000 : 10000); }
     private void policy(Bundle request) throws Exception {
         JSONObject profile = selected(); String mode = request.getString("mode", "all");
         ArrayList<String> packages = request.getStringArrayList("apps"); if (packages == null) packages = new ArrayList<>();
@@ -293,13 +302,18 @@ final class VpnEngine {
         result.putParcelableArrayList("profiles", profiles); return result;
     }
     private void notifyState() {
+        if (!status.equals(loggedStatus)) {
+            Log.i("HeckerVPN", "state=" + status + " configured=" + configured
+                    + " peerContact=" + (handshake > 0) + " rx=" + rx + " tx=" + tx);
+            loggedStatus = status;
+        }
         NotificationManager notifications = context.getSystemService(NotificationManager.class);
         if (!desired && !status.equals("error")) { notifications.cancel(7841); return; }
         Intent open = new Intent().setClassName("org.hecker.suite", "org.hecker.suite.SuiteRouterActivity")
                 .putExtra("org.hecker.suite.PAGE", "HeckerVpnActivity");
         PendingIntent content = PendingIntent.getActivity(context, 0, open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent stop = PendingIntent.getService(context, 1, new Intent(context, VpnService.class).setAction("disconnect"), PendingIntent.FLAG_IMMUTABLE);
-        int label = status.equals("active") ? R.string.vpn_active : status.equals("idle") ? R.string.vpn_idle : status.equals("waiting_peer") ? R.string.vpn_waiting_peer
+        int label = status.equals("active") ? R.string.vpn_active : status.equals("idle") ? R.string.vpn_idle : status.equals("peer_timeout") ? R.string.vpn_peer_timeout : status.equals("waiting_peer") ? R.string.vpn_waiting_peer
                 : status.equals("waiting_network") ? R.string.vpn_waiting_network : status.equals("error") ? R.string.vpn_error : R.string.vpn_connecting;
         notifications.notify(7841, new Notification.Builder(context, "heckervpn").setSmallIcon(R.drawable.ic_vpn)
                 .setContentTitle(context.getString(R.string.vpn_title)).setContentText(context.getString(label))

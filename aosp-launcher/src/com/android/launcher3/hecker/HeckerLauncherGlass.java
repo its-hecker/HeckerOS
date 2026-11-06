@@ -61,7 +61,9 @@ public final class HeckerLauncherGlass {
         void scan(View v,int[] count){
             if(++count[0]>3000||v.getVisibility()!=View.VISIBLE)return;
             String name=v.getClass().getName(),id="";
-            try{if(v.getId()!=View.NO_ID)id=v.getResources().getResourceEntryName(v.getId());}catch(RuntimeException ignored){}
+            // generateViewId() uses 0x00xxxxxx; those are not resource-table entries.
+            int resourceId = v.getId();
+            try{if(resourceId != View.NO_ID && (resourceId >>> 24) != 0)id=v.getResources().getResourceEntryName(resourceId);}catch(RuntimeException ignored){}
             String target="hecker_glass_preview".equals(v.getTag())?"preview":name.endsWith(".Hotseat")?"dock":name.endsWith(".hecker.HeckerDockBar")||name.endsWith(".qsb.OseWidgetView")||id.equals("qsb_container")||id.equals("search_container_workspace")||id.equals("search_container_all_apps")?"search"
                     :v instanceof android.appwidget.AppWidgetHostView?"widgets":null;
             if(v instanceof android.appwidget.AppWidgetHostView && ((android.appwidget.AppWidgetHostView)v).getAppWidgetInfo()!=null

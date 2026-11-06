@@ -70,6 +70,13 @@ public final class HeckerIconStudio {
     public static Drawable icon(Context c, ComponentName component, UserHandle user, Drawable original,
             Runnable refresh, android.view.View host, boolean drawer) {
         if (component == null || original == null) return original;
+        // Refresh this built-in artwork even if a dirty flash retained an old bitmap.
+        // It remains the fallback: selected packs and glass glyphs are resolved below.
+        if ("org.hecker.suite".equals(component.getPackageName())
+                && "org.hecker.suite.GameSpaceLauncher".equals(component.getClassName())) {
+            int resource = HeckerStudio.res(c, "drawable", "hs_gamespace");
+            if (resource != 0) original = c.getPackageManager().getUserBadgedIcon(c.getDrawable(resource), user);
+        }
         if (drawer && !HeckerStudio.enabled(c, "drawer_custom_icons", true)) return original;
         String selected = HeckerStudio.value(c, "icon_" + HeckerStudio.appKey(c, component, user), "");
         if (selected.equals("@system")) return shaped(c, original);
