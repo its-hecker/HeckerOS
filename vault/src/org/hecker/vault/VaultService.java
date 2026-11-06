@@ -2,6 +2,7 @@
 package org.hecker.vault;
 
 import android.app.*;
+import android.app.Service;
 import android.content.*;
 import android.os.*;
 import java.io.File;
