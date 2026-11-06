@@ -314,7 +314,7 @@
         "notes": "Current PIF Java behavior adapted to HeckerOS Settings/process-scoped native property bridge; overlapping PixelOS PIF/keybox call paths removed."
       }
     },
-    "functional_revision": "a9d1818b200eed74ff11784c271974c41d75b6c2"
+    "functional_revision": "5a0ce893d05fe780f2858a6e90ee6d00cadd58f0"
   },
   "heckeros": {
     "version": "1.5",
@@ -461,7 +461,7 @@
     "device_testing": "pending",
     "source_validation": "host/SDK checked; full ROM and physical acceptance pending",
     "native_source_lock": "native-compat/source-lock.json",
-    "suite_revision": "a9d1818b200eed74ff11784c271974c41d75b6c2"
+    "suite_revision": "5a0ce893d05fe780f2858a6e90ee6d00cadd58f0"
   },
   "device_feedback_20261102": {
     "branch": "fix/coral-ui-compatibility-20261102",
@@ -639,12 +639,14 @@
       "Hecker preferences",
       "native launcher backup",
       "portable password encryption",
-      "scheduled backup/retention"
+      "scheduled backup/retention",
+      "saved app/personal-data groups",
+      "app/package and archive-filename search"
     ],
     "swift_import": "deferred until physical backup/clean-flash/restore acceptance succeeds",
     "validation": "41 production crypto/archive and 50 production native-transport checks; complete locked SDK/resource compile and exact Android platform permission/transport wiring audit pass",
     "device_acceptance": "Full ServerHive ROM build and physical backup/clean-flash/restore acceptance pending",
-    "functional_revision": "a9d1818b200eed74ff11784c271974c41d75b6c2",
-    "suite_revision": "a9d1818b200eed74ff11784c271974c41d75b6c2"
+    "functional_revision": "5a0ce893d05fe780f2858a6e90ee6d00cadd58f0",
+    "suite_revision": "5a0ce893d05fe780f2858a6e90ee6d00cadd58f0"
   }
 }
