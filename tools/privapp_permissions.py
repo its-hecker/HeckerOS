@@ -54,11 +54,15 @@ def check_feature_privapp_permissions(platform_manifest, suite_root):
     requested = {p.get(A + "name") for p in controller.findall("uses-permission")}
     result[controller.get("package")] = check_package_permissions(platform_manifest,
         controller.get("package"), requested, root / "configs/privapp-permissions-hecker-netlab.xml", "HeckerNetLabController")
+    vault = ET.parse(root / "vault/AndroidManifest.xml").getroot()
+    requested = {p.get(A + "name") for p in vault.findall("uses-permission")}
+    result[vault.get("package")] = check_package_permissions(platform_manifest,
+        vault.get("package"), requested, root / "configs/privapp-permissions-hecker-vault.xml", "HeckerVault")
     result["com.android.launcher3"] = check_package_permissions(platform_manifest,
         "com.android.launcher3", set(EXTRA_PERMISSIONS), root / "configs/privapp-permissions-hecker-launcher.xml", "HeckerLauncher additions")
     blueprint = (root / "Android.bp").read_text()
     blocks = re.findall(r'prebuilt_etc\s*\{([^{}]*)\}', blueprint)
-    for module, name in (("HeckerLauncherPermissions", "launcher"), ("HeckerNetLabPermissions", "netlab")):
+    for module, name in (("HeckerLauncherPermissions", "launcher"), ("HeckerNetLabPermissions", "netlab"), ("HeckerVaultPermissions", "vault")):
         matches = [block for block in blocks if re.search(r'\bname:\s*"' + module + '"', block)]
         if len(matches) != 1 or not re.search(r'\bsystem_ext_specific:\s*true', matches[0]) \
                 or '"configs/privapp-permissions-hecker-' + name + '.xml"' not in matches[0] \

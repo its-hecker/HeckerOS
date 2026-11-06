@@ -30,7 +30,7 @@ def main():
         "android.permission.SYSTEM_ALERT_WINDOW", "android.permission.KILL_BACKGROUND_PROCESSES",
         "android.permission.KILL_ALL_BACKGROUND_PROCESSES", "android.permission.FORCE_STOP_PACKAGES", "android.permission.CONTROL_DISPLAY_BRIGHTNESS",
         "android.permission.MODIFY_AUDIO_SETTINGS", "android.permission.MANAGE_GAME_MODE", "android.permission.ACCESS_NETWORK_STATE",
-        "android.permission.INTERNET", "android.permission.ACCESS_LOCAL_NETWORK", "org.hecker.netlab.permission.CONTROL", "org.hecker.vpn.permission.CONTROL",
+        "android.permission.INTERNET", "android.permission.ACCESS_LOCAL_NETWORK", "org.hecker.netlab.permission.CONTROL", "org.hecker.vpn.permission.CONTROL", "org.hecker.vault.permission.OPEN",
         "android.permission.ACCESS_NOTIFICATION_POLICY", "android.permission.READ_FRAME_BUFFER",
         "android.permission.POST_NOTIFICATIONS", "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_SPECIAL_USE", "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",

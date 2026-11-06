@@ -27,6 +27,7 @@ class PrivappPermissionTests(unittest.TestCase):
                 android:protectionLevel="normal" />
             <permission android:name="android.permission.READ_WALLPAPER_INTERNAL"
                 android:protectionLevel="signature|privileged" />
+            <permission android:name="android.permission.BACKUP" android:protectionLevel="signature|privileged" />
             <permission android:name="android.permission.TETHER_PRIVILEGED"
                 android:protectionLevel="signature|privileged" />
             <permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
@@ -34,7 +35,8 @@ class PrivappPermissionTests(unittest.TestCase):
         </manifest>''')
         for relative in ("app/AndroidManifest.xml", "configs/privapp-permissions-hecker-suite.xml",
                          "netlab/AndroidManifest.xml", "configs/privapp-permissions-hecker-netlab.xml",
-                         "configs/privapp-permissions-hecker-launcher.xml", "Android.bp"):
+                         "configs/privapp-permissions-hecker-launcher.xml", "vault/AndroidManifest.xml",
+                         "configs/privapp-permissions-hecker-vault.xml", "Android.bp"):
             target = self.root / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes((ROOT / relative).read_bytes())
@@ -77,6 +79,17 @@ class PrivappPermissionTests(unittest.TestCase):
         decisions = check_feature_privapp_permissions(self.platform, self.root)
         self.assertEqual({'android.permission.READ_WALLPAPER_INTERNAL'}, decisions['com.android.launcher3'])
         self.assertEqual({'android.permission.SCHEDULE_EXACT_ALARM', 'android.permission.TETHER_PRIVILEGED'}, decisions['org.hecker.netlab'])
+
+    def test_vault_backup_permission_is_audited_before_build(self):
+        decisions = check_feature_privapp_permissions(self.platform, self.root)
+        self.assertEqual({'android.permission.BACKUP', 'android.permission.READ_WALLPAPER_INTERNAL'}, decisions['org.hecker.vault'])
+        path = self.root / 'configs/privapp-permissions-hecker-vault.xml'
+        tree = ET.parse(path)
+        node = tree.getroot().find("privapp-permissions/permission[@name='android.permission.BACKUP']")
+        tree.getroot().find('privapp-permissions').remove(node)
+        tree.write(path)
+        with self.assertRaisesRegex(ValueError, 'HeckerVault.*prevent Android from booting.*BACKUP'):
+            check_feature_privapp_permissions(self.platform, self.root)
 
     def test_missing_wallpaper_allowlist_reproduces_reported_boot_failure(self):
         path = self.root / 'configs/privapp-permissions-hecker-launcher.xml'

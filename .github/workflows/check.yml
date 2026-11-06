@@ -69,6 +69,8 @@ jobs:
           python3 -m pip install Pillow fonttools==4.61.1
           python3 tools/fetch_depth_assets.py
           bash tests/run_host_tests.sh
+      - name: Verify HeckerVault encryption, native transport, controller and permissions
+        run: python3 tools/check_vault.py --sdk-cache generated/sdk
       - name: Compile Suite Java and link Android resources with locked dependencies
         run: python3 tools/compile_sdk.py --cache generated/sdk
       - name: Verify native XMorphClock renderer and all packaged clock states

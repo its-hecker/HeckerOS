@@ -271,8 +271,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "fix/device-feedback-20261105",
-    "integration_branch": "fix/device-feedback-20261105",
+    "source_branch": "feat/heckervault-20261106",
+    "integration_branch": "feat/heckervault-20261106",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required",
@@ -621,5 +621,27 @@
     ],
     "device_report": "User reports UBL, banking apps and Wallet working on the prior matched detector build. Compatibility/attestation backend remains unchanged.",
     "validation": "194 Suite host tests and 86 integration tests; locked Suite/Settings SDK/AIDL/resources, SystemUI Compose against the pinned ActivityStarter API, 138 native inputs with fresh/upgrade/idempotent/exact revert checks, native VPN checks, and compiled user/userdebug SELinux policies with neverallows and DNS access probes pass. Full 1.5 ROM build and physical UI/icon-cache/tunnel acceptance remain required."
+  },
+  "heckervault_20261106": {
+    "branch": "feat/heckervault-20261106",
+    "controller": "org.hecker.vault",
+    "archive_format": 1,
+    "backend": "Native Android full/key-value BackupTransport; app-declared exclusions retained; no root grant",
+    "features": [
+      "APK/splits",
+      "eligible native app data",
+      "Wi-Fi",
+      "local contacts",
+      "SMS/MMS attachments",
+      "call history",
+      "static wallpapers",
+      "Hecker preferences",
+      "native launcher backup",
+      "portable password encryption",
+      "scheduled backup/retention"
+    ],
+    "swift_import": "deferred until physical backup/clean-flash/restore acceptance succeeds",
+    "validation": "41 production crypto/archive and 50 production native-transport checks; complete locked SDK/resource compile and exact Android platform permission/transport wiring audit pass",
+    "device_acceptance": "Full ServerHive ROM build and physical backup/clean-flash/restore acceptance pending"
   }
 }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="vault_background">#F5F2F7</color>
+    <color name="vault_card">#FFFFFF</color>
+    <color name="vault_foreground">#211D26</color>
+    <color name="vault_secondary">#625B69</color>
+    <color name="vault_chip">#DCE7FD</color>
+    <color name="vault_accent">#386AB8</color>
+    <style name="VaultTheme" parent="android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowBackground">@color/vault_background</item>
+        <item name="android:colorBackground">@color/vault_background</item>
+        <item name="android:colorAccent">@color/vault_accent</item>
+        <item name="android:textColorPrimary">@color/vault_foreground</item>
+        <item name="android:textColorSecondary">@color/vault_secondary</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+</resources>

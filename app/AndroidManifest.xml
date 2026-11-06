@@ -6,6 +6,7 @@
         android:protectionLevel="signature" />
     <permission android:name="org.hecker.suite.permission.READ_GAME_LIBRARY" android:protectionLevel="signature" />
     <permission android:name="org.hecker.suite.permission.READ_DEPTH" android:protectionLevel="signature" />
+    <uses-permission android:name="org.hecker.vault.permission.OPEN" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.HECKER_SUITE_APP_LOCK" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />

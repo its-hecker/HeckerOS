@@ -51,6 +51,31 @@ def check_suite(rom, output):
     if not original.is_file() or not installed.is_file() or installed.read_bytes() != original.read_bytes():
         raise ValueError("Built system_ext image is missing the exact Launcher permission allowlist")
     check_vpn(rom, output)
+    check_vault(rom, output)
+
+
+def check_vault(rom, output):
+    source = rom / "vendor/hecker/floral/suite"
+    if not (source / "vault/AndroidManifest.xml").is_file():
+        return  # Older Suite revisions predate this optional feature branch.
+    apk = output / "system_ext/priv-app/HeckerVault/HeckerVault.apk"
+    if not apk.is_file() or apk.stat().st_size == 0:
+        raise ValueError("Built system_ext image is missing HeckerVault.apk")
+    try:
+        with zipfile.ZipFile(apk) as archive:
+            names = archive.namelist()
+            if len(names) != len(set(names)) or not {"AndroidManifest.xml", "classes.dex"} <= set(names) \
+                    or not archive.read("classes.dex").startswith(b"dex\n"):
+                raise ValueError("Built HeckerVault APK is incomplete")
+    except zipfile.BadZipFile as error:
+        raise ValueError("Built HeckerVault APK is invalid") from error
+    for folder, name in (("permissions", "privapp-permissions-hecker-vault.xml"),
+                         ("default-permissions", "default-permissions-hecker-vault.xml"),
+                         ("sysconfig", "hecker-vault-transport.xml")):
+        original = source / "configs" / name
+        installed = output / "system_ext/etc" / folder / name
+        if not installed.is_file() or installed.read_bytes() != original.read_bytes():
+            raise ValueError("Built image is missing the exact HeckerVault runtime file: " + name)
 
 
 def check_vpn(rom, output):

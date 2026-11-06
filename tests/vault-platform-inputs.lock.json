@@ -1,0 +1,32 @@
+{
+  "AndroidManifest.xml": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/4ff5e646649ad99adb3eeb19133189c811ea1212/core/res/AndroidManifest.xml",
+    "sha256": "dd0884f00cdde6a7eb42d7b0783bce260561aa193f18cf43b556447c1f865c00",
+    "base64": false
+  },
+  "BackupTransport.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/4ff5e646649ad99adb3eeb19133189c811ea1212/core/java/android/app/backup/BackupTransport.java",
+    "sha256": "7802fde2068f0bbb54c216e5b5d28956969abe123b0dc98ef5bc7c9e74dbacf7",
+    "base64": false
+  },
+  "BackupManager.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/4ff5e646649ad99adb3eeb19133189c811ea1212/core/java/android/app/backup/BackupManager.java",
+    "sha256": "16c386e11a00cf5bbca843c0e64730312acb8ef5397fd2a847c5d684feb5d7fb",
+    "base64": false
+  },
+  "RestoreSession.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/4ff5e646649ad99adb3eeb19133189c811ea1212/core/java/android/app/backup/RestoreSession.java",
+    "sha256": "ceae49a1f411bc018ec3e8fc1176b7f5a1dec231594b6afeddcb7e2ebfff27c2",
+    "base64": false
+  },
+  "SystemConfig.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/4ff5e646649ad99adb3eeb19133189c811ea1212/services/core/java/com/android/server/SystemConfig.java",
+    "sha256": "2d0bf76dac844930c4b065335895674d2abab1349b8ea65b0e7f852b70a12c61",
+    "base64": false
+  },
+  "TransportManager.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/4ff5e646649ad99adb3eeb19133189c811ea1212/services/backup/java/com/android/server/backup/TransportManager.java",
+    "sha256": "7933132a4ed745ca4ab6aabff7a6aeab0a5e2c95f03acc9cb8f9b6b13de544c4",
+    "base64": false
+  }
+}
