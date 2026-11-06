@@ -271,8 +271,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "fix/coral-ui-compatibility-20261102",
-    "integration_branch": "fix/coral-ui-compatibility-20261102",
+    "source_branch": "fix/device-feedback-20261105",
+    "integration_branch": "fix/device-feedback-20261105",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required",
@@ -313,7 +313,8 @@
         "verified_at": "2026-10-26",
         "notes": "Current PIF Java behavior adapted to HeckerOS Settings/process-scoped native property bridge; overlapping PixelOS PIF/keybox call paths removed."
       }
-    }
+    },
+    "functional_revision": "36d147c88d396e0ffdff6493c5cf80a953c89b2f"
   },
   "heckeros": {
     "version": "1.0",
