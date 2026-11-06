@@ -327,15 +327,24 @@
   "src/com/android/launcher3/WorkspaceStateTransitionAnimation.java": [
     {
       "old": "        float hotseatScale = hotseatScaleAndTranslation.scale;\n        if (shouldSpring) {",
-      "new": "        float hotseatScale = hotseatScaleAndTranslation.scale;\n        if (shouldSpring && com.android.launcher3.hecker.HeckerLauncherMotion.dockBounce(mLauncher)) {"
+      "new": "        float hotseatScale = hotseatScaleAndTranslation.scale;\n        if (shouldSpring) {",
+      "previous": [
+        "        float hotseatScale = hotseatScaleAndTranslation.scale;\n        if (shouldSpring && com.android.launcher3.hecker.HeckerLauncherMotion.dockBounce(mLauncher)) {"
+      ]
     },
     {
       "old": "        Interpolator hotseatTranslationInterpolator = config.getInterpolator(\n                ANIM_HOTSEAT_TRANSLATE, translationInterpolator);",
-      "new": "        Interpolator hotseatTranslationInterpolator = com.android.launcher3.hecker.HeckerLauncherMotion.dockInterpolator(\n                mLauncher, config.getInterpolator(ANIM_HOTSEAT_TRANSLATE, translationInterpolator));"
+      "new": "        Interpolator hotseatTranslationInterpolator = config.getInterpolator(\n                ANIM_HOTSEAT_TRANSLATE, translationInterpolator);",
+      "previous": [
+        "        Interpolator hotseatTranslationInterpolator = com.android.launcher3.hecker.HeckerLauncherMotion.dockInterpolator(\n                mLauncher, config.getInterpolator(ANIM_HOTSEAT_TRANSLATE, translationInterpolator));"
+      ]
     },
     {
       "old": "            Interpolator hotseatScaleInterpolator = config.getInterpolator(ANIM_HOTSEAT_SCALE,\n                    scaleInterpolator);",
-      "new": "            Interpolator hotseatScaleInterpolator = com.android.launcher3.hecker.HeckerLauncherMotion.dockInterpolator(\n                    mLauncher, config.getInterpolator(ANIM_HOTSEAT_SCALE, scaleInterpolator));"
+      "new": "            Interpolator hotseatScaleInterpolator = config.getInterpolator(ANIM_HOTSEAT_SCALE,\n                    scaleInterpolator);",
+      "previous": [
+        "            Interpolator hotseatScaleInterpolator = com.android.launcher3.hecker.HeckerLauncherMotion.dockInterpolator(\n                    mLauncher, config.getInterpolator(ANIM_HOTSEAT_SCALE, scaleInterpolator));"
+      ]
     }
   ]
 }

@@ -29,6 +29,9 @@ allow netutils_wrapper toolbox_exec:file { rx_file_perms execute_no_trans };
 allow netutils_wrapper system_data_file:dir search;
 allow netutils_wrapper packages_list_file:file r_file_perms;
 get_prop(netutils_wrapper, build_prop)
+# wg setconf resolves Endpoint hostnames with bionic getaddrinfo(), which uses
+# netd's DNS proxy socket independently of the DnsResolver Binder setup path.
+unix_socket_connect(netutils_wrapper, dnsproxyd, netd)
 
 # A unique domain authenticates the init socket; the APK separately authenticates Binder callers.
 type hecker_vpn_app, domain, coredomain;

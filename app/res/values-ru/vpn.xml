@@ -57,6 +57,6 @@
     <string name="vpn_account_pending">Регистрация Mullvad не завершена. Повторите настройку с сохранённым аккаунтом.</string>
     <string name="vpn_account_retry">Повторить настройку Mullvad</string>
     <string name="vpn_import_access">Не удалось открыть выбранный файл. Выберите его снова в приложении «Файлы».</string>
-    <string name="vpn_free_title">Proton VPN Free</string>
-    <string name="vpn_free_summary">Скачайте конфигурацию WireGuard в аккаунте Proton и импортируйте её здесь. Выберите расположение при скачивании. Сохранённые конфигурации находятся в разделе «Мои профили».</string>
+    <string name="vpn_free_title">VPNBook · Бесплатный WireGuard</string>
+    <string name="vpn_free_summary">Создайте профиль WireGuard без регистрации и оплаты и импортируйте его сюда. Профиль работает на одном устройстве и истекает через 7 дней. VPNBook сохраняет IP-адрес и время подключения; см. политику конфиденциальности.</string>
 </resources>

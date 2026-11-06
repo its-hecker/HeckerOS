@@ -133,7 +133,6 @@ public final class HeckerStudioActivity extends Activity {
             }, true);
         }
         for (String target : new String[]{"dock", "folders", "search", "widgets"}) toggle("hecker_glass_" + target, !target.equals("dock"), false);
-        toggle("dock_bounce", true);
         for (String position : new String[]{"tl", "tr", "br", "bl"}) {
             int current; try { current = Integer.parseInt(HeckerStudio.prefs(this).getString("hecker_glass_corner_" + position, "28")); } catch (RuntimeException bad) { current = 28; }
             rawSlider("corner_" + position, current, 0, 48, value -> HeckerStudio.prefs(this).edit().putString("hecker_glass_corner_" + position, Integer.toString(value)).apply(), true);

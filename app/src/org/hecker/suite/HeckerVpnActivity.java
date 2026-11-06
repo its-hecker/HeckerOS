@@ -160,8 +160,8 @@ public final class HeckerVpnActivity extends Activity {
         LinearLayout provider = Ui.card(this);
         provider.addView(Ui.text(this, getString(R.string.vpn_free_title), 20, true));
         provider.addView(Ui.text(this, getString(R.string.vpn_free_summary), 14, false));
-        action(provider, R.string.vpn_proton_free, () -> startActivity(new Intent(Intent.ACTION_VIEW,
-                android.net.Uri.parse("https://protonvpn.com/support/wireguard-configurations"))));
+        action(provider, R.string.vpn_get_free_profile, () -> startActivity(new Intent(Intent.ACTION_VIEW,
+                android.net.Uri.parse("https://www.vpnbook.com/freevpn/wireguard-vpn"))));
         action(provider, R.string.vpn_import, () -> startActivityForResult(
                 new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*"), 784));
         action(provider, R.string.vpn_paste, this::pasteConfigDialog);
@@ -171,8 +171,8 @@ public final class HeckerVpnActivity extends Activity {
         LinearLayout header = Ui.card(this); action(header, R.string.vpn_import, () -> startActivityForResult(
                 new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*"), 784));
         action(header, R.string.vpn_paste, this::pasteConfigDialog);
-        action(header, R.string.vpn_proton_free, () -> startActivity(new Intent(Intent.ACTION_VIEW,
-                android.net.Uri.parse("https://protonvpn.com/support/wireguard-configurations"))));
+        action(header, R.string.vpn_get_free_profile, () -> startActivity(new Intent(Intent.ACTION_VIEW,
+                android.net.Uri.parse("https://www.vpnbook.com/freevpn/wireguard-vpn"))));
         body.addView(header);
         ArrayList<Bundle> items = state.getParcelableArrayList("profiles", Bundle.class);
         if (items == null || items.isEmpty()) { body.addView(Ui.text(this, getString(R.string.vpn_no_profiles), 15, false)); return; }

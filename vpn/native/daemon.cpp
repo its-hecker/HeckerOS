@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Narrow init-owned controller. No su, caller-selected executable, path, interface or shell command.
 #include "protocol.h"
+#include "setup_status.h"
 #include <arpa/inet.h>
 #include <cerrno>
 #include <chrono>
@@ -25,6 +26,7 @@
 
 namespace {
 constexpr char kConfig[] = "/data/misc/heckervpn/hkvpn0.conf";
+constexpr char kStage[] = "/data/misc/heckervpn/setup-stage";
 constexpr char kNetid[] = "/data/misc/heckervpn/netid";
 constexpr char kWg[] = "/system_ext/bin/hecker-wg";
 constexpr char kQuick[] = "/system_ext/bin/hecker-wg-quick";
@@ -86,7 +88,7 @@ bool cleanup() {
     // The recorded netid survives an interrupted helper. It belongs solely to this tunnel.
     if (access(kNetid, F_OK) == 0) cleaned = run(kQuick, {"cleanup"}, "", false, true).code == 0 && cleaned;
     cleanup_pending = !cleaned;
-    if (cleaned) { unlink(kNetid); unlink(kConfig); }
+    if (cleaned) { unlink(kNetid); unlink(kConfig); unlink(kStage); }
     return cleaned;
 }
 bool save_config(const std::string& config) {
@@ -141,7 +143,16 @@ std::string request(const std::string& command) {
         if (!hecker::vpn::valid_config(config)) return "{\"ok\":false,\"error\":\"Rejected noncanonical configuration\"}";
         if (!cleanup()) return "{\"ok\":false,\"cleanup_required\":true,\"error\":\"Previous tunnel cleanup is incomplete\"}";
         if (!save_config(config)) return "{\"ok\":false,\"error\":\"Unable to stage tunnel configuration\"}";
-        if (run(kQuick, {"up", kConfig}).code) { cleanup(); return "{\"ok\":false,\"error\":\"Kernel tunnel setup failed. Check kernel, routing and SELinux compatibility.\"}"; }
+        Result up = run(kQuick, {"up", kConfig});
+        if (up.code) {
+            char stage[32] = {};
+            int fd = open(kStage, O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
+            if (fd >= 0) { ssize_t count = read(fd, stage, sizeof(stage) - 1); (void)count; close(fd); }
+            std::string error = hecker::vpn::setup_error(stage);
+            cleanup();
+            return std::string("{\"ok\":false,\"cleanup_required\":") + (cleanup_pending ? "true" : "false")
+                + ",\"exit_code\":" + std::to_string(up.code) + ",\"error\":\"" + error + "\"}";
+        }
         std::string result = state();
         if (result.find("\"configured\":true") == std::string::npos) {
             cleanup(); return "{\"ok\":false,\"error\":\"Tunnel setup did not produce a readable WireGuard interface\"}";

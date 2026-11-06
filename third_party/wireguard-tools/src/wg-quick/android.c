@@ -1154,12 +1154,23 @@ static void cmd_up_cleanup(void)
 	free(cleanup_iface);
 }
 
+/* Record only a fixed setup stage, never command output, endpoints or keys. */
+static void hecker_setup_stage(const char *stage)
+{
+ FILE *file = fopen("/data/misc/heckervpn/setup-stage", "we");
+ if (!file) return;
+ fchmod(fileno(file), 0600);
+ fputs(stage, file);
+ fclose(file);
+}
+
 static void cmd_up(const char *iface, const char *config, unsigned int mtu, const char *addrs, const char *dnses, const char *excluded_applications, const char *included_applications)
 {
 	DEFINE_CMD(c);
 	unsigned int netid = 0;
 	uint16_t listen_port;
 
+	hecker_setup_stage("interface");
 	if (cmd_ret(&c, "ip link show dev %s 2>/dev/null", iface)) {
 		fprintf(stderr, "Error: %s already exists\n", iface);
 		exit(EEXIST);
@@ -1169,14 +1180,22 @@ static void cmd_up(const char *iface, const char *config, unsigned int mtu, cons
 	atexit(cmd_up_cleanup);
 
 	add_if(iface);
+	hecker_setup_stage("peer");
 	set_config(iface, config);
 	listen_port = determine_listen_port(iface);
+	hecker_setup_stage("network");
 	up_if(&netid, iface, listen_port);
+	hecker_setup_stage("address");
 	set_addr(iface, addrs);
+	hecker_setup_stage("dns");
 	set_dnses(netid, dnses);
+	hecker_setup_stage("routes");
 	set_routes(iface, netid);
+	hecker_setup_stage("mtu");
 	set_mtu(iface, mtu);
+	hecker_setup_stage("apps");
 	set_users(netid, excluded_applications, included_applications);
+	hecker_setup_stage("ready");
 	broadcast_change();
 
 	free(cleanup_iface);

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.hecker.suite" android:versionCode="3" android:versionName="0.3">
+    package="org.hecker.suite" android:versionCode="150" android:versionName="1.5">
     <uses-sdk android:minSdkVersion="36" android:targetSdkVersion="37" />
     <permission android:name="org.hecker.suite.permission.OPEN_FEATURE"
         android:protectionLevel="signature" />
@@ -72,9 +72,9 @@
         <activity android:name=".InfraredCameraActivity" android:exported="false"
             android:label="@string/ir_title" android:excludeFromRecents="true" />
         <activity android:name=".GamingActivity" android:exported="false"
-            android:label="@string/gaming_title" android:icon="@mipmap/ic_gamespace" android:roundIcon="@mipmap/ic_gamespace" android:theme="@style/GamingTheme" />
+            android:label="@string/gaming_title" android:icon="@mipmap/ic_gamespace" android:roundIcon="@drawable/ic_gamespace_round" android:theme="@style/GamingTheme" />
         <activity-alias android:name=".GameSpaceLauncher" android:targetActivity=".GamingActivity"
-            android:exported="true" android:label="@string/gaming_title" android:icon="@mipmap/ic_gamespace" android:roundIcon="@mipmap/ic_gamespace">
+            android:exported="true" android:label="@string/gaming_title" android:icon="@mipmap/ic_gamespace" android:roundIcon="@drawable/ic_gamespace_round">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <provider android:name=".GamingLibraryProvider" android:authorities="org.hecker.suite.games"

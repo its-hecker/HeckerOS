@@ -73,13 +73,12 @@ public final class SuiteActivity extends Activity {
                 tile(R.string.netlab_title,R.string.netlab_summary,R.drawable.ic_netlab,v->open("NetworkLabActivity")));
         addRow(tile(R.string.vpn_title,R.string.vpn_summary,R.drawable.ic_vpn,v->open("HeckerVpnActivity")),
                 tile(R.string.spoofing_title,R.string.spoofing_summary,R.drawable.ic_spoofing,v->openSpoofing()));
-        if("coral".equals(android.os.Build.DEVICE)||"flame".equals(android.os.Build.DEVICE)){
-            Ui.actionCard(this,content,R.string.sensor_recovery_title,R.string.sensor_recovery_summary,
-                    v->open("SensorRecoveryActivity"));
-        }
-        if ("coral".equals(android.os.Build.DEVICE)) {
-            Ui.actionCard(this, content, R.string.root_privacy_title, R.string.root_privacy_summary,
-                    v -> open("RootPrivacyActivity"));
+        if ("coral".equals(android.os.Build.DEVICE) || "flame".equals(android.os.Build.DEVICE)) {
+            addRow(tile(R.string.sensor_recovery_title,R.string.sensor_recovery_summary,R.drawable.ic_motion_sense,
+                            v -> open("SensorRecoveryActivity")),
+                    "coral".equals(android.os.Build.DEVICE)
+                            ? tile(R.string.root_privacy_title,R.string.root_privacy_summary,R.drawable.ic_spoofing,
+                                    v -> open("RootPrivacyActivity")) : null);
         }
         LinearLayout footer=Ui.card(this); footer.addView(Ui.text(this,"HeckerOS",17,true));
         footer.addView(Ui.text(this,getString(R.string.suite_footer),12,false));content.addView(footer);
@@ -99,7 +98,7 @@ public final class SuiteActivity extends Activity {
         LinearLayout row=new LinearLayout(this);row.setBaselineAligned(false);
         LinearLayout.LayoutParams a=new LinearLayout.LayoutParams(0,-2,1),b=new LinearLayout.LayoutParams(0,-2,1);
         a.setMarginEnd(Ui.dp(this,5));b.setMarginStart(Ui.dp(this,5));a.bottomMargin=b.bottomMargin=Ui.dp(this,10);
-        row.addView(left,a);row.addView(right,b);content.addView(row);
+        row.addView(left,a);row.addView(right != null ? right : new android.widget.Space(this),b);content.addView(row);
     }
     private void open(String page) {
         try {

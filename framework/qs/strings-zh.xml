@@ -59,4 +59,6 @@
     <string name="hecker_media_stop_app">关闭应用</string>
     <string name="hecker_media_stop_failed">无法关闭媒体应用</string>
     <string name="hecker_media_options">媒体选项</string>
+    <string name="hecker_media_open_app">打开媒体应用</string>
+    <string name="hecker_media_open_failed">无法打开媒体应用</string>
 </resources>

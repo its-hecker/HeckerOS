@@ -191,5 +191,6 @@
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionCharacterPose.java": "framework/motionisland/MotionCharacterPose.java",
   "frameworks/base/services/core/java/com/android/server/hecker/HeckerGameMonitor.java": "framework/gaming/HeckerGameMonitor.java",
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/LockscreenClockLayout.java": "framework/lockscreen/LockscreenClockLayout.java",
-  "frameworks/base/packages/SystemUI/res/drawable/hecker_media_more.xml": "framework/qs/icons/hecker_media_more.xml"
+  "frameworks/base/packages/SystemUI/res/drawable/hecker_media_more.xml": "framework/qs/icons/hecker_media_more.xml",
+  "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMediaAppLaunch.java": "framework/qs/HeckerMediaAppLaunch.java"
 }

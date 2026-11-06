@@ -54,6 +54,8 @@ int main(int argc, char **argv) {
     access_check("u:r:hecker_vpn_app:s0:c512,c768", "u:r:hecker_vpnd:s0", "unix_stream_socket", "connectto", 1);
     access_check("u:r:hecker_vpnd:s0", "u:r:hecker_vpn_app:s0:c512,c768", "unix_stream_socket", "read", 1);
     access_check("u:r:hecker_vpnd:s0", "u:r:hecker_vpn_app:s0:c512,c768", "unix_stream_socket", "write", 1);
+    access_check("u:r:netutils_wrapper:s0", "u:object_r:dnsproxyd_socket:s0", "sock_file", "write", 1);
+    access_check("u:r:netutils_wrapper:s0", "u:r:netd:s0", "unix_stream_socket", "connectto", 1);
     puts("HeckerVPN compiled policy: Android service lookup, Binder and private daemon access PASS");
     return 0;
 }

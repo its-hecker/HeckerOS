@@ -7,19 +7,22 @@ from test_motion_island import java_run
 ROOT = Path(__file__).resolve().parents[1]
 
 STUBS = {
+'android/app/PendingIntent.java': '''package android.app;public class PendingIntent {public boolean activity=true,switchOnCreatorRead;public int uid=ActivityManager.user*100000+12000;public boolean isActivity(){return activity;}public int getCreatorUid(){if(switchOnCreatorRead){switchOnCreatorRead=false;ActivityManager.user++;}return uid;}}''',
 'android/app/ActivityManager.java': '''package android.app;public class ActivityManager {public static String stopped;public static int stoppedUser=-1;public void forceStopPackageAsUser(String pkg,int user){stopped=pkg;stoppedUser=user;}public static int user;public static int getCurrentUser(){return user;}}''',
 'android/content/pm/ApplicationInfo.java': 'package android.content.pm;public class ApplicationInfo{public int uid=android.app.ActivityManager.user*100000+12000;}',
-'android/content/pm/PackageManager.java': 'package android.content.pm;public class PackageManager{public static class NameNotFoundException extends Exception{}public ApplicationInfo getApplicationInfo(String pkg,int flags)throws NameNotFoundException{return new ApplicationInfo();}}',
+'android/content/pm/PackageManager.java': '''package android.content.pm;public class PackageManager{public static class NameNotFoundException extends Exception{}public boolean launchable=true,switchDuringResolve,failResolve;public String requestedPackage;
+public android.content.Intent getLaunchIntentForPackage(String pkg){requestedPackage=pkg;if(failResolve)throw new SecurityException();if(switchDuringResolve){switchDuringResolve=false;android.app.ActivityManager.user++;}return launchable?new android.content.Intent(pkg):null;}
+public ApplicationInfo getApplicationInfo(String pkg,int flags)throws NameNotFoundException{return new ApplicationInfo();}}''',
 'android/os/Looper.java': '''package android.os;public class Looper {public static Looper getMainLooper(){return null;}}''',
 'android/os/Handler.java': '''package android.os;public class Handler {public Handler(Looper l){}public void postDelayed(Runnable r,long delay){}public void removeCallbacks(Runnable r){}}''',
 'android/os/SystemClock.java': '''package android.os;public class SystemClock {public static long elapsedRealtime(){return 10000;}}''',
 'android/os/UserHandle.java': '''package android.os;public class UserHandle {public int id;public static UserHandle ALL=new UserHandle(),SYSTEM=new UserHandle();public static UserHandle of(int id){UserHandle u=new UserHandle();u.id=id;return u;}}''',
 'android/content/BroadcastReceiver.java': '''package android.content;public abstract class BroadcastReceiver{public abstract void onReceive(Context c,Intent i);}''',
 'android/content/IntentFilter.java': '''package android.content;public class IntentFilter{public IntentFilter(String s){}}''',
-'android/content/Intent.java': '''package android.content;public class Intent{public static String ACTION_USER_SWITCHED="user";public Intent(String s){}public Intent setPackage(String p){return this;}public Intent putExtra(String k,Object o){return this;}}''',
+'android/content/Intent.java': '''package android.content;public class Intent{public static String ACTION_USER_SWITCHED="user";public static int FLAG_ACTIVITY_NEW_TASK=0x10000000;public String packageName;public int flags;public Intent(String s){packageName=s;}public Intent addFlags(int f){flags|=f;return this;}public Intent setPackage(String p){return this;}public Intent putExtra(String k,Object o){return this;}}''',
 'android/content/Context.java': '''package android.content;public class Context {
  public static int RECEIVER_NOT_EXPORTED=4;public android.media.session.MediaSessionManager manager=new android.media.session.MediaSessionManager();
- public Context createContextAsUser(android.os.UserHandle u,int flags){return this;}public android.content.pm.PackageManager getPackageManager(){return new android.content.pm.PackageManager();}
+ public int requestedUser=-1;public android.content.pm.PackageManager packages=new android.content.pm.PackageManager();public Context createContextAsUser(android.os.UserHandle u,int flags){requestedUser=u.id;return this;}public android.content.pm.PackageManager getPackageManager(){return packages;}
  public BroadcastReceiver receiver;public int registrations;
  public <T>T getSystemService(Class<T> c){return c.cast(c==android.app.ActivityManager.class?new android.app.ActivityManager():manager);}public java.util.concurrent.Executor getMainExecutor(){return Runnable::run;}
  public void registerReceiver(BroadcastReceiver r,IntentFilter f,int flags){receiver=r;registrations++;}
@@ -40,6 +43,8 @@ STUBS = {
  public int state=2;public int getState(){return state;}public long getPosition(){return 0;}public long getLastPositionUpdateTime(){return 0;}public float getPlaybackSpeed(){return 1;}public long getActions(){return 304;}public long getActiveQueueItemId(){return -1;}
 }''',
 'android/media/session/MediaController.java': '''package android.media.session;public class MediaController{
+ public android.app.PendingIntent activity;public boolean failActivity,switchDuringActivity;
+ public android.app.PendingIntent getSessionActivity(){if(failActivity)throw new SecurityException();if(switchDuringActivity){switchDuringActivity=false;android.app.ActivityManager.user++;}return activity;}
  public final MediaSession.Token token=new MediaSession.Token();public String pkg;public PlaybackState state=new PlaybackState();public android.media.MediaMetadata metadata=new android.media.MediaMetadata();public PlaybackInfo info=new PlaybackInfo();
  public java.util.List<Callback> callbacks=new java.util.ArrayList<>();public int plays,pauses;public MediaController(String p){pkg=p;}
  public MediaSession.Token getSessionToken(){return token;}public String getPackageName(){return pkg;}public PlaybackState getPlaybackState(){return state;}public android.media.MediaMetadata getMetadata(){return metadata;}public PlaybackInfo getPlaybackInfo(){return info;}
@@ -115,3 +120,68 @@ public class SessionTest {
 }'''
         java_run(sources, [ROOT/'framework/qs/HeckerQsMedia.java', ROOT/'framework/qs/MusicSessionPolicy.java'],
                  'com.android.systemui.hecker.SessionTest')
+
+    def test_media_app_launch_preserves_session_user_and_native_keyguard_path(self):
+        sources = dict(STUBS)
+        sources['com/android/systemui/animation/ActivityTransitionAnimator.java'] = 'package com.android.systemui.animation;public class ActivityTransitionAnimator {public interface Controller{}}'
+        sources['com/android/systemui/plugins/ActivityStarter.java'] = r'''
+package com.android.systemui.plugins;
+public interface ActivityStarter {
+ void postStartActivityDismissingKeyguard(android.app.PendingIntent intent);
+ void postStartActivityDismissingKeyguard(android.content.Intent intent,int delay,
+  com.android.systemui.animation.ActivityTransitionAnimator.Controller animation,String message,android.os.UserHandle user);
+}
+'''
+        sources['com/android/systemui/hecker/MediaAppLaunchTest.java'] = r'''
+package com.android.systemui.hecker;
+import android.app.*;import android.content.*;import android.media.session.*;import java.util.*;
+public class MediaAppLaunchTest {
+ static int checks;static void check(boolean b){checks++;if(!b)throw new AssertionError("launch check "+checks);}
+ static class Starter implements com.android.systemui.plugins.ActivityStarter {
+  int calls,user=-1;PendingIntent pending;Intent intent;boolean fail;
+  public void postStartActivityDismissingKeyguard(PendingIntent p){if(fail)throw new SecurityException();calls++;pending=p;intent=null;}
+  public void postStartActivityDismissingKeyguard(Intent i,int delay,
+   com.android.systemui.animation.ActivityTransitionAnimator.Controller animation,String message,android.os.UserHandle u){
+   if(fail)throw new SecurityException();check(delay==0&&animation==null&&message==null);calls++;intent=i;pending=null;user=u.id;
+  }
+ }
+ public static void main(String[] args){
+  ActivityManager.user=10;Context c=new Context();Starter starter=new Starter();HeckerMediaAppLaunch launch=new HeckerMediaAppLaunch(c,starter);
+  MediaController a=new MediaController("player.a"),b=new MediaController("player.b");a.state.state=3;
+  a.activity=new PendingIntent();b.activity=new PendingIntent();c.manager.list=List.of(a,b);
+  HeckerQsMedia media=new HeckerQsMedia(c,s->{});media.start();
+  check(media.launchTarget(null)==null&&media.launchTarget(b.token)==null);
+  HeckerQsMedia.LaunchTarget first=media.launchTarget(a.token);check(first!=null&&first.user==10&&first.sessionActivity==a.activity);
+  check(launch.open(first)&&starter.calls==1&&starter.pending==a.activity);
+  check(a.plays==0&&a.pauses==0&&b.plays==0&&b.pauses==0); // Navigation never toggles playback.
+  a.playback(2);b.playback(3);check(media.launchTarget(a.token)==null);
+  HeckerQsMedia.LaunchTarget selected=media.launchTarget(b.token);
+  check(launch.open(selected)&&starter.pending==b.activity&&starter.calls==2);
+  b.activity=null;selected=media.launchTarget(b.token);
+  check(launch.open(selected)&&starter.intent.packageName.equals("player.b")&&starter.user==10&&c.requestedUser==10);
+  check((starter.intent.flags&Intent.FLAG_ACTIVITY_NEW_TASK)!=0&&c.packages.requestedPackage.equals("player.b"));
+  PendingIntent wrongUser=new PendingIntent();wrongUser.uid=12000;b.activity=wrongUser;
+  check(launch.open(media.launchTarget(b.token))&&starter.pending==null&&starter.user==10);
+  b.activity=new PendingIntent();b.activity.activity=false;
+  check(launch.open(media.launchTarget(b.token))&&starter.pending==null); // Never dispatch a service/broadcast intent.
+  c.packages.launchable=false;int before=starter.calls;check(!launch.open(media.launchTarget(b.token))&&starter.calls==before);
+  c.packages.launchable=true;b.activity=null;c.packages.switchDuringResolve=true;
+  check(!launch.open(media.launchTarget(b.token))&&starter.calls==before);ActivityManager.user=10;
+  b.activity=new PendingIntent();b.activity.switchOnCreatorRead=true;
+  check(!launch.open(media.launchTarget(b.token))&&starter.calls==before);ActivityManager.user=10;
+  b.switchDuringActivity=true;check(media.launchTarget(b.token)==null);ActivityManager.user=10;
+  b.failActivity=true;check(media.launchTarget(b.token)==null);b.failActivity=false;
+  selected=media.launchTarget(b.token);ActivityManager.user=11;
+  check(media.launchTarget(b.token)==null&&!launch.open(selected)&&starter.calls==before);ActivityManager.user=10;
+  starter.fail=true;check(!launch.open(media.launchTarget(b.token)));starter.fail=false;
+  b.activity=null;c.packages.failResolve=true;check(!launch.open(media.launchTarget(b.token)));c.packages.failResolve=false;
+  b.playback(2);check(launch.open(media.launchTarget(a.token))); // Paused sessions can still open their app.
+  a.destroy();check(media.launchTarget(a.token)==null);
+  media.stop();check(media.launchTarget(b.token)==null&&!launch.open(null));
+  check(a.plays==0&&a.pauses==0&&b.plays==0&&b.pauses==0);
+  System.out.println("Media app launch: "+checks+" session/user/keyguard/fallback/error checks PASS");
+ }
+}
+'''
+        java_run(sources, [ROOT/'framework/qs/HeckerQsMedia.java', ROOT/'framework/qs/MusicSessionPolicy.java',
+                          ROOT/'framework/qs/HeckerMediaAppLaunch.java'], 'com.android.systemui.hecker.MediaAppLaunchTest')

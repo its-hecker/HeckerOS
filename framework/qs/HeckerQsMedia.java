@@ -2,6 +2,7 @@
 package com.android.systemui.hecker;
 
 import android.app.ActivityManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -107,6 +108,7 @@ public final class HeckerQsMedia {
     private final Set<MediaSession.Token> destroyed = new HashSet<>();
     private final Map<MediaSession.Token, Long> knownMusic = new LinkedHashMap<>();
     private MediaController controller;
+    private int controllerUser = -1;
     private boolean started;
     private final Runnable revalidate=this::refresh;
     private final MediaSessionManager.OnActiveSessionsChangedListener active = ignored -> refresh();
@@ -182,12 +184,13 @@ public final class HeckerQsMedia {
                 }
             }
             controller = selected;
+            controllerUser = user;
             update();
         } catch (RuntimeException e) { clear(); update(); }
     }
     private void clear() {
         for (Watch watch : watching.values()) watch.close();
-        watching.clear(); destroyed.clear(); knownMusic.clear(); controller = null;
+        watching.clear(); destroyed.clear(); knownMusic.clear(); controller = null; controllerUser = -1;
     }
     private boolean eligibleMusic(MediaController candidate) {
         MediaSession.Token token = candidate.getSessionToken();
@@ -222,6 +225,32 @@ public final class HeckerQsMedia {
         catch (RuntimeException unavailable) { return new Snapshot(null); }
     }
     private void update() { listener.changed(new Snapshot(controller)); }
+    /** A tap is bound to the rendered session, never whichever app became active later. */
+    public static final class LaunchTarget {
+        public final int user;
+        public final String packageName;
+        public final PendingIntent sessionActivity;
+        LaunchTarget(int user, String packageName, PendingIntent sessionActivity) {
+            this.user = user; this.packageName = packageName; this.sessionActivity = sessionActivity;
+        }
+    }
+    public LaunchTarget launchTarget(MediaSession.Token renderedToken) {
+        MediaController selected = controller;
+        int user = controllerUser;
+        if (!started || selected == null || renderedToken == null
+                || user != ActivityManager.getCurrentUser()
+                || !renderedToken.equals(selected.getSessionToken())) return null;
+        try {
+            String pkg = selected.getPackageName();
+            if (pkg == null || pkg.isEmpty() || pkg.equals(context.getPackageName()) || pkg.equals("android")) return null;
+            PendingIntent activity = selected.getSessionActivity();
+            if (user != ActivityManager.getCurrentUser()) return null;
+            return new LaunchTarget(user, pkg, activity);
+        } catch (RuntimeException unavailable) {
+            Log.w("HeckerQsMedia", "Media app launch target unavailable", unavailable);
+            return null;
+        }
+    }
     public void playPause() {
         try {
             if (controller != null) {

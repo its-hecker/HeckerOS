@@ -1,6 +1,6 @@
 # HeckerOS · Android 17
 
-## Current Coral track — 6 November 2026
+## HeckerOS 1.5 — Coral track, 6 November 2026
 
 Use `fix/device-feedback-20261105` in both HeckerOS and
 HeckerOs-localmanifest. The current local manifest selects immutable source
@@ -8,14 +8,21 @@ revisions and the build helper refuses mismatched core project heads.
 The phone exposes `ro.heckeros.suite_revision` and
 `ro.heckeros.manifest_revision` so the flashed image can be identified.
 
-The current follow-up corrects the real WireGuard MLS socket denial, removes
-paid Mullvad setup, fixes the QS host collapse path, polishes the media menu,
-uses a monotonic dock curve when bounce is off, preserves the GameSpace artwork,
-and keeps Bluetooth connection cards visible if blur fails.
-See [causes, validation and banking-app limits](docs/device-feedback-2026-11-06.md).
-A full ROM build and phone acceptance remain required. UBL and Wallet are not
-claimed fixed; Strong Integrity and hardware bootloader attestation are separate
-observations. Older sections record the development history.
+Version 1.5 makes media cards open their session app, keeps QS media inside its
+own host instead of the shared scene overlay, removes the ineffective dock
+bounce switch, and corrects GameSpace adaptive artwork, round icons and icon-pack
+priority. Sensor Recovery and App Compatibility use the other dashboard tiles'
+layout, and About has a new version/device/community presentation.
+
+The Free VPN entry now links to VPNBook's free WireGuard generator instead of
+Proton. Profiles require no account or payment, expire after seven days and are
+imported manually. The native helper gains its missing DNS-proxy permission and
+reports a safe setup-stage error. See [changes, validation and upgrade checks](docs/release-1.5-2026-11-06.md).
+
+The user reports banking apps, UBL and Wallet working on the prior matched
+detector build; their backend is unchanged. Full 1.5 ROM compilation and phone
+acceptance remain required. The intermittent navigation-gesture freeze is still
+unresolved. Older sections record the development history.
 
 
 ## Penguin integrity integration — 5 November 2026
@@ -129,8 +136,9 @@ updates. See [coverage, restart behavior and limits](docs/app-compatibility.md).
 
 The matching `HeckerOs-localmanifest:fix/device-feedback-20261105` pins the
 Suite, framework, kernel and KernelSU together. The detector follow-up covers renamed managers, scoped native debugging probes and configured attestation failure recovery. See [coverage and remaining limits](docs/app-compatibility.md). Full Android/SELinux builds and phone tests remain
-pending. Pixel Launcher weather still needs Smartspace diagnostics; UBL's crash
-and hardware attestation are not established as fixed. The older sections below
+pending. Pixel Launcher weather still needs Smartspace diagnostics. The user now
+reports UBL and Wallet working; this is separate from a hardware attestation
+verdict. The older sections below
 retain inherited product and feature documentation.
 
 For an existing Coral checkout:

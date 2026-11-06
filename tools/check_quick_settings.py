@@ -18,6 +18,9 @@ from compile_sdk import fetch
 
 ROOT = Path(__file__).resolve().parents[1]
 JAVA = {
+    # The SDK jar omits the public platform annotation visibility.
+    'android/annotation/Nullable.java': 'package android.annotation;public @interface Nullable{}',
+
     # SystemUIDialog and ComposeInitializer signatures reviewed at framework pin
     # 140b06a482a6ecbbdbe33190a149228c50220fb1; never packaged in the ROM.
     'com/android/systemui/statusbar/phone/SystemUIDialog.java': '''package com.android.systemui.statusbar.phone;
@@ -89,8 +92,14 @@ public interface StatusBarStateController {
  boolean isDozing(); float getDozeAmount(); int getState(); void addCallback(StateListener listener); void removeCallback(StateListener listener);
  interface StateListener { default void onDozingChanged(boolean dozing) {} default void onStateChanged(int state) {} default void onDozeAmountChanged(float linear,float eased) {} }
 }''',
-    'com/android/systemui/plugins/ActivityStarter.java': '''package com.android.systemui.plugins;
-public interface ActivityStarter { void postStartActivityDismissingKeyguard(android.content.Intent intent,int delay); }
+    # The real hash-locked ActivityStarter interface is compiled below. Only its
+    # unrelated transition/options/annotation dependency types are compile facades.
+    'com/android/systemui/animation/ActivityTransitionAnimator.java': '''package com.android.systemui.animation;
+public class ActivityTransitionAnimator {public interface Controller{}public interface ControllerFactory{}public static class TransitionCookie{}}
+''',
+    'com/android/systemui/plugins/ActivityStartOptions.java': 'package com.android.systemui.plugins;public class ActivityStartOptions{}',
+    'com/android/systemui/plugins/annotations/ProvidesInterface.java': '''package com.android.systemui.plugins.annotations;
+@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE) public @interface ProvidesInterface {int version();}
 ''',
     'javax/inject/Inject.java': '''package javax.inject;
 @java.lang.annotation.Target({java.lang.annotation.ElementType.CONSTRUCTOR}) public @interface Inject {}
@@ -302,12 +311,15 @@ def main():
         if name.endswith('.aar'):
             with zipfile.ZipFile(archive) as zipped:
                 archive.with_suffix('.jar').write_bytes(zipped.read('classes.jar'))
+    api_lock = json.loads((ROOT / 'tests/media-launch-api.lock.json').read_text())
+    activity_starter = fetch(cache, 'ActivityStarter.java', api_lock['ActivityStarter.java'])
+    jars = sorted(cache.glob('*.jar'))
     def run(*cmd): subprocess.run([str(v) for v in cmd], check=True)
     with tempfile.TemporaryDirectory(prefix='hecker-qs-check-') as temp:
         out = Path(temp)
         from check_xmorph_clock import build as build_xmorph
         xmorph_classes, xmorph_resources = build_xmorph(sdk, cache, out/'xmorph')
-        for folder, resource in [('values', 'strings.xml'), ('values-zh-rCN', 'strings-zh.xml')]:
+        for folder, resource in [('values', 'strings.xml'), ('values-ru', 'strings-ru.xml'), ('values-zh-rCN', 'strings-zh.xml')]:
             dest = out / 'res' / folder / 'hecker_strings.xml'
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / 'framework/qs' / resource, dest)
@@ -356,8 +368,9 @@ object LockscreenElementKeys { object Clock { val Small = Any(); val Large = Any
             ROOT / 'tests/platform-api-stubs/android/content/om/OverlayIdentifier.java',
             ROOT / 'tests/platform-api-stubs/android/content/om/OverlayManagerTransaction.java',
             ROOT / 'framework/themes/ThemeIconNames.java', ROOT / 'framework/applock/HeckerAppLockPrompt.java']
-        run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', sdk / 'android-system.jar',
-            '-d', out / 'classes', *java_sources)
+        run('java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp',
+            os.pathsep.join(map(str, [sdk / 'android-system.jar', *jars])),
+            '-d', out / 'classes', *java_sources, activity_starter)
         jars = sorted(cache.glob('*.jar'))
         classpath = os.pathsep.join(map(str, [out / 'classes', sdk / 'android-system.jar', xmorph_classes, sdk/'core.jar', *jars]))
         run('java', '-cp', os.pathsep.join(map(str, jars)), 'org.jetbrains.kotlin.cli.jvm.K2JVMCompiler',

@@ -60,4 +60,6 @@
     <string name="hecker_media_stop_app">Закрыть приложение</string>
     <string name="hecker_media_stop_failed">Не удалось закрыть медиаприложение</string>
     <string name="hecker_media_options">Параметры плеера</string>
+    <string name="hecker_media_open_app">Открыть медиаприложение</string>
+    <string name="hecker_media_open_failed">Не удалось открыть медиаприложение</string>
 </resources>

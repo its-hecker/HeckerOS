@@ -37,7 +37,8 @@ object HeckerMotionMediaDialog {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             setContent {
                 HeckerMediaCard(modifier = Modifier.fillMaxWidth(), hideWhenInactive = true,
-                    sessionToken = token, musicOnly = true, onInactive = { dialog.dismiss() })
+                    sessionToken = token, musicOnly = true, onInactive = { dialog.dismiss() },
+                    onAppLaunched = { dialog.dismiss() })
             }
         }
         root.addView(compose, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,

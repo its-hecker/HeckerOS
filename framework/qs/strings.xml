@@ -60,4 +60,6 @@
     <string name="hecker_media_stop_app">Close app</string>
     <string name="hecker_media_stop_failed">Could not close the media app</string>
     <string name="hecker_media_options">Media options</string>
+    <string name="hecker_media_open_app">Open media app</string>
+    <string name="hecker_media_open_failed">Could not open the media app</string>
 </resources>

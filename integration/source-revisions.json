@@ -317,7 +317,7 @@
     "functional_revision": "36d147c88d396e0ffdff6493c5cf80a953c89b2f"
   },
   "heckeros": {
-    "version": "1.0",
+    "version": "1.5",
     "android": 17,
     "devices": [
       "coral",
@@ -606,5 +606,20 @@
       "matching kernel/submodule build preflight"
     ],
     "limits": "Full ROM/kernel and device Wallet/UBL tests required. No private keybox bundled, bootloader locking or guaranteed absence of all raw ROM/integrity signals."
+  },
+  "release_1_5_20261106": {
+    "branch": "fix/device-feedback-20261105",
+    "scope": [
+      "media card opens its rendered session app through native ActivityStarter",
+      "local QS media rendering without scene-overlay promotion",
+      "remove dock-bounce switch and restore native dock timing",
+      "GameSpace adaptive safe zone, circular round icon, package version 150 and icon-pack precedence",
+      "matching sensor-recovery and compatibility dashboard tiles",
+      "HeckerOS 1.5 and redesigned About page",
+      "VPNBook free expiring WireGuard profiles",
+      "native helper DNS-proxy permission and safe setup-stage errors"
+    ],
+    "device_report": "User reports UBL, banking apps and Wallet working on the prior matched detector build. Compatibility/attestation backend remains unchanged.",
+    "validation": "194 Suite host tests and 86 integration tests; locked Suite/Settings SDK/AIDL/resources, SystemUI Compose against the pinned ActivityStarter API, 138 native inputs with fresh/upgrade/idempotent/exact revert checks, native VPN checks, and compiled user/userdebug SELinux policies with neverallows and DNS access probes pass. Full 1.5 ROM build and physical UI/icon-cache/tunnel acceptance remain required."
   }
 }

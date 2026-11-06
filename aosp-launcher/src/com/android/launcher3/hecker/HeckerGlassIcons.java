@@ -60,6 +60,11 @@ public final class HeckerGlassIcons {
             // layer on Coral. Do not depend on LauncherApps resolving that layer.
             if ("com.google.android.apps.docs".equals(component.getPackageName())) {
                 result = driveGlyph(); tinted = true;
+            } else if ("org.hecker.suite".equals(component.getPackageName())
+                    && "org.hecker.suite.GameSpaceLauncher".equals(component.getClassName())) {
+                Drawable glyph = context.getDrawable(HeckerStudio.res(context,"drawable","hs_gamespace_monochrome"));
+                result = Bitmap.createBitmap(SIZE, SIZE, Bitmap.Config.ARGB_8888);
+                glyph.setBounds(0, 0, SIZE, SIZE); glyph.draw(new Canvas(result)); tinted = true;
             } else {
             LauncherApps apps = context.getSystemService(LauncherApps.class);
             LauncherActivityInfo info = apps.resolveActivity(new Intent(Intent.ACTION_MAIN)

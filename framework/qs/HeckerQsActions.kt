@@ -27,6 +27,7 @@ class HeckerQsActions @Inject constructor(
     private val activityStarter: ActivityStarter,
     private val controlsComponent: ControlsComponent,
 ) : CoreStartable {
+    private val mediaLauncher = HeckerMediaAppLaunch(context, activityStarter)
     override fun start() {
         current = this
         HeckerSystemUiControl.start(context)
@@ -68,6 +69,7 @@ class HeckerQsActions @Inject constructor(
 
     companion object {
         @Volatile private var current: HeckerQsActions? = null
+        fun media(target: HeckerQsMedia.LaunchTarget): Boolean = current?.mediaLauncher?.open(target) ?: false
         @JvmStatic fun settings(action: String) { current?.open(Intent(action)) }
         fun dolby() {
             val owner = current ?: return

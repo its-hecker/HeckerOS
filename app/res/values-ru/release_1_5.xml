@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_maintainer">Hecker (Разработчик)</string>
+    <string name="about_device">Устройство</string>
+    <string name="about_android">Android</string>
+    <string name="about_security_patch">Обновление безопасности</string>
+    <string name="about_community">Сообщество</string>
+</resources>

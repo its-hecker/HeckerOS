@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "protocol.h"
+#include "setup_status.h"
 #include <cassert>
 #include <iostream>
 int main() {
@@ -17,5 +18,12 @@ int main() {
     assert(!valid_config(config + std::string(1, '\0')));
     assert(!valid_config(std::string(65537, 'x')));
     assert(!valid_config("[Peer]\n" + config));
+    assert(setup_error("peer").find("endpoint") != std::string::npos);
+    assert(setup_error("dns").find("DNS") != std::string::npos);
+    assert(setup_error("interface") != setup_error("network"));
+    for (const std::string stage : {"interface", "peer", "network", "address", "dns", "routes", "mtu", "apps", "ready"})
+        assert(!setup_error(stage).empty());
+    const std::string secret = "PrivateKey=NEVER_ECHO_THIS";
+    assert(setup_error(secret).find(secret) == std::string::npos);
     std::cout << "HeckerVPN native authorization and canonical config boundary: PASS\n";
 }
