@@ -1,5 +1,23 @@
 # HeckerOS · Android 17
 
+## Current Coral track — 6 November 2026
+
+Use `fix/device-feedback-20261105` in both HeckerOS and
+HeckerOs-localmanifest. The current local manifest selects immutable source
+revisions and the build helper refuses mismatched core project heads.
+The phone exposes `ro.heckeros.suite_revision` and
+`ro.heckeros.manifest_revision` so the flashed image can be identified.
+
+The current follow-up corrects the real WireGuard MLS socket denial, removes
+paid Mullvad setup, fixes the QS host collapse path, polishes the media menu,
+uses a monotonic dock curve when bounce is off, preserves the GameSpace artwork,
+and keeps Bluetooth connection cards visible if blur fails.
+See [causes, validation and banking-app limits](docs/device-feedback-2026-11-06.md).
+A full ROM build and phone acceptance remain required. UBL and Wallet are not
+claimed fixed; Strong Integrity and hardware bootloader attestation are separate
+observations. Older sections record the development history.
+
+
 ## Penguin integrity integration — 5 November 2026
 
 The current fix/device-feedback-20261105 build track includes the completed
@@ -16,9 +34,11 @@ remain required; no attestation verdict is claimed.
 ## VPN startup and fast QS close — 5 November 2026
 
 The same `fix/device-feedback-20261105` branch now corrects the VPN controller's
-missing platform-app SELinux service access, retries failed bindings, accepts
-formatted Mullvad account numbers, refreshes countries after registration, and
-imports readable configurations even when document metadata is unavailable.
+missing platform-app SELinux service access, retries failed bindings, accepted
+formatted account numbers in the original paid-provider UI, and
+imported readable configurations even when document metadata was unavailable.
+The 6 November follow-up removes that paid-provider UI and fixes the additional
+MLS boundary that these earlier checks missed.
 The native QS container also stops drawing at the outer shade's zero expansion,
 including while its inner media scene is settling. See [cause and validation](docs/vpn-qs-repair-2026-11-05.md).
 
@@ -107,7 +127,7 @@ VoltageOS fixes to a per-app policy. Coral images exclude `addon.d` during the
 build, including old staged copies. This disables add-on preservation across ROM
 updates. See [coverage, restart behavior and limits](docs/app-compatibility.md).
 
-The matching `HeckerOs-localmanifest:fix/coral-ui-compatibility-20261102` pins the
+The matching `HeckerOs-localmanifest:fix/device-feedback-20261105` pins the
 Suite and framework together. Full Android/SELinux builds and phone tests remain
 pending. Pixel Launcher weather still needs Smartspace diagnostics; UBL's crash
 and hardware attestation are not established as fixed. The older sections below
@@ -116,8 +136,9 @@ retain inherited product and feature documentation.
 For an existing Coral checkout:
 
 ```bash
-repo init -u https://github.com/its-hecker/HeckerOS.git -b fix/coral-ui-compatibility-20261102 --git-lfs &&
-git -C .repo/local_manifests fetch origin fix/coral-ui-compatibility-20261102 &&
+python3 vendor/hecker/floral/suite/tools/prepare.py --rom-root "$PWD" --revert &&
+repo init -u https://github.com/its-hecker/HeckerOS.git -b fix/device-feedback-20261105 --git-lfs &&
+git -C .repo/local_manifests fetch origin fix/device-feedback-20261105 &&
 git -C .repo/local_manifests switch --detach FETCH_HEAD &&
 repo sync -c --fail-fast --no-clone-bundle --no-tags &&
 env -u HECKER_BUILD_JOBS USE_RBE=true HECKER_DEVICE=coral HECKER_BUILD_VARIANT=userdebug bash .repo/local_manifests/build.sh
@@ -237,21 +258,24 @@ their existing upstream repositories at exact commit pins. Forking them is
 optional and is not a build prerequisite.
 
 ```bash
-repo init -u https://github.com/its-hecker/HeckerOS -b main --git-lfs
-git clone -b feat/statusbar-lyrics-dual-20261029 https://github.com/its-hecker/HeckerOs-localmanifest .repo/local_manifests
-repo sync -c -j8 --fail-fast --no-clone-bundle --no-tags
-bash .repo/local_manifests/build.sh
+repo init -u https://github.com/its-hecker/HeckerOS.git -b fix/device-feedback-20261105 --git-lfs
+git clone -b fix/device-feedback-20261105 https://github.com/its-hecker/HeckerOs-localmanifest.git .repo/local_manifests
+repo sync -c --fail-fast --no-clone-bundle --no-tags
+env -u HECKER_BUILD_JOBS USE_RBE=true HECKER_DEVICE=coral HECKER_BUILD_VARIANT=userdebug bash .repo/local_manifests/build.sh
 ```
 
 OmniJaws is excluded from the ROM and source sync. When upgrading a checkout
 that previously included it, preserve its locally adapted files before syncing:
 
 ```bash
-git -C .repo/local_manifests pull --ff-only
+python3 vendor/hecker/floral/suite/tools/prepare.py --rom-root "$PWD" --revert &&
+repo init -u https://github.com/its-hecker/HeckerOS.git -b fix/device-feedback-20261105 --git-lfs &&
+git -C .repo/local_manifests fetch origin fix/device-feedback-20261105 &&
+git -C .repo/local_manifests switch --detach FETCH_HEAD
 python3 .repo/local_manifests/tools/retire_launcher.py
 python3 .repo/local_manifests/tools/retire_omnijaws.py
-repo sync -c -j2 --fail-fast --no-clone-bundle --no-tags vendor/hecker/floral/suite packages/apps/Launcher3 packages/apps/Settings kernel/google/msm-4.14
-HECKER_BUILD_JOBS=8 bash .repo/local_manifests/build.sh
+repo sync -c --fail-fast --no-clone-bundle --no-tags vendor/hecker/floral/suite packages/apps/Launcher3 packages/apps/Settings kernel/google/msm-4.14
+env -u HECKER_BUILD_JOBS USE_RBE=true HECKER_DEVICE=coral HECKER_BUILD_VARIANT=userdebug bash .repo/local_manifests/build.sh
 ```
 
 Run this from the existing Android source root. The retirement helpers preserve
@@ -273,7 +297,7 @@ a tested release, production signing keys, an OTA feed or a certification result
 
 This development branch enables USB debugging and accepts every connected PC on
 `userdebug`/`eng` builds. For the final build, restore PC authorization with
-`HECKER_DEV_USB_ADB=false HECKER_BUILD_JOBS=8 bash .repo/local_manifests/build.sh`.
+`env -u HECKER_BUILD_JOBS HECKER_DEV_USB_ADB=false USE_RBE=true HECKER_DEVICE=coral HECKER_BUILD_VARIANT=userdebug bash .repo/local_manifests/build.sh`.
 Rebuild and flash to apply that change. See [development ADB](rom/adb/README.md)
 for property checks and dirty-flash behavior.
 
