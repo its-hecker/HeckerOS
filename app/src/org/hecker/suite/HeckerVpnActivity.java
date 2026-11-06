@@ -36,7 +36,7 @@ public final class HeckerVpnActivity extends Activity {
     private Bundle state = new Bundle();
     private LinearLayout body;
     private TextView status, detail, warning;
-    private Button connect, countries, profiles;
+    private Button connect, retryPeer, countries, profiles;
     private boolean countriesTab = true, busy, started;
     private android.net.Uri pendingImport;
 
@@ -58,7 +58,10 @@ public final class HeckerVpnActivity extends Activity {
                 Toast.makeText(this, R.string.vpn_no_profiles, Toast.LENGTH_LONG).show();
             } else operation(HeckerVpnClient.request(state.getBoolean("desired") || state.getBoolean("cleanup_required") ? "disconnect" : "connect"), true);
         });
-        hero.addView(connect); page.addView(hero);
+        hero.addView(connect);
+        retryPeer = Ui.button(this); retryPeer.setText(R.string.vpn_retry_peer);
+        retryPeer.setOnClickListener(v -> operation(HeckerVpnClient.request("reconnect"), true));
+        hero.addView(retryPeer); page.addView(hero);
         countries = Ui.button(this); countries.setText(R.string.vpn_countries);
         profiles = Ui.button(this); profiles.setText(R.string.vpn_profiles);
         countries.setOnClickListener(v -> { countriesTab = true; renderBody(); });
@@ -124,7 +127,11 @@ public final class HeckerVpnActivity extends Activity {
         if (handshake > 0) text += "\n" + getString(R.string.vpn_handshake, DateUtils.getRelativeTimeSpanString(handshake * 1000, System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS));
         detail.setText(text);
         String error = state.getString("error", "");
-        warning.setText(error.isEmpty() && state.containsKey("kernel") && !state.getBoolean("kernel") ? getString(R.string.vpn_kernel_missing) : error);
+        boolean peerTimeout = "peer_timeout".equals(state.getString("status"));
+        warning.setText(!error.isEmpty() ? error : peerTimeout ? getString(R.string.vpn_peer_help)
+                : state.containsKey("kernel") && !state.getBoolean("kernel") ? getString(R.string.vpn_kernel_missing) : "");
+        retryPeer.setVisibility(peerTimeout && state.getBoolean("desired") ? View.VISIBLE : View.GONE);
+        retryPeer.setEnabled(!busy);
         connect.setText(!state.getBoolean("controller_available", true) ? R.string.vpn_retry
                 : state.getBoolean("desired") || state.getBoolean("cleanup_required") ? R.string.vpn_disconnect : R.string.vpn_connect);
         connect.setEnabled(!busy);
@@ -136,6 +143,7 @@ public final class HeckerVpnActivity extends Activity {
             case "idle": return R.string.vpn_idle;
             case "connecting": return R.string.vpn_connecting;
             case "waiting_peer": return R.string.vpn_waiting_peer;
+            case "peer_timeout": return R.string.vpn_peer_timeout;
             case "waiting_network": return R.string.vpn_waiting_network;
             case "error": return R.string.vpn_error;
             default: return R.string.vpn_disconnected;
@@ -162,6 +170,8 @@ public final class HeckerVpnActivity extends Activity {
         provider.addView(Ui.text(this, getString(R.string.vpn_free_summary), 14, false));
         action(provider, R.string.vpn_get_free_profile, () -> startActivity(new Intent(Intent.ACTION_VIEW,
                 android.net.Uri.parse("https://www.vpnbook.com/freevpn/wireguard-vpn"))));
+        action(provider, R.string.vpn_free_mirror, () -> startActivity(new Intent(Intent.ACTION_VIEW,
+                android.net.Uri.parse("https://static.vpnbook.com/freevpn/wireguard-vpn"))));
         action(provider, R.string.vpn_import, () -> startActivityForResult(
                 new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*"), 784));
         action(provider, R.string.vpn_paste, this::pasteConfigDialog);
@@ -173,6 +183,8 @@ public final class HeckerVpnActivity extends Activity {
         action(header, R.string.vpn_paste, this::pasteConfigDialog);
         action(header, R.string.vpn_get_free_profile, () -> startActivity(new Intent(Intent.ACTION_VIEW,
                 android.net.Uri.parse("https://www.vpnbook.com/freevpn/wireguard-vpn"))));
+        action(header, R.string.vpn_free_mirror, () -> startActivity(new Intent(Intent.ACTION_VIEW,
+                android.net.Uri.parse("https://static.vpnbook.com/freevpn/wireguard-vpn"))));
         body.addView(header);
         ArrayList<Bundle> items = state.getParcelableArrayList("profiles", Bundle.class);
         if (items == null || items.isEmpty()) { body.addView(Ui.text(this, getString(R.string.vpn_no_profiles), 15, false)); return; }

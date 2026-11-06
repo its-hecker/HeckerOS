@@ -1,3 +1,12 @@
+## Device log feedback — 6 November 2026
+
+The `fix/device-log-20261106` track restores the shared QQS/full-QS media
+transition requested after the 1.5 regression. It refreshes the circular GameSpace
+icon, avoids generated view IDs in launcher resource lookups, and adds VPN peer
+contact/timeout/retry diagnostics plus the official VPNBook mirror. HeckerVault,
+including saved groups and archive search, is included. [Evidence, changes and
+remaining phone checks](docs/device-log-2026-11-06.md).
+
 ## HeckerVault feature — 6 November 2026
 
 `feat/heckervault-20261106` adds **Hecker Lab → HeckerVault**: portable encrypted

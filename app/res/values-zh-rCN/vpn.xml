@@ -59,4 +59,8 @@
     <string name="vpn_import_access">无法打开所选文件，请在“文件”应用中重新选择。</string>
     <string name="vpn_free_title">VPNBook · 免费 WireGuard</string>
     <string name="vpn_free_summary">无需账号或付款即可生成 WireGuard 配置，再导入此处。每个配置仅供一台设备使用，7 天后过期。VPNBook 会记录连接 IP 地址和时间，请查看其隐私政策。</string>
+    <string name="vpn_peer_timeout">VPN 服务器未响应</string>
+    <string name="vpn_retry_peer">重试连接</string>
+    <string name="vpn_peer_help">45 秒内未完成 WireGuard 握手。使用此配置的应用尚未确认连接到 VPN。请检查配置是否有效，然后尝试其他服务器或网络。保持隧道开启可继续重试；断开连接可恢复正常路由。</string>
+    <string name="vpn_free_mirror">打开 VPNBook 镜像站点</string>
 </resources>

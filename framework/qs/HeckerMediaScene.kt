@@ -9,11 +9,15 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.ValueKey
+import com.android.compose.animation.scene.animateElementFloatAsState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.systemui.scene.shared.model.Scenes
 
 /** A host is provided by both native QS paths, so scene progress owns the player bounds. */
 val LocalHeckerQsContentScope = staticCompositionLocalOf<ContentScope?> { null }
+private val SquareWeight = ValueKey("HeckerMediaSquareWeight")
+private val RowWeight = ValueKey("HeckerMediaRowWeight")
 
 /** Shared across QQS/full-QS copies; a fresh playback event restores a dismissed card. */
 object HeckerMediaVisibility {
@@ -85,20 +89,35 @@ fun HeckerQsMediaPlayer(modifier: Modifier = Modifier, square: Boolean = false,
         return
     }
     val scope = LocalHeckerQsContentScope.current
-    // Tear down the local card as soon as the outer shade is closed, even
+    // A zero-alpha shared element may remain drawn by a cached scene overlay.
+    // Tear down the element itself as soon as the outer shade is closed, even
     // if QQS/full-QS transition settlement is still active.
     if (HeckerQsPanelState.alpha(scope) <= .001f) return
-    // Keep the card owned by this QS subtree. A scene-shared media element is
-    // promoted to the transition overlay, where the old full-QS recording can
-    // outlive both its original host and our immediate alpha/teardown updates.
-    HeckerMediaCard(modifier = modifier.drawWithContent {
-        if (HeckerQsPanelState.alpha(scope) > .001f) drawContent()
-    }.graphicsLayer { alpha = HeckerQsPanelState.alpha(scope) },
-        square = square, hideWhenInactive = hideWhenInactive, compactRow = compactRow,
-        visible = { HeckerQsPanelState.alpha(scope) > .001f }, dismissible = true)
+    if (scope == null) {
+        HeckerMediaCard(modifier.graphicsLayer { alpha = HeckerQsPanelState.alpha(null) },
+            square, hideWhenInactive, compactRow = compactRow,
+            visible = { HeckerQsPanelState.alpha(null) > 0f }, dismissible = true)
+        return
+    }
+    with(scope) {
+        ElementWithValues(HeckerQsScene.Media, modifier) {
+            val tile = animateElementFloatAsState(if (square) 1f else 0f, SquareWeight, canOverflow = false)
+            val row = animateElementFloatAsState(if (compactRow) 1f else 0f, RowWeight, canOverflow = false)
+            content {
+                HeckerMediaCard(modifier = Modifier.drawWithContent {
+                    if (HeckerQsPanelState.alpha(scope) > .001f) drawContent()
+                }.graphicsLayer {
+                    alpha = HeckerQsPanelState.alpha(scope)
+                }, square = square, compactRow = compactRow,
+                    hideWhenInactive = hideWhenInactive,
+                    squareWeight = { tile.value }, rowWeight = { row.value },
+                    visible = { HeckerQsPanelState.alpha(scope) > 0f }, dismissible = true)
+            }
+        }
+    }
 }
 
-/** Controls fade independently of the locally rendered media card. */
+/** Controls fade independently; no fading ancestor is allowed to dim the shared media surface. */
 @Composable
 fun heckerQsElement(key: ElementKey): Modifier {
     val scope = LocalHeckerQsContentScope.current ?: return Modifier

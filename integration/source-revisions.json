@@ -271,8 +271,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "feat/heckervault-20261106",
-    "integration_branch": "feat/heckervault-20261106",
+    "source_branch": "fix/device-log-20261106",
+    "integration_branch": "fix/device-log-20261106",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required",
@@ -648,5 +648,22 @@
     "device_acceptance": "Full ServerHive ROM build and physical backup/clean-flash/restore acceptance pending",
     "functional_revision": "5a0ce893d05fe780f2858a6e90ee6d00cadd58f0",
     "suite_revision": "5a0ce893d05fe780f2858a6e90ee6d00cadd58f0"
+  },
+  "device_log_feedback_20261106": {
+    "branch": "fix/device-log-20261106",
+    "base_suite_revision": "1ac62cb6998a892c54e56ba28cb236723f6cb057",
+    "evidence": "06_11-13-00-11_722.log (21,504 lines; private raw log not committed) and six supplied screenshots",
+    "changes": [
+      "restore the shared QQS/full-QS media element and geometry weights at the user request",
+      "fresh circular GameSpace vector and package version 151; pack-aware native launcher fallback",
+      "skip generated non-resource view IDs in the glass layout scanner",
+      "session-only keepalive default, 45-second first-peer timeout, retry action and safe VPN diagnostics",
+      "official VPNBook static mirror with provider troubleshooting",
+      "gesture acceptance diagnostics; existing finite character lifecycle retained"
+    ],
+    "limits": "No full ROM or phone verification in this environment. Log has no peer/endpoint handshake diagnostics; root cause of the remote non-response remains unconfirmed. HeckerVault including saved groups is retained; Swift import remains deferred.",
+    "validation": "195 Suite tests plus complete host runner, 87 integration tests; locked Suite/Settings SDK, QS Compose, Launcher helpers, Motion Island/device features, WireGuard native/controller and HeckerVault archive/transport/SDK checks pass. Full ROM and physical tests pending.",
+    "functional_revision": "11ece3f5e8a06d3947a89fe26741235ec1f6f1bd",
+    "suite_revision": "11ece3f5e8a06d3947a89fe26741235ec1f6f1bd"
   }
 }

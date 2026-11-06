@@ -8,4 +8,5 @@
     <string name="vpn_waiting_peer">隧道已配置 · 等待对端</string>
     <string name="vpn_waiting_network">等待网络</string>
     <string name="vpn_error">连接需要处理</string>
+    <string name="vpn_peer_timeout">VPN 服务器未响应</string>
 </resources>

@@ -11,6 +11,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.*;
 import android.text.*;
+import android.text.InputFilter;
 import android.text.method.PasswordTransformationMethod;
 import android.view.*;
 import android.view.inputmethod.EditorInfo;

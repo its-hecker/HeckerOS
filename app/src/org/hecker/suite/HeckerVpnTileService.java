@@ -29,7 +29,9 @@ public final class HeckerVpnTileService extends TileService {
         Tile tile = getQsTile(); if (tile == null) return;
         tile.setLabel(getString(R.string.vpn_title));
         tile.setSubtitle(getString(HeckerVpnActivity.statusLabel(state.getString("status", "disconnected"))));
-        tile.setState(state.getBoolean("configured") ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE); tile.updateTile();
+        // A configured interface with no peer response is not a connected VPN.
+        tile.setState(state.getBoolean("configured") && state.getLong("handshake") > 0
+                ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE); tile.updateTile();
     }
     private void open() {
         PendingIntent intent = PendingIntent.getActivity(this, 784, new Intent(this, HeckerVpnActivity.class), PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);

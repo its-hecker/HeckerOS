@@ -148,6 +148,14 @@ public final class VpnConfig {
     public static boolean packageName(String name) {
         return name != null && name.length() <= 255 && name.matches("[A-Za-z][A-Za-z0-9_]*(?:\\.[A-Za-z][A-Za-z0-9_]*)*");
     }
+    /** Initiate contact even when an app-only route has no foreground traffic yet.
+     * The saved/imported profile is unchanged; explicit keepalive choices win. */
+    public String forConnection(String policy, List<String> packages) {
+        VpnConfig session = parse(render(policy, packages));
+        for (Map<String, String> peer : session.peers)
+            peer.putIfAbsent("PersistentKeepalive", "25");
+        return session.render(policy, packages);
+    }
     public String render(String policy, List<String> packages) {
         if (!List.of("all", "include", "exclude").contains(policy)) fail("Invalid routing mode");
         LinkedHashSet<String> names = new LinkedHashSet<>(packages);

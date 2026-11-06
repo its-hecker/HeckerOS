@@ -306,7 +306,8 @@
     "26ebab4ebbce86375c830f10705ce342821b1810",
     "fb834da5a870e8ab5af0a49f3d93be8363993afd",
     "13024140a945387fb07b0c7139858e96894298d3",
-    "7413017f3337433dc893056eaba85423e616b75e"
+    "7413017f3337433dc893056eaba85423e616b75e",
+    "382312c459c3cd5666e02579e3b6354930fd76c1"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MotionIslandState.java": [
     "eb55dca8174260270c856a48bac3300103c39790",
@@ -380,7 +381,8 @@
     "5e27e82a4bf2a04d9b42684dac11be89019c23f8",
     "faae291495215dbfb65ac5dbc53be229bf33f61d",
     "a74df1a084f64c3efad76840db651bf574f8fe14",
-    "d9dbdfd360d8624e9f23fcbac2d168dc20a3752e"
+    "d9dbdfd360d8624e9f23fcbac2d168dc20a3752e",
+    "09072472f5c8bc4792fda09c6b39473bb83a5182"
   ],
   "packages/apps/Settings/res/values-night/hecker_about_colors.xml": [
     "38f85ef382b8898179015eb08306487a46a9175b"
