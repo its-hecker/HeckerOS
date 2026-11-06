@@ -32,6 +32,8 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +42,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
@@ -153,14 +156,20 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
         }
         if (dismissible) Box(Modifier.align(Alignment.TopEnd).padding(4.dp)) {
             var menu by remember { mutableStateOf(false) }
-            Text("⋮", color = Color.White, fontSize = 22.sp,
-                modifier = Modifier.size(40.dp).clickable { menu = true }
-                    .wrapContentSize().semantics { contentDescription = context.getString(R.string.hecker_media_hide) })
-            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(text = { Text(context.getString(R.string.hecker_media_hide)) },
+            LaunchedEffect(panelVisible) { if (!panelVisible) menu = false }
+            IconButton(onClick = { menu = true }, modifier = Modifier.size(36.dp)) {
+                Icon(painterResource(R.drawable.hecker_media_more),
+                    contentDescription = context.getString(R.string.hecker_media_options),
+                    tint = Color(0xFFE0E8FF), modifier = Modifier.size(18.dp))
+            }
+            DropdownMenu(expanded = menu && panelVisible, onDismissRequest = { menu = false },
+                modifier = Modifier.widthIn(min = 180.dp, max = 240.dp),
+                shape = RoundedCornerShape(20.dp), containerColor = Color(0xFF242938),
+                tonalElevation = 0.dp) {
+                DropdownMenuItem(text = { Text(context.getString(R.string.hecker_media_hide), color = Color(0xFFE0E8FF), fontSize = 14.sp) },
                     onClick = { menu = false; HeckerMediaVisibility.dismiss(state) })
                 if (state?.active == true) DropdownMenuItem(
-                    text = { Text(context.getString(R.string.hecker_media_stop_app)) }, onClick = {
+                    text = { Text(context.getString(R.string.hecker_media_stop_app), color = Color(0xFFE0E8FF), fontSize = 14.sp) }, onClick = {
                         menu = false
                         if (media.stopApp()) HeckerMediaVisibility.dismiss(state)
                         else android.widget.Toast.makeText(context, R.string.hecker_media_stop_failed,

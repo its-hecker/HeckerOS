@@ -16,12 +16,14 @@ final class KernelChannel implements AutoCloseable {
     }
     private LocalSocket socket;
     JSONObject call(String command) throws Exception {
+        String stage = "connect";
         try {
             if (socket == null) {
                 socket = new LocalSocket();
                 socket.connect(new LocalSocketAddress("heckervpnd", LocalSocketAddress.Namespace.RESERVED));
                 socket.setSoTimeout(90000);
             }
+            stage = "exchange";
             byte[] request = command.getBytes(StandardCharsets.UTF_8);
             if (request.length > VpnConfig.MAX_BYTES + 8) throw new IllegalArgumentException("Request is too large");
             DataOutputStream output = new DataOutputStream(socket.getOutputStream());
@@ -33,6 +35,12 @@ final class KernelChannel implements AutoCloseable {
             JSONObject result = new JSONObject(new String(response, StandardCharsets.UTF_8));
             if (!result.optBoolean("ok")) throw new Failure(result);
             return result;
+        } catch (java.io.IOException failure) {
+            close();
+            // Never include configuration, keys or arbitrary helper output.
+            throw new IllegalArgumentException(stage.equals("connect")
+                    ? "Cannot reach the built-in WireGuard service. Reboot after updating the ROM; if this persists, check HeckerVPN service and SELinux logs."
+                    : "The built-in WireGuard service stopped responding. Reconnect to retry; check HeckerVPN service logs if this persists.", failure);
         } catch (Exception failure) { close(); throw failure; }
     }
     @Override public void close() {

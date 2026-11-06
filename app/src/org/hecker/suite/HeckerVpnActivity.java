@@ -2,6 +2,7 @@
 package org.hecker.suite;
 
 import android.app.Activity;
+import org.hecker.vpn.VpnInput;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -23,24 +24,20 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.InputStream;
-import org.hecker.vpn.VpnInput;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.TreeMap;
 
 /** Two profile sources, one connection and routing model. No keys are rendered or exported. */
 public final class HeckerVpnActivity extends Activity {
     private HeckerVpnClient client;
     private final Handler main = new Handler(Looper.getMainLooper());
     private Bundle state = new Bundle();
-    private ArrayList<Bundle> servers = new ArrayList<>();
     private LinearLayout body;
     private TextView status, detail, warning;
     private Button connect, countries, profiles;
     private boolean countriesTab = true, busy, started;
-    private long catalogTime;
     private android.net.Uri pendingImport;
 
     @Override public void onCreate(Bundle saved) {
@@ -74,9 +71,7 @@ public final class HeckerVpnActivity extends Activity {
         super.onStart(); started = true; client = new HeckerVpnClient(this);
         // Opening Settings must not wait on the privileged kernel socket. Connect probes it
         // when required; profile import and provider setup remain usable independently.
-        operation(HeckerVpnClient.request("state"), true, result -> {
-            if (countriesTab && servers.isEmpty()) refreshAfterAccount(result);
-        }); main.postDelayed(poll, 3000);
+        operation(HeckerVpnClient.request("state"), true); main.postDelayed(poll, 3000);
     }
     @Override protected void onResume() {
         super.onResume(); consumeImport();
@@ -109,7 +104,6 @@ public final class HeckerVpnActivity extends Activity {
         busy = true; renderState();
         client.call(request, result -> {
             busy = false; acceptState(result);
-            if (result.containsKey("servers")) { servers = result.getParcelableArrayList("servers", Bundle.class); catalogTime = result.getLong("catalog_time"); }
             renderState(); if (rebuild) renderBody();
             if (completed != null) completed.accept(result);
         });
@@ -163,59 +157,15 @@ public final class HeckerVpnActivity extends Activity {
         setEnabled(body, !busy);
     }
     private void renderCountries() {
-        LinearLayout provider = Ui.card(this); provider.addView(Ui.text(this, getString(R.string.vpn_mullvad), 20, true));
-        provider.addView(Ui.text(this, getString(R.string.vpn_provider_summary), 14, false));
-        if (state.getBoolean("account") || state.getBoolean("account_pending")) {
-            provider.addView(Ui.text(this, getString(state.getBoolean("account") ? R.string.vpn_account_saved : R.string.vpn_account_pending), 15, true));
-            if (!state.getBoolean("account")) action(provider, R.string.vpn_account_retry, () ->
-                    operation(HeckerVpnClient.request("retry_account"), true, this::refreshAfterAccount));
-            action(provider, R.string.vpn_remove_account, () -> new AlertDialog.Builder(this)
-                    .setMessage(R.string.vpn_remove_account_confirm).setNegativeButton(android.R.string.cancel, null)
-                    .setPositiveButton(R.string.vpn_remove_account, (d, w) -> operation(HeckerVpnClient.request("logout"), true)).show());
-        } else action(provider, R.string.vpn_add_account, this::accountDialog);
-        action(provider, R.string.vpn_load_countries, () -> operation(HeckerVpnClient.request("catalog"), true));
-        if (catalogTime > 0) provider.addView(Ui.text(this, getString(R.string.vpn_updated,
-                DateUtils.getRelativeTimeSpanString(catalogTime)), 12, false));
+        LinearLayout provider = Ui.card(this);
+        provider.addView(Ui.text(this, getString(R.string.vpn_free_title), 20, true));
+        provider.addView(Ui.text(this, getString(R.string.vpn_free_summary), 14, false));
+        action(provider, R.string.vpn_proton_free, () -> startActivity(new Intent(Intent.ACTION_VIEW,
+                android.net.Uri.parse("https://protonvpn.com/support/wireguard-configurations"))));
+        action(provider, R.string.vpn_import, () -> startActivityForResult(
+                new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*"), 784));
+        action(provider, R.string.vpn_paste, this::pasteConfigDialog);
         body.addView(provider);
-        if (servers == null || servers.isEmpty()) { body.addView(Ui.text(this, getString(R.string.vpn_no_servers), 15, false)); return; }
-        TreeMap<String, ArrayList<Bundle>> groups = new TreeMap<>();
-        for (Bundle server : servers) groups.computeIfAbsent(server.getString("country_name", ""), k -> new ArrayList<>()).add(server);
-        for (String country : groups.keySet()) {
-            ArrayList<Bundle> options = groups.get(country);
-            Button button = Ui.button(this); button.setText(getString(R.string.vpn_server_count, country, options.size()));
-            button.setOnClickListener(v -> {
-                String[] labels = options.stream().map(row -> row.getString("city") + " · " + row.getString("host")).toArray(String[]::new);
-                new AlertDialog.Builder(this).setTitle(country).setItems(labels, (d, which) -> {
-                    if (!state.getBoolean("account")) { accountDialog(); return; }
-                    Bundle request = HeckerVpnClient.request("provider_connect"); request.putString("host", options.get(which).getString("host")); operation(request, true);
-                }).setNegativeButton(android.R.string.cancel, null).show();
-            }); body.addView(button);
-        }
-    }
-    private void accountDialog() {
-        LinearLayout page = Ui.card(this); page.addView(Ui.text(this, getString(R.string.vpn_account_explanation), 14, false));
-        EditText number = new EditText(this); number.setHint(R.string.vpn_account_number);
-        number.setTextColor(getColor(R.color.hecker_foreground));
-        number.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-        number.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);
-        // Pasted account numbers often contain four groups, spaces or dashes. Do not truncate them.
-        number.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(64)}); page.addView(number);
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.vpn_add_account).setView(page)
-                .setNegativeButton(android.R.string.cancel, null).setPositiveButton(R.string.vpn_add_account, null).create();
-        dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String account;
-            try { account = VpnInput.accountNumber(number.getText().toString()); }
-            catch (IllegalArgumentException invalid) { number.setError(getString(R.string.vpn_account_invalid)); return; }
-            Bundle request = HeckerVpnClient.request("account"); request.putString("account", account);
-            operation(request, true, result -> {
-                if (!result.getString("error", "").isEmpty()) { number.setError(result.getString("error")); return; }
-                number.setText(""); dialog.dismiss(); refreshAfterAccount(result);
-            });
-        })); dialog.show();
-    }
-    private void refreshAfterAccount(Bundle result) {
-        if (result.getBoolean("account") && result.getString("error", "").isEmpty())
-            operation(HeckerVpnClient.request("catalog"), true);
     }
     private void renderProfiles() {
         LinearLayout header = Ui.card(this); action(header, R.string.vpn_import, () -> startActivityForResult(

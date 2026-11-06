@@ -33,7 +33,15 @@ class BuildPreflightTests(unittest.TestCase):
         binary = self.rom / "test-bin"
         binary.mkdir()
         git = binary / "git"
-        git.write_text("#!/bin/sh\necho REACHED_LFS_BOUNDARY >&2\nexit 47\n")
+        import json
+        pins = {p.get("path"): p.get("revision") for p in ET.parse(BUILD.parent / "floral.xml").getroot()
+                if p.tag in {"project", "extend-project"}}
+        git.write_text("#!/usr/bin/env python3\nimport sys\npins=" + repr(pins) + "\n"
+                       "if 'rev-parse' in sys.argv:\n"
+                       " path=sys.argv[2]\n"
+                       " print(next((v for k,v in pins.items() if path.endswith(k)), '0'*40))\n"
+                       "elif 'status' in sys.argv: pass\n"
+                       "else:\n print('REACHED_LFS_BOUNDARY',file=sys.stderr);sys.exit(47)\n")
         git.chmod(0o755)
         self.namespace_source, manifest = stage(self.rom)
         repo = binary / "repo"

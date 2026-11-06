@@ -2,7 +2,7 @@
 <resources>
     <string name="vpn_title">HeckerVPN</string>
     <string name="vpn_summary">Countries, private profiles and app routing</string>
-    <string name="vpn_countries">Countries</string>
+    <string name="vpn_countries">Free VPN</string>
     <string name="vpn_profiles">My Profiles</string>
     <string name="vpn_connect">Connect</string>
     <string name="vpn_disconnect">Disconnect</string>
@@ -62,4 +62,6 @@
     <string name="vpn_owner_only">HeckerVPN currently supports the main user only.</string>
     <string name="vpn_kernel_missing">WireGuard kernel support has not been confirmed on this build.</string>
     <string name="vpn_session_note">Starts disconnected after a reboot. Disconnecting restores normal routing. A kill switch and Android always-on control are not enabled in this release.</string>
+    <string name="vpn_free_title">Proton VPN Free</string>
+    <string name="vpn_free_summary">Download a WireGuard configuration with your Proton account, then import it here. Choose the location when downloading. Your saved configurations are in My Profiles.</string>
 </resources>

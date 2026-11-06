@@ -20,7 +20,13 @@ public final class HeckerLauncherMotion {
         return enabled(context) && HeckerStudio.enabled(context, "dock_bounce", true);
     }
     public static Interpolator dockInterpolator(Context context, Interpolator nativeCurve) {
-        return dockBounce(context) ? nativeCurve : value -> Math.max(0f, Math.min(1f, nativeCurve.getInterpolation(value)));
+        // Clamping a bounce curve does not make it monotonic: it can still
+        // reverse inside 0..1. Replace the curve when the user disables bounce.
+        return dockBounce(context) ? nativeCurve : HeckerLauncherMotion::settleDock;
+    }
+    public static float settleDock(float value) {
+        float t = Math.max(0f, Math.min(1f, value));
+        return t * t * (3f - 2f * t);
     }
     private HeckerLauncherMotion() {}
 }

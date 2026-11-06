@@ -332,6 +332,10 @@
     {
       "old": "        Interpolator hotseatTranslationInterpolator = config.getInterpolator(\n                ANIM_HOTSEAT_TRANSLATE, translationInterpolator);",
       "new": "        Interpolator hotseatTranslationInterpolator = com.android.launcher3.hecker.HeckerLauncherMotion.dockInterpolator(\n                mLauncher, config.getInterpolator(ANIM_HOTSEAT_TRANSLATE, translationInterpolator));"
+    },
+    {
+      "old": "            Interpolator hotseatScaleInterpolator = config.getInterpolator(ANIM_HOTSEAT_SCALE,\n                    scaleInterpolator);",
+      "new": "            Interpolator hotseatScaleInterpolator = com.android.launcher3.hecker.HeckerLauncherMotion.dockInterpolator(\n                    mLauncher, config.getInterpolator(ANIM_HOTSEAT_SCALE, scaleInterpolator));"
     }
   ]
 }

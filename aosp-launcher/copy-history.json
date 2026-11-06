@@ -61,7 +61,8 @@
   "src/com/android/launcher3/hecker/HeckerIconStudio.java": [
     "509ca22e0f2363a23f81a010d30497d54b532655",
     "41b2ce64c0796d12372ba1521c9123856ee8a8c3",
-    "5c1fa33e7cd0f30e16457791c964a646b50b741e"
+    "5c1fa33e7cd0f30e16457791c964a646b50b741e",
+    "625072518194e3bca8455ff8db16dd9480bef38a"
   ],
   "src/com/android/launcher3/hecker/HeckerStudio.java": [
     "9d4bd88f3347f68af8540e6b094c18fe8dc84949",
@@ -121,6 +122,7 @@
     "05810f9a5adb7f717b2969be885341734ce5f777"
   ],
   "src/com/android/launcher3/hecker/HeckerLauncherMotion.java": [
-    "a65b9d199ecb53276c8b22488f1fd4974c05caac"
+    "a65b9d199ecb53276c8b22488f1fd4974c05caac",
+    "ac231940860587d3de296db9bb10e0c77d851752"
   ]
 }

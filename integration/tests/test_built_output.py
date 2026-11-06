@@ -57,7 +57,7 @@ class BuiltOutputTests(unittest.TestCase):
             properties.parent.mkdir(parents=True)
             properties.write_text("pixel.oslo.allowed_override=1\n")
             with patch("check_built_output.verify_installed") as apks, patch("check_built_output.check_suite"), \
-                    patch("check_built_output.check_bootanimation"), \
+                    patch("check_built_output.check_bootanimation"), patch("check_built_output.check_build_revision"), \
                     patch("check_built_output.check_librepods"), \
                     patch("check_built_output.check_font_customization") as fonts, \
                     patch("check_built_output.check_development_adb") as adb:

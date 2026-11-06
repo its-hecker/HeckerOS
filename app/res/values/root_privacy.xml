@@ -10,7 +10,7 @@
   <string name="compat_downgrade_body">Allow an older version signed by the same developer to replace this app. You still choose and install the APK. Older versions may not understand existing app data. All Android users with this app must allow downgrades. System apps cannot go below their factory version.</string>
   <string name="compat_developer_title">Hide developer options</string>
   <string name="compat_developer_body">Report developer options and USB or wireless debugging as off through Android Settings APIs in this app. Your actual device settings stay enabled.</string>
-  <string name="compat_bootloader_title">Bootloader spoof</string>
+  <string name="compat_bootloader_title">Bootloader software properties</string>
   <string name="compat_bootloader_body">Report locked bootloader properties inside this app process. This does not lock the bootloader or change hardware attestation and does not guarantee app compatibility.</string>
   <string name="compat_restart_body">After changing an option, close the app below, then reopen it. Closing may interrupt downloads or unsaved work. Restart the phone if a retained app process still uses the previous settings.</string>
   <string name="compat_backend_unavailable">This ROM does not have the required compatibility backend enabled. Options remain unavailable until you install a matching HeckerOS build.</string>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="vpn_paste">粘贴 WireGuard 配置</string>
+    <string name="vpn_paste_hint">粘贴完整的 [Interface] 和 [Peer] 配置</string>
+    <string name="vpn_continue">继续</string>
+    <string name="vpn_pasted_name">粘贴的 WireGuard 配置</string>
+    <string name="vpn_proton_free">Proton VPN Free · 获取 WireGuard 配置</string>
+    <string name="motion_bar_width">Motion Island 胶囊宽度 · %1$d dp</string>
+</resources>

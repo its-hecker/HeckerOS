@@ -32,7 +32,7 @@ class Canvas {
  fun translate(x:Float,y:Float){};fun clipOutPath(path:Path){}
 }
 class Path { val isEmpty=true }
-open class Parent {
+open class Parent:android.view.View() {
  var drawn=0;fun invalidate(){}
  open fun dispatchDraw(canvas:Canvas){drawn++}
 }
@@ -48,14 +48,28 @@ class Model {
 class NativePanel:Panel {
  val containerView:Container?=Container();val viewModel=Model()
 ''' + methods + '\n}',
-        'PanelState.kt': '''package com.android.systemui.hecker
-object HeckerQsPanelState {
- var shown=false;var fraction=0f
- fun setVisible(value:Boolean){shown=value}
- fun setExpansion(value:Float){fraction=value}
- fun alpha()=MediaCardGeometry.shadeAlpha(true,shown,fraction,false,false,false,0f)
-}''',
+        'View.kt': 'package android.view; open class View { var alpha=1f }',
+        'Runtime.kt': """package androidx.compose.runtime
+import kotlin.reflect.KProperty
+class MutableState<T>(var value:T) {
+ operator fun getValue(owner:Any?, property:KProperty<*>)=value
+ operator fun setValue(owner:Any?, property:KProperty<*>, next:T){value=next}
+}
+fun <T> mutableStateOf(value:T)=MutableState(value)
+fun mutableFloatStateOf(value:Float)=MutableState(value)
+""",
+        'PanelState.kt': 'package com.android.systemui.hecker\nimport androidx.compose.runtime.*\nimport com.android.compose.animation.scene.ContentScope\nimport com.android.compose.animation.scene.content.state.TransitionState\nimport com.android.systemui.scene.shared.model.Scenes\n' +
+            'object HeckerQsPanelState {' + (ROOT/'framework/qs/HeckerMediaScene.kt').read_text().split('object HeckerQsPanelState {',1)[1].split('\n@Composable',1)[0],
+        'TransitionState.kt': """package com.android.compose.animation.scene.content.state
+sealed class TransitionState {
+ class Idle(val currentScene:Any):TransitionState()
+ class Transition(val fromContent:Any,val toContent:Any,val progress:Float):TransitionState()
+}
+""",
+        'Scenes.kt': 'package com.android.systemui.scene.shared.model; object Scenes { val Gone=Any() }',
         'Scene.kt': '''package com.android.compose.animation.scene
+class LayoutState { var transitionState: com.android.compose.animation.scene.content.state.TransitionState?=null }
+class ContentScope { val layoutState=LayoutState() }
 open class ContentKey
 interface ElementMatcher { fun matches(key:ElementKey,content:ContentKey):Boolean }
 class ElementKey(val debugName:String):ElementMatcher {
@@ -93,13 +107,13 @@ fun main(){
  val panel=NativePanel();panel.setQsVisible(true)
  for(step in 0..100){
   panel.setQsExpansion(step/100f,1f,3f,.5f)
-  check(HeckerQsPanelState.alpha()==1f)
+  check(HeckerQsPanelState.alpha(null)==1f)
   check(panel.viewModel.qs==step/100f && panel.viewModel.panelExpansionFraction==1f)
   check(panel.viewModel.squishinessFraction==.5f && panel.viewModel.proposedTranslation==3f)
  }
  for(step in 100 downTo 0){
   panel.setQsExpansion(1f,step/100f,0f,1f)
-  check((HeckerQsPanelState.alpha()>0)==(step>0))
+  check((HeckerQsPanelState.alpha(null)>0)==(step>0))
   val container=panel.containerView!!;val drawn=container.drawn
   container.dispatchDraw(probe.Canvas())
   check(container.drawn==drawn+(if(step>0)1 else 0))
@@ -114,12 +128,21 @@ fun main(){
  panel.setQsExpansion(1f,1f,0f,1f);container.dispatchDraw(probe.Canvas())
  check(container.drawn==drawn+1)
  panel.hideImmediately();container.dispatchDraw(probe.Canvas())
- check(container.drawn==drawn+1 && HeckerQsPanelState.alpha()==0f)
+ check(container.drawn==drawn+1 && HeckerQsPanelState.alpha(null)==0f)
  panel.setQsVisible(true);panel.setQsExpansion(1f,1f,0f,1f);container.dispatchDraw(probe.Canvas())
  check(container.drawn==drawn+2)
  panel.setQsExpansion(1f,1f,0f,1f);panel.setQsVisible(false)
- check(HeckerQsPanelState.alpha()==0f && panel.containerView?.qsVisible==false)
- panel.setQsVisible(true);panel.setQsExpansion(0f,0f,0f,1f);check(HeckerQsPanelState.alpha()==0f)
+ check(HeckerQsPanelState.alpha(null)==0f && panel.containerView?.qsVisible==false)
+ panel.setQsVisible(true);panel.setQsExpansion(0f,0f,0f,1f);check(HeckerQsPanelState.alpha(null)==0f)
+ // The actual panel has closed while the QS fragment delivers a stale inner expansion.
+ HeckerQsPanelState.setOuterExpansion(0f)
+ panel.setQsExpansion(1f,1f,0f,1f)
+ check(container.alpha==0f && HeckerQsPanelState.alpha(null)==0f)
+ repeat(120){check(container.alpha==0f)}
+ HeckerQsPanelState.setOuterExpansion(Float.NaN)
+ check(container.alpha==0f)
+ HeckerQsPanelState.setOuterExpansion(.5f)
+ check(container.alpha==1f && HeckerQsPanelState.alpha(null)>.0f)
  val transition=TransitionBuilder();transition.quickQuickSettingsToQuickSettings()
  check(transition.fades.none{it.key===Elements.QuickSettingsContent || it.key===HeckerQsScene.Media})
  check(transition.anchors.none{it===Elements.QuickSettingsContent})

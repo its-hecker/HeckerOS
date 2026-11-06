@@ -56,7 +56,8 @@
     <string name="hecker_charge_estimate">Осталось</string>
     <string name="hecker_charge_minutes">%1$d мин</string>
     <string name="hecker_charge_connected">Зарядное устройство подключено</string>
-    <string name="hecker_media_hide">Скрыть</string>
+    <string name="hecker_media_hide">Скрыть в быстрой панели</string>
     <string name="hecker_media_stop_app">Закрыть приложение</string>
     <string name="hecker_media_stop_failed">Не удалось закрыть медиаприложение</string>
+    <string name="hecker_media_options">Параметры плеера</string>
 </resources>

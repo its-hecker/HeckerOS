@@ -214,13 +214,6 @@ public final class HeckerHeadphonePopup {
         Window window = dialog.getWindow();
         if (window != null) {
             window.setBackgroundDrawableResource(android.R.color.transparent);
-            boolean glass = Settings.Secure.getIntForUser(context.getContentResolver(), "hecker_headphone_glass", 0, visibleUser) != 0;
-            android.os.PowerManager power = context.getSystemService(android.os.PowerManager.class);
-            WindowManager manager = context.getSystemService(WindowManager.class);
-            if (glass && manager.isCrossWindowBlurEnabled() && (power == null || !power.isPowerSaveMode())) {
-                background.setColors(new int[]{0x771C3144, 0x880B1725});
-                panel.setBackground(null); window.setBackgroundDrawable(background); window.setBackgroundBlurRadius(dp(28));
-            }
             window.setGravity(Gravity.BOTTOM);
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
             window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -236,6 +229,28 @@ public final class HeckerHeadphonePopup {
             dialog.show();
             if (window != null) window.setLayout(
                     Math.min(context.getResources().getDisplayMetrics().widthPixels - dp(32), dp(440)), -2);
+            // The window must be attached before enabling background blur. Keep
+            // the opaque card if the compositor rejects an optional effect.
+            if (window != null && Settings.Secure.getIntForUser(context.getContentResolver(),
+                    "hecker_headphone_glass", 0, visibleUser) != 0) {
+                try {
+                    android.os.PowerManager power = context.getSystemService(android.os.PowerManager.class);
+                    WindowManager manager = context.getSystemService(WindowManager.class);
+                    if (manager != null && manager.isCrossWindowBlurEnabled()
+                            && (power == null || !power.isPowerSaveMode())) {
+                        GradientDrawable glass = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                                new int[]{0x991C3144, 0xAA0B1725});
+                        glass.setCornerRadius(dp(36)); glass.setStroke(dp(1), 0xFF415D75);
+                        window.addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+                        window.setBackgroundDrawable(glass);
+                        window.setBackgroundBlurRadius(dp(28));
+                        panel.setBackground(null);
+                    }
+                } catch (RuntimeException unavailable) {
+                    panel.setBackground(background);
+                    Log.w(TAG, "Connection card uses opaque fallback; blur unavailable", unavailable);
+                }
+            }
             if (android.animation.ValueAnimator.areAnimatorsEnabled()) {
                 panel.setAlpha(0); panel.setTranslationY(dp(28));
                 panel.animate().alpha(1).translationY(0).setDuration(300).start();

@@ -1,5 +1,5 @@
 {
-  "checked_on": "2026-11-04",
+  "checked_on": "2026-11-06",
   "pixelos_manifest": {
     "repository": "PixelOS-AOSP/android_manifest",
     "branch": "seventeen",
@@ -92,7 +92,7 @@
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
       "branch": "feat/penguin-integrity-20261105",
-      "revision": "db2d4435d1d2cce17d35f6fdc0efb303becfc2c5",
+      "revision": "52b48def74719b328b3704be72f7c3745299f18a",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",

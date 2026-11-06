@@ -33,6 +33,7 @@ fi
 floral_setup_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 python3 "$floral_setup_dir/tools/retire_launcher.py"
 python3 "$floral_setup_dir/tools/check_qcom_namespaces.py"
+python3 "$floral_setup_dir/tools/check_build_revision.py" --rom-root "$PWD"
 python3 "$floral_setup_dir/tools/validate.py"
 git -C "vendor/google/$HECKER_DEVICE" lfs pull
 python3 "$floral_setup_dir/tools/prepare.py" "$@"

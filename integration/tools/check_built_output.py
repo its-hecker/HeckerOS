@@ -180,6 +180,20 @@ def check_font_customization(rom, output):
         raise ValueError("Built product font validation failed: " + result.stdout + result.stderr)
 
 
+def check_build_revision(rom, output):
+    from check_build_revision import head
+    props = next((output / path for path in ("system_ext/etc/build.prop", "system_ext/build.prop")
+                  if (output / path).is_file()), None)
+    if props is None:
+        raise ValueError("Built system_ext image is missing build.prop")
+    values = dict(line.split("=", 1) for line in props.read_text().splitlines()
+                  if "=" in line and not line.startswith("#"))
+    for key, path in (("ro.heckeros.suite_revision", rom / "vendor/hecker/floral/suite"),
+                      ("ro.heckeros.manifest_revision", Path(__file__).resolve().parents[1])):
+        if values.get(key) != head(path):
+            raise ValueError("Built image revision is stale or missing: " + key)
+
+
 def check(rom, output):
     check_no_addon_d(output)
     check_removed_weather(output)
@@ -196,6 +210,7 @@ def check(rom, output):
     check_motion_sense(output)
     check_development_adb(output, expected_mode=os.environ.get("HECKER_DEV_USB_ADB"))
     check_suite(rom, output)
+    check_build_revision(rom, output)
     check_bootanimation(rom, output)
     check_librepods(rom, output)
     check_font_customization(rom, output)

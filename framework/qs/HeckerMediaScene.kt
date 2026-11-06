@@ -46,12 +46,30 @@ object HeckerQsPanelState {
     private var legacy by mutableStateOf(false)
     private var shown by mutableStateOf(false)
     private var nativeExpansion by mutableFloatStateOf(0f)
+    private var outerKnown by mutableStateOf(false)
+    private var actualPanelFraction by mutableFloatStateOf(0f)
+    private var host = java.lang.ref.WeakReference<android.view.View>(null)
+    @JvmStatic fun attachHost(view: android.view.View?) {
+        host = java.lang.ref.WeakReference(view)
+        updateHost()
+    }
+    @JvmStatic fun setOuterExpansion(fraction: Float) {
+        outerKnown = true
+        actualPanelFraction = fraction
+        updateHost()
+    }
+    private fun updateHost() {
+        // RenderNode alpha updates even if a scene reuses a recorded layer and
+        // does not call dispatchDraw while its transition is settling.
+        host.get()?.alpha = if (!outerKnown || actualPanelFraction.isFinite() && actualPanelFraction > 0f) 1f else 0f
+    }
     @JvmStatic fun setVisible(visible: Boolean) { legacy = true; shown = visible }
     @JvmStatic fun setExpansion(fraction: Float) { legacy = true; nativeExpansion = fraction }
     fun alpha(scope: ContentScope?): Float {
         val state = scope?.layoutState?.transitionState
         val transition = state as? TransitionState.Transition
-        return MediaCardGeometry.shadeAlpha(legacy, shown, nativeExpansion,
+        val expansion = if (outerKnown) actualPanelFraction else nativeExpansion
+        return MediaCardGeometry.shadeAlpha(legacy, shown, expansion,
             state is TransitionState.Idle && state.currentScene == Scenes.Gone,
             transition?.toContent == Scenes.Gone, transition?.fromContent == Scenes.Gone,
             transition?.progress ?: 0f)

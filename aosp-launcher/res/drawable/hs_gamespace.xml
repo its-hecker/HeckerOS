@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Reference-style purple field and white rounded controller capsule. -->
+    <path android:fillColor="#4336C7" android:pathData="M0,0H108V108H0Z"/>
+    <path android:fillColor="#FFFFFFFF" android:pathData="M31,35H77A19,19 0,0 1,96 54A19,19 0,0 1,77 73H31A19,19 0,0 1,12 54A19,19 0,0 1,31 35Z"/>
+    <path android:fillColor="#4336C7" android:pathData="M35,50H41V44H47V50H53V56H47V62H41V56H35Z"/>
+    <path android:fillColor="#DEDAF9" android:pathData="M62,60L80,42L89,51L71,69Z"/>
+    <path android:fillColor="#6551EB" android:pathData="M70,57A5,5 0,1 0,70 67A5,5 0,1 0,70 57Z"/>
+    <path android:fillColor="#4336C7" android:pathData="M85,41A5.5,5.5 0,1 0,85 52A5.5,5.5 0,1 0,85 41Z"/>
+</vector>

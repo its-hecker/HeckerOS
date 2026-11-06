@@ -5,6 +5,10 @@ type hecker_vpn_tool_exec, exec_type, system_file_type, file_type;
 type hecker_vpn_socket, file_type, coredomain_socket, mlstrustedobject;
 type hecker_vpn_data_file, file_type, data_file_type, core_data_file_type;
 init_daemon_domain(hecker_vpnd)
+# The platform-signed controller has per-user MLS categories (levelFrom=user).
+# Its init-owned peer is s0. Trust only the native daemon across that boundary;
+# keep the app categorized and retain TE plus SO_PEERCRED/SO_PEERSEC checks.
+typeattribute hecker_vpnd mlstrustedsubject;
 allow hecker_vpnd hecker_vpn_data_file:dir create_dir_perms;
 allow hecker_vpnd hecker_vpn_data_file:file create_file_perms;
 allow hecker_vpnd sysfs:dir { getattr search };

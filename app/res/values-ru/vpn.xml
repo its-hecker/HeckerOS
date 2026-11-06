@@ -2,7 +2,7 @@
 <resources>
     <string name="vpn_title">HeckerVPN</string>
     <string name="vpn_summary">Страны, личные профили и маршрутизация приложений</string>
-    <string name="vpn_countries">Страны</string>
+    <string name="vpn_countries">Бесплатный VPN</string>
     <string name="vpn_profiles">Мои профили</string>
     <string name="vpn_connect">Подключить</string>
     <string name="vpn_disconnect">Отключить</string>
@@ -57,4 +57,6 @@
     <string name="vpn_account_pending">Регистрация Mullvad не завершена. Повторите настройку с сохранённым аккаунтом.</string>
     <string name="vpn_account_retry">Повторить настройку Mullvad</string>
     <string name="vpn_import_access">Не удалось открыть выбранный файл. Выберите его снова в приложении «Файлы».</string>
+    <string name="vpn_free_title">Proton VPN Free</string>
+    <string name="vpn_free_summary">Скачайте конфигурацию WireGuard в аккаунте Proton и импортируйте её здесь. Выберите расположение при скачивании. Сохранённые конфигурации находятся в разделе «Мои профили».</string>
 </resources>

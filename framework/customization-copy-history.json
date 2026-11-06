@@ -71,7 +71,8 @@
     "b8c068150ce24a56a275df451d271bd4cf22634f",
     "8e16d8ab00d6a9d6596babbf6aa9d3f1e0980204",
     "dcc62bc6d171900cca9ea26098366927bd9f81a6",
-    "37ef636f66ad54a6096b87ec3109faa647486a56"
+    "37ef636f66ad54a6096b87ec3109faa647486a56",
+    "44b1a66e7730f1e4b9db55c77f868241c9af952a"
   ],
   "packages/apps/Settings/src/com/android/settings/hecker/HeckerBrandPreference.java": [
     "6f5ddd26068e7b517bc83b72189993087b28fc86"
@@ -197,7 +198,8 @@
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerHeadphonePopup.java": [
     "3c3b676a8670aad6e9f845c8c134fe5f55153885",
-    "7e9279f9320d54a81b765eb61732af4a8f7b4d5c"
+    "7e9279f9320d54a81b765eb61732af4a8f7b4d5c",
+    "b3145e91bf898453f28358e715d977f53ab10fe3"
   ],
   "frameworks/base/packages/SystemUI/res/values/hecker_headphones.xml": [
     "72bc7a36aaca7a8bad98898a05cbb17fd10f5867"
@@ -220,7 +222,8 @@
     "a934e28c584934d82c0638ee48121106f6c33188",
     "db130ab2c0f99ea9f82b197e1a3f60461b1829b9",
     "6d131afb18ddedf23d0808822ec8a5567cbbfe4a",
-    "75d6e201e1359bc07669a4e320e60d44cb53bbc7"
+    "75d6e201e1359bc07669a4e320e60d44cb53bbc7",
+    "d08c70aa82189e7399046fad49562b666cedee93"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsMedia.java": [
     "305001f4caeae8be8b9c99e895e0f97843daf364",
@@ -290,7 +293,8 @@
     "aa694c7fbda2b43d6de8ef26731750ad9e7ee4ae",
     "fe959db0bc7d5b48db523e946c2f5bc9aa0e45f0",
     "1f1293d2994ed0278b9cb0d186c8970282f91b4d",
-    "65993de1a12d74ddfb2f07736c4147720f31043a"
+    "65993de1a12d74ddfb2f07736c4147720f31043a",
+    "f50e08789d76174e450fb20bbfc676a715a56284"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMotionIsland.java": [
     "b9e18585e75500f62a906a0a163c0c52df90c52d",
@@ -369,7 +373,8 @@
     "f24350fd5c54cbfa8aea70253262d1644bc9246f",
     "8d63cbe2b745412195e8077af22c6fb428621df2",
     "5e27e82a4bf2a04d9b42684dac11be89019c23f8",
-    "faae291495215dbfb65ac5dbc53be229bf33f61d"
+    "faae291495215dbfb65ac5dbc53be229bf33f61d",
+    "a74df1a084f64c3efad76840db651bf574f8fe14"
   ],
   "packages/apps/Settings/res/values-night/hecker_about_colors.xml": [
     "38f85ef382b8898179015eb08306487a46a9175b"
@@ -390,7 +395,8 @@
     "0fb319ebecc07f566cf123d054fa5a9adf8a0028"
   ],
   "frameworks/base/packages/SystemUI/res/values-ru/hecker_strings.xml": [
-    "c0ffdec3f95768ae6f59c24b5cf0e8299192de28"
+    "c0ffdec3f95768ae6f59c24b5cf0e8299192de28",
+    "e890b8c89b7a9706fe1ec5861bc1690a926d23b2"
   ],
   "packages/apps/Settings/res/values-ru/hecker_ru.xml": [
     "a4fd97cecf1565b73dfa06ad3547ccb4a848d744"

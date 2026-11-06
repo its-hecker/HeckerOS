@@ -1,5 +1,5 @@
 <resources>
-    <color name="gamespace_launcher_background">#344581</color>
+    <color name="gamespace_launcher_background">#4336C7</color>
     <string name="aod_clock_size">AOD clock size</string>
     <string name="aod_clock_size_summary">Set the always-on clock size independently of the lock screen. Large sizes fit within the native clock area and retain burn-in protection.</string>
     <string name="qs_blur_strength">Background blur strength</string>

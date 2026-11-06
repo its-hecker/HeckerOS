@@ -2,7 +2,7 @@
 <resources>
     <string name="vpn_title">HeckerVPN</string>
     <string name="vpn_summary">国家、个人配置与应用路由</string>
-    <string name="vpn_countries">国家</string>
+    <string name="vpn_countries">免费 VPN</string>
     <string name="vpn_profiles">我的配置</string>
     <string name="vpn_connect">连接</string>
     <string name="vpn_disconnect">断开连接</string>
@@ -57,4 +57,6 @@
     <string name="vpn_account_pending">Mullvad 注册尚未完成，请使用已保存的账户重试。</string>
     <string name="vpn_account_retry">重试 Mullvad 设置</string>
     <string name="vpn_import_access">无法打开所选文件，请在“文件”应用中重新选择。</string>
+    <string name="vpn_free_title">Proton VPN Free</string>
+    <string name="vpn_free_summary">使用 Proton 账户下载 WireGuard 配置，然后在此导入。下载时选择位置。已保存的配置位于「我的配置」中。</string>
 </resources>

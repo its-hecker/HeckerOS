@@ -1,0 +1,8 @@
+<resources>
+    <string name="vpn_paste">Вставить конфигурацию WireGuard</string>
+    <string name="vpn_paste_hint">Вставьте полную конфигурацию [Interface] и [Peer]</string>
+    <string name="vpn_continue">Продолжить</string>
+    <string name="vpn_pasted_name">Вставленный профиль WireGuard</string>
+    <string name="vpn_proton_free">Proton VPN Free · Скачать профиль WireGuard</string>
+    <string name="motion_bar_width">Ширина панели Motion Island · %1$d dp</string>
+</resources>

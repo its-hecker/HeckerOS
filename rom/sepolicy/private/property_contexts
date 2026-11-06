@@ -4,6 +4,8 @@ ro.heckeros.version      u:object_r:build_prop:s0 exact string
 ro.heckeros.maintainer   u:object_r:build_prop:s0 exact string
 ro.heckeros.device       u:object_r:build_prop:s0 exact string
 ro.heckeros.build_type   u:object_r:build_prop:s0 exact string
+ro.heckeros.suite_revision u:object_r:build_prop:s0 exact string
+ro.heckeros.manifest_revision u:object_r:build_prop:s0 exact string
 ro.heckeros.dev_usb_adb  u:object_r:build_prop:s0 exact bool
 sys.hecker.game_charge_access u:object_r:hecker_game_control_prop:s0 exact string
 sys.hecker.sensor_recovery.request u:object_r:hecker_sensor_recovery_request_prop:s0 exact enum idle clear multihal20 multihal21 hal20

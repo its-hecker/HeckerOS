@@ -72,6 +72,14 @@ public final class HeckerIconStudio {
         if (component == null || original == null) return original;
         if (drawer && !HeckerStudio.enabled(c, "drawer_custom_icons", true)) return original;
         String selected = HeckerStudio.value(c, "icon_" + HeckerStudio.appKey(c, component, user), "");
+        // Render the shipped GameSpace art directly instead of reusing a
+        // stale/themed launcher bitmap or extracting an opaque adaptive plate.
+        if ((selected.isEmpty() || selected.equals("@system"))
+                && component.getPackageName().equals("org.hecker.suite")
+                && component.getClassName().equals("org.hecker.suite.GameSpaceLauncher")) {
+            Drawable game = c.getDrawable(HeckerStudio.res(c, "drawable", "hs_gamespace"));
+            return c.getPackageManager().getUserBadgedIcon(shaped(c, game), user);
+        }
         if (selected.equals("@system")) return shaped(c, original);
         String pack = selected.isEmpty() ? HeckerStudio.value(c, "icon_pack", "") : selected.split("\\|", 2)[0];
         if (pack.isEmpty()) return HeckerGlassIcons.icon(c, component, user, shaped(c, original), refresh, host);

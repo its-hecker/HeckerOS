@@ -1184,6 +1184,10 @@
     {
       "old": "            if (mDoubleTapToSleepEnabled && !mPulsing && !mDozing) {\n                mDoubleTapGesture.onTouchEvent(event);\n            }\n",
       "new": "            // QQSGestureListener owns the legacy sleep gesture, after falsing/bouncer checks.\n"
+    },
+    {
+      "old": "            mShadeRepository.setLegacyShadeExpansion(mExpandedFraction);",
+      "new": "            com.android.systemui.hecker.HeckerQsPanelState.setOuterExpansion(mExpandedFraction);\n            mShadeRepository.setLegacyShadeExpansion(mExpandedFraction);"
     }
   ],
   "packages/apps/Settings/src/com/android/settings/widget/HighlightableTopLevelPreferenceAdapter.java": [
@@ -1211,9 +1215,10 @@
     },
     {
       "old": "        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction",
-      "new": "        com.android.systemui.hecker.HeckerQsPanelState.setExpansion(panelExpansionFraction)\n        containerView?.heckerShadeExpansion = panelExpansionFraction\n        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction",
+      "new": "        com.android.systemui.hecker.HeckerQsPanelState.attachHost(containerView)\n        com.android.systemui.hecker.HeckerQsPanelState.setExpansion(panelExpansionFraction)\n        containerView?.heckerShadeExpansion = panelExpansionFraction\n        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction",
       "previous": [
-        "        com.android.systemui.hecker.HeckerQsPanelState.setExpansion(panelExpansionFraction)\n        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction"
+        "        com.android.systemui.hecker.HeckerQsPanelState.setExpansion(panelExpansionFraction)\n        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction",
+        "        com.android.systemui.hecker.HeckerQsPanelState.setExpansion(panelExpansionFraction)\n        containerView?.heckerShadeExpansion = panelExpansionFraction\n        viewModel.setQsExpansionValue(qsExpansionFraction)\n        viewModel.panelExpansionFraction = panelExpansionFraction"
       ]
     },
     {

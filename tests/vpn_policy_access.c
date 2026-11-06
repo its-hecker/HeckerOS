@@ -43,6 +43,17 @@ int main(int argc, char **argv) {
     access_check(app, "u:r:hecker_vpnd:s0", "unix_stream_socket", "connectto", 1);
     access_check("u:r:untrusted_app:s0", "u:r:hecker_vpnd:s0", "unix_stream_socket", "connectto", 0);
     access_check("u:r:platform_app:s0", "u:r:hecker_vpnd:s0", "unix_stream_socket", "connectto", 0);
+    access_check(app, "u:object_r:hecker_vpn_socket:s0", "sock_file", "write", 1);
+    access_check("u:r:hecker_vpnd:s0", "u:r:hecker_vpnd:s0", "unix_stream_socket", "listen", 1);
+    access_check("u:r:hecker_vpnd:s0", "u:r:hecker_vpnd:s0", "unix_stream_socket", "accept", 1);
+    access_check("u:r:hecker_vpnd:s0", "u:r:hecker_vpnd:s0", "unix_stream_socket", "getopt", 1);
+    access_check("u:r:hecker_vpnd:s0", "u:r:hecker_vpn_app:s0", "unix_stream_socket", "read", 1);
+    access_check("u:r:hecker_vpnd:s0", "u:object_r:hecker_vpn_tool_exec:s0", "file", "execute", 1);
+    access_check("u:r:netutils_wrapper:s0", "u:r:netutils_wrapper:s0", "capability", "net_admin", 1);
+    access_check("u:r:netutils_wrapper:s0", "u:r:netutils_wrapper:s0", "netlink_generic_socket", "create", 1);
+    access_check("u:r:hecker_vpn_app:s0:c512,c768", "u:r:hecker_vpnd:s0", "unix_stream_socket", "connectto", 1);
+    access_check("u:r:hecker_vpnd:s0", "u:r:hecker_vpn_app:s0:c512,c768", "unix_stream_socket", "read", 1);
+    access_check("u:r:hecker_vpnd:s0", "u:r:hecker_vpn_app:s0:c512,c768", "unix_stream_socket", "write", 1);
     puts("HeckerVPN compiled policy: Android service lookup, Binder and private daemon access PASS");
     return 0;
 }
