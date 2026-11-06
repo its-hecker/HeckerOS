@@ -18,14 +18,15 @@ preview; the preview still permits individual selection before restoration.
 ## Use
 
 1. Choose a folder in Documents or on USB. Select apps and personal-data categories.
-2. Back up with a password of at least 12 characters. Read the result: each app
-   says whether its archive includes data or only APKs.
+2. In the app parts sheet, select optional shared storage folders for this backup.
+   Back up with a password of at least 12 characters. The result lists the APK,
+   native app data and shared storage outcomes for each selected app.
 3. Copy the whole folder to PC/USB **before** formatting data. Keep the password
    separately. Internal storage is erased by a clean flash.
 4. After flashing a HeckerVault-enabled ROM, copy the folder back and select it.
 5. Inspect an archive with its password. HeckerVault decrypts and verifies it in
    private staging before showing a restore preview. Choose apps, categories and
-   APK + data / APK-only / data-only, then restore.
+   APK + data / APK-only / data-only. Select any shared storage parts to restore.
 
 Data-only requires an already installed matching-signer app at the backed-up
 version or newer. The installer refuses signing mismatches and downgrades.
@@ -36,11 +37,14 @@ launch, boot or package update.
 
 ## Coverage
 
-| Item | Version 1 behavior |
+| Item | Behavior |
 | --- | --- |
 | APKs | Base APK and all installed splits; native PackageInstaller restores them |
 | App data | Android full/key-value backup agents and native signing/ownership/permission handling |
-| Apps refusing Android backup | APK-only, explicitly shown in archive results; no sandbox-policy bypass |
+| Apps refusing Android backup | APK and explicitly chosen expansion or app media where present. Native and external app data are skipped |
+| External app data | Selected app's Android/data folder on internal shared storage, excluding cache and honoring the app's backup opt-out |
+| Expansion files | Selected app's Android/obb folder on internal shared storage |
+| App media | Selected app's Android/media folder on internal shared storage |
 | Wi-Fi | Platform Wi-Fi backup/restore API; platform exclusions, including hardware credentials, apply |
 | Contacts | Local on-device raw contacts, fields and photos; synced accounts resync separately |
 | Messages | SMS and MMS including binary attachments; no RCS/third-party encrypted chat guarantee |
@@ -52,10 +56,14 @@ launch, boot or package update.
 | Scheduling | Daily/weekly, optional charging requirement, current selections or all user apps |
 | Retention | Latest 1/3/5/10 scheduled snapshots; only files created by this installation are pruned |
 
-This is a native Android backup implementation, not unrestricted raw app-directory
-copying. App-declared extraction rules still apply. External Android/data/OBB,
-cache, notification channels and SSAID are not independently cloned in v1.
-Hardware Keystore keys and session/device-bound logins do not become portable.
+Private app data follows Android's native backup rules. Version 1.2 adds optional
+per-app shared storage folders through the platform-signed Vault's writable
+Android storage mount. Those parts are selected per manual backup. Restore checks
+the installed package, signer and version, then replaces matching files one at a
+time, preserving files absent from the snapshot. The encrypted format stays at
+version 1. Earlier Vault builds ignore the optional shared storage parts.
+Cache, notification channels, SSAID, hardware Keystore keys and device-bound
+sessions remain outside the portable snapshot.
 The controller supports the owner profile. Swift Backup import is intentionally
 deferred until physical HeckerVault backup/clean-flash/restore acceptance succeeds.
 
@@ -100,8 +108,9 @@ original password still makes the archive unrecoverable.
 `HeckerVault` is selected by `suite.mk`, alongside the existing Suite. Its
 system_ext permission/default-permission/sysconfig modules are required by Soong.
 The Hecker Lab tile opens the signature-protected controller; only the system
-backup service can bind its transport. There is no Internet or blanket storage
-permission, shared system UID or private-app-file SELinux grant.
+backup service can bind its transport. The ROM allowlists the existing platform
+Android storage permission for the Vault process. Folder operations are confined
+to the selected packages and parts on the owner's primary shared volume.
 
 ```bash
 python3 tools/check_vault.py --sdk-cache generated/sdk

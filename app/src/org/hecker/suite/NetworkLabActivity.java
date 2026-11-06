@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hecker.suite;
 
+import org.hecker.ui.HeckerChoiceSheet;
+
 import android.app.*;
 import android.content.*;
 import android.content.pm.PackageManager;
@@ -340,8 +342,8 @@ public final class NetworkLabActivity extends Activity {
     }
     private void filterDevices(){
         String[] labels={getString(R.string.netlab_ui_all_devices),getString(R.string.netlab_ui_controlled),getString(R.string.netlab_trusted)};
-        new AlertDialog.Builder(this).setTitle(R.string.netlab_ui_filter).setSingleChoiceItems(labels,filter==3?1:filter==2?2:0,(dialog,which)->{
-            filter=new int[]{0,3,2}[which];tab=0;limit=50;dialog.dismiss();renderTab();}).setNegativeButton(android.R.string.cancel,null).show();
+        HeckerChoiceSheet.show(this, getString(R.string.netlab_ui_filter), labels, filter==3?1:filter==2?2:0, which -> {
+            filter=new int[]{0,3,2}[which];tab=0;limit=50;renderTab();});
     }
     private void renderTab(){
         cancelRateChoice();
@@ -598,7 +600,7 @@ public final class NetworkLabActivity extends Activity {
         }
         labels.add(R.string.netlab_details);actions.add(()->details(device));labels.add(R.string.netlab_rename_trust);actions.add(()->rename(device));
         String[] titles=new String[labels.size()];for(int i=0;i<titles.length;i++)titles[i]=getString(labels.get(i));
-        new AlertDialog.Builder(this).setTitle(label(device)).setItems(titles,(dialog,which)->actions.get(which).run()).setNegativeButton(android.R.string.cancel,null).show();
+        HeckerChoiceSheet.show(this, label(device), titles, which -> actions.get(which).run());
     }
     private void controlWifi(List<Bundle> targets,boolean speedLimit){
         controlWifi(targets,speedLimit,-1);
@@ -658,17 +660,17 @@ public final class NetworkLabActivity extends Activity {
     private void nameActions(Bundle d){
         String id=d.getString("id","");boolean expanded=id.equals(expandedDevice);
         String[] labels={getString(R.string.netlab_rename_device),getString(expanded?R.string.netlab_hide_controls:R.string.netlab_show_controls)};
-        new AlertDialog.Builder(this).setTitle(displayName(d)).setItems(labels,(dialog,which)->{
+        HeckerChoiceSheet.show(this, displayName(d), labels, which -> {
             if(which==0)rename(d);else{expandedDevice=expanded?"":id;lastList="";renderDevices();}
-        }).setNegativeButton(android.R.string.cancel,null).show();
+        });
     }
     private void savedNames(){
         List<NetLabSavedDevices.Device> names=preferences.savedNames();
         if(names.isEmpty()){new AlertDialog.Builder(this).setTitle(R.string.netlab_saved_names).setMessage(R.string.netlab_saved_names_empty).setPositiveButton(android.R.string.ok,null).show();return;}
         String[] labels=new String[names.size()];for(int i=0;i<names.size();i++)labels[i]=names.get(i).name+" · "+names.get(i).mac;
-        new AlertDialog.Builder(this).setTitle(R.string.netlab_saved_names).setItems(labels,(dialog,which)->{
+        HeckerChoiceSheet.show(this, getString(R.string.netlab_saved_names), labels, which -> {
             NetLabSavedDevices.Device entry=names.get(which);Bundle d=new Bundle();d.putString("id","saved:"+entry.mac);d.putString("mac",entry.mac);rename(d);
-        }).setNegativeButton(android.R.string.cancel,null).show();
+        });
     }
     private void rename(Bundle d){
         LinearLayout page=Ui.page(this,R.string.netlab_rename_device);EditText name=new EditText(this);
@@ -691,11 +693,11 @@ public final class NetworkLabActivity extends Activity {
         int[] names=state.getBoolean("can_time")?new int[]{R.string.netlab_duration_session,R.string.netlab_duration_30s,R.string.netlab_duration_5m,R.string.netlab_duration_hour,R.string.netlab_duration_custom}:new int[]{R.string.netlab_duration_session};
         String[] labels=new String[names.length];for(int i=0;i<names.length;i++)labels[i]=getString(names[i]);
         new AlertDialog.Builder(this).setTitle(R.string.netlab_pause).setMessage(R.string.netlab_pause_explanation).setNegativeButton(android.R.string.cancel,null)
-                .setPositiveButton(R.string.netlab_continue,(v,w)->new AlertDialog.Builder(this).setTitle(R.string.netlab_duration).setItems(labels,(dialog,which)->{
+                .setPositiveButton(R.string.netlab_continue,(v,w)->HeckerChoiceSheet.show(this, getString(R.string.netlab_duration), labels, which -> {
                     if(which==4){EditText seconds=new EditText(this);seconds.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);seconds.setHint(R.string.netlab_seconds);
                         AlertDialog custom=new AlertDialog.Builder(this).setTitle(R.string.netlab_duration_custom).setView(seconds).setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.netlab_pause,null).create();custom.setOnShowListener(x->custom.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(y->{
                             try{long value=Long.parseLong(seconds.getText().toString());if(value<1||value>86400)throw new NumberFormatException();custom.dismiss();perform("pause",clients,value*1000);}catch(NumberFormatException invalid){seconds.setError(getString(R.string.netlab_duration_error));}}));custom.show();
-                    }else perform("pause",clients,new long[]{0,30_000,300_000,3_600_000}[which]);}).show()).show();
+                    }else perform("pause",clients,new long[]{0,30_000,300_000,3_600_000}[which]);})).show();
     }
     private void confirmRestore(){new AlertDialog.Builder(this).setTitle(R.string.netlab_restore_all).setMessage(R.string.netlab_restore_explanation)
             .setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.netlab_restore_all,(d,w)->perform("restore_all",Collections.emptyList(),0)).show();}
@@ -765,14 +767,22 @@ public final class NetworkLabActivity extends Activity {
         if(found==null||found.isEmpty()||!b.getString("scope","").equals(scope)){toast(R.string.netlab_lan_scan_first);return;}
         String[] labels=new String[found.size()];boolean[] checked=new boolean[found.size()];
         for(int i=0;i<found.size();i++){Bundle d=found.get(i);labels[i]=label(d)+" · "+d.getString("mac","");checked[i]=selected.contains(d.getString("id"));}
-        AlertDialog picker=new AlertDialog.Builder(this).setTitle(R.string.netlab_lan_choose).setMultiChoiceItems(labels,checked,(d,i,on)->checked[i]=on)
-                .setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.netlab_continue,null).create();
-        picker.setOnShowListener(v->picker.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(w->{List<Bundle> chosen=new ArrayList<>();for(int i=0;i<checked.length;i++)if(checked[i])chosen.add(found.get(i));
-            if(chosen.isEmpty()||chosen.size()>32){toast(R.string.netlab_lan_selection_error);return;}picker.dismiss();configureRoot(chosen);}));picker.show();
+        HeckerChoiceSheet.showMultiple(this, getString(R.string.netlab_lan_choose), labels, checked,
+                getString(R.string.netlab_continue), selection -> {
+                    List<Bundle> chosen = new ArrayList<>();
+                    for (int i = 0; i < selection.length; i++) if (selection[i]) chosen.add(found.get(i));
+                    if (chosen.isEmpty() || chosen.size() > 32) {
+                        toast(R.string.netlab_lan_selection_error);
+                        return false;
+                    }
+                    configureRoot(chosen);
+                    return true;
+                });
     }
     private void configureRoot(List<Bundle> peers){
-        new AlertDialog.Builder(this).setTitle(R.string.netlab_ui_manage).setItems(new String[]{getString(R.string.netlab_ui_pause_internet),getString(R.string.netlab_ui_speed_limit)},
-                (dialog,which)->controlWifi(peers,which==1)).setNegativeButton(android.R.string.cancel,null).show();
+        HeckerChoiceSheet.show(this, getString(R.string.netlab_ui_manage),
+                new String[]{getString(R.string.netlab_ui_pause_internet),getString(R.string.netlab_ui_speed_limit)},
+                which -> controlWifi(peers,which==1));
     }
     private void configureRoot(List<Bundle> peers,boolean speedLimit){
         configureRoot(peers,speedLimit,-1);

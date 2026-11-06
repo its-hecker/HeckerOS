@@ -56,10 +56,12 @@
     <string name="vault_part_apks">APKs</string>
     <string name="vault_part_data">Data</string>
     <string name="vault_apks_required">APKs are included in every HeckerVault snapshot.</string>
-    <string name="vault_external_data">Ext. data</string>
-    <string name="vault_expansion">Expansion</string>
-    <string name="vault_media">Media</string>
-    <string name="vault_parts_note">App agents control the app data included. External data, expansion files and media folders are not backed up separately.</string>
+    <string name="vault_external_data">External app data</string>
+    <string name="vault_expansion">Expansion files</string>
+    <string name="vault_media">App media</string>
+    <string name="vault_parts_note">Select folders for the chosen apps on internal shared storage. External app data excludes cache and follows each app’s backup opt-out.</string>
+    <string name="vault_parts_unavailable">Per-app folders need writable internal shared storage and HeckerVault’s ROM permission.</string>
+    <string name="vault_restore_parts">Shared storage folders</string>
     <string name="vault_backup_location">Select backup location</string>
     <string name="vault_device">Device</string>
     <string name="vault_backup_action">+  BACKUP</string>

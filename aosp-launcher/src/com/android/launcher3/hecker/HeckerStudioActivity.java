@@ -1,6 +1,8 @@
 // Copyright (C) 2026 HeckerOS. SPDX-License-Identifier: Apache-2.0
 package com.android.launcher3.hecker;
 
+import org.hecker.ui.HeckerChoiceSheet;
+
 import android.app.*;
 import android.appwidget.*;
 import android.content.*;
@@ -144,13 +146,12 @@ public final class HeckerStudioActivity extends Activity {
         for (int i = 0; i < names.length; i++) names[i] = StudioPolicy.CLOCKS[i].replace(".json", "").replace("_", " · ");
         button("clock_style", v -> {
             int selected = java.util.Arrays.asList(StudioPolicy.CLOCKS).indexOf(clock.style());
-            HeckerStudioUi.show(new AlertDialog.Builder(this).setTitle(t("clock_style"))
-                    .setSingleChoiceItems(names, selected, (dialog, which) -> {
+            HeckerChoiceSheet.show(this, t("clock_style"), names, selected, which -> {
                         String style = StudioPolicy.CLOCKS[which];
                         HeckerStudio.prefs(this).edit().putString(HeckerStudio.PREFIX
                                 + (pickingWidget ? "clock_widget_" + widgetId : "clock_style"), style).apply();
-                        clock.setStyle(style); dialog.dismiss();
-                    }).setNegativeButton(android.R.string.cancel, null).create());
+                        clock.setStyle(style);
+            });
         });
         LinearLayout preview = HeckerStudioUi.card(this);
         preview.addView(clock, new LinearLayout.LayoutParams(-1, HeckerStudio.dp(this, 240))); page.addView(preview);
@@ -223,7 +224,12 @@ public final class HeckerStudioActivity extends Activity {
         worker.execute(() -> {
             List<ResolveInfo> packs = HeckerIconStudio.packs(this); String[] names = new String[packs.size() + 1]; names[0] = t("system");
             for (int i = 0; i < packs.size(); i++) names[i + 1] = packs.get(i).loadLabel(getPackageManager()).toString();
-            runOnUiThread(() -> { if (!isFinishing() && !isDestroyed()) HeckerStudioUi.show(new AlertDialog.Builder(this).setTitle(t("icon_pack")).setItems(names, (d, which) -> chosen.accept(which == 0 ? "" : packs.get(which - 1).activityInfo.packageName)).create()); });
+            runOnUiThread(() -> {
+                if (!isFinishing() && !isDestroyed()) {
+                    HeckerChoiceSheet.show(this, t("icon_pack"), names,
+                            which -> chosen.accept(which == 0 ? "" : packs.get(which - 1).activityInfo.packageName));
+                }
+            });
         });
     }
     private void chooseDrawable(String pack, String appKey) {
@@ -326,11 +332,10 @@ public final class HeckerStudioActivity extends Activity {
     private void choice(String key, String[] options, java.util.function.IntSupplier selected,
             java.util.function.IntConsumer picked) {
         int current = selected.getAsInt();
-        Button control = button(key, v -> HeckerStudioUi.show(new AlertDialog.Builder(this).setTitle(t(key))
-                .setSingleChoiceItems(options, selected.getAsInt(), (dialog, which) -> {
-                    picked.accept(which); dialog.dismiss();
+        Button control = button(key, v -> HeckerChoiceSheet.show(this, t(key), options, selected.getAsInt(), which -> {
+                    picked.accept(which);
                     ((Button) v).setText(t(key) + " · " + options[which]);
-                }).setNegativeButton(android.R.string.cancel, null).create()));
+                }));
         if (current >= 0 && current < options.length) control.setText(t(key) + " · " + options[current]);
     }
     private void slider(String key, int fallback, int min, int max, boolean live) {

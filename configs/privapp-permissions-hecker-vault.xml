@@ -3,6 +3,7 @@
     <privapp-permissions package="org.hecker.vault">
         <permission name="android.permission.BACKUP" />
         <permission name="android.permission.INSTALL_PACKAGES" />
+        <permission name="android.permission.ACCESS_MTP" />
         <permission name="android.permission.READ_WALLPAPER_INTERNAL" />
         <permission name="android.permission.WRITE_SECURE_SETTINGS" />
         <permission name="android.permission.READ_SMS" />

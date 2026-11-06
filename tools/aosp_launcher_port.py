@@ -66,6 +66,8 @@ def aosp_launcher_plan(rom, replace, revert=False):
     copies={'generated/hecker-launcher/AndroidManifest.xml':expected}
     for path in (ROOT/'aosp-launcher/src').rglob('*.java'):
         copies['src/'+str(path.relative_to(ROOT/'aosp-launcher/src'))]=path.read_text()
+    menu = 'org/hecker/ui/HeckerChoiceSheet.java'
+    copies['src/' + menu] = (ROOT/'app/src'/menu).read_text()
     for path in (ROOT/'aosp-launcher/res').rglob('*.xml'):
         copies['generated/hecker-launcher/res/'+str(path.relative_to(ROOT/'aosp-launcher/res'))]=path.read_text()
     for path in (ROOT/'fonts/living-flow').glob('*.ttf'):

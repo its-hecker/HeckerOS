@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hecker.suite;
 
+import org.hecker.ui.HeckerChoiceSheet;
+
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -177,8 +179,11 @@ public final class GamingActivity extends Activity implements SharedPreferences.
         play.setContentDescription(getString(R.string.gaming_launch_game)+" "+app.label);
         FrameLayout.LayoutParams launch=new FrameLayout.LayoutParams(-1,GamingUi.dp(this,52),Gravity.BOTTOM);
         launch.setMargins(GamingUi.dp(this,16),0,GamingUi.dp(this,16),GamingUi.dp(this,16));hero.addView(play,launch);
-        hero.setOnLongClickListener(v->{new AlertDialog.Builder(this).setTitle(app.label)
-            .setItems(new String[]{getString(R.string.gaming_remove)},(d,i)->GamingPrefs.include(this,app.info.packageName,false)).show();return true;});
+        hero.setOnLongClickListener(v -> {
+            HeckerChoiceSheet.show(this, app.label, new String[]{getString(R.string.gaming_remove)},
+                    which -> GamingPrefs.include(this,app.info.packageName,false));
+            return true;
+        });
         return hero;
     }
     private interface Change{void set(boolean value);}

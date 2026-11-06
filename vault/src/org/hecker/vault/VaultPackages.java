@@ -4,6 +4,9 @@ package org.hecker.vault;
 import android.content.*;
 import android.content.pm.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.*;
 import org.json.*;
@@ -48,6 +51,7 @@ final class VaultPackages {
         VaultGroups.validate(snapshot.optJSONObject("groups"));
         UUID.fromString(snapshot.getString("id"));if(snapshot.getLong("token")<=0)throw new IOException("Invalid restore token");
         JSONArray apps=snapshot.getJSONArray("apps");if(apps.length()>10000)throw new IOException("Too many apps");Set<String> names=new HashSet<>();
+        Set<Path> expectedExternal = new HashSet<>();
         for(int i=0;i<apps.length();i++){JSONObject app=apps.getJSONObject(i);String pkg=app.getString("package");
             if(!VaultSession.validPackage(pkg)||pkg.equals("@pm@")||!names.add(pkg))throw new IOException("Invalid app metadata");
             if(app.getLong("version")<0||app.getString("label").length()>1024)throw new IOException("Invalid app version or label");
@@ -60,16 +64,53 @@ final class VaultPackages {
             if(!paths.contains("apps/"+pkg+"/base.apk"))throw new IOException("Missing base APK");
             String kind=app.optString("data","");if(!kind.isEmpty()&&!kind.equals("kv")&&!kind.equals("full"))throw new IOException("Invalid app-data type");
             if(!kind.isEmpty()&&(!new File(root,"data/"+pkg+"/"+kind).isFile()||!new File(root,"data/@pm@/kv").isFile()))throw new IOException("App data is missing native signing metadata");
+            for (VaultExternal.Part part : externalParts(app)) {
+                Path folder = VaultExternal.staged(root.toPath(), pkg, part);
+                VaultExternal.readIndex(folder, part);
+                expectedExternal.add(folder);
+            }
+        }
+        Path external = root.toPath().resolve("external");
+        if (!Files.notExists(external, LinkOption.NOFOLLOW_LINKS)) {
+            if (!Files.isDirectory(external, LinkOption.NOFOLLOW_LINKS)) throw new IOException("Invalid external storage section");
+            try (var folders = Files.walk(external, 2)) {
+                for (Path folder : (Iterable<Path>) folders::iterator) {
+                    int depth = folder.equals(external) ? 0 : external.relativize(folder).getNameCount();
+                    if (!Files.isDirectory(folder, LinkOption.NOFOLLOW_LINKS)
+                            || depth == 1 && !names.contains(folder.getFileName().toString())
+                            || depth == 2 && !expectedExternal.contains(folder)) {
+                        throw new IOException("Undeclared external storage section");
+                    }
+                }
+            }
         }
         JSONArray categories=snapshot.getJSONArray("categories");Set<String> allowed=VaultSystemData.CATEGORIES;
         if(categories.length()>allowed.size())throw new IOException("Too many system-data categories");Set<String> seen=new HashSet<>();
         for(int i=0;i<categories.length();i++)if(!allowed.contains(categories.getString(i))||!seen.add(categories.getString(i)))throw new IOException("Unknown or duplicate system-data category");
     }
-    static void checkInstalled(Context c,JSONObject app)throws Exception{
+    static Set<VaultExternal.Part> externalParts(JSONObject app) throws JSONException, IOException {
+        Set<VaultExternal.Part> parts = EnumSet.noneOf(VaultExternal.Part.class);
+        if (!app.has("externalParts")) return parts;
+        JSONArray declared = app.getJSONArray("externalParts");
+        if (declared.length() > VaultExternal.Part.values().length) throw new IOException("Invalid external storage parts");
+        for (int i = 0; i < declared.length(); i++) {
+            String name = declared.getString(i);
+            VaultExternal.Part match = null;
+            for (VaultExternal.Part part : VaultExternal.Part.values()) {
+                if (part.directory.equals(name)) match = part;
+            }
+            if (match == null || !parts.add(match) || match == VaultExternal.Part.DATA && !app.getBoolean("allowsData")) {
+                throw new IOException("Invalid external storage part");
+            }
+        }
+        return parts;
+    }
+    static PackageInfo checkInstalled(Context c,JSONObject app)throws Exception{
         PackageInfo p=c.getPackageManager().getPackageInfo(app.getString("package"),PackageManager.GET_SIGNING_CERTIFICATES);
-        if(p.applicationInfo==null||p.applicationInfo.uid<10000)throw new IOException("Protected package cannot be restored");
+        if(p.applicationInfo==null||p.applicationInfo.uid<10000||p.packageName.equals(c.getPackageName()))throw new IOException("Protected package cannot be restored");
         List<String> expected=new ArrayList<>();JSONArray a=app.getJSONArray("signers");for(int i=0;i<a.length();i++)expected.add(a.getString(i));Collections.sort(expected);
         if(!expected.equals(signers(p)))throw new IOException("Installed app signing certificate does not match this backup");
         if(p.getLongVersionCode()<app.getLong("version"))throw new IOException("Install the backed-up app version or newer before restoring data");
+        return p;
     }
 }

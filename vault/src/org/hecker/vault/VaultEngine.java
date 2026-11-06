@@ -7,6 +7,7 @@ import android.os.*;
 import android.net.Uri;
 import org.json.*;
 import java.io.*;
+import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -23,6 +24,10 @@ final class VaultEngine {
     static void owner(Context c)throws IOException{
         if(android.os.Process.myUid()/100000!=0||c.getSystemService(UserManager.class).isManagedProfile())throw new IOException("HeckerVault v1 supports the owner profile");
         if(!c.getSystemService(UserManager.class).isUserUnlocked())throw new IOException("Unlock the phone before using HeckerVault");
+    }
+    static boolean sharedStorageAvailable(Context context) {
+        return context.checkSelfPermission(VaultExternal.PERMISSION) == PackageManager.PERMISSION_GRANTED
+                && Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
     String run(VaultRequest request)throws Exception{
         owner(context);try{
@@ -61,9 +66,22 @@ final class VaultEngine {
                     if(metadata&&data.results.getOrDefault(pkg,-1)==0&&kind!=null){app.put("data",kind);app.put("result","APK + app data");}
                     else{app.put("data","");app.put("result",app.getBoolean("allowsData")?"APK only: Android did not produce a complete data backup":"APK only: app does not allow Android backup");}}
             }else for(int i=0;i<apps.length();i++)apps.getJSONObject(i).put("data","").put("result","APK only");
+            Path shared = request.externalParts.isEmpty() || !sharedStorageAvailable(context)
+                    ? null : Environment.getExternalStorageDirectory().toPath();
+            if (shared == null && !request.externalParts.isEmpty()) {
+                notes.put("Selected shared storage folders were unavailable on this build or volume.");
+            }
             for(int i=0;i<apps.length();i++){JSONObject app=apps.getJSONObject(i);String pkg=app.getString("package");
+                session.check();
                 VaultPackages.checkInstalled(context,app);PackageInfo now=context.getPackageManager().getPackageInfo(pkg,0);
                 if(now.getLongVersionCode()!=app.getLong("version"))throw new IOException("An app updated during backup; run the backup again");
+                if (shared != null && request.packages.contains(pkg)) {
+                    captureExternal(shared, root.toPath(), app, request.externalParts, session, notes);
+                    now = VaultPackages.checkInstalled(context, app);
+                    if (now.getLongVersionCode() != app.getLong("version")) {
+                        throw new IOException("An app updated during backup; run the backup again");
+                    }
+                }
                 if(request.categories.contains("launcher")&&pkg.equals("com.android.launcher3")&&!app.optString("data").isEmpty())categories.put("launcher");
             }
             if(request.categories.contains("launcher")&&!contains(categories,"launcher"))notes.put("Launcher layout: native launcher backup was unavailable");
@@ -96,6 +114,30 @@ final class VaultEngine {
             cleanup(root);
         }
     }
+    private void captureExternal(Path shared, Path root, JSONObject app, Set<VaultExternal.Part> parts,
+            VaultSession session, JSONArray notes) throws Exception {
+        String pkg = app.getString("package");
+        JSONArray captured = new JSONArray();
+        for (VaultExternal.Part part : VaultExternal.Part.values()) {
+            if (!parts.contains(part)) continue;
+            session.check();
+            String label = pkg + " · Android/" + part.directory;
+            if (part == VaultExternal.Part.DATA && !app.getBoolean("allowsData")) {
+                notes.put(label + ": app does not allow backup");
+                continue;
+            }
+            status.text("Backing up " + label);
+            try {
+                int count = VaultExternal.capture(shared, root, pkg, part, bytes -> session.check());
+                if (count > 0) captured.put(part.directory);
+                notes.put(label + ": " + (count == 0 ? "no files" : count + " files backed up"));
+            } catch (IOException | SecurityException failure) {
+                session.check();
+                notes.put(label + ": backup failed (" + failure.getClass().getSimpleName() + ")");
+            }
+        }
+        if (captured.length() > 0) app.put("externalParts", captured);
+    }
     private void inspect(VaultRequest request)throws Exception{
         if(request.archive==null)throw new IOException("Choose an archive");
         boolean found=false;for(VaultStorage.Archive a:VaultStorage.list(context))if(a.uri.equals(request.archive))found=true;
@@ -125,24 +167,68 @@ final class VaultEngine {
         VaultPackages.validate(p.snapshot,p.root);validateApks(p.snapshot,p.root);VaultSystemData.validate(p.root,p.snapshot.getJSONArray("categories"));
         Set<String> chosen=new HashSet<>(request.packages);if(request.categories.contains("launcher"))chosen.add("com.android.launcher3");
         JSONArray apps=p.snapshot.getJSONArray("apps");List<String> data=new ArrayList<>();
+        List<JSONObject> externalApps = new ArrayList<>();
         VaultSession session=new VaultSession(p.root,p.snapshot.getLong("token"),true,chosen);VaultSession.current=session;
         try{for(int i=0;i<apps.length();i++){session.check();JSONObject app=apps.getJSONObject(i);String pkg=app.getString("package");if(!chosen.contains(pkg))continue;
                 status.text("Preparing restore: "+pkg);
                 try{if(!request.mode.equals("data"))VaultInstaller.install(context,app,p.root);
                     VaultPackages.checkInstalled(context,app);
-                    if(!request.mode.equals("apk")&&!app.optString("data").isEmpty())data.add(pkg);
-                    else report.add(pkg+(request.mode.equals("data")?": skipped, no app data in this snapshot":": APK ready"));
+                    if (!request.mode.equals("apk")) {
+                        if (!app.optString("data").isEmpty()) data.add(pkg);
+                        if (request.packages.contains(pkg)
+                                && !Collections.disjoint(request.externalParts, VaultPackages.externalParts(app))) {
+                            externalApps.add(app);
+                        } else if (request.mode.equals("data") && app.optString("data").isEmpty()) {
+                            report.add(pkg + ": skipped, no selected app data in this snapshot");
+                        }
+                    }
+                    if (!request.mode.equals("data") && app.optString("data").isEmpty()) report.add(pkg + ": APK ready");
                 }catch(Exception e){if(Thread.currentThread().isInterrupted())throw e;report.add(pkg+": restore preparation failed ("+e.getClass().getSimpleName()+")");}
             }
             if(!data.isEmpty())try(VaultNative nativeRestore=new VaultNative(context,status::text)){
                 nativeRestore.restore(session,data);for(String pkg:data)report.add(pkg+": Android app-data restore pass completed");
             }catch(Exception e){if(Thread.currentThread().isInterrupted())throw e;report.add("App data: "+safeNativeError(e));}
+            restoreExternal(p.root.toPath(), externalApps, request.externalParts, session);
             JSONArray available=p.snapshot.getJSONArray("categories");for(String category:request.categories){session.check();if(!contains(available,category)||category.equals("launcher"))continue;
                 status.text("Restoring "+category);try{VaultSystemData.restore(context,category,p.root,p.snapshot.getString("id"));if(category.equals("settings"))VaultGroups.merge(context,p.snapshot.optJSONObject("groups"));report.add(category+": restored");}
                 catch(Exception e){if(Thread.currentThread().isInterrupted())throw e;report.add(category+": restore failed ("+e.getClass().getSimpleName()+")");}}
             if(report.isEmpty())report.add("Nothing was selected to restore.");
             report.add("Check the restored apps. Hardware-bound keys and existing login sessions may need to be set up again.");
         }finally{prepared=null;cleanup(p.root);}
+    }
+    private void restoreExternal(Path root, List<JSONObject> apps, Set<VaultExternal.Part> parts,
+            VaultSession session) throws Exception {
+        if (apps.isEmpty()) return;
+        if (!sharedStorageAvailable(context)) {
+            report.add("Selected shared storage folders could not be restored. Writable shared storage was unavailable.");
+            return;
+        }
+        Path shared = Environment.getExternalStorageDirectory().toPath();
+        for (JSONObject app : apps) {
+            String pkg = app.getString("package");
+            for (VaultExternal.Part part : VaultPackages.externalParts(app)) {
+                if (!parts.contains(part)) continue;
+                session.check();
+                String label = pkg + " · Android/" + part.directory;
+                status.text("Restoring " + label);
+                try {
+                    PackageInfo installed = VaultPackages.checkInstalled(context, app);
+                    if (part == VaultExternal.Part.DATA
+                            && (installed.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
+                        report.add(label + ": installed app does not allow backup data");
+                        continue;
+                    }
+                    int count = VaultExternal.restore(shared, root, pkg, part, bytes -> session.check());
+                    report.add(label + ": " + count + " files restored");
+                } catch (VaultExternal.PartialRestore failure) {
+                    session.check();
+                    report.add(label + ": " + failure.restored + "/" + failure.total + " files restored before failure");
+                } catch (Exception failure) {
+                    session.check();
+                    report.add(label + ": restore failed (" + failure.getClass().getSimpleName() + ")");
+                }
+            }
+        }
     }
     static boolean contains(JSONArray array,String value){for(int i=0;i<array.length();i++)if(value.equals(array.optString(i)))return true;return false;}
     static void cleanup(File root){try{VaultArchive.delete(root);}catch(IOException ignored){/* Private leftovers are cleaned when the next operation starts. */}}

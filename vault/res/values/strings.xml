@@ -73,7 +73,7 @@
     <string name="vault_preview_summary">Verified: %1$d apps · %2$d personal-data categories</string>
     <string name="vault_restore_preview">Restore preview</string>
     <string name="vault_restore_selected">Restore selected</string>
-    <string name="vault_restore_confirm">Restore these selected items? App data may replace the apps’ current data. Contacts, SMS, MMS and call history are merged. Installed apps with different signing certificates are rejected.</string>
+    <string name="vault_restore_confirm">Restore these selected items? App data may replace current data. Shared storage files with matching paths will be replaced. Contacts, SMS, MMS and call history are merged. Installed apps with different signing certificates are rejected.</string>
     <string name="vault_invalid_archive">This archive could not be prepared for restore.</string>
     <string name="vault_search_archives">Search archive filenames</string>
     <string name="vault_load_group">Load app group</string>
