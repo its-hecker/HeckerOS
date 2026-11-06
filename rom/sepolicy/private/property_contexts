@@ -14,3 +14,6 @@ sys.hecker.sensor_recovery.pending u:object_r:hecker_sensor_recovery_status_prop
 sys.hecker.sensor_recovery.ack_token u:object_r:hecker_sensor_recovery_status_prop:s0 exact uint
 sys.hecker.sensor_recovery.before u:object_r:hecker_sensor_recovery_status_prop:s0 exact uint
 sys.hecker.sensor_recovery.after u:object_r:hecker_sensor_recovery_status_prop:s0 exact uint
+sys.hecker.sensor_recovery.state.multihal20 u:object_r:hecker_sensor_recovery_status_prop:s0 exact enum stopped stopping restarting running
+sys.hecker.sensor_recovery.state.multihal21 u:object_r:hecker_sensor_recovery_status_prop:s0 exact enum stopped stopping restarting running
+sys.hecker.sensor_recovery.state.hal20 u:object_r:hecker_sensor_recovery_status_prop:s0 exact enum stopped stopping restarting running

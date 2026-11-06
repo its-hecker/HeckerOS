@@ -57,25 +57,30 @@ class SensorRecoveryTests(unittest.TestCase):
    subprocess.run(['java','-cp',temporary,'SensorRecoveryEngineTest'],check=True)
  def test_init_receipt_and_property_boundaries(self):
   policy=(ROOT/'rom/sepolicy/private/hecker_sensor_recovery.te').read_text()
-  self.assertNotRegex(policy,r'get_prop\(system_server,\s*init_svc_debug_prop\)')
+  self.assertNotRegex(policy,r'get_prop\(system_server,\s*(init_svc_debug_prop|vendor_default_prop)\)')
+  self.assertIn('get_prop(system_server, hecker_sensor_recovery_status_prop)',policy)
   self.assertIn('neverallow { domain -init } hecker_sensor_recovery_status_prop:property_service set;',policy)
   self.assertNotRegex(policy,r'set_prop\((platform_app|shell),')
   actions={};current=None
   for line in (ROOT/'configs/hecker-sensor-recovery.rc').read_text().splitlines():
    if line.startswith('on '):current=line[3:];actions[current]=[]
    elif line.strip() and not line.lstrip().startswith('#'):actions[current].append(line.strip())
-  self.assertEqual(len(actions),7)
+  self.assertEqual(len(actions),10)
+  contexts=(ROOT/'rom/sepolicy/private/property_contexts').read_text().splitlines()
   for action,service in [('multihal20','vendor.sensors-hal-2-0-multihal'),('multihal21','vendor.sensors-hal-2-1-multihal'),('hal20','vendor.sensors-hal-2-0')]:
+   state='sys.hecker.sensor_recovery.state.'+action
+   self.assertEqual(actions['property:init.svc.'+service+'=*'],['setprop '+state+' ${init.svc.'+service+':-stopped}'])
+   self.assertIn(state+' u:object_r:hecker_sensor_recovery_status_prop:s0 exact enum stopped stopping restarting running',contexts)
    request=actions['property:sys.hecker.sensor_recovery.request='+action]
-   self.assertEqual([x for x in request if x.startswith('restart ')],['restart '+service])
-   self.assertIn('setprop sys.hecker.sensor_recovery.before ${init.svc_debug_pid.'+service+'}',request)
+   self.assertEqual([x for x in request if x.startswith('restart ')],['restart --only-if-running '+service])
+   self.assertIn('setprop sys.hecker.sensor_recovery.before ${init.svc_debug_pid.'+service+':-0}',request)
    self.assertIn('setprop sys.hecker.sensor_recovery.ack_token ${sys.hecker.sensor_recovery.token}',request)
    response=actions['property:init.svc.'+service+'=running && property:sys.hecker.sensor_recovery.pending='+action]
    self.assertEqual(response,['setprop sys.hecker.sensor_recovery.after ${init.svc_debug_pid.'+service+'}'])
    # Leaving pending armed is necessary: an early queued running event can still contain the old PID.
    self.assertFalse(any('pending idle' in x for x in response))
   for commands in actions.values():
-   for command in commands:self.assertTrue(command.startswith(('setprop sys.hecker.sensor_recovery.','restart vendor.sensors-hal-')))
+   for command in commands:self.assertTrue(command.startswith(('setprop sys.hecker.sensor_recovery.','restart --only-if-running vendor.sensors-hal-')))
  def test_ui_has_no_root_or_shell_execution(self):
   for file in ['SensorRecoveryActivity.java','SensorRecoveryClient.java','SensorRecoveryTileService.java']:
    text=(ROOT/'app/src/org/hecker/suite'/file).read_text()
