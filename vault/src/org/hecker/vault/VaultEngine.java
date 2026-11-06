@@ -72,7 +72,7 @@ final class VaultEngine {
                 Set<String> keep=new HashSet<>();for(int i=0;i<apps.length();i++)if(!apps.getJSONObject(i).optString("data").isEmpty())keep.add(apps.getJSONObject(i).getString("package"));
                 if(!keep.isEmpty())keep.add("@pm@");File[] dirs=dataRoot.listFiles();if(dirs!=null)for(File dir:dirs)if(!keep.contains(dir.getName()))cleanup(dir);
             }
-            snapshot.put("apps",apps).put("categories",categories).put("notes",notes);VaultStorage.json(new File(root,"snapshot.json"),snapshot);
+            snapshot.put("apps",apps).put("categories",categories).put("notes",notes).put("groups",VaultGroups.load(context));VaultStorage.json(new File(root,"snapshot.json"),snapshot);
             VaultPackages.validate(snapshot,root);VaultSystemData.validate(root,categories);
             String stamp=new SimpleDateFormat("yyyyMMdd-HHmmss",Locale.ROOT).format(new Date());
             destination=VaultStorage.create(context,"HV-"+stamp+"-"+id.substring(0,8)+".hvault");status.text("Encrypting and exporting the snapshot");
@@ -131,7 +131,7 @@ final class VaultEngine {
                 nativeRestore.restore(session,data);for(String pkg:data)report.add(pkg+": Android app-data restore pass completed");
             }catch(Exception e){if(Thread.currentThread().isInterrupted())throw e;report.add("App data: "+safeNativeError(e));}
             JSONArray available=p.snapshot.getJSONArray("categories");for(String category:request.categories){session.check();if(!contains(available,category)||category.equals("launcher"))continue;
-                status.text("Restoring "+category);try{VaultSystemData.restore(context,category,p.root,p.snapshot.getString("id"));report.add(category+": restored");}
+                status.text("Restoring "+category);try{VaultSystemData.restore(context,category,p.root,p.snapshot.getString("id"));if(category.equals("settings"))VaultGroups.merge(context,p.snapshot.optJSONObject("groups"));report.add(category+": restored");}
                 catch(Exception e){if(Thread.currentThread().isInterrupted())throw e;report.add(category+": restore failed ("+e.getClass().getSimpleName()+")");}}
             if(report.isEmpty())report.add("Nothing was selected to restore.");
             report.add("Check the restored apps. Hardware-bound keys and existing login sessions may need to be set up again.");

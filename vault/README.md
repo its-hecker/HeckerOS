@@ -37,6 +37,7 @@ launch, boot or package update.
 | Wallpapers | Static Home/lock images; live wallpaper packages/settings are not exported |
 | Hecker settings | `hecker_` Secure/System settings; credential/key/secret settings excluded |
 | Launcher | Hecker Launcher's native agent, only when it returns a successful data backup |
+| App groups/search | Saved app + personal-data selections; app/package and archive-filename search |
 | Scheduling | Daily/weekly, optional charging requirement, current selections or all user apps |
 | Retention | Latest 1/3/5/10 scheduled snapshots; only files created by this installation are pruned |
 

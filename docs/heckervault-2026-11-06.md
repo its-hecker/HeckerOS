@@ -30,6 +30,10 @@ message identifiers and a private SQLite receipt journal. Queued/outbox SMS/MMS
 become drafts to avoid sending old messages. The temporary SMS write AppOp is
 restored, with recovery following process death.
 
+Saved app groups keep named app/personal-data selections for reuse. Groups travel
+in encrypted snapshot metadata and merge when Hecker settings are restored.
+Apps can be searched by label/package; archives can be searched by filename.
+
 Scheduled backups are opt-in. Daily/weekly charging-aware JobScheduler jobs use
 a device-wrapped password after unlock. Their portable archives still use the
 user's password; a factory reset does not require the old device Keystore.

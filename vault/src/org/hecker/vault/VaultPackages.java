@@ -45,6 +45,7 @@ final class VaultPackages {
     }
     static void validate(JSONObject snapshot,File root)throws Exception{
         if(snapshot.getInt("format")!=1||snapshot.getInt("sdk")>android.os.Build.VERSION.SDK_INT)throw new IOException("This snapshot needs the same or newer Android version");
+        VaultGroups.validate(snapshot.optJSONObject("groups"));
         UUID.fromString(snapshot.getString("id"));if(snapshot.getLong("token")<=0)throw new IOException("Invalid restore token");
         JSONArray apps=snapshot.getJSONArray("apps");if(apps.length()>10000)throw new IOException("Too many apps");Set<String> names=new HashSet<>();
         for(int i=0;i<apps.length();i++){JSONObject app=apps.getJSONObject(i);String pkg=app.getString("package");
