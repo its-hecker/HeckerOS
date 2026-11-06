@@ -662,6 +662,8 @@
       "gesture acceptance diagnostics; existing finite character lifecycle retained"
     ],
     "limits": "No full ROM or phone verification in this environment. Log has no peer/endpoint handshake diagnostics; root cause of the remote non-response remains unconfirmed. HeckerVault including saved groups is retained; Swift import remains deferred.",
-    "validation": "195 Suite tests plus complete host runner, 87 integration tests; locked Suite/Settings SDK, QS Compose, Launcher helpers, Motion Island/device features, WireGuard native/controller and HeckerVault archive/transport/SDK checks pass. Full ROM and physical tests pending."
+    "validation": "195 Suite tests plus complete host runner, 87 integration tests; locked Suite/Settings SDK, QS Compose, Launcher helpers, Motion Island/device features, WireGuard native/controller and HeckerVault archive/transport/SDK checks pass. Full ROM and physical tests pending.",
+    "functional_revision": "11ece3f5e8a06d3947a89fe26741235ec1f6f1bd",
+    "suite_revision": "11ece3f5e8a06d3947a89fe26741235ec1f6f1bd"
   }
 }
