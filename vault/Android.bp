@@ -2,7 +2,7 @@
 android_app {
     name: "HeckerVault",
     manifest: "AndroidManifest.xml",
-    srcs: ["src/**/*.java", "core/**/*.java"],
+    srcs: ["src/**/*.java", "core/**/*.java", ":HeckerChoiceSheetSource"],
     resource_dirs: ["res"],
     platform_apis: true,
     certificate: "platform",

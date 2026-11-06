@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.hecker.vault" android:versionCode="2" android:versionName="1.1">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.hecker.vault" android:versionCode="3" android:versionName="1.2">
     <uses-sdk android:minSdkVersion="37" android:targetSdkVersion="37" />
     <permission android:name="org.hecker.vault.permission.OPEN" android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.BACKUP" />
     <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.ACCESS_MTP" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />

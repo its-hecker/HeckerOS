@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hecker.suite;
 
+import org.hecker.ui.HeckerChoiceSheet;
+
 import android.app.Activity;
 import org.hecker.vpn.VpnInput;
 import android.app.AlertDialog;
@@ -25,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -207,9 +210,10 @@ public final class HeckerVpnActivity extends Activity {
     private void routingDialog(Bundle profile) {
         String[] modes = {"all", "include", "exclude"};
         String[] labels = {getString(R.string.vpn_route_all), getString(R.string.vpn_route_include), getString(R.string.vpn_route_exclude)};
-        new AlertDialog.Builder(this).setTitle(R.string.vpn_routing).setItems(labels, (d, which) -> {
+        int selected = Arrays.asList(modes).indexOf(profile.getString("mode", "all"));
+        HeckerChoiceSheet.show(this, getString(R.string.vpn_routing), labels, selected, which -> {
             if (which == 0) applyPolicy("all", new ArrayList<>()); else chooseApps(modes[which], profile.getStringArrayList("apps"));
-        }).setNegativeButton(android.R.string.cancel, null).show();
+        });
     }
     private void chooseApps(String mode, ArrayList<String> initial) {
         // Package enumeration and label loading stay off the main thread.

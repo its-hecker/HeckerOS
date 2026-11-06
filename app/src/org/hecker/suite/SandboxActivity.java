@@ -3,7 +3,7 @@ package org.hecker.suite;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.AlertDialog;
+import org.hecker.ui.HeckerChoiceSheet;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -109,13 +109,12 @@ public final class SandboxActivity extends Activity {
         String[] labels = {getString(R.string.sandbox_data), getString(R.string.sandbox_network),
                 getString(R.string.sandbox_storage)};
         boolean[] checked = {(mask & 1) != 0, (mask & 2) != 0, (mask & 4) != 0};
-        new AlertDialog.Builder(this).setTitle(label)
-                .setMultiChoiceItems(labels, checked, (dialog, which, value) -> checked[which] = value)
-                .setPositiveButton(R.string.sandbox_apply, (dialog, which) -> {
-                    int updated = (checked[0] ? 1 : 0) | (checked[1] ? 2 : 0) | (checked[2] ? 4 : 0);
+        HeckerChoiceSheet.showMultiple(this, label, labels, checked,
+                getString(R.string.sandbox_apply), selection -> {
+                    int updated = (selection[0] ? 1 : 0) | (selection[1] ? 2 : 0) | (selection[2] ? 4 : 0);
                     if (updated != mask) save(app.packageName, updated);
-                })
-                .setNegativeButton(android.R.string.cancel, null).show();
+                    return true;
+                });
     }
 
     private void save(String packageName, int mask) {

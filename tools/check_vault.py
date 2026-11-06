@@ -31,6 +31,7 @@ def main():
     requested={p.get(A+'name') for p in app.findall('uses-permission')}
     check_package_permissions(api/'AndroidManifest.xml',app.get('package'),requested,ROOT/'configs/privapp-permissions-hecker-vault.xml','HeckerVault')
     assert 'android.permission.INTERNET' not in requested and 'android.permission.MANAGE_EXTERNAL_STORAGE' not in requested
+    assert 'android.permission.ACCESS_MTP' in requested
     application=app.find('application');assert application.get(A+'allowBackup')=='false' and not app.get(A+'sharedUserId')
     activity=application.find('activity');assert activity.get(A+'permission')=='org.hecker.vault.permission.OPEN'
     transport=application.find("service[@android:name='.VaultTransportService']",{'android':A[1:-1]})
@@ -54,15 +55,18 @@ def main():
         out=Path(tmp)
         javac=['java','-m','jdk.compiler/com.sun.tools.javac.Main']
         core=sorted((ROOT/'vault/core').rglob('*.java'))
-        run(*javac,'-d',out/'host',*core,ROOT/'vault/tests/VaultArchiveTest.java',ROOT/'vault/tests/VaultSelectionTest.java')
+        run(*javac,'-d',out/'host',*core,ROOT/'vault/tests/VaultArchiveTest.java',
+            ROOT/'vault/tests/VaultSelectionTest.java',ROOT/'vault/tests/VaultExternalTest.java')
         run('java','-cp',out/'host','org.hecker.vault.VaultArchiveTest')
         run('java','-cp',out/'host','org.hecker.vault.VaultSelectionTest')
+        run('java','-cp',out/'host','org.hecker.vault.VaultExternalTest')
         run(*javac,'-d',out/'transport',*sorted((ROOT/'vault/tests/host').rglob('*.java')),*core,
             ROOT/'vault/src/org/hecker/vault/VaultSession.java',ROOT/'vault/src/org/hecker/vault/VaultTransport.java',ROOT/'vault/tests/VaultTransportTest.java')
         run('java','-cp',out/'transport','org.hecker.vault.VaultTransportTest')
         run(cache/'aapt2','compile','--dir',ROOT/'vault/res','-o',out/'resources.zip')
         run(cache/'aapt2','link','-I',cache/'android.jar','--manifest',ROOT/'vault/AndroidManifest.xml','--java',out/'generated','-o',out/'vault.apk',out/'resources.zip')
-        run(*javac,'-cp',cache/'android-system.jar','-d',out/'classes',out/'generated/org/hecker/vault/R.java',*core,*sorted((ROOT/'vault/src').rglob('*.java')))
+        run(*javac,'-cp',cache/'android-system.jar','-d',out/'classes',out/'generated/org/hecker/vault/R.java',
+            ROOT/'app/src/org/hecker/ui/HeckerChoiceSheet.java',*core,*sorted((ROOT/'vault/src').rglob('*.java')))
     print('HeckerVault complete controller Java/resources + exact Android transport/permission wiring: PASS')
     print('Full ROM compilation and physical backup/wipe/restore acceptance remain required. Swift import is deferred.')
 

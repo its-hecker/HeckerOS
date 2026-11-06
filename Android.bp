@@ -36,6 +36,11 @@ license {
     license_text: ["fonts/google-sans-cyrillic/OFL.txt"],
 }
 
+filegroup {
+    name: "HeckerChoiceSheetSource",
+    srcs: ["app/src/org/hecker/ui/HeckerChoiceSheet.java"],
+}
+
 android_app {
     name: "HeckerSuite",
     licenses: ["hecker_suite_license", "hecker_netlab_registry_license", "hecker_xmorph_license"],

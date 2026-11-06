@@ -16,6 +16,7 @@ import android.text.method.PasswordTransformationMethod;
 import android.view.*;
 import android.view.inputmethod.EditorInfo;
 import android.widget.*;
+import org.hecker.ui.HeckerChoiceSheet;
 import org.json.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -106,7 +107,9 @@ public final class VaultActivity extends Activity {
     private String backupTitle(){int id=R.string.vault_backup_apps_title;if(scope.equals("pending"))id=R.string.vault_pending_title;else if(scope.equals("updated"))id=R.string.vault_updated_title;else if(scope.equals("existing"))id=R.string.vault_existing_title;return getString(id);}
     private void updateCount(){if(selectionCount!=null){List<AppEntry> shown=visibleApps();int count=0;for(AppEntry app:shown)if(selected.contains(app.info.packageName))count++;selectionCount.setText(getString(R.string.vault_shown_selection_count,count,shown.size()));}}
     private void moreMenu(){List<String> names=Arrays.asList(getString(R.string.vault_quick_actions),getString(R.string.vault_app_backups),getString(R.string.vault_load_group),getString(R.string.vault_save_group),getString(R.string.vault_choose_folder));
-        new AlertDialog.Builder(this).setItems(names.toArray(new String[0]),(d,w)->{switch(w){case 0:openPage("quick");break;case 1:openPage("app_settings");break;case 2:loadGroup();break;case 3:saveGroup();break;default:chooseFolder();}}).show();}
+        HeckerChoiceSheet.show(this, getString(R.string.vault_title), names.toArray(new String[0]), w -> {
+            switch(w){case 0:openPage("quick");break;case 1:openPage("app_settings");break;case 2:loadGroup();break;case 3:saveGroup();break;default:chooseFolder();}
+        });}
     private void quickCard(LinearLayout page,boolean first,boolean last,int title,int detail,int button,Runnable action){LinearLayout item=ui.card(page,first,last);ui.copy(item,getString(title),getString(detail));
         if(button!=0)ui.action(item,getString(button),action);else{item.setOnClickListener(v->action.run());item.setFocusable(true);}}
     private void overview(){LinearLayout page=scrolling();
@@ -127,7 +130,7 @@ public final class VaultActivity extends Activity {
             result.setOnClickListener(v->new AlertDialog.Builder(this).setTitle(R.string.vault_last_result).setMessage(report).setPositiveButton(android.R.string.ok,null).show());}
     }
     private void categoryActions(LinearLayout page,String category,int icon,int heading,int backup,int restore,int detail){ui.section(page,icon,getString(heading));
-        quickCard(page,true,false,backup,detail,0,()->password("backup",null,Collections.emptySet(),Set.of(category)));
+        quickCard(page,true,false,backup,detail,0,()->password("backup",null,Collections.emptySet(),Set.of(category),Collections.emptySet()));
         quickCard(page,false,true,restore,R.string.vault_restore_category_detail,R.string.vault_from_device,()->restoreArchives("all",category));}
     private void quickActions(){LinearLayout page=scrolling();ui.section(page,R.drawable.v_apps,getString(R.string.vault_quick_backup_heading));
         quickCard(page,true,false,R.string.vault_backup_all_short,R.string.vault_backup_all_detail,R.string.vault_to_device,()->selectScope("all"));
@@ -157,9 +160,16 @@ public final class VaultActivity extends Activity {
     private List<AppEntry> visibleApps(){List<AppEntry> result=new ArrayList<>();for(AppEntry app:apps)if(visible(app))result.add(app);return result;}
     private void toggleVisible(){List<AppEntry> visible=visibleApps();boolean all=!visible.isEmpty();for(AppEntry app:visible)all&=selected.contains(app.info.packageName);
         for(AppEntry app:visible)if(all)selected.remove(app.info.packageName);else selected.add(app.info.packageName);saveScope();refilter.run();}
-    private void filterDialog(){String[] labels={getString(R.string.vault_filter_all),getString(R.string.vault_backup_pending),getString(R.string.vault_backup_updated),getString(R.string.vault_backup_existing)};String[] scopes={"all","pending","updated","existing"};
-        new AlertDialog.Builder(this).setTitle(R.string.vault_filter).setSingleChoiceItems(labels,Arrays.asList(scopes).indexOf(scope),(d,w)->{scope=scopes[w];d.dismiss();render();})
-                .setNeutralButton(systemApps?R.string.vault_hide_system:R.string.vault_show_system,(d,w)->{systemApps=!systemApps;VaultStorage.prefs(this).edit().putBoolean("show_system",systemApps).apply();render();}).setNegativeButton(android.R.string.cancel,null).show();}
+    private void filterDialog(){String[] labels={getString(R.string.vault_filter_all),getString(R.string.vault_backup_pending),getString(R.string.vault_backup_updated),getString(R.string.vault_backup_existing),
+            getString(systemApps ? R.string.vault_hide_system : R.string.vault_show_system)};String[] scopes={"all","pending","updated","existing"};
+        HeckerChoiceSheet.show(this, getString(R.string.vault_filter), labels, Arrays.asList(scopes).indexOf(scope), which -> {
+            if (which < scopes.length) scope = scopes[which];
+            else {
+                systemApps = !systemApps;
+                VaultStorage.prefs(this).edit().putBoolean("show_system", systemApps).apply();
+            }
+            render();
+        });}
     private void appPage(){FrameLayout frame=new FrameLayout(this);body.addView(frame,new LinearLayout.LayoutParams(-1,-1));LinearLayout page=ui.column();frame.addView(page,new FrameLayout.LayoutParams(-1,-1));
         if(showSearch){EditText search=new EditText(this);search.setSingleLine();search.setHint(R.string.vault_search_apps);search.setText(query);search.setTextColor(getColor(R.color.vault_foreground));
             search.setTextSize(15);search.setPadding(dp(20),dp(8),dp(20),dp(8));page.addView(search);
@@ -194,23 +204,54 @@ public final class VaultActivity extends Activity {
             box.setButtonTintList(ColorStateList.valueOf(getColor(R.color.vault_accent)));box.setChecked(categories.contains(id));box.setOnCheckedChangeListener((v,on)->{if(on)categories.add(id);else categories.remove(id);saveScope();});row.addView(box);}
         TextView note=text(getString(R.string.vault_personal_note),13,false);note.setPadding(dp(12),dp(18),dp(12),dp(18));page.addView(note);Button backup=ui.button(getString(R.string.vault_backup_selected),true);page.addView(backup);backup.setOnClickListener(v->backupOptions(true));}
     private void backupOptions(boolean includePersonal){if(VaultService.busy){message(getString(R.string.vault_busy));return;}if(selected.isEmpty()&&(!includePersonal||categories.isEmpty())){message(getString(R.string.vault_select_items));return;}
-        Dialog dialog=new Dialog(this);LinearLayout content=ui.column();content.setPadding(dp(16),dp(10),dp(16),dp(24));content.setBackground(shape(getColor(R.color.vault_sheet),28));
+        Dialog dialog=new Dialog(this);dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        LinearLayout content=ui.column();content.setPadding(dp(16),dp(10),dp(16),dp(24));content.setBackground(shape(getColor(R.color.vault_sheet),28));
         View handle=new View(this);handle.setBackground(shape(getColor(R.color.vault_button),2));LinearLayout.LayoutParams hp=new LinearLayout.LayoutParams(dp(24),dp(4));hp.gravity=Gravity.CENTER;hp.bottomMargin=dp(28);content.addView(handle,hp);
         ui.copy(content,getString(R.string.vault_user_parts),getString(R.string.vault_app_selection_count,selected.size()));
         boolean[] data={VaultStorage.prefs(this).getBoolean("include_data",true)};LinearLayout parts=new LinearLayout(this);LinearLayout.LayoutParams pp=new LinearLayout.LayoutParams(-1,-2);pp.topMargin=dp(18);content.addView(parts,pp);
-        Button apk=partChip(getString(R.string.vault_part_apks),true),appData=partChip(getString(R.string.vault_part_data),data[0]);LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(0,dp(48),1);ap.setMarginEnd(dp(8));parts.addView(apk,ap);parts.addView(appData,new LinearLayout.LayoutParams(0,dp(48),1));
+        Button apk=partChip(getString(R.string.vault_part_apks),true),appData=partChip(getString(R.string.vault_part_data),data[0]);LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(0,-2,1);ap.setMarginEnd(dp(8));parts.addView(apk,ap);parts.addView(appData,new LinearLayout.LayoutParams(0,-2,1));
         apk.setOnClickListener(v->message(getString(R.string.vault_apks_required)));appData.setOnClickListener(v->{data[0]=!data[0];styleChip(appData,getString(R.string.vault_part_data),data[0]);});
-        LinearLayout unsupported=new LinearLayout(this);LinearLayout.LayoutParams up=new LinearLayout.LayoutParams(-1,-2);up.topMargin=dp(8);content.addView(unsupported,up);
-        for(int id:new int[]{R.string.vault_external_data,R.string.vault_expansion,R.string.vault_media}){Button chip=partChip(getString(id),false);chip.setAlpha(.45f);chip.setOnClickListener(v->message(getString(R.string.vault_parts_note)));LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(0,dp(44),1);cp.setMarginEnd(dp(5));unsupported.addView(chip,cp);}
-        TextView note=text(getString(R.string.vault_parts_note),12,false);note.setPadding(0,dp(12),0,dp(12));content.addView(note);
+        Set<VaultExternal.Part> external = EnumSet.noneOf(VaultExternal.Part.class);
+        boolean sharedAvailable = VaultEngine.sharedStorageAvailable(this);
+        if (!selected.isEmpty()) {
+            addPartChoices(content, EnumSet.allOf(VaultExternal.Part.class), external, sharedAvailable);
+        }
+        TextView note=text(getString(sharedAvailable ? R.string.vault_parts_note : R.string.vault_parts_unavailable),12,false);
+        note.setPadding(0,dp(12),0,dp(12));content.addView(note);
         ui.settingsSection(content,getString(R.string.vault_backup_location));Button location=partChip(getString(R.string.vault_device),true);content.addView(location,new LinearLayout.LayoutParams(-1,dp(48)));location.setOnClickListener(v->{dialog.dismiss();chooseFolder();});
         TextView folder=text(folderLabel(),12,false);folder.setPadding(dp(8),dp(10),dp(8),dp(20));content.addView(folder);
-        Button backup=ui.button(getString(R.string.vault_backup_action),true);content.addView(backup,new LinearLayout.LayoutParams(-1,dp(48)));backup.setOnClickListener(v->{VaultStorage.prefs(this).edit().putBoolean("include_data",data[0]).apply();dialog.dismiss();
-            password("backup",null,selected,includePersonal?categories:Collections.emptySet());});
+        Button backup=ui.button(getString(R.string.vault_backup_action),true);content.addView(backup,new LinearLayout.LayoutParams(-1,-2));backup.setOnClickListener(v->{VaultStorage.prefs(this).edit().putBoolean("include_data",data[0]).apply();dialog.dismiss();
+            password("backup",null,selected,includePersonal?categories:Collections.emptySet(),external);});
         ScrollView scroll=new ScrollView(this);scroll.addView(content);dialog.setContentView(scroll);Window window=dialog.getWindow();if(window!=null){window.setBackgroundDrawableResource(android.R.color.transparent);window.setGravity(Gravity.BOTTOM);window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);window.setDimAmount(.4f);}dialog.show();
         if(window!=null){window.setLayout(-1,-2);window.getDecorView().setPadding(0,0,0,0);}}
+    private void addPartChoices(LinearLayout parent, Set<VaultExternal.Part> available,
+            Set<VaultExternal.Part> selectedParts, boolean enabled) {
+        for (VaultExternal.Part part : VaultExternal.Part.values()) {
+            if (!available.contains(part)) continue;
+            String label = partName(part);
+            Button chip = partChip(label, selectedParts.contains(part));
+            chip.setEnabled(enabled);
+            if (!enabled) chip.setAlpha(.45f);
+            LinearLayout.LayoutParams size = new LinearLayout.LayoutParams(-1, -2);
+            size.topMargin = dp(8);
+            parent.addView(chip, size);
+            chip.setOnClickListener(view -> {
+                boolean checked = selectedParts.add(part);
+                if (!checked) selectedParts.remove(part);
+                styleChip(chip, label, checked);
+            });
+        }
+    }
+    private String partName(VaultExternal.Part part) {
+        switch (part) {
+            case DATA: return getString(R.string.vault_external_data);
+            case OBB: return getString(R.string.vault_expansion);
+            case MEDIA: return getString(R.string.vault_media);
+            default: throw new AssertionError(part);
+        }
+    }
     private Button partChip(String name,boolean checked){Button b=button(name);styleChip(b,name,checked);return b;}
-    private void styleChip(Button b,String name,boolean checked){b.setText((checked?"✓  ":"")+name);GradientDrawable bg=shape(getColor(checked?R.color.vault_selected:R.color.vault_navigation),26);
+    private void styleChip(Button b,String name,boolean checked){b.setText((checked?"✓  ":"")+name);b.setSelected(checked);GradientDrawable bg=shape(getColor(checked?R.color.vault_selected:R.color.vault_navigation),26);
         bg.setStroke(dp(1),getColor(checked?R.color.vault_accent:R.color.vault_outline));b.setBackground(bg);b.setTextColor(getColor(checked?R.color.vault_accent:R.color.vault_secondary));}
     private void saveGroup(){
         if(selected.isEmpty()&&categories.isEmpty()){message(getString(R.string.vault_select_items));return;}
@@ -223,13 +264,13 @@ public final class VaultActivity extends Activity {
     private void loadGroup(){
         try{JSONObject groups=VaultGroups.load(this);List<String> names=new ArrayList<>();Iterator<String> keys=groups.keys();while(keys.hasNext())names.add(keys.next());Collections.sort(names,String.CASE_INSENSITIVE_ORDER);
             if(names.isEmpty()){message(getString(R.string.vault_no_groups));return;}
-            new AlertDialog.Builder(this).setTitle(R.string.vault_load_group).setItems(names.toArray(new String[0]),(d,which)->{
+            HeckerChoiceSheet.show(this, getString(R.string.vault_load_group), names.toArray(new String[0]), which -> {
                 String name=names.get(which);new AlertDialog.Builder(this).setTitle(name).setMessage(R.string.vault_group_scope)
                         .setNegativeButton(android.R.string.cancel,null).setNeutralButton(R.string.vault_delete_group,(dialog,w)->{try{VaultGroups.remove(this,name);}catch(Exception e){message(getString(R.string.vault_group_invalid));}})
                         .setPositiveButton(R.string.vault_use_group,(dialog,w)->{try{JSONObject group=groups.getJSONObject(name);selected.clear();categories.clear();
                             JSONArray appList=group.getJSONArray("apps"),categoryList=group.getJSONArray("categories");for(int i=0;i<appList.length();i++)selected.add(appList.getString(i));
                             for(int i=0;i<categoryList.length();i++)categories.add(categoryList.getString(i));saveScope();showTab(1);
-                        }catch(Exception e){message(getString(R.string.vault_group_invalid));}}).show();}).show();
+                        }catch(Exception e){message(getString(R.string.vault_group_invalid));}}).show();});
         }catch(Exception e){message(getString(R.string.vault_group_invalid));}
     }
     private void archives(){LinearLayout page=scrolling();ui.settingsSection(page,getString(R.string.vault_device));LinearLayout heading=card(page);ui.copy(heading,getString(R.string.vault_folder),folderLabel());
@@ -242,7 +283,11 @@ public final class VaultActivity extends Activity {
             if(entries.isEmpty())page.addView(text(getString(R.string.vault_no_archives),14,false));for(VaultStorage.Archive entry:entries){LinearLayout item=card(page);LinearLayout.LayoutParams spacing=(LinearLayout.LayoutParams)item.getLayoutParams();spacing.topMargin=dp(8);item.setLayoutParams(spacing);item.setTag(entry.name);archiveCards.add(item);item.addView(text(entry.name,15,true));
                 item.addView(text(android.text.format.Formatter.formatFileSize(this,entry.size)+" · AES-256-GCM",12,false));action(item,R.string.vault_inspect,()->password("inspect",entry.uri));
                 Button remove=button(getString(R.string.vault_delete));remove.setOnClickListener(v->new AlertDialog.Builder(this).setTitle(R.string.vault_delete).setMessage(R.string.vault_delete_confirm)
-                        .setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.vault_delete,(d,w)->io.execute(()->{try{VaultStorage.remove(this,entry.uri);runOnUiThread(()->showTab(2));}catch(Exception e){runOnUiThread(()->message(getString(R.string.vault_folder_error)));}})).show());item.addView(remove);}filter.run();});
+                        .setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.vault_delete,(d,w)->io.execute(()->{try{VaultStorage.remove(this,entry.uri);runOnUiThread(()->showTab(2));}catch(Exception e){runOnUiThread(()->message(getString(R.string.vault_folder_error)));}})).show());
+                LinearLayout.LayoutParams deleteSize = new LinearLayout.LayoutParams(-1, -2);
+                deleteSize.topMargin = dp(8);
+                item.addView(remove, deleteSize);
+            }filter.run();});
         }catch(Exception e){runOnUiThread(()->{loading.setText(R.string.vault_folder_error);});}});
     }
     private void settingRow(LinearLayout page,boolean first,boolean last,String title,String detail,Runnable action){LinearLayout row=ui.card(page,first,last);ui.copy(row,title,detail);if(action!=null){row.setOnClickListener(v->action.run());row.setFocusable(true);}}
@@ -253,8 +298,10 @@ public final class VaultActivity extends Activity {
         toggle.setOnCheckedChangeListener((v,on)->{VaultStorage.prefs(this).edit().putBoolean(key,on).apply();if(changed!=null)changed.run();});row.setOnClickListener(v->toggle.setChecked(!toggle.isChecked()));}
     private void appSettings(){LinearLayout page=scrolling();ui.settingsSection(page,getString(R.string.vault_general));
         switchRow(page,true,false,R.string.vault_show_system,"show_system",false,()->systemApps=VaultStorage.prefs(this).getBoolean("show_system",false));
-        settingRow(page,false,false,getString(R.string.vault_manage_groups),getString(R.string.vault_manage_groups_detail),()->new AlertDialog.Builder(this).setTitle(R.string.vault_manage_groups)
-                .setItems(new String[]{getString(R.string.vault_load_group),getString(R.string.vault_save_group)},(d,w)->{if(w==0)loadGroup();else saveGroup();}).show());
+        settingRow(page,false,false,getString(R.string.vault_manage_groups),getString(R.string.vault_manage_groups_detail),()->
+                HeckerChoiceSheet.show(this, getString(R.string.vault_manage_groups),
+                        new String[]{getString(R.string.vault_load_group),getString(R.string.vault_save_group)},
+                        which -> { if (which == 0) loadGroup(); else saveGroup(); }));
         switchRow(page,false,true,R.string.vault_include_app_data,"include_data",true,null);
         ui.settingsSection(page,getString(R.string.vault_multiple_backups));settingRow(page,true,true,getString(R.string.vault_backup_strategy),getString(R.string.vault_strategy_detail,VaultStorage.prefs(this).getInt("retention",3)),this::retentionDialog);
         encryptionSettings(page);ui.settingsSection(page,getString(R.string.vault_app_data));settingRow(page,true,false,getString(R.string.vault_native_backend),getString(R.string.vault_native_note),null);
@@ -277,17 +324,18 @@ public final class VaultActivity extends Activity {
         settingRow(page,false,true,getString(R.string.vault_compression),getString(label),this::compressionDialog);}
     private void compressionDialog(){int[] levels={VaultArchive.FASTEST,VaultArchive.BALANCED,VaultArchive.SMALLEST};String[] labels={getString(R.string.vault_fastest),getString(R.string.vault_balanced),getString(R.string.vault_smallest)};
         int current=VaultStorage.prefs(this).getInt("compression",VaultArchive.FASTEST),choice=0;for(int i=0;i<levels.length;i++)if(levels[i]==current)choice=i;
-        new AlertDialog.Builder(this).setTitle(R.string.vault_compression).setSingleChoiceItems(labels,choice,(d,w)->{VaultStorage.prefs(this).edit().putInt("compression",levels[w]).apply();d.dismiss();render();}).setNegativeButton(android.R.string.cancel,null).show();}
+        HeckerChoiceSheet.show(this,getString(R.string.vault_compression),labels,choice,w->{VaultStorage.prefs(this).edit().putInt("compression",levels[w]).apply();render();});}
     private void retentionDialog(){String[] labels={"1","3","5","10"};int[] values={1,3,5,10};int current=VaultStorage.prefs(this).getInt("retention",3),choice=1;
         for(int i=0;i<values.length;i++)if(values[i]==current)choice=i;
-        new AlertDialog.Builder(this).setTitle(R.string.vault_retention).setSingleChoiceItems(labels,choice,(d,w)->{VaultStorage.prefs(this).edit().putInt("retention",values[w]).apply();d.dismiss();render();}).setNegativeButton(android.R.string.cancel,null).show();}
+        HeckerChoiceSheet.show(this,getString(R.string.vault_retention),labels,choice,w->{VaultStorage.prefs(this).edit().putInt("retention",values[w]).apply();render();});}
     private void reschedule(){if(VaultStorage.prefs(this).getBoolean("scheduled",false))try{VaultJobs.configure(this,true);}catch(Exception e){message(getString(R.string.vault_schedule_failed));}}
     private void enableAndroidBackup(){new AlertDialog.Builder(this).setTitle(R.string.vault_enable_android).setMessage(R.string.vault_enable_android_note)
             .setNegativeButton(android.R.string.cancel,null).setPositiveButton(android.R.string.ok,(d,w)->{new BackupManager(this).setBackupEnabled(true);message(getString(R.string.vault_android_enabled));}).show();}
     private void chooseFolder(){if(VaultService.busy){message(getString(R.string.vault_busy));return;}startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION|Intent.FLAG_GRANT_PREFIX_URI_PERMISSION),FOLDER);}
-    private void password(String operation,Uri archive){password(operation,archive,selected,categories);}
-    private void password(String operation,Uri archive,Collection<String> chosenApps,Collection<String> chosenCategories){if(VaultService.busy){message(getString(R.string.vault_busy));return;}
+    private void password(String operation,Uri archive){password(operation,archive,selected,categories,Collections.emptySet());}
+    private void password(String operation,Uri archive,Collection<String> chosenApps,Collection<String> chosenCategories,
+            Set<VaultExternal.Part> externalParts){if(VaultService.busy){message(getString(R.string.vault_busy));return;}
         try{VaultStorage.folder(this);VaultEngine.owner(this);}catch(Exception e){message(getString(R.string.vault_choose_folder));return;}
         if(operation.equals("backup")&&chosenApps.isEmpty()&&chosenCategories.isEmpty()){message(getString(R.string.vault_select_items));return;}
         LinearLayout fields=new LinearLayout(this);fields.setOrientation(LinearLayout.VERTICAL);fields.setPadding(dp(24),dp(8),dp(24),dp(8));
@@ -297,7 +345,7 @@ public final class VaultActivity extends Activity {
         dialog.setOnDismissListener(d->{password.setText("");confirm.setText("");});dialog.setOnShowListener(d->{dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
             char[] pass=new char[password.length()];password.getText().getChars(0,pass.length,pass,0);
             if(pass.length<12||pass.length>1024||!operation.equals("inspect")&&!TextUtils.equals(password.getText(),confirm.getText())){Arrays.fill(pass,'\0');password.setError(getString(R.string.vault_password_invalid));return;}
-            VaultRequest request=new VaultRequest(operation,pass,chosenApps,chosenCategories,archive,VaultStorage.prefs(this).getBoolean("include_data",true)?"both":"apk",false);dialog.dismiss();authenticate(request); });});dialog.show();
+            VaultRequest request=new VaultRequest(operation,pass,chosenApps,chosenCategories,archive,VaultStorage.prefs(this).getBoolean("include_data",true)?"both":"apk",false,externalParts);dialog.dismiss();authenticate(request); });});dialog.show();
     }
     private EditText secret(int hint){EditText e=new EditText(this);e.setHint(hint);e.setSingleLine();e.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
         e.setTransformationMethod(PasswordTransformationMethod.getInstance());e.setSaveEnabled(false);e.setImeOptions(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING);e.setFilterTouchesWhenObscured(true);return e;}
@@ -318,10 +366,30 @@ public final class VaultActivity extends Activity {
             Set<String> chosenApps=new LinkedHashSet<>(),chosenCategories=new LinkedHashSet<>();
             RadioGroup modes=new RadioGroup(this);int[] modeIds={101,102,103};String[] modesValues={"both","apk","data"};int[] modeLabels={R.string.vault_apk_data,R.string.vault_apk_only,R.string.vault_data_only};
             for(int i=0;i<modeIds.length;i++){RadioButton b=new RadioButton(this);b.setId(modeIds[i]);b.setText(modeLabels[i]);modes.addView(b);}modes.check(modeIds[0]);content.addView(modes);
+            Set<VaultExternal.Part> archiveParts = EnumSet.noneOf(VaultExternal.Part.class);
+            for (int i = 0; i < apps.length(); i++) {
+                archiveParts.addAll(VaultPackages.externalParts(apps.getJSONObject(i)));
+            }
+            Set<VaultExternal.Part> chosenParts = EnumSet.noneOf(VaultExternal.Part.class);
+            if (!archiveParts.isEmpty()) {
+                boolean canRestore = VaultEngine.sharedStorageAvailable(this);
+                if (canRestore) chosenParts.addAll(archiveParts);
+                LinearLayout partOptions = ui.column();
+                ui.settingsSection(partOptions, getString(R.string.vault_restore_parts));
+                addPartChoices(partOptions, archiveParts, chosenParts, canRestore);
+                if (!canRestore) partOptions.addView(text(getString(R.string.vault_parts_unavailable), 12, false));
+                content.addView(partOptions);
+                modes.setOnCheckedChangeListener((group, id) ->
+                        partOptions.setVisibility(id == modeIds[1] ? View.GONE : View.VISIBLE));
+            }
             for(int i=0;i<apps.length();i++){JSONObject app=apps.getJSONObject(i);String pkg=app.getString("package");Long installed=null;for(AppEntry entry:this.apps)if(entry.info.packageName.equals(pkg)){installed=entry.info.getLongVersionCode();break;}
                 boolean included=(restoreCategory.equals("all")||restoreCategory.isEmpty())&&VaultSelection.restore(restoreScope,app.getLong("version"),installed);
                 if(included)chosenApps.add(pkg);CheckBox check=new CheckBox(this);
-                check.setText(app.getString("label")+"\n"+app.optString("result"));check.setChecked(included);check.setButtonTintList(ColorStateList.valueOf(getColor(R.color.vault_accent)));check.setOnCheckedChangeListener((v,on)->{if(on)chosenApps.add(pkg);else chosenApps.remove(pkg);});content.addView(check);}
+                List<String> partNames = new ArrayList<>();
+                for (VaultExternal.Part part : VaultPackages.externalParts(app)) partNames.add(partName(part));
+                String details = app.optString("result");
+                if (!partNames.isEmpty()) details += " · " + String.join(", ", partNames);
+                check.setText(app.getString("label")+"\n"+details);check.setChecked(included);check.setButtonTintList(ColorStateList.valueOf(getColor(R.color.vault_accent)));check.setOnCheckedChangeListener((v,on)->{if(on)chosenApps.add(pkg);else chosenApps.remove(pkg);});content.addView(check);}
             for(int i=0;i<available.length();i++){String category=available.getString(i);boolean included=restoreCategory.equals("all")||restoreCategory.equals(category);if(included)chosenCategories.add(category);CheckBox check=new CheckBox(this);check.setText(categoryName(category));check.setChecked(included);check.setButtonTintList(ColorStateList.valueOf(getColor(R.color.vault_accent)));
                 check.setOnCheckedChangeListener((v,on)->{if(on)chosenCategories.add(category);else chosenCategories.remove(category);});content.addView(check);}
             JSONArray notes=snapshot.optJSONArray("notes");if(notes!=null)for(int i=0;i<notes.length();i++)content.addView(text(notes.getString(i),12,false));
@@ -330,7 +398,7 @@ public final class VaultActivity extends Activity {
                     .setPositiveButton(R.string.vault_restore_selected,(d,w)->{if(chosenApps.isEmpty()&&chosenCategories.isEmpty()){message(getString(R.string.vault_select_items));return;}
                         new AlertDialog.Builder(this).setTitle(R.string.vault_restore_selected).setMessage(R.string.vault_restore_confirm).setNegativeButton(android.R.string.cancel,null)
                                 .setPositiveButton(R.string.vault_restore_selected,(confirm,which)->{int index=modes.getCheckedRadioButtonId()-101;
-                                    VaultRequest request=new VaultRequest("restore",new char[0],chosenApps,chosenCategories,null,modesValues[index],false);request.preparedId=prepared.id;authenticate(request);}).show();}).show();
+                                    VaultRequest request=new VaultRequest("restore",new char[0],chosenApps,chosenCategories,null,modesValues[index],false,chosenParts);request.preparedId=prepared.id;authenticate(request);}).show();}).show();
         }catch(Exception e){message(getString(R.string.vault_invalid_archive));}
     }
     private String categoryName(String id){int[] names={R.string.vault_wifi,R.string.vault_contacts,R.string.vault_messages,R.string.vault_calls,R.string.vault_wallpapers,R.string.vault_preferences,R.string.vault_launcher};

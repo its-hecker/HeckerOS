@@ -33,7 +33,8 @@ def main():
         receiver.write_text('package com.android.launcher3;public class SessionCommitReceiver{'
                             'public static final String ADD_ICON_PREFERENCE_KEY="pref_add_icon_to_home";'
                             'public static boolean isEnabled(android.content.Context c,android.os.UserHandle u){return true;}}')
-        sources = [fixture, receiver, *sorted((ROOT / 'tests/launcher-api-stubs').rglob('*.java')),
+        sources = [fixture, receiver, ROOT / 'app/src/org/hecker/ui/HeckerChoiceSheet.java',
+                   *sorted((ROOT / 'tests/launcher-api-stubs').rglob('*.java')),
                    *sorted((ROOT / 'aosp-launcher/src').rglob('*.java'))]
         subprocess.run(['java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', classpath,
                         '-d', str(output / 'classes'), *map(str, sources)], check=True)
