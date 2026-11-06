@@ -10,6 +10,10 @@ public final class SuiteRouterActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         String page = getIntent().getStringExtra("org.hecker.suite.PAGE");
+        if ("HeckerVault".equals(page)) {
+            startActivity(new Intent().setClassName("org.hecker.vault", "org.hecker.vault.VaultActivity"));
+            finish(); return;
+        }
         Class<? extends Activity> target = target(page);
         if (target != null) {
             Intent intent = new Intent(this, target);

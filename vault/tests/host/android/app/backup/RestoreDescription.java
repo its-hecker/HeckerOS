@@ -1,0 +1,1 @@
+package android.app.backup;public class RestoreDescription{public static final int TYPE_KEY_VALUE=1,TYPE_FULL_STREAM=2;public static final RestoreDescription NO_MORE_PACKAGES=new RestoreDescription("NO_MORE_PACKAGES",0);public final String pkg;public final int type;public RestoreDescription(String n,int t){pkg=n;type=t;}}

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="vault_background">#000000</color>
+    <color name="vault_card">#19161D</color>
+    <color name="vault_foreground">#F5F0F7</color>
+    <color name="vault_secondary">#C7BFCE</color>
+    <color name="vault_chip">#233751</color>
+    <color name="vault_accent">#7DAAFF</color>
+</resources>

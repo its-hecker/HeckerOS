@@ -1,0 +1,2 @@
+-keep class org.hecker.vault.VaultTransport { *; }
+-keep class org.hecker.vault.VaultTransportService { *; }

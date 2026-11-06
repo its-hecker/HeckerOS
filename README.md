@@ -1,3 +1,12 @@
+## HeckerVault feature — 6 November 2026
+
+`feat/heckervault-20261106` adds **Hecker Lab → HeckerVault**: portable encrypted
+app/APK and personal-data snapshots, native root-free restore, PC/USB folder
+copy, preview, schedules and retention. App-data backup follows Android rules;
+apps opting out are explicitly APK-only. See [coverage and instructions](vault/README.md)
+and [validation / pending physical acceptance](docs/heckervault-2026-11-06.md).
+Swift Backup import is deferred until HeckerVault device restore testing succeeds.
+
 # HeckerOS · Android 17
 
 ## HeckerOS 1.5 — Coral track, 6 November 2026

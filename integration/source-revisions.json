@@ -271,8 +271,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "fix/device-feedback-20261105",
-    "integration_branch": "fix/device-feedback-20261105",
+    "source_branch": "feat/heckervault-20261106",
+    "integration_branch": "feat/heckervault-20261106",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required",
@@ -314,7 +314,7 @@
         "notes": "Current PIF Java behavior adapted to HeckerOS Settings/process-scoped native property bridge; overlapping PixelOS PIF/keybox call paths removed."
       }
     },
-    "functional_revision": "ffd227eda1a15dc49b3cde9383c677a9b7f8585c"
+    "functional_revision": "5a0ce893d05fe780f2858a6e90ee6d00cadd58f0"
   },
   "heckeros": {
     "version": "1.5",
@@ -460,7 +460,8 @@
     "inherited_suite_revision": "6963155a0d449cf6a163c391c14c18fafd4cbd41",
     "device_testing": "pending",
     "source_validation": "host/SDK checked; full ROM and physical acceptance pending",
-    "native_source_lock": "native-compat/source-lock.json"
+    "native_source_lock": "native-compat/source-lock.json",
+    "suite_revision": "5a0ce893d05fe780f2858a6e90ee6d00cadd58f0"
   },
   "device_feedback_20261102": {
     "branch": "fix/coral-ui-compatibility-20261102",
@@ -621,5 +622,31 @@
     ],
     "device_report": "User reports UBL, banking apps and Wallet working on the prior matched detector build. Compatibility/attestation backend remains unchanged.",
     "validation": "194 Suite host tests and 86 integration tests; locked Suite/Settings SDK/AIDL/resources, SystemUI Compose against the pinned ActivityStarter API, 138 native inputs with fresh/upgrade/idempotent/exact revert checks, native VPN checks, and compiled user/userdebug SELinux policies with neverallows and DNS access probes pass. Full 1.5 ROM build and physical UI/icon-cache/tunnel acceptance remain required."
+  },
+  "heckervault_20261106": {
+    "branch": "feat/heckervault-20261106",
+    "controller": "org.hecker.vault",
+    "archive_format": 1,
+    "backend": "Native Android full/key-value BackupTransport; app-declared exclusions retained; no root grant",
+    "features": [
+      "APK/splits",
+      "eligible native app data",
+      "Wi-Fi",
+      "local contacts",
+      "SMS/MMS attachments",
+      "call history",
+      "static wallpapers",
+      "Hecker preferences",
+      "native launcher backup",
+      "portable password encryption",
+      "scheduled backup/retention",
+      "saved app/personal-data groups",
+      "app/package and archive-filename search"
+    ],
+    "swift_import": "deferred until physical backup/clean-flash/restore acceptance succeeds",
+    "validation": "41 production crypto/archive and 50 production native-transport checks; complete locked SDK/resource compile and exact Android platform permission/transport wiring audit pass",
+    "device_acceptance": "Full ServerHive ROM build and physical backup/clean-flash/restore acceptance pending",
+    "functional_revision": "5a0ce893d05fe780f2858a6e90ee6d00cadd58f0",
+    "suite_revision": "5a0ce893d05fe780f2858a6e90ee6d00cadd58f0"
   }
 }

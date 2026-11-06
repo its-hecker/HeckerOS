@@ -2,7 +2,7 @@
 # The release-config discovery pass runs before Android defines my-dir.
 HECKER_SUITE_PATH := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 PRODUCT_PACKAGES := $(filter-out HeckerLauncher HeckerLauncherRecentsOverlay Launcher3QuickStep Launcher3,$(PRODUCT_PACKAGES))
-PRODUCT_PACKAGES += HeckerSuite HeckerLauncher HeckerNetLabController HeckerVpnController
+PRODUCT_PACKAGES += HeckerSuite HeckerLauncher HeckerNetLabController HeckerVpnController HeckerVault
 PRODUCT_RELEASE_CONFIG_MAPS += $(HECKER_SUITE_PATH)/release/release_config_map.textproto
 PRODUCT_SYSTEM_EXT_PROPERTIES += \
     ro.heckeros.suite_revision=$(shell git -C $(HECKER_SUITE_PATH) rev-parse HEAD) \

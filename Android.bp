@@ -222,3 +222,27 @@ prebuilt_etc {
     sub_dir: "init",
     system_ext_specific: true,
 }
+
+prebuilt_etc {
+    name: "HeckerVaultPermissions",
+    src: "configs/privapp-permissions-hecker-vault.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}
+
+prebuilt_etc {
+    name: "HeckerVaultDefaultPermissions",
+    src: "configs/default-permissions-hecker-vault.xml",
+    filename_from_src: true,
+    sub_dir: "default-permissions",
+    system_ext_specific: true,
+}
+
+prebuilt_etc {
+    name: "HeckerVaultTransportConfig",
+    src: "configs/hecker-vault-transport.xml",
+    filename_from_src: true,
+    sub_dir: "sysconfig",
+    system_ext_specific: true,
+}

@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: Apache-2.0
+android_app {
+    name: "HeckerVault",
+    manifest: "AndroidManifest.xml",
+    srcs: ["src/**/*.java", "core/**/*.java"],
+    resource_dirs: ["res"],
+    platform_apis: true,
+    certificate: "platform",
+    privileged: true,
+    system_ext_specific: true,
+    required: ["HeckerVaultPermissions", "HeckerVaultDefaultPermissions", "HeckerVaultTransportConfig"],
+    optimize: { proguard_flags_files: ["proguard.flags"] },
+}

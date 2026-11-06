@@ -1,0 +1,1 @@
+package android.content.pm;public class PackageInfo{public String packageName;public PackageInfo(String name){packageName=name;}}
