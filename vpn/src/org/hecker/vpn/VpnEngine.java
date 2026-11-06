@@ -36,6 +36,7 @@ final class VpnEngine {
     private boolean desired, configured, supported, cleanupRequired, probed;
     private long rx, tx, handshake, catalogTime;
     private long attemptStarted;
+    private long lastDiagnostic;
     private String loggedStatus = "";
     private Network underlying;
     private List<JSONObject> catalog = List.of();
@@ -171,7 +172,8 @@ final class VpnEngine {
     }
     private void connect() throws Exception {
         JSONObject profile = selected();
-        String config = VpnConfig.parse(profile.getString("config")).forConnection(profile.getString("mode"), apps(profile));
+        VpnConfig saved = VpnConfig.parse(profile.getString("config"));
+        List<String> routedApps=apps(profile);
         android.net.NetworkCapabilities capabilities = connectivity.getNetworkCapabilities(connectivity.getActiveNetwork());
         if (capabilities != null && capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_VPN))
             throw new IllegalArgumentException("Disconnect the other Android VPN before connecting HeckerVPN");
@@ -181,7 +183,22 @@ final class VpnEngine {
         if (underlying == null) { status = "waiting_network"; notifyState(); schedulePoll(); return; }
         attemptStarted = SystemClock.elapsedRealtime();
         status = "connecting"; notifyState();
-        try { snapshot(kernel.call("UP\n" + config)); error = ""; }
+        try {
+            final Network network=underlying;
+            String config=saved.forNetwork(profile.getString("mode"),routedApps,host->{
+                ArrayList<String> addresses=new ArrayList<>();
+                try{for(java.net.InetAddress address:network.getAllByName(host)){
+                    if(address.isAnyLocalAddress()||address.isLoopbackAddress()||address.isLinkLocalAddress())continue;
+                    String ip=address.getHostAddress();if(ip!=null&&ip.indexOf('%')<0)addresses.add(ip);
+                }}catch(java.net.UnknownHostException failure){throw new IllegalArgumentException("Cannot resolve the VPN server on the current network. Check the profile or try another network.");}
+                return addresses;
+            });
+            // A network switch during DNS must not create a tunnel pinned to the old network.
+            if(!network.equals(connectivity.getActiveNetwork())){
+                status="waiting_network";underlying=null;schedulePoll();notifyState();return;
+            }
+            snapshot(kernel.call("UP\n"+network.getNetId()+"\n"+config)); error = "";
+        }
         catch (Exception failure) { failed(failure); throw failure; }
         schedulePoll(); notifyState();
     }
@@ -218,7 +235,8 @@ final class VpnEngine {
             if (connectivity.getActiveNetwork() == null) {
                 if (configured) { kernel.call("DOWN"); configured = false; }
                 status = "waiting_network";
-            } else if (!configured) connect();
+            } else if (!java.util.Objects.equals(connectivity.getActiveNetwork(),underlying)) reconnect();
+            else if (!configured) connect();
             else { snapshot(kernel.call("STATUS")); if (!configured) throw new IllegalArgumentException("Kernel tunnel stopped. Reconnect to try again."); }
             notifyState(); schedulePoll();
         } catch (Exception failure) { failed(failure); }
@@ -284,6 +302,7 @@ final class VpnEngine {
         result.putBoolean("configured", configured); result.putBoolean("desired", desired);
         result.putBoolean("cleanup_required", cleanupRequired);
         result.putLong("rx", rx); result.putLong("tx", tx); result.putLong("handshake", handshake);
+        result.putInt("underlying_netid",underlying==null?0:underlying.getNetId());
         ArrayList<Bundle> profiles = new ArrayList<>();
         if (store != null) {
             result.putString("selected", store.data.optString("selected"));
@@ -302,10 +321,12 @@ final class VpnEngine {
         result.putParcelableArrayList("profiles", profiles); return result;
     }
     private void notifyState() {
-        if (!status.equals(loggedStatus)) {
+        long now=SystemClock.elapsedRealtime();
+        if (!status.equals(loggedStatus)||(desired&&now-lastDiagnostic>=15000)) {
             Log.i("HeckerVPN", "state=" + status + " configured=" + configured
-                    + " peerContact=" + (handshake > 0) + " rx=" + rx + " tx=" + tx);
-            loggedStatus = status;
+                    + " peerContact=" + (handshake > 0) + " rx=" + rx + " tx=" + tx
+                    + " physicalNetwork="+(underlying==null?0:underlying.getNetId()));
+            loggedStatus = status;lastDiagnostic=now;
         }
         NotificationManager notifications = context.getSystemService(NotificationManager.class);
         if (!desired && !status.equals("error")) { notifications.cancel(7841); return; }

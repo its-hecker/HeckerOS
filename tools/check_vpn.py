@@ -21,7 +21,13 @@ def host(out):
     assert b'IncludedApplications' in subprocess.check_output([out/'quick','--help'])
     reply_test=out/'cleanup_reply.c'
     reply_test.write_text('#define main wireguard_quick_main\n#include "'+str(source/'src/wg-quick/android.c')+'"\n#undef main\n#include <assert.h>\n'
-        'int main(void){char reply[256];assert(hecker_destroy_reply_ok("200 0 success"));'
+        'int main(void){char reply[256];uint32_t mark=0;'
+        'assert(hecker_parse_underlying_mark("101",&mark)&&mark==0x30065);'
+        'assert(hecker_parse_underlying_mark("65535",&mark)&&mark==0x3ffff);'
+        'assert(!hecker_parse_underlying_mark("99",&mark));assert(!hecker_parse_underlying_mark("65536",&mark));'
+        'assert(!hecker_parse_underlying_mark("101;id",&mark));assert(!hecker_parse_underlying_mark("101 102",&mark));'
+        'assert(!hecker_parse_underlying_mark("",&mark));assert(!hecker_parse_underlying_mark(NULL,&mark));'
+        'assert(hecker_destroy_reply_ok("200 0 success"));'
         'assert(!hecker_destroy_reply_ok(NULL));assert(!hecker_destroy_reply_ok("500 0 destroyNetwork() failed (Permission denied)"));'
         'assert(!hecker_destroy_reply_ok("400 0 syntax error"));'
         'snprintf(reply,sizeof(reply),"500 0 destroyNetwork() failed (%s)",strerror(ENONET));assert(hecker_destroy_reply_ok(reply));return 0;}\n')
@@ -63,6 +69,8 @@ def android(out,sdk):
     assert 'CONFIG_WIREGUARD=y' in (platform/'kernel-floral-defconfig').read_text()
     assert 'source "net/wireguard/Kconfig"' in (platform/'kernel-net-Kconfig').read_text()
     assert 'obj-$(CONFIG_WIREGUARD) += wireguard/' in (platform/'kernel-net-Makefile').read_text()
+    fwmark=(platform/'Fwmark.h').read_text()
+    assert re.search(r'unsigned netId\s*: 16;\s*bool explicitlySelected\s*:  1;\s*bool protectedFromVpn\s*:  1;',fwmark)
     ndc=(platform/'NdcDispatcher.cpp').read_text()
     for marker in ['network create <netId> vpn <secure>','networkCreateVpn(netId, secure)','network users  add','networkDestroy(netId)']:assert marker in ndc,marker
     dns=(platform/'IDnsResolver.aidl').read_text();dns=re.sub(r'/\*.*?\*/|//[^\n]*','',dns,flags=re.S)

@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="vault_background">#F5F2F7</color>
-    <color name="vault_card">#FFFFFF</color>
-    <color name="vault_foreground">#211D26</color>
-    <color name="vault_secondary">#625B69</color>
-    <color name="vault_chip">#DCE7FD</color>
-    <color name="vault_accent">#386AB8</color>
-    <style name="VaultTheme" parent="android:style/Theme.DeviceDefault.DayNight">
+    <color name="vault_background">#0B1012</color>
+    <color name="vault_card">#1B2228</color>
+    <color name="vault_foreground">#DFE4E9</color>
+    <color name="vault_secondary">#A5ADB3</color>
+    <color name="vault_muted">#89969D</color>
+    <color name="vault_chip">#2B3E49</color>
+    <color name="vault_selected">#2B3E49</color>
+    <color name="vault_accent">#A8CFE3</color>
+    <color name="vault_on_accent">#1F4355</color>
+    <color name="vault_button">#28333B</color>
+    <color name="vault_navigation">#151D21</color>
+    <color name="vault_sheet">#0F1619</color>
+    <color name="vault_outline">#424C52</color>
+    <color name="vault_fab">#31596E</color>
+    <color name="vault_success">#45BD99</color>
+    <color name="vault_ripple">#247CACC4</color>
+    <style name="VaultTheme" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:windowBackground">@color/vault_background</item>
         <item name="android:colorBackground">@color/vault_background</item>
@@ -14,5 +24,10 @@
         <item name="android:textColorPrimary">@color/vault_foreground</item>
         <item name="android:textColorSecondary">@color/vault_secondary</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="android:statusBarColor">@color/vault_background</item>
+        <item name="android:navigationBarColor">@color/vault_navigation</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:colorControlActivated">@color/vault_accent</item>
     </style>
 </resources>

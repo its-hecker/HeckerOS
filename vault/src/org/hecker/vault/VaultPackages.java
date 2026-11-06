@@ -14,7 +14,7 @@ final class VaultPackages {
             if(p.applicationInfo==null||p.packageName.equals(c.getPackageName())||p.applicationInfo.uid<10000)continue;
             if((p.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM)!=0&&!system)continue;
             apps.add(p);}
-        apps.sort(Comparator.comparing(p->p.applicationInfo.loadLabel(c.getPackageManager()).toString(),String.CASE_INSENSITIVE_ORDER));return apps;
+        apps.sort(Comparator.comparing(p->p.packageName));return apps;
     }
     static List<String> userApps(Context c){List<String> result=new ArrayList<>();for(PackageInfo p:installed(c,false))result.add(p.packageName);return result;}
     static List<String> signers(PackageInfo p)throws Exception{

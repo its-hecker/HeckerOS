@@ -7,6 +7,12 @@ int main() {
     using namespace hecker::vpn;
     std::string config = "[Interface]\nPrivateKey=AQ==\nAddress=10.0.0.2/32\nIncludedApplications=com.example.test\n[Peer]\nPublicKey=AQ==\nAllowedIPs=0.0.0.0/0\nEndpoint=192.0.2.1:51820\n";
     assert(valid_config(config));
+    unsigned int netid=0;std::string decoded;
+    assert(parse_up("UP\n101\n"+config,netid,decoded)&&netid==101&&decoded==config);
+    assert(parse_up("UP\n65535\n"+config,netid,decoded)&&netid==65535);
+    for(const std::string bad:{"", "0", "99", "65536", "100000", "-1", "101;id", "101 102", "0x65", "101\nPostUp=id"})
+        assert(!parse_up("UP\n"+bad+"\n"+config,netid,decoded));
+    assert(!parse_up("UP\n"+config,netid,decoded));
     assert(authorized_peer(10001, "u:r:hecker_vpn_app:s0"));
     assert(!authorized_peer(1010001, "u:r:hecker_vpn_app:s0"));
     assert(!authorized_peer(10001, "u:r:platform_app:s0"));

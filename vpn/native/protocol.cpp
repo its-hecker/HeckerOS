@@ -6,6 +6,15 @@
 #include <sstream>
 
 namespace hecker::vpn {
+bool parse_up(const std::string& command,unsigned int& netid,std::string& config) {
+    if(command.rfind("UP\n",0)!=0)return false;
+    const size_t end=command.find('\n',3);
+    if(end==std::string::npos||end<6||end>8)return false;
+    unsigned int value=0;
+    for(size_t i=3;i<end;i++){if(command[i]<'0'||command[i]>'9')return false;value=value*10+(command[i]-'0');}
+    if(value<100||value>65535)return false;
+    config=command.substr(end+1);if(!valid_config(config))return false;netid=value;return true;
+}
 bool authorized_peer(unsigned int uid, const std::string& context) {
     return uid >= 10000 && uid < 100000 && context.rfind("u:r:hecker_vpn_app:", 0) == 0;
 }

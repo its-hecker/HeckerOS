@@ -54,8 +54,9 @@ def main():
         out=Path(tmp)
         javac=['java','-m','jdk.compiler/com.sun.tools.javac.Main']
         core=sorted((ROOT/'vault/core').rglob('*.java'))
-        run(*javac,'-d',out/'host',*core,ROOT/'vault/tests/VaultArchiveTest.java')
+        run(*javac,'-d',out/'host',*core,ROOT/'vault/tests/VaultArchiveTest.java',ROOT/'vault/tests/VaultSelectionTest.java')
         run('java','-cp',out/'host','org.hecker.vault.VaultArchiveTest')
+        run('java','-cp',out/'host','org.hecker.vault.VaultSelectionTest')
         run(*javac,'-d',out/'transport',*sorted((ROOT/'vault/tests/host').rglob('*.java')),*core,
             ROOT/'vault/src/org/hecker/vault/VaultSession.java',ROOT/'vault/src/org/hecker/vault/VaultTransport.java',ROOT/'vault/tests/VaultTransportTest.java')
         run('java','-cp',out/'transport','org.hecker.vault.VaultTransportTest')

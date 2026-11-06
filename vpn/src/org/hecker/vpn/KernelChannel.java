@@ -25,7 +25,7 @@ final class KernelChannel implements AutoCloseable {
             }
             stage = "exchange";
             byte[] request = command.getBytes(StandardCharsets.UTF_8);
-            if (request.length > VpnConfig.MAX_BYTES + 8) throw new IllegalArgumentException("Request is too large");
+            if (request.length > VpnConfig.MAX_BYTES + 16) throw new IllegalArgumentException("Request is too large");
             DataOutputStream output = new DataOutputStream(socket.getOutputStream());
             output.writeInt(request.length); output.write(request); output.flush();
             DataInputStream input = new DataInputStream(socket.getInputStream());

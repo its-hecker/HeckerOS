@@ -37,5 +37,10 @@
   "netutils_wrapper.te": {
     "url": "https://raw.githubusercontent.com/PixelOS-AOSP/android_system_sepolicy/99c58a7cc9a44fe33c93808452d018e756d84753/private/netutils_wrapper.te",
     "sha256": "7e6ec7baf99800847cc6d6c2c54aa2eb46cd0d931f72dc99e289589409340e45"
+  },
+  "Fwmark.h": {
+    "url": "https://android.googlesource.com/platform/system/netd/+/refs/tags/android-17.0.0_r1/include/Fwmark.h?format=TEXT",
+    "base64": true,
+    "sha256": "74cff60cf0e3228994b646584706cc0c106ccbe1b2ae3f3ee1572c703e2b93db"
   }
 }

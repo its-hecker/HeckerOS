@@ -4,6 +4,17 @@ Hecker Lab → HeckerVault. An original, offline Android 17 backup controller an
 native BackupTransport, built and platform-signed with HeckerOS. No root grant,
 Shizuku session or separate backup app is needed.
 
+The local dashboard uses dark joined cards, blue pill actions, a searchable
+app-card list, a backup-parts bottom sheet and Home / Apps / Archives / Settings
+icon navigation. There are no cloud controls or accounts.
+
+Apps quick actions select all, pending, updated or previously backed-up apps.
+The private index is updated only after a completed export or verified archive
+inspection, is scoped to the chosen folder, and is reconciled with its files.
+After a clean flash, inspect copied snapshots to rebuild their app history.
+Restore quick actions preselect all, missing or newer apps in the verified
+preview; the preview still permits individual selection before restoration.
+
 ## Use
 
 1. Choose a folder in Documents or on USB. Select apps and personal-data categories.
@@ -54,6 +65,14 @@ A snapshot is one `.hvault` file. Plaintext exists only in the controller's priv
 credential-encrypted staging directory during work; the public chosen folder gets
 only the encrypted archive. Enough free internal storage is required for staging.
 USB/file systems must support the resulting file size.
+
+Fastest compression is the default. Balanced and Smallest size are available in
+App backups → Encryption & compression. APKs are already ZIP containers, so all
+three modes stream them with DEFLATE level zero instead of recompressing them.
+Other payloads use the selected compression level. Export/import buffers are
+256 KiB, and export shows plaintext bytes processed, percentage and speed.
+These options do not change v1 encryption, password derivation or integrity
+checks. Old and new v1 archives remain readable by either implementation.
 
 The format begins with `HVLT` and version 1, followed by a 16-byte random PBKDF2
 salt, an 8-byte random nonce prefix, the fixed 310000 SHA-256 derivation count and

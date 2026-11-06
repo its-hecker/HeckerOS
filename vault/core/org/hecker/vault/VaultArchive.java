@@ -12,6 +12,8 @@ public final class VaultArchive {
     public static final int MAX_FILES=25000;
     public static final long MAX_BYTES=128L*1024*1024*1024;
     private static final String INDEX="vault-index.properties";
+    public static final int FASTEST=Deflater.BEST_SPEED, BALANCED=Deflater.DEFAULT_COMPRESSION, SMALLEST=Deflater.BEST_COMPRESSION;
+    private static final int BUFFER=256*1024;
     private VaultArchive(){}
     public interface Progress { void bytes(long count)throws IOException; }
     public static String hash(File file)throws IOException{
@@ -39,13 +41,20 @@ public final class VaultArchive {
             }else throw new IOException("Unsupported backup file");}
     }
     public static void write(File root,OutputStream output,char[] password,Progress progress)throws Exception{
+        write(root,output,password,FASTEST,progress);
+    }
+    /** APKs are ZIP containers already. Level zero streams them without a second CRC/size pass. */
+    public static void write(File root,OutputStream output,char[] password,int compression,Progress progress)throws Exception{
+        if(compression!=FASTEST&&compression!=BALANCED&&compression!=SMALLEST)throw new IOException("Invalid compression level");
         List<File> files=new ArrayList<>();files(root,root,files);Properties index=new Properties();index.setProperty("format","1");
         long total=0;for(File f:files){String name=root.toPath().relativize(f.toPath()).toString();
             if(name.equals(INDEX))throw new IOException("Reserved archive path");total=Math.addExact(total,f.length());}
         if(total>MAX_BYTES)throw new IOException("Backup is too large");
-        try(ZipOutputStream zip=new ZipOutputStream(VaultCipher.encrypt(output,password))){
+        progress.bytes(0); // Allow cancellation before password derivation and the first payload.
+        try(ZipOutputStream zip=new SnapshotZip(VaultCipher.encrypt(new BufferedOutputStream(output,BUFFER),password))){
             byte[] b=new byte[65536];long copied=0;
             for(File f:files){String name=safe(root.toPath().relativize(f.toPath()).toString());
+                zip.setLevel(name.endsWith(".apk")?Deflater.NO_COMPRESSION:compression);
                 zip.putNextEntry(new ZipEntry(name));MessageDigest md=digest();long size=0;
                 try(InputStream in=new FileInputStream(f)){int n;while((n=in.read(b))!=-1){
                     zip.write(b,0,n);md.update(b,0,n);size+=n;copied+=n;if(copied>MAX_BYTES)throw new IOException("Backup exceeds limit");progress.bytes(copied);}}
@@ -53,15 +62,23 @@ public final class VaultArchive {
             }
             ByteArrayOutputStream encodedIndex=new ByteArrayOutputStream();index.store(encodedIndex,"HeckerVault integrity index");
             if(encodedIndex.size()>4*1024*1024)throw new IOException("Backup index is too large");
+            zip.setLevel(Deflater.BEST_SPEED);
             zip.putNextEntry(new ZipEntry(INDEX));encodedIndex.writeTo(zip);zip.closeEntry();
         }
+    }
+    private static final class SnapshotZip extends ZipOutputStream {
+        SnapshotZip(OutputStream out){super(out);buf=new byte[65536];}
+    }
+    public static long size(File root)throws IOException{
+        List<File> entries=new ArrayList<>();files(root,root,entries);long total=0;
+        for(File file:entries)total=Math.addExact(total,file.length());return total;
     }
     public static void read(InputStream input,File destination,char[] password,long byteLimit,Progress progress)throws Exception{
         if(!destination.isDirectory()||Objects.requireNonNull(destination.list()).length!=0)
             throw new IOException("Restore needs empty private staging");
         long limit=Math.min(MAX_BYTES,byteLimit),total=0;Map<String,String> actual=new HashMap<>();byte[] indexBytes=null;
         // ZipInputStream stops before the encrypted final chunk. Explicitly drain the cipher afterwards.
-        try(InputStream decoded=VaultCipher.decrypt(input,password)){
+        try(InputStream decoded=VaultCipher.decrypt(new BufferedInputStream(input,BUFFER),password)){
             ZipInputStream zip=new ZipInputStream(decoded);byte[] b=new byte[65536];ZipEntry entry;
             while((entry=zip.getNextEntry())!=null){String name=safe(entry.getName());
                 if(entry.isDirectory()||actual.containsKey(name)||name.equals(INDEX)&&indexBytes!=null)

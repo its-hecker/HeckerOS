@@ -40,13 +40,13 @@ final class VaultStorage {
         try{org.json.JSONArray old=new org.json.JSONArray(prefs(c).getString("owned","[]"));
             List<String> ids=new ArrayList<>();ids.add(uri.toString());for(int i=0;i<old.length();i++)ids.add(old.getString(i));
             if(retention>0)while(ids.size()>retention){String remove=ids.get(ids.size()-1);
-                if(!DocumentsContract.deleteDocument(c.getContentResolver(),Uri.parse(remove)))break;ids.remove(ids.size()-1);}
+                Uri removed=Uri.parse(remove);if(!DocumentsContract.deleteDocument(c.getContentResolver(),removed))break;VaultHistory.forget(c,removed);ids.remove(ids.size()-1);}
             prefs(c).edit().putString("owned",new org.json.JSONArray(ids).toString()).apply();
         }catch(Exception ignored){/* A provider refusing retention must never invalidate the completed backup. */}
     }
     static void remove(Context c,Uri uri)throws IOException{
         // Restrict deletion to a currently enumerated archive in the selected tree.
-        for(Archive a:list(c))if(a.uri.equals(uri)){if(!DocumentsContract.deleteDocument(c.getContentResolver(),uri))throw new IOException("Cannot delete archive");return;}
+        for(Archive a:list(c))if(a.uri.equals(uri)){if(!DocumentsContract.deleteDocument(c.getContentResolver(),uri))throw new IOException("Cannot delete archive");VaultHistory.forget(c,uri);return;}
         throw new IOException("Archive no longer exists in the selected folder");
     }
     static File staging(Context c)throws IOException{

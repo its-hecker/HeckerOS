@@ -36,5 +36,6 @@
     "src/uapi/linux/linux/wireguard.h": "6c81853a62075ce2286b0c9b15cbb44fb96c26b5ee079e010fa9dfcc5089e479",
     "src/wg-quick/android.c": "c668b2cbc1047710f109d89328ccd172b978ef1e51682b48636b6b912d0eeb3a"
   },
-  "hecker_setup_diagnostics": "Fixed setup-stage journal for privacy-preserving connection errors; no command output, endpoint, configuration or key is logged."
+  "hecker_setup_diagnostics": "Fixed setup-stage journal for privacy-preserving connection errors; no command output, endpoint, configuration or key is logged.",
+  "hecker_underlay_binding": "Physical Android network ID is validated separately, then used for explicitlySelected/protectedFromVpn UDP marking before peer setup. Existing upstream file hashes identify the original source, excluding the documented android.c adaptation."
 }

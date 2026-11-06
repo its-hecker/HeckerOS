@@ -42,6 +42,19 @@ public final class HeckerVpnConfigTest {
                 || !session.applications.equals(List.of("com.android.chrome")))
             throw new AssertionError("Idle app-only connection cannot initiate peer contact");
         if (!imported.equals(parsed.render("all", List.of()))) throw new AssertionError("Connection rewrote the saved profile");
+        int[] resolutions={0};
+        String onNetwork=parsed.forNetwork("include",List.of("com.android.chrome"),host->{
+            if(!host.equals("vpn.example.org"))throw new AssertionError("Wrong endpoint host");resolutions[0]++;
+            return List.of("2001:db8::5","192.0.2.5");});
+        VpnConfig resolved=VpnConfig.parse(onNetwork);
+        if(resolutions[0]!=1||!resolved.peers.get(0).get("Endpoint").equals("[2001:db8::5]:51820")
+                ||!resolved.peers.get(0).get("PersistentKeepalive").equals("25")||!resolved.mode.equals("include"))
+            throw new AssertionError("Physical-network resolution lost endpoint, keepalive or app policy");
+        if(!imported.equals(parsed.render("all",List.of())))throw new AssertionError("Numeric connection address leaked into stored profile");
+        VpnConfig numeric=VpnConfig.parse(CONFIG.replace("vpn.example.org","192.0.2.8"));
+        numeric.forNetwork("all",List.of(),host->{throw new AssertionError("Numeric endpoint reached DNS");});
+        try{parsed.forNetwork("all",List.of(),host->List.of());throw new AssertionError("Missing DNS results accepted");}catch(IllegalArgumentException expected){}
+        try{parsed.forNetwork("all",List.of(),host->List.of("192.0.2.5;id"));throw new AssertionError("Non-IP DNS result accepted");}catch(IllegalArgumentException expected){}
         for (String keepalive : List.of("0", "120")) {
             VpnConfig explicit = VpnConfig.parse(CONFIG + "PersistentKeepalive=" + keepalive + "\n");
             if (!keepalive.equals(VpnConfig.parse(explicit.forConnection("all", List.of())).peers.get(0).get("PersistentKeepalive")))

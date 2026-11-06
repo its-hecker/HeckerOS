@@ -28,6 +28,14 @@ public final class VaultArchiveTest {
             VaultArchive.read(new ByteArrayInputStream(archive),restored,PASSWORD,16*1024*1024,n->{});
             check(Arrays.equals(payload,Files.readAllBytes(new File(restored,"apps/org.example.app/base.apk").toPath())));
             check(Files.readString(new File(restored,"data/org.example.app/full").toPath()).contains("حافظہ"));
+            check(VaultArchive.size(root)>payload.length);
+            for(int level:new int[]{VaultArchive.FASTEST,VaultArchive.BALANCED,VaultArchive.SMALLEST}){
+                File copy=directory();try{ByteArrayOutputStream out=new ByteArrayOutputStream();long[] copied={0};
+                    VaultArchive.write(root,out,PASSWORD,level,n->{check(n>=copied[0]);copied[0]=n;});
+                    check(copied[0]==VaultArchive.size(root));VaultArchive.read(new ByteArrayInputStream(out.toByteArray()),copy,PASSWORD,16*1024*1024,n->{});
+                    check(Arrays.equals(payload,Files.readAllBytes(new File(copy,"apps/org.example.app/base.apk").toPath())));
+                }finally{VaultArchive.delete(copy);}}
+            rejected(()->VaultArchive.write(root,new ByteArrayOutputStream(),PASSWORD,42,n->{}));
             rejected(()->read(archive,"incorrect password 12345".toCharArray(),16*1024*1024));
             for(int position:new int[]{0,8,24,32,39,44,archive.length/2,archive.length-1}){byte[] changed=archive.clone();changed[position]^=0x11;rejected(()->read(changed,PASSWORD,16*1024*1024));}
             for(int end:new int[]{0,7,39,40,44,100,archive.length/2,archive.length-1,archive.length-20}){

@@ -44,5 +44,6 @@ public final class VpnService extends Service {
         for (String key : new String[]{"status", "error", "backend"}) writer.println(key + "=" + state.getString(key, ""));
         writer.println("configured=" + state.getBoolean("configured") + " rx=" + state.getLong("rx")
                 + " tx=" + state.getLong("tx") + " handshake=" + state.getLong("handshake"));
+        writer.println("physicalNetwork="+state.getInt("underlying_netid"));
     }
 }

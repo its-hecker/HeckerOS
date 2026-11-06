@@ -139,11 +139,11 @@ std::string request(const std::string& command) {
         return "{\"ok\":true,\"private\":\"" + private_key + "\",\"public\":\"" + public_key + "\"}";
     }
     if (command.rfind("UP\n", 0) == 0) {
-        std::string config = command.substr(3);
-        if (!hecker::vpn::valid_config(config)) return "{\"ok\":false,\"error\":\"Rejected noncanonical configuration\"}";
+        std::string config;unsigned int underlay=0;
+        if (!hecker::vpn::parse_up(command,underlay,config)) return "{\"ok\":false,\"error\":\"Rejected noncanonical configuration or physical network\"}";
         if (!cleanup()) return "{\"ok\":false,\"cleanup_required\":true,\"error\":\"Previous tunnel cleanup is incomplete\"}";
         if (!save_config(config)) return "{\"ok\":false,\"error\":\"Unable to stage tunnel configuration\"}";
-        Result up = run(kQuick, {"up", kConfig});
+        Result up = run(kQuick, {"up", kConfig,std::to_string(underlay)});
         if (up.code) {
             char stage[32] = {};
             int fd = open(kStage, O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
@@ -198,7 +198,7 @@ int main() {
         while (!stopping) {
             uint32_t length;
             if (!io(client, &length, sizeof(length), false)) break;
-            length = ntohl(length); if (!length || length > hecker::vpn::kMaxConfig + 8) break;
+            length = ntohl(length); if (!length || length > hecker::vpn::kMaxConfig + 16) break;
             std::string command(length, '\0'); if (!io(client, command.data(), length, false)) break;
             std::string response = request(command); uint32_t size = htonl(static_cast<uint32_t>(response.size()));
             if (!io(client, &size, sizeof(size), true) || !io(client, response.data(), response.size(), true)) break;

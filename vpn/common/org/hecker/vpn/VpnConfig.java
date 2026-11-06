@@ -156,6 +156,24 @@ public final class VpnConfig {
             peer.putIfAbsent("PersistentKeepalive", "25");
         return session.render(policy, packages);
     }
+    @FunctionalInterface
+    public interface Resolver { List<String> addresses(String host) throws Exception; }
+    /** Resolve on the chosen physical Network before installing any VPN UID rules.
+     * Only the in-memory connection copy changes; saved profiles keep their hostname. */
+    public String forNetwork(String policy,List<String> packages,Resolver resolver) throws Exception {
+        VpnConfig session=parse(forConnection(policy,packages));
+        for(Map<String,String> peer:session.peers){
+            String endpoint=peer.get("Endpoint");int colon=endpoint.lastIndexOf(':');
+            String host=endpoint.startsWith("[")?endpoint.substring(1,endpoint.indexOf(']')):endpoint.substring(0,colon);
+            boolean numeric=host.contains(":")||host.matches("[0-9.]+");
+            if(numeric)continue;
+            List<String> addresses=resolver.addresses(host);
+            if(addresses==null||addresses.isEmpty())throw new IllegalArgumentException("The VPN server has no usable address on this network");
+            String address=addresses.get(0);ip(address);
+            peer.put("Endpoint",(address.contains(":")?"["+address+"]":address)+endpoint.substring(colon));
+        }
+        return session.render(policy,packages);
+    }
     public String render(String policy, List<String> packages) {
         if (!List.of("all", "include", "exclude").contains(policy)) fail("Invalid routing mode");
         LinkedHashSet<String> names = new LinkedHashSet<>(packages);

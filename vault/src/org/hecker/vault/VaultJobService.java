@@ -17,7 +17,7 @@ public final class VaultJobService extends JobService {
             char[] password=VaultKeys.recalled(this);Set<String> categories=VaultStorage.prefs(this).getStringSet("categories",VaultSystemData.CATEGORIES);
             List<String> apps=VaultStorage.prefs(this).getBoolean("schedule_all",true)?VaultPackages.userApps(this):
                     new ArrayList<>(VaultStorage.prefs(this).getStringSet("selected_apps",Collections.emptySet()));
-            VaultRequest request=new VaultRequest("backup",password,apps,categories,null,"both",true);
+            VaultRequest request=new VaultRequest("backup",password,apps,categories,null,VaultStorage.prefs(this).getBoolean("include_data",true)?"both":"apk",true);
             active=this;parameters=params;VaultService.launch(this,request);return true;
         }catch(Exception e){VaultStorage.prefs(this).edit().putString("report","Scheduled backup could not start. Unlock the device, check the folder and set the schedule password again.").apply();return false;}
     }

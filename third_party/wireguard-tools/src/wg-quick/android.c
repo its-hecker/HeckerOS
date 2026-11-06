@@ -41,6 +41,23 @@
 static bool is_exiting = false;
 static bool binder_available = false;
 static unsigned int sdk_version;
+static uint32_t hecker_underlying_mark = 0x20000;
+
+/* AOSP Fwmark: low 16 bits netId, bit 16 explicitlySelected, bit 17 protectedFromVpn.
+ * Pin encrypted UDP to the physical Network selected by the controller, including CLAT.
+ * Numeric metadata is an argv token, never a profile directive or a shell fragment. */
+static bool hecker_parse_underlying_mark(const char *text, uint32_t *mark)
+{
+ if (!text || !*text || strlen(text) > 5) return false;
+ unsigned int netid = 0;
+ for (const char *p = text; *p; ++p) {
+  if (*p < '0' || *p > '9') return false;
+  netid = netid * 10 + (*p - '0');
+ }
+ if (netid < 100 || netid > 65535) return false;
+ *mark = 0x30000U | netid;
+ return true;
+}
 
 static void *xmalloc(size_t size)
 {
@@ -760,9 +777,9 @@ static void up_if(unsigned int *netid, const char *iface, uint16_t listen_port)
 	while (*netid < 4096)
 		*netid = random() & 0xfffe;
 
-	cmd("/system_ext/bin/hecker-wg set %s fwmark 0x20000", iface);
-	cmd("iptables -I OUTPUT 1 -m mark --mark 0x20000 -j ACCEPT -m comment --comment \"wireguard rule %s\"", iface);
-	cmd("ip6tables -I OUTPUT 1 -m mark --mark 0x20000 -j ACCEPT -m comment --comment \"wireguard rule %s\"", iface);
+	cmd("/system_ext/bin/hecker-wg set %s fwmark 0x%x", iface, hecker_underlying_mark);
+	cmd("iptables -I OUTPUT 1 -m mark --mark 0x%x/0xffffffff -j ACCEPT -m comment --comment \"wireguard rule %s\"", hecker_underlying_mark, iface);
+	cmd("ip6tables -I OUTPUT 1 -m mark --mark 0x%x/0xffffffff -j ACCEPT -m comment --comment \"wireguard rule %s\"", hecker_underlying_mark, iface);
 	if (listen_port) {
 		cmd("iptables -I INPUT 1 -p udp --dport %u -j ACCEPT -m comment --comment \"wireguard rule %s\"", listen_port, iface);
 		cmd("ip6tables -I INPUT 1 -p udp --dport %u -j %s -m comment --comment \"wireguard rule %s\"", listen_port, should_block_ipv6(iface) ? "DROP" : "ACCEPT", iface);
@@ -1180,6 +1197,8 @@ static void cmd_up(const char *iface, const char *config, unsigned int mtu, cons
 	atexit(cmd_up_cleanup);
 
 	add_if(iface);
+	/* Install the bypass before setconf enables PersistentKeepalive or opens UDP sockets. */
+	cmd("/system_ext/bin/hecker-wg set %s fwmark 0x%x", iface, hecker_underlying_mark);
 	hecker_setup_stage("peer");
 	set_config(iface, config);
 	listen_port = determine_listen_port(iface);
@@ -1339,8 +1358,9 @@ int main(int argc, char *argv[])
  }
 	if (argc == 2 && (!strcmp(argv[1], "help") || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")))
 		cmd_usage(argv[0]);
-	else if (argc == 3 && !strcmp(argv[1], "up")) {
+	else if ((argc == 3 || argc == 4) && !strcmp(argv[1], "up")) {
 		auto_su(argc, argv);
+        if (argc == 4 && !hecker_parse_underlying_mark(argv[3], &hecker_underlying_mark)) return EINVAL;
 		parse_options(&iface, &config, &mtu, &addrs, &dnses, &excluded_applications, &included_applications, argv[2]);
 		cmd_up(iface, config, mtu, addrs, dnses, excluded_applications, included_applications);
 	} else if (argc == 3 && !strcmp(argv[1], "down")) {

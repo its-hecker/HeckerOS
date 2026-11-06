@@ -75,12 +75,18 @@ final class VaultEngine {
             snapshot.put("apps",apps).put("categories",categories).put("notes",notes).put("groups",VaultGroups.load(context));VaultStorage.json(new File(root,"snapshot.json"),snapshot);
             VaultPackages.validate(snapshot,root);VaultSystemData.validate(root,categories);
             String stamp=new SimpleDateFormat("yyyyMMdd-HHmmss",Locale.ROOT).format(new Date());
-            destination=VaultStorage.create(context,"HV-"+stamp+"-"+id.substring(0,8)+".hvault");status.text("Encrypting and exporting the snapshot");
+            destination=VaultStorage.create(context,"HV-"+stamp+"-"+id.substring(0,8)+".hvault");status.text("Preparing encrypted export");
+            final long total=VaultArchive.size(root),started=SystemClock.elapsedRealtime();final long[] last={0};
             try(OutputStream out=context.getContentResolver().openOutputStream(destination,"w")){
                 if(out==null)throw new IOException("Backup folder is unavailable");final VaultSession export=session;
-                VaultArchive.write(root,out,request.password,bytes->{export.check();});}
+                VaultArchive.write(root,out,request.password,VaultStorage.prefs(context).getInt("compression",VaultArchive.FASTEST),bytes->{export.check();
+                    long now=SystemClock.elapsedRealtime();if(now-last[0]<500&&bytes<total)return;last[0]=now;
+                    String done=android.text.format.Formatter.formatFileSize(context,bytes),size=android.text.format.Formatter.formatFileSize(context,total);
+                    long speed=bytes*1000/Math.max(1,now-started);int percent=total==0?100:(int)Math.min(100,bytes*100/total);
+                    status.text("Encrypting and exporting · "+percent+"% · "+done+" / "+size+" · "+android.text.format.Formatter.formatFileSize(context,speed)+"/s");});}
+            status.text("Finishing encrypted snapshot");
             complete=true;int retention=request.scheduled?VaultStorage.prefs(context).getInt("retention",3):0;
-            VaultStorage.committed(context,destination,retention);int withData=0;for(int i=0;i<apps.length();i++)if(!apps.getJSONObject(i).optString("data").isEmpty())withData++;
+            VaultStorage.committed(context,destination,retention);VaultHistory.record(context,destination,snapshot);int withData=0;for(int i=0;i<apps.length();i++)if(!apps.getJSONObject(i).optString("data").isEmpty())withData++;
             report.add("Snapshot saved: "+apps.length()+" apps ("+withData+" with app data), "+categories.length()+" personal-data categories.");
             for(int i=0;i<apps.length();i++)report.add(apps.getJSONObject(i).optString("label")+": "+apps.getJSONObject(i).getString("result"));
             for(int i=0;i<notes.length();i++)report.add(notes.getString(i));
@@ -101,6 +107,7 @@ final class VaultEngine {
                 VaultArchive.read(in,root,request.password,Math.max(0,root.getUsableSpace()-128L*1024*1024),bytes->VaultSystemData.check());}
             JSONObject snapshot=VaultStorage.json(new File(root,"snapshot.json"));VaultPackages.validate(snapshot,root);
             validateApks(snapshot,root);VaultSystemData.validate(root,snapshot.getJSONArray("categories"));
+            VaultHistory.record(context,request.archive,snapshot);
             prepared=new Prepared(root,snapshot);ready=true;report.add("Archive verified. Review the apps, personal data and restore mode, then tap Restore selected.");
         }finally{if(!ready)cleanup(root);}
     }
