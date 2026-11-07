@@ -1,0 +1,10 @@
+<resources>
+    <string name="vault_data_saved">APK + Android app data</string>
+    <string name="vault_data_empty">APK only: this app returned no data through its Android backup agent</string>
+    <string name="vault_data_disallowed">APK only: app does not allow Android data backup</string>
+    <string name="vault_data_metadata_missing">APK only: Android package metadata was not saved</string>
+    <string name="vault_data_failed">APK only: Android app-data backup failed</string>
+    <string name="vault_partial_saved">Partial snapshot saved: %1$d apps (%2$d with Android app data), %3$d personal-data categories.</string>
+    <string name="vault_complete_saved">Snapshot saved: %1$d apps (%2$d with Android app data), %3$d personal-data categories.</string>
+    <string name="vault_partial_note">Partial backup · some selected data was not included. Review the results below.</string>
+</resources>

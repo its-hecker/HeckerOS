@@ -18,7 +18,7 @@ final class VaultHistory {
             JSONObject summaries=summaries(c);int withData=0;for(int i=0;i<apps.length();i++)if(!apps.getJSONObject(i).optString("data").isEmpty())withData++;
             summaries.put(archive.toString(),new JSONObject().put("created",time).put("apps",apps.length()).put("withData",withData)
                     .put("categories",snapshot.getJSONArray("categories")).put("wifiCount",snapshot.optInt("wifiCount",-1))
-                    .put("device",snapshot.optString("device")).put("sdk",snapshot.optInt("sdk")));
+                    .put("device",snapshot.optString("device")).put("sdk",snapshot.optInt("sdk")).put("partial",snapshot.optBoolean("partial")));
             VaultStorage.prefs(c).edit().putString("snapshot_history",summaries.toString()).apply();
             for(int i=0;i<apps.length();i++){JSONObject app=apps.getJSONObject(i);String pkg=app.getString("package");JSONObject old=history.optJSONObject(pkg);
                 if(old!=null&&old.optLong("time")>time)continue;
