@@ -23,7 +23,7 @@ import java.util.concurrent.*;
 
 /** Native, local-only backup dashboard. Passwords never enter saved UI state. */
 public final class VaultActivity extends Activity {
-    private static final int FOLDER=8,AUTH=9;
+    private static final int FOLDER=8,AUTH=9,RESET_AUTH=10;
     private LinearLayout shell,body,navigation,toolbar,workBanner;
     private TextView activityStatus,selectionCount;private VaultUi ui;private int tab;
     private String subpage="",scope="all",query="",restoreScope="all",restoreCategory="all";
@@ -32,7 +32,11 @@ public final class VaultActivity extends Activity {
     private List<AppEntry> apps=Collections.emptyList();private boolean systemApps,loaded;
     private JSONObject history=new JSONObject();private Runnable refilter=()->{};
     private final ExecutorService io=Executors.newSingleThreadExecutor();private final Handler handler=new Handler(Looper.getMainLooper());
-    private VaultRequest authenticating;private String shownPrepared="";private long lastFinished;
+    private boolean unlocked,authPending,setupShowing;
+    private final BroadcastReceiver screenOff=new BroadcastReceiver(){@Override public void onReceive(Context c,Intent i){
+        unlocked=false;if(shell!=null)shell.setVisibility(View.INVISIBLE);
+    }};
+    private String shownPrepared="";private long lastFinished;
     private static final class AppEntry {
         final PackageInfo info;final String label,search;final Drawable icon;
         AppEntry(Context c,PackageInfo p){info=p;CharSequence name=p.applicationInfo.loadLabel(c.getPackageManager());label=name==null?p.packageName:name.toString();
@@ -42,6 +46,8 @@ public final class VaultActivity extends Activity {
         workBanner.setVisibility(VaultService.busy?View.VISIBLE:View.GONE);activityStatus.setText(VaultService.progress);
         long finished=VaultStorage.prefs(VaultActivity.this).getLong("last_finished",0);
         if(lastFinished!=finished&&!VaultService.busy){lastFinished=finished;history=VaultHistory.load(VaultActivity.this);render();}
+        if(!unlocked){handler.postDelayed(this,700);return;}
+        Uri needsPassword=VaultEngine.needsPassword;if(!VaultService.busy&&needsPassword!=null){VaultEngine.needsPassword=null;importArchivePassword(needsPassword);}
         VaultEngine.Prepared p=VaultEngine.prepared;if(!VaultService.busy&&p!=null&&!p.id.equals(shownPrepared)){shownPrepared=p.id;preview(p);}
         handler.postDelayed(this,700);}};
     @Override public void onCreate(Bundle state){super.onCreate(state);ui=new VaultUi(this);
@@ -65,11 +71,12 @@ public final class VaultActivity extends Activity {
         workBanner.setVisibility(View.GONE);shell.addView(workBanner);
         body=ui.column();shell.addView(body,new LinearLayout.LayoutParams(-1,0,1));navigation=new LinearLayout(this);shell.addView(navigation);setContentView(shell);
         lastFinished=VaultStorage.prefs(this).getLong("last_finished",0);render();loadApps();
+        shell.setVisibility(View.INVISIBLE);registerReceiver(screenOff,new IntentFilter(Intent.ACTION_SCREEN_OFF),Context.RECEIVER_NOT_EXPORTED);
         io.execute(()->{if(!VaultService.busy){VaultNative.recoverIdle(this);VaultSystemData.recoverSmsWrite(this);}});
     }
-    @Override protected void onStart(){super.onStart();handler.post(refresh);}
+    @Override protected void onStart(){super.onStart();handler.post(refresh);ensureUnlocked();}
     @Override protected void onStop(){handler.removeCallbacks(refresh);super.onStop();}
-    @Override protected void onDestroy(){if(authenticating!=null){authenticating.clear();authenticating=null;}io.shutdownNow();super.onDestroy();}
+    @Override protected void onDestroy(){unregisterReceiver(screenOff);io.shutdownNow();super.onDestroy();}
     @Override protected void onSaveInstanceState(Bundle state){state.putInt("tab",tab);state.putString("page",subpage);state.putString("scope",scope);state.putString("query",query);
         state.putBoolean("show_search",showSearch);state.putString("restore_scope",restoreScope);state.putString("restore_category",restoreCategory);super.onSaveInstanceState(state);}
     @Override public void onBackPressed(){back();}
@@ -112,7 +119,7 @@ public final class VaultActivity extends Activity {
         });}
     private void quickCard(LinearLayout page,boolean first,boolean last,int title,int detail,int button,Runnable action){LinearLayout item=ui.card(page,first,last);ui.copy(item,getString(title),getString(detail));
         if(button!=0)ui.action(item,getString(button),action);else{item.setOnClickListener(v->action.run());item.setFocusable(true);}}
-    private void overview(){LinearLayout page=scrolling();
+    private void overview(){LinearLayout page=scrolling();storageDashboard(page);
         ui.section(page,R.drawable.v_apps,getString(R.string.vault_apps_quick_heading));
         quickCard(page,true,false,R.string.vault_backup_all_short,R.string.vault_backup_all_detail,R.string.vault_to_device,()->selectScope("all"));
         quickCard(page,false,false,R.string.vault_restore_all,R.string.vault_restore_all_detail,R.string.vault_from_device,()->restoreArchives("all",""));
@@ -120,6 +127,7 @@ public final class VaultActivity extends Activity {
         link.setCompoundDrawablesRelativeWithIntrinsicBounds(null,null,getDrawable(R.drawable.v_arrow),null);link.setCompoundDrawableTintList(ColorStateList.valueOf(getColor(R.color.vault_accent)));more.addView(link);more.setOnClickListener(v->openPage("quick"));
         categoryActions(page,"messages",R.drawable.v_messages,R.string.vault_messages_heading,R.string.vault_backup_messages,R.string.vault_restore_messages,R.string.vault_messages_detail);
         categoryActions(page,"calls",R.drawable.v_phone,R.string.vault_calls_heading,R.string.vault_backup_calls,R.string.vault_restore_calls,R.string.vault_calls_detail);
+        categoryActions(page,"wifi",R.drawable.v_restore,R.string.vault_wifi_heading,R.string.vault_backup_wifi,R.string.vault_restore_wifi,R.string.vault_wifi_detail);
         ui.section(page,R.drawable.v_folder,getString(R.string.vault_setup_heading));LinearLayout setup=ui.card(page,true,false);
         ui.copy(setup,getString(R.string.vault_personal),getString(R.string.vault_selected_count,selected.size(),categories.size()));
         action(setup,R.string.vault_choose_parts,()->openPage("personal"));action(setup,R.string.vault_backup_selected,()->backupOptions(true));
@@ -129,8 +137,26 @@ public final class VaultActivity extends Activity {
             LinearLayout result=card(page);ui.copy(result,getString(VaultStorage.prefs(this).getBoolean("last_failed",false)?R.string.vault_result_attention:R.string.vault_result_saved),getString(R.string.vault_view_report));
             result.setOnClickListener(v->new AlertDialog.Builder(this).setTitle(R.string.vault_last_result).setMessage(report).setPositiveButton(android.R.string.ok,null).show());}
     }
+    private void storageDashboard(LinearLayout page){
+        ui.section(page,R.drawable.v_folder,getString(R.string.vault_storage_heading));LinearLayout storage=ui.card(page,true,false);
+        java.io.File volume=Environment.getDataDirectory();long total=volume.getTotalSpace(),free=volume.getUsableSpace(),used=Math.max(0,total-free);
+        ui.copy(storage,getString(R.string.vault_storage_used,android.text.format.Formatter.formatFileSize(this,used)),
+                getString(R.string.vault_storage_available,android.text.format.Formatter.formatFileSize(this,free),android.text.format.Formatter.formatFileSize(this,total)));
+        ProgressBar meter=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);meter.setMax(1000);
+        meter.setProgress(total<=0?0:(int)Math.min(1000,(double)used/total*1000));meter.setProgressTintList(ColorStateList.valueOf(getColor(R.color.vault_accent)));
+        LinearLayout.LayoutParams mp=new LinearLayout.LayoutParams(-1,dp(6));mp.topMargin=dp(16);storage.addView(meter,mp);
+        LinearLayout archives=ui.card(page,false,true);TextView summary=text(getString(R.string.vault_loading),14,true);archives.addView(summary);
+        TextView location=text(folderLabel(),12,false);location.setPadding(0,dp(6),0,0);archives.addView(location);
+        archives.setOnClickListener(v->showTab(2));
+        io.execute(()->{String result;
+            try{List<VaultStorage.Archive> entries=VaultStorage.list(this);long bytes=0;for(VaultStorage.Archive archive:entries)bytes=Math.addExact(bytes,archive.size);
+                result=getString(R.string.vault_archive_storage,entries.size(),android.text.format.Formatter.formatFileSize(this,bytes));}
+            catch(Exception e){result=getString(R.string.vault_no_folder);}
+            String value=result;runOnUiThread(()->{if(!isDestroyed())summary.setText(value);});
+        });
+    }
     private void categoryActions(LinearLayout page,String category,int icon,int heading,int backup,int restore,int detail){ui.section(page,icon,getString(heading));
-        quickCard(page,true,false,backup,detail,0,()->password("backup",null,Collections.emptySet(),Set.of(category),Collections.emptySet()));
+        quickCard(page,true,false,backup,detail,0,()->beginOperation("backup",null,Collections.emptySet(),Set.of(category),Collections.emptySet()));
         quickCard(page,false,true,restore,R.string.vault_restore_category_detail,R.string.vault_from_device,()->restoreArchives("all",category));}
     private void quickActions(){LinearLayout page=scrolling();ui.section(page,R.drawable.v_apps,getString(R.string.vault_quick_backup_heading));
         quickCard(page,true,false,R.string.vault_backup_all_short,R.string.vault_backup_all_detail,R.string.vault_to_device,()->selectScope("all"));
@@ -152,7 +178,7 @@ public final class VaultActivity extends Activity {
         try{VaultHistory.reconcile(this,VaultStorage.list(this));}catch(Exception ignored){}
         runOnUiThread(()->{if(isFinishing()||isDestroyed())return;apps=result;loaded=true;history=VaultHistory.load(this);
             if(!VaultStorage.prefs(this).contains("selected_apps")){for(AppEntry p:apps)if((p.info.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM)==0)selected.add(p.info.packageName);saveScope();}
-            if(tab==1)render();});});}
+            if(tab==0||tab==1)render();});});}
     private void saveScope(){VaultStorage.prefs(this).edit().putStringSet("selected_apps",new HashSet<>(selected)).putStringSet("categories",new HashSet<>(categories)).apply();updateCount();}
     private boolean visible(AppEntry app){if(!systemApps&&(app.info.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM)!=0)return false;
         JSONObject backup=history.optJSONObject(app.info.packageName);Long version=backup==null?null:backup.optLong("version");
@@ -221,7 +247,7 @@ public final class VaultActivity extends Activity {
         ui.settingsSection(content,getString(R.string.vault_backup_location));Button location=partChip(getString(R.string.vault_device),true);content.addView(location,new LinearLayout.LayoutParams(-1,dp(48)));location.setOnClickListener(v->{dialog.dismiss();chooseFolder();});
         TextView folder=text(folderLabel(),12,false);folder.setPadding(dp(8),dp(10),dp(8),dp(20));content.addView(folder);
         Button backup=ui.button(getString(R.string.vault_backup_action),true);content.addView(backup,new LinearLayout.LayoutParams(-1,-2));backup.setOnClickListener(v->{VaultStorage.prefs(this).edit().putBoolean("include_data",data[0]).apply();dialog.dismiss();
-            password("backup",null,selected,includePersonal?categories:Collections.emptySet(),external);});
+            beginOperation("backup",null,selected,includePersonal?categories:Collections.emptySet(),external);});
         ScrollView scroll=new ScrollView(this);scroll.addView(content);dialog.setContentView(scroll);Window window=dialog.getWindow();if(window!=null){window.setBackgroundDrawableResource(android.R.color.transparent);window.setGravity(Gravity.BOTTOM);window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);window.setDimAmount(.4f);}dialog.show();
         if(window!=null){window.setLayout(-1,-2);window.getDecorView().setPadding(0,0,0,0);}}
     private void addPartChoices(LinearLayout parent, Set<VaultExternal.Part> available,
@@ -281,7 +307,7 @@ public final class VaultActivity extends Activity {
         TextView loading=text(getString(R.string.vault_loading),13,false);page.addView(loading);
         io.execute(()->{try{List<VaultStorage.Archive> entries=VaultStorage.list(this);runOnUiThread(()->{if(tab!=2||isDestroyed())return;page.removeView(loading);
             if(entries.isEmpty())page.addView(text(getString(R.string.vault_no_archives),14,false));for(VaultStorage.Archive entry:entries){LinearLayout item=card(page);LinearLayout.LayoutParams spacing=(LinearLayout.LayoutParams)item.getLayoutParams();spacing.topMargin=dp(8);item.setLayoutParams(spacing);item.setTag(entry.name);archiveCards.add(item);item.addView(text(entry.name,15,true));
-                item.addView(text(android.text.format.Formatter.formatFileSize(this,entry.size)+" · AES-256-GCM",12,false));action(item,R.string.vault_inspect,()->password("inspect",entry.uri));
+                item.addView(text(android.text.format.Formatter.formatFileSize(this,entry.size)+" · AES-256-GCM",12,false));action(item,R.string.vault_inspect,()->beginOperation("inspect",entry.uri));
                 Button remove=button(getString(R.string.vault_delete));remove.setOnClickListener(v->new AlertDialog.Builder(this).setTitle(R.string.vault_delete).setMessage(R.string.vault_delete_confirm)
                         .setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.vault_delete,(d,w)->io.execute(()->{try{VaultStorage.remove(this,entry.uri);runOnUiThread(()->showTab(2));}catch(Exception e){runOnUiThread(()->message(getString(R.string.vault_folder_error)));}})).show());
                 LinearLayout.LayoutParams deleteSize = new LinearLayout.LayoutParams(-1, -2);
@@ -311,7 +337,7 @@ public final class VaultActivity extends Activity {
         settingRow(page,true,false,getString(R.string.vault_app_backups),getString(R.string.vault_app_settings_detail),()->openPage("app_settings"));
         settingRow(page,false,true,getString(R.string.vault_folder),folderLabel(),this::chooseFolder);encryptionSettings(page);
         ui.settingsSection(page,getString(R.string.vault_schedules));boolean enabled=VaultStorage.prefs(this).getBoolean("scheduled",false);
-        settingRow(page,true,false,getString(enabled?R.string.vault_change_schedule_password:R.string.vault_enable_schedule),getString(R.string.vault_schedule_note),()->password("schedule",null));
+        settingRow(page,true,false,getString(enabled?R.string.vault_schedule_enabled:R.string.vault_enable_schedule),getString(R.string.vault_schedule_note),()->beginOperation("schedule",null));
         if(enabled)settingRow(page,false,false,getString(R.string.vault_disable_schedule),null,()->{VaultJobs.configure(this,false);render();});
         switchRow(page,false,false,R.string.vault_weekly,"weekly",false,this::reschedule);switchRow(page,false,false,R.string.vault_charging,"charging",true,this::reschedule);
         switchRow(page,false,false,R.string.vault_schedule_all,"schedule_all",true,this::reschedule);
@@ -321,7 +347,8 @@ public final class VaultActivity extends Activity {
     private void encryptionSettings(LinearLayout page){ui.settingsSection(page,getString(R.string.vault_encryption_compression));
         settingRow(page,true,false,getString(R.string.vault_encrypted_snapshots),getString(R.string.vault_encrypted_detail),()->new AlertDialog.Builder(this).setTitle(R.string.vault_security).setMessage(R.string.vault_encryption_note).setPositiveButton(android.R.string.ok,null).show());
         int level=VaultStorage.prefs(this).getInt("compression",VaultArchive.FASTEST);int label=level==VaultArchive.BALANCED?R.string.vault_balanced:level==VaultArchive.SMALLEST?R.string.vault_smallest:R.string.vault_fastest;
-        settingRow(page,false,true,getString(R.string.vault_compression),getString(label),this::compressionDialog);}
+        settingRow(page,false,false,getString(R.string.vault_compression),getString(label),this::compressionDialog);
+        settingRow(page,false,true,getString(R.string.vault_reset_password),getString(R.string.vault_reset_password_detail),this::resetPassword);}
     private void compressionDialog(){int[] levels={VaultArchive.FASTEST,VaultArchive.BALANCED,VaultArchive.SMALLEST};String[] labels={getString(R.string.vault_fastest),getString(R.string.vault_balanced),getString(R.string.vault_smallest)};
         int current=VaultStorage.prefs(this).getInt("compression",VaultArchive.FASTEST),choice=0;for(int i=0;i<levels.length;i++)if(levels[i]==current)choice=i;
         HeckerChoiceSheet.show(this,getString(R.string.vault_compression),labels,choice,w->{VaultStorage.prefs(this).edit().putInt("compression",levels[w]).apply();render();});}
@@ -333,29 +360,82 @@ public final class VaultActivity extends Activity {
             .setNegativeButton(android.R.string.cancel,null).setPositiveButton(android.R.string.ok,(d,w)->{new BackupManager(this).setBackupEnabled(true);message(getString(R.string.vault_android_enabled));}).show();}
     private void chooseFolder(){if(VaultService.busy){message(getString(R.string.vault_busy));return;}startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION|Intent.FLAG_GRANT_PREFIX_URI_PERMISSION),FOLDER);}
-    private void password(String operation,Uri archive){password(operation,archive,selected,categories,Collections.emptySet());}
-    private void password(String operation,Uri archive,Collection<String> chosenApps,Collection<String> chosenCategories,
-            Set<VaultExternal.Part> externalParts){if(VaultService.busy){message(getString(R.string.vault_busy));return;}
+    private void beginOperation(String operation,Uri archive){beginOperation(operation,archive,selected,categories,Collections.emptySet());}
+    private void beginOperation(String operation,Uri archive,Collection<String> chosenApps,Collection<String> chosenCategories,
+            Set<VaultExternal.Part> externalParts){
+        if(!unlocked){ensureUnlocked();return;}
+        if(VaultService.busy){message(getString(R.string.vault_busy));return;}
         try{VaultStorage.folder(this);VaultEngine.owner(this);}catch(Exception e){message(getString(R.string.vault_choose_folder));return;}
         if(operation.equals("backup")&&chosenApps.isEmpty()&&chosenCategories.isEmpty()){message(getString(R.string.vault_select_items));return;}
-        LinearLayout fields=new LinearLayout(this);fields.setOrientation(LinearLayout.VERTICAL);fields.setPadding(dp(24),dp(8),dp(24),dp(8));
-        EditText password=secret(R.string.vault_password);fields.addView(password);EditText confirm=secret(R.string.vault_confirm_password);if(!operation.equals("inspect"))fields.addView(confirm);
-        fields.addView(text(getString(R.string.vault_password_note),12,false));AlertDialog dialog=new AlertDialog.Builder(this).setTitle(operation.equals("inspect")?R.string.vault_unlock_archive:R.string.vault_archive_password)
-                .setView(fields).setNegativeButton(android.R.string.cancel,null).setPositiveButton(android.R.string.ok,null).create();
-        dialog.setOnDismissListener(d->{password.setText("");confirm.setText("");});dialog.setOnShowListener(d->{dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
-            char[] pass=new char[password.length()];password.getText().getChars(0,pass.length,pass,0);
-            if(pass.length<12||pass.length>1024||!operation.equals("inspect")&&!TextUtils.equals(password.getText(),confirm.getText())){Arrays.fill(pass,'\0');password.setError(getString(R.string.vault_password_invalid));return;}
-            VaultRequest request=new VaultRequest(operation,pass,chosenApps,chosenCategories,archive,VaultStorage.prefs(this).getBoolean("include_data",true)?"both":"apk",false,externalParts);dialog.dismiss();authenticate(request); });});dialog.show();
+        List<String> requestedApps=new ArrayList<>(chosenApps);Set<String> requestedCategories=new HashSet<>(chosenCategories);
+        Set<VaultExternal.Part> requestedParts=Set.copyOf(externalParts);
+        io.execute(()->{try{char[] pass=VaultKeys.recalled(this);
+            VaultRequest request=new VaultRequest(operation,pass,requestedApps,requestedCategories,archive,
+                    VaultStorage.prefs(this).getBoolean("include_data",true)?"both":"apk",false,requestedParts);
+            runOnUiThread(()->{if(isDestroyed()||!unlocked){request.clear();return;}launch(request);});
+        }catch(Exception e){runOnUiThread(()->message(getString(R.string.vault_key_unavailable)));}});
+    }
+    private void ensureUnlocked(){
+        if(unlocked||authPending||setupShowing||isFinishing())return;
+        shell.setVisibility(View.INVISIBLE);KeyguardManager kg=getSystemService(KeyguardManager.class);
+        if(kg.isDeviceSecure()){
+            Intent confirm=kg.createConfirmDeviceCredentialIntent(getString(R.string.vault_title),getString(R.string.vault_entry_auth));
+            if(confirm==null){message(getString(R.string.vault_key_unavailable));finish();return;}
+            authPending=true;startActivityForResult(confirm,AUTH);
+        }else entered();
+    }
+    private void entered(){
+        if(!VaultKeys.configured(this)){configurePassword(false);return;}
+        unlocked=true;shell.setVisibility(View.VISIBLE);
+    }
+    private void resetPassword(){
+        if(VaultService.busy){message(getString(R.string.vault_busy));return;}
+        KeyguardManager kg=getSystemService(KeyguardManager.class);
+        if(!kg.isDeviceSecure()){message(getString(R.string.vault_reset_requires_lock));return;}
+        Intent confirm=kg.createConfirmDeviceCredentialIntent(getString(R.string.vault_reset_password),getString(R.string.vault_reset_auth));
+        if(confirm!=null){authPending=true;startActivityForResult(confirm,RESET_AUTH);}
+    }
+    private void configurePassword(boolean resetting){
+        if(setupShowing)return;setupShowing=true;
+        LinearLayout fields=ui.column();fields.setPadding(dp(24),dp(8),dp(24),dp(8));
+        EditText password=secret(R.string.vault_password),confirm=secret(R.string.vault_confirm_password);
+        fields.addView(password);fields.addView(confirm);fields.addView(text(getString(resetting?R.string.vault_reset_note:R.string.vault_first_setup_note),13,false));
+        AlertDialog dialog=new AlertDialog.Builder(this).setTitle(resetting?R.string.vault_reset_password:R.string.vault_first_setup)
+                .setView(fields).setCancelable(resetting).setNegativeButton(android.R.string.cancel,(d,w)->{if(!resetting)finish();})
+                .setPositiveButton(R.string.vault_save_password,null).create();
+        dialog.setOnDismissListener(d->{setupShowing=false;password.setText("");confirm.setText("");});
+        dialog.setOnShowListener(d->{dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
+                char[] pass=new char[password.length()];password.getText().getChars(0,pass.length,pass,0);
+                if(pass.length<12||pass.length>1024||!TextUtils.equals(password.getText(),confirm.getText())){
+                    Arrays.fill(pass,'\0');password.setError(getString(R.string.vault_password_invalid));return;}
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                io.execute(()->{boolean saved=false;
+                    try{VaultKeys.remember(this,pass);saved=true;}catch(Exception ignored){}finally{Arrays.fill(pass,'\0');}
+                    boolean success=saved;runOnUiThread(()->{if(isDestroyed())return;
+                        if(success){dialog.dismiss();unlocked=true;shell.setVisibility(View.VISIBLE);render();}
+                        else{dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);password.setError(getString(R.string.vault_key_unavailable));}});
+                });
+            });});dialog.show();
+    }
+    private void importArchivePassword(Uri archive){
+        EditText password=secret(R.string.vault_password);LinearLayout fields=ui.column();fields.setPadding(dp(24),dp(8),dp(24),dp(8));
+        fields.addView(text(getString(R.string.vault_import_password_note),13,false));fields.addView(password);
+        AlertDialog dialog=new AlertDialog.Builder(this).setTitle(R.string.vault_unlock_archive).setView(fields)
+                .setNegativeButton(android.R.string.cancel,null).setPositiveButton(android.R.string.ok,null).create();
+        dialog.setOnDismissListener(d->password.setText(""));dialog.setOnShowListener(d->{dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{char[] pass=new char[password.length()];password.getText().getChars(0,pass.length,pass,0);
+                if(pass.length<12||pass.length>1024){Arrays.fill(pass,'\0');password.setError(getString(R.string.vault_password_invalid));return;}
+                VaultRequest request=new VaultRequest("inspect",pass,Collections.emptySet(),Collections.emptySet(),archive,"both",false);request.rememberPassword=true;
+                dialog.dismiss();launch(request);
+            });});dialog.show();
     }
     private EditText secret(int hint){EditText e=new EditText(this);e.setHint(hint);e.setSingleLine();e.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
         e.setTransformationMethod(PasswordTransformationMethod.getInstance());e.setSaveEnabled(false);e.setImeOptions(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING);e.setFilterTouchesWhenObscured(true);return e;}
-    private void authenticate(VaultRequest request){KeyguardManager kg=getSystemService(KeyguardManager.class);
-        if(kg.isDeviceSecure()){Intent confirm=kg.createConfirmDeviceCredentialIntent(getString(R.string.vault_title),getString(R.string.vault_auth));if(confirm!=null){authenticating=request;startActivityForResult(confirm,AUTH);return;}}
-        launch(request);
-    }
-    private void launch(VaultRequest request){try{VaultService.launch(this,request);activityStatus.setText(R.string.vault_preparing);}catch(Exception e){request.clear();message(getString(R.string.vault_start_failed));}}
+    private void launch(VaultRequest request){if(!unlocked){request.clear();ensureUnlocked();return;}try{VaultService.launch(this,request);activityStatus.setText(R.string.vault_preparing);}catch(Exception e){request.clear();message(getString(R.string.vault_start_failed));}}
     @Override protected void onActivityResult(int code,int result,Intent data){super.onActivityResult(code,result,data);
-        if(code==AUTH){VaultRequest request=authenticating;authenticating=null;if(request!=null){if(result==RESULT_OK)launch(request);else request.clear();}return;}
+        if(code==AUTH||code==RESET_AUTH){authPending=false;
+            if(result==RESULT_OK){if(code==RESET_AUTH)configurePassword(true);else entered();}else if(code==AUTH)finish();return;}
         if(code==FOLDER&&result==RESULT_OK&&data!=null&&data.getData()!=null){try{Uri uri=data.getData();getContentResolver().takePersistableUriPermission(uri,
                 data.getFlags()&(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION));VaultStorage.prefs(this).edit().putString("folder",uri.toString()).apply();history=VaultHistory.load(this);render();}
             catch(SecurityException e){message(getString(R.string.vault_folder_error));}}
@@ -398,7 +478,7 @@ public final class VaultActivity extends Activity {
                     .setPositiveButton(R.string.vault_restore_selected,(d,w)->{if(chosenApps.isEmpty()&&chosenCategories.isEmpty()){message(getString(R.string.vault_select_items));return;}
                         new AlertDialog.Builder(this).setTitle(R.string.vault_restore_selected).setMessage(R.string.vault_restore_confirm).setNegativeButton(android.R.string.cancel,null)
                                 .setPositiveButton(R.string.vault_restore_selected,(confirm,which)->{int index=modes.getCheckedRadioButtonId()-101;
-                                    VaultRequest request=new VaultRequest("restore",new char[0],chosenApps,chosenCategories,null,modesValues[index],false,chosenParts);request.preparedId=prepared.id;authenticate(request);}).show();}).show();
+                                    VaultRequest request=new VaultRequest("restore",new char[0],chosenApps,chosenCategories,null,modesValues[index],false,chosenParts);request.preparedId=prepared.id;launch(request);}).show();}).show();
         }catch(Exception e){message(getString(R.string.vault_invalid_archive));}
     }
     private String categoryName(String id){int[] names={R.string.vault_wifi,R.string.vault_contacts,R.string.vault_messages,R.string.vault_calls,R.string.vault_wallpapers,R.string.vault_preferences,R.string.vault_launcher};

@@ -3,7 +3,6 @@ package org.hecker.vault;
 
 import android.app.backup.*;
 import android.content.*;
-import android.os.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -48,7 +47,10 @@ final class VaultNative implements AutoCloseable {
     void backup(VaultSession session)throws Exception{
         if(!manager.isBackupEnabled())throw new IOException("Enable Android backup in Settings before including app data");
         CompletableFuture<Integer> finished=new CompletableFuture<>();
-        int accepted=manager.requestBackup(session.packages.toArray(new String[0]),new BackupObserver(){
+        // Non-incremental snapshots do not get @pm@ implicitly. Every standalone archive
+        // needs fresh package/signature metadata, including a full-backup-only selection.
+        LinkedHashSet<String> targets=new LinkedHashSet<>();targets.add("@pm@");targets.addAll(session.packages);
+        int accepted=manager.requestBackup(targets.toArray(new String[0]),new BackupObserver(){
             @Override public void onUpdate(String pkg,BackupProgress progress){status.text("Backing up app data: "+pkg);}
             @Override public void onResult(String pkg,int code){session.results.put(pkg,code);}
             @Override public void backupFinished(int code){finished.complete(code);}},null,BackupManager.FLAG_NON_INCREMENTAL_BACKUP);

@@ -656,13 +656,14 @@ static int32_t dnsresolver_set_resolver_configuration(void *handle, const struct
 	return meaningful_binder_status(status_out);
 }
 
-/* HeckerVPN: init supplies privilege; never invoke a user root manager. */
+/* ndc uses 400 for operation failures; 500 is a syntax error. A missing owned
+ * network after reboot/netd restart is already clean, not a permanent failure. */
 static bool hecker_destroy_reply_ok(const char *reply)
 {
  if (!reply) return false;
  int code = atoi(reply);
  return (code >= 200 && code < 300) ||
-  (code == 500 && strstr(reply, "destroyNetwork() failed") &&
+  (code == 400 && strstr(reply, "destroyNetwork() failed") &&
    (strstr(reply, strerror(ENONET)) || strstr(reply, strerror(ENOENT))));
 }
 
@@ -671,11 +672,16 @@ static void hecker_cleanup_network(void)
  FILE *journal = fopen("/data/misc/heckervpn/netid", "re"); unsigned int netid = 0;
  if (journal) { if (fscanf(journal, "%u", &netid) != 1) netid = 0; fclose(journal); }
  if (netid < 4096 || netid > 65534) exit(EINVAL);
- _cleanup_binder_ AIBinder *handle = dnsresolver_get_handle();
- if (!handle || dnsresolver_destroy_network_cache(handle, netid) != STATUS_OK) exit(EREMOTEIO);
  DEFINE_CMD(response);
- if (!hecker_destroy_reply_ok(cmd_ret(&response, "ndc network destroy %u", netid))) exit(ENONET);
- unlink("/data/misc/heckervpn/netid");
+ char *reply = cmd_ret(&response, "ndc network destroy %u", netid);
+ if (!hecker_destroy_reply_ok(reply)) exit(ENONET);
+ /* networkDestroy may have already happened before a reboot. ndc only clears
+  * DNS on successful destruction, so also retire an orphan resolver cache. */
+ if (atoi(reply) == 400) {
+  _cleanup_binder_ AIBinder *handle = dnsresolver_get_handle();
+  if (!handle || dnsresolver_destroy_network_cache(handle, netid) != STATUS_OK) exit(EREMOTEIO);
+ }
+ if (unlink("/data/misc/heckervpn/netid") && errno != ENOENT) exit(EIO);
 }
 
 static void auto_su(int argc, char *argv[])

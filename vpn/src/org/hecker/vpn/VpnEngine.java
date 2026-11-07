@@ -39,6 +39,8 @@ final class VpnEngine {
     private long lastDiagnostic;
     private String loggedStatus = "";
     private Network underlying;
+    private int endpointAttempt,endpointChoices=1;
+    private String underlyingProperties="";
     private List<JSONObject> catalog = List.of();
 
     VpnEngine(Context context) {
@@ -48,6 +50,12 @@ final class VpnEngine {
         connectivity.registerDefaultNetworkCallback(new ConnectivityManager.NetworkCallback() {
             @Override public void onAvailable(Network network) { networkChanged(); }
             @Override public void onLost(Network network) { networkChanged(); }
+            @Override public void onLinkPropertiesChanged(Network network,android.net.LinkProperties properties){
+                worker.post(()->{
+                    if(!desired||!network.equals(underlying)||!configured||fingerprint(properties).equals(underlyingProperties))return;
+                    try{reconnect();}catch(Exception failure){failed(failure);}
+                });
+            }
         });
         IntentFilter packages = new IntentFilter(); packages.addAction(Intent.ACTION_PACKAGE_ADDED);
         packages.addAction(Intent.ACTION_PACKAGE_REMOVED); packages.addDataScheme("package");
@@ -65,6 +73,9 @@ final class VpnEngine {
         }, packages, Context.RECEIVER_NOT_EXPORTED);
         NotificationManager notifications = context.getSystemService(NotificationManager.class);
         notifications.createNotificationChannel(new NotificationChannel("heckervpn", context.getString(R.string.vpn_title), NotificationManager.IMPORTANCE_LOW));
+    }
+    private static String fingerprint(android.net.LinkProperties link){
+        return link==null?"":link.getLinkAddresses().toString()+"/"+link.getNat64Prefix()+"/"+link.getMtu();
     }
     private void networkChanged() {
         worker.postDelayed(() -> {
@@ -94,7 +105,7 @@ final class VpnEngine {
                     if (desired) disconnect(); store.profile(request.getString("id", ""));
                     store.data.put("selected", request.getString("id")); store.save(); break;
                 case "delete": delete(request.getString("id", "")); break;
-                case "connect": connect(); break;
+                case "connect": endpointAttempt=0;connect(); break;
                 case "reconnect": reconnect(); break;
                 case "disconnect": disconnect(); break;
                 case "policy": policy(request); break;
@@ -185,14 +196,31 @@ final class VpnEngine {
         status = "connecting"; notifyState();
         try {
             final Network network=underlying;
-            String config=saved.forNetwork(profile.getString("mode"),routedApps,host->{
+            android.net.LinkProperties link=connectivity.getLinkProperties(network);
+            boolean v4=false,v6=false;
+            if(link!=null)for(android.net.LinkAddress address:link.getLinkAddresses()){
+                if(address.getAddress() instanceof java.net.Inet4Address)v4=true;
+                if(address.getAddress() instanceof java.net.Inet6Address&&!address.getAddress().isLinkLocalAddress())v6=true;
+            }
+            final boolean ipv4=v4,ipv6=v6;final String prefix=link==null||link.getNat64Prefix()==null?null:link.getNat64Prefix().toString();
+            if(!v4&&!v6){status="waiting_network";schedulePoll();notifyState();return;}
+            underlyingProperties=fingerprint(link);endpointChoices=1;
+            String config=saved.forUnderlay(profile.getString("mode"),routedApps,host->{
                 ArrayList<String> addresses=new ArrayList<>();
                 try{for(java.net.InetAddress address:network.getAllByName(host)){
                     if(address.isAnyLocalAddress()||address.isLoopbackAddress()||address.isLinkLocalAddress())continue;
                     String ip=address.getHostAddress();if(ip!=null&&ip.indexOf('%')<0)addresses.add(ip);
                 }}catch(java.net.UnknownHostException failure){throw new IllegalArgumentException("Cannot resolve the VPN server on the current network. Check the profile or try another network.");}
-                return addresses;
+                List<String> usable=VpnUnderlay.addresses(addresses,ipv4,ipv6,prefix);
+                endpointChoices=Math.max(endpointChoices,usable.size());
+                if(usable.isEmpty())throw new IllegalArgumentException("The VPN profile has no reachable address family on this network. Try a dual-stack profile.");
+                return List.of(usable.get(endpointAttempt%usable.size()));
             });
+            // Mobile MTUs often differ from Wi-Fi. Retain explicit imported MTUs.
+            VpnConfig connection=VpnConfig.parse(config);
+            if(!connection.network.containsKey("MTU"))connection.network.put("MTU",Integer.toString(
+                    link!=null&&link.getMtu()>0?Math.max(1280,Math.min(1420,link.getMtu()-80)):1280));
+            config=connection.render(profile.getString("mode"),routedApps);
             // A network switch during DNS must not create a tunnel pinned to the old network.
             if(!network.equals(connectivity.getActiveNetwork())){
                 status="waiting_network";underlying=null;schedulePoll();notifyState();return;
@@ -203,7 +231,7 @@ final class VpnEngine {
         schedulePoll(); notifyState();
     }
     private void reconnect() throws Exception {
-        kernel.call("DOWN"); configured = false; rx = tx = handshake = 0; connect();
+        endpointAttempt=0;kernel.call("DOWN"); configured = false; rx = tx = handshake = 0; connect();
     }
     private void disconnect() throws Exception {
         desired = false; worker.removeCallbacks(poll);
@@ -237,7 +265,16 @@ final class VpnEngine {
                 status = "waiting_network";
             } else if (!java.util.Objects.equals(connectivity.getActiveNetwork(),underlying)) reconnect();
             else if (!configured) connect();
-            else { snapshot(kernel.call("STATUS")); if (!configured) throw new IllegalArgumentException("Kernel tunnel stopped. Reconnect to try again."); }
+            else {
+                snapshot(kernel.call("STATUS"));
+                if (!configured) throw new IllegalArgumentException("Kernel tunnel stopped. Reconnect to try again.");
+                if(handshake==0&&SystemClock.elapsedRealtime()-attemptStarted>=15000
+                        &&endpointAttempt<Math.min(2,endpointChoices-1)){
+                    // Try alternate DNS/NAT64 addresses at most twice. Provider failures
+                    // eventually remain visible as peer_timeout, never a fake connection.
+                    snapshot(kernel.call("DOWN"));endpointAttempt++;connect();
+                }
+            }
             notifyState(); schedulePoll();
         } catch (Exception failure) { failed(failure); }
     }

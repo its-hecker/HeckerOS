@@ -126,7 +126,12 @@ std::string state() {
         + ",\"rx\":" + std::to_string(rx) + ",\"tx\":" + std::to_string(tx) + "}";
 }
 std::string request(const std::string& command) {
-    if (command == "STATUS") return cleanup_pending ? "{\"ok\":false,\"cleanup_required\":true,\"error\":\"Previous tunnel cleanup is incomplete. Retry disconnect.\"}" : state();
+    if (command == "STATUS") {
+        // Recover stale journal ownership before refusing a new connection. A missing
+        // netd network after reboot is a normal idempotent cleanup case.
+        if (cleanup_pending && !cleanup()) return "{\"ok\":false,\"cleanup_required\":true,\"error\":\"Previous tunnel cleanup is incomplete. Retry disconnect.\"}";
+        return state();
+    }
     if (command == "DOWN") {
         if (!cleanup()) return "{\"ok\":false,\"cleanup_required\":true,\"error\":\"Network cleanup is incomplete; ownership journal retained for retry.\"}";
         return state();

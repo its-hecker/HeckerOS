@@ -49,10 +49,10 @@
     <string name="vault_enable_android_note">Allow Android app-data backups? HeckerVault temporarily selects its local transport during a backup. Your previous backup provider is restored afterwards, when available.</string>
     <string name="vault_android_enabled">Android backup enabled.</string>
     <string name="vault_schedules">Scheduled backups</string>
-    <string name="vault_schedule_note">Uses the current selections and folder. Your password is wrapped with this device’s Keystore for background jobs after unlock. Keep the original password for recovery after a clean flash.</string>
-    <string name="vault_enable_schedule">Enable schedule and save password</string>
+    <string name="vault_schedule_note">Uses the current selections, folder and saved Vault encryption password. Runs after device unlock. Keep the original password for recovery after a clean flash.</string>
+    <string name="vault_enable_schedule">Enable scheduled backups</string>
     <string name="vault_change_schedule_password">Change scheduled-backup password</string>
-    <string name="vault_disable_schedule">Disable schedule and forget password</string>
+    <string name="vault_disable_schedule">Disable scheduled backups</string>
     <string name="vault_weekly">Weekly (otherwise daily)</string>
     <string name="vault_charging">Run only while charging</string>
     <string name="vault_schedule_all">Include all current user apps</string>
@@ -64,7 +64,7 @@
     <string name="vault_select_items">Select apps or personal data first.</string>
     <string name="vault_password">Archive password (12+ characters)</string>
     <string name="vault_confirm_password">Confirm password</string>
-    <string name="vault_password_note">This password is required to restore after a clean flash. HeckerVault cannot recover a forgotten password.</string>
+    <string name="vault_password_note">Keep this password separately for recovery after a clean flash. You can reset it on this phone using your screen lock.</string>
     <string name="vault_unlock_archive">Unlock archive</string>
     <string name="vault_archive_password">Protect your snapshot</string>
     <string name="vault_password_invalid">Use 12–1024 characters and matching passwords.</string>
