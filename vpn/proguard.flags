@@ -1,0 +1,4 @@
+# Only SafeConstructor + Composer scalar/list/map loading is used. Desktop
+# JavaBean introspection is unreachable and its optional java.beans types are
+# absent from Android. Do not keep the unused bean/dumper implementation.
+-dontwarn java.beans.**

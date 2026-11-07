@@ -2,6 +2,7 @@
 // Narrow init-owned controller. No su, caller-selected executable, path, interface or shell command.
 #include "protocol.h"
 #include "setup_status.h"
+#include "proxy_config.h"
 #include <arpa/inet.h>
 #include <cerrno>
 #include <chrono>
@@ -30,10 +31,55 @@ constexpr char kStage[] = "/data/misc/heckervpn/setup-stage";
 constexpr char kNetid[] = "/data/misc/heckervpn/netid";
 constexpr char kWg[] = "/system_ext/bin/hecker-wg";
 constexpr char kQuick[] = "/system_ext/bin/hecker-wg-quick";
+constexpr char kTcp[] = "/system_ext/bin/hecker-tcp-core";
+pid_t tcp_pid = -1;
+int tcp_fd = -1;
+unsigned int tcp_netid = 0;
 volatile sig_atomic_t stopping = 0;
 bool cleanup_pending = false;
 void stopped(int) { stopping = 1; }
 struct Result { int code = -1; std::string output; };
+bool io(int fd, void* buffer, size_t size, bool writing);
+
+bool tcp_exchange(std::string& data, bool send_request = true) {
+    if (tcp_fd < 0) return false;
+    uint32_t size = htonl(static_cast<uint32_t>(data.size()));
+    if (send_request && (!io(tcp_fd, &size, sizeof(size), true) || !io(tcp_fd, data.data(), data.size(), true))) return false;
+    if (!io(tcp_fd, &size, sizeof(size), false)) return false;
+    size = ntohl(size); if (size < 2 || size > 8192) return false;
+    data.resize(size); return io(tcp_fd, data.data(), size, false);
+}
+void stop_tcp() {
+    if (tcp_fd >= 0) { close(tcp_fd); tcp_fd = -1; }
+    if (tcp_pid > 0) {
+        kill(-tcp_pid, SIGKILL); kill(tcp_pid, SIGKILL);
+        while (waitpid(tcp_pid, nullptr, 0) < 0 && errno == EINTR) {}
+        tcp_pid = -1;
+    }
+    tcp_netid = 0;
+    unlink("/data/misc/heckervpn/tcp/config.yaml");
+}
+bool start_tcp(const hecker::vpn::ProxyConfig& config) {
+    int pair[2]; if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, pair)) return false;
+    tcp_pid = fork();
+    if (!tcp_pid) {
+        setpgid(0, 0); dup2(pair[1], STDIN_FILENO);
+        int null = open("/dev/null", O_RDWR); dup2(null, STDOUT_FILENO); dup2(null, STDERR_FILENO);
+        close(pair[0]); if (pair[1] != STDIN_FILENO) close(pair[1]); if (null > 2) close(null);
+        char path[] = "PATH=/system_ext/bin:/system/bin", lang[] = "LANG=C";
+        char root[] = "ANDROID_ROOT=/system", data[] = "ANDROID_DATA=/data";
+        char certs[] = "SSL_CERT_DIR=/apex/com.android.conscrypt/cacerts:/system/etc/security/cacerts";
+        char memory[] = "GOMEMLIMIT=192MiB";
+        char* env[] = {path, lang, root, data, certs, memory, nullptr};
+        char* args[] = {const_cast<char*>(kTcp), nullptr}; execve(kTcp, args, env); _exit(127);
+    }
+    close(pair[1]); if (tcp_pid < 0) { close(pair[0]); return false; }
+    setpgid(tcp_pid, tcp_pid); tcp_fd = pair[0];
+    timeval timeout{25, 0}; setsockopt(tcp_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+    setsockopt(tcp_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
+    std::string message = hecker::vpn::proxy_json(config);
+    return tcp_exchange(message) && message == "{\"ok\":true}";
+}
 
 Result run(const char* command, std::vector<std::string> arguments, const std::string& input = "", bool capture = false, bool cleanup_call = false) {
     Result result; int in[2], out[2];
@@ -87,6 +133,7 @@ bool cleanup() {
     if (access(kConfig, F_OK) == 0) cleaned = run(kQuick, {"down", kConfig}, "", false, true).code == 0;
     // The recorded netid survives an interrupted helper. It belongs solely to this tunnel.
     if (access(kNetid, F_OK) == 0) cleaned = run(kQuick, {"cleanup"}, "", false, true).code == 0 && cleaned;
+    stop_tcp();
     cleanup_pending = !cleaned;
     if (cleaned) { unlink(kNetid); unlink(kConfig); unlink(kStage); }
     return cleaned;
@@ -102,6 +149,9 @@ bool save_config(const std::string& config) {
     }
     bool ok = fsync(file) == 0; close(file); return ok;
 }
+std::string tcp_error(const char* message) {
+    return std::string("{\"ok\":false,\"cleanup_required\":") + (cleanup_pending ? "true" : "false") + ",\"error\":\"" + message + "\"}";
+}
 std::string trim(std::string value) {
     while (!value.empty() && (value.back() == '\n' || value.back() == '\r')) value.pop_back();
     return value;
@@ -110,6 +160,13 @@ bool key(const std::string& text) {
     return text.size() == 44 && text.back() == '=' && text.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=") == std::string::npos;
 }
 std::string state() {
+    if (tcp_pid > 0) {
+        std::string message = "STATUS";
+        if (!tcp_exchange(message) || message.find("\"ok\":true") == std::string::npos) {
+            cleanup(); return tcp_error("The root TCP worker stopped. Reconnect or choose another server.");
+        }
+        return message;
+    }
     Result handshakes = run(kWg, {"show", "hkvpn0", "latest-handshakes"}, "", true);
     bool active = handshakes.code == 0;
     uint64_t handshake = 0, rx = 0, tx = 0;
@@ -142,6 +199,36 @@ std::string request(const std::string& command) {
         Result derived = run(kWg, {"pubkey"}, private_key + "\n", true); std::string public_key = trim(derived.output);
         if (derived.code || !key(public_key)) return "{\"ok\":false,\"error\":\"Public key generation failed\"}";
         return "{\"ok\":true,\"private\":\"" + private_key + "\",\"public\":\"" + public_key + "\"}";
+    }
+    if (command.rfind("TCP_UP\n", 0) == 0) {
+        hecker::vpn::ProxyConfig config;
+        if (!hecker::vpn::parse_proxy(command.substr(7), config)) return "{\"ok\":false,\"error\":\"Rejected TCP proxy configuration\"}";
+        if (!cleanup()) return "{\"ok\":false,\"cleanup_required\":true,\"error\":\"Previous tunnel cleanup is incomplete\"}";
+        if (!save_config(hecker::vpn::proxy_routes(config))) return tcp_error("Unable to stage root TCP routing");
+        if (!start_tcp(config)) {
+            // No netd setup has run yet. A worker that rejected an existing
+            // foreign hkvpn0 must not cause cleanup to delete that interface.
+            unlink(kConfig); stop_tcp();
+            return tcp_error("Root TCP core could not start. Check the ROM installation and SELinux logs.");
+        }
+        Result up = run(kQuick, {"up-tcp", kConfig, std::to_string(config.netid)});
+        if (!up.code) {
+            FILE* journal = fopen(kNetid, "re");
+            if (journal) { if (fscanf(journal, "%u", &tcp_netid) != 1) tcp_netid = 0; fclose(journal); }
+        }
+        if (up.code || tcp_netid < 4096 || tcp_netid > 65534) {
+            cleanup(); return std::string("{\"ok\":false,\"cleanup_required\":") + (cleanup_pending ? "true" : "false") + ",\"error\":\"Root TCP routing setup failed. Check SELinux and HeckerVPN service logs.\"}";
+        }
+        std::string probe = "PROBE\n" + std::to_string(tcp_netid);
+        if (!tcp_exchange(probe) || probe.find("\"validated\":true") == std::string::npos) {
+            cleanup(); return std::string("{\"ok\":false,\"cleanup_required\":") + (cleanup_pending ? "true" : "false") + ",\"error\":\"The TCP server did not pass the HTTPS and tunnel DNS checks. Try another free server or import a working HTTPS proxy.\"}";
+        }
+        return probe;
+    }
+    if (command == "TCP_PROBE" && tcp_pid > 0) {
+        std::string probe = "PROBE\n" + std::to_string(tcp_netid);
+        if (tcp_exchange(probe)) return probe;
+        cleanup(); return tcp_error("The root TCP worker stopped");
     }
     if (command.rfind("UP\n", 0) == 0) {
         std::string config;unsigned int underlay=0;

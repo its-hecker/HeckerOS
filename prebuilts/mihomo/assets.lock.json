@@ -1,0 +1,20 @@
+{
+  "release": "https://github.com/WhiteDNS/WhiteVPN/releases/tag/v1.7.1",
+  "core_source": "https://github.com/WhiteDNS/FlClash/tree/8f08f6e2d732c58bcbb9d13771af4456c039fe46/core",
+  "mihomo_source": "https://github.com/WhiteDNS/mihomo/tree/05fb40f89637aa27d81b638bff765a6d57797cdb",
+  "apk": {
+    "url": "https://github.com/WhiteDNS/WhiteVPN/releases/download/v1.7.1/WhiteVPN-V1.7.1-arm64-v8a.apk",
+    "sha256": "86e68061471804f206ba52329c04b21a04fcb2c1cbe1363a70bd0d012caf23f9",
+    "size": 44974234
+  },
+  "core": {
+    "entry": "lib/arm64-v8a/libclash.so",
+    "sha256": "a216f53972abd55418570ca59b4164e0ca88513733ffb08059e9f215fb0c69d0",
+    "size": 75255592
+  },
+  "yaml": {
+    "url": "https://repo.maven.apache.org/maven2/org/yaml/snakeyaml/2.4/snakeyaml-2.4.jar",
+    "sha256": "ef779af5d29a9dde8cc70ce0341f5c6f7735e23edff9685ceaa9d35359b7bb7f",
+    "size": 339825
+  }
+}

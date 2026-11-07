@@ -11,7 +11,8 @@ def host(out):
     run('java','-cp',out/'classes','HeckerVpnConfigTest')
     run('g++','-std=c++17','-Wall','-Wextra','-Werror','-I',ROOT/'vpn/native',ROOT/'vpn/native/protocol.cpp',ROOT/'tests/vpn_protocol_test.cpp','-o',out/'protocol')
     run(out/'protocol')
-    run('g++','-std=c++17','-Wall','-Wextra','-Werror',ROOT/'vpn/native/protocol.cpp',ROOT/'vpn/native/daemon.cpp','-o',out/'daemon')
+    run('g++','-std=c++17','-Wall','-Wextra','-Werror',ROOT/'vpn/native/protocol.cpp',ROOT/'vpn/native/daemon.cpp',ROOT/'vpn/native/proxy_config.cpp','-o',out/'daemon')
+    run('g++','-std=c++17','-Wall','-Wextra','-Werror',ROOT/'vpn/native/proxy_config.cpp',ROOT/'vpn/native/proxy_core.cpp','-ldl','-pthread','-o',out/'tcp-core')
     source=ROOT/'third_party/wireguard-tools'
     run('gcc','-std=gnu11','-O2','-D_GNU_SOURCE','-DRUNSTATEDIR="/data/misc/heckervpn"','-I',source/'src/uapi/linux',*sorted((source/'src').glob('*.c')),'-o',out/'wg')
     private=subprocess.check_output([out/'wg','genkey']); public=subprocess.check_output([out/'wg','pubkey'],input=private)
@@ -57,7 +58,9 @@ def android(out,sdk):
     for name in ['vpn','app']:
         run(sdk/'aapt2','compile','--dir',ROOT/name/'res','-o',out/(name+'-resources.zip'))
         run(sdk/'aapt2','link','-I',sdk/'android.jar','--manifest',ROOT/name/'AndroidManifest.xml','--java',out/(name+'-r'),'-o',out/(name+'.apk'),out/(name+'-resources.zip'))
-    cp=os.pathsep.join(map(str,[sdk/'android-system.jar',sdk/'lottie.jar',sdk/'appcompat.jar',sdk/'core.jar']))
+    from prepare_proxy_assets import prepare as prepare_proxy_assets
+    prepare_proxy_assets()
+    cp=os.pathsep.join(map(str,[sdk/'android-system.jar',sdk/'lottie.jar',sdk/'appcompat.jar',sdk/'core.jar',ROOT/'prebuilts/mihomo/snakeyaml.jar']))
     run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',cp,'-d',out/'backend',out/'vpn-r/org/hecker/vpn/R.java',*common,*sorted((ROOT/'vpn/src').rglob('*.java')))
     ui=ROOT/'app/src/org/hecker/suite'
     run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',cp,'-d',out/'ui',out/'app-r/org/hecker/suite/R.java',ROOT/'app/src/org/hecker/ui/HeckerChoiceSheet.java',*common,

@@ -43,6 +43,8 @@ final class VpnEngine {
     private String routingKey="",routingText="";
     private android.graphics.Bitmap routingIcon;
     private Network underlying;
+    private boolean tcpMode;
+    private long lastTcpProbe;
     private int endpointAttempt,endpointChoices=1;
     private String underlyingProperties="";
     private List<JSONObject> catalog = List.of();
@@ -106,6 +108,11 @@ final class VpnEngine {
                 case "state": break;
                 case "probe": snapshot(kernel.call("STATUS")); break;
                 case "import": importProfile(request.getString("name", "VPN profile"), request.getString("config")); break;
+                case "import_tcp": importTcp(request.getString("name", "TCP proxy"), request.getString("config")); break;
+                case "tcp_catalog":
+                    JSONArray tcpCatalog = TcpCatalog.fetch(connectivity.getActiveNetwork());
+                    store.data.put("tcp_catalog", tcpCatalog).put("tcp_catalog_time", System.currentTimeMillis()); store.save(); break;
+                case "tcp_connect": tcpConnect(request.getString("id", "")); break;
                 case "select":
                     if (desired) disconnect(); store.profile(request.getString("id", ""));
                     store.data.put("selected", request.getString("id")); store.save(); break;
@@ -175,6 +182,34 @@ final class VpnEngine {
         if (!desired) store.data.put("selected", profile.getString("id"));
         store.save();
     }
+    private void importTcp(String name, String text) throws Exception {
+        if (name == null || name.trim().isEmpty() || name.length() > 80 || name.chars().anyMatch(Character::isISOControl))
+            throw new IllegalArgumentException("Use a profile name of 1–80 characters");
+        ProxyConfig config = ProxyConfig.uri(text);
+        JSONArray profiles = store.data.getJSONArray("profiles");
+        if (profiles.length() >= 32) throw new IllegalArgumentException("Remove a saved profile before importing another");
+        JSONObject profile = new JSONObject().put("id", UUID.randomUUID().toString()).put("name", name.trim())
+                .put("kind", "tcp").put("config", config.json()).put("tls", config.tls)
+                .put("mode", "all").put("apps", new JSONArray()).put("source", "manual");
+        profiles.put(profile); if (!desired) store.data.put("selected", profile.getString("id")); store.save();
+    }
+    private void tcpConnect(String id) throws Exception {
+        JSONArray rows = store.data.optJSONArray("tcp_catalog"); JSONObject server = null;
+        if (rows != null) for (int i = 0; i < rows.length(); i++) if (id.equals(rows.getJSONObject(i).optString("id"))) server = rows.getJSONObject(i);
+        if (server == null) throw new IllegalArgumentException("Refresh the free TCP list and choose a server");
+        ProxyConfig config = ProxyConfig.saved(server.getString("config"));
+        if (desired) disconnect();
+        JSONObject profile;
+        try { profile = store.profile("public-tcp"); }
+        catch (IllegalArgumentException absent) {
+            if (store.data.getJSONArray("profiles").length() >= 32) throw new IllegalArgumentException("Remove a saved profile first");
+            profile = new JSONObject().put("id", "public-tcp").put("mode", "all").put("apps", new JSONArray());
+            store.data.getJSONArray("profiles").put(profile);
+        }
+        profile.put("name", server.getString("name")).put("kind", "tcp").put("source", "whitedns")
+                .put("config", config.json()).put("tls", config.tls);
+        store.data.put("selected", "public-tcp"); store.save(); endpointAttempt = 0; connect();
+    }
     private void delete(String id) throws Exception {
         store.profile(id);
         if (id.equals(store.data.optString("selected")) && desired) disconnect();
@@ -195,6 +230,8 @@ final class VpnEngine {
     }
     private void connect() throws Exception {
         JSONObject profile = selected();
+        if ("tcp".equals(profile.optString("kind"))) { connectTcp(profile); return; }
+        tcpMode = false;
         VpnConfig saved = VpnConfig.parse(profile.getString("config"));
         List<String> routedApps=apps(profile);
         android.net.NetworkCapabilities capabilities = connectivity.getNetworkCapabilities(connectivity.getActiveNetwork());
@@ -242,6 +279,41 @@ final class VpnEngine {
         catch (Exception failure) { failed(failure); throw failure; }
         schedulePoll(); notifyState();
     }
+    private void connectTcp(JSONObject profile) throws Exception {
+        ProxyConfig saved = ProxyConfig.saved(profile.getString("config"));
+        List<String> routedApps = ProxyConfig.policy(profile.getString("mode"), apps(profile));
+        Network network = connectivity.getActiveNetwork();
+        android.net.NetworkCapabilities caps = connectivity.getNetworkCapabilities(network);
+        if (caps != null && caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_VPN))
+            throw new IllegalArgumentException("Disconnect the other Android VPN before connecting HeckerVPN");
+        tcpMode = true; desired = true; underlying = network;
+        if (network == null) { status = "waiting_network"; notifyState(); schedulePoll(); return; }
+        attemptStarted = SystemClock.elapsedRealtime(); status = "connecting"; notifyState();
+        try {
+            android.net.LinkProperties link = connectivity.getLinkProperties(network);
+            boolean v4 = false, v6 = false;
+            if (link != null) for (android.net.LinkAddress address : link.getLinkAddresses()) {
+                v4 |= address.getAddress() instanceof java.net.Inet4Address;
+                v6 |= address.getAddress() instanceof java.net.Inet6Address && !address.getAddress().isLinkLocalAddress();
+            }
+            if (!v4 && !v6) { status = "waiting_network"; notifyState(); schedulePoll(); return; }
+            underlyingProperties = fingerprint(link);
+            List<String> resolved = new ArrayList<>();
+            for (java.net.InetAddress address : network.getAllByName(saved.server)) {
+                if (!address.isAnyLocalAddress() && !address.isLoopbackAddress() && !address.isLinkLocalAddress() && !address.isMulticastAddress())
+                    resolved.add(address.getHostAddress());
+            }
+            List<String> addresses = VpnUnderlay.addresses(resolved, v4, v6, link == null || link.getNat64Prefix() == null ? null : link.getNat64Prefix().toString());
+            if (addresses.isEmpty()) throw new IllegalArgumentException("The TCP proxy has no reachable address on this network");
+            if (!network.equals(connectivity.getActiveNetwork())) { underlying = null; status = "waiting_network"; notifyState(); schedulePoll(); return; }
+            snapshot(kernel.call(saved.request(network.getNetId(), addresses.get(0), profile.getString("mode"), routedApps)));
+            if (!network.equals(connectivity.getActiveNetwork())) {
+                snapshot(kernel.call("DOWN")); underlying = null; status = "waiting_network"; notifyState(); schedulePoll(); return;
+            }
+            lastTcpProbe = SystemClock.elapsedRealtime(); error = "";
+        } catch (Exception failure) { failed(failure); throw failure; }
+        schedulePoll(); notifyState();
+    }
     private void reconnect() throws Exception {
         endpointAttempt=0;kernel.call("DOWN"); configured = false; rx = tx = handshake = 0; connect();
     }
@@ -261,11 +333,15 @@ final class VpnEngine {
         worker.removeCallbacks(poll); notifyState();
     }
     private void snapshot(JSONObject data) {
-        probed = true;
+        if (data.has("kernel")) { probed = true; supported = data.optBoolean("kernel"); }
         cleanupRequired = false;
-        supported = data.optBoolean("kernel"); configured = data.optBoolean("configured");
+        configured = data.optBoolean("configured");
         rx = data.optLong("rx"); tx = data.optLong("tx"); handshake = data.optLong("handshake");
-        if (configured) status = VpnConnectionState.classify(true, handshake, System.currentTimeMillis() / 1000,
+        if (configured && "tcp".equals(data.optString("transport"))) {
+            tcpMode = true; handshake = 0; status = data.optBoolean("validated") ? "active" : "peer_timeout";
+            if (!data.optBoolean("validated")) error = "The TCP server stopped passing connectivity checks. Reconnect or choose another server.";
+            else error = "";
+        } else if (configured) status = VpnConnectionState.classify(true, handshake, System.currentTimeMillis() / 1000,
                 Math.max(0, SystemClock.elapsedRealtime() - attemptStarted));
         else if (!desired) status = "disconnected";
     }
@@ -279,9 +355,11 @@ final class VpnEngine {
             } else if (!java.util.Objects.equals(connectivity.getActiveNetwork(),underlying)) reconnect();
             else if (!configured) connect();
             else {
-                snapshot(kernel.call("STATUS"));
-                if (!configured) throw new IllegalArgumentException("Kernel tunnel stopped. Reconnect to try again.");
-                if(handshake==0&&SystemClock.elapsedRealtime()-attemptStarted>=15000
+                boolean probeTcp = tcpMode && SystemClock.elapsedRealtime() - lastTcpProbe >= 45000;
+                snapshot(kernel.call(probeTcp ? "TCP_PROBE" : "STATUS"));
+                if (probeTcp) lastTcpProbe = SystemClock.elapsedRealtime();
+                if (!configured) throw new IllegalArgumentException("Tunnel stopped. Reconnect to try again.");
+                if(!tcpMode&&handshake==0&&SystemClock.elapsedRealtime()-attemptStarted>=15000
                         &&endpointAttempt<Math.min(2,endpointChoices-1)){
                     // Try alternate DNS/NAT64 addresses at most twice. Provider failures
                     // eventually remain visible as peer_timeout, never a fake connection.
@@ -291,11 +369,12 @@ final class VpnEngine {
             notifyState(); schedulePoll();
         } catch (Exception failure) { failed(failure); }
     }
-    private void schedulePoll() { worker.removeCallbacks(poll); worker.postDelayed(poll, configured && handshake <= 0 ? 3000 : 10000); }
+    private void schedulePoll() { worker.removeCallbacks(poll); worker.postDelayed(poll, configured && !tcpMode && handshake <= 0 ? 3000 : 10000); }
     private void policy(Bundle request) throws Exception {
         JSONObject profile = selected(); String mode = request.getString("mode", "all");
         ArrayList<String> packages = request.getStringArrayList("apps"); if (packages == null) packages = new ArrayList<>();
-        VpnConfig.parse(profile.getString("config")).render(mode, packages);
+        if ("tcp".equals(profile.optString("kind"))) ProxyConfig.policy(mode, packages);
+        else VpnConfig.parse(profile.getString("config")).render(mode, packages);
         boolean resume = desired; if (resume) disconnect();
         profile.put("mode", mode).put("apps", new JSONArray(packages)); store.save();
         if (resume) connect();
@@ -348,7 +427,10 @@ final class VpnEngine {
     }
     private Bundle state() {
         Bundle result = new Bundle(); result.putString("status", status); result.putString("error", error);
-        result.putString("backend", "WireGuard kernel"); if (probed) result.putBoolean("kernel", supported);
+        boolean tcp = tcpMode;
+        if (!desired && store != null) try { tcp = "tcp".equals(selected().optString("kind")); } catch (Exception absent) { /* No selected profile. */ }
+        result.putString("transport", tcp ? "tcp" : "wireguard");
+        result.putString("backend", tcp ? "TCP proxy · root TUN" : "WireGuard kernel"); if (probed) result.putBoolean("kernel", supported);
         result.putBoolean("configured", configured); result.putBoolean("desired", desired);
         result.putBoolean("cleanup_required", cleanupRequired);
         result.putLong(VpnTileState.VERSION, tileStateVersion);
@@ -363,12 +445,24 @@ final class VpnEngine {
             if (values != null) for (int i = 0; i < values.length(); i++) {
                 JSONObject profile = values.optJSONObject(i); if (profile == null) continue;
                 Bundle row = new Bundle();
-                for (String key : new String[]{"id", "name", "mode", "source"}) row.putString(key, profile.optString(key));
+                for (String key : new String[]{"id", "name", "mode", "source", "kind"}) row.putString(key, profile.optString(key));
+                row.putBoolean("tls", profile.optBoolean("tls"));
                 ArrayList<String> apps = new ArrayList<>(); JSONArray list = profile.optJSONArray("apps");
                 if (list != null) for (int n = 0; n < list.length(); n++) apps.add(list.optString(n));
                 row.putStringArrayList("apps", apps); profiles.add(row);
             }
         }
+        ArrayList<Bundle> tcpRows = new ArrayList<>();
+        if (store != null) {
+            JSONArray rows = store.data.optJSONArray("tcp_catalog");
+            if (rows != null) for (int i = 0; i < rows.length(); i++) {
+                JSONObject item = rows.optJSONObject(i); if (item == null) continue;
+                Bundle row = new Bundle(); row.putString("id", item.optString("id")); row.putString("name", item.optString("name"));
+                row.putBoolean("tls", item.optBoolean("tls")); tcpRows.add(row);
+            }
+            result.putLong("tcp_catalog_time", store.data.optLong("tcp_catalog_time"));
+        }
+        result.putParcelableArrayList("tcp_servers", tcpRows);
         result.putParcelableArrayList("profiles", profiles); return result;
     }
     private void updateRoutingNotification() {
@@ -421,7 +515,8 @@ final class VpnEngine {
         long now=SystemClock.elapsedRealtime();
         if (!status.equals(loggedStatus)||(desired&&now-lastDiagnostic>=15000)) {
             Log.i("HeckerVPN", "state=" + status + " configured=" + configured
-                    + " peerContact=" + (handshake > 0) + " rx=" + rx + " tx=" + tx
+                    + " transport=" + (tcpMode ? "tcp" : "wireguard") + " peerContact=" + (handshake > 0)
+                    + " tcpValidated=" + (tcpMode && "active".equals(status)) + " rx=" + rx + " tx=" + tx
                     + " physicalNetwork="+(underlying==null?0:underlying.getNetId()));
             loggedStatus = status;lastDiagnostic=now;
         }

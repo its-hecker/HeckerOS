@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: Apache-2.0
+java_import {
+    name: "HeckerVpnSafeYaml",
+    jars: ["snakeyaml.jar"],
+    sdk_version: "current",
+    licenses: ["hecker_suite_license"],
+}
+license {
+    name: "hecker_proxy_core_license",
+    license_kinds: ["SPDX-license-identifier-GPL-3.0"],
+    license_text: ["COPYING", "NOTICE.md"],
+}
+cc_prebuilt_library_shared {
+    name: "libhecker_mihomo_core",
+    stem: "libclash",
+    arch: { arm64: { srcs: ["arm64/libclash.so"] } },
+    compile_multilib: "64",
+    stl: "none",
+    shared_libs: ["liblog", "libdl"],
+    system_shared_libs: ["libc"],
+    strip: { none: true },
+    // The pinned upstream c-shared ELF has no SONAME. The worker loads its fixed
+    // absolute path; prepare_proxy_assets verifies every byte with SHA-256.
+    check_elf_files: false,
+    system_ext_specific: true,
+    licenses: ["hecker_proxy_core_license"],
+}
