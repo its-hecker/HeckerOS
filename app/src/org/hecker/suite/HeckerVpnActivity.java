@@ -164,6 +164,7 @@ public final class HeckerVpnActivity extends Activity {
             case "active": return R.string.vpn_active;
             case "idle": return R.string.vpn_idle;
             case "connecting": return R.string.vpn_connecting;
+            case "disconnecting": return R.string.vpn_disconnecting;
             case "waiting_peer": return R.string.vpn_waiting_peer;
             case "peer_timeout": return R.string.vpn_peer_timeout;
             case "waiting_network": return R.string.vpn_waiting_network;
