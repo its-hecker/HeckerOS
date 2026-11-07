@@ -1,4 +1,5 @@
 <resources>
+    <string name="vpn_disconnecting">正在断开连接…</string>
     <string name="vpn_tunneling_all">正在为所有应用建立隧道</string>
     <string name="vpn_tunneling_apps">隧道应用：%1$s</string>
     <string name="vpn_tunneling_except">为除 %1$s 以外的所有应用建立隧道</string>

@@ -550,6 +550,14 @@
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/pipeline/mobile/ui/compose/MobileIcon.kt": [
     {
+      "old": "import androidx.compose.ui.Alignment",
+      "new": "import androidx.compose.ui.Alignment\nimport androidx.compose.ui.draw.clipToBounds"
+    },
+    {
+      "old": "    networkTypeIcon?.let { networkIcon ->\n        val height = with(LocalDensity.current) { MobileIconDimensions.IconHeightSp.toDp() }\n        Box(modifier = Modifier.height(height), contentAlignment = Alignment.Center) {\n            Image(\n                painter = painterResource(networkIcon.resId),\n                contentDescription = networkIcon.contentDescription?.load(),\n                modifier = Modifier.height(height),\n                colorFilter = ColorFilter.tint(contentColor, BlendMode.SrcIn),\n                contentScale = ContentScale.FillHeight,\n            )\n        }\n    }",
+      "new": "    networkTypeIcon?.let { networkIcon ->\n        val height = with(LocalDensity.current) { MobileIconDimensions.IconHeightSp.toDp() }\n        val networkPainter = painterResource(networkIcon.resId)\n        val intrinsic = networkPainter.intrinsicSize\n        val aspectRatio =\n            if (intrinsic.width.isFinite() && intrinsic.height.isFinite() &&\n                intrinsic.width > 0f && intrinsic.height > 0f) {\n                intrinsic.width / intrinsic.height\n            } else 1f\n        // Reserve the scaled RAT label's full width before laying out the signal bars.\n        Box(\n            modifier = Modifier.size(width = height * aspectRatio, height = height).clipToBounds(),\n            contentAlignment = Alignment.Center,\n        ) {\n            Image(\n                painter = networkPainter,\n                contentDescription = networkIcon.contentDescription?.load(),\n                modifier = Modifier.matchParentSize(),\n                colorFilter = ColorFilter.tint(contentColor, BlendMode.SrcIn),\n                contentScale = ContentScale.Fit,\n            )\n        }\n    }"
+    },
+    {
       "old": "    Canvas(\n        modifier.width(width).height(height).graphicsLayer {",
       "new": "    if (viewModel is SignalIconModel.CellularTypeIconModel.Cellular &&\n        !viewModel.showExclamationMark && !viewModel.carrierNetworkChange &&\n        com.android.systemui.hecker.HeckerSignalIcon(\n            viewModel.level, viewModel.numberOfLevels, color, modifier.width(width).height(height)\n        )) return\n\n    Canvas(\n        modifier.width(width).height(height).graphicsLayer {"
     }

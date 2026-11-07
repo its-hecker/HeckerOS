@@ -1,4 +1,5 @@
 <resources>
+    <string name="vpn_disconnecting">Disconnecting…</string>
     <string name="vpn_tunneling_all">Tunneling all apps</string>
     <string name="vpn_tunneling_apps">Tunneling %1$s</string>
     <string name="vpn_tunneling_except">Tunneling all apps except %1$s</string>

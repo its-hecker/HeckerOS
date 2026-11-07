@@ -38,6 +38,8 @@ final class VpnEngine {
     private long attemptStarted;
     private long lastDiagnostic;
     private String loggedStatus = "";
+    private String lastTileState = "";
+    private long tileStateVersion;
     private String routingKey="",routingText="";
     private android.graphics.Bitmap routingIcon;
     private Network underlying;
@@ -111,6 +113,12 @@ final class VpnEngine {
                 case "connect": endpointAttempt=0;connect(); break;
                 case "reconnect": reconnect(); break;
                 case "disconnect": disconnect(); break;
+                case "set_enabled":
+                    if (!request.containsKey("enabled")) throw new IllegalArgumentException("Missing enabled state");
+                    if (request.getBoolean("enabled")) {
+                        if (!desired) { endpointAttempt = 0; connect(); }
+                    } else if (VpnTileState.enabled(desired, configured, cleanupRequired)) disconnect();
+                    break;
                 case "policy": policy(request); break;
                 case "catalog": catalog = MullvadProvider.servers(); catalogTime = System.currentTimeMillis(); break;
                 case "account": account(VpnInput.accountNumber(request.getString("account", ""))); break;
@@ -130,6 +138,7 @@ final class VpnEngine {
             if (cleanupRequired) { status = "error"; notifyState(); }
             // Import and catalog errors must not tear down a healthy unrelated profile.
         }
+        publishTileState();
         Bundle result = state();
         if (request != null && request.getString("op", "").equals("catalog")) {
             ArrayList<Bundle> servers = new ArrayList<>();
@@ -238,6 +247,7 @@ final class VpnEngine {
     }
     private void disconnect() throws Exception {
         desired = false; worker.removeCallbacks(poll);
+        status = "disconnecting"; notifyState();
         try { snapshot(kernel.call("DOWN")); cleanupRequired = false; }
         catch (Exception failure) {
             if (failure instanceof KernelChannel.Failure) cleanupRequired |= ((KernelChannel.Failure) failure).cleanupRequired;
@@ -341,6 +351,7 @@ final class VpnEngine {
         result.putString("backend", "WireGuard kernel"); if (probed) result.putBoolean("kernel", supported);
         result.putBoolean("configured", configured); result.putBoolean("desired", desired);
         result.putBoolean("cleanup_required", cleanupRequired);
+        result.putLong(VpnTileState.VERSION, tileStateVersion);
         result.putLong("rx", rx); result.putLong("tx", tx); result.putLong("handshake", handshake);
         result.putInt("underlying_netid",underlying==null?0:underlying.getNetId());
         ArrayList<Bundle> profiles = new ArrayList<>();
@@ -390,7 +401,23 @@ final class VpnEngine {
             routingText=context.getString(mode.equals("exclude")?R.string.vpn_tunneling_except:R.string.vpn_tunneling_apps,names);
         }catch(Exception unavailable){routingKey="";routingText="";routingIcon=null;}
     }
+    private void publishTileState() {
+        String projection = status + "|" + desired + "|" + configured + "|" + cleanupRequired
+                + "|" + (handshake > 0) + "|" + error;
+        if (projection.equals(lastTileState)) return;
+        lastTileState = projection;
+        tileStateVersion = Math.max(tileStateVersion + 1, SystemClock.elapsedRealtimeNanos());
+        Bundle event = new Bundle();
+        event.putString("status", status); event.putString("error", error);
+        event.putBoolean("desired", desired); event.putBoolean("configured", configured);
+        event.putBoolean("cleanup_required", cleanupRequired);
+        event.putBoolean("controller_available", true);
+        event.putLong(VpnTileState.VERSION, tileStateVersion);
+        context.sendBroadcast(new Intent(VpnTileState.ACTION_CHANGED).setPackage("org.hecker.suite")
+                .putExtras(event), VpnTileState.CONTROL_PERMISSION);
+    }
     private void notifyState() {
+        publishTileState();
         long now=SystemClock.elapsedRealtime();
         if (!status.equals(loggedStatus)||(desired&&now-lastDiagnostic>=15000)) {
             Log.i("HeckerVPN", "state=" + status + " configured=" + configured
@@ -404,7 +431,7 @@ final class VpnEngine {
                 .putExtra("org.hecker.suite.PAGE", "HeckerVpnActivity");
         PendingIntent content = PendingIntent.getActivity(context, 0, open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent stop = PendingIntent.getService(context, 1, new Intent(context, VpnService.class).setAction("disconnect"), PendingIntent.FLAG_IMMUTABLE);
-        int label = status.equals("active") ? R.string.vpn_active : status.equals("idle") ? R.string.vpn_idle : status.equals("peer_timeout") ? R.string.vpn_peer_timeout : status.equals("waiting_peer") ? R.string.vpn_waiting_peer
+        int label = status.equals("disconnecting") ? R.string.vpn_disconnecting : status.equals("active") ? R.string.vpn_active : status.equals("idle") ? R.string.vpn_idle : status.equals("peer_timeout") ? R.string.vpn_peer_timeout : status.equals("waiting_peer") ? R.string.vpn_waiting_peer
                 : status.equals("waiting_network") ? R.string.vpn_waiting_network : status.equals("error") ? R.string.vpn_error : R.string.vpn_connecting;
         updateRoutingNotification();
         String summary=routingText.isEmpty()?context.getString(label):routingText;

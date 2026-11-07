@@ -1,4 +1,5 @@
 <resources>
+    <string name="vpn_disconnecting">正在断开连接…</string>
     <string name="vpn_loading_apps">正在加载应用…</string>
     <string name="vpn_no_matching_apps">没有符合搜索条件的应用。</string>
     <string name="vpn_apps_load_failed">无法加载应用。请关闭列表后重试。</string>

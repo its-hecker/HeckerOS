@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.hecker.vpn">
     <uses-sdk android:minSdkVersion="37" android:targetSdkVersion="37" />
     <permission android:name="org.hecker.vpn.permission.CONTROL" android:protectionLevel="signature" />
+    <uses-permission android:name="org.hecker.vpn.permission.CONTROL" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
