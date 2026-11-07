@@ -1,0 +1,10 @@
+<resources>
+    <string name="vault_data_saved">APK + Android 应用数据</string>
+    <string name="vault_data_empty">仅 APK：此应用未通过 Android 备份代理提供数据</string>
+    <string name="vault_data_disallowed">仅 APK：应用不允许 Android 数据备份</string>
+    <string name="vault_data_metadata_missing">仅 APK：未保存 Android 软件包元数据</string>
+    <string name="vault_data_failed">仅 APK：Android 应用数据备份失败</string>
+    <string name="vault_partial_saved">已保存部分备份：%1$d 个应用（%2$d 个含 Android 应用数据），%3$d 类个人数据。</string>
+    <string name="vault_complete_saved">已保存备份：%1$d 个应用（%2$d 个含 Android 应用数据），%3$d 类个人数据。</string>
+    <string name="vault_partial_note">部分备份 · 某些所选数据未包含在内。请查看下方结果。</string>
+</resources>

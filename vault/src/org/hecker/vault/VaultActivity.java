@@ -319,6 +319,7 @@ public final class VaultActivity extends Activity {
                     JSONArray contents=summary.optJSONArray("categories");item.addView(text(getString(R.string.vault_archive_contents,summary.optInt("apps"),summary.optInt("withData"),contents==null?0:contents.length()),12,false));
                     item.addView(text(getString(R.string.vault_snapshot_detail,java.text.DateFormat.getDateTimeInstance().format(new Date(summary.optLong("created"))),summary.optString("device"),summary.optInt("sdk")),12,false));
                     if(summary.optInt("wifiCount",-1)>=0)item.addView(text(getString(R.string.vault_wifi_count,summary.optInt("wifiCount")),12,false));
+                    if(summary.optBoolean("partial"))item.addView(text(getString(R.string.vault_partial_note),12,true));
                 }
                 action(item,R.string.vault_inspect,()->beginOperation("inspect",entry.uri));
                 Button remove=button(getString(R.string.vault_delete));remove.setOnClickListener(v->new AlertDialog.Builder(this).setTitle(R.string.vault_delete).setMessage(R.string.vault_delete_confirm)
@@ -485,6 +486,7 @@ public final class VaultActivity extends Activity {
         try{JSONObject snapshot=prepared.snapshot;JSONArray apps=snapshot.getJSONArray("apps"),available=snapshot.getJSONArray("categories");
             LinearLayout content=new LinearLayout(this);content.setOrientation(LinearLayout.VERTICAL);content.setPadding(dp(20),0,dp(20),0);content.addView(text(getString(R.string.vault_preview_summary,apps.length(),available.length()),15,true));
             content.addView(text(getString(R.string.vault_snapshot_detail,java.text.DateFormat.getDateTimeInstance().format(new Date(snapshot.optLong("created"))),snapshot.optString("device"),snapshot.optInt("sdk")),12,false));
+            if(snapshot.optBoolean("partial"))content.addView(text(getString(R.string.vault_partial_note),13,true));
             if(VaultEngine.contains(available,"wifi"))action(content,R.string.vault_wifi_details,()->wifiDetails(prepared));
             Set<String> chosenApps=new LinkedHashSet<>(),chosenCategories=new LinkedHashSet<>();
             RadioGroup modes=new RadioGroup(this);int[] modeIds={101,102,103};String[] modesValues={"both","apk","data"};int[] modeLabels={R.string.vault_apk_data,R.string.vault_apk_only,R.string.vault_data_only};

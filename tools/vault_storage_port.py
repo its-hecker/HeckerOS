@@ -7,8 +7,9 @@ MEDIA=Path('packages/providers/MediaProvider/src/com/android/providers/media')
 ANCHOR='''    private boolean shouldBypassFuseRestrictions(boolean forWrite, String filePath) {
 '''
 PATCH=ANCHOR+'''        // HeckerVault: opt-in package-folder snapshots through the existing FUSE path.
+        // FUSE requests carry LocalCallingIdentity, not ContentProvider Binder attribution.
         if (HeckerVaultMediaAccess.allowed(getContext(), mCallingIdentity.get().uid,
-                getCallingPackage(), filePath)) {
+                mCallingIdentity.get().getPackageName(), filePath)) {
             return true;
         }
 
@@ -20,7 +21,8 @@ PRIVATE_ANCHOR='''        try {
 PRIVATE_PATCH='''        try {
             // FUSE lookup, readdir and directory operations check private paths before
             // shouldBypassFuseRestrictions. Grant the same narrowly scoped access here.
-            if (HeckerVaultMediaAccess.allowed(getContext(), uid, getCallingPackage(), path)) {
+            if (HeckerVaultMediaAccess.allowed(getContext(), uid,
+                    mCallingIdentity.get().getPackageName(), path)) {
                 return true;
             }
             return isCallingIdentityAllowedAccessToDataOrObbPath(

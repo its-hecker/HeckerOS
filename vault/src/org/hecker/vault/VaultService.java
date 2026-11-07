@@ -40,7 +40,7 @@ public final class VaultService extends Service {
         busy=true;cancelRequested=false;scheduled=request.scheduled;progress=getString(R.string.vault_preparing);startForeground(NOTIFICATION,notification(progress));
         worker=executor.submit(()->{workerThread=Thread.currentThread();String report;boolean failed=false;
             try{if(cancelRequested)throw new InterruptedException();VaultNative.recover(this);VaultSystemData.recoverSmsWrite(this);cleanOldStaging();
-                report=new VaultEngine(this,this::update).run(request);
+                VaultEngine engine=new VaultEngine(this,this::update);report=engine.run(request);failed=engine.needsAttention();
             }catch(Exception e){failed=true;report=Thread.currentThread().isInterrupted()?"Operation cancelled. Review the result before retrying.":
                     "Operation failed: "+safeError(e)+". Review permissions, folder access and free storage before retrying.";
             }finally{request.clear();workerThread=null;}

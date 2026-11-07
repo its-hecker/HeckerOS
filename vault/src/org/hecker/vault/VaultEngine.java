@@ -21,7 +21,9 @@ final class VaultEngine {
     static volatile Prepared prepared;
     static volatile Uri needsPassword;
     private final Context context;private final Status status;private final List<String> report=new ArrayList<>();
+    private boolean attention;
     VaultEngine(Context c,Status status){context=c;this.status=status;}
+    boolean needsAttention(){return attention;}
     static void owner(Context c)throws IOException{
         if(android.os.Process.myUid()/100000!=0||c.getSystemService(UserManager.class).isManagedProfile())throw new IOException("HeckerVault v1 supports the owner profile");
         if(!c.getSystemService(UserManager.class).isUserUnlocked())throw new IOException("Unlock the phone before using HeckerVault");
@@ -48,7 +50,7 @@ final class VaultEngine {
             VaultSession session=new VaultSession(root,token,false,selected);VaultSession.current=session;
             int position=0;for(String pkg:selected){session.check();status.text("Saving APKs ("+(++position)+"/"+selected.size()+"): "+pkg);
                 try{apps.put(VaultPackages.capture(context,pkg,root));}
-                catch(PackageManager.NameNotFoundException unavailable){notes.put(pkg+": app is not installed");}
+                catch(PackageManager.NameNotFoundException unavailable){attention=true;notes.put(pkg+": app is not installed");}
             }
             if(apps.length()==0&&request.categories.isEmpty())throw new IOException("Select apps or personal data to back up");
             for(String category:request.categories){session.check();if(category.equals("launcher"))continue;status.text("Backing up "+category);
@@ -56,8 +58,8 @@ final class VaultEngine {
                     if(category.equals("wifi"))try{List<VaultWifi.Network> saved=VaultWifi.read(new File(root,"system/wifi.bin"));
                         snapshot.put("wifiCount",saved.size());for(VaultWifi.Network network:saved)network.clear();
                     }catch(Exception unsupported){/* Preserve Android's restore payload if its detail format is newer. */}}
-                catch(SecurityException e){notes.put(category+": permission is unavailable");}
-                catch(Exception e){if(Thread.currentThread().isInterrupted())throw e;notes.put(category+": backup failed ("+e.getClass().getSimpleName()+")");}
+                catch(SecurityException e){attention=true;notes.put(category+": permission is unavailable");}
+                catch(Exception e){if(Thread.currentThread().isInterrupted())throw e;attention=true;notes.put(category+": backup failed ("+e.getClass().getSimpleName()+")");}
             }
             Set<String> dataPackages=new LinkedHashSet<>();for(int i=0;i<apps.length();i++){JSONObject app=apps.getJSONObject(i);if(app.getBoolean("allowsData"))dataPackages.add(app.getString("package"));}
             if(!request.mode.equals("apk")&&!dataPackages.isEmpty()){
@@ -67,12 +69,25 @@ final class VaultEngine {
                 catch(Exception e){if(Thread.currentThread().isInterrupted())throw e;notes.put("App data: "+safeNativeError(e));}
                 boolean metadata=nativeComplete&&"kv".equals(data.kinds.get("@pm@"));
                 for(int i=0;i<apps.length();i++){JSONObject app=apps.getJSONObject(i);String pkg=app.getString("package");String kind=data.kinds.get(pkg);
-                    if(metadata&&data.results.getOrDefault(pkg,-1)==0&&kind!=null){app.put("data",kind);app.put("result","APK + app data");}
-                    else{app.put("data","");app.put("result",app.getBoolean("allowsData")?"APK only: Android did not produce a complete data backup":"APK only: app does not allow Android backup");}}
-            }else for(int i=0;i<apps.length();i++)apps.getJSONObject(i).put("data","").put("result","APK only");
+                    boolean hasPayload=kind!=null&&new File(root,"data/"+pkg+"/"+kind).length()>0;
+                    VaultDataOutcome outcome=VaultDataOutcome.classify(app.getBoolean("allowsData"),nativeComplete,metadata,data.results.getOrDefault(pkg,-1),hasPayload);
+                    int label;
+                    switch(outcome){case SAVED:label=R.string.vault_data_saved;break;case EMPTY:label=R.string.vault_data_empty;break;
+                        case DISALLOWED:label=R.string.vault_data_disallowed;break;case METADATA_MISSING:label=R.string.vault_data_metadata_missing;break;
+                        default:label=R.string.vault_data_failed;}
+                    app.put("data",outcome==VaultDataOutcome.SAVED?kind:"").put("dataStatus",outcome.name().toLowerCase(Locale.ROOT)).put("result",context.getString(label));
+                    if(outcome!=VaultDataOutcome.SAVED)attention=true;
+                }
+            }else for(int i=0;i<apps.length();i++){
+                JSONObject app=apps.getJSONObject(i);boolean requested=!request.mode.equals("apk");
+                app.put("data","").put("dataStatus",requested?"disallowed":"not_requested")
+                        .put("result",requested?context.getString(R.string.vault_data_disallowed):"APK only");
+                if(requested)attention=true;
+            }
             Path shared = request.externalParts.isEmpty() || !sharedStorageAvailable(context)
                     ? null : Environment.getExternalStorageDirectory().toPath();
             if (shared == null && !request.externalParts.isEmpty()) {
+                attention=true;
                 notes.put("Selected shared storage folders were unavailable on this build or volume.");
             }
             for(int i=0;i<apps.length();i++){JSONObject app=apps.getJSONObject(i);String pkg=app.getString("package");
@@ -88,13 +103,13 @@ final class VaultEngine {
                 }
                 if(request.categories.contains("launcher")&&pkg.equals("com.android.launcher3")&&!app.optString("data").isEmpty())categories.put("launcher");
             }
-            if(request.categories.contains("launcher")&&!contains(categories,"launcher"))notes.put("Launcher layout: native launcher backup was unavailable");
+            if(request.categories.contains("launcher")&&!contains(categories,"launcher")){attention=true;notes.put("Launcher layout: native launcher backup was unavailable");}
             // Drop unsuccessful native payloads instead of exporting unusable private data.
             File dataRoot=new File(root,"data");if(dataRoot.isDirectory()){
                 Set<String> keep=new HashSet<>();for(int i=0;i<apps.length();i++)if(!apps.getJSONObject(i).optString("data").isEmpty())keep.add(apps.getJSONObject(i).getString("package"));
                 if(!keep.isEmpty())keep.add("@pm@");File[] dirs=dataRoot.listFiles();if(dirs!=null)for(File dir:dirs)if(!keep.contains(dir.getName()))cleanup(dir);
             }
-            snapshot.put("apps",apps).put("categories",categories).put("notes",notes).put("groups",VaultGroups.load(context));VaultStorage.json(new File(root,"snapshot.json"),snapshot);
+            snapshot.put("apps",apps).put("categories",categories).put("notes",notes).put("partial",attention).put("groups",VaultGroups.load(context));VaultStorage.json(new File(root,"snapshot.json"),snapshot);
             VaultPackages.validate(snapshot,root);VaultSystemData.validate(root,categories);
             String stamp=new SimpleDateFormat("yyyyMMdd-HHmmss",Locale.ROOT).format(new Date());
             destination=VaultStorage.create(context,"HV-"+stamp+"-"+id.substring(0,8)+".hvault");status.text("Preparing encrypted export");
@@ -107,9 +122,10 @@ final class VaultEngine {
                     long speed=bytes*1000/Math.max(1,now-started);int percent=total==0?100:(int)Math.min(100,bytes*100/total);
                     status.text("Encrypting and exporting · "+percent+"% · "+done+" / "+size+" · "+android.text.format.Formatter.formatFileSize(context,speed)+"/s");});}
             status.text("Finishing encrypted snapshot");
-            complete=true;int retention=request.scheduled?VaultStorage.prefs(context).getInt("retention",3):0;
+            // An incomplete scheduled snapshot must not rotate away older complete archives.
+            complete=true;int retention=request.scheduled&&!attention?VaultStorage.prefs(context).getInt("retention",3):0;
             VaultStorage.committed(context,destination,retention);VaultHistory.record(context,destination,snapshot);int withData=0;for(int i=0;i<apps.length();i++)if(!apps.getJSONObject(i).optString("data").isEmpty())withData++;
-            report.add("Snapshot saved: "+apps.length()+" apps ("+withData+" with app data), "+categories.length()+" personal-data categories.");
+            report.add(context.getString(attention?R.string.vault_partial_saved:R.string.vault_complete_saved,apps.length(),withData,categories.length()));
             for(int i=0;i<apps.length();i++)report.add(apps.getJSONObject(i).optString("label")+": "+apps.getJSONObject(i).getString("result"));
             for(int i=0;i<notes.length();i++)report.add(notes.getString(i));
             report.add("Copy the HeckerVault folder to PC or USB before formatting data. Keep the archive password.");
@@ -128,6 +144,7 @@ final class VaultEngine {
             session.check();
             String label = pkg + " · Android/" + part.directory;
             if (part == VaultExternal.Part.DATA && !app.getBoolean("allowsData")) {
+                attention=true;
                 results.put(part.directory,new JSONObject().put("state","disallowed"));
                 notes.put(label + ": app does not allow backup");
                 continue;
@@ -140,6 +157,7 @@ final class VaultEngine {
                 notes.put(label + ": " + (count == 0 ? "no files" : count + " files backed up"));
             } catch (IOException | SecurityException failure) {
                 session.check();
+                attention=true;
                 results.put(part.directory,new JSONObject().put("state","failed").put("reason",failure.getClass().getSimpleName()));
                 notes.put(label + ": backup failed (" + failure.getClass().getSimpleName() + ")");
             }
