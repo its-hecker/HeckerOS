@@ -22,8 +22,9 @@ def host(out):
     reply_test=out/'cleanup_reply.c'
     reply_test.write_text('#define main wireguard_quick_main\n#include "'+str(source/'src/wg-quick/android.c')+'"\n#undef main\n#include <assert.h>\n'
         'int main(void){char reply[256];uint32_t mark=0;'
-        'assert(hecker_parse_underlying_mark("101",&mark)&&mark==0x30065);'
-        'assert(hecker_parse_underlying_mark("65535",&mark)&&mark==0x3ffff);'
+        'assert(hecker_parse_underlying_mark("101",&mark)&&mark==0xf0065);'
+        'assert(hecker_parse_underlying_mark("65535",&mark)&&mark==0xfffff);'
+        'assert((mark&0xc0000U)==0xc0000U);'  # Kernel-created UDP carries system permission.
         'assert(!hecker_parse_underlying_mark("99",&mark));assert(!hecker_parse_underlying_mark("65536",&mark));'
         'assert(!hecker_parse_underlying_mark("101;id",&mark));assert(!hecker_parse_underlying_mark("101 102",&mark));'
         'assert(!hecker_parse_underlying_mark("",&mark));assert(!hecker_parse_underlying_mark(NULL,&mark));'

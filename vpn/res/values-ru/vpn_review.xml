@@ -1,0 +1,6 @@
+<resources>
+    <string name="vpn_tunneling_all">Туннелируются все приложения</string>
+    <string name="vpn_tunneling_apps">Туннелируются: %1$s</string>
+    <string name="vpn_tunneling_except">Туннелируются все, кроме: %1$s</string>
+    <string name="vpn_tunneling_more">%1$s и ещё %2$d</string>
+</resources>

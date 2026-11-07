@@ -41,9 +41,11 @@
 static bool is_exiting = false;
 static bool binder_available = false;
 static unsigned int sdk_version;
-static uint32_t hecker_underlying_mark = 0x20000;
+static uint32_t hecker_underlying_mark = 0xe0000;
 
-/* AOSP Fwmark: low 16 bits netId, bit 16 explicitlySelected, bit 17 protectedFromVpn.
+/* AOSP Fwmark: low 16 bits netId, bit 16 explicitlySelected, bit 17 protectedFromVpn,
+ * bits 18-19 PERMISSION_SYSTEM (3, including PERMISSION_NETWORK). Kernel-created
+ * sockets do not pass through libnetd_client to receive these permission bits.
  * Pin encrypted UDP to the physical Network selected by the controller, including CLAT.
  * Numeric metadata is an argv token, never a profile directive or a shell fragment. */
 static bool hecker_parse_underlying_mark(const char *text, uint32_t *mark)
@@ -55,7 +57,7 @@ static bool hecker_parse_underlying_mark(const char *text, uint32_t *mark)
   netid = netid * 10 + (*p - '0');
  }
  if (netid < 100 || netid > 65535) return false;
- *mark = 0x30000U | netid;
+ *mark = 0xf0000U | netid;
  return true;
 }
 

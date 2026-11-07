@@ -41,6 +41,25 @@ final class VaultUi {
     void settingsSection(LinearLayout parent,String title){TextView v=text(title,15,true);v.setTextColor(color(R.color.vault_accent));v.setPadding(dp(12),dp(24),dp(12),dp(10));parent.addView(v);}
     void copy(LinearLayout parent,String title,String detail){TextView name=text(title,16,true);parent.addView(name);
         if(detail!=null&&!detail.isEmpty()){TextView secondary=text(detail,14,false);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(4);parent.addView(secondary,p);}}
+    void feature(LinearLayout parent,int icon,int tint,String title,String detail){
+        LinearLayout row=new LinearLayout(c);row.setGravity(Gravity.CENTER_VERTICAL);
+        ImageView badge=new ImageView(c);badge.setImageResource(icon);badge.setImageTintList(ColorStateList.valueOf(tint));
+        badge.setPadding(dp(11),dp(11),dp(11),dp(11));badge.setBackground(shape((tint&0x00ffffff)|0x24000000,16));
+        badge.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);row.addView(badge,new LinearLayout.LayoutParams(dp(46),dp(46)));
+        LinearLayout copy=column();copy.setPadding(dp(14),0,0,0);copy(copy,title,detail);row.addView(copy,new LinearLayout.LayoutParams(0,-2,1));parent.addView(row);
+    }
+    void hero(LinearLayout parent){
+        LinearLayout card=new LinearLayout(c);card.setGravity(Gravity.CENTER_VERTICAL);card.setPadding(dp(20),dp(20),dp(12),dp(20));
+        GradientDrawable background=new GradientDrawable(GradientDrawable.Orientation.TL_BR,new int[]{0xff293956,0xff183237,0xff1d283e});
+        background.setCornerRadius(dp(26));background.setStroke(dp(1),0xff3e5469);card.setBackground(background);
+        LinearLayout copy=column();copy.addView(text(c.getString(R.string.vault_hero_title),23,true));
+        TextView subtitle=text(c.getString(R.string.vault_hero_detail),13,false);subtitle.setTextColor(0xffbdcdd9);subtitle.setPadding(0,dp(8),0,0);copy.addView(subtitle);
+        card.addView(copy,new LinearLayout.LayoutParams(0,-2,1));
+        com.airbnb.lottie.LottieAnimationView animation=new com.airbnb.lottie.LottieAnimationView(c);
+        animation.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);animation.setAnimation(R.raw.vault_guardian);animation.setRepeatCount(-1);
+        if(android.animation.ValueAnimator.areAnimatorsEnabled())animation.playAnimation();else animation.setProgress(.5f);
+        card.addView(animation,new LinearLayout.LayoutParams(dp(112),dp(132)));parent.addView(card,new LinearLayout.LayoutParams(-1,-2));
+    }
     void action(LinearLayout parent,String label,Runnable action){Button v=button(label,false);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(14);parent.addView(v,p);v.setOnClickListener(w->action.run());}
     void navigation(LinearLayout parent,int selected,java.util.function.IntConsumer action){parent.removeAllViews();parent.setBackgroundColor(color(R.color.vault_navigation));parent.setPadding(dp(8),dp(8),dp(8),dp(10));
         int[] icons={R.drawable.v_home,R.drawable.v_apps,R.drawable.v_archive,R.drawable.v_settings};

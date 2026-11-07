@@ -1,0 +1,5 @@
+<resources>
+    <string name="vpn_loading_apps">Loading apps…</string>
+    <string name="vpn_no_matching_apps">No apps match this search.</string>
+    <string name="vpn_apps_load_failed">Could not load apps. Close this list and try again.</string>
+</resources>

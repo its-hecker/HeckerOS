@@ -4,19 +4,20 @@ package com.android.providers.media;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
-/** Local ROM backup access, restricted to package folders under the owner's Android/media. */
+/** Local ROM backup access, restricted to installed package folders on owner shared storage. */
 final class HeckerVaultMediaAccess {
     private static final String VAULT="org.hecker.vault";
-    private static final String PREFIX="/storage/emulated/0/Android/media/";
+    private static final String PREFIX="/storage/emulated/0/Android/";
     private HeckerVaultMediaAccess() {}
 
     static String owner(String path) {
         if(path==null||!path.startsWith(PREFIX)||path.indexOf('\\')>=0||path.indexOf('\0')>=0)return null;
         String relative=path.substring(PREFIX.length());
         String[] segments=relative.split("/",-1);
-        if(segments.length==0||!segments[0].matches("[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z0-9_]+)+"))return null;
+        if(segments.length<2||!java.util.Set.of("data","obb","media").contains(segments[0])
+                ||!segments[1].matches("[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z0-9_]+)+"))return null;
         for(String segment:segments)if(segment.isEmpty()||segment.equals(".")||segment.equals(".."))return null;
-        return segments[0];
+        return segments[1];
     }
     static boolean allowed(Context context,int uid,String caller,String path) {
         String owner=owner(path);

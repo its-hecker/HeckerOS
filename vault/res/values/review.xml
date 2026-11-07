@@ -1,0 +1,16 @@
+<resources>
+    <string name="vault_hero_title">Everything worth keeping</string>
+    <string name="vault_hero_detail">Apps, memories and saved networks, together in your encrypted vault.</string>
+    <string name="vault_wifi_details">Saved Wi-Fi networks</string>
+    <string name="vault_wifi_count">%1$d networks in this backup</string>
+    <string name="vault_wifi_hidden">Hidden network</string>
+    <string name="vault_wifi_no_password">No password stored in this backup.</string>
+    <string name="vault_wifi_reveal">Reveal password</string>
+    <string name="vault_wifi_details_unavailable">Network details are unavailable for this backup format. The original Wi-Fi restore is still available.</string>
+    <string name="vault_snapshot_detail">%1$s · %2$s · Android API %3$d</string>
+    <string name="vault_archive_contents">%1$d apps · %2$d with app data · %3$d personal-data categories</string>
+    <string name="vault_part_saved">%1$s: %2$d files saved</string>
+    <string name="vault_part_empty">%1$s: no files found</string>
+    <string name="vault_part_failed">%1$s: backup failed</string>
+    <string name="vault_part_disallowed">%1$s: app does not allow data backup</string>
+</resources>

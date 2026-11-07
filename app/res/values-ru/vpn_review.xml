@@ -1,0 +1,5 @@
+<resources>
+    <string name="vpn_loading_apps">Загрузка приложений…</string>
+    <string name="vpn_no_matching_apps">По этому запросу приложения не найдены.</string>
+    <string name="vpn_apps_load_failed">Не удалось загрузить приложения. Закройте список и повторите попытку.</string>
+</resources>

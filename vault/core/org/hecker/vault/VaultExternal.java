@@ -13,6 +13,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
@@ -228,15 +229,20 @@ final class VaultExternal {
         if (relative == null) return path;
         for (Path segment : relative) {
             path = path.resolve(segment);
-            if (Files.notExists(path, NO_LINKS)) {
+            try {
+                BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class, NO_LINKS);
+                if (!attrs.isDirectory()) throw new IOException("Shared storage path is not a directory");
+            } catch (NoSuchFileException absent) {
                 if (!create) return null;
                 try {
                     Files.createDirectory(path);
                 } catch (FileAlreadyExistsException concurrentCreate) {
                     // Another writer can create this folder before we do. Still check its type.
                 }
+                if (!Files.readAttributes(path, BasicFileAttributes.class, NO_LINKS).isDirectory()) {
+                    throw new IOException("Shared storage path is not a directory");
+                }
             }
-            if (!Files.isDirectory(path, NO_LINKS)) throw new IOException("Shared storage folder is not accessible");
         }
         return path;
     }

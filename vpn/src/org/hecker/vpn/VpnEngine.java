@@ -38,6 +38,8 @@ final class VpnEngine {
     private long attemptStarted;
     private long lastDiagnostic;
     private String loggedStatus = "";
+    private String routingKey="",routingText="";
+    private android.graphics.Bitmap routingIcon;
     private Network underlying;
     private int endpointAttempt,endpointChoices=1;
     private String underlyingProperties="";
@@ -63,6 +65,7 @@ final class VpnEngine {
             @Override public void onReceive(Context c, Intent intent) {
                 String name = intent.getData() == null ? "" : intent.getData().getSchemeSpecificPart();
                 worker.post(() -> {
+                    routingKey="";
                     if (!desired || store == null) return;
                     try {
                         JSONObject profile = selected();
@@ -357,6 +360,36 @@ final class VpnEngine {
         }
         result.putParcelableArrayList("profiles", profiles); return result;
     }
+    private void updateRoutingNotification() {
+        try {
+            JSONObject profile=selected();String mode=profile.optString("mode","all");
+            JSONArray packages=profile.optJSONArray("apps");
+            String key=profile.optString("id")+mode+packages+context.getResources().getConfiguration().getLocales();
+            if(key.equals(routingKey))return;
+            routingKey=key;routingIcon=null;
+            if(mode.equals("all")||mode.equals("exclude")&&(packages==null||packages.length()==0)) {
+                routingText=context.getString(R.string.vpn_tunneling_all);return;
+            }
+            List<String> labels=new ArrayList<>();int count=packages==null?0:packages.length();
+            for(int i=0;i<Math.min(count,3);i++){
+                String pkg=packages.getString(i),label=pkg;
+                try {
+                    android.content.pm.ApplicationInfo app=context.getPackageManager().getApplicationInfo(pkg,0);
+                    label=app.loadLabel(context.getPackageManager()).toString();
+                    if(i==0){
+                        android.graphics.drawable.Drawable drawable=app.loadIcon(context.getPackageManager());
+                        int size=Math.round(48*context.getResources().getDisplayMetrics().density);
+                        routingIcon=android.graphics.Bitmap.createBitmap(size,size,android.graphics.Bitmap.Config.ARGB_8888);
+                        drawable.setBounds(0,0,size,size);drawable.draw(new android.graphics.Canvas(routingIcon));
+                    }
+                }catch(PackageManager.NameNotFoundException|RuntimeException absent){/* Retain the package label. */}
+                labels.add(label);
+            }
+            String names=String.join(", ",labels);
+            if(count>3)names=context.getString(R.string.vpn_tunneling_more,names,count-3);
+            routingText=context.getString(mode.equals("exclude")?R.string.vpn_tunneling_except:R.string.vpn_tunneling_apps,names);
+        }catch(Exception unavailable){routingKey="";routingText="";routingIcon=null;}
+    }
     private void notifyState() {
         long now=SystemClock.elapsedRealtime();
         if (!status.equals(loggedStatus)||(desired&&now-lastDiagnostic>=15000)) {
@@ -373,8 +406,12 @@ final class VpnEngine {
         PendingIntent stop = PendingIntent.getService(context, 1, new Intent(context, VpnService.class).setAction("disconnect"), PendingIntent.FLAG_IMMUTABLE);
         int label = status.equals("active") ? R.string.vpn_active : status.equals("idle") ? R.string.vpn_idle : status.equals("peer_timeout") ? R.string.vpn_peer_timeout : status.equals("waiting_peer") ? R.string.vpn_waiting_peer
                 : status.equals("waiting_network") ? R.string.vpn_waiting_network : status.equals("error") ? R.string.vpn_error : R.string.vpn_connecting;
+        updateRoutingNotification();
+        String summary=routingText.isEmpty()?context.getString(label):routingText;
         notifications.notify(7841, new Notification.Builder(context, "heckervpn").setSmallIcon(R.drawable.ic_vpn)
-                .setContentTitle(context.getString(R.string.vpn_title)).setContentText(context.getString(label))
+                .setContentTitle(context.getString(R.string.vpn_title)+" · "+context.getString(label)).setContentText(summary)
+                .setLargeIcon(routingIcon).setStyle(new Notification.BigTextStyle().bigText(summary))
+                .setVisibility(Notification.VISIBILITY_PRIVATE)
                 .setContentIntent(content).setOngoing(desired).setOnlyAlertOnce(true)
                 .addAction(new Notification.Action.Builder(null, context.getString(R.string.vpn_disconnect), stop).build()).build());
     }

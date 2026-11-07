@@ -13,6 +13,7 @@ final class VaultSession {
     final Map<String,Integer> results=new ConcurrentHashMap<>();
     final Map<String,String> kinds=new ConcurrentHashMap<>();
     volatile boolean cancelled;
+    boolean deviceTransfer=true;
     VaultSession(File root,long token,boolean restoring,Collection<String> packages){
         this.root=root;this.token=token;this.restoring=restoring;
         this.packages=Collections.unmodifiableSet(new HashSet<>(packages));

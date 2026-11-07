@@ -8,19 +8,20 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
-from vault_storage_port import vault_storage_plan,MEDIA,ANCHOR,PATCH
+from vault_storage_port import vault_storage_plan,MEDIA,ANCHOR,PATCH,PRIVATE_ANCHOR,PRIVATE_PATCH
 from prepare import replace_guarded
 
 class VaultMediaTest(unittest.TestCase):
     def test_guarded_integration_apply_twice_revert_and_upstream_change(self):
         with tempfile.TemporaryDirectory() as temporary:
             rom=Path(temporary);provider=rom/MEDIA/'MediaProvider.java';provider.parent.mkdir(parents=True)
-            original='class MediaProvider {\n'+ANCHOR+'return false;\n}\n}\n';provider.write_text(original)
+            original='class MediaProvider {\n'+ANCHOR+'return false;\n}\n'+PRIVATE_ANCHOR+'}\n}\n';provider.write_text(original)
             def apply(changes):
                 for path,text in changes.items():
                     if text is None:path.unlink()
                     else:path.write_text(text)
             apply(vault_storage_plan(rom,replace_guarded));self.assertIn(PATCH,provider.read_text())
+            self.assertIn(PRIVATE_PATCH,provider.read_text())
             self.assertEqual(vault_storage_plan(rom,replace_guarded),{})
             apply(vault_storage_plan(rom,replace_guarded,True));self.assertEqual(provider.read_text(),original)
             self.assertFalse((rom/MEDIA/'HeckerVaultMediaAccess.java').exists())
@@ -47,8 +48,11 @@ public class MediaProbe {
  static void check(boolean value){if(!value)throw new AssertionError();}
  public static void main(String[] args){
   String base="/storage/emulated/0/Android/media/com.whatsapp",file=base+"/WhatsApp/Media/a photo.jpg";Context c=new Context();
-  check(HeckerVaultMediaAccess.allowed(c,10203,"org.hecker.vault",base));check(HeckerVaultMediaAccess.allowed(c,10203,"org.hecker.vault",file));
-  for(String path:new String[]{"/data/user/0/com.whatsapp",base.replace("/media/","/data/"),base.replace("/0/","/10/"),
+  for(String part:new String[]{"data","obb","media"}){
+   check(HeckerVaultMediaAccess.allowed(c,10203,"org.hecker.vault",base.replace("/media/","/"+part+"/")));
+   check(HeckerVaultMediaAccess.allowed(c,10203,"org.hecker.vault",file.replace("/media/","/"+part+"/")));
+  }
+  for(String path:new String[]{"/data/user/0/com.whatsapp",base.replace("/media/","/cache/"),base.replace("/0/","/10/"),
    "/storage/1234-5678/Android/media/com.whatsapp",base+"/../com.example/a",base+"//a",base+"/./a",base+"/x\\\\a",base+"/x\\0a",
    "/storage/emulated/0/Android/media/",null})check(!HeckerVaultMediaAccess.allowed(c,10203,"org.hecker.vault",path));
   check(!HeckerVaultMediaAccess.allowed(c,10204,"org.hecker.vault",file));check(!HeckerVaultMediaAccess.allowed(c,10203,"com.fake.vault",file));
@@ -56,7 +60,7 @@ public class MediaProbe {
   c.mtp=false;check(!HeckerVaultMediaAccess.allowed(c,10203,"org.hecker.vault",file));c.mtp=true;c.backup=false;
   check(!HeckerVaultMediaAccess.allowed(c,10203,"org.hecker.vault",file));c.backup=true;c.pm.installed=false;
   check(!HeckerVaultMediaAccess.allowed(c,10203,"org.hecker.vault",file));
-  System.out.println("Vault MediaProvider adapter: allowed owner media, rejected private paths, traversal, other users, forged identities and missing permissions: PASS");
+  System.out.println("Vault MediaProvider adapter: scoped data/obb/media allowed; internal private paths, traversal, other users, forged identities and missing permissions rejected: PASS");
  }
 }'''
         }
