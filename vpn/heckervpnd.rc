@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 on post-fs-data
     mkdir /data/misc/heckervpn 0700 root root
+    mkdir /data/misc/heckervpn/tcp 0700 root root
     restorecon_recursive /data/misc/heckervpn
 
 service heckervpnd /system_ext/bin/heckervpnd

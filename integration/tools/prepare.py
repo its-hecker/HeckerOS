@@ -104,6 +104,7 @@ def prepare(rom, offline=False, allowlists=(), biometrics=()):
         run(rom, plugin, "verify_ready.py")
     prepare_google_camera(rom, offline=offline)
     run(rom, suite, "prepare_librepods.py", *(["--offline"] if offline else []))
+    run(rom, suite, "prepare_proxy_assets.py", *(["--offline"] if offline else []))
     theme_args = ["--offline"] if offline else []
     run(rom, suite, "fetch_depth_assets.py", *theme_args)
     run(rom, suite, "fetch_theme_assets.py", *theme_args)

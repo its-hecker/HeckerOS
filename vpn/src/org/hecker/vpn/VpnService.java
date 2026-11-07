@@ -40,7 +40,7 @@ public final class VpnService extends Service {
         VpnEngine engine = ((VpnApplication) getApplication()).engine();
         if (engine == null) { writer.println("Owner user only"); return; }
         Bundle request = new Bundle(); request.putString("op", "state"); Bundle state = engine.call(request);
-        writer.println("HeckerVPN kernel backend; credentials omitted");
+        writer.println("HeckerVPN native backend; credentials omitted");
         for (String key : new String[]{"status", "error", "backend"}) writer.println(key + "=" + state.getString(key, ""));
         writer.println("configured=" + state.getBoolean("configured") + " rx=" + state.getLong("rx")
                 + " tx=" + state.getLong("tx") + " handshake=" + state.getLong("handshake"));

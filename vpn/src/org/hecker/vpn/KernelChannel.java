@@ -39,8 +39,8 @@ final class KernelChannel implements AutoCloseable {
             close();
             // Never include configuration, keys or arbitrary helper output.
             throw new IllegalArgumentException(stage.equals("connect")
-                    ? "Cannot reach the built-in WireGuard service. Reboot after updating the ROM; if this persists, check HeckerVPN service and SELinux logs."
-                    : "The built-in WireGuard service stopped responding. Reconnect to retry; check HeckerVPN service logs if this persists.", failure);
+                    ? "Cannot reach the built-in HeckerVPN service. Reboot after updating the ROM; if this persists, check HeckerVPN service and SELinux logs."
+                    : "The built-in HeckerVPN service stopped responding. Reconnect to retry; check HeckerVPN service logs if this persists.", failure);
         } catch (Exception failure) { close(); throw failure; }
     }
     @Override public void close() {

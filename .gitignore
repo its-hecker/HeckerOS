@@ -8,3 +8,5 @@ out/*
 /prebuilts/depth/litert.jar
 /prebuilts/depth/litert-api.jar
 /prebuilts/depth/libtensorflowlite_jni.so
+/prebuilts/mihomo/arm64/
+/prebuilts/mihomo/snakeyaml.jar
