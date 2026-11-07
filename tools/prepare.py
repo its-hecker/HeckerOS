@@ -15,6 +15,7 @@ from google_sans_cyrillic import google_sans_cyrillic_plan
 from native_rom_compat import native_rom_compat_plan
 from recovery_port import recovery_plan
 from pakistan_ims import pakistan_ims_plan
+from vault_storage_port import vault_storage_plan
 from privapp_permissions import check_feature_privapp_permissions
 
 
@@ -347,6 +348,7 @@ def plan(rom, revert=False):
     changes.update(aosp_launcher_plan(rom, replace_guarded, revert))
     changes.update(recovery_plan(rom, revert))
     changes.update(pakistan_ims_plan(rom, revert))
+    changes.update(vault_storage_plan(rom, replace_guarded, revert))
     return changes
 
 

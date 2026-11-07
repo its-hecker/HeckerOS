@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vault_storage_heading">ОБЗОР ХРАНИЛИЩА</string>
+    <string name="vault_storage_used">Использовано: %1$s</string>
+    <string name="vault_storage_available">Доступно: %1$s · Всего: %2$s</string>
+    <string name="vault_archive_storage">Снимков: %1$d · %2$s в папке копий</string>
+    <string name="vault_wifi_heading">СЕТИ WI-FI</string>
+    <string name="vault_backup_wifi">Сохранить сети Wi-Fi</string>
+    <string name="vault_restore_wifi">Восстановить сети Wi-Fi</string>
+    <string name="vault_wifi_detail">Сохранить названия сетей и пароли в зашифрованном снимке</string>
+    <string name="vault_schedule_enabled">Резервное копирование по расписанию включено</string>
+    <string name="vault_reset_password">Сбросить пароль шифрования</string>
+    <string name="vault_reset_password_detail">Подтвердите PIN-код, графический ключ или пароль телефона, чтобы задать новый пароль Vault</string>
+    <string name="vault_reset_auth">Подтвердите блокировку телефона для сброса пароля шифрования Vault.</string>
+    <string name="vault_entry_auth">Откройте HeckerVault. В этом сеансе копирование и восстановление не потребуют повторного подтверждения.</string>
+    <string name="vault_reset_requires_lock">Для сброса пароля Vault сначала задайте PIN-код, графический ключ или пароль в настройках телефона.</string>
+    <string name="vault_first_setup">Настройка шифрования Vault</string>
+    <string name="vault_first_setup_note">Задайте единый пароль для копий. Телефон надёжно сохранит его, и повторный ввод при копировании и восстановлении не потребуется. Сохраните пароль отдельно для восстановления после чистой установки.</string>
+    <string name="vault_reset_note">Новые снимки будут использовать новый пароль. Телефон сохранит предыдущие пароли для старых снимков. После удаления данных телефона для старого снимка потребуется его исходный пароль.</string>
+    <string name="vault_save_password">Сохранить пароль шифрования</string>
+    <string name="vault_key_unavailable">Не удалось открыть или сохранить ключ Vault. Разблокируйте телефон и повторите попытку.</string>
+    <string name="vault_import_password_note">У этого снимка другой пароль либо файл повреждён. Введите исходный пароль один раз. Vault сохранит его только после полной проверки архива.</string>
+</resources>

@@ -2,6 +2,7 @@
 import org.hecker.vpn.VpnConfig;
 import java.util.List;
 import org.hecker.vpn.VpnInput;
+import org.hecker.vpn.VpnUnderlay;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 public final class HeckerVpnConfigTest {
@@ -55,6 +56,24 @@ public final class HeckerVpnConfigTest {
         numeric.forNetwork("all",List.of(),host->{throw new AssertionError("Numeric endpoint reached DNS");});
         try{parsed.forNetwork("all",List.of(),host->List.of());throw new AssertionError("Missing DNS results accepted");}catch(IllegalArgumentException expected){}
         try{parsed.forNetwork("all",List.of(),host->List.of("192.0.2.5;id"));throw new AssertionError("Non-IP DNS result accepted");}catch(IllegalArgumentException expected){}
+        if(!VpnUnderlay.addresses(List.of("2001:db8::5","192.0.2.5"),true,false,null).equals(List.of("192.0.2.5")))
+            throw new AssertionError("IPv4 Wi-Fi retained an unreachable IPv6 endpoint");
+        String nat64=VpnUnderlay.synthesize("192.0.2.5","64:ff9b::/96");
+        if(!java.net.InetAddress.getByName(nat64).equals(java.net.InetAddress.getByName("64:ff9b::c000:205")))
+            throw new AssertionError("Numeric IPv4 endpoint cannot use carrier NAT64");
+        if(!VpnUnderlay.addresses(List.of("192.0.2.5"),false,true,"64:ff9b::/96").equals(List.of(nat64,"192.0.2.5")))
+            throw new AssertionError("IPv6-only mobile endpoint order lost NAT64 or CLAT fallback");
+        if(!VpnUnderlay.addresses(List.of("192.0.2.5"),true,true,"64:ff9b::/96").equals(List.of("192.0.2.5")))
+            throw new AssertionError("Dual-stack endpoint was unnecessarily translated");
+        for(int prefix:List.of(32,40,48,56,64,96)){
+            byte[] result=java.net.InetAddress.getByName(VpnUnderlay.synthesize("192.0.2.5","2001:db8::/"+prefix)).getAddress();
+            int position=prefix/8;for(int value:List.of(192,0,2,5)){if(position==8)position++;
+                if((result[position++]&255)!=value)throw new AssertionError("RFC6052 IPv4 placement");}
+            if(result[8]!=0)throw new AssertionError("RFC6052 reserved octet was overwritten");
+        }
+        VpnConfig numericOnMobile=VpnConfig.parse(numeric.forUnderlay("all",List.of(),host->List.of(nat64)));
+        if(!numericOnMobile.peers.get(0).get("Endpoint").equals("["+nat64+"]:51820"))
+            throw new AssertionError("Numeric profile skipped mobile endpoint handling");
         for (String keepalive : List.of("0", "120")) {
             VpnConfig explicit = VpnConfig.parse(CONFIG + "PersistentKeepalive=" + keepalive + "\n");
             if (!keepalive.equals(VpnConfig.parse(explicit.forConnection("all", List.of())).peers.get(0).get("PersistentKeepalive")))

@@ -30,7 +30,10 @@ def host(out):
         'assert(hecker_destroy_reply_ok("200 0 success"));'
         'assert(!hecker_destroy_reply_ok(NULL));assert(!hecker_destroy_reply_ok("500 0 destroyNetwork() failed (Permission denied)"));'
         'assert(!hecker_destroy_reply_ok("400 0 syntax error"));'
-        'snprintf(reply,sizeof(reply),"500 0 destroyNetwork() failed (%s)",strerror(ENONET));assert(hecker_destroy_reply_ok(reply));return 0;}\n')
+        'snprintf(reply,sizeof(reply),"400 0 destroyNetwork() failed (%s)",strerror(ENONET));assert(hecker_destroy_reply_ok(reply));'
+        'snprintf(reply,sizeof(reply),"400 0 destroyNetwork() failed (%s)",strerror(ENOENT));assert(hecker_destroy_reply_ok(reply));'
+        'snprintf(reply,sizeof(reply),"500 0 destroyNetwork() failed (%s)",strerror(ENONET));assert(!hecker_destroy_reply_ok(reply));'
+        'assert(!hecker_destroy_reply_ok("400 0 destroyNetwork() failed (Permission denied)"));return 0;}\n')
     run('gcc','-std=gnu11','-Wall','-Wextra','-Werror','-Wno-sign-compare','-I',out,reply_test,'-ldl','-o',out/'cleanup-reply')
     run(out/'cleanup-reply')
     lock=json.loads((source/'UPSTREAM.json').read_text())
@@ -56,7 +59,7 @@ def android(out,sdk):
     cp=os.pathsep.join(map(str,[sdk/'android-system.jar',sdk/'lottie.jar',sdk/'appcompat.jar',sdk/'core.jar']))
     run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',cp,'-d',out/'backend',out/'vpn-r/org/hecker/vpn/R.java',*common,*sorted((ROOT/'vpn/src').rglob('*.java')))
     ui=ROOT/'app/src/org/hecker/suite'
-    run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',cp,'-d',out/'ui',out/'app-r/org/hecker/suite/R.java',*common,
+    run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',cp,'-d',out/'ui',out/'app-r/org/hecker/suite/R.java',ROOT/'app/src/org/hecker/ui/HeckerChoiceSheet.java',*common,
         *[ui/(name+'.java') for name in ['Ui','SuiteAnimation','HeckerVpnClient','HeckerVpnActivity','HeckerVpnTileService']])
     print('HeckerVPN controller, real AIDL, HeckerLab page, QS tile and Android resources: PASS')
     json_lock=json.loads((ROOT/'tests/xmorph-inputs.lock.json').read_text())

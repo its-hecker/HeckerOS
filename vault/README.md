@@ -17,14 +17,20 @@ preview; the preview still permits individual selection before restoration.
 
 ## Use
 
-1. Choose a folder in Documents or on USB. Select apps and personal-data categories.
+1. On first opening, confirm the phone lock if configured, then set one encryption
+   password of at least 12 characters. The Home dashboard shows device storage,
+   free space, snapshot count and the space used by the selected backup folder.
+   Choose a folder in Documents or on USB and select apps and personal-data categories.
 2. In the app parts sheet, select optional shared storage folders for this backup.
-   Back up with a password of at least 12 characters. The result lists the APK,
-   native app data and shared storage outcomes for each selected app.
+   Backup, archive inspection and restore reuse the saved password without another
+   credential prompt during this visit. Wi-Fi backup/restore has dedicated Home actions.
+   The result lists APK, native app data and shared storage outcomes for each app.
 3. Copy the whole folder to PC/USB **before** formatting data. Keep the password
    separately. Internal storage is erased by a clean flash.
 4. After flashing a HeckerVault-enabled ROM, copy the folder back and select it.
-5. Inspect an archive with its password. HeckerVault decrypts and verifies it in
+5. Use the original password during setup to reopen those snapshots automatically.
+   An archive using another password can be unlocked once; that password is remembered
+   only after complete verification. HeckerVault decrypts and verifies the archive in
    private staging before showing a restore preview. Choose apps, categories and
    APK + data / APK-only / data-only. Select any shared storage parts to restore.
 
@@ -56,7 +62,7 @@ launch, boot or package update.
 | Scheduling | Daily/weekly, optional charging requirement, current selections or all user apps |
 | Retention | Latest 1/3/5/10 scheduled snapshots; only files created by this installation are pruned |
 
-Private app data follows Android's native backup rules. Version 1.2 adds optional
+Private app data follows Android's native backup rules. Version 1.3 retains optional
 per-app shared storage folders through the platform-signed Vault's writable
 Android storage mount. Those parts are selected per manual backup. Restore checks
 the installed package, signer and version, then replaces matching files one at a
@@ -98,10 +104,18 @@ links or duplicate paths. Inspection validates archive authentication, every fil
 hash, package metadata, base-APK signer/version, native package-manager metadata
 and selected system-data schemas before a restore can start.
 
-For an explicitly enabled schedule, a separate Android Keystore key wraps the
-password in private app storage, usable after unlock. This local wrapping is not
-needed to recover an exported archive and is lost on a wipe. Forgetting the
-original password still makes the archive unrecoverable.
+The encryption password is always wrapped using Android Keystore in private app
+storage and is available after device unlock. Schedules reuse the same password;
+disabling a schedule does not delete it. Previous scheduler-only credentials migrate
+in place. No password is sent through Intent extras or saved UI state.
+
+Settings → Encryption & compression → Reset encryption password confirms the phone
+PIN, pattern or password. New snapshots use the replacement password. Earlier
+passwords remain wrapped locally so older snapshots still open on this phone. The
+local key history is lost on a wipe: an older exported snapshot still needs its
+original password afterwards. A screen lock cannot recover keys erased by a clean
+flash. Up to 32 prior/imported passwords can be remembered; this limit never evicts
+an old key automatically.
 
 ## Build and tests
 
@@ -109,8 +123,14 @@ original password still makes the archive unrecoverable.
 system_ext permission/default-permission/sysconfig modules are required by Soong.
 The Hecker Lab tile opens the signature-protected controller; only the system
 backup service can bind its transport. The ROM allowlists the existing platform
-Android storage permission for the Vault process. Folder operations are confined
-to the selected packages and parts on the owner's primary shared volume.
+Android storage permission for the Vault process. A guarded preparation adapter also
+allows this exact, platform-signed owner-user process to access installed packages'
+Android/media folders through MediaProvider FUSE. Package UID, platform signature,
+BACKUP and ACCESS_MTP are all checked. It does not grant private /data access,
+MANAGE_EXTERNAL_STORAGE, a shared system UID or Internet permission. Folder
+operations are confined to selected packages and parts on the primary shared volume.
+Each non-incremental native snapshot explicitly requests @pm@ package metadata;
+without it, otherwise successful full backups are not independently restorable.
 
 ```bash
 python3 tools/check_vault.py --sdk-cache generated/sdk

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vault_storage_heading">STORAGE OVERVIEW</string>
+    <string name="vault_storage_used">%1$s used</string>
+    <string name="vault_storage_available">%1$s available · %2$s total</string>
+    <string name="vault_archive_storage">%1$d snapshots · %2$s in backup folder</string>
+    <string name="vault_wifi_heading">WI-FI NETWORKS</string>
+    <string name="vault_backup_wifi">Back up saved Wi-Fi networks</string>
+    <string name="vault_restore_wifi">Restore saved Wi-Fi networks</string>
+    <string name="vault_wifi_detail">Save network names and passwords in your encrypted snapshot</string>
+    <string name="vault_schedule_enabled">Scheduled backups enabled</string>
+    <string name="vault_reset_password">Reset encryption password</string>
+    <string name="vault_reset_password_detail">Confirm your phone PIN, pattern or password to set a new Vault password</string>
+    <string name="vault_reset_auth">Confirm your phone lock to reset the Vault encryption password.</string>
+    <string name="vault_entry_auth">Unlock HeckerVault. Backup and restore will not ask again during this visit.</string>
+    <string name="vault_reset_requires_lock">Set a phone PIN, pattern or password in Settings before resetting Vault encryption.</string>
+    <string name="vault_first_setup">Set up Vault encryption</string>
+    <string name="vault_first_setup_note">Choose one password for your backups. This phone remembers it securely, so backup and restore need no further password. Keep it separately to restore after a clean flash.</string>
+    <string name="vault_reset_note">New snapshots will use the new password. This phone keeps previous passwords to open earlier snapshots. After wiping the phone, each older snapshot still needs its original password.</string>
+    <string name="vault_save_password">Save encryption password</string>
+    <string name="vault_key_unavailable">Could not unlock or save the Vault key. Unlock the phone and try again.</string>
+    <string name="vault_import_password_note">This snapshot uses a password this phone does not remember, or the file is damaged. Enter its original password once. Vault will remember it only after the whole archive is verified.</string>
+</resources>

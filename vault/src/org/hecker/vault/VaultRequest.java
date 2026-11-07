@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /** Passwords and restore requests stay in process memory, never in Intent extras or saved UI state. */
 final class VaultRequest {
     static final Map<String,VaultRequest> pending=new ConcurrentHashMap<>();
-    String preparedId;
+    String preparedId;boolean rememberPassword;
     final String operation;final char[] password;final List<String> packages;
     final Set<String> categories;final Uri archive;final String mode;final boolean scheduled;
     final Set<VaultExternal.Part> externalParts;

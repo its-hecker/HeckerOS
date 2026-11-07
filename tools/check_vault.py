@@ -12,6 +12,8 @@ import xml.etree.ElementTree as ET
 import zipfile
 from compile_sdk import fetch
 from privapp_permissions import check_package_permissions
+from vault_storage_port import vault_storage_plan, MEDIA
+from prepare import replace_guarded
 
 ROOT=Path(__file__).resolve().parents[1]
 A='{http://schemas.android.com/apk/res/android}'
@@ -51,6 +53,22 @@ def main():
         assert f'"{name}"' in module
     assert 'HeckerVault' in (ROOT/'suite.mk').read_text()
     assert 'org.hecker.vault.permission.OPEN' in (ROOT/'app/AndroidManifest.xml').read_text()
+    # Verify the omitted metadata behavior against the exact pinned platform, and
+    # apply/revert the FUSE adapter against actual upstream source, not only fixtures.
+    native=(api/'KeyValueBackupTask.java').read_text()
+    assert 'boolean backupPm = mQueue.remove(PM_PACKAGE) || !mNonIncremental;' in native
+    native=(api/'UserBackupManagerService.java').read_text()
+    assert 'if (PACKAGE_MANAGER_SENTINEL.equals(packageName))' in native
+    assert 'kvBackupList.add(packageName);' in native
+    with tempfile.TemporaryDirectory(prefix='vault-provider-port-') as tmp:
+        rom=Path(tmp);provider=rom/MEDIA/'MediaProvider.java';provider.parent.mkdir(parents=True)
+        original=(api/'MediaProvider.java').read_text();provider.write_text(original)
+        for path,value in vault_storage_plan(rom,replace_guarded).items():path.write_text(value)
+        assert not vault_storage_plan(rom,replace_guarded)
+        for path,value in vault_storage_plan(rom,replace_guarded,True).items():
+            if value is None:path.unlink()
+            else:path.write_text(value)
+        assert provider.read_text()==original
     with tempfile.TemporaryDirectory(prefix='heckervault-check-') as tmp:
         out=Path(tmp)
         javac=['java','-m','jdk.compiler/com.sun.tools.javac.Main']
@@ -66,7 +84,7 @@ def main():
         run(cache/'aapt2','compile','--dir',ROOT/'vault/res','-o',out/'resources.zip')
         run(cache/'aapt2','link','-I',cache/'android.jar','--manifest',ROOT/'vault/AndroidManifest.xml','--java',out/'generated','-o',out/'vault.apk',out/'resources.zip')
         run(*javac,'-cp',cache/'android-system.jar','-d',out/'classes',out/'generated/org/hecker/vault/R.java',
-            ROOT/'app/src/org/hecker/ui/HeckerChoiceSheet.java',*core,*sorted((ROOT/'vault/src').rglob('*.java')))
+            ROOT/'app/src/org/hecker/ui/HeckerChoiceSheet.java',ROOT/'rom/media/HeckerVaultMediaAccess.java',*core,*sorted((ROOT/'vault/src').rglob('*.java')))
     print('HeckerVault complete controller Java/resources + exact Android transport/permission wiring: PASS')
     print('Full ROM compilation and physical backup/wipe/restore acceptance remain required. Swift import is deferred.')
 

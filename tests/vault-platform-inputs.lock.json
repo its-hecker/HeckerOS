@@ -28,5 +28,20 @@
     "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/4ff5e646649ad99adb3eeb19133189c811ea1212/services/backup/java/com/android/server/backup/TransportManager.java",
     "sha256": "7933132a4ed745ca4ab6aabff7a6aeab0a5e2c95f03acc9cb8f9b6b13de544c4",
     "base64": false
+  },
+  "MediaProvider.java": {
+    "url": "https://raw.githubusercontent.com/PixelOS-AOSP/android_packages_providers_MediaProvider/eaf62ef2f7f864c5345a2da747cef320690568e8/src/com/android/providers/media/MediaProvider.java",
+    "sha256": "142bf8013c4b17591251dcc1f11d469ab25e558c46d18c890d697e3235bd4d24",
+    "base64": false
+  },
+  "KeyValueBackupTask.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/4ff5e646649ad99adb3eeb19133189c811ea1212/services/backup/java/com/android/server/backup/keyvalue/KeyValueBackupTask.java",
+    "sha256": "fbb8a00c71a2a4aa2d469c089fd16a535d27157bc04655d3dd2f3bc0193ad171",
+    "base64": false
+  },
+  "UserBackupManagerService.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/4ff5e646649ad99adb3eeb19133189c811ea1212/services/backup/java/com/android/server/backup/UserBackupManagerService.java",
+    "sha256": "a737879d82bce2d1fc47afd3f012e34fc1aad9c0aab5b0dbf075202ab57e4f3d",
+    "base64": false
   }
 }

@@ -161,12 +161,18 @@ public final class VpnConfig {
     /** Resolve on the chosen physical Network before installing any VPN UID rules.
      * Only the in-memory connection copy changes; saved profiles keep their hostname. */
     public String forNetwork(String policy,List<String> packages,Resolver resolver) throws Exception {
+        return forNetwork(policy,packages,resolver,false);
+    }
+    public String forUnderlay(String policy,List<String> packages,Resolver resolver) throws Exception {
+        return forNetwork(policy,packages,resolver,true);
+    }
+    private String forNetwork(String policy,List<String> packages,Resolver resolver,boolean resolveNumeric) throws Exception {
         VpnConfig session=parse(forConnection(policy,packages));
         for(Map<String,String> peer:session.peers){
             String endpoint=peer.get("Endpoint");int colon=endpoint.lastIndexOf(':');
             String host=endpoint.startsWith("[")?endpoint.substring(1,endpoint.indexOf(']')):endpoint.substring(0,colon);
             boolean numeric=host.contains(":")||host.matches("[0-9.]+");
-            if(numeric)continue;
+            if(numeric&&!resolveNumeric)continue;
             List<String> addresses=resolver.addresses(host);
             if(addresses==null||addresses.isEmpty())throw new IllegalArgumentException("The VPN server has no usable address on this network");
             String address=addresses.get(0);ip(address);

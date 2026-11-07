@@ -19,6 +19,7 @@ final class VaultEngine {
         Prepared(File root,JSONObject snapshot){this.root=root;this.snapshot=snapshot;}
     }
     static volatile Prepared prepared;
+    static volatile Uri needsPassword;
     private final Context context;private final Status status;private final List<String> report=new ArrayList<>();
     VaultEngine(Context c,Status status){context=c;this.status=status;}
     static void owner(Context c)throws IOException{
@@ -32,7 +33,7 @@ final class VaultEngine {
     String run(VaultRequest request)throws Exception{
         owner(context);try{
             switch(request.operation){case "backup":backup(request);break;case "inspect":inspect(request);break;case "restore":restore(request);break;
-                case "schedule":VaultStorage.folder(context);VaultKeys.remember(context,request.password);VaultJobs.configure(context,true);report.add("Scheduled backups enabled. Keep your password for recovery after a clean flash.");break;
+                case "schedule":VaultStorage.folder(context);VaultJobs.configure(context,true);report.add("Scheduled backups enabled. Keep your password for recovery after a clean flash.");break;
                 default:throw new IOException("Unknown backup operation");}
             return String.join("\n",report);
         }finally{VaultSession session=VaultSession.current;if(session!=null)session.cancelled=true;VaultSession.current=null;}
@@ -144,13 +145,31 @@ final class VaultEngine {
         if(!found)throw new IOException("Archive is outside the selected folder");
         Prepared old=prepared;prepared=null;if(old!=null)cleanup(old.root);File root=VaultStorage.staging(context);boolean ready=false;
         try{status.text("Decrypting and checking the complete archive");
+            List<char[]> passwords=VaultKeys.candidates(context);passwords.add(0,request.password.clone());
+            char[] matching=null;
+            try{
+                for(char[] candidate:passwords){
+                    VaultSystemData.check();
+                    try(InputStream source=context.getContentResolver().openInputStream(request.archive)){
+                        if(source==null)throw new IOException("Archive is unavailable");
+                        // Authenticate the first chunk before extracting anything. Old local passwords
+                        // remain usable following a phone-credential password reset.
+                        try(InputStream decoded=VaultCipher.decrypt(source,candidate)){decoded.read();matching=candidate.clone();break;}
+                        catch(IOException failure){if(!(failure.getCause() instanceof javax.crypto.AEADBadTagException))throw failure;}
+                    }
+                }
+            }finally{for(char[] candidate:passwords)Arrays.fill(candidate,'\0');}
+            if(matching==null){needsPassword=request.archive;throw new IOException("Archive needs its original password or is damaged");}
+            try{
             try(InputStream in=context.getContentResolver().openInputStream(request.archive)){
                 if(in==null)throw new IOException("Archive is unavailable");
-                VaultArchive.read(in,root,request.password,Math.max(0,root.getUsableSpace()-128L*1024*1024),bytes->VaultSystemData.check());}
+                VaultArchive.read(in,root,matching,Math.max(0,root.getUsableSpace()-128L*1024*1024),bytes->VaultSystemData.check());}
             JSONObject snapshot=VaultStorage.json(new File(root,"snapshot.json"));VaultPackages.validate(snapshot,root);
             validateApks(snapshot,root);VaultSystemData.validate(root,snapshot.getJSONArray("categories"));
             VaultHistory.record(context,request.archive,snapshot);
-            prepared=new Prepared(root,snapshot);ready=true;report.add("Archive verified. Review the apps, personal data and restore mode, then tap Restore selected.");
+            if(request.rememberPassword)VaultKeys.rememberImported(context,matching);
+            needsPassword=null;prepared=new Prepared(root,snapshot);ready=true;report.add("Archive verified. Review the apps, personal data and restore mode, then tap Restore selected.");
+            }finally{Arrays.fill(matching,'\0');}
         }finally{if(!ready)cleanup(root);}
     }
     private void validateApks(JSONObject snapshot,File root)throws Exception{
