@@ -24,7 +24,13 @@ final class VaultTransport extends BackupTransport {
     @Override public long requestBackupTime(){return VaultSession.current==null?3650L*86400000:0;}
     @Override public long requestFullBackupTime(){return requestBackupTime();}
     @Override public long getBackupQuota(String pkg,boolean full){return QUOTA;}
-    @Override public int getTransportFlags(){return BackupAgent.FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED;}
+    @Override public int getTransportFlags(){
+        VaultSession session=VaultSession.current;
+        // Local migration archives use the app's device-transfer rules. Advertising
+        // only cloud capabilities silently excludes data that is allowed for transfer.
+        return BackupAgent.FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED
+                |(session==null||session.deviceTransfer?BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER:0);
+    }
     private VaultSession backup()throws IOException{
         VaultSession s=VaultSession.current;if(s==null||s.restoring)throw new IOException("No active backup");s.check();return s;
     }
@@ -81,7 +87,7 @@ final class VaultTransport extends BackupTransport {
         try{if(fullOutput!=null)fullOutput.close();}catch(IOException ignored){}
         fullInput=null;fullOutput=null;fullFd=null;fullPackage=null;active=null;}
     @Override public synchronized RestoreSet[] getAvailableRestoreSets(){VaultSession s=VaultSession.current;
-        return s!=null&&s.restoring&&!s.cancelled?new RestoreSet[]{new RestoreSet("HeckerVault snapshot","HeckerOS",s.token)}:new RestoreSet[0];}
+        return s!=null&&s.restoring&&!s.cancelled?new RestoreSet[]{new RestoreSet("HeckerVault snapshot","HeckerOS",s.token,getTransportFlags())}:new RestoreSet[0];}
     @Override public long getCurrentRestoreSet(){VaultSession s=VaultSession.current;return s==null?0:s.token;}
     @Override public synchronized int startRestore(long token,PackageInfo[] packages){
         VaultSession s=VaultSession.current;if(s==null||!s.restoring||s.cancelled||s.token!=token)return TRANSPORT_ERROR;

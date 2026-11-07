@@ -41,7 +41,7 @@ final class VaultEngine {
     private void backup(VaultRequest request)throws Exception{
         File root=VaultStorage.staging(context);Uri destination=null;boolean complete=false;long token=new SecureRandom().nextLong()&Long.MAX_VALUE;if(token==0)token=1;
         String id=UUID.randomUUID().toString();JSONObject snapshot=new JSONObject().put("format",1).put("id",id).put("token",token)
-                .put("created",System.currentTimeMillis()).put("sdk",Build.VERSION.SDK_INT).put("device",Build.DEVICE);
+                .put("created",System.currentTimeMillis()).put("sdk",Build.VERSION.SDK_INT).put("device",Build.DEVICE).put("deviceTransfer",true);
         JSONArray apps=new JSONArray(),categories=new JSONArray(),notes=new JSONArray();List<String> selected=new ArrayList<>(new LinkedHashSet<>(request.packages));
         if(request.categories.contains("launcher")&&!selected.contains("com.android.launcher3"))selected.add("com.android.launcher3");
         try{
@@ -52,7 +52,10 @@ final class VaultEngine {
             }
             if(apps.length()==0&&request.categories.isEmpty())throw new IOException("Select apps or personal data to back up");
             for(String category:request.categories){session.check();if(category.equals("launcher"))continue;status.text("Backing up "+category);
-                try{VaultSystemData.capture(context,category,root);categories.put(category);}
+                try{VaultSystemData.capture(context,category,root);categories.put(category);
+                    if(category.equals("wifi"))try{List<VaultWifi.Network> saved=VaultWifi.read(new File(root,"system/wifi.bin"));
+                        snapshot.put("wifiCount",saved.size());for(VaultWifi.Network network:saved)network.clear();
+                    }catch(Exception unsupported){/* Preserve Android's restore payload if its detail format is newer. */}}
                 catch(SecurityException e){notes.put(category+": permission is unavailable");}
                 catch(Exception e){if(Thread.currentThread().isInterrupted())throw e;notes.put(category+": backup failed ("+e.getClass().getSimpleName()+")");}
             }
@@ -119,11 +122,13 @@ final class VaultEngine {
             VaultSession session, JSONArray notes) throws Exception {
         String pkg = app.getString("package");
         JSONArray captured = new JSONArray();
+        JSONObject results=new JSONObject();app.put("externalStatus",results);
         for (VaultExternal.Part part : VaultExternal.Part.values()) {
             if (!parts.contains(part)) continue;
             session.check();
             String label = pkg + " · Android/" + part.directory;
             if (part == VaultExternal.Part.DATA && !app.getBoolean("allowsData")) {
+                results.put(part.directory,new JSONObject().put("state","disallowed"));
                 notes.put(label + ": app does not allow backup");
                 continue;
             }
@@ -131,9 +136,11 @@ final class VaultEngine {
             try {
                 int count = VaultExternal.capture(shared, root, pkg, part, bytes -> session.check());
                 if (count > 0) captured.put(part.directory);
+                results.put(part.directory,new JSONObject().put("state",count>0?"saved":"empty").put("files",count));
                 notes.put(label + ": " + (count == 0 ? "no files" : count + " files backed up"));
             } catch (IOException | SecurityException failure) {
                 session.check();
+                results.put(part.directory,new JSONObject().put("state","failed").put("reason",failure.getClass().getSimpleName()));
                 notes.put(label + ": backup failed (" + failure.getClass().getSimpleName() + ")");
             }
         }
@@ -187,7 +194,8 @@ final class VaultEngine {
         Set<String> chosen=new HashSet<>(request.packages);if(request.categories.contains("launcher"))chosen.add("com.android.launcher3");
         JSONArray apps=p.snapshot.getJSONArray("apps");List<String> data=new ArrayList<>();
         List<JSONObject> externalApps = new ArrayList<>();
-        VaultSession session=new VaultSession(p.root,p.snapshot.getLong("token"),true,chosen);VaultSession.current=session;
+        VaultSession session=new VaultSession(p.root,p.snapshot.getLong("token"),true,chosen);
+        session.deviceTransfer=p.snapshot.optBoolean("deviceTransfer",false);VaultSession.current=session;
         try{for(int i=0;i<apps.length();i++){session.check();JSONObject app=apps.getJSONObject(i);String pkg=app.getString("package");if(!chosen.contains(pkg))continue;
                 status.text("Preparing restore: "+pkg);
                 try{if(!request.mode.equals("data"))VaultInstaller.install(context,app,p.root);

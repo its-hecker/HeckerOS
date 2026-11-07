@@ -1,1 +1,1 @@
-package android.app.backup;public class RestoreSet{public final String name,device;public final long token;public RestoreSet(String n,String d,long t){name=n;device=d;token=t;}}
+package android.app.backup;public class RestoreSet{public final String name,device;public final long token;public final int backupTransportFlags;public RestoreSet(String n,String d,long t){this(n,d,t,0);}public RestoreSet(String n,String d,long t,int flags){name=n;device=d;token=t;backupTransportFlags=flags;}}

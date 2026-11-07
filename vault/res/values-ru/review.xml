@@ -1,0 +1,16 @@
+<resources>
+    <string name="vault_hero_title">Всё, что важно сохранить</string>
+    <string name="vault_hero_detail">Приложения, воспоминания и сохранённые сети в вашем зашифрованном хранилище.</string>
+    <string name="vault_wifi_details">Сохранённые сети Wi-Fi</string>
+    <string name="vault_wifi_count">Сетей в этой копии: %1$d</string>
+    <string name="vault_wifi_hidden">Скрытая сеть</string>
+    <string name="vault_wifi_no_password">В этой копии пароль не сохранён.</string>
+    <string name="vault_wifi_reveal">Показать пароль</string>
+    <string name="vault_wifi_details_unavailable">Сведения о сетях недоступны для этого формата копии. Исходное восстановление Wi-Fi по-прежнему доступно.</string>
+    <string name="vault_snapshot_detail">%1$s · %2$s · Android API %3$d</string>
+    <string name="vault_archive_contents">Приложений: %1$d · с данными: %2$d · категорий личных данных: %3$d</string>
+    <string name="vault_part_saved">%1$s: сохранено файлов — %2$d</string>
+    <string name="vault_part_empty">%1$s: файлы не найдены</string>
+    <string name="vault_part_failed">%1$s: ошибка резервного копирования</string>
+    <string name="vault_part_disallowed">%1$s: приложение запрещает копирование данных</string>
+</resources>

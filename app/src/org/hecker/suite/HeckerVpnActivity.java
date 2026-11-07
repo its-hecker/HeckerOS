@@ -42,6 +42,20 @@ public final class HeckerVpnActivity extends Activity {
     private Button connect, retryPeer, countries, profiles;
     private boolean countriesTab = true, busy, started;
     private android.net.Uri pendingImport;
+    private final java.util.concurrent.ExecutorService appLoader=java.util.concurrent.Executors.newSingleThreadExecutor();
+    private List<RouteApp> routingApps=List.of();
+    private boolean routingAppsLoaded,loadingRoutingApps;private int packageGeneration;
+    private Runnable routingAppsChanged=()->{};
+    private AlertDialog appPicker;
+    private final android.util.LruCache<String,android.graphics.drawable.Drawable.ConstantState> appIcons=new android.util.LruCache<>(64);
+    private final java.util.Set<String> loadingIcons=new java.util.HashSet<>();
+    private static final class RouteApp {
+        final ApplicationInfo info;final String label,search;
+        RouteApp(ApplicationInfo info,String label){this.info=info;this.label=label;search=(label+" "+info.packageName).toLowerCase(java.util.Locale.ROOT);}
+    }
+    private final android.content.BroadcastReceiver packageChanges=new android.content.BroadcastReceiver(){
+        @Override public void onReceive(android.content.Context context,Intent intent){packageGeneration++;routingAppsLoaded=false;appIcons.evictAll();loadRoutingApps();}
+    };
 
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved); getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
@@ -72,6 +86,9 @@ public final class HeckerVpnActivity extends Activity {
         page.addView(Ui.chips(this, countries, profiles));
         body = new LinearLayout(this); body.setOrientation(LinearLayout.VERTICAL); page.addView(body);
         renderBody(); Ui.scroll(this, page);
+        android.content.IntentFilter changes=new android.content.IntentFilter();changes.addAction(Intent.ACTION_PACKAGE_ADDED);
+        changes.addAction(Intent.ACTION_PACKAGE_REMOVED);changes.addAction(Intent.ACTION_PACKAGE_CHANGED);changes.addDataScheme("package");
+        registerReceiver(packageChanges,changes,android.content.Context.RECEIVER_NOT_EXPORTED);loadRoutingApps();
     }
     @Override protected void onStart() {
         super.onStart(); started = true; client = new HeckerVpnClient(this);
@@ -87,8 +104,10 @@ public final class HeckerVpnActivity extends Activity {
         android.net.Uri uri = pendingImport; pendingImport = null; readImport(uri);
     }
     @Override protected void onStop() {
+        if(appPicker!=null)appPicker.dismiss();
         started = false; main.removeCallbacks(poll); if (client != null) client.close(); client = null; busy = false; super.onStop();
     }
+    @Override protected void onDestroy(){unregisterReceiver(packageChanges);appLoader.shutdownNow();super.onDestroy();}
     @Override protected void onSaveInstanceState(Bundle saved) { saved.putBoolean("countries", countriesTab); super.onSaveInstanceState(saved); }
     private final Runnable poll = new Runnable() {
         @Override public void run() {
@@ -215,47 +234,93 @@ public final class HeckerVpnActivity extends Activity {
             if (which == 0) applyPolicy("all", new ArrayList<>()); else chooseApps(modes[which], profile.getStringArrayList("apps"));
         });
     }
+    private void loadRoutingApps() {
+        if(routingAppsLoaded||loadingRoutingApps||isDestroyed())return;
+        loadingRoutingApps=true;int generation=packageGeneration;
+        appLoader.execute(()->{
+            ArrayList<RouteApp> found=new ArrayList<>();boolean success=true;
+            try {
+                for(ApplicationInfo info:getPackageManager().getInstalledApplications(0)){
+                    if(Thread.currentThread().isInterrupted())return;
+                    // Resource overlays cannot originate network traffic. Loading their
+                    // resources was also the largest source of slow and failed icon loads.
+                    if((info.flags&ApplicationInfo.FLAG_HAS_CODE)==0)continue;
+                    String label=info.packageName;
+                    try{label=info.loadLabel(getPackageManager()).toString();}catch(RuntimeException unavailable){}
+                    found.add(new RouteApp(info,label));
+                }
+                found.sort(Comparator.comparing(app->app.label,String.CASE_INSENSITIVE_ORDER));
+            }catch(RuntimeException unavailable){success=false;}
+            boolean loaded=success;
+            main.post(()->{if(isDestroyed())return;loadingRoutingApps=false;if(generation!=packageGeneration){loadRoutingApps();return;}routingAppsLoaded=loaded;
+                if(loaded)routingApps=List.copyOf(found);routingAppsChanged.run();});
+        });
+    }
+    private void routeIcon(RouteApp app,android.widget.ImageView image) {
+        String pkg=app.info.packageName;image.setTag(pkg);
+        android.graphics.drawable.Drawable.ConstantState cached=appIcons.get(pkg);
+        image.setImageDrawable(cached==null?getPackageManager().getDefaultActivityIcon():cached.newDrawable(getResources()));
+        if(cached!=null||!loadingIcons.add(pkg)||isDestroyed())return;
+        appLoader.execute(()->{
+            android.graphics.drawable.Drawable loaded;
+            try{loaded=app.info.loadIcon(getPackageManager());}catch(RuntimeException unavailable){loaded=getPackageManager().getDefaultActivityIcon();}
+            android.graphics.drawable.Drawable icon=loaded;
+            main.post(()->{loadingIcons.remove(pkg);if(isDestroyed())return;
+                if(icon.getConstantState()!=null)appIcons.put(pkg,icon.getConstantState());
+                if(pkg.equals(image.getTag()))image.setImageDrawable(icon);});
+        });
+    }
     private void chooseApps(String mode, ArrayList<String> initial) {
-        // Package enumeration and label loading stay off the main thread.
-        new Thread(() -> {
-            List<ApplicationInfo> installed = getPackageManager().getInstalledApplications(0);
-            class App {
-                ApplicationInfo info; String label; android.graphics.drawable.Drawable icon;
-                App(ApplicationInfo i) { info = i; label = i.loadLabel(getPackageManager()).toString(); icon = i.loadIcon(getPackageManager()); }
+        if(appPicker!=null&&appPicker.isShowing())return;
+        LinkedHashSet<String> selected=new LinkedHashSet<>(initial==null?List.of():initial);
+        LinearLayout page=Ui.card(this);EditText search=new EditText(this);search.setSingleLine();
+        search.setHint(R.string.vpn_search_apps);search.setTextColor(getColor(R.color.hecker_foreground));page.addView(search);
+        TextView loading=Ui.text(this,getString(R.string.vpn_loading_apps),14,false);page.addView(loading);
+        android.widget.ProgressBar progress=new android.widget.ProgressBar(this);page.addView(progress,new LinearLayout.LayoutParams(-1,Ui.dp(this,32)));
+        android.widget.ListView list=new android.widget.ListView(this);list.setDivider(null);list.setChoiceMode(android.widget.ListView.CHOICE_MODE_NONE);
+        page.addView(list,new LinearLayout.LayoutParams(-1,Ui.dp(this,360)));
+        ArrayList<RouteApp> filtered=new ArrayList<>();
+        android.widget.BaseAdapter adapter=new android.widget.BaseAdapter(){
+            public int getCount(){return filtered.size();}public Object getItem(int pos){return filtered.get(pos);}public long getItemId(int pos){return pos;}
+            public View getView(int pos,View recycled,android.view.ViewGroup parent){
+                RouteApp app=filtered.get(pos);LinearLayout row;
+                if(recycled instanceof LinearLayout)row=(LinearLayout)recycled;
+                else {
+                    row=new LinearLayout(HeckerVpnActivity.this);row.setGravity(android.view.Gravity.CENTER_VERTICAL);row.setPadding(Ui.dp(HeckerVpnActivity.this,4),Ui.dp(HeckerVpnActivity.this,6),0,Ui.dp(HeckerVpnActivity.this,6));
+                    android.widget.ImageView image=new android.widget.ImageView(HeckerVpnActivity.this);image.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+                    row.addView(image,new LinearLayout.LayoutParams(Ui.dp(HeckerVpnActivity.this,36),Ui.dp(HeckerVpnActivity.this,36)));
+                    CheckBox check=new CheckBox(HeckerVpnActivity.this);check.setTextColor(getColor(R.color.hecker_foreground));check.setMinHeight(Ui.dp(HeckerVpnActivity.this,56));check.setMaxLines(3);
+                    row.addView(check,new LinearLayout.LayoutParams(0,-2,1));
+                }
+                CheckBox check=(CheckBox)row.getChildAt(1);check.setOnCheckedChangeListener(null);
+                check.setText(app.label+"\n"+app.info.packageName);check.setChecked(selected.contains(app.info.packageName));
+                check.setOnCheckedChangeListener((button,on)->{if(on)selected.add(app.info.packageName);else selected.remove(app.info.packageName);});
+                row.setOnClickListener(v->check.setChecked(!check.isChecked()));routeIcon(app,(android.widget.ImageView)row.getChildAt(0));return row;
             }
-            ArrayList<App> apps = new ArrayList<>(); for (ApplicationInfo info : installed) apps.add(new App(info));
-            apps.sort(Comparator.comparing(app -> app.label.toLowerCase(java.util.Locale.ROOT)));
-            main.post(() -> {
-                if (!started) return;
-                LinkedHashSet<String> selected = new LinkedHashSet<>(initial == null ? List.of() : initial);
-                LinearLayout page = Ui.card(this); EditText search = new EditText(this); search.setHint(R.string.vpn_search_apps);
-                search.setTextColor(getColor(R.color.hecker_foreground)); page.addView(search);
-                LinearLayout list = new LinearLayout(this); list.setOrientation(LinearLayout.VERTICAL);
-                ScrollView scroll = new ScrollView(this); scroll.addView(list); page.addView(scroll, new LinearLayout.LayoutParams(-1, Ui.dp(this, 360)));
-                Runnable render = () -> {
-                    list.removeAllViews(); String query = search.getText().toString().toLowerCase(java.util.Locale.ROOT);
-                    for (App app : apps) {
-                        if (!app.label.toLowerCase(java.util.Locale.ROOT).contains(query) && !app.info.packageName.toLowerCase(java.util.Locale.ROOT).contains(query)) continue;
-                        CheckBox row = new CheckBox(this); row.setText(app.label + "\n" + app.info.packageName);
-                        row.setTextColor(getColor(R.color.hecker_foreground)); row.setMinHeight(Ui.dp(this, 56)); row.setChecked(selected.contains(app.info.packageName));
-                        android.graphics.drawable.Drawable icon = app.icon; icon.setBounds(0, 0, Ui.dp(this, 32), Ui.dp(this, 32));
-                        row.setCompoundDrawablesRelative(icon, null, null, null); row.setCompoundDrawablePadding(Ui.dp(this, 8));
-                        row.setOnCheckedChangeListener((button, checked) -> { if (checked) selected.add(app.info.packageName); else selected.remove(app.info.packageName); }); list.addView(row);
-                    }
-                }; render.run();
-                search.addTextChangedListener(new TextWatcher() {
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                    public void onTextChanged(CharSequence s, int start, int before, int count) { render.run(); }
-                    public void afterTextChanged(Editable text) {}
-                });
-                AlertDialog dialog = new AlertDialog.Builder(this).setTitle(routeLabel(mode)).setView(page)
-                        .setNegativeButton(android.R.string.cancel, null).setPositiveButton(R.string.vpn_apply, null).create();
-                dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-                    if (mode.equals("include") && selected.isEmpty()) { Toast.makeText(this, R.string.vpn_select_apps_first, Toast.LENGTH_SHORT).show(); return; }
-                    applyPolicy(mode, new ArrayList<>(selected)); dialog.dismiss();
-                })); dialog.show();
-            });
-        }, "HeckerVPN-apps").start();
+        };
+        list.setAdapter(adapter);
+        Runnable render=()->{
+            filtered.clear();String query=search.getText().toString().toLowerCase(java.util.Locale.ROOT);
+            for(RouteApp app:routingApps)if(app.search.contains(query))filtered.add(app);
+            adapter.notifyDataSetChanged();progress.setVisibility(loadingRoutingApps?View.VISIBLE:View.GONE);
+            loading.setText(loadingRoutingApps?R.string.vpn_loading_apps:routingAppsLoaded?R.string.vpn_no_matching_apps:R.string.vpn_apps_load_failed);
+            loading.setVisibility(loadingRoutingApps||filtered.isEmpty()?View.VISIBLE:View.GONE);
+        };
+        AlertDialog dialog=new AlertDialog.Builder(this).setTitle(routeLabel(mode)).setView(page)
+                .setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.vpn_apply,null).create();
+        appPicker=dialog;routingAppsChanged=render;
+        dialog.setOnDismissListener(d->{routingAppsChanged=()->{};appPicker=null;});
+        search.addTextChangedListener(new TextWatcher(){
+            public void beforeTextChanged(CharSequence s,int start,int count,int after){}
+            public void onTextChanged(CharSequence s,int start,int before,int count){render.run();}
+            public void afterTextChanged(Editable text){}
+        });
+        dialog.setOnShowListener(d->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
+            if(!routingAppsLoaded){Toast.makeText(this,R.string.vpn_loading_apps,Toast.LENGTH_SHORT).show();return;}
+            if(mode.equals("include")&&selected.isEmpty()){Toast.makeText(this,R.string.vpn_select_apps_first,Toast.LENGTH_SHORT).show();return;}
+            applyPolicy(mode,new ArrayList<>(selected));dialog.dismiss();
+        }));
+        dialog.show();loadRoutingApps();render.run();
     }
     private void applyPolicy(String mode, ArrayList<String> apps) {
         Bundle request = HeckerVpnClient.request("policy"); request.putString("mode", mode); request.putStringArrayList("apps", apps); operation(request, true);

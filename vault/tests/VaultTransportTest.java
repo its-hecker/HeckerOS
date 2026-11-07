@@ -13,6 +13,7 @@ VaultTransport t=new VaultTransport();PackageInfo app=new PackageInfo("org.examp
 try{
 check(t.initializeDevice()==-1000);check(!t.isAppEligibleForBackup(app,true));check(t.requestBackupTime()>86400000);
 VaultSession s=new VaultSession(root,123,false,Arrays.asList(app.packageName));VaultSession.current=s;
+check(t.getTransportFlags()==3);
 check(t.initializeDevice()==0);check(t.isAppEligibleForBackup(app,true));check(!t.isAppEligibleForBackup(other,true));check(t.isAppEligibleForBackup(pm,false));
 try(ParcelFileDescriptor fd=new ParcelFileDescriptor(input,false)){
 check(t.performBackup(other,fd,4)==-1002);check(t.performBackup(app,fd,2)==-1006);check(t.performBackup(app,fd,4)==0);}
@@ -24,6 +25,8 @@ check(Arrays.equals(payload,Files.readAllBytes(s.data(app.packageName,"full").to
 try(ParcelFileDescriptor fd=new ParcelFileDescriptor(input,false)){check(t.performFullBackup(app,fd,1)==0);check(t.sendBackupData(50)==0);t.cancelFullBackup();}
 check(!s.data(app.packageName,"full.part").exists());check(s.data(app.packageName,"full").isFile());check(t.checkFullBackupSize(VaultTransport.QUOTA+1)==-1005);
 VaultSession restoring=new VaultSession(root,123,true,Arrays.asList(app.packageName));VaultSession.current=restoring;
+check(t.getAvailableRestoreSets()[0].backupTransportFlags==3);
+restoring.deviceTransfer=false;check(t.getTransportFlags()==1);check(t.getAvailableRestoreSets()[0].backupTransportFlags==1);
 check(t.getAvailableRestoreSets().length==1);check(t.startRestore(124,new PackageInfo[]{app})==-1000);check(t.startRestore(123,new PackageInfo[]{other,app})==0);
 RestoreDescription next=t.nextRestorePackage();check(next.pkg.equals(app.packageName));check(next.type==1);
 try(ParcelFileDescriptor fd=new ParcelFileDescriptor(output,true)){check(t.getRestoreData(fd)==0);}check(Arrays.equals(payload,Files.readAllBytes(output.toPath())));

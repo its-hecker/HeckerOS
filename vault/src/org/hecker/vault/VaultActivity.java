@@ -33,8 +33,10 @@ public final class VaultActivity extends Activity {
     private JSONObject history=new JSONObject();private Runnable refilter=()->{};
     private final ExecutorService io=Executors.newSingleThreadExecutor();private final Handler handler=new Handler(Looper.getMainLooper());
     private boolean unlocked,authPending,setupShowing;
+    private AlertDialog wifiDialog;private boolean wifiDetailsLoading,foreground;
     private final BroadcastReceiver screenOff=new BroadcastReceiver(){@Override public void onReceive(Context c,Intent i){
         unlocked=false;if(shell!=null)shell.setVisibility(View.INVISIBLE);
+        if(wifiDialog!=null)wifiDialog.dismiss();
     }};
     private String shownPrepared="";private long lastFinished;
     private static final class AppEntry {
@@ -74,8 +76,8 @@ public final class VaultActivity extends Activity {
         shell.setVisibility(View.INVISIBLE);registerReceiver(screenOff,new IntentFilter(Intent.ACTION_SCREEN_OFF),Context.RECEIVER_NOT_EXPORTED);
         io.execute(()->{if(!VaultService.busy){VaultNative.recoverIdle(this);VaultSystemData.recoverSmsWrite(this);}});
     }
-    @Override protected void onStart(){super.onStart();handler.post(refresh);ensureUnlocked();}
-    @Override protected void onStop(){handler.removeCallbacks(refresh);super.onStop();}
+    @Override protected void onStart(){super.onStart();foreground=true;handler.post(refresh);ensureUnlocked();}
+    @Override protected void onStop(){foreground=false;if(wifiDialog!=null)wifiDialog.dismiss();handler.removeCallbacks(refresh);super.onStop();}
     @Override protected void onDestroy(){unregisterReceiver(screenOff);io.shutdownNow();super.onDestroy();}
     @Override protected void onSaveInstanceState(Bundle state){state.putInt("tab",tab);state.putString("page",subpage);state.putString("scope",scope);state.putString("query",query);
         state.putBoolean("show_search",showSearch);state.putString("restore_scope",restoreScope);state.putString("restore_category",restoreCategory);super.onSaveInstanceState(state);}
@@ -117,9 +119,14 @@ public final class VaultActivity extends Activity {
         HeckerChoiceSheet.show(this, getString(R.string.vault_title), names.toArray(new String[0]), w -> {
             switch(w){case 0:openPage("quick");break;case 1:openPage("app_settings");break;case 2:loadGroup();break;case 3:saveGroup();break;default:chooseFolder();}
         });}
-    private void quickCard(LinearLayout page,boolean first,boolean last,int title,int detail,int button,Runnable action){LinearLayout item=ui.card(page,first,last);ui.copy(item,getString(title),getString(detail));
+    private void quickCard(LinearLayout page,boolean first,boolean last,int title,int detail,int button,Runnable action){LinearLayout item=ui.card(page,first,last);
+        boolean restore=button==R.string.vault_from_device;int icon=restore?R.drawable.v_restore:R.drawable.v_archive,tint=restore?0xffa8afff:0xff71dfbb;
+        if(title==R.string.vault_backup_wifi||title==R.string.vault_restore_wifi){icon=R.drawable.v_wifi;tint=0xff7dcfff;}
+        else if(title==R.string.vault_backup_messages||title==R.string.vault_restore_messages){icon=R.drawable.v_messages;tint=0xffffc478;}
+        else if(title==R.string.vault_backup_calls||title==R.string.vault_restore_calls){icon=R.drawable.v_phone;tint=0xffed9bce;}
+        ui.feature(item,icon,tint,getString(title),getString(detail));
         if(button!=0)ui.action(item,getString(button),action);else{item.setOnClickListener(v->action.run());item.setFocusable(true);}}
-    private void overview(){LinearLayout page=scrolling();storageDashboard(page);
+    private void overview(){LinearLayout page=scrolling();ui.hero(page);storageDashboard(page);
         ui.section(page,R.drawable.v_apps,getString(R.string.vault_apps_quick_heading));
         quickCard(page,true,false,R.string.vault_backup_all_short,R.string.vault_backup_all_detail,R.string.vault_to_device,()->selectScope("all"));
         quickCard(page,false,false,R.string.vault_restore_all,R.string.vault_restore_all_detail,R.string.vault_from_device,()->restoreArchives("all",""));
@@ -127,7 +134,7 @@ public final class VaultActivity extends Activity {
         link.setCompoundDrawablesRelativeWithIntrinsicBounds(null,null,getDrawable(R.drawable.v_arrow),null);link.setCompoundDrawableTintList(ColorStateList.valueOf(getColor(R.color.vault_accent)));more.addView(link);more.setOnClickListener(v->openPage("quick"));
         categoryActions(page,"messages",R.drawable.v_messages,R.string.vault_messages_heading,R.string.vault_backup_messages,R.string.vault_restore_messages,R.string.vault_messages_detail);
         categoryActions(page,"calls",R.drawable.v_phone,R.string.vault_calls_heading,R.string.vault_backup_calls,R.string.vault_restore_calls,R.string.vault_calls_detail);
-        categoryActions(page,"wifi",R.drawable.v_restore,R.string.vault_wifi_heading,R.string.vault_backup_wifi,R.string.vault_restore_wifi,R.string.vault_wifi_detail);
+        categoryActions(page,"wifi",R.drawable.v_wifi,R.string.vault_wifi_heading,R.string.vault_backup_wifi,R.string.vault_restore_wifi,R.string.vault_wifi_detail);
         ui.section(page,R.drawable.v_folder,getString(R.string.vault_setup_heading));LinearLayout setup=ui.card(page,true,false);
         ui.copy(setup,getString(R.string.vault_personal),getString(R.string.vault_selected_count,selected.size(),categories.size()));
         action(setup,R.string.vault_choose_parts,()->openPage("personal"));action(setup,R.string.vault_backup_selected,()->backupOptions(true));
@@ -140,7 +147,7 @@ public final class VaultActivity extends Activity {
     private void storageDashboard(LinearLayout page){
         ui.section(page,R.drawable.v_folder,getString(R.string.vault_storage_heading));LinearLayout storage=ui.card(page,true,false);
         java.io.File volume=Environment.getDataDirectory();long total=volume.getTotalSpace(),free=volume.getUsableSpace(),used=Math.max(0,total-free);
-        ui.copy(storage,getString(R.string.vault_storage_used,android.text.format.Formatter.formatFileSize(this,used)),
+        ui.feature(storage,R.drawable.v_folder,0xff7dcfff,getString(R.string.vault_storage_used,android.text.format.Formatter.formatFileSize(this,used)),
                 getString(R.string.vault_storage_available,android.text.format.Formatter.formatFileSize(this,free),android.text.format.Formatter.formatFileSize(this,total)));
         ProgressBar meter=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);meter.setMax(1000);
         meter.setProgress(total<=0?0:(int)Math.min(1000,(double)used/total*1000));meter.setProgressTintList(ColorStateList.valueOf(getColor(R.color.vault_accent)));
@@ -307,7 +314,13 @@ public final class VaultActivity extends Activity {
         TextView loading=text(getString(R.string.vault_loading),13,false);page.addView(loading);
         io.execute(()->{try{List<VaultStorage.Archive> entries=VaultStorage.list(this);runOnUiThread(()->{if(tab!=2||isDestroyed())return;page.removeView(loading);
             if(entries.isEmpty())page.addView(text(getString(R.string.vault_no_archives),14,false));for(VaultStorage.Archive entry:entries){LinearLayout item=card(page);LinearLayout.LayoutParams spacing=(LinearLayout.LayoutParams)item.getLayoutParams();spacing.topMargin=dp(8);item.setLayoutParams(spacing);item.setTag(entry.name);archiveCards.add(item);item.addView(text(entry.name,15,true));
-                item.addView(text(android.text.format.Formatter.formatFileSize(this,entry.size)+" · AES-256-GCM",12,false));action(item,R.string.vault_inspect,()->beginOperation("inspect",entry.uri));
+                item.addView(text(android.text.format.Formatter.formatFileSize(this,entry.size)+" · AES-256-GCM",12,false));
+                JSONObject summary=VaultHistory.summary(this,entry.uri);if(summary!=null){
+                    JSONArray contents=summary.optJSONArray("categories");item.addView(text(getString(R.string.vault_archive_contents,summary.optInt("apps"),summary.optInt("withData"),contents==null?0:contents.length()),12,false));
+                    item.addView(text(getString(R.string.vault_snapshot_detail,java.text.DateFormat.getDateTimeInstance().format(new Date(summary.optLong("created"))),summary.optString("device"),summary.optInt("sdk")),12,false));
+                    if(summary.optInt("wifiCount",-1)>=0)item.addView(text(getString(R.string.vault_wifi_count,summary.optInt("wifiCount")),12,false));
+                }
+                action(item,R.string.vault_inspect,()->beginOperation("inspect",entry.uri));
                 Button remove=button(getString(R.string.vault_delete));remove.setOnClickListener(v->new AlertDialog.Builder(this).setTitle(R.string.vault_delete).setMessage(R.string.vault_delete_confirm)
                         .setNegativeButton(android.R.string.cancel,null).setPositiveButton(R.string.vault_delete,(d,w)->io.execute(()->{try{VaultStorage.remove(this,entry.uri);runOnUiThread(()->showTab(2));}catch(Exception e){runOnUiThread(()->message(getString(R.string.vault_folder_error)));}})).show());
                 LinearLayout.LayoutParams deleteSize = new LinearLayout.LayoutParams(-1, -2);
@@ -440,9 +453,39 @@ public final class VaultActivity extends Activity {
                 data.getFlags()&(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION));VaultStorage.prefs(this).edit().putString("folder",uri.toString()).apply();history=VaultHistory.load(this);render();}
             catch(SecurityException e){message(getString(R.string.vault_folder_error));}}
     }
+    private void wifiDetails(VaultEngine.Prepared prepared){
+        if(!unlocked||wifiDialog!=null||wifiDetailsLoading)return;wifiDetailsLoading=true;
+        io.execute(()->{
+            try{List<VaultWifi.Network> networks=VaultWifi.read(new java.io.File(prepared.root,"system/wifi.bin"));
+                runOnUiThread(()->{
+                    wifiDetailsLoading=false;
+                    if(isDestroyed()||!foreground||!unlocked||prepared!=VaultEngine.prepared){for(VaultWifi.Network n:networks)n.clear();return;}
+                    LinearLayout page=ui.column();page.setPadding(dp(20),0,dp(20),dp(12));
+                    page.addView(text(getString(R.string.vault_wifi_count,networks.size()),15,true));
+                    List<Switch> reveals=new ArrayList<>();
+                    for(VaultWifi.Network network:networks){
+                        LinearLayout item=ui.card(page,true,true);LinearLayout.LayoutParams spacing=(LinearLayout.LayoutParams)item.getLayoutParams();spacing.topMargin=dp(12);item.setLayoutParams(spacing);
+                        ui.feature(item,R.drawable.v_wifi,0xff7dcfff,network.ssid,network.security+(network.hidden?" · "+getString(R.string.vault_wifi_hidden):""));
+                        if(network.password.length==0){TextView open=text(getString(R.string.vault_wifi_no_password),13,false);open.setPadding(0,dp(10),0,0);item.addView(open);continue;}
+                        TextView password=text("••••••••",16,true);password.setSaveEnabled(false);password.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);
+                        password.setPadding(0,dp(12),0,dp(8));item.addView(password);
+                        Switch reveal=new Switch(this);reveal.setText(R.string.vault_wifi_reveal);reveal.setTextColor(getColor(R.color.vault_accent));
+                        reveal.setSaveEnabled(false);reveal.setFilterTouchesWhenObscured(true);reveal.setMinHeight(dp(48));item.addView(reveal);reveals.add(reveal);
+                        reveal.setOnCheckedChangeListener((button,on)->password.setText(on?new String(network.password):"••••••••"));
+                    }
+                    ScrollView scroll=new ScrollView(this);scroll.addView(page);
+                    AlertDialog dialog=new AlertDialog.Builder(this).setTitle(R.string.vault_wifi_details).setView(scroll).setPositiveButton(android.R.string.ok,null).create();
+                    wifiDialog=dialog;dialog.setOnDismissListener(d->{for(Switch reveal:reveals)reveal.setChecked(false);for(VaultWifi.Network n:networks)n.clear();wifiDialog=null;});
+                    dialog.setOnShowListener(d->dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE));dialog.show();
+                });
+            }catch(Exception failure){runOnUiThread(()->{wifiDetailsLoading=false;if(!isDestroyed()&&foreground&&unlocked)message(getString(R.string.vault_wifi_details_unavailable));});}
+        });
+    }
     private void preview(VaultEngine.Prepared prepared){
         try{JSONObject snapshot=prepared.snapshot;JSONArray apps=snapshot.getJSONArray("apps"),available=snapshot.getJSONArray("categories");
             LinearLayout content=new LinearLayout(this);content.setOrientation(LinearLayout.VERTICAL);content.setPadding(dp(20),0,dp(20),0);content.addView(text(getString(R.string.vault_preview_summary,apps.length(),available.length()),15,true));
+            content.addView(text(getString(R.string.vault_snapshot_detail,java.text.DateFormat.getDateTimeInstance().format(new Date(snapshot.optLong("created"))),snapshot.optString("device"),snapshot.optInt("sdk")),12,false));
+            if(VaultEngine.contains(available,"wifi"))action(content,R.string.vault_wifi_details,()->wifiDetails(prepared));
             Set<String> chosenApps=new LinkedHashSet<>(),chosenCategories=new LinkedHashSet<>();
             RadioGroup modes=new RadioGroup(this);int[] modeIds={101,102,103};String[] modesValues={"both","apk","data"};int[] modeLabels={R.string.vault_apk_data,R.string.vault_apk_only,R.string.vault_data_only};
             for(int i=0;i<modeIds.length;i++){RadioButton b=new RadioButton(this);b.setId(modeIds[i]);b.setText(modeLabels[i]);modes.addView(b);}modes.check(modeIds[0]);content.addView(modes);
@@ -469,6 +512,10 @@ public final class VaultActivity extends Activity {
                 for (VaultExternal.Part part : VaultPackages.externalParts(app)) partNames.add(partName(part));
                 String details = app.optString("result");
                 if (!partNames.isEmpty()) details += " · " + String.join(", ", partNames);
+                JSONObject externalStatus=app.optJSONObject("externalStatus");if(externalStatus!=null)for(VaultExternal.Part part:VaultExternal.Part.values()){
+                    JSONObject result=externalStatus.optJSONObject(part.directory);if(result==null)continue;
+                    String state=result.optString("state");details+="\n"+getString(state.equals("saved")?R.string.vault_part_saved:state.equals("empty")?R.string.vault_part_empty:state.equals("disallowed")?R.string.vault_part_disallowed:R.string.vault_part_failed,partName(part),result.optInt("files"));
+                }
                 check.setText(app.getString("label")+"\n"+details);check.setChecked(included);check.setButtonTintList(ColorStateList.valueOf(getColor(R.color.vault_accent)));check.setOnCheckedChangeListener((v,on)->{if(on)chosenApps.add(pkg);else chosenApps.remove(pkg);});content.addView(check);}
             for(int i=0;i<available.length();i++){String category=available.getString(i);boolean included=restoreCategory.equals("all")||restoreCategory.equals(category);if(included)chosenCategories.add(category);CheckBox check=new CheckBox(this);check.setText(categoryName(category));check.setChecked(included);check.setButtonTintList(ColorStateList.valueOf(getColor(R.color.vault_accent)));
                 check.setOnCheckedChangeListener((v,on)->{if(on)chosenCategories.add(category);else chosenCategories.remove(category);});content.addView(check);}

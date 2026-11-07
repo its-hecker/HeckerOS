@@ -1,0 +1,16 @@
+<resources>
+    <string name="vault_hero_title">值得珍藏的一切</string>
+    <string name="vault_hero_detail">将应用、回忆和已保存的网络保存在加密保险库中。</string>
+    <string name="vault_wifi_details">已保存的 Wi-Fi 网络</string>
+    <string name="vault_wifi_count">此备份中有 %1$d 个网络</string>
+    <string name="vault_wifi_hidden">隐藏网络</string>
+    <string name="vault_wifi_no_password">此备份未存储密码。</string>
+    <string name="vault_wifi_reveal">显示密码</string>
+    <string name="vault_wifi_details_unavailable">此备份格式无法显示网络详情，仍可恢复原始 Wi-Fi 备份。</string>
+    <string name="vault_snapshot_detail">%1$s · %2$s · Android API %3$d</string>
+    <string name="vault_archive_contents">%1$d 个应用 · %2$d 个含应用数据 · %3$d 类个人数据</string>
+    <string name="vault_part_saved">%1$s：已保存 %2$d 个文件</string>
+    <string name="vault_part_empty">%1$s：未找到文件</string>
+    <string name="vault_part_failed">%1$s：备份失败</string>
+    <string name="vault_part_disallowed">%1$s：应用不允许备份数据</string>
+</resources>
