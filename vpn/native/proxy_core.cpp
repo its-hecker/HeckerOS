@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Private init-owned TUN worker. No Android VpnService, public listener, shell or remote config.
 #include "proxy_config.h"
+#include "proxy_status.h"
 #include "../../third_party/picojson/picojson.h"
 #include <arpa/inet.h>
 #include <atomic>
@@ -53,7 +54,9 @@ bool frame(int fd, std::string& data, bool writing) {
         char* p = static_cast<char*>(address);
         while (length) {
             pollfd ready{fd, static_cast<short>(send_data ? POLLOUT : POLLIN), 0};
-            if (poll(&ready, 1, send_data ? 25000 : 120000) <= 0) return false;
+            int polled = poll(&ready, 1, send_data ? 25000 : 120000);
+            if (polled < 0 && errno == EINTR) continue;
+            if (polled <= 0) return false;
             ssize_t n = send_data ? send(fd, p, length, MSG_NOSIGNAL) : recv(fd, p, length, 0);
             if (n < 0 && errno == EINTR) continue;
             if (n <= 0) return false;
@@ -66,14 +69,17 @@ bool frame(int fd, std::string& data, bool writing) {
     return io(data.data(), data.size(), writing);
 }
 class Core {
+    hecker::vpn::TcpStartup& status;
     void (*invoke)(void*, char*) = nullptr;
     bool (*start)(void*, int, char*, char*, char*) = nullptr;
     void (*stop)() = nullptr;
 public:
+    explicit Core(hecker::vpn::TcpStartup& progress) : status(progress) {}
     bool load(const char* path = kLibrary) {
+        status.enter(hecker::vpn::TcpPhase::library);
         // Production main always uses the fixed path. The argument enables host ABI tests.
         void* library = dlopen(path, RTLD_NOW | RTLD_LOCAL);
-        if (!library) return false;
+        if (!library) return status.fail(hecker::vpn::TcpFailure::system, errno);
         invoke = reinterpret_cast<decltype(invoke)>(dlsym(library, "invokeAction"));
         start = reinterpret_cast<decltype(start)>(dlsym(library, "startTUN"));
         stop = reinterpret_cast<decltype(stop)>(dlsym(library, "stopTun"));
@@ -82,7 +88,7 @@ public:
         auto protect_slot = reinterpret_cast<void (**)(void*, int)>(dlsym(library, "protect_func"));
         auto resolve_slot = reinterpret_cast<char* (**)(void*, int, const char*, const char*, int)>(dlsym(library, "resolve_process_func"));
         auto result_slot = reinterpret_cast<void (**)(void*, const char*)>(dlsym(library, "result_func"));
-        if (!invoke || !start || !stop || !release_slot || !free_slot || !protect_slot || !resolve_slot || !result_slot) return false;
+        if (!invoke || !start || !stop || !release_slot || !free_slot || !protect_slot || !resolve_slot || !result_slot) return status.fail(hecker::vpn::TcpFailure::symbols);
         *release_slot = released; *free_slot = free_string; *protect_slot = protect; *resolve_slot = resolve; *result_slot = result;
         return true;
     }
@@ -91,28 +97,42 @@ public:
         std::string json = Value(Object{{"id", Value("hecker")}, {"method", Value(method)}, {"data", data}}).serialize();
         invoke(new Callback{wait}, strdup(json.c_str())); // Go owns strings and releases callbacks.
         std::unique_lock<std::mutex> lock(wait->mutex);
-        if (!wait->changed.wait_for(lock, std::chrono::seconds(12), [&] { return wait->done; })) return false;
+        if (!wait->changed.wait_for(lock, std::chrono::seconds(12), [&] { return wait->done; })) return status.fail(hecker::vpn::TcpFailure::timeout);
         Value response;
-        if (!picojson::parse(response, wait->json).empty() || !response.is<Object>()) return false;
+        if (!picojson::parse(response, wait->json).empty() || !response.is<Object>()) return status.fail(hecker::vpn::TcpFailure::protocol);
         const Value& code = response.get("code");
-        if (!code.is<double>() || code.get<double>() != 0) return false;
+        if (!code.is<double>()) return status.fail(hecker::vpn::TcpFailure::protocol);
+        if (code.get<double>() != 0) return status.fail(hecker::vpn::TcpFailure::rejected);
         reply = response.get("data"); return true;
     }
-    bool setup() {
+    bool prepare() {
         Value reply;
+        status.enter(hecker::vpn::TcpPhase::initialize);
         std::string init = Value(Object{{"home-dir", Value(kHome)}, {"version", Value(37.0)}}).serialize();
-        if (!action("initClash", Value(init), reply) || !reply.is<bool>() || !reply.get<bool>()) return false;
-        if (!action("setupConfig", Value("{\"selected-map\":{},\"test-url\":\"https://www.gstatic.com/generate_204\"}"), reply)
-            || !reply.is<std::string>() || !reply.get<std::string>().empty()) return false;
-        if (if_nametoindex("hkvpn0")) return false;
+        if (!action("initClash", Value(init), reply)) return false;
+        if (!reply.is<bool>() || !reply.get<bool>()) return status.fail(hecker::vpn::TcpFailure::rejected);
+        status.enter(hecker::vpn::TcpPhase::configuration);
+        if (!action("setupConfig", Value("{\"selected-map\":{},\"test-url\":\"https://www.gstatic.com/generate_204\"}"), reply)) return false;
+        if (!reply.is<std::string>()) return status.fail(hecker::vpn::TcpFailure::protocol);
+        if (!reply.get<std::string>().empty()) return status.fail(hecker::vpn::tcp_config_failure(reply.get<std::string>()));
+        return true;
+    }
+    bool setup() {
+        if (!prepare()) return false;
+        status.enter(hecker::vpn::TcpPhase::tun_check);
+        if (if_nametoindex("hkvpn0")) return status.fail(hecker::vpn::TcpFailure::system, EEXIST);
+        status.enter(hecker::vpn::TcpPhase::tun_open);
         int fd = open("/dev/tun", O_RDWR | O_NONBLOCK | O_CLOEXEC);
-        if (fd < 0) return false;
+        if (fd < 0) return status.fail(hecker::vpn::TcpFailure::system, errno);
+        status.enter(hecker::vpn::TcpPhase::tun_attach);
         ifreq request{}; strcpy(request.ifr_name, "hkvpn0"); request.ifr_flags = IFF_TUN | IFF_NO_PI;
-        if (ioctl(fd, TUNSETIFF, &request)) { close(fd); return false; }
+        if (ioctl(fd, TUNSETIFF, &request)) { int error = errno; close(fd); return status.fail(hecker::vpn::TcpFailure::system, error); }
+        status.enter(hecker::vpn::TcpPhase::tun_start);
         tun_alive = true;
         start(new Callback{}, fd, strdup("gvisor"), strdup("172.19.0.1/30,fdfe:dcba:9876::1/126"), strdup("172.19.0.2"));
         // The pinned startTUN returns true even on listener failure. Use its release callback.
-        return tun_alive.load() && if_nametoindex("hkvpn0");
+        if (!tun_alive.load() || !if_nametoindex("hkvpn0")) return status.fail(hecker::vpn::TcpFailure::rejected);
+        status.enter(hecker::vpn::TcpPhase::ready); return true;
     }
     bool test() {
         Value reply;
@@ -153,16 +173,19 @@ int main() {
     // Only heckervpnd supplies the private inherited socket. No command-line API.
     if (getuid() || getppid() == 1 || prctl(PR_SET_PDEATHSIG, SIGKILL) || getppid() == 1) return 1;
     signal(SIGPIPE, SIG_IGN);
+    hecker::vpn::TcpStartup status(hecker::vpn::kTcpStartup);
+    status.enter(hecker::vpn::TcpPhase::input);
     std::string input; hecker::vpn::ProxyConfig config;
-    if (!frame(0, input, false) || !hecker::vpn::parse_proxy(input, config)) return 2;
+    if (!frame(0, input, false) || !hecker::vpn::parse_proxy(input, config)) { status.fail(hecker::vpn::TcpFailure::protocol); return 2; }
     physical_mark = 0xf0000U | config.netid;
+    status.enter(hecker::vpn::TcpPhase::config_write);
     int file = open("/data/misc/heckervpn/tcp/config.yaml", O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, 0600);
     std::string json = hecker::vpn::proxy_core_config(config);
-    if (file < 0) return 3;
+    if (file < 0) { status.fail(hecker::vpn::TcpFailure::system, errno); return 3; }
     size_t offset = 0;
-    while (offset < json.size()) { ssize_t n = write(file, json.data() + offset, json.size() - offset); if (n <= 0) { close(file); return 3; } offset += n; }
-    bool saved = fsync(file) == 0; close(file); if (!saved) return 3;
-    Core core;
+    while (offset < json.size()) { ssize_t n = write(file, json.data() + offset, json.size() - offset); if (n <= 0) { int error = errno; close(file); status.fail(hecker::vpn::TcpFailure::system, error); return 3; } offset += n; }
+    bool saved = fsync(file) == 0; int error = errno; close(file); if (!saved) { status.fail(hecker::vpn::TcpFailure::system, error); return 3; }
+    Core core(status);
     if (!core.load() || !core.setup()) return 4;
     std::string reply = "{\"ok\":true}";
     if (!frame(0, reply, true)) return 5;

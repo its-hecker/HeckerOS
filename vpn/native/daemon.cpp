@@ -3,6 +3,7 @@
 #include "protocol.h"
 #include "setup_status.h"
 #include "proxy_config.h"
+#include "proxy_status.h"
 #include <arpa/inet.h>
 #include <cerrno>
 #include <chrono>
@@ -60,6 +61,7 @@ void stop_tcp() {
     unlink("/data/misc/heckervpn/tcp/config.yaml");
 }
 bool start_tcp(const hecker::vpn::ProxyConfig& config) {
+    unlink(hecker::vpn::kTcpStartup);
     int pair[2]; if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, pair)) return false;
     tcp_pid = fork();
     if (!tcp_pid) {
@@ -70,15 +72,21 @@ bool start_tcp(const hecker::vpn::ProxyConfig& config) {
         char root[] = "ANDROID_ROOT=/system", data[] = "ANDROID_DATA=/data";
         char certs[] = "SSL_CERT_DIR=/apex/com.android.conscrypt/cacerts:/system/etc/security/cacerts";
         char memory[] = "GOMEMLIMIT=192MiB";
-        char* env[] = {path, lang, root, data, certs, memory, nullptr};
+        // Native Go package initializers run before initClash sets HomeDir.
+        // Keep those probes inside private storage rather than /sdcard.
+        char home[] = "HOME=/data/misc/heckervpn/tcp", xdg[] = "XDG_CONFIG_HOME=/data/misc/heckervpn/tcp";
+        char* env[] = {path, lang, root, data, certs, memory, home, xdg, nullptr};
         char* args[] = {const_cast<char*>(kTcp), nullptr}; execve(kTcp, args, env); _exit(127);
     }
     close(pair[1]); if (tcp_pid < 0) { close(pair[0]); return false; }
     setpgid(tcp_pid, tcp_pid); tcp_fd = pair[0];
-    timeval timeout{25, 0}; setsockopt(tcp_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+    timeval timeout{45, 0}; setsockopt(tcp_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
     setsockopt(tcp_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
     std::string message = hecker::vpn::proxy_json(config);
-    return tcp_exchange(message) && message == "{\"ok\":true}";
+    bool ready = tcp_exchange(message) && message == "{\"ok\":true}";
+    timeout.tv_sec = 25; setsockopt(tcp_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+    setsockopt(tcp_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
+    return ready;
 }
 
 Result run(const char* command, std::vector<std::string> arguments, const std::string& input = "", bool capture = false, bool cleanup_call = false) {
@@ -206,10 +214,15 @@ std::string request(const std::string& command) {
         if (!cleanup()) return "{\"ok\":false,\"cleanup_required\":true,\"error\":\"Previous tunnel cleanup is incomplete\"}";
         if (!save_config(hecker::vpn::proxy_routes(config))) return tcp_error("Unable to stage root TCP routing");
         if (!start_tcp(config)) {
+            int error = errno;
+            hecker::vpn::TcpStartupSnapshot startup;
+            hecker::vpn::TcpStartup::read(hecker::vpn::kTcpStartup, startup);
+            if (startup.failure == hecker::vpn::TcpFailure::none)
+                startup.failure = error == EAGAIN || error == ETIMEDOUT ? hecker::vpn::TcpFailure::timeout : hecker::vpn::TcpFailure::stopped;
             // No netd setup has run yet. A worker that rejected an existing
             // foreign hkvpn0 must not cause cleanup to delete that interface.
             unlink(kConfig); stop_tcp();
-            return tcp_error("Root TCP core could not start. Check the ROM installation and SELinux logs.");
+            return tcp_error(hecker::vpn::tcp_startup_message(startup).c_str());
         }
         Result up = run(kQuick, {"up-tcp", kConfig, std::to_string(config.netid)});
         if (!up.code) {
