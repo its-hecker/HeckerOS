@@ -2,6 +2,6 @@
     <string name="motion_bar_horizontal">Motion bar horizontal position</string>
     <string name="motion_bar_vertical">Motion bar vertical position</string>
     <string name="motion_media_events">Show companion on media play, pause and track changes</string>
-    <string name="headphones_glass">Glass blur for connection popups</string>
+    <string name="headphones_glass">Frosted glass connection popup</string>
     <string name="compat_rom_global">Custom ROM visibility protection is enabled across apps. Choose which apps use the other compatibility controls.</string>
 </resources>

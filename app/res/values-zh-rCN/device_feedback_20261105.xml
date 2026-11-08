@@ -2,6 +2,6 @@
     <string name="motion_bar_horizontal">动态栏水平位置</string>
     <string name="motion_bar_vertical">动态栏垂直位置</string>
     <string name="motion_media_events">播放、暂停或切换曲目时显示角色</string>
-    <string name="headphones_glass">连接弹窗玻璃模糊</string>
+    <string name="headphones_glass">磨砂玻璃连接弹窗</string>
     <string name="compat_rom_global">已为所有应用启用自定义 ROM 可见性保护。请选择需要其他兼容性设置的应用。</string>
 </resources>

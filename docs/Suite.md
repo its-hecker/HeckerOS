@@ -4,6 +4,29 @@
 
 HeckerOS Android 17 targets coral first. The approved Settings design, two-column Suite cards, offline random Lottie greeting and central About page accompany the native App Lock, Motion Sense, Gaming and infrared camera pages. Suite also provides native Quick Settings controls, launcher selection, opt-in synchronized lyrics and the offline Lunaris theme picker.
 
+## Connection popup and navigation
+
+The headphone connection popup uses Android's wallpaper-derived Material 3
+surface, text, primary and container colors in light and dark mode. Its rounded
+window uses background blur with a translucent surface; content stays sharp.
+The glass option defaults on and retains any existing explicit choice. A
+cross-window blur listener switches the background to a solid Material surface
+when blur becomes unavailable, and is removed when the popup closes. The close
+button, scrollable content and accessibility timeout support larger text and
+longer interaction times. Existing headset artwork and reported battery data
+remain in use for AirPods, Soundcore and generic audio devices.
+
+**HeckerLab → Gestures and navigation** contains the native navigation-mode
+shortcut and **Hide gesture pill and bottom space**, moved from Status bar.
+The new offline Lottie shows a Home swipe and the reclaimed bottom inset. Moving
+the setting preserves the paired overlay state and per-user behavior.
+
+Source checks cover complete Suite Java/resource linking, the SystemUI popup,
+Russian translations and navigation overlay transactions. Full SystemUI Soong
+compilation and phone checks remain necessary: test both color modes, change the
+wallpaper, disable cross-window blur while the popup is visible, reconnect a
+headset, and verify the navigation toggle with both gesture and button modes.
+
 ## Architecture
 
 `HeckerSuite` is platform-signed, privileged, installed on `system_ext`, and has

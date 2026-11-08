@@ -16,7 +16,7 @@
   <project name="its-hecker/vendor_lunaris_dolby" path="vendor/lunaris/dolby" remote="floral-github" revision="544e6271c955e2bf450c8481ac1e71551cb5a800" upstream="refs/heads/pixelos-compat" dest-branch="pixelos-compat" />
   <project name="its-hecker/floral-motionsense-plugin" path="vendor/hecker/floral/motionsense" remote="floral-github" revision="1e958fce2d9b8d5542bea3d0ca8643cc8482cb5a" upstream="refs/heads/fix/xda-improvements-20261108" dest-branch="fix/xda-improvements-20261108" />
   <project name="its-hecker/floral-3D-faceid-plugin" path="vendor/hecker/floral/faceid" remote="floral-github" revision="d998995e1452d2c3d9882bfdf659e1db760a99be" upstream="refs/heads/main" dest-branch="main" />
-  <project name="its-hecker/HeckerOS" path="vendor/hecker/floral/suite" remote="floral-github" revision="11ece3f5e8a06d3947a89fe26741235ec1f6f1bd" upstream="refs/heads/fix/device-log-20261106" dest-branch="fix/device-log-20261106" />
+  <project name="its-hecker/HeckerOS" path="vendor/hecker/floral/suite" remote="floral-github" revision="refs/heads/feat/bluetooth-glass-navigation-20261109" upstream="refs/heads/feat/bluetooth-glass-navigation-20261109" dest-branch="feat/bluetooth-glass-navigation-20261109" />
   <remove-project path="packages/services/OmniJaws" optional="true" />
   <extend-project name="PixelOS-AOSP/android_packages_apps_DolbyAtmos" path="packages/apps/DolbyAtmos" revision="13bbe61cf3e1046e3a1f0bda4719c321c953ce50" upstream="refs/heads/seventeen" />
   <extend-project name="LineageOS/android_hardware_lineage_compat" path="hardware/lineage/compat" revision="590c94850e079642136a4577305d02e4174caabc" upstream="refs/heads/lineage-24.0" />

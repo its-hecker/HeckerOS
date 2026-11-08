@@ -65,6 +65,7 @@ public class KeyguardUpdateMonitorCallback {
 package com.android.systemui.statusbar.phone;
 public class SystemUIDialog extends android.app.AlertDialog {
     public SystemUIDialog(android.content.Context context) { super(context); }
+    public SystemUIDialog(android.content.Context context, int theme) { super(context, theme); }
 }''',
     'android/content/ContentResolver.java': '''
 package android.content;
@@ -115,10 +116,18 @@ def main():
     with tempfile.TemporaryDirectory(prefix='hecker-device-features-') as temporary:
         out = Path(temporary)
         for directory, name in [('values', 'strings.xml'), ('values-zh-rCN', 'strings-zh.xml'),
-                                ('drawable', 'hecker_headphones_art.xml')]:
-            target = out / 'res' / directory / ('strings.xml' if directory.startswith('values') else name)
+                                ('values-ru', 'strings-ru.xml'), ('values', 'styles.xml'),
+                                ('drawable', 'hecker_headphones_art.xml'),
+                                ('drawable', 'hecker_headphones_bluetooth.xml'),
+                                ('drawable', 'hecker_headphones_close.xml')]:
+            target = out / 'res' / directory / ('strings.xml' if name.startswith('strings') else name)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / 'framework/headphones' / name, target)
+        # The native parent is declared in SystemUI/res/values/styles.xml at
+        # the reviewed framework revision above. Model only that parent here.
+        (out / 'res/values/systemui_theme.xml').write_text(
+            '<resources><style name="Theme.SystemUI.Dialog" '
+            'parent="@android:style/Theme.DeviceDefault.Dialog"/></resources>')
         manifest = out / 'AndroidManifest.xml'
         for directory, name in [('values', 'strings.xml'), ('values-zh-rCN', 'strings-zh.xml')]:
             shutil.copyfile(ROOT / 'framework/faceisland' / name,

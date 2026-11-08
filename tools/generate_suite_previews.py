@@ -68,6 +68,7 @@ def generate():
     headphones=[group(line([[-52,12],[-52,-21],[-35,-48],[0,-60],[35,-48],[52,-21],[52,12]],violet,9)),group(rect(-51,18,25,50,cyan)),group(rect(51,18,25,50,cyan))]
     for x,h in [(-22,18),(-7,42),(8,30),(23,16)]:headphones+=[group(rect(x,18,6,h,white,3))]
     write('headphones',headphones)
+    generate_navigation()
     shield=[group(line([[-47,-50],[0,-67],[47,-50],[44,16],[0,61],[-44,16],[-47,-50]],cyan,6)),group(rect(0,0,40,39,navy,10)),group(line([[-15,0],[-3,12],[21,-15]],violet,7))]
     write('sandbox',shield)
     write('integrity',shield,[layer(2,[group(circle(66,0,6,violet))],rotate=True)])
@@ -80,6 +81,39 @@ def generate():
     write('charge',[group(ring),bolt],[layer(2,dots,rotate=True)])
     generate_netlab()
     generate_spoofing()
+
+def generate_navigation():
+    # Phone, app surface and a Home swipe. The pill and reserved strip fade
+    # together while the app expands into the reclaimed space.
+    phone = [group(rect(0,0,112,184,navy,24)),
+             group(rect(0,-75,30,5,white,3)),
+             group(rect(0,-37,84,40,violet,12)),
+             group(rect(-20,-37,22,20,white,6))]
+    app = group(rect(0,24,84,70,[.13,.25,.36,1],12))
+    app['it'][0]['s'] = {'a':1,'k':[
+        {'t':0,'s':[84,70],'e':[84,90],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},
+        {'t':60,'s':[84,90],'e':[84,70],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},
+        {'t':120,'s':[84,70]}]}
+    app['it'][-1]['p'] = {'a':1,'k':[
+        {'t':0,'s':[0,0],'e':[0,10],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},
+        {'t':60,'s':[0,10],'e':[0,0],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},
+        {'t':120,'s':[0,0]}]}
+    phone.append(app)
+    for shape in [rect(0,76,84,18,[.18,.29,.43,1],7), rect(0,76,36,4,white,2)]:
+        strip = group(shape)
+        strip['it'][-1]['o'] = motion(100,0)
+        phone.append(strip)
+    phone += [group(line([[-20,10],[17,10]],white,4)),
+              group(line([[-20,25],[7,25]],cyan,4)),
+              group(line([[-20,40],[17,40]],white,4)),
+              group(line([[79,26],[67,14],[79,2]],violet,4)),
+              group(line([[-76,50],[-76,-12],[-87,0]],cyan,4))]
+    swipe = group(circle(0,0,12,cyan))
+    swipe['it'][-1]['p'] = {'a':1,'k':[
+        {'t':0,'s':[0,72],'e':[0,-5],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},
+        {'t':60,'s':[0,-5],'e':[0,72],'o':{'x':[.33],'y':[0]},'i':{'x':[.67],'y':[1]}},
+        {'t':120,'s':[0,72]}]}
+    write('navigation',phone+[swipe])
 
 def generate_netlab():
     s=[group(rect(0,0,292,182,navy,26))]

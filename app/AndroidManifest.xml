@@ -62,6 +62,8 @@
             android:readPermission="org.hecker.suite.permission.READ_DEPTH"
             android:writePermission="org.hecker.suite.permission.READ_DEPTH" />
         <activity android:name=".StatusBarSettingsActivity" android:exported="false" android:label="@string/status_bar_title" />
+        <activity android:name=".GestureNavigationActivity" android:exported="false"
+            android:label="@string/gestures_navigation_title" />
         <activity android:name=".StatusBarLayoutActivity" android:exported="false" android:label="@string/sb_options_title" />
         <activity android:name=".ThemePackActivity" android:exported="false" android:label="@string/themes_title" />
         <activity android:name=".CaptureSettingsActivity" android:exported="false" android:label="@string/capture_title" />

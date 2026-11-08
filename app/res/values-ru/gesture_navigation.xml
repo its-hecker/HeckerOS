@@ -1,4 +1,6 @@
 <resources>
+    <string name="gestures_navigation_title">Жесты и навигация</string>
+    <string name="gestures_navigation_summary">Системная навигация, полоска жестов и отступ под приложениями</string>
     <string name="gesture_navigation_title">Навигация жестами</string>
     <string name="gesture_hide_pill">Скрыть полоску жестов и отступ снизу</string>
     <string name="gesture_hide_pill_summary">Убирает отступ под приложениями, сохраняя жесты «Домой», «Назад» и «Недавние». Трёхкнопочная навигация сохраняет обычные кнопки.</string>
