@@ -1,7 +1,7 @@
 {
   "settings": {
     "repository": "its-hecker/heckeros_packages_apps_Settings",
-    "revision": "1cc575774ca85cf5ca5a8cf6a164a4583238c9c5",
+    "revision": "86f9737d2059a67d2a63535bd777b03a6de9ab63",
     "files": {
       "Android.bp": "7734560e9290e57348a9da9626045091388829dc909ca1bea49a91ec827e2f41",
       "AndroidManifest.xml": "7862284ba5215699bee65c70d5f06bc6977c65d17b164cc8f7fc42cfdcfd2742",
@@ -23,11 +23,11 @@
       "res/values/hecker_face_pose_grid.xml": "c2b0855fe44724e156395c1bd25465db25dfc00dd5a6317ade1260f43913938f",
       "res/values/hecker_integrity.xml": "fdbe848b64dcad7f2b6e495b7457e931299bc7148938cca6547f6ddf21726c1a",
       "src/com/android/settings/biometrics/face/FaceEnrollEnrolling.java": "2cdc4e7393f280e104c9d27046d41a6181609efbd94fe1c42b12defdeaf321d3",
-      "src/com/android/settings/biometrics/face/FaceEnrollPreviewFragment.java": "46be98bca9d61d537421cdd6177c3c908e95715a13e71c4ce75baa4f732f234b",
+      "src/com/android/settings/biometrics/face/FaceEnrollPreviewFragment.java": "41c8ee5f73ab1135bc65a9da72a8371d018fae743847a76943debd948ee5ba3a",
       "src/com/android/settings/biometrics/face/FaceEnrollProgressView.java": "dc806bb876037fdaafdffa2535144cb8d24bf45a3cacffcda93581be27bdb78f",
       "src/com/android/settings/biometrics/face/FaceEnrollRingView.java": "655b6a6e57cca20b24ec15b4fe3fdad59b0f638ccecccfa59f6ac73bb31a7f09",
       "src/com/android/settings/biometrics/face/FacePoseEnrollmentState.java": "457bfab56bde33bff1f8213c88dca33966dd07866eaccb06041dcd4b6a615d5e",
-      "src/com/android/settings/biometrics/face/FacePoseGridView.java": "db180ebb8e494439bae427f8f03314879b12cb8e2b35c91819a4f5774bb7fe78",
+      "src/com/android/settings/biometrics/face/FacePoseGridView.java": "3f1651e9380421fac723651308ffca5bf7cc0e1261830b1642bec6dacc209da3",
       "src/com/android/settings/biometrics/face/PixelFaceAnimationLifecycle.java": "f3dac03146d72f7580104b7df8445b7b784a594a93b75851f9eca0336b80d917",
       "src/com/android/settings/hecker/HeckerIntegrityActivity.java": "8f65171d297b72ccf87c5fc9c2ef63bd6881aaa5e414d8bc18f1e5179d9151e2",
       "src/com/android/settings/hecker/PifProfile.java": "d322a106a94b6f72dc7193bdfa720d94b8b61c5bd4e22395077548fad6d7848d",
@@ -51,12 +51,14 @@
       "res/drawable/hecker_hub_back.xml": "ff0a6f19a38f48654550a1dfe33a5312262134d1de1a8becf3d59085711ce069",
       "res/values/hecker_spoofing_hub.xml": "7ea3016cb66908213fd226797d063294c43217dde93ac6f74e74a3f933193033",
       "res/values-zh-rCN/hecker_spoofing_hub.xml": "5e229e38eafb6c2935a166b93d0a869bcee558816a880108c467cb6f5e2887d6",
-      "res/raw/hecker_spoofing_hub.json": "20c5cf22a8f369f759dccd0dbc63e5f8444a28423f1c192c53a28ab1a076ad10"
+      "res/raw/hecker_spoofing_hub.json": "20c5cf22a8f369f759dccd0dbc63e5f8444a28423f1c192c53a28ab1a076ad10",
+      "src/com/android/settings/biometrics/face/FacePreviewGeometry.java": "a1e6871d3af56785fde39d1009a04d05d4234e10fe227132eaaa082d341248e0",
+      "tools/hecker/tests/FacePreviewGeometryTest.java": "9caf5528878ea4609ad4812eab0ec0629fc6e029be2a73a77afbaa118620a1ce"
     }
   },
   "framework": {
     "repository": "its-hecker/heckeros_frameworks_base",
-    "revision": "4ff5e646649ad99adb3eeb19133189c811ea1212",
+    "revision": "32c50e2a85da710694f8e18ea2452aef1c7a1933",
     "files": {
       "core/java/android/app/ActivityThread.java": "1358818961d7af385f8671f5fe3c79be3952addec4aae867a932eccaa7ff6ab9",
       "core/java/android/app/IActivityManager.aidl": "28ea763ad5aa2fe6344d89dd4207e70d31f0f999dca19d0e44962ec827a7da17",
@@ -114,6 +116,7 @@
     "com/android/settings/hecker/PixelCanaryProfileFetcher.java",
     "com/android/settings/hecker/SpoofingUi.java",
     "com/android/settings/hecker/SpoofingTargets.java",
-    "com/android/settings/hecker/SpoofingHttp.java"
+    "com/android/settings/hecker/SpoofingHttp.java",
+    "com/android/settings/biometrics/face/FacePreviewGeometry.java"
   ]
 }

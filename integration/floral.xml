@@ -14,7 +14,7 @@
   <project name="its-hecker/heckeros-floral-kernel" path="kernel/google/msm-4.14" remote="floral-github" revision="e1d6f9ada81bd9bbe040c5fe369f2607b6bd5a64" upstream="refs/heads/fix/device-feedback-20261105" dest-branch="fix/device-feedback-20261105" sync-s="true" />
   <project name="LineageOS/android_packages_apps_ElmyraService" path="packages/apps/ElmyraService" remote="floral-github" revision="baab2beb7165caef27b4ee235641775e9d189acc" upstream="refs/heads/lineage-24.0" />
   <project name="its-hecker/vendor_lunaris_dolby" path="vendor/lunaris/dolby" remote="floral-github" revision="544e6271c955e2bf450c8481ac1e71551cb5a800" upstream="refs/heads/pixelos-compat" dest-branch="pixelos-compat" />
-  <project name="its-hecker/floral-motionsense-plugin" path="vendor/hecker/floral/motionsense" remote="floral-github" revision="87b91ac74c46de0d00992f72c6fe115189a2e83e" upstream="refs/heads/test/coral-root-privacy-20261027" dest-branch="test/coral-root-privacy-20261027" />
+  <project name="its-hecker/floral-motionsense-plugin" path="vendor/hecker/floral/motionsense" remote="floral-github" revision="8339ac4d1f0e5c6c9b21fb444d3ce50cabd6d510" upstream="refs/heads/fix/xda-improvements-20261108" dest-branch="fix/xda-improvements-20261108" />
   <project name="its-hecker/floral-3D-faceid-plugin" path="vendor/hecker/floral/faceid" remote="floral-github" revision="d998995e1452d2c3d9882bfdf659e1db760a99be" upstream="refs/heads/main" dest-branch="main" />
   <project name="its-hecker/HeckerOS" path="vendor/hecker/floral/suite" remote="floral-github" revision="11ece3f5e8a06d3947a89fe26741235ec1f6f1bd" upstream="refs/heads/fix/device-log-20261106" dest-branch="fix/device-log-20261106" />
   <remove-project path="packages/services/OmniJaws" optional="true" />
@@ -24,9 +24,9 @@
   <extend-project name="LineageOS/android_hardware_qcom-caf_common" path="hardware/qcom-caf/common" revision="5e84e6f8fc47530881fa8d95cf533617ff51e820" upstream="refs/heads/lineage-24.0" />
   <extend-project name="its-hecker/heckeros_vendor_custom" path="vendor/custom" revision="82457873ad4f7c75195c21ddf9da35903a0d975f" upstream="refs/heads/feat/coral-upstream-20261030" />
   <extend-project name="its-hecker/heckeros_vendor_lineage" path="vendor/lineage" revision="a8286e3a3edc3aed7e774ca57476477f178a0c46" upstream="refs/heads/feat/coral-upstream-20261030" />
-  <extend-project name="its-hecker/heckeros_frameworks_base" path="frameworks/base" revision="4ff5e646649ad99adb3eeb19133189c811ea1212" upstream="refs/heads/fix/device-feedback-20261105" dest-branch="fix/device-feedback-20261105" />
+  <extend-project name="its-hecker/heckeros_frameworks_base" path="frameworks/base" revision="32c50e2a85da710694f8e18ea2452aef1c7a1933" upstream="refs/heads/fix/xda-improvements-20261108" dest-branch="fix/xda-improvements-20261108" />
   <extend-project name="platform/hardware/google/camera" path="hardware/google/camera" revision="cd15337bd229dd521a860d88bca3e37c3ca845f7" upstream="refs/tags/android-17.0.0_r1" />
   <extend-project name="PixelOS-AOSP/android_system_sepolicy" path="system/sepolicy" revision="99c58a7cc9a44fe33c93808452d018e756d84753" upstream="refs/heads/seventeen" />
   <extend-project name="PixelOS-AOSP/android_system_core" path="system/core" revision="a5313eaec0219b021aaa5e59cc10dd07cfa8504c" upstream="refs/heads/seventeen" />
-  <extend-project name="its-hecker/heckeros_packages_apps_Settings" path="packages/apps/Settings" revision="1cc575774ca85cf5ca5a8cf6a164a4583238c9c5" upstream="refs/heads/feat/penguin-integrity-20261105" />
+  <extend-project name="its-hecker/heckeros_packages_apps_Settings" path="packages/apps/Settings" revision="86f9737d2059a67d2a63535bd777b03a6de9ab63" upstream="refs/heads/fix/xda-improvements-20261108" dest-branch="fix/xda-improvements-20261108" />
 </manifest>

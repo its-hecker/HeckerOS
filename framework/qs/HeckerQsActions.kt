@@ -8,6 +8,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.Configuration
 import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
@@ -85,6 +86,13 @@ class HeckerQsActions @Inject constructor(
                 else Intent().setComponent(ComponentName(owner.context, controller.resolveActivity()))
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     .putExtra(ControlsUiController.EXTRA_ANIMATE, true))
+        }
+        fun toggleDark() {
+            val owner = current ?: return
+            // Read the effective theme at the tap. nightMode is the policy (auto/custom
+            // included), and a Compose-captured configuration can be stale.
+            val mode = owner.context.resources.configuration.uiMode
+            dark(mode and Configuration.UI_MODE_NIGHT_MASK != Configuration.UI_MODE_NIGHT_YES)
         }
         fun dark(enabled: Boolean) {
             val owner = current ?: return

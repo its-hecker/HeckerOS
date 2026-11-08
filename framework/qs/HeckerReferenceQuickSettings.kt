@@ -320,10 +320,9 @@ private fun iconFor(spec: String): Int = when (spec) {
 @Composable
 private fun ReferenceDarkButton(tile: TileViewModel?) {
     val context = LocalContext.current
-    val night = LocalConfiguration.current.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
     Box(Modifier.size(48.dp).clip(CircleShape).background(Disc)
         .semantics { contentDescription = context.getString(R.string.hecker_qs_dark) }
-        .then(if (tile != null) referenceActions(tile) else Modifier.clickable { HeckerQsActions.dark(!night) }),
+        .then(if (tile != null) referenceActions(tile) else Modifier.clickable { HeckerQsActions.toggleDark() }),
         contentAlignment = Alignment.Center) { ReferenceIcon(R.drawable.hecker_qs_moon, 28, White) }
 }
 
