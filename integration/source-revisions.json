@@ -92,7 +92,7 @@
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
       "branch": "fix/xda-improvements-20261108",
-      "revision": "32c50e2a85da710694f8e18ea2452aef1c7a1933",
+      "revision": "1c4177ea2bf71de8bbb556ad480f59673c8ba31f",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -681,7 +681,7 @@
     "euicc_status": "Integrated Google-signed D.2.1.989982212-google (306110); 14 required privileged permissions covered.",
     "motion_sense": {
       "repository": "its-hecker/floral-motionsense-plugin",
-      "revision": "8339ac4d1f0e5c6c9b21fb444d3ce50cabd6d510",
+      "revision": "8c14ea2952305004a658ed0506e39f0b5b1e3c58",
       "branch": "fix/xda-improvements-20261108"
     },
     "phone_validation": "Full ROM build and Coral/Flame hardware tests remain required.",
