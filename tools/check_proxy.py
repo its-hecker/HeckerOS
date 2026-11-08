@@ -41,6 +41,8 @@ def main():
         run('g++','-std=c++17','-Wall','-Wextra','-Werror','-fPIC','-shared',ROOT/'tests/proxy_fake_core.cpp','-pthread','-o',out/'libfixture.so')
         run('g++','-std=c++17','-Wall','-Wextra','-Werror',ROOT/'tests/proxy_bridge_test.cpp',ROOT/'vpn/native/proxy_config.cpp','-ldl','-pthread','-o',out/'bridge-test')
         run(out/'bridge-test', out/'libfixture.so')
+        run('g++','-std=c++17','-Wall','-Wextra','-Werror',ROOT/'tests/proxy_status_test.cpp','-o',out/'status-test')
+        run(out/'status-test')
         if args.core_config:
             checks = json.loads((ROOT/'tests/proxy-tools.lock.json').read_text())
             item = next(iter(checks)); archive = fetch(ROOT/'generated/proxy-check', item, checks[item])

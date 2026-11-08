@@ -68,6 +68,40 @@ The app does not silently switch a private WireGuard profile to public proxy mod
 
 ## Validation
 
+### 8 November device startup trace
+
+The enforcing-phone log shows a root worker starting, then an error within about
+50 ms. It reports denied reads of `/proc/net/tcp` and `/proc/stat`; the pinned
+FlClash proc-table initializer treats the first read as optional, so those events
+alone do not identify the fatal step. No root grant is missing.
+
+The subsequent syscall trace shows successful executable/library loading and a
+successful read of the private generated configuration. It does not reach the
+TUN creation ioctl. Under tracing, the supervisor kills the still-initializing
+worker at its 25-second deadline. Tracing itself adds substantial latency; this
+does not prove the original untraced failure is a timeout or carrier filtering.
+
+The follow-up gives the worker an explicit private HOME/XDG_CONFIG_HOME before
+Go package initialization, a 45-second startup allowance (normal operation stays
+at 25 seconds), and interrupt-tolerant frame polling. Each startup phase and
+bounded error category/errno is retained in a root-only `startup-status` file.
+The app error identifies initialization, configuration parsing/application,
+library ABI, or TUN open/attach/start failure. Raw native parser messages are
+discarded because they can quote credentials. SELinux remains enforcing and no
+additional proc/private-data permission is granted based on these optional reads.
+
+This is a startup robustness/diagnostics update. The original on-phone startup
+failure and ONIC traffic still require a new device run; host checks do not
+establish that TCP connectivity is fixed.
+
+```sh
+adb shell su -c 'cat /data/misc/heckervpn/tcp/startup-status'
+```
+
+The three integers are phase, failure category and errno. The same values are
+translated to fixed, credential-free text on the HeckerVPN error card. The marker
+survives failed teardown and is replaced on the next connection attempt.
+
 Host checks cover the production config boundary and native bridge, asynchronous
 callback ownership, UTF-8 authentication, failed socket marking, safe catalog
 loading, app policy, actual Android Java/AIDL/resource compilation, and the existing
