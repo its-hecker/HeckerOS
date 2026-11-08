@@ -16,8 +16,8 @@ cc_prebuilt_library_shared {
     arch: { arm64: { srcs: ["arm64/libclash.so"] } },
     compile_multilib: "64",
     stl: "none",
-    shared_libs: ["liblog", "libdl"],
-    system_shared_libs: ["libc"],
+    shared_libs: ["liblog"],
+    system_shared_libs: ["libc", "libdl"],
     strip: { none: true },
     // The pinned upstream c-shared ELF has no SONAME. The worker loads its fixed
     // absolute path; prepare_proxy_assets verifies every byte with SHA-256.
