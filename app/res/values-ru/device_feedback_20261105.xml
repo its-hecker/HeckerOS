@@ -2,6 +2,6 @@
     <string name="motion_bar_horizontal">Положение панели по горизонтали</string>
     <string name="motion_bar_vertical">Положение панели по вертикали</string>
     <string name="motion_media_events">Персонаж при воспроизведении, паузе и смене трека</string>
-    <string name="headphones_glass">Размытие стекла во всплывающих окнах подключения</string>
+    <string name="headphones_glass">Матовый стеклянный фон карточки подключения</string>
     <string name="compat_rom_global">Защита от определения пользовательской прошивки включена для всех приложений. Выберите приложения для остальных настроек совместимости.</string>
 </resources>

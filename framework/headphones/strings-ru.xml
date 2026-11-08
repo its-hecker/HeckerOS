@@ -3,6 +3,7 @@
     <string name="hecker_headphones">Наушники</string>
     <string name="hecker_headphones_wired">Проводные наушники</string>
     <string name="hecker_headphones_connected">Подключено</string>
+    <string name="hecker_headphones_dismiss">Закрыть карточку подключения</string>
     <string name="hecker_headphones_settings">Сведения об устройстве</string>
     <string name="hecker_headphones_battery">Батарея %1$d%%</string>
     <string name="hecker_headphones_battery_unknown">Сведения о батарее недоступны</string>

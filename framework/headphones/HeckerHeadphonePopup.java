@@ -11,8 +11,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.media.AudioDeviceCallback;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
@@ -26,8 +31,12 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -35,17 +44,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /** Connection UI only. Pairing, codecs, routing and audio policy stay with Android. */
 public final class HeckerHeadphonePopup {
     private static final String TAG = "HeckerHeadphones";
     private static final String ENABLED = "hecker_headphone_popup";
+    private static final String GLASS = "hecker_headphone_glass";
     private static HeckerHeadphonePopup instance;
     private final Context context;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Map<String, Long> shown = new HashMap<>();
     private final Set<Integer> wiredDevices = new HashSet<>();
     private SystemUIDialog dialog;
+    private FrostedSurface frost;
     private TextView battery;
     private BluetoothDevice visibleDevice;
     private int visibleUser;
@@ -90,12 +102,16 @@ public final class HeckerHeadphonePopup {
                         && device.equals(visibleDevice)) dismiss();
             }
         }, filter, null, handler, Context.RECEIVER_EXPORTED);
+        ContentObserver preferences = new ContentObserver(handler) {
+            @Override public void onChange(boolean selfChange) {
+                if (!enabled()) dismiss();
+                else if (frost != null) frost.refresh();
+            }
+        };
         context.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(ENABLED), false, new ContentObserver(handler) {
-                    @Override public void onChange(boolean selfChange) {
-                        if (!enabled()) dismiss();
-                    }
-                }, UserHandle.USER_ALL);
+                Settings.Secure.getUriFor(ENABLED), false, preferences, UserHandle.USER_ALL);
+        context.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(GLASS), false, preferences, UserHandle.USER_ALL);
         AudioManager audio = context.getSystemService(AudioManager.class);
         if (audio != null) {
             for (AudioDeviceInfo device : audio.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
@@ -160,102 +176,146 @@ public final class HeckerHeadphonePopup {
         dismiss();
         visibleUser = ActivityManager.getCurrentUser();
         visibleDevice = device;
-        LinearLayout panel = new LinearLayout(context);
+        dialog = new SystemUIDialog(context, R.style.HeckerHeadphoneDialog);
+        Context themed = dialog.getContext();
+        boolean dark = (themed.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        // Android's Material 3 color roles follow the wallpaper palette and
+        // light/dark mode. The illustration retains the headset's own colors.
+        int surface = themed.getColor(dark ? android.R.color.system_surface_container_high_dark
+                : android.R.color.system_surface_container_high_light);
+        int onSurface = themed.getColor(dark ? android.R.color.system_on_surface_dark
+                : android.R.color.system_on_surface_light);
+        int secondary = themed.getColor(dark ? android.R.color.system_on_surface_variant_dark
+                : android.R.color.system_on_surface_variant_light);
+        int primary = themed.getColor(dark ? android.R.color.system_primary_dark
+                : android.R.color.system_primary_light);
+        int onPrimary = themed.getColor(dark ? android.R.color.system_on_primary_dark
+                : android.R.color.system_on_primary_light);
+        int container = themed.getColor(dark ? android.R.color.system_primary_container_dark
+                : android.R.color.system_primary_container_light);
+        int onContainer = themed.getColor(dark ? android.R.color.system_on_primary_container_dark
+                : android.R.color.system_on_primary_container_light);
+        int outline = themed.getColor(dark ? android.R.color.system_outline_variant_dark
+                : android.R.color.system_outline_variant_light);
+
+        LinearLayout panel = new LinearLayout(themed);
         panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setPadding(dp(24), dp(16), dp(24), dp(18));
-        GradientDrawable background = new GradientDrawable();
-        background.setColors(new int[]{0xFF1C3144, 0xFF0B1725});
-        background.setOrientation(GradientDrawable.Orientation.TL_BR);
-        background.setCornerRadius(dp(36));
-        background.setStroke(dp(1), 0xFF415D75);
-        panel.setBackground(background);
-        TextView title = text(name, 23, 0xFFF2F7FF);
-        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        panel.setPadding(dp(24), dp(12), dp(24), dp(24));
+        LinearLayout header = new LinearLayout(themed);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        ImageView icon = new ImageView(themed);
+        icon.setImageResource(R.drawable.hecker_headphones_bluetooth);
+        icon.setImageTintList(ColorStateList.valueOf(onContainer));
+        icon.setBackground(shape(container, 20));
+        icon.setPadding(dp(10), dp(10), dp(10), dp(10));
+        icon.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        header.addView(icon, new LinearLayout.LayoutParams(dp(40), dp(40)));
+        TextView state = text(themed, context.getString(R.string.hecker_headphones_connected), 14, secondary);
+        state.setPadding(dp(12), 0, dp(8), 0);
+        header.addView(state, new LinearLayout.LayoutParams(0, -2, 1));
+        ImageButton close = new ImageButton(themed);
+        close.setImageResource(R.drawable.hecker_headphones_close);
+        close.setImageTintList(ColorStateList.valueOf(secondary));
+        close.setBackground(new RippleDrawable(ColorStateList.valueOf(alpha(onSurface, 0.12f)),
+                null, shape(Color.WHITE, 24)));
+        close.setContentDescription(context.getString(R.string.hecker_headphones_dismiss));
+        close.setOnClickListener(view -> dismiss());
+        header.addView(close, new LinearLayout.LayoutParams(dp(48), dp(48)));
+        panel.addView(header);
+        TextView title = text(themed, name, 24, onSurface);
+        title.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
         title.setMaxLines(2); title.setEllipsize(android.text.TextUtils.TruncateAt.END);
         title.setGravity(Gravity.CENTER);
+        title.setPadding(0, dp(12), 0, dp(4));
+        title.setAccessibilityHeading(true);
         panel.addView(title, new LinearLayout.LayoutParams(-1, -2));
-        TextView state = text(context.getString(R.string.hecker_headphones_connected), 13, 0xFF91EAD4);
-        state.setGravity(Gravity.CENTER); state.setPadding(0, dp(6), 0, 0);
-        panel.addView(state, new LinearLayout.LayoutParams(-1, -2));
         if (device != null) {
-            org.hecker.earbuds.HeckerEarbudsView artwork = new org.hecker.earbuds.HeckerEarbudsView(context);
+            org.hecker.earbuds.HeckerEarbudsView artwork = new org.hecker.earbuds.HeckerEarbudsView(themed);
             artwork.setDeviceName(name);
-            panel.addView(artwork, new LinearLayout.LayoutParams(-1, dp(220)));
+            artwork.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+            panel.addView(artwork, new LinearLayout.LayoutParams(-1, dp(180)));
         } else {
-            ImageView artwork = new ImageView(context);
+            ImageView artwork = new ImageView(themed);
             artwork.setImageResource(R.drawable.hecker_headphones_art);
+            artwork.setImageTintList(ColorStateList.valueOf(primary));
             artwork.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
             panel.addView(artwork, new LinearLayout.LayoutParams(-1, dp(110)));
         }
-        battery = text("", 16, 0xFFAAC9FF);
+        battery = text(themed, "", 14, onContainer);
         battery.setGravity(Gravity.CENTER);
-        battery.setPadding(0, 0, 0, dp(14));
-        panel.addView(battery);
-        TextView settings = text(context.getString(device == null
-                ? R.string.hecker_headphones_sound_settings : R.string.hecker_headphones_settings),
-                14, 0xFFAAC9FF);
+        battery.setPadding(dp(16), dp(10), dp(16), dp(10));
+        battery.setBackground(shape(container, 20));
+        LinearLayout.LayoutParams batteryParams = new LinearLayout.LayoutParams(-1, -2);
+        batteryParams.bottomMargin = dp(20);
+        panel.addView(battery, batteryParams);
+        Button settings = new Button(themed);
+        settings.setText(device == null ? R.string.hecker_headphones_sound_settings
+                : R.string.hecker_headphones_settings);
+        settings.setAllCaps(false);
+        settings.setTextSize(14);
+        settings.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        settings.setTextColor(onPrimary);
         settings.setGravity(Gravity.CENTER);
-        GradientDrawable button = new GradientDrawable();
-        button.setColor(0xFF294B66); button.setCornerRadius(dp(24)); settings.setBackground(button);
+        settings.setBackgroundTintList(null);
+        settings.setBackground(new RippleDrawable(ColorStateList.valueOf(alpha(onPrimary, 0.12f)),
+                shape(primary, 24), null));
+        settings.setPadding(dp(24), dp(12), dp(24), dp(12));
         settings.setMinHeight(dp(48));
         settings.setOnClickListener(view -> {
+            int user = visibleUser;
             dismiss();
             Intent details = device == null ? null : context.getPackageManager()
                     .getLaunchIntentForPackage("org.hecker.librepods");
             if (details == null) details = new Intent(device == null
                     ? Settings.ACTION_SOUND_SETTINGS : Settings.ACTION_BLUETOOTH_SETTINGS);
             if (device != null) details.putExtra("hecker_device_address", device.getAddress());
-            context.startActivityAsUser(details.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), UserHandle.of(visibleUser));
+            try {
+                context.startActivityAsUser(details.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), UserHandle.of(user));
+            } catch (android.content.ActivityNotFoundException | SecurityException unavailable) {
+                Log.w(TAG, "Headphone details unavailable", unavailable);
+            }
         });
-        panel.addView(settings);
-        dialog = new SystemUIDialog(context);
-        dialog.setView(panel, 0, 0, 0, 0);
+        panel.addView(settings, new LinearLayout.LayoutParams(-1, -2));
+        ScrollView scroll = new ScrollView(themed);
+        scroll.setVerticalScrollBarEnabled(false);
+        scroll.addView(panel);
+        // Own the full container so AlertDialog's custom-panel padding cannot
+        // double the Material spacing or leave an opaque layer over the glass.
+        dialog.create();
+        dialog.setContentView(scroll);
         dialog.setCanceledOnTouchOutside(true);
         Window window = dialog.getWindow();
         if (window != null) {
-            window.setBackgroundDrawableResource(android.R.color.transparent);
             window.setGravity(Gravity.BOTTOM);
-            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND
+                    | WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
             window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+            frost = new FrostedSurface(window, surface, outline);
         }
         final SystemUIDialog ownedDialog = dialog;
+        final FrostedSurface ownedSurface = frost;
         dialog.setOnDismissListener(ignored -> {
+            if (ownedSurface != null) ownedSurface.stop();
             if (dialog != ownedDialog) return;
             handler.removeCallbacks(refresh);
-            visibleDevice = null; battery = null; dialog = null;
+            visibleDevice = null; battery = null; dialog = null; frost = null;
         });
         try {
             dialog.show();
             if (window != null) window.setLayout(
                     Math.min(context.getResources().getDisplayMetrics().widthPixels - dp(32), dp(440)), -2);
-            // The window must be attached before enabling background blur. Keep
-            // the opaque card if the compositor rejects an optional effect.
-            if (window != null && Settings.Secure.getIntForUser(context.getContentResolver(),
-                    "hecker_headphone_glass", 0, visibleUser) != 0) {
-                try {
-                    android.os.PowerManager power = context.getSystemService(android.os.PowerManager.class);
-                    WindowManager manager = context.getSystemService(WindowManager.class);
-                    if (manager != null && manager.isCrossWindowBlurEnabled()
-                            && (power == null || !power.isPowerSaveMode())) {
-                        GradientDrawable glass = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
-                                new int[]{0x991C3144, 0xAA0B1725});
-                        glass.setCornerRadius(dp(36)); glass.setStroke(dp(1), 0xFF415D75);
-                        window.addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
-                        window.setBackgroundDrawable(glass);
-                        window.setBackgroundBlurRadius(dp(28));
-                        panel.setBackground(null);
-                    }
-                } catch (RuntimeException unavailable) {
-                    panel.setBackground(background);
-                    Log.w(TAG, "Connection card uses opaque fallback; blur unavailable", unavailable);
-                }
-            }
+            if (ownedSurface != null) ownedSurface.start();
             if (android.animation.ValueAnimator.areAnimatorsEnabled()) {
                 panel.setAlpha(0); panel.setTranslationY(dp(28));
                 panel.animate().alpha(1).translationY(0).setDuration(300).start();
             }
-            expires = SystemClock.elapsedRealtime() + 9000;
+            AccessibilityManager accessibility = context.getSystemService(AccessibilityManager.class);
+            int timeout = accessibility == null ? 9000 : accessibility.getRecommendedTimeoutMillis(9000,
+                    AccessibilityManager.FLAG_CONTENT_ICONS | AccessibilityManager.FLAG_CONTENT_TEXT
+                            | AccessibilityManager.FLAG_CONTENT_CONTROLS);
+            expires = SystemClock.elapsedRealtime() + timeout;
             updateBattery(); handler.postDelayed(refresh, 500);
         } catch (RuntimeException unavailable) {
             Log.w(TAG, "Could not display connection card", unavailable);
@@ -308,8 +368,8 @@ public final class HeckerHeadphonePopup {
         text.append(context.getString(label)).append(' ').append(level).append('%');
     }
 
-    private TextView text(String value, int size, int color) {
-        TextView view = new TextView(context);
+    private TextView text(Context themed, String value, int size, int color) {
+        TextView view = new TextView(themed);
         view.setText(value); view.setTextSize(size); view.setTextColor(color);
         return view;
     }
@@ -318,9 +378,76 @@ public final class HeckerHeadphonePopup {
         return Math.round(value * context.getResources().getDisplayMetrics().density);
     }
 
+    private GradientDrawable shape(int color, int radius) {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setColor(color);
+        drawable.setCornerRadius(dp(radius));
+        return drawable;
+    }
+
+    private static int alpha(int color, float opacity) {
+        return (Math.round(255 * opacity) << 24) | (color & 0x00FFFFFF);
+    }
+
+    /** Blur only the rounded window background, leaving all content crisp. */
+    private final class FrostedSurface {
+        private final Window window;
+        private final int surface, outline;
+        private final GradientDrawable background;
+        private final WindowManager manager = context.getSystemService(WindowManager.class);
+        private final Consumer<Boolean> listener = this::update;
+        private boolean available, registered, stopped;
+
+        FrostedSurface(Window window, int surface, int outline) {
+            this.window = window; this.surface = surface; this.outline = outline;
+            background = shape(surface, 28);
+            window.setBackgroundDrawable(background);
+        }
+
+        void start() {
+            if (manager == null) { update(false); return; }
+            try {
+                update(manager.isCrossWindowBlurEnabled());
+                manager.addCrossWindowBlurEnabledListener(context.getMainExecutor(), listener);
+                registered = true;
+            } catch (RuntimeException unavailable) {
+                update(false);
+                Log.w(TAG, "Connection card uses solid Material surface", unavailable);
+            }
+        }
+
+        void refresh() { update(available); }
+
+        private void update(boolean blurAvailable) {
+            if (stopped) return;
+            available = blurAvailable;
+            boolean glass = blurAvailable && Settings.Secure.getIntForUser(
+                    context.getContentResolver(), GLASS, 1, visibleUser) != 0;
+            try {
+                // The blur API takes pixels. Avoid density-scaling this beyond
+                // the compositor's recommended range on Floral's dense screen.
+                window.setBackgroundBlurRadius(glass ? 80 : 0);
+            } catch (RuntimeException unavailable) {
+                glass = false;
+                Log.w(TAG, "Connection card background blur unavailable", unavailable);
+            }
+            background.setColor(glass ? alpha(surface, 0.86f) : surface);
+            background.setStroke(dp(1), alpha(outline, glass ? 0.55f : 0.25f));
+        }
+
+        void stop() {
+            stopped = true;
+            if (!registered || manager == null) return;
+            registered = false;
+            try { manager.removeCrossWindowBlurEnabledListener(listener); }
+            catch (RuntimeException unavailable) { Log.w(TAG, "Could not release blur listener", unavailable); }
+        }
+    }
+
     private void dismiss() {
         handler.removeCallbacks(refresh);
+        if (frost != null) frost.stop();
         if (dialog != null) dialog.dismiss();
-        dialog = null; visibleDevice = null; battery = null;
+        dialog = null; visibleDevice = null; battery = null; frost = null;
     }
 }

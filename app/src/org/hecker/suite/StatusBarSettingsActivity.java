@@ -14,7 +14,6 @@ public final class StatusBarSettingsActivity extends Activity {
                     v -> startActivity(new android.content.Intent(this, MotionFeedbackSettingsActivity.class)));
         Ui.actionCard(this, page, R.string.sb_options_title, R.string.sb_options_summary,
                 v -> startActivity(new android.content.Intent(this, StatusBarLayoutActivity.class)));
-        GestureNavigationPreference.add(this, page);
         LinearLayout calling = Ui.card(this);
         calling.addView(Ui.text(this, getString(R.string.ims_icons_title), 18, true));
         calling.addView(Ui.text(this, getString(R.string.ims_icons_summary), 14, false));
