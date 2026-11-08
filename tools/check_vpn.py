@@ -11,6 +11,8 @@ def host(out):
     run('java','-cp',out/'classes','HeckerVpnConfigTest')
     run('g++','-std=c++17','-Wall','-Wextra','-Werror','-I',ROOT/'vpn/native',ROOT/'vpn/native/protocol.cpp',ROOT/'tests/vpn_protocol_test.cpp','-o',out/'protocol')
     run(out/'protocol')
+    run('g++','-std=c++17','-Wall','-Wextra','-Werror',ROOT/'tests/vpn_lease_test.cpp',ROOT/'vpn/native/protocol.cpp',ROOT/'vpn/native/proxy_config.cpp','-o',out/'lease')
+    run(out/'lease')
     run('g++','-std=c++17','-Wall','-Wextra','-Werror',ROOT/'vpn/native/protocol.cpp',ROOT/'vpn/native/daemon.cpp',ROOT/'vpn/native/proxy_config.cpp','-o',out/'daemon')
     run('g++','-std=c++17','-Wall','-Wextra','-Werror',ROOT/'vpn/native/proxy_config.cpp',ROOT/'vpn/native/proxy_core.cpp','-ldl','-pthread','-o',out/'tcp-core')
     source=ROOT/'third_party/wireguard-tools'

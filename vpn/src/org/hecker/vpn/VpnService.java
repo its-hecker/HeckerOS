@@ -28,9 +28,9 @@ public final class VpnService extends Service {
     };
     @Override public IBinder onBind(Intent intent) { return binder; }
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && "disconnect".equals(intent.getAction())) {
+        if (intent != null && ("disconnect".equals(intent.getAction()) || "test_stop".equals(intent.getAction()))) {
             VpnEngine engine = ((VpnApplication) getApplication()).engine();
-            if (engine != null) { Bundle request = new Bundle(); request.putString("op", "disconnect"); engine.enqueue(request); }
+            if (engine != null) { Bundle request = new Bundle(); request.putString("op", intent.getAction()); engine.enqueue(request); }
         }
         return START_NOT_STICKY;
     }

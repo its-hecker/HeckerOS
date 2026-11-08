@@ -36,11 +36,13 @@ def prepare(cache=None, offline=False):
     lock = json.loads((ROOT / 'prebuilts/mihomo/assets.lock.json').read_text())
     cache = cache or ROOT / 'generated/proxy-assets'
     target = ROOT / 'prebuilts/mihomo/arm64/libclash.so'
-    if target.exists():
-        if not verified(target.read_bytes(), lock['core']):
+    current = target.read_bytes() if target.exists() else None
+    if current is not None and not verified(current, lock['core']):
+        # Upgrade only the previously shipped verified asset. Unknown changes fail.
+        if hashlib.sha256(current).hexdigest() != 'a216f53972abd55418570ca59b4164e0ca88513733ffb08059e9f215fb0c69d0':
             raise ValueError('TCP core checksum differs')
-    else:
-        apk = download(cache / 'WhiteVPN-V1.7.1-arm64-v8a.apk', lock['apk'], offline)
+    if current is None or not verified(current, lock['core']):
+        apk = download(cache / lock['apk']['url'].rsplit('/', 1)[-1], lock['apk'], offline)
         with zipfile.ZipFile(apk) as archive:
             entry = archive.getinfo(lock['core']['entry'])
             if entry.file_size != lock['core']['size']:
@@ -55,7 +57,7 @@ def prepare(cache=None, offline=False):
         staged.write_bytes(data)
         staged.replace(target)
     download(ROOT / 'prebuilts/mihomo/snakeyaml.jar', lock['yaml'], offline)
-    print('Pinned WhiteVPN 1.7.1 native core and SnakeYAML checksums: PASS')
+    print('Pinned FlClash 0.8.92 native core and SnakeYAML checksums: PASS')
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description=__doc__)

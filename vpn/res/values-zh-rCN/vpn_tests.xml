@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_testing">正在测试连接</string>
+    <string name="vpn_test_stop">停止测试</string>
+</resources>

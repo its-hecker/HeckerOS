@@ -1,6 +1,6 @@
 {
-  "mihomo-linux-amd64-compatible-v1.19.30.gz": {
-    "url": "https://github.com/MetaCubeX/mihomo/releases/download/v1.19.30/mihomo-linux-amd64-compatible-v1.19.30.gz",
-    "sha256": "db214c7a2517e63c150d123178d16d102e03a241ccdae4e5e07ffbe9cf56c6f9"
+  "FlClash-0.8.92-linux-amd64.deb": {
+    "url": "https://github.com/chen08209/FlClash/releases/download/v0.8.92/FlClash-0.8.92-linux-amd64.deb",
+    "sha256": "4fb078ef34eb98f3fff557f13c4115a2048dc449b7f6a33815b52526e37e5ea4"
   }
 }

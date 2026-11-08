@@ -36,11 +36,18 @@ constexpr char kTcp[] = "/system_ext/bin/hecker-tcp-core";
 pid_t tcp_pid = -1;
 int tcp_fd = -1;
 unsigned int tcp_netid = 0;
+int lease_fd = -1;
+int tcp_timeout_ms = 45000;
 volatile sig_atomic_t stopping = 0;
 bool cleanup_pending = false;
 void stopped(int) { stopping = 1; }
 struct Result { int code = -1; std::string output; };
 bool io(int fd, void* buffer, size_t size, bool writing);
+bool lease_closed() {
+    if (lease_fd < 0) return false;
+    pollfd lease{lease_fd, POLLRDHUP, 0};
+    return poll(&lease, 1, 0) > 0 && (lease.revents & (POLLRDHUP | POLLHUP | POLLERR | POLLNVAL));
+}
 
 bool tcp_exchange(std::string& data, bool send_request = true) {
     if (tcp_fd < 0) return false;
@@ -80,10 +87,12 @@ bool start_tcp(const hecker::vpn::ProxyConfig& config) {
     }
     close(pair[1]); if (tcp_pid < 0) { close(pair[0]); return false; }
     setpgid(tcp_pid, tcp_pid); tcp_fd = pair[0];
+    tcp_timeout_ms = 45000;
     timeval timeout{45, 0}; setsockopt(tcp_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
     setsockopt(tcp_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
     std::string message = hecker::vpn::proxy_json(config);
     bool ready = tcp_exchange(message) && message == "{\"ok\":true}";
+    tcp_timeout_ms = 25000;
     timeout.tv_sec = 25; setsockopt(tcp_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
     setsockopt(tcp_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
     return ready;
@@ -122,7 +131,7 @@ Result run(const char* command, std::vector<std::string> arguments, const std::s
         }
         pid_t exited = waitpid(child, &status, WNOHANG);
         if (exited == child) { result.code = WIFEXITED(status) ? WEXITSTATUS(status) : -1; break; }
-        if (exited < 0 || (stopping && !cleanup_call) || result.output.size() > 16384 || std::chrono::steady_clock::now() > deadline) {
+        if (exited < 0 || (!cleanup_call && (stopping || lease_closed())) || result.output.size() > 16384 || std::chrono::steady_clock::now() > deadline) {
             kill(-child, SIGKILL); while (waitpid(child, &status, 0) < 0 && errno == EINTR) {} break;
         }
         if (!capture) poll(nullptr, 0, 30);
@@ -167,13 +176,23 @@ std::string trim(std::string value) {
 bool key(const std::string& text) {
     return text.size() == 44 && text.back() == '=' && text.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=") == std::string::npos;
 }
+unsigned int tunnel_netid() {
+    unsigned int netid = 0;
+    FILE* journal = fopen(kNetid, "re");
+    if (journal) { if (fscanf(journal, "%u", &netid) != 1) netid = 0; fclose(journal); }
+    return netid >= 4096 && netid <= 65534 ? netid : 0;
+}
+std::string with_netid(std::string response, unsigned int netid) {
+    if (!response.empty() && response.front() == '{') response.insert(1, "\"netid\":" + std::to_string(netid) + ",");
+    return response;
+}
 std::string state() {
     if (tcp_pid > 0) {
         std::string message = "STATUS";
         if (!tcp_exchange(message) || message.find("\"ok\":true") == std::string::npos) {
             cleanup(); return tcp_error("The root TCP worker stopped. Reconnect or choose another server.");
         }
-        return message;
+        return with_netid(message, tcp_netid);
     }
     Result handshakes = run(kWg, {"show", "hkvpn0", "latest-handshakes"}, "", true);
     bool active = handshakes.code == 0;
@@ -188,7 +207,8 @@ std::string state() {
     }
     return std::string("{\"ok\":true,\"kernel\":") + (access("/sys/module/wireguard", F_OK) == 0 ? "true" : "false")
         + ",\"configured\":" + (active ? "true" : "false") + ",\"handshake\":" + std::to_string(handshake)
-        + ",\"rx\":" + std::to_string(rx) + ",\"tx\":" + std::to_string(tx) + "}";
+        + ",\"rx\":" + std::to_string(rx) + ",\"tx\":" + std::to_string(tx)
+        + ",\"netid\":" + std::to_string(active ? tunnel_netid() : 0) + "}";
 }
 std::string request(const std::string& command) {
     if (command == "STATUS") {
@@ -236,11 +256,11 @@ std::string request(const std::string& command) {
         if (!tcp_exchange(probe) || probe.find("\"validated\":true") == std::string::npos) {
             cleanup(); return std::string("{\"ok\":false,\"cleanup_required\":") + (cleanup_pending ? "true" : "false") + ",\"error\":\"The TCP server did not pass the HTTPS and tunnel DNS checks. Try another free server or import a working HTTPS proxy.\"}";
         }
-        return probe;
+        return with_netid(probe, tcp_netid);
     }
     if (command == "TCP_PROBE" && tcp_pid > 0) {
         std::string probe = "PROBE\n" + std::to_string(tcp_netid);
-        if (tcp_exchange(probe)) return probe;
+        if (tcp_exchange(probe)) return with_netid(probe, tcp_netid);
         cleanup(); return tcp_error("The root TCP worker stopped");
     }
     if (command.rfind("UP\n", 0) == 0) {
@@ -269,8 +289,20 @@ std::string request(const std::string& command) {
 bool io(int fd, void* buffer, size_t size, bool writing) {
     auto* bytes = static_cast<char*>(buffer);
     while (size && !stopping) {
-        ssize_t count = writing ? send(fd, bytes, size, MSG_NOSIGNAL) : recv(fd, bytes, size, 0);
+        bool worker = fd == tcp_fd;
+        if (worker) {
+            // Closing the authenticated lease cancels a test even while the
+            // Go worker initializes or probes. Cleanup helpers still run fully.
+            pollfd ready[2] = {{fd, static_cast<short>(writing ? POLLOUT : POLLIN), 0}, {lease_fd, POLLRDHUP, 0}};
+            int result = poll(ready, lease_fd < 0 ? 1 : 2, tcp_timeout_ms);
+            if (result < 0 && errno == EINTR) continue;
+            if (result <= 0) { if (!result) errno = ETIMEDOUT; return false; }
+            if (ready[1].revents & (POLLRDHUP | POLLHUP | POLLERR | POLLNVAL)) { errno = ECANCELED; return false; }
+        }
+        ssize_t count = writing ? send(fd, bytes, size, MSG_NOSIGNAL | (worker ? MSG_DONTWAIT : 0))
+                               : recv(fd, bytes, size, worker ? MSG_DONTWAIT : 0);
         if (count < 0 && errno == EINTR) continue;
+        if (worker && count < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) continue;
         if (count <= 0) return false;
         bytes += count; size -= static_cast<size_t>(count);
     }
@@ -298,6 +330,7 @@ int main() {
         int client = accept4(server, nullptr, nullptr, SOCK_CLOEXEC);
         if (client < 0) { if (errno == EINTR) continue; break; }
         if (!authorized(client)) { close(client); continue; }
+        lease_fd = client;
         timeval timeout{90, 0}; setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
         setsockopt(client, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
         while (!stopping) {
@@ -308,7 +341,7 @@ int main() {
             std::string response = request(command); uint32_t size = htonl(static_cast<uint32_t>(response.size()));
             if (!io(client, &size, sizeof(size), true) || !io(client, response.data(), response.size(), true)) break;
         }
-        cleanup(); close(client);
+        cleanup(); close(client); lease_fd = -1;
     }
     cleanup(); close(server); return 0;
 }

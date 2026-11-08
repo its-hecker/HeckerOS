@@ -14,14 +14,18 @@ final class KernelChannel implements AutoCloseable {
         final boolean cleanupRequired;
         Failure(JSONObject response) { super(response.optString("error", "Kernel operation failed")); cleanupRequired = response.optBoolean("cleanup_required"); }
     }
-    private LocalSocket socket;
+    private volatile LocalSocket socket;
+    private volatile boolean aborted;
     JSONObject call(String command) throws Exception {
         String stage = "connect";
         try {
-            if (socket == null) {
-                socket = new LocalSocket();
-                socket.connect(new LocalSocketAddress("heckervpnd", LocalSocketAddress.Namespace.RESERVED));
-                socket.setSoTimeout(90000);
+            synchronized (this) {
+                if (aborted) throw new java.io.InterruptedIOException("Cancelled");
+                if (socket == null) {
+                    socket = new LocalSocket();
+                    socket.connect(new LocalSocketAddress("heckervpnd", LocalSocketAddress.Namespace.RESERVED));
+                    socket.setSoTimeout(90000);
+                }
             }
             stage = "exchange";
             byte[] request = command.getBytes(StandardCharsets.UTF_8);
@@ -43,7 +47,8 @@ final class KernelChannel implements AutoCloseable {
                     : "The built-in HeckerVPN service stopped responding. Reconnect to retry; check HeckerVPN service logs if this persists.", failure);
         } catch (Exception failure) { close(); throw failure; }
     }
-    @Override public void close() {
+    synchronized void abort() { aborted = true; close(); }
+    @Override public synchronized void close() {
         if (socket != null) { try { socket.close(); } catch (Exception ignored) {} socket = null; }
     }
 }

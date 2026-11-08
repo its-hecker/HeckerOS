@@ -3,7 +3,6 @@
 """Compile/test real root TCP parsers; verify the pinned native ABI and Android-free boundary."""
 import argparse
 import hashlib
-import gzip
 import json
 import os
 from pathlib import Path
@@ -19,7 +18,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--sdk-cache', type=Path, default=ROOT/'generated/sdk')
     parser.add_argument('--catalog', type=Path)
-    parser.add_argument('--core-config', action='store_true', help='Validate owned config with pinned upstream Mihomo 1.19.30 Linux parser')
+    parser.add_argument('--core-config', action='store_true', help='Apply generated config using the matching pinned FlClash release core')
     args = parser.parse_args(); prepare(offline=True)
     lock = json.loads((ROOT/'prebuilts/mihomo/assets.lock.json').read_text())
     core = ROOT/'prebuilts/mihomo/arm64/libclash.so'
@@ -46,8 +45,8 @@ def main():
         if args.core_config:
             checks = json.loads((ROOT/'tests/proxy-tools.lock.json').read_text())
             item = next(iter(checks)); archive = fetch(ROOT/'generated/proxy-check', item, checks[item])
-            binary = out/'mihomo'; binary.write_bytes(gzip.decompress(archive.read_bytes())); binary.chmod(0o755)
-            run(binary, '-t', '-d', out, '-f', out/'config.yaml')
+            from check_proxy_core import check
+            check(archive, out/'config.yaml', out)
         cp = os.pathsep.join(map(str,[jar,ROOT/'prebuilts/mihomo/snakeyaml.jar',args.sdk_cache/'android-system.jar']))
         run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',cp,'-d',out/'classes',ROOT/'vpn/common/org/hecker/vpn/VpnConfig.java',
             ROOT/'vpn/src/org/hecker/vpn/ProxyConfig.java',ROOT/'vpn/src/org/hecker/vpn/TcpCatalog.java',ROOT/'tests/HeckerProxyTest.java')

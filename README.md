@@ -394,3 +394,11 @@ The Google-signed SIM Manager `D.2.1.989982212-google` (306110) is pinned in
 the vendor input with the five additional product permission grants. All seven
 items are implemented; full ROM and physical setup validation remain pending.
 See [the implementation and validation notes](docs/xda-improvements-2026-11-08.md).
+
+## HeckerVPN TCP startup and connection testing — 9 November 2026
+
+`fix/vpn-tests-20261109` corrects the bundled TCP core's Android configuration
+incompatibility and adds a live connection-test log above the VPN connection card.
+Test saved WireGuard profiles and free TCP entries, filter by transport, stop a
+batch, optionally measure a 1 MiB download and share credential-free results.
+See [behavior, validation and matching Coral build instructions](docs/vpn-tests-2026-11-09.md).
