@@ -390,6 +390,7 @@ Play Integrity verdict remain required.
 The `fix/xda-improvements-20261108` branch ports the Motion Sense Bridge,
 Settings colours/alignment, optional gesture-pill/space removal, uniform shade,
 dark-theme fallback and face-enrollment improvements into the current source.
-The eSIM permission allowlist is prepared, but its newer Google APK is still
-required; the setup-wizard/eSIM fix is pending.
+The Google-signed SIM Manager `D.2.1.989982212-google` (306110) is pinned in
+the vendor input with the five additional product permission grants. All seven
+items are implemented; full ROM and physical setup validation remain pending.
 See [the implementation and validation notes](docs/xda-improvements-2026-11-08.md).
