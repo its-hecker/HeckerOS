@@ -230,7 +230,7 @@ public final class VaultActivity extends Activity {
             check.setContentDescription(app.label);surface.setBackground(ui.ripple(getColor(selected.contains(pkg)?R.color.vault_selected:R.color.vault_card),16));
             check.setOnCheckedChangeListener((v,on)->{if(on)selected.add(pkg);else selected.remove(pkg);saveScope();surface.setBackground(ui.ripple(getColor(on?R.color.vault_selected:R.color.vault_card),16));});
             surface.setOnClickListener(v->check.setChecked(!check.isChecked()));surface.setOnLongClickListener(v->{new AlertDialog.Builder(VaultActivity.this).setTitle(app.label)
-                    .setMessage(pkg+"\n\n"+getString((app.info.applicationInfo.flags&ApplicationInfo.FLAG_ALLOW_BACKUP)!=0?R.string.vault_native_data:R.string.vault_apk_only)).setPositiveButton(android.R.string.ok,null).show();return true;});}
+                    .setMessage(pkg+"\n\n"+getString(VaultPackages.privateFilesEligible(app.info)?R.string.vault_private_files_note:(app.info.applicationInfo.flags&ApplicationInfo.FLAG_ALLOW_BACKUP)!=0?R.string.vault_native_data:R.string.vault_apk_only)).setPositiveButton(android.R.string.ok,null).show();return true;});}
     }
     private void personalPage(){LinearLayout page=scrolling();ui.settingsSection(page,getString(R.string.vault_personal));String[] ids=VaultSystemData.CATEGORIES.toArray(new String[0]);
         for(int i=0;i<ids.length;i++){String id=ids[i];LinearLayout row=ui.card(page,i==0,i==ids.length-1);CheckBox box=new CheckBox(this);box.setText(categoryName(id));box.setTextColor(getColor(R.color.vault_foreground));box.setTextSize(15);
@@ -244,6 +244,7 @@ public final class VaultActivity extends Activity {
         boolean[] data={VaultStorage.prefs(this).getBoolean("include_data",true)};LinearLayout parts=new LinearLayout(this);LinearLayout.LayoutParams pp=new LinearLayout.LayoutParams(-1,-2);pp.topMargin=dp(18);content.addView(parts,pp);
         Button apk=partChip(getString(R.string.vault_part_apks),true),appData=partChip(getString(R.string.vault_part_data),data[0]);LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(0,-2,1);ap.setMarginEnd(dp(8));parts.addView(apk,ap);parts.addView(appData,new LinearLayout.LayoutParams(0,-2,1));
         apk.setOnClickListener(v->message(getString(R.string.vault_apks_required)));appData.setOnClickListener(v->{data[0]=!data[0];styleChip(appData,getString(R.string.vault_part_data),data[0]);});
+        content.addView(text(getString(R.string.vault_private_files_note),13,false));
         Set<VaultExternal.Part> external = EnumSet.noneOf(VaultExternal.Part.class);
         boolean sharedAvailable = VaultEngine.sharedStorageAvailable(this);
         if (!selected.isEmpty()) {

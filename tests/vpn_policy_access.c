@@ -68,6 +68,9 @@ int main(int argc, char **argv) {
     access_check(proxy, "u:object_r:hecker_vpn_data_file:s0", "file", "write", 1);
     access_check(proxy, "u:object_r:netd_service:s0", "service_manager", "find", 0);
     access_check("u:r:untrusted_app:s0", "u:object_r:hecker_vpn_proxy_exec:s0", "file", "execute", 0);
+    access_check("u:r:platform_app:s0", "u:object_r:hecker_vault_files_service:s0", "service_manager", "find", 1);
+    access_check("u:r:untrusted_app:s0", "u:object_r:hecker_vault_files_service:s0", "service_manager", "find", 0);
+    access_check("u:r:system_server:s0", "u:object_r:hecker_vault_files_service:s0", "service_manager", "add", 1);
     puts("HeckerVPN compiled policy: Android service lookup, Binder and private daemon access PASS");
     return 0;
 }

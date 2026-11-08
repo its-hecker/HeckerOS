@@ -86,7 +86,8 @@ def main():
         for folder in [policy/'public',policy/'private']:
             candidates=(([folder/'attributes'] if (folder/'attributes').exists() else [])+sorted(folder.glob('*.te'))) if name=='te' else [folder/name]
             paths.extend(path for path in candidates if path.is_file())
-        if name=='te':paths.append(ROOT/'rom/sepolicy/private/hecker_vpn.te')
+        if name=='te':
+            paths.extend(ROOT/path for path in ['rom/sepolicy/private/hecker_vpn.te','rom/sepolicy/private/hecker_vault_files.te'])
     text='\n'.join(path.read_text()+'\n' for path in paths)
     source=cache/'source.m4';source.write_text(text)
     flags={flag for flag in re.findall(r'is_flag_(?:enabled|disabled)\((\w+)',text) if flag.startswith('RELEASE_')}
@@ -100,6 +101,6 @@ def main():
         with conf.open('w') as target:run(tools/'m4','--fatal-warnings',*[f'-D{k}={v}' for k,v in defs.items()],'-s',source,stdout=target)
         run(compiler/'checkpolicy/checkpolicy','-M','-c','30','-o',cache/(variant+'.bin'),conf)
         run(probe,cache/(variant+'.bin'))
-        print('HeckerVPN + pinned platform SELinux policy, '+variant+', neverallows enforced: PASS',flush=True)
+        print('HeckerVPN + Vault broker + pinned platform SELinux policy, '+variant+', neverallows enforced: PASS',flush=True)
     print('Standalone policy checks do not replace a full device policy build or enforcing phone validation.')
 if __name__=='__main__':main()

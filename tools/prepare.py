@@ -16,6 +16,7 @@ from native_rom_compat import native_rom_compat_plan
 from recovery_port import recovery_plan
 from pakistan_ims import pakistan_ims_plan
 from vault_storage_port import vault_storage_plan
+from vault_files_port import vault_files_plan
 from privapp_permissions import check_feature_privapp_permissions
 
 
@@ -349,6 +350,7 @@ def plan(rom, revert=False):
     changes.update(recovery_plan(rom, revert))
     changes.update(pakistan_ims_plan(rom, revert))
     changes.update(vault_storage_plan(rom, replace_guarded, revert))
+    changes.update(vault_files_plan(rom, replace_guarded, revert, pending=changes))
     return changes
 
 

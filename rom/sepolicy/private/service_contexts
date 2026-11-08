@@ -1,3 +1,4 @@
 theme_engine    u:object_r:hecker_theme_service:s0
 hecker_game u:object_r:hecker_game_service:s0
 hecker_sensor_recovery u:object_r:hecker_sensor_recovery_service:s0
+hecker_vault_files u:object_r:hecker_vault_files_service:s0

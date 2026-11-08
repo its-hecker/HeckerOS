@@ -24,7 +24,8 @@ preview; the preview still permits individual selection before restoration.
 2. In the app parts sheet, select optional shared storage folders for this backup.
    Backup, archive inspection and restore reuse the saved password without another
    credential prompt during this visit. Wi-Fi backup/restore has dedicated Home actions.
-   The result lists APK, native app data and shared storage outcomes for each app.
+   The result lists APK, private app files and shared storage outcomes for each app.
+   Selected user apps close briefly while their private files are copied.
 3. Copy the whole folder to PC/USB **before** formatting data. Keep the password
    separately. Internal storage is erased by a clean flash.
 4. After flashing a HeckerVault-enabled ROM, copy the folder back and select it.
@@ -46,9 +47,9 @@ launch, boot or package update.
 | Item | Behavior |
 | --- | --- |
 | APKs | Base APK and all installed splits; native PackageInstaller restores them |
-| App data | Android full/key-value backup agents and native signing/ownership/permission handling |
-| Apps refusing Android backup | APK and explicitly chosen expansion or app media where present. Native and external app data are skipped |
-| External app data | Selected app's Android/data folder on internal shared storage, excluding cache and honoring the app's backup opt-out |
+| User app data | Private credential/device-encrypted files via a Vault-only system service and installd; selected app is stopped during copy |
+| Apps refusing or returning empty Android backup | Private-file capture when eligible, independent of the app backup agent; protected/system/shared-UID apps retain Android agent restrictions |
+| External app data | Selected app's Android/data folder on internal shared storage, excluding cache; private-file snapshots also support backup opt-outs |
 | Expansion files | Selected app's Android/obb folder on internal shared storage |
 | App media | Selected app's Android/media folder on internal shared storage |
 | Wi-Fi | Platform Wi-Fi backup/restore API; platform exclusions, including hardware credentials, apply |
@@ -57,19 +58,40 @@ launch, boot or package update.
 | Call history | Provider-backed call records; not voicemail recordings |
 | Wallpapers | Static Home/lock images; live wallpaper packages/settings are not exported |
 | Hecker settings | `hecker_` Secure/System settings; credential/key/secret settings excluded |
-| Launcher | Hecker Launcher's native agent, only when it returns a successful data backup |
+| Launcher | Hecker Launcher private files, with native Android agent fallback |
 | App groups/search | Saved app + personal-data selections; app/package and archive-filename search |
 | Scheduling | Daily/weekly, optional charging requirement, current selections or all user apps |
 | Retention | Latest 1/3/5/10 scheduled snapshots; only files created by this installation are pruned |
 
-Private app data follows Android's native backup rules. Version 1.3 retains optional
-per-app shared storage folders through the platform-signed Vault's writable
+Version 1.4 captures private files for internal-storage owner-user apps without a
+separate root grant. This includes databases and their WAL files, preferences,
+files, no_backup content and device-encrypted data. A package-manager freezer
+stops the selected app during capture/restore. System/shared-UID apps are excluded
+except Hecker Launcher. Signer, version, package UID and exact paths are checked
+in system_server; existing installd ownership checks and SELinux relabeling do
+the copying. An app's Android backup agent is a fallback for unsupported/failed
+file capture, with an explicit partial result if full file capture failed.
+
+Version 1.3 retains optional per-app shared storage folders through the platform-signed Vault's writable
 Android storage mount. Those parts are selected per manual backup. Restore checks
 the installed package, signer and version, then replaces matching files one at a
 time, preserving files absent from the snapshot. The encrypted format stays at
 version 1. Earlier Vault builds ignore the optional shared storage parts.
-Cache, notification channels, SSAID, hardware Keystore keys and device-bound
-sessions remain outside the portable snapshot.
+Private restore validates all indexed blobs first, stages replacement CE/DE files
+before modifying current data, and keeps old files in a journaled rollback area.
+It preserves the app root inode and managed native-library link. Native journal
+recovery runs before subsequent captures/restores and after reported restore
+failures when installd remains available. This is not a guarantee of seamless
+app recovery after power loss: a pending operation must be recovered before
+using that app. Fault-injection phone acceptance remains required.
+
+Top-level cache/code_cache, symlinks, sockets, notification channels, SSAID,
+hardware Keystore keys and device-bound sessions remain outside the portable
+snapshot. Private paths use numbered blobs plus a UTF-8 binary index, so spaces
+and Unicode app filenames do not enter the restricted public ZIP path namespace.
+Older Vault builds reject this new private-data kind; use the matching 1.4 ROM
+for restore. Existing partial archives cannot recover private files they never
+contained: make a fresh backup after flashing this build.
 The controller supports the owner profile. Swift Backup import is intentionally
 deferred until physical HeckerVault backup/clean-flash/restore acceptance succeeds.
 
@@ -86,7 +108,7 @@ three modes stream them with DEFLATE level zero instead of recompressing them.
 Other payloads use the selected compression level. Export/import buffers are
 256 KiB, and export shows plaintext bytes processed, percentage and speed.
 These options do not change v1 encryption, password derivation or integrity
-checks. Old and new v1 archives remain readable by either implementation.
+checks. Old v1 archives remain readable; the new private-file data kind requires Vault 1.4.
 
 The format begins with `HVLT` and version 1, followed by a 16-byte random PBKDF2
 salt, an 8-byte random nonce prefix, the fixed 310000 SHA-256 derivation count and
@@ -134,6 +156,8 @@ without it, otherwise successful full backups are not independently restorable.
 
 ```bash
 python3 tools/check_vault.py --sdk-cache generated/sdk
+python3 tools/check_vault_files.py
+python3 tools/check_vpn_policy.py
 ```
 
 This runs production archive/transport tests, complete locked Android SDK/resource

@@ -11,8 +11,9 @@ remaining phone checks](docs/device-log-2026-11-06.md).
 
 `feat/heckervault-20261106` adds **Hecker Lab → HeckerVault**: portable encrypted
 app/APK and personal-data snapshots, native root-free restore, PC/USB folder
-copy, preview, schedules and retention. App-data backup follows Android rules;
-apps opting out are explicitly APK-only. See [coverage and instructions](vault/README.md)
+copy, preview, schedules and retention. Version 1.4 adds a privileged private-file
+backend for selected user apps, including apps with empty Android backup agents.
+See [coverage and instructions](vault/README.md)
 and [validation / pending physical acceptance](docs/heckervault-2026-11-06.md).
 Swift Backup import is deferred until HeckerVault device restore testing succeeds.
 

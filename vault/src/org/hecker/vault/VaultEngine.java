@@ -61,7 +61,22 @@ final class VaultEngine {
                 catch(SecurityException e){attention=true;notes.put(category+": permission is unavailable");}
                 catch(Exception e){if(Thread.currentThread().isInterrupted())throw e;attention=true;notes.put(category+": backup failed ("+e.getClass().getSimpleName()+")");}
             }
-            Set<String> dataPackages=new LinkedHashSet<>();for(int i=0;i<apps.length();i++){JSONObject app=apps.getJSONObject(i);if(app.getBoolean("allowsData"))dataPackages.add(app.getString("package"));}
+            if(!request.mode.equals("apk")) for(int i=0;i<apps.length();i++) {
+                JSONObject app=apps.getJSONObject(i);String pkg=app.getString("package");
+                PackageInfo installed=context.getPackageManager().getPackageInfo(pkg,0);
+                boolean eligible=VaultPackages.privateFilesEligible(installed);
+                if(!eligible)continue;
+                session.check();status.text("Saving private app files: "+pkg);
+                try {
+                    VaultFileData.Summary saved=VaultPrivateFiles.capture(context,root,app,session);
+                    app.put("data","files").put("dataStatus","files_saved").put("privateFiles",saved.files).put("privateBytes",saved.bytes)
+                            .put("result",context.getString(R.string.vault_private_files_saved,saved.files));
+                } catch(Exception failure) {
+                    if(Thread.currentThread().isInterrupted())throw failure;
+                    attention=true;notes.put(pkg+": private-file backup failed ("+failure.getClass().getSimpleName()+"); Android backup will be tried if supported");
+                }
+            }
+            Set<String> dataPackages=new LinkedHashSet<>();for(int i=0;i<apps.length();i++){JSONObject app=apps.getJSONObject(i);if(app.getBoolean("allowsData")&&!app.optString("data").equals("files"))dataPackages.add(app.getString("package"));}
             if(!request.mode.equals("apk")&&!dataPackages.isEmpty()){
                 VaultSession data=new VaultSession(root,token,false,dataPackages);VaultSession.current=data;session=data;
                 boolean nativeComplete=false;
@@ -69,6 +84,7 @@ final class VaultEngine {
                 catch(Exception e){if(Thread.currentThread().isInterrupted())throw e;notes.put("App data: "+safeNativeError(e));}
                 boolean metadata=nativeComplete&&"kv".equals(data.kinds.get("@pm@"));
                 for(int i=0;i<apps.length();i++){JSONObject app=apps.getJSONObject(i);String pkg=app.getString("package");String kind=data.kinds.get(pkg);
+                    if(app.optString("data").equals("files"))continue;
                     boolean hasPayload=kind!=null&&new File(root,"data/"+pkg+"/"+kind).length()>0;
                     VaultDataOutcome outcome=VaultDataOutcome.classify(app.getBoolean("allowsData"),nativeComplete,metadata,data.results.getOrDefault(pkg,-1),hasPayload);
                     int label;
@@ -80,6 +96,7 @@ final class VaultEngine {
                 }
             }else for(int i=0;i<apps.length();i++){
                 JSONObject app=apps.getJSONObject(i);boolean requested=!request.mode.equals("apk");
+                if(app.optString("data").equals("files"))continue;
                 app.put("data","").put("dataStatus",requested?"disallowed":"not_requested")
                         .put("result",requested?context.getString(R.string.vault_data_disallowed):"APK only");
                 if(requested)attention=true;
@@ -143,7 +160,7 @@ final class VaultEngine {
             if (!parts.contains(part)) continue;
             session.check();
             String label = pkg + " · Android/" + part.directory;
-            if (part == VaultExternal.Part.DATA && !app.getBoolean("allowsData")) {
+            if (part == VaultExternal.Part.DATA && !app.getBoolean("allowsData") && !app.optString("data").equals("files")) {
                 attention=true;
                 results.put(part.directory,new JSONObject().put("state","disallowed"));
                 notes.put(label + ": app does not allow backup");
@@ -211,6 +228,7 @@ final class VaultEngine {
         VaultPackages.validate(p.snapshot,p.root);validateApks(p.snapshot,p.root);VaultSystemData.validate(p.root,p.snapshot.getJSONArray("categories"));
         Set<String> chosen=new HashSet<>(request.packages);if(request.categories.contains("launcher"))chosen.add("com.android.launcher3");
         JSONArray apps=p.snapshot.getJSONArray("apps");List<String> data=new ArrayList<>();
+        List<JSONObject> privateApps=new ArrayList<>();
         List<JSONObject> externalApps = new ArrayList<>();
         VaultSession session=new VaultSession(p.root,p.snapshot.getLong("token"),true,chosen);
         session.deviceTransfer=p.snapshot.optBoolean("deviceTransfer",false);VaultSession.current=session;
@@ -219,7 +237,8 @@ final class VaultEngine {
                 try{if(!request.mode.equals("data"))VaultInstaller.install(context,app,p.root);
                     VaultPackages.checkInstalled(context,app);
                     if (!request.mode.equals("apk")) {
-                        if (!app.optString("data").isEmpty()) data.add(pkg);
+                        if (app.optString("data").equals("files")) privateApps.add(app);
+                        else if (!app.optString("data").isEmpty()) data.add(pkg);
                         if (request.packages.contains(pkg)
                                 && !Collections.disjoint(request.externalParts, VaultPackages.externalParts(app))) {
                             externalApps.add(app);
@@ -233,6 +252,11 @@ final class VaultEngine {
             if(!data.isEmpty())try(VaultNative nativeRestore=new VaultNative(context,status::text)){
                 nativeRestore.restore(session,data);for(String pkg:data)report.add(pkg+": Android app-data restore pass completed");
             }catch(Exception e){if(Thread.currentThread().isInterrupted())throw e;report.add("App data: "+safeNativeError(e));}
+            for(JSONObject app:privateApps) {
+                String pkg=app.getString("package");session.check();status.text("Restoring private app files: "+pkg);
+                try {VaultPrivateFiles.restore(context,p.root,app,session);report.add(context.getString(R.string.vault_private_files_restored,pkg));}
+                catch(Exception failure){if(Thread.currentThread().isInterrupted())throw failure;attention=true;report.add(pkg+": private-file restore failed ("+failure.getClass().getSimpleName()+"); inspect HeckerVault system logs before retrying");}
+            }
             restoreExternal(p.root.toPath(), externalApps, request.externalParts, session);
             JSONArray available=p.snapshot.getJSONArray("categories");for(String category:request.categories){session.check();if(!contains(available,category)||category.equals("launcher"))continue;
                 status.text("Restoring "+category);try{VaultSystemData.restore(context,category,p.root,p.snapshot.getString("id"));if(category.equals("settings"))VaultGroups.merge(context,p.snapshot.optJSONObject("groups"));report.add(category+": restored");}
@@ -259,7 +283,7 @@ final class VaultEngine {
                 try {
                     PackageInfo installed = VaultPackages.checkInstalled(context, app);
                     if (part == VaultExternal.Part.DATA
-                            && (installed.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
+                            && (installed.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0 && !app.optString("data").equals("files")) {
                         report.add(label + ": installed app does not allow backup data");
                         continue;
                     }

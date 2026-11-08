@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.hecker.vault" android:versionCode="4" android:versionName="1.3">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.hecker.vault" android:versionCode="5" android:versionName="1.4">
     <uses-sdk android:minSdkVersion="37" android:targetSdkVersion="37" />
     <permission android:name="org.hecker.vault.permission.OPEN" android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.BACKUP" />

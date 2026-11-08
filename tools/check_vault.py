@@ -77,12 +77,13 @@ def main():
         javac=['java','-m','jdk.compiler/com.sun.tools.javac.Main']
         core=sorted((ROOT/'vault/core').rglob('*.java'))
         run(*javac,'-d',out/'host',*core,ROOT/'vault/tests/VaultArchiveTest.java',
-            ROOT/'vault/tests/VaultSelectionTest.java',ROOT/'vault/tests/VaultExternalTest.java',ROOT/'vault/tests/VaultWifiTest.java',ROOT/'vault/tests/VaultDataOutcomeTest.java')
+            ROOT/'vault/tests/VaultSelectionTest.java',ROOT/'vault/tests/VaultExternalTest.java',ROOT/'vault/tests/VaultWifiTest.java',ROOT/'vault/tests/VaultDataOutcomeTest.java',ROOT/'vault/tests/VaultFileDataTest.java')
         run('java','-cp',out/'host','org.hecker.vault.VaultArchiveTest')
         run('java','-cp',out/'host','org.hecker.vault.VaultSelectionTest')
         run('java','-cp',out/'host','org.hecker.vault.VaultExternalTest')
         run('java','-cp',out/'host','org.hecker.vault.VaultWifiTest')
         run('java','-cp',out/'host','org.hecker.vault.VaultDataOutcomeTest')
+        run('java','-cp',out/'host','org.hecker.vault.VaultFileDataTest')
         run(*javac,'-d',out/'transport',*sorted((ROOT/'vault/tests/host').rglob('*.java')),*core,
             ROOT/'vault/src/org/hecker/vault/VaultSession.java',ROOT/'vault/src/org/hecker/vault/VaultTransport.java',ROOT/'vault/tests/VaultTransportTest.java')
         run('java','-cp',out/'transport','org.hecker.vault.VaultTransportTest')

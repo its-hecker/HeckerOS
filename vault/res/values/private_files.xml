@@ -1,0 +1,5 @@
+<resources>
+    <string name="vault_private_files_saved">APK + private app files: %1$d files saved</string>
+    <string name="vault_private_files_restored">%1$s: private app files restored</string>
+    <string name="vault_private_files_note">App data includes private files, including apps that disable Android backup. Selected apps close during capture or restore. Cache, library links and hardware-bound keys are excluded.</string>
+</resources>
