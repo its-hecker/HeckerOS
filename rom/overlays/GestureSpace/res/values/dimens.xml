@@ -1,0 +1,4 @@
+<resources>
+    <!-- Only the stashed taskbar inset; gesture touch targets and 3-button heights stay native. -->
+    <dimen name="taskbar_stashed_size">0dp</dimen>
+</resources>

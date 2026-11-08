@@ -91,8 +91,8 @@
     },
     "frameworks/base": {
       "repository": "its-hecker/heckeros_frameworks_base",
-      "branch": "fix/device-feedback-20261105",
-      "revision": "4ff5e646649ad99adb3eeb19133189c811ea1212",
+      "branch": "fix/xda-improvements-20261108",
+      "revision": "32c50e2a85da710694f8e18ea2452aef1c7a1933",
       "files": [
         "core/res/res/values/config.xml",
         "packages/SystemUI/res/values/config.xml",
@@ -244,8 +244,8 @@
     },
     "packages/apps/Settings": {
       "repository": "its-hecker/heckeros_packages_apps_Settings",
-      "branch": "feat/penguin-integrity-20261105",
-      "revision": "1cc575774ca85cf5ca5a8cf6a164a4583238c9c5",
+      "branch": "fix/xda-improvements-20261108",
+      "revision": "d2cef314d2899f4cdf5acd31881c803f2d55f3f0",
       "files": [
         "src/com/android/settings/homepage/",
         "src/com/android/settings/DisplaySettings.java",
@@ -665,5 +665,24 @@
     "validation": "195 Suite tests plus complete host runner, 87 integration tests; locked Suite/Settings SDK, QS Compose, Launcher helpers, Motion Island/device features, WireGuard native/controller and HeckerVault archive/transport/SDK checks pass. Full ROM and physical tests pending.",
     "functional_revision": "11ece3f5e8a06d3947a89fe26741235ec1f6f1bd",
     "suite_revision": "11ece3f5e8a06d3947a89fe26741235ec1f6f1bd"
+  },
+  "xda_improvements_20261108": {
+    "credit": "Natxus0898/hecker_os",
+    "source_revision": "e52ebc3b498c8cd82cfe98ea98a6be4117c69088",
+    "implemented": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "euicc_status": "Product permission allowlist prepared; exact D.2.1.989982212-google APK still required. Existing vendor APK retained.",
+    "motion_sense": {
+      "repository": "its-hecker/floral-motionsense-plugin",
+      "revision": "8339ac4d1f0e5c6c9b21fb444d3ce50cabd6d510",
+      "branch": "fix/xda-improvements-20261108"
+    },
+    "phone_validation": "Full ROM build and Coral/Flame hardware tests remain required."
   }
 }

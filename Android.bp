@@ -251,3 +251,12 @@ prebuilt_etc {
     sub_dir: "sysconfig",
     system_ext_specific: true,
 }
+
+// Google eSIM's additional grants belong on the same product partition as its APK.
+prebuilt_etc {
+    name: "HeckerEuiccPermissions",
+    src: "configs/privapp-permissions-hecker-euicc.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    product_specific: true,
+}

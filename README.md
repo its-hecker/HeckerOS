@@ -384,3 +384,12 @@ review and rebuild. See [migration/README.md](migration/README.md) for optional
 full ownership and [docs/face-integrity.md](docs/face-integrity.md) for configuration
 and validation limits. Full platform compilation, coral testing and an actual
 Play Integrity verdict remain required.
+
+## XDA improvements, 8 November 2026
+
+The `fix/xda-improvements-20261108` branch ports the Motion Sense Bridge,
+Settings colours/alignment, optional gesture-pill/space removal, uniform shade,
+dark-theme fallback and face-enrollment improvements into the current source.
+The eSIM permission allowlist is prepared, but its newer Google APK is still
+required; the setup-wizard/eSIM fix is pending.
+See [the implementation and validation notes](docs/xda-improvements-2026-11-08.md).

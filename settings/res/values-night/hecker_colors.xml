@@ -1,9 +1,9 @@
 <resources>
-    <color name="hecker_background">#071019</color>
-    <color name="hecker_card">#101C28</color>
-    <color name="hecker_border">#26384D</color>
-    <color name="hecker_foreground">#E2E9FA</color>
-    <color name="hecker_secondary">#B2C1D8</color>
-    <color name="hecker_accent">#7DAAFF</color>
-    <color name="hecker_icon_background">#203958</color>
+    <color name="hecker_background">@android:color/system_surface_container_dark</color>
+    <color name="hecker_card">@android:color/system_surface_bright_dark</color>
+    <color name="hecker_border">@android:color/system_outline_variant_dark</color>
+    <color name="hecker_foreground">@android:color/system_on_surface_dark</color>
+    <color name="hecker_secondary">@android:color/system_on_surface_variant_dark</color>
+    <color name="hecker_accent">@android:color/system_primary_dark</color>
+    <color name="hecker_icon_background">@android:color/system_primary_container_dark</color>
 </resources>

@@ -119,6 +119,7 @@ def main():
             *sorted((settings/'tools/hecker/tests').glob('*.java')))
         for test in ['com.android.settings.biometrics.face.FacePoseEnrollmentStateTest',
                      'com.android.settings.biometrics.face.FacePoseGridGeometryTest',
+                     'com.android.settings.biometrics.face.FacePreviewGeometryTest',
                      'com.android.settings.hecker.PifProfileTest']:
             run('java','-cp',out/'settings-classes',test)
         stubs = out/'stubs/android'

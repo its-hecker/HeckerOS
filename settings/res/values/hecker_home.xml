@@ -1,7 +1,7 @@
 <resources>
-    <color name="hecker_home_background">#F5F2F7</color>
-    <color name="hecker_home_card">#FFFFFF</color>
-    <color name="hecker_home_separator">#D8D1DD</color>
-    <color name="hecker_home_foreground">#211D26</color>
-    <color name="hecker_home_search">#E3DDE9</color>
+    <color name="hecker_home_background">@android:color/system_surface_container_light</color>
+    <color name="hecker_home_card">@android:color/system_surface_bright_light</color>
+    <color name="hecker_home_separator">@android:color/system_outline_variant_light</color>
+    <color name="hecker_home_foreground">@android:color/system_on_surface_light</color>
+    <color name="hecker_home_search">@android:color/system_secondary_container_light</color>
 </resources>

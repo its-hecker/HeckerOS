@@ -96,17 +96,21 @@
     "302bf3412d1f63bf8710f9ec3197abf15762f74a"
   ],
   "packages/apps/Settings/res/values/hecker_colors.xml": [
-    "cb0f40c0a8e89448df5fb77bb9384f1f3a44e78f"
+    "cb0f40c0a8e89448df5fb77bb9384f1f3a44e78f",
+    "e62ffc5ff3d92a3407d907af58565fa6e11ea295"
   ],
   "packages/apps/Settings/res/values-night/hecker_colors.xml": [
-    "95315016a56f86b944c68b89e0d69044aa084603"
+    "95315016a56f86b944c68b89e0d69044aa084603",
+    "2c7244c47d6cb2601f4664b079498b3c66ffb5f5"
   ],
   "packages/apps/Settings/res/layout/hecker_maintainer_preference.xml": [
-    "9fa88fdeb1c4acb6ed8734a07e21a668173a0fba"
+    "9fa88fdeb1c4acb6ed8734a07e21a668173a0fba",
+    "b52b9ff3748b5fe08756b04bc61e20a7f1bae9bb"
   ],
   "packages/apps/Settings/res/layout/hecker_homepage_preference.xml": [
     "a50ae92a32d573414ab3fcdd24f607777ae10304",
-    "2a311ae91c759bbd70714f7263ab0274eaf2a5a5"
+    "2a311ae91c759bbd70714f7263ab0274eaf2a5a5",
+    "9f8e89001df6d11c15d6504ccedd45710f7394c1"
   ],
   "packages/apps/Settings/res/layout/hecker_settings_homepage_container.xml": [
     "052f3cb21a8875a1263552ab0f6968984487af12",
@@ -174,7 +178,8 @@
     "0063332a3f86c140ea7c35596e8c17617958c36f",
     "0e3365fd8f9f3104e55cbd0a3f25048f8b7f6175",
     "c22eadd0780c7da52fe43a0b3b955cdd489c674b",
-    "829ed233e732999cd297d9fa3ccd5a16bb4f6fb3"
+    "829ed233e732999cd297d9fa3ccd5a16bb4f6fb3",
+    "59781359ba75c462fd76afc2533e4d13457c2930"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerQsScene.kt": [
     "8f4bca91cc5e8d5cc0e34f9400270cf0c4cb0ac1",
@@ -193,7 +198,8 @@
     "1c0d49c1bbba994ea49625b15a4e2c707e1f50b5",
     "f31ee21bdf49cdf6c1255af54b1a4f648a3e177d",
     "8fc5fb302a80a187070db113b03b17ba2819d79d",
-    "7f7bfac2b8045492b23179157619114930046983"
+    "7f7bfac2b8045492b23179157619114930046983",
+    "fc7ae2ea6223105b5fcbcf7a782b1880ec6ccc4a"
   ],
   "frameworks/base/packages/SystemUI/res/drawable/hecker_qs_bluetooth.xml": [
     "1e62f74248882595a9cdf304ca6d659d5d2b370e"
@@ -419,5 +425,11 @@
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/HeckerMotionMediaDialog.kt": [
     "38b8761fe8d37c2a86ae66ced12ea431655b7177"
+  ],
+  "packages/apps/Settings/res/values-night/hecker_home.xml": [
+    "e2546fad79aef1b13018269df34ee0891ae2a485"
+  ],
+  "packages/apps/Settings/res/values/hecker_home.xml": [
+    "0b10066d742b3399e4271960a39106eb1cf6f523"
   ]
 }
