@@ -43,8 +43,8 @@
     <string name="vault_folder_error">The backup folder is unavailable. Reconnect the drive or choose the folder again.</string>
     <string name="vault_security">Storage and encryption</string>
     <string name="vault_encryption_note">Every snapshot uses password-based AES-256-GCM encryption. Keep the password separately: a clean flash removes local settings, but the password still unlocks the archive. No account or network connection is needed.</string>
-    <string name="vault_native_backend">Android app-data backup</string>
-    <string name="vault_native_note">Android restores data through each app’s backup agent and verifies signing certificates. Apps that opt out are recorded as APK-only. The previous Android backup provider is restored when the operation finishes.</string>
+    <string name="vault_native_backend">Private app-data backup</string>
+    <string name="vault_native_note">Selected user apps close briefly while HeckerOS saves their private files. This also supports apps whose Android backup agent returns no data. Signing certificates and versions are checked on restore. Protected system apps use Android backup agents when supported.</string>
     <string name="vault_enable_android">Enable Android backup</string>
     <string name="vault_enable_android_note">Allow Android app-data backups? HeckerVault temporarily selects its local transport during a backup. Your previous backup provider is restored afterwards, when available.</string>
     <string name="vault_android_enabled">Android backup enabled.</string>
@@ -59,7 +59,7 @@
     <string name="vault_retention">Scheduled snapshots to keep</string>
     <string name="vault_schedule_failed">Android could not update the schedule.</string>
     <string name="vault_limits_title">Backup coverage</string>
-    <string name="vault_limits">Owner profile only. APKs and splits are included. App data follows Android backup rules and app exclusions; cache and hardware Keystore keys are not copied. Some apps need login or setup again. Personal data is merged on restore; selected app data can be replaced. Swift Backup import will follow after HeckerVault restore testing.</string>
+    <string name="vault_limits">Internal owner profile only. APKs and splits are included. Private files of selected user apps are captured even when their Android backup agent provides no data. Cache, links, notification channels, device identifiers and hardware Keystore keys are excluded. Some apps need login or setup again. Personal data is merged; private app data is replaced on restore. Swift import remains deferred.</string>
     <string name="vault_busy">A backup operation is running. Wait or cancel it first.</string>
     <string name="vault_select_items">Select apps or personal data first.</string>
     <string name="vault_password">Archive password (12+ characters)</string>

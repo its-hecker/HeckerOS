@@ -1,0 +1,8 @@
+<resources>
+    <string name="vault_native_backend">应用私有数据备份</string>
+    <string name="vault_native_note">HeckerOS 会暂时关闭所选用户应用以保存私有文件，即使其 Android 备份代理未返回数据。恢复时检查签名和版本。受保护的系统应用在支持时使用 Android 备份代理。</string>
+    <string name="vault_limits">仅支持主用户内部存储。包含 APK 和拆分 APK。用户应用的私有文件不依赖 Android 备份代理。不包含缓存、链接、通知渠道、设备标识符和硬件密钥。部分应用需重新登录。个人数据合并；所选应用的私有数据会被替换。Swift 导入暂缓。</string>
+    <string name="vault_private_files_saved">APK + 应用私有文件：已保存 %1$d 个文件</string>
+    <string name="vault_private_files_restored">%1$s：应用私有文件已恢复</string>
+    <string name="vault_private_files_note">应用数据包含私有文件，也支持禁止 Android 备份的应用。备份或恢复时会关闭所选应用。不包含缓存、库链接及硬件绑定密钥。</string>
+</resources>

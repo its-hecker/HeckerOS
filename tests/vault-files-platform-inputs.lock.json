@@ -1,0 +1,32 @@
+{
+  "PackageManagerService.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/4ff5e646649ad99adb3eeb19133189c811ea1212/services/core/java/com/android/server/pm/PackageManagerService.java",
+    "sha256": "e888f9e0c94e1c214291f5faa6e54430fdc2b1072bd0b6d78af8dd111bfbeec2",
+    "base64": false
+  },
+  "PackageFreezer.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/4ff5e646649ad99adb3eeb19133189c811ea1212/services/core/java/com/android/server/pm/PackageFreezer.java",
+    "sha256": "ebb73a0f5ae8b23646a15ebf338a44616d4f729e2c8f9643917d78a811393c20",
+    "base64": false
+  },
+  "Installer.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/4ff5e646649ad99adb3eeb19133189c811ea1212/services/core/java/com/android/server/pm/Installer.java",
+    "sha256": "35347bd84e7950130ef0787d1a456c5405061d5a6d7c4afd16ebc87c923c33b4",
+    "base64": false
+  },
+  "PackageManagerTracedLock.java": {
+    "url": "https://raw.githubusercontent.com/its-hecker/heckeros_frameworks_base/4ff5e646649ad99adb3eeb19133189c811ea1212/services/core/java/com/android/server/pm/PackageManagerTracedLock.java",
+    "sha256": "f610c105c3c6a38469f4a15dd82096c1bb72059dbb7832119bd5e1ca80125b39",
+    "base64": false
+  },
+  "InstalldNativeService.cpp": {
+    "url": "https://android.googlesource.com/platform/frameworks/native/+/refs/tags/android-17.0.0_r1/cmds/installd/InstalldNativeService.cpp?format=TEXT",
+    "sha256": "074e5ce7fedcaa83de576915e3fef21ded70c01cb8b10714bb9f44d60e99dcce",
+    "base64": true
+  },
+  "IInstalld.aidl": {
+    "url": "https://android.googlesource.com/platform/frameworks/native/+/refs/tags/android-17.0.0_r1/cmds/installd/binder/android/os/IInstalld.aidl?format=TEXT",
+    "sha256": "8d314df09e7da753409ba4d3e979d3355858da9ee6b6eba7aceec8db355e8d8f",
+    "base64": true
+  }
+}

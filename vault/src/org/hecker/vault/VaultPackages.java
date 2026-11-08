@@ -12,6 +12,10 @@ import java.util.*;
 import org.json.*;
 
 final class VaultPackages {
+    static boolean privateFilesEligible(PackageInfo app) {
+        return app.applicationInfo!=null&&app.applicationInfo.uid>=10000&&app.applicationInfo.uid<100000&&app.sharedUserId==null
+                &&((app.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM)==0||app.packageName.equals("com.android.launcher3"));
+    }
     static List<PackageInfo> installed(Context c,boolean system){
         List<PackageInfo> apps=new ArrayList<>();for(PackageInfo p:c.getPackageManager().getInstalledPackages(PackageManager.GET_SIGNING_CERTIFICATES)){
             if(p.applicationInfo==null||p.packageName.equals(c.getPackageName())||p.applicationInfo.uid<10000)continue;
@@ -62,8 +66,9 @@ final class VaultPackages {
                 if(!path.matches("apps/"+java.util.regex.Pattern.quote(pkg)+"/(base|split-[0-9]+)\\.apk")||!paths.add(path)
                         ||!new File(root,path).isFile())throw new IOException("Missing or invalid APK split");}
             if(!paths.contains("apps/"+pkg+"/base.apk"))throw new IOException("Missing base APK");
-            String kind=app.optString("data","");if(!kind.isEmpty()&&!kind.equals("kv")&&!kind.equals("full"))throw new IOException("Invalid app-data type");
-            if(!kind.isEmpty()&&(!new File(root,"data/"+pkg+"/"+kind).isFile()||!new File(root,"data/@pm@/kv").isFile()))throw new IOException("App data is missing native signing metadata");
+            String kind=app.optString("data","");if(!kind.isEmpty()&&!kind.equals("kv")&&!kind.equals("full")&&!kind.equals("files"))throw new IOException("This app-data type requires a matching HeckerVault version");
+            if(kind.equals("files"))VaultFileData.validate(root.toPath().resolve("data/"+pkg+"/files"));
+            else if(!kind.isEmpty()&&(!new File(root,"data/"+pkg+"/"+kind).isFile()||!new File(root,"data/@pm@/kv").isFile()))throw new IOException("App data is missing native signing metadata");
             for (VaultExternal.Part part : externalParts(app)) {
                 Path folder = VaultExternal.staged(root.toPath(), pkg, part);
                 VaultExternal.readIndex(folder, part);
@@ -99,7 +104,7 @@ final class VaultPackages {
             for (VaultExternal.Part part : VaultExternal.Part.values()) {
                 if (part.directory.equals(name)) match = part;
             }
-            if (match == null || !parts.add(match) || match == VaultExternal.Part.DATA && !app.getBoolean("allowsData")) {
+            if (match == null || !parts.add(match) || match == VaultExternal.Part.DATA && !app.getBoolean("allowsData") && !app.optString("data").equals("files")) {
                 throw new IOException("Invalid external storage part");
             }
         }

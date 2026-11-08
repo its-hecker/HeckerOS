@@ -1,0 +1,4 @@
+# The controller gets one authenticated broker, with no private-app file policy grants.
+type hecker_vault_files_service, system_server_service, service_manager_type;
+add_service(system_server, hecker_vault_files_service)
+allow platform_app hecker_vault_files_service:service_manager find;

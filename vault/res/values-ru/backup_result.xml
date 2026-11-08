@@ -4,7 +4,7 @@
     <string name="vault_data_disallowed">Только APK: приложение запрещает резервное копирование данных Android</string>
     <string name="vault_data_metadata_missing">Только APK: метаданные пакета Android не сохранены</string>
     <string name="vault_data_failed">Только APK: ошибка резервного копирования данных Android</string>
-    <string name="vault_partial_saved">Сохранена неполная копия: приложений — %1$d (с данными Android — %2$d), категорий личных данных — %3$d.</string>
-    <string name="vault_complete_saved">Копия сохранена: приложений — %1$d (с данными Android — %2$d), категорий личных данных — %3$d.</string>
+    <string name="vault_partial_saved">Сохранена неполная копия: приложений — %1$d (с данными — %2$d), категорий личных данных — %3$d.</string>
+    <string name="vault_complete_saved">Копия сохранена: приложений — %1$d (с данными — %2$d), категорий личных данных — %3$d.</string>
     <string name="vault_partial_note">Неполная копия · часть выбранных данных не сохранена. Проверьте результаты ниже.</string>
 </resources>
