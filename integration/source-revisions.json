@@ -334,8 +334,8 @@
     },
     "vendor": {
       "repository": "its-hecker/heckeros-coral-vendor",
-      "branch": "main",
-      "revision": "60b0c615e939cd09ce956e6fe6df5d5aa6ccbdd4"
+      "branch": "fix/xda-improvements-20261108",
+      "revision": "e8732539ab2292d269827d45940c148ccf4042a7"
     },
     "kernel": {
       "repository": "its-hecker/heckeros-floral-kernel",
@@ -670,6 +670,7 @@
     "credit": "Natxus0898/hecker_os",
     "source_revision": "e52ebc3b498c8cd82cfe98ea98a6be4117c69088",
     "implemented": [
+      1,
       2,
       3,
       4,
@@ -677,12 +678,28 @@
       6,
       7
     ],
-    "euicc_status": "Product permission allowlist prepared; exact D.2.1.989982212-google APK still required. Existing vendor APK retained.",
+    "euicc_status": "Integrated Google-signed D.2.1.989982212-google (306110); 14 required privileged permissions covered.",
     "motion_sense": {
       "repository": "its-hecker/floral-motionsense-plugin",
       "revision": "8339ac4d1f0e5c6c9b21fb444d3ce50cabd6d510",
       "branch": "fix/xda-improvements-20261108"
     },
-    "phone_validation": "Full ROM build and Coral/Flame hardware tests remain required."
+    "phone_validation": "Full ROM build and Coral/Flame hardware tests remain required.",
+    "euicc": {
+      "package": "com.google.android.euicc",
+      "version_name": "D.2.1.989982212-google",
+      "version_code": 306110,
+      "size_bytes": 18037540,
+      "sha256": "579f75da460e6a6137a1f2b39e603e20999b4f55c2ec1bde51acc4feac1c6760",
+      "signer_sha256": "7e26b6d5802a16799448ad635868f0345d6730310634684c0ae44e7e9f7ea764",
+      "source": {
+        "source": "https://www.transfernow.net/dl/20261108yTFnEmXn",
+        "rom": "HeckerOS_flame-17.0-20261108-mod.zip",
+        "product_manifest_sha256": "89cc846e6a7eb78422f68d9ed48d98973ce76dec322522b7e9bc03b64bf6d024",
+        "downloaded_bytes": 17848753,
+        "method": "Range reads, SHA-256-verified payload operations, exact previously verified APK hash"
+      },
+      "validation_limit": "Full ROM build and physical eSIM setup validation pending"
+    }
   }
 }

@@ -10,7 +10,7 @@
   <remove-project path="vendor/hecker/floral/faceid" optional="true" />
   <remove-project path="vendor/hecker/floral/suite" optional="true" />
   <project name="its-hecker/heckeros-floral-devicetree" path="device/google/coral" remote="floral-github" revision="4829092f7b7b988fc5fb2efe57c481f266364c71" upstream="refs/heads/test/floral-low-brightness-flicker-20261029" dest-branch="test/floral-low-brightness-flicker-20261029" />
-  <project name="its-hecker/heckeros-coral-vendor" path="vendor/google/coral" remote="floral-github" revision="60b0c615e939cd09ce956e6fe6df5d5aa6ccbdd4" upstream="refs/heads/main" dest-branch="main" />
+  <project name="its-hecker/heckeros-coral-vendor" path="vendor/google/coral" remote="floral-github" revision="e8732539ab2292d269827d45940c148ccf4042a7" upstream="refs/heads/fix/xda-improvements-20261108" dest-branch="fix/xda-improvements-20261108" />
   <project name="its-hecker/heckeros-floral-kernel" path="kernel/google/msm-4.14" remote="floral-github" revision="e1d6f9ada81bd9bbe040c5fe369f2607b6bd5a64" upstream="refs/heads/fix/device-feedback-20261105" dest-branch="fix/device-feedback-20261105" sync-s="true" />
   <project name="LineageOS/android_packages_apps_ElmyraService" path="packages/apps/ElmyraService" remote="floral-github" revision="baab2beb7165caef27b4ee235641775e9d189acc" upstream="refs/heads/lineage-24.0" />
   <project name="its-hecker/vendor_lunaris_dolby" path="vendor/lunaris/dolby" remote="floral-github" revision="544e6271c955e2bf450c8481ac1e71551cb5a800" upstream="refs/heads/pixelos-compat" dest-branch="pixelos-compat" />
