@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vpn_testing">正在测试连接</string>
+    <string name="vpn_test_title">连接测试</string>
+    <string name="vpn_test_summary">在当前网络上测试已保存的 WireGuard 配置和可用 TCP 服务器。每次测试一个隧道，设置后进行最长 15 秒的联网检查。当前 VPN 将暂时断开，测试后重新连接。临时路由仅用于 HeckerVPN 的测试流量。</string>
+    <string name="vpn_test_empty">各个配置的测试结果将显示在此处。</string>
+    <string name="vpn_test_all_types">所有类型</string>
+    <string name="vpn_test_type">连接类型</string>
+    <string name="vpn_test_speed">通过每个可用服务器下载 1 MiB</string>
+    <string name="vpn_test_start">测试连接</string>
+    <string name="vpn_test_stop">停止测试</string>
+    <string name="vpn_test_share">分享测试结果</string>
+    <string name="vpn_test_one">测试此配置</string>
+    <string name="vpn_test_progress">已测试 %1$d / %2$d</string>
+    <string name="vpn_test_latency">HTTPS %1$d 毫秒</string>
+    <string name="vpn_test_mbps">%1$.2f Mbps</string>
+    <string name="vpn_test_working">可用</string>
+    <string name="vpn_test_starting">正在启动隧道…</string>
+    <string name="vpn_test_checking">正在检查联网状态…</string>
+    <string name="vpn_test_downloading">正在测量下载速度…</string>
+    <string name="vpn_test_no_handshake">测试期间未收到 WireGuard 握手</string>
+    <string name="vpn_test_internet_failed">联网检查失败</string>
+    <string name="vpn_test_startup_failed">TCP 内核启动失败</string>
+    <string name="vpn_test_setup_failed">隧道设置失败</string>
+    <string name="vpn_test_invalid">无法使用配置或解析服务器地址</string>
+    <string name="vpn_test_network_changed">网络已更改，请在当前网络上重新测试。</string>
+    <string name="vpn_test_cleanup_failed">无法确认隧道已清理，测试已停止</string>
+    <string name="vpn_test_cancelled">已停止</string>
+    <string name="vpn_test_queued">等待中</string>
+    <string name="vpn_test_stale">这些结果来自其他网络，请重新测试。</string>
+    <string name="vpn_test_speed_unavailable">无法测量速度</string>
+</resources>

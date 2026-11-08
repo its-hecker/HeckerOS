@@ -48,6 +48,8 @@ final class VpnEngine {
     private int endpointAttempt,endpointChoices=1;
     private String underlyingProperties="";
     private List<JSONObject> catalog = List.of();
+    private VpnTestRunner tests;
+    private boolean testing, restoreAfterTests;
 
     VpnEngine(Context context) {
         this.context = context;
@@ -103,9 +105,16 @@ final class VpnEngine {
             if (store == null) store = new VpnStore(context);
             if (request == null) throw new IllegalArgumentException("Missing request");
             String op = request.getString("op", "state");
+            if (testing && (op.equals("disconnect") || op.equals("set_enabled") && !request.getBoolean("enabled"))) {
+                restoreAfterTests = false; tests.cancel(); return state();
+            }
+            if (testing && !op.equals("state") && !op.equals("test_stop"))
+                throw new IllegalArgumentException("Connection testing is running. Stop the tests before changing the connection.");
             if (!op.equals("state")) error = "";
             switch (op) {
                 case "state": break;
+                case "test_start": startTests(request); break;
+                case "test_stop": if (testing) tests.cancel(); break;
                 case "probe": snapshot(kernel.call("STATUS")); break;
                 case "import": importProfile(request.getString("name", "VPN profile"), request.getString("config")); break;
                 case "import_tcp": importTcp(request.getString("name", "TCP proxy"), request.getString("config")); break;
@@ -169,6 +178,45 @@ final class VpnEngine {
                 : "Operation failed. Check network access and saved profile availability, then try again.";
     }
     private JSONObject selected() throws Exception { return store.profile(store.data.optString("selected")); }
+    private void startTests(Bundle request) throws Exception {
+        String filter = request.getString("kind", "all"), only = request.getString("id", "");
+        if (!List.of("all", "wireguard", "tcp").contains(filter)) throw new IllegalArgumentException("Invalid test filter");
+        Network network = connectivity.getActiveNetwork();
+        android.net.NetworkCapabilities caps = connectivity.getNetworkCapabilities(network);
+        if (network == null) throw new IllegalArgumentException("Connect to Wi-Fi or mobile data before testing");
+        if (caps != null && caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_VPN))
+            throw new IllegalArgumentException("Disconnect the other Android VPN before testing");
+        List<VpnTestRunner.Target> targets = new ArrayList<>();
+        java.util.HashSet<String> seen = new java.util.HashSet<>();
+        JSONArray profiles = store.data.getJSONArray("profiles");
+        for (int i = 0; i < profiles.length(); i++) {
+            JSONObject row = profiles.getJSONObject(i);
+            String kind = row.optString("kind").equals("tcp") ? "tcp" : "wireguard";
+            if ((!filter.equals("all") && !filter.equals(kind)) || !only.isEmpty() && !only.equals(row.getString("id"))) continue;
+            String config = row.getString("config");
+            seen.add(kind + config);
+            targets.add(new VpnTestRunner.Target(row.getString("id"), row.getString("name"), kind, config));
+        }
+        JSONArray tcp = store.data.optJSONArray("tcp_catalog");
+        if (only.isEmpty() && !filter.equals("wireguard") && tcp != null) for (int i = 0; i < tcp.length(); i++) {
+            JSONObject row = tcp.getJSONObject(i); String config = row.getString("config");
+            if (seen.add("tcp" + config)) targets.add(new VpnTestRunner.Target("tcp:" + row.getString("id"), row.getString("name"), "tcp", config));
+        }
+        if (targets.isEmpty()) throw new IllegalArgumentException("No matching profiles. Import WireGuard configs or refresh the free TCP list first.");
+        boolean resume = desired;
+        if (desired || configured || cleanupRequired) disconnect(); else kernel.close();
+        restoreAfterTests = resume; testing = true; status = "testing";
+        tests = new VpnTestRunner(context, connectivity, network, targets, request.getBoolean("speed"), () -> worker.post(() -> {
+            testing = false; status = "disconnected";
+            boolean cleaned = false;
+            try {
+                snapshot(kernel.call("DOWN")); cleanupRequired = false; kernel.close(); cleaned = true;
+                if (restoreAfterTests) { endpointAttempt = 0; connect(); }
+            } catch (Exception failure) { if (!cleaned) cleanupRequired = true; failed(failure); }
+            restoreAfterTests = false; notifyState();
+        }));
+        tests.start(); notifyState();
+    }
     private void importProfile(String name, String text) throws Exception {
         if (name.trim().isEmpty() || name.length() > 80 || name.chars().anyMatch(Character::isISOControl))
             throw new IllegalArgumentException("Use a profile name of 1–80 characters");
@@ -433,6 +481,8 @@ final class VpnEngine {
         result.putString("backend", tcp ? "TCP proxy · root TUN" : "WireGuard kernel"); if (probed) result.putBoolean("kernel", supported);
         result.putBoolean("configured", configured); result.putBoolean("desired", desired);
         result.putBoolean("cleanup_required", cleanupRequired);
+        result.putBoolean("testing", testing);
+        if (tests != null) result.putBundle("tests", tests.snapshot());
         result.putLong(VpnTileState.VERSION, tileStateVersion);
         result.putLong("rx", rx); result.putLong("tx", tx); result.putLong("handshake", handshake);
         result.putInt("underlying_netid",underlying==null?0:underlying.getNetId());
@@ -521,20 +571,20 @@ final class VpnEngine {
             loggedStatus = status;lastDiagnostic=now;
         }
         NotificationManager notifications = context.getSystemService(NotificationManager.class);
-        if (!desired && !status.equals("error")) { notifications.cancel(7841); return; }
+        if (!desired && !testing && !status.equals("error")) { notifications.cancel(7841); return; }
         Intent open = new Intent().setClassName("org.hecker.suite", "org.hecker.suite.SuiteRouterActivity")
                 .putExtra("org.hecker.suite.PAGE", "HeckerVpnActivity");
         PendingIntent content = PendingIntent.getActivity(context, 0, open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent stop = PendingIntent.getService(context, 1, new Intent(context, VpnService.class).setAction("disconnect"), PendingIntent.FLAG_IMMUTABLE);
-        int label = status.equals("disconnecting") ? R.string.vpn_disconnecting : status.equals("active") ? R.string.vpn_active : status.equals("idle") ? R.string.vpn_idle : status.equals("peer_timeout") ? R.string.vpn_peer_timeout : status.equals("waiting_peer") ? R.string.vpn_waiting_peer
+        PendingIntent stop = PendingIntent.getService(context, 1, new Intent(context, VpnService.class).setAction(testing ? "test_stop" : "disconnect"), PendingIntent.FLAG_IMMUTABLE);
+        int label = testing ? R.string.vpn_testing : status.equals("disconnecting") ? R.string.vpn_disconnecting : status.equals("active") ? R.string.vpn_active : status.equals("idle") ? R.string.vpn_idle : status.equals("peer_timeout") ? R.string.vpn_peer_timeout : status.equals("waiting_peer") ? R.string.vpn_waiting_peer
                 : status.equals("waiting_network") ? R.string.vpn_waiting_network : status.equals("error") ? R.string.vpn_error : R.string.vpn_connecting;
         updateRoutingNotification();
-        String summary=routingText.isEmpty()?context.getString(label):routingText;
+        String summary=testing || routingText.isEmpty()?context.getString(label):routingText;
         notifications.notify(7841, new Notification.Builder(context, "heckervpn").setSmallIcon(R.drawable.ic_vpn)
                 .setContentTitle(context.getString(R.string.vpn_title)+" · "+context.getString(label)).setContentText(summary)
                 .setLargeIcon(routingIcon).setStyle(new Notification.BigTextStyle().bigText(summary))
                 .setVisibility(Notification.VISIBILITY_PRIVATE)
-                .setContentIntent(content).setOngoing(desired).setOnlyAlertOnce(true)
-                .addAction(new Notification.Action.Builder(null, context.getString(R.string.vpn_disconnect), stop).build()).build());
+                .setContentIntent(content).setOngoing(desired || testing).setOnlyAlertOnce(true)
+                .addAction(new Notification.Action.Builder(null, context.getString(testing ? R.string.vpn_test_stop : R.string.vpn_disconnect), stop).build()).build());
     }
 }
