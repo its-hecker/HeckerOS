@@ -1,5 +1,4 @@
 /system_ext/bin/heckervpnd                 u:object_r:hecker_vpnd_exec:s0
-/system_ext/bin/hecker-tcp-core             u:object_r:hecker_vpn_proxy_exec:s0
 /system_ext/bin/hecker-wg(-quick)?         u:object_r:hecker_vpn_tool_exec:s0
 /dev/socket/heckervpnd                    u:object_r:hecker_vpn_socket:s0
 /data/misc/heckervpn(/.*)?                u:object_r:hecker_vpn_data_file:s0

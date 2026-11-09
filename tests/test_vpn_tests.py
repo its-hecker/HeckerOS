@@ -64,15 +64,14 @@ import org.json.*;import java.util.*;import java.util.concurrent.*;
 final class KernelChannel implements AutoCloseable {
  static boolean failNext,handshake=true,block;static CountDownLatch entered=new CountDownLatch(1);
  static final List<String> commands=Collections.synchronizedList(new ArrayList<>());boolean aborted;
- static final class Failure extends IllegalArgumentException{final boolean cleanupRequired=false;Failure(){super("TCP core startup failed (stage: configuration, reason: rejected).");}}
+ static final class Failure extends IllegalArgumentException{final boolean cleanupRequired=false;Failure(){super("Could not configure the VPN peer.");}}
  JSONObject call(String command)throws Exception{
   commands.add(command);
-  if(command.startsWith("UP\\n")||command.startsWith("TCP_UP\\n")){
+  if(command.startsWith("UP\\n")){
    entered.countDown();if(block){while(!aborted)Thread.sleep(5);throw new InterruptedException();}
    if(failNext){failNext=false;throw new Failure();}
-   if(command.startsWith("TCP_UP")){JSONObject p=new JSONObject(command.substring(7));if(!p.getString("mode").equals("include")||!p.getString("apps").equals("org.hecker.vpn"))throw new AssertionError("TCP test routed other apps");}
-   else if(!command.contains("IncludedApplications=org.hecker.vpn\\n"))throw new AssertionError("WG test routed other apps");
-  }
+   if(!command.contains("IncludedApplications=org.hecker.vpn\\n"))throw new AssertionError("WG test routed other apps");
+  }else if(!command.equals("STATUS")&&!command.equals("DOWN"))throw new AssertionError("Unexpected tunnel command");
   if(aborted)throw new InterruptedException();
   return new JSONObject().put("ok",true).put("configured",true).put("netid",5000).put("handshake",handshake?10L:0L);
  }
@@ -83,29 +82,33 @@ import android.content.*;import android.net.*;import android.os.*;import java.ut
 public class RunnerProbe {
  static final String KEY="AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=";
  static final String WG="[Interface]\nPrivateKey="+KEY+"\nAddress=10.0.0.2/32\nDNS=1.1.1.1\n[Peer]\nPublicKey="+KEY+"\nEndpoint=203.0.113.2:51820\nAllowedIPs=0.0.0.0/0\n";
- static final VpnTestRunner.Target wg=new VpnTestRunner.Target("wg","Saved WG","wireguard",WG.replace("\\n","\n"));
- static VpnTestRunner.Target tcp()throws Exception{return new VpnTestRunner.Target("tcp","Saved TCP","tcp",new ProxyConfig("203.0.113.2",443,true,"proxy.example","fixture-user","private-fixture-password").json());}
+ static final VpnTestRunner.Target wg=new VpnTestRunner.Target("wg","Saved WG",WG);
+ static final VpnTestRunner.Target alternate=new VpnTestRunner.Target("second","Second WG",WG.replace(":51820",":51821"));
  static void check(boolean b){if(!b)throw new AssertionError();}
  static ArrayList<Bundle> rows(Bundle b){return b.getParcelableArrayList("rows",Bundle.class);}
  static Bundle run(List<VpnTestRunner.Target> targets,boolean speed)throws Exception{
   ConnectivityManager cm=new ConnectivityManager();Network.manager=cm;CountDownLatch done=new CountDownLatch(1);
   VpnTestRunner runner=new VpnTestRunner(new Context(),cm,cm.active,targets,speed,done::countDown);runner.start();
   check(done.await(5,TimeUnit.SECONDS));Bundle b=runner.snapshot();check(!b.getBoolean("running"));
-  check(!b.toString().contains(KEY)&&!b.toString().contains("private-fixture-password"));return b;
+  check(!b.toString().contains(KEY));return b;
  }
  public static void main(String[] args)throws Exception{
-  Bundle all=run(List.of(wg,tcp()),true);check(all.getInt("completed")==2);
+  Bundle all=run(List.of(wg,alternate),true);check(all.getInt("completed")==2);
   for(Bundle row:rows(all)){check(row.getString("result").equals("working"));check(row.getDouble("mbps")>0);}
   check(KernelChannel.commands.stream().filter(c->c.equals("DOWN")).count()==2);
-  KernelChannel.failNext=true;Bundle startup=run(List.of(tcp(),wg),false);
-  check(rows(startup).get(0).getString("result").equals("startup_failed"));check(rows(startup).get(1).getString("result").equals("working"));
-  KernelChannel.handshake=false;Network.fail=true;Bundle noPeer=run(List.of(wg),false);
+  KernelChannel.failNext=true;Bundle startup=run(List.of(wg,alternate),false);
+  check(rows(startup).get(0).getString("result").equals("setup_failed"));
+  check(rows(startup).get(0).getString("detail").equals("Could not configure the VPN peer."));
+  check(rows(startup).get(1).getString("result").equals("working"));
+  KernelChannel.handshake=false;Bundle noPeer=run(List.of(wg),false);
   check(rows(noPeer).get(0).getString("result").equals("no_handshake"));
+  KernelChannel.handshake=true;Network.fail=true;Bundle noInternet=run(List.of(wg),false);
+  check(rows(noInternet).get(0).getString("result").equals("internet_failed"));
   KernelChannel.handshake=true;Network.fail=false;Network.change=true;
-  Bundle changed=run(List.of(wg,tcp()),false);check(changed.getString("ending").equals("network_changed"));check(changed.getInt("completed")==0);
+  Bundle changed=run(List.of(wg,alternate),false);check(changed.getString("ending").equals("network_changed"));check(changed.getInt("completed")==0);
   Network.change=false;KernelChannel.block=true;KernelChannel.entered=new CountDownLatch(1);
   ConnectivityManager cm=new ConnectivityManager();Network.manager=cm;CountDownLatch done=new CountDownLatch(1);
-  VpnTestRunner cancel=new VpnTestRunner(new Context(),cm,cm.active,List.of(wg,tcp()),false,done::countDown);
+  VpnTestRunner cancel=new VpnTestRunner(new Context(),cm,cm.active,List.of(wg,alternate),false,done::countDown);
   cancel.start();check(KernelChannel.entered.await(3,TimeUnit.SECONDS));cancel.cancel();check(done.await(3,TimeUnit.SECONDS));
   check(cancel.snapshot().getString("ending").equals("cancelled"));check(cancel.snapshot().getInt("completed")==0);
   System.out.println("Production batch runner: isolated routes, tunnel-bound HTTPS, speed cap, failure continuation, fresh handshake, network change, cancellation and credential-free results PASS");
@@ -118,7 +121,7 @@ public class RunnerProbe {
             for name, text in fixtures.items():
                 path = out/name; path.parent.mkdir(parents=True, exist_ok=True); path.write_text(text); paths.append(path)
             paths += [ROOT/'vpn/common/org/hecker/vpn'/name for name in ['VpnConfig.java', 'VpnUnderlay.java']]
-            paths += [ROOT/'vpn/src/org/hecker/vpn'/name for name in ['ProxyConfig.java', 'VpnTestRunner.java']]
+            paths.append(ROOT/'vpn/src/org/hecker/vpn/VpnTestRunner.java')
             subprocess.run(['java', '-m', 'jdk.compiler/com.sun.tools.javac.Main', '-cp', str(jar), '-d', str(out/'classes'), *map(str, paths)], check=True)
             subprocess.run(['java', '-cp', str(out/'classes')+':'+str(jar), 'org.hecker.vpn.RunnerProbe'], check=True, timeout=20)
 

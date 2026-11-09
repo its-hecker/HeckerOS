@@ -271,8 +271,8 @@
     }
   },
   "hecker_suite": {
-    "source_branch": "feat/bluetooth-glass-navigation-20261109",
-    "integration_branch": "feat/bluetooth-glass-navigation-20261109",
+    "source_branch": "fix/vpn-terminal-20261109",
+    "integration_branch": "fix/vpn-terminal-20261109",
     "release": "hecker_suite",
     "base_release": "cp2a",
     "status": "Source validation only; full ROM build and phone tests required",

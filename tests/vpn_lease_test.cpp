@@ -4,28 +4,24 @@
 #undef main
 #include <cassert>
 #include <iostream>
-// Loopback sockets exercise poll/half-close without needing an Android init socket.
-std::pair<int, int> pair() {
-    int listener = socket(AF_INET, SOCK_STREAM, 0); assert(listener >= 0);
-    sockaddr_in address{}; address.sin_family = AF_INET; address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    assert(!bind(listener, reinterpret_cast<sockaddr*>(&address), sizeof(address)) && !listen(listener, 1));
-    socklen_t length = sizeof(address); assert(!getsockname(listener, reinterpret_cast<sockaddr*>(&address), &length));
-    int sender = socket(AF_INET, SOCK_STREAM, 0); assert(sender >= 0);
-    assert(!connect(sender, reinterpret_cast<sockaddr*>(&address), sizeof(address)));
-    int receiver = accept(listener, nullptr, nullptr); assert(receiver >= 0); close(listener);
-    return {sender, receiver};
-}
 int main() {
-    auto lease = pair(), worker = pair(); lease_fd = lease.second; tcp_fd = worker.second;
+    int lease[2];
+    assert(socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, lease) == 0);
+    lease_fd = lease[1];
     assert(!lease_closed());
-    char value = 'x', received = 0; assert(send(worker.first, &value, 1, 0) == 1);
-    assert(io(tcp_fd, &received, 1, false) && received == value);
-    assert(!shutdown(lease.first, SHUT_WR)); assert(lease_closed());
-    auto before = std::chrono::steady_clock::now();
-    assert(!io(tcp_fd, &received, 1, false) && errno == ECANCELED);
-    assert(std::chrono::steady_clock::now() - before < std::chrono::seconds(1));
-    assert(with_netid("{\"ok\":true}", 5000) == "{\"netid\":5000,\"ok\":true}");
-    close(lease.first); close(lease.second); close(worker.first); close(worker.second);
-    lease_fd = tcp_fd = -1;
-    std::cout << "Native controller lease: live read, half-close cancellation during core wait, bounded return and test netid PASS\n";
+    char value = 'x', received = 0;
+    assert(send(lease[0], &value, 1, 0) == 1);
+    assert(io(lease_fd, &received, 1, false) && received == value);
+    assert(shutdown(lease[0], SHUT_WR) == 0);
+    assert(lease_closed());
+
+    const auto before = std::chrono::steady_clock::now();
+    assert(run("/bin/sleep", {"10"}).code == -1);
+    assert(std::chrono::steady_clock::now() - before < std::chrono::seconds(2));
+    assert(run("/bin/true", {}, "", false, true).code == 0);
+    assert(request("TCP_UP\n{}").find("Unsupported operation") != std::string::npos);
+    assert(request("TCP_PROBE").find("Unsupported operation") != std::string::npos);
+    close(lease[0]); close(lease[1]);
+    lease_fd = -1;
+    std::cout << "Native controller lease: helper cancellation, cleanup after half-close and retired operation rejection PASS\n";
 }

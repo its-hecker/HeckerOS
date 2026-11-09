@@ -44,23 +44,3 @@ binder_call(platform_app, hecker_vpn_app)
 binder_call(hecker_vpn_app, platform_app)
 unix_socket_connect(hecker_vpn_app, hecker_vpn, hecker_vpnd)
 allow hecker_vpnd hecker_vpn_app:unix_stream_socket { read write getattr getopt setopt };
-
-# Separate root TUN worker, with no Binder/service-manager access and no Android
-# VpnService. Only heckervpnd can launch it and supply its inherited control fd.
-type hecker_vpn_proxy, domain, coredomain;
-type hecker_vpn_proxy_exec, exec_type, system_file_type, file_type;
-domain_auto_trans(hecker_vpnd, hecker_vpn_proxy_exec, hecker_vpn_proxy)
-net_domain(hecker_vpn_proxy)
-allow hecker_vpnd hecker_vpn_proxy:process { signal sigkill };
-allow hecker_vpn_proxy hecker_vpnd:fd use;
-allow hecker_vpn_proxy hecker_vpnd:unix_stream_socket { read write getattr getopt setopt };
-allow hecker_vpn_proxy self:global_capability_class_set net_admin;
-allow hecker_vpn_proxy hecker_vpn_data_file:dir create_dir_perms;
-allow hecker_vpn_proxy hecker_vpn_data_file:file create_file_perms;
-allow hecker_vpn_proxy tun_device:chr_file rw_file_perms;
-allow hecker_vpn_proxy self:tun_socket create_socket_perms_no_ioctl;
-allowxperm hecker_vpn_proxy tun_device:chr_file ioctl { 0x54ca 0x54cf 0x54d0 0x54d2 };
-allow hecker_vpn_proxy self:netlink_route_socket create_socket_perms_no_ioctl;
-allow hecker_vpn_proxy self:netlink_route_socket nlmsg_read;
-allowxperm hecker_vpn_proxy self:netlink_route_socket nlmsg unpriv_route_socket_nlmsgs;
-r_dir_file(hecker_vpn_proxy, system_security_cacerts_file)

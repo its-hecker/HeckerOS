@@ -6,6 +6,7 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.AtomicFile;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,7 +30,30 @@ final class VpnStore {
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             cipher.init(Cipher.DECRYPT_MODE, key(), new GCMParameterSpec(128, Arrays.copyOf(encrypted, 12)));
             data = new JSONObject(new String(cipher.doFinal(encrypted, 12, encrypted.length - 12), StandardCharsets.UTF_8));
+            if (removeLegacyTcpProfiles(data)) save();
         } else data = new JSONObject().put("profiles", new JSONArray()).put("selected", "");
+    }
+
+    static boolean removeLegacyTcpProfiles(JSONObject data) throws JSONException {
+        boolean changed = data.remove("tcp_catalog") != null;
+        changed |= data.remove("tcp_catalog_time") != null;
+        JSONArray profiles = data.optJSONArray("profiles");
+        if (profiles == null) return changed;
+
+        String selected = data.optString("selected");
+        boolean selectionRemoved = false;
+        for (int i = profiles.length() - 1; i >= 0; i--) {
+            JSONObject profile = profiles.optJSONObject(i);
+            if (profile != null && "tcp".equals(profile.optString("kind"))) {
+                selectionRemoved |= selected.equals(profile.optString("id"));
+                profiles.remove(i);
+                changed = true;
+            }
+        }
+        if (selectionRemoved) {
+            data.put("selected", profiles.length() == 0 ? "" : profiles.getJSONObject(0).getString("id"));
+        }
+        return changed;
     }
     private SecretKey key() throws Exception {
         KeyStore store = KeyStore.getInstance("AndroidKeyStore"); store.load(null);

@@ -59,8 +59,12 @@ for floral_addon_path in system/addon.d system/system/addon.d system_ext/addon.d
         floral_stale_app=true
     fi
 done
+if [[ -e "$floral_product_out/system_ext/bin/hecker-tcp-core" || \
+      -e "$floral_product_out/system_ext/lib64/libclash.so" ]]; then
+    floral_stale_app=true
+fi
 if [[ "$floral_stale_app" == true ]]; then
-    echo "Removing retired apps or addon.d from build outputs (installclean)."
+    echo "Removing retired files from build outputs (installclean)."
     m installclean
 fi
 if [[ -n "${HECKER_BUILD_JOBS:-}" ]]; then

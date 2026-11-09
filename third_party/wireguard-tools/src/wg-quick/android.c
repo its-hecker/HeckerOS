@@ -42,7 +42,6 @@ static bool is_exiting = false;
 static bool binder_available = false;
 static unsigned int sdk_version;
 static uint32_t hecker_underlying_mark = 0xe0000;
-static bool hecker_tcp_mode = false;
 
 /* AOSP Fwmark: low 16 bits netId, bit 16 explicitlySelected, bit 17 protectedFromVpn,
  * bits 18-19 PERMISSION_SYSTEM (3, including PERMISSION_NETWORK). Kernel-created
@@ -786,7 +785,7 @@ static void up_if(unsigned int *netid, const char *iface, uint16_t listen_port)
 	while (*netid < 4096)
 		*netid = random() & 0xfffe;
 
-	if (!hecker_tcp_mode) cmd("/system_ext/bin/hecker-wg set %s fwmark 0x%x", iface, hecker_underlying_mark);
+	cmd("/system_ext/bin/hecker-wg set %s fwmark 0x%x", iface, hecker_underlying_mark);
 	cmd("iptables -I OUTPUT 1 -m mark --mark 0x%x/0xffffffff -j ACCEPT -m comment --comment \"wireguard rule %s\"", hecker_underlying_mark, iface);
 	cmd("ip6tables -I OUTPUT 1 -m mark --mark 0x%x/0xffffffff -j ACCEPT -m comment --comment \"wireguard rule %s\"", hecker_underlying_mark, iface);
 	if (listen_port) {
@@ -1239,26 +1238,6 @@ static void cmd_down(const char *iface)
  exit(EXIT_SUCCESS);
 }
 
-/* The root TCP worker already owns a nonpersistent TUN fd. Only fixed netd
- * setup is shared here; no WireGuard calls, shell values or arbitrary core YAML. */
-static void cmd_up_tcp(const char *iface, const char *addrs, const char *dnses,
-                       const char *excluded, const char *included)
-{
- unsigned int netid = 0;
- if (strcmp(iface, "hkvpn0")) exit(EINVAL);
- hecker_tcp_mode = true;
- cleanup_iface = xstrdup(iface); atexit(cmd_up_cleanup);
- hecker_setup_stage("network"); up_if(&netid, iface, 0);
- hecker_setup_stage("address"); set_addr(iface, addrs);
- hecker_setup_stage("dns"); set_dnses(netid, dnses);
- hecker_setup_stage("routes");
- add_route(iface, netid, "0.0.0.0/0"); add_route(iface, netid, "::/0");
- hecker_setup_stage("mtu"); set_mtu(iface, 1280);
- hecker_setup_stage("apps"); set_users(netid, excluded, included);
- hecker_setup_stage("ready"); free(cleanup_iface); cleanup_iface = NULL;
- exit(EXIT_SUCCESS);
-}
-
 static void parse_options(char **iface, char **config, unsigned int *mtu, char **addrs, char **dnses, char **excluded_applications, char **included_applications, const char *arg)
 {
 	_cleanup_fclose_ FILE *file = NULL;
@@ -1392,12 +1371,6 @@ int main(int argc, char *argv[])
         if (argc == 4 && !hecker_parse_underlying_mark(argv[3], &hecker_underlying_mark)) return EINVAL;
 		parse_options(&iface, &config, &mtu, &addrs, &dnses, &excluded_applications, &included_applications, argv[2]);
 		cmd_up(iface, config, mtu, addrs, dnses, excluded_applications, included_applications);
-	} else if (argc == 4 && !strcmp(argv[1], "up-tcp")) {
-        auto_su(argc, argv);
-        if (strcmp(argv[2], "/data/misc/heckervpn/hkvpn0.conf") ||
-            !hecker_parse_underlying_mark(argv[3], &hecker_underlying_mark)) return EINVAL;
-        parse_options(&iface, &config, &mtu, &addrs, &dnses, &excluded_applications, &included_applications, argv[2]);
-        cmd_up_tcp(iface, addrs, dnses, excluded_applications, included_applications);
 	} else if (argc == 3 && !strcmp(argv[1], "down")) {
 		auto_su(argc, argv);
 		parse_options(&iface, &config, &mtu, &addrs, &dnses, &excluded_applications, &included_applications, argv[2]);

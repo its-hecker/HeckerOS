@@ -8,6 +8,8 @@ import org.hecker.vpn.VpnInput;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,7 +18,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
 import android.text.format.Formatter;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewParent;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -41,10 +45,11 @@ public final class HeckerVpnActivity extends Activity {
     private TextView status, detail, warning;
     private Button connect, retryPeer, countries, profiles;
     private TextView testLog, testProgress;
-    private Button testStart, testStop, testType, testShare;
+    private ScrollView testLogScroll;
+    private Button testStart, testStop, testShare;
     private android.widget.ProgressBar testBar;
     private CheckBox testSpeed;
-    private String testKind = "all";
+    private long testRunStarted;
     private boolean countriesTab = true, busy, started;
     private android.net.Uri pendingImport;
     private final java.util.concurrent.ExecutorService appLoader=java.util.concurrent.Executors.newSingleThreadExecutor();
@@ -148,8 +153,7 @@ public final class HeckerVpnActivity extends Activity {
     private void renderState() {
         String label = getString(statusLabel(state.getString("status", "disconnected")));
         status.setText(busy ? getString(R.string.vpn_busy) : label);
-        boolean tcp = "tcp".equals(state.getString("transport"));
-        String text = getString(R.string.vpn_status, tcp ? getString(R.string.vpn_tcp_backend) : "WireGuard kernel", Formatter.formatFileSize(this, state.getLong("rx")), Formatter.formatFileSize(this, state.getLong("tx")));
+        String text = getString(R.string.vpn_status, state.getString("backend", "WireGuard kernel"), Formatter.formatFileSize(this, state.getLong("rx")), Formatter.formatFileSize(this, state.getLong("tx")));
         ArrayList<Bundle> saved = state.getParcelableArrayList("profiles", Bundle.class);
         if (saved != null) for (Bundle profile : saved) if (profile.getString("id", "").equals(state.getString("selected"))) { text = profile.getString("name", "") + "\n" + text; break; }
         long handshake = state.getLong("handshake");
@@ -158,7 +162,7 @@ public final class HeckerVpnActivity extends Activity {
         String error = state.getString("error", "");
         boolean peerTimeout = "peer_timeout".equals(state.getString("status"));
         warning.setText(!error.isEmpty() ? error : peerTimeout ? getString(R.string.vpn_peer_help)
-                : !tcp && state.containsKey("kernel") && !state.getBoolean("kernel") ? getString(R.string.vpn_kernel_missing) : "");
+                : state.containsKey("kernel") && !state.getBoolean("kernel") ? getString(R.string.vpn_kernel_missing) : "");
         retryPeer.setVisibility(peerTimeout && state.getBoolean("desired") ? View.VISIBLE : View.GONE);
         retryPeer.setEnabled(!busy);
         connect.setText(!state.getBoolean("controller_available", true) ? R.string.vpn_retry
@@ -190,59 +194,94 @@ public final class HeckerVpnActivity extends Activity {
         LinearLayout card = Ui.card(this);
         card.addView(Ui.text(this, getString(R.string.vpn_test_title), 22, true));
         card.addView(Ui.text(this, getString(R.string.vpn_test_summary), 13, false));
-        ScrollView scroll = new ScrollView(this);
-        testLog = Ui.text(this, getString(R.string.vpn_test_empty), 13, false);
-        testLog.setTypeface(android.graphics.Typeface.MONOSPACE); testLog.setTextIsSelectable(true);
-        scroll.addView(testLog); card.addView(scroll, new LinearLayout.LayoutParams(-1, Ui.dp(this, 180)));
+        card.addView(buildTestLog());
         testProgress = Ui.text(this, "", 14, true); card.addView(testProgress);
         testBar = new android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         card.addView(testBar, new LinearLayout.LayoutParams(-1, Ui.dp(this, 6)));
-        testType = Ui.button(this); testType.setText(R.string.vpn_test_all_types);
-        testType.setOnClickListener(v -> {
-            String[] kinds = {"all", "wireguard", "tcp"};
-            String[] labels = {getString(R.string.vpn_test_all_types), "WireGuard", "TCP"};
-            HeckerChoiceSheet.show(this, getString(R.string.vpn_test_type), labels, Arrays.asList(kinds).indexOf(testKind), which -> {
-                testKind = kinds[which]; testType.setText(labels[which]);
-            });
-        });
-        card.addView(testType);
         testSpeed = new CheckBox(this); testSpeed.setText(R.string.vpn_test_speed);
         testSpeed.setTextColor(getColor(R.color.hecker_foreground)); card.addView(testSpeed);
         testStart = action(card, R.string.vpn_test_start, () -> startTests(""));
         testStop = action(card, R.string.vpn_test_stop, () -> operation(HeckerVpnClient.request("test_stop"), false));
         testShare = action(card, R.string.vpn_test_share, () -> {
             Intent send = new Intent(Intent.ACTION_SEND).setType("text/plain")
-                    .putExtra(Intent.EXTRA_TEXT, testProgress.getText() + "\n" + testLog.getText());
+                    .putExtra(Intent.EXTRA_TEXT, getString(R.string.vpn_test_log_title) + "\n"
+                            + testProgress.getText() + "\n\n" + testLog.getText());
             startActivity(Intent.createChooser(send, getString(R.string.vpn_test_share)));
         });
         page.addView(card); Ui.styleControls(this, card);
     }
+    private View buildTestLog() {
+        LinearLayout terminal = new LinearLayout(this);
+        terminal.setOrientation(LinearLayout.VERTICAL);
+        int inset = Ui.dp(this, 12);
+        terminal.setPadding(inset, Ui.dp(this, 6), inset, inset);
+        GradientDrawable surface = new GradientDrawable();
+        surface.setColor(0xff10151c);
+        surface.setCornerRadius(Ui.dp(this, 16));
+        surface.setStroke(Ui.dp(this, 1), 0xff394655);
+        terminal.setBackground(surface);
+
+        TextView heading = Ui.text(this, getString(R.string.vpn_test_log_title), 13, true);
+        heading.setTypeface(Typeface.MONOSPACE, Typeface.BOLD);
+        heading.setTextColor(0xffa8c7fa);
+        heading.setAccessibilityHeading(true);
+        terminal.addView(heading);
+
+        testLogScroll = new ScrollView(this) {
+            @Override public boolean dispatchTouchEvent(MotionEvent event) {
+                int action = event.getActionMasked();
+                ViewParent parent = getParent();
+                if (parent == null) return super.dispatchTouchEvent(event);
+                // Claim the swipe on DOWN before the enclosing page can intercept its MOVE.
+                if (action == MotionEvent.ACTION_DOWN && (canScrollVertically(1) || canScrollVertically(-1))) {
+                    parent.requestDisallowInterceptTouchEvent(true);
+                }
+                boolean handled = super.dispatchTouchEvent(event);
+                if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL
+                        || (action == MotionEvent.ACTION_DOWN && !handled)) {
+                    parent.requestDisallowInterceptTouchEvent(false);
+                }
+                return handled;
+            }
+        };
+        testLogScroll.setFillViewport(true);
+        testLogScroll.setVerticalScrollBarEnabled(true);
+        testLogScroll.setScrollbarFadingEnabled(false);
+        testLogScroll.setScrollBarStyle(View.SCROLLBARS_INSIDE_INSET);
+        testLog = Ui.text(this, getString(R.string.vpn_test_empty), 13, false);
+        testLog.setTypeface(Typeface.MONOSPACE);
+        testLog.setTextColor(0xffe3eaf4);
+        testLog.setTextIsSelectable(true);
+        testLogScroll.addView(testLog);
+        terminal.addView(testLogScroll, new LinearLayout.LayoutParams(-1, Ui.dp(this, 192)));
+        return terminal;
+    }
     private void startTests(String id) {
         Bundle request = HeckerVpnClient.request("test_start");
-        request.putString("kind", id.isEmpty() ? testKind : "all");
         request.putString("id", id); request.putBoolean("speed", testSpeed.isChecked());
         operation(request, false);
     }
     private void renderTests() {
         boolean running = state.getBoolean("testing"); Bundle tests = state.getBundle("tests");
-        testStart.setEnabled(!busy && !running); testType.setEnabled(!busy && !running); testSpeed.setEnabled(!busy && !running);
+        testStart.setEnabled(!busy && !running); testSpeed.setEnabled(!busy && !running);
         testStop.setVisibility(running ? View.VISIBLE : View.GONE); testStop.setEnabled(!busy);
         testShare.setVisibility(tests == null ? View.GONE : View.VISIBLE); testShare.setEnabled(!busy && !running);
         testBar.setVisibility(tests == null ? View.GONE : View.VISIBLE);
         if (tests == null) return;
         int total = tests.getInt("total"), completed = tests.getInt("completed");
         testBar.setMax(total); testBar.setProgress(completed);
+        long startedAt = tests.getLong("started");
         String ending = tests.getString("ending", "");
         testProgress.setText(getString(R.string.vpn_test_progress, completed, total) + " · " + tests.getString("network", "")
-                + "\n" + DateUtils.formatDateTime(this, tests.getLong("started"), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME)
+                + "\n" + DateUtils.formatDateTime(this, startedAt, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME)
                 + (ending.isEmpty() ? "" : "\n" + getString(testResultLabel(ending)))
                 + (tests.getBoolean("network_current", true) ? "" : "\n" + getString(R.string.vpn_test_stale)));
         ArrayList<Bundle> rows = tests.getParcelableArrayList("rows", Bundle.class);
         StringBuilder log = new StringBuilder();
         if (rows != null) for (Bundle row : rows) {
             String result = row.getString("result", "queued");
-            log.append(row.getString("kind", "").equals("tcp") ? "TCP" : "WireGuard").append(" · ")
-                    .append(row.getString("name", "")).append("\n")
+            if (log.length() > 0) log.append("\n\n");
+            log.append("> ").append(row.getString("name", "")).append("\n")
                     .append(getString(testResultLabel(result)));
             if (result.equals("working")) {
                 log.append(" · ").append(getString(R.string.vpn_test_latency, row.getLong("latency_ms")));
@@ -251,9 +290,13 @@ public final class HeckerVpnActivity extends Activity {
             }
             String detail = row.getString("detail", "");
             if (!detail.isEmpty()) log.append("\n").append(detail);
-            log.append("\n\n");
         }
-        String text = log.toString(); if (!text.contentEquals(testLog.getText())) testLog.setText(text);
+        String text = log.toString();
+        if (!text.contentEquals(testLog.getText())) testLog.setText(text);
+        if (testRunStarted != startedAt) {
+            testRunStarted = startedAt;
+            testLogScroll.scrollTo(0, 0);
+        }
     }
     private static int testResultLabel(String result) {
         switch (result) {
@@ -263,7 +306,6 @@ public final class HeckerVpnActivity extends Activity {
             case "speed": return R.string.vpn_test_downloading;
             case "no_handshake": return R.string.vpn_test_no_handshake;
             case "internet_failed": return R.string.vpn_test_internet_failed;
-            case "startup_failed": return R.string.vpn_test_startup_failed;
             case "setup_failed": return R.string.vpn_test_setup_failed;
             case "invalid_configuration": return R.string.vpn_test_invalid;
             case "network_changed": return R.string.vpn_test_network_changed;
@@ -285,20 +327,6 @@ public final class HeckerVpnActivity extends Activity {
         setEnabled(body, !busy && !state.getBoolean("testing"));
     }
     private void renderCountries() {
-        LinearLayout tcp = Ui.card(this);
-        tcp.addView(Ui.text(this, getString(R.string.vpn_tcp_title), 20, true));
-        tcp.addView(Ui.text(this, getString(R.string.vpn_tcp_summary), 14, false));
-        tcp.addView(Ui.text(this, getString(R.string.vpn_tcp_public_note), 13, false));
-        action(tcp, R.string.vpn_tcp_refresh, () -> operation(HeckerVpnClient.request("tcp_catalog"), true));
-        ArrayList<Bundle> servers = state.getParcelableArrayList("tcp_servers", Bundle.class);
-        if (servers != null && !servers.isEmpty()) {
-            tcp.addView(Ui.text(this, getString(R.string.vpn_tcp_available, servers.size()), 14, true));
-            action(tcp, R.string.vpn_tcp_choose, () -> chooseTcpServer(servers));
-        }
-        action(tcp, R.string.vpn_tcp_paste, () -> pasteConfigDialog(true));
-        action(tcp, R.string.vpn_tcp_source, () -> startActivity(new Intent(Intent.ACTION_VIEW,
-                android.net.Uri.parse("https://github.com/iampedii/whitedns-sub"))));
-        body.addView(tcp);
         LinearLayout provider = Ui.card(this);
         provider.addView(Ui.text(this, getString(R.string.vpn_free_title), 20, true));
         provider.addView(Ui.text(this, getString(R.string.vpn_free_summary), 14, false));
@@ -311,22 +339,10 @@ public final class HeckerVpnActivity extends Activity {
         action(provider, R.string.vpn_paste, this::pasteConfigDialog);
         body.addView(provider);
     }
-    private void chooseTcpServer(ArrayList<Bundle> servers) {
-        String[] labels = new String[servers.size()];
-        for (int i = 0; i < servers.size(); i++) {
-            Bundle row = servers.get(i);
-            labels[i] = row.getString("name", "") + "\n" + getString(row.getBoolean("tls") ? R.string.vpn_tcp_tls : R.string.vpn_tcp_plain);
-        }
-        HeckerChoiceSheet.show(this, getString(R.string.vpn_tcp_choose), labels, -1, which -> {
-            Bundle request = HeckerVpnClient.request("tcp_connect"); request.putString("id", servers.get(which).getString("id"));
-            operation(request, true);
-        });
-    }
     private void renderProfiles() {
         LinearLayout header = Ui.card(this); action(header, R.string.vpn_import, () -> startActivityForResult(
                 new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*"), 784));
         action(header, R.string.vpn_paste, this::pasteConfigDialog);
-        action(header, R.string.vpn_tcp_paste, () -> pasteConfigDialog(true));
         action(header, R.string.vpn_get_free_profile, () -> startActivity(new Intent(Intent.ACTION_VIEW,
                 android.net.Uri.parse("https://www.vpnbook.com/freevpn/wireguard-vpn"))));
         action(header, R.string.vpn_free_mirror, () -> startActivity(new Intent(Intent.ACTION_VIEW,
@@ -338,8 +354,6 @@ public final class HeckerVpnActivity extends Activity {
             String id = profile.getString("id", ""), name = profile.getString("name", "");
             boolean selected = id.equals(state.getString("selected"));
             LinearLayout card = Ui.card(this); card.addView(Ui.text(this, name, 18, true));
-            if ("tcp".equals(profile.getString("kind"))) card.addView(Ui.text(this,
-                    getString(profile.getBoolean("tls") ? R.string.vpn_tcp_tls : R.string.vpn_tcp_plain), 13, false));
             card.addView(Ui.text(this, getString(routeLabel(profile.getString("mode", "all"))), 14, false));
             action(card, R.string.vpn_test_one, () -> startTests(id));
             if (selected) {
@@ -487,21 +501,18 @@ public final class HeckerVpnActivity extends Activity {
     }
     /** Paste configuration locally; never place WireGuard private keys in logs or saved UI state. */
     private void pasteConfigDialog() {
-        pasteConfigDialog(false);
-    }
-    private void pasteConfigDialog(boolean tcp) {
         EditText input = new EditText(this);
-        input.setHint(tcp ? R.string.vpn_tcp_hint : R.string.vpn_paste_hint);
+        input.setHint(R.string.vpn_paste_hint);
         input.setTextColor(getColor(R.color.hecker_foreground));
         input.setInputType(android.text.InputType.TYPE_CLASS_TEXT
                 | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE
                 | android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        input.setMinLines(tcp ? 2 : 8);
+        input.setMinLines(8);
         input.setMaxLines(16);
         input.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);
         ScrollView scroll = new ScrollView(this);
         scroll.addView(input);
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(tcp ? R.string.vpn_tcp_paste : R.string.vpn_paste)
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.vpn_paste)
                 .setView(scroll)
                 .setNegativeButton(android.R.string.cancel, (d, which) -> input.setText(""))
                 .setPositiveButton(R.string.vpn_continue, null).create();
@@ -518,21 +529,18 @@ public final class HeckerVpnActivity extends Activity {
             }
             input.setText("");
             dialog.dismiss();
-            importDialog(getString(R.string.vpn_pasted_name), config, tcp);
+            importDialog(getString(R.string.vpn_pasted_name), config);
         }));
         dialog.show();
     }
 
     private void importDialog(String name, String config) {
-        importDialog(name, config, false);
-    }
-    private void importDialog(String name, String config, boolean tcp) {
         EditText input = new EditText(this); input.setText(name.length() > 80 ? name.substring(0, 80) : name);
         input.setHint(R.string.vpn_name); input.setTextColor(getColor(R.color.hecker_foreground));
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.vpn_import).setView(input)
                 .setNegativeButton(android.R.string.cancel, null).setPositiveButton(R.string.vpn_save, null).create();
         dialog.setOnShowListener(d -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            Bundle request = HeckerVpnClient.request(tcp ? "import_tcp" : "import"); request.putString("name", input.getText().toString()); request.putString("config", config);
+            Bundle request = HeckerVpnClient.request("import"); request.putString("name", input.getText().toString()); request.putString("config", config);
             operation(request, true, result -> {
                 if (result.getString("error", "").isEmpty()) dialog.dismiss();
                 else input.setError(result.getString("error"));

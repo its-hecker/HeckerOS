@@ -259,6 +259,13 @@ class BuiltOutputTests(unittest.TestCase):
                     check_vpn(root, output)
                 installed.write_bytes((source / name).read_bytes())
             check_vpn(root, output)
+            for relative in ("bin/hecker-tcp-core", "lib64/libclash.so"):
+                retired = output / "system_ext" / relative
+                retired.parent.mkdir(parents=True, exist_ok=True)
+                retired.touch()
+                with self.assertRaisesRegex(ValueError, "retired HeckerVPN file"):
+                    check_vpn(root, output)
+                retired.unlink()
 
     def test_librepods_accepts_rom_signing_but_requires_source_payload_and_permissions(self):
         with tempfile.TemporaryDirectory() as directory:

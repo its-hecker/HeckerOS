@@ -80,6 +80,9 @@ def check_vault(rom, output):
 
 def check_vpn(rom, output):
     source = rom / "vendor/hecker/floral/suite/vpn"
+    for name in ("bin/hecker-tcp-core", "lib64/libclash.so"):
+        if (output / "system_ext" / name).exists():
+            raise ValueError("Built system_ext image contains a retired HeckerVPN file: " + name)
     controller = output / "system_ext/priv-app/HeckerVpnController/HeckerVpnController.apk"
     if not controller.is_file() or controller.stat().st_size == 0:
         raise ValueError("Built system_ext image is missing HeckerVpnController.apk")
