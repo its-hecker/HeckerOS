@@ -19,31 +19,101 @@ public final class HeckerLauncherGlass {
     private static final Handler MAIN=new Handler(Looper.getMainLooper());
     public static void attach(View workspace){detach(workspace);Session s=new Session(workspace);SESSIONS.put(workspace,s);s.start();}
     public static void detach(View workspace){Session s=SESSIONS.remove(workspace);if(s!=null)s.close();}
-    public static void offset(View workspace,float offset){Session s=SESSIONS.get(workspace);if(s!=null&&Float.isFinite(offset)&&s.offset!=offset){s.offset=Math.max(0,Math.min(1,offset));s.invalidate();}}
+    public static void offset(View workspace, float offset) {
+        Session session = SESSIONS.get(workspace);
+        if (session == null || !Float.isFinite(offset)) return;
+        float clamped = Math.max(0, Math.min(1, offset));
+        if (session.offset != clamped) {
+            session.offset = clamped;
+            session.invalidate();
+        }
+    }
+
     private static final class Session implements ViewTreeObserver.OnGlobalLayoutListener,SharedPreferences.OnSharedPreferenceChangeListener {
+        private static final String[] CORNERS = {"tl", "tr", "br", "bl"};
         final WeakReference<View> workspace;
         final SharedPreferences prefs;
         final Context app;
+        final int wallpaperScaleResId;
         final WeakHashMap<View,Drawable> originals=new WeakHashMap<>();
         final WeakHashMap<View,Glass> panels=new WeakHashMap<>();
         Bitmap wallpaper,frosted;
         boolean stopped,queued;
+        boolean targetsDirty;
         int generation;
         float offset=.5f;
+        int mode, frostRadius, tint, border, styleRevision;
+        float opacity;
+        boolean foldersEnabled;
+        final int[] cornerDp = new int[CORNERS.length];
         final BroadcastReceiver changed=new BroadcastReceiver(){@Override public void onReceive(Context c,Intent i){load();}};
         final Runnable refresh=this::refresh;
         final Runnable refrost=this::refrost;
         int option(String key,int fallback,int min,int max){try{return Math.max(min,Math.min(max,prefs.getInt("hecker_glass_"+key,fallback)));}catch(ClassCastException bad){return fallback;}}
-        void refresh(){queued=false;if(!stopped){restore();View v=workspace.get();if(v!=null&&mode()!=0)scan(v.getRootView(),new int[]{0});invalidate();}}
-        Session(View v){workspace=new WeakReference<>(v);app=v.getContext().getApplicationContext();prefs=app.getSharedPreferences(LauncherFiles.SHARED_PREFERENCES_KEY,Context.MODE_PRIVATE);}
-        int mode(){try{return Math.max(0,Math.min(2,Integer.parseInt(prefs.getString("hecker_glass","1"))));}catch(NumberFormatException|ClassCastException bad){return 1;}}
-        int corner(String position){try{return Math.max(0,Math.min(48,Integer.parseInt(prefs.getString("hecker_glass_corner_"+position,"28"))));}catch(NumberFormatException|ClassCastException bad){return 28;}}
+        Session(View view) {
+            workspace = new WeakReference<>(view);
+            app = view.getContext().getApplicationContext();
+            prefs = app.getSharedPreferences(LauncherFiles.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
+            wallpaperScaleResId = view.getResources().getIdentifier(
+                    "config_wallpaperMaxScale", "dimen", "android");
+            readStyle();
+        }
+
+        private int stringOption(String key, int fallback, int max) {
+            try {
+                return Math.max(0, Math.min(max,
+                        Integer.parseInt(prefs.getString(key, Integer.toString(fallback)))));
+            } catch (NumberFormatException | ClassCastException bad) {
+                return fallback;
+            }
+        }
+
+        private boolean targetEnabled(String target) {
+            boolean fallback = !"dock".equals(target);
+            try {
+                return prefs.getBoolean("hecker_glass_" + target, fallback);
+            } catch (ClassCastException bad) {
+                return fallback;
+            }
+        }
+
+        private void readStyle() {
+            mode = stringOption("hecker_glass", 1, 2);
+            opacity = option("opacity", 72, 0, 100) / 100f;
+            frostRadius = option("frost", 18, 0, 32);
+            tint = option("tint", 0xff30232e, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            border = option("border", 1, 0, 4);
+            foldersEnabled = targetEnabled("folders");
+            for (int i = 0; i < cornerDp.length; i++) {
+                cornerDp[i] = stringOption("hecker_glass_corner_" + CORNERS[i], 28, 48);
+            }
+            styleRevision++;
+        }
+
+        void refresh() {
+            queued = false;
+            if (stopped) return;
+            readStyle();
+            if (targetsDirty) {
+                targetsDirty = false;
+                restore();
+                View view = workspace.get();
+                if (view != null) {
+                    View root = view.getRootView();
+                    if (mode != 0) scan(root, new int[]{0});
+                    root.invalidate();
+                }
+            }
+            invalidate();
+        }
+
         void start(){
             View v=workspace.get();if(v==null)return;
             v.getRootView().getViewTreeObserver().addOnGlobalLayoutListener(this);
             prefs.registerOnSharedPreferenceChangeListener(this);
             app.registerReceiver(changed,new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED),Context.RECEIVER_NOT_EXPORTED);
-            schedule();load();
+            schedule(true);
+            load();
         }
         void close(){stopped=true;generation++;MAIN.removeCallbacks(refresh);MAIN.removeCallbacks(refrost);prefs.unregisterOnSharedPreferenceChangeListener(this);
             app.unregisterReceiver(changed);View v=workspace.get();if(v!=null){ViewTreeObserver observer=v.getRootView().getViewTreeObserver();if(observer.isAlive())observer.removeOnGlobalLayoutListener(this);}
@@ -51,10 +121,37 @@ public final class HeckerLauncherGlass {
         }
         void restore(){for(Map.Entry<View,Drawable> e:new ArrayList<>(originals.entrySet())){View v=e.getKey();if(v!=null&&v.getBackground() instanceof Glass)v.setBackground(e.getValue());}originals.clear();}
         void invalidate(){for(View v:new ArrayList<>(originals.keySet()))if(v!=null)v.invalidate();for(View v:new ArrayList<>(panels.keySet()))if(v!=null)v.invalidate();}
-        void schedule(){if(!stopped&&!queued){queued=true;MAIN.post(refresh);}}
-        @Override public void onSharedPreferenceChanged(SharedPreferences p,String key){if(key!=null&&(key.startsWith("hecker_glass")||key.startsWith(HeckerStudio.PREFIX+"dock_search")||key.equals(HeckerStudio.PREFIX+"google_search")||key.equals(HeckerStudio.PREFIX+"search_height"))){schedule();if(key.equals("hecker_glass_frost")){MAIN.removeCallbacks(refrost);MAIN.postDelayed(refrost,120);}}}
+        void schedule(boolean refreshTargets) {
+            if (stopped) return;
+            targetsDirty |= refreshTargets;
+            if (!queued) {
+                queued = true;
+                MAIN.post(refresh);
+            }
+        }
+
+        @Override public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
+            if (key == null || key.startsWith("hecker_glass")) {
+                boolean refreshTargets = key == null || switch (key) {
+                    case "hecker_glass", "hecker_glass_dock", "hecker_glass_folders",
+                            "hecker_glass_search", "hecker_glass_widgets",
+                            "hecker_glass_preview" -> true;
+                    default -> false;
+                };
+                schedule(refreshTargets);
+                if (key == null || key.equals("hecker_glass_frost")) {
+                    MAIN.removeCallbacks(refrost);
+                    MAIN.postDelayed(refrost, 120);
+                }
+            } else if (key.startsWith(HeckerStudio.PREFIX + "dock_search")
+                    || key.equals(HeckerStudio.PREFIX + "google_search")
+                    || key.equals(HeckerStudio.PREFIX + "search_height")) {
+                schedule(true);
+            }
+        }
+
         @Override public void onGlobalLayout(){
-            if(stopped||mode()==0)return;
+            if(stopped||mode==0)return;
             // New folders/widgets are discovered after layout, not on every frame.
             View v=workspace.get();if(v!=null)scan(v.getRootView(),new int[]{0});
         }
@@ -71,14 +168,17 @@ public final class HeckerLauncherGlass {
                     && v instanceof ViewGroup && ((ViewGroup)v).getChildCount()>0 && ((ViewGroup)v).getChildAt(0) instanceof HeckerClockView
                     && !((HeckerClockView)((ViewGroup)v).getChildAt(0)).style().equals("glass"))target=null;
             if(v instanceof HeckerDockBar&&((HeckerDockBar)v).compact())target=null;
-            if(target!=null&&prefs.getBoolean("hecker_glass_"+target,!"dock".equals(target))&&!originals.containsKey(v)){
+            if(target!=null&&!originals.containsKey(v)&&targetEnabled(target)){
                 originals.put(v,v.getBackground());v.setBackground(new Glass(v,this));
             }
-            if(v instanceof ViewGroup){ViewGroup group=(ViewGroup)v;for(int i=0;i<group.getChildCount();i++)scan(group.getChildAt(i),count);}
+            // The widget host is a launcher target. Its child views belong to the widget.
+            if(v instanceof ViewGroup && !(v instanceof android.appwidget.AppWidgetHostView)){
+                ViewGroup group=(ViewGroup)v;for(int i=0;i<group.getChildCount();i++)scan(group.getChildAt(i),count);
+            }
         }
         void refrost(){
             Bitmap source=wallpaper;if(source==null||stopped)return;
-            int request=++generation,radius=option("frost",18,0,32);
+            int request=++generation,radius=frostRadius;
             WORKER.execute(()->{Bitmap soft=frost(source,radius);MAIN.post(()->{if(!stopped&&request==generation){frosted=soft;invalidate();}});});
         }
         void load(){
@@ -147,7 +247,7 @@ public final class HeckerLauncherGlass {
      */
     public static boolean drawFolder(View host, Canvas canvas, Drawable nativeBackground) {
         Session session = session(host);
-        if (session == null || session.mode() == 0 || !session.prefs.getBoolean("hecker_glass_folders", true)) return false;
+        if (session == null || session.mode == 0 || !session.foldersEnabled) return false;
         Glass glass = panel(session, host); glass.setBounds(nativeBackground.getBounds());
         glass.round = false; glass.draw(canvas); return true;
     }
@@ -155,7 +255,7 @@ public final class HeckerLauncherGlass {
             int left, int top, int diameter) {
         if (host == null) return false;
         Session session = session(host);
-        if (session == null || session.mode() == 0 || !session.prefs.getBoolean("hecker_glass_folders", true)) return false;
+        if (session == null || session.mode == 0 || !session.foldersEnabled) return false;
         Glass glass = panel(session, host); glass.round = false; glass.setBounds(left, top, left + diameter, top + diameter);
         int save = canvas.save(); canvas.clipPath(mask); glass.draw(canvas); canvas.restoreToCount(save);
         return true;
@@ -163,7 +263,7 @@ public final class HeckerLauncherGlass {
     static boolean drawIconPlate(View host, Canvas canvas, Rect bounds) {
         if (host == null) return false;
         Session session = session(host);
-        if (session == null || session.mode() == 0) return false;
+        if (session == null || session.mode == 0) return false;
         Glass glass = panel(session, host); glass.round = true; glass.setBounds(bounds); glass.draw(canvas);
         return true;
     }
@@ -173,7 +273,10 @@ public final class HeckerLauncherGlass {
         final RectF bounds = new RectF(); final Path path = new Path();
         final Matrix matrix = new Matrix(); final int[] position = new int[2];
         final float[] radii = new float[8];
-        private static final String[] POSITIONS = {"tl", "tr", "br", "bl"};
+        final Rect geometryBounds = new Rect();
+        int geometryRevision = -1;
+        float geometryDensity;
+        boolean geometryRound;
         Bitmap textureImage; BitmapShader texture; RuntimeShader liquid;
         final RectF rimBounds = new RectF(); LinearGradient rim;
         int alpha = 255; boolean round;
@@ -183,28 +286,39 @@ public final class HeckerLauncherGlass {
                 + "float2 n=normalize(p+float2(.001));float edge=1.-smoothstep(0.,14.,abs(d));"
                 + "half4 c=image.eval(xy+n*edge*4.);return half4(c.rgb+edge*.025,1.);}";
         Glass(View view, Session owner) { host = new WeakReference<>(view); this.owner = owner; }
-        @Override public void draw(Canvas canvas) {
-            View view = host.get(); if (view == null || alpha == 0) return;
-            bounds.set(getBounds()); if (bounds.isEmpty()) return;
+
+        private void updateGeometry(View view, Rect frame, float density) {
+            if (geometryRevision == owner.styleRevision && geometryDensity == density
+                    && geometryRound == round && geometryBounds.equals(frame)) return;
+            geometryRevision = owner.styleRevision;
+            geometryDensity = density;
+            geometryRound = round;
+            geometryBounds.set(frame);
+            bounds.set(frame);
             if (view instanceof HeckerDockBar) {
                 float inset = Math.max(0, (bounds.height() - ((HeckerDockBar) view).visualHeight()) / 2);
                 bounds.inset(0, inset);
             }
-            float density = view.getResources().getDisplayMetrics().density;
             float limit = Math.min(bounds.width(), bounds.height()) / 2;
             for (int i = 0; i < 4; i++) radii[i * 2] = radii[i * 2 + 1] = round ? limit
-                    : Math.min(limit, owner.corner(POSITIONS[i]) * density);
+                    : Math.min(limit, owner.cornerDp[i] * density);
             path.reset(); path.addRoundRect(bounds, radii, Path.Direction.CW);
-            float opacity = owner.option("opacity", 72, 0, 100) / 100f;
-            if (opacity == 0) return;
-            int tint = owner.option("tint", 0xff30232e, Integer.MIN_VALUE, Integer.MAX_VALUE);
-            Bitmap image = owner.option("frost", 18, 0, 32) > 0 ? owner.frosted : owner.wallpaper;
+        }
+
+        @Override public void draw(Canvas canvas) {
+            View view = host.get();
+            float opacity = owner.opacity;
+            Rect frame = getBounds();
+            if (view == null || alpha == 0 || opacity == 0 || frame.isEmpty()) return;
+            float density = view.getResources().getDisplayMetrics().density;
+            updateGeometry(view, frame, density);
+            Bitmap image = owner.frostRadius > 0 ? owner.frosted : owner.wallpaper;
             if (image == null) image = owner.wallpaper;
             paint.setShader(null); paint.setStyle(Paint.Style.FILL);
             if (image != null && !image.isRecycled()) try {
                 view.getLocationOnScreen(position); View root = view.getRootView();
                 float w = root.getWidth(), h = root.getHeight(), zoom = 1f;
-                int maxScale = view.getResources().getIdentifier("config_wallpaperMaxScale", "dimen", "android");
+                int maxScale = owner.wallpaperScaleResId;
                 if (maxScale != 0) zoom = view.getResources().getFloat(maxScale);
                 float scale = Math.max(w / image.getWidth(), h / image.getHeight()) * zoom;
                 matrix.setScale(scale, scale);
@@ -215,7 +329,7 @@ public final class HeckerLauncherGlass {
                     texture.setFilterMode(BitmapShader.FILTER_MODE_LINEAR);
                 }
                 texture.setLocalMatrix(matrix);
-                if (owner.mode() == 2) {
+                if (owner.mode == 2) {
                     if (liquid == null) liquid = new RuntimeShader(PROGRAM);
                     liquid.setInputShader("image", texture); liquid.setFloatUniform("size", bounds.width(), bounds.height());
                     liquid.setFloatUniform("radii", radii[0], radii[2], radii[4], radii[6]); paint.setShader(liquid);
@@ -223,10 +337,10 @@ public final class HeckerLauncherGlass {
                 paint.setColor(Color.WHITE); paint.setAlpha(Math.round(alpha * opacity * .94f));
                 canvas.drawPath(path, paint);
             } catch (RuntimeException unsupported) { paint.setShader(null); }
-            paint.setShader(null); paint.setColor(tint);
+            paint.setShader(null); paint.setColor(owner.tint);
             paint.setAlpha(Math.round(alpha * opacity * (image == null ? .98f : .65f)));
             canvas.drawPath(path, paint);
-            int border = owner.option("border", 1, 0, 4);
+            int border = owner.border;
             if (border > 0) {
                 // Inset the rim so it remains inside both the reveal clip and icon plate.
                 paint.setStyle(Paint.Style.STROKE); paint.setStrokeWidth(density * border * .65f);
