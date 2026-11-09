@@ -22,9 +22,9 @@ import org.json.JSONObject;
 /** One owned tunnel at a time. Only this controller UID is routed during tests. */
 final class VpnTestRunner {
     static final class Target {
-        final String id, name, kind, config;
-        Target(String id, String name, String kind, String config) {
-            this.id = id; this.name = name; this.kind = kind; this.config = config;
+        final String id, name, config;
+        Target(String id, String name, String config) {
+            this.id = id; this.name = name; this.config = config;
         }
     }
     private final Context context;
@@ -53,7 +53,7 @@ final class VpnTestRunner {
                 : caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ? "Mobile data" : "Network";
         for (Target target : targets) {
             Bundle row = new Bundle(); row.putString("id", target.id); row.putString("name", target.name);
-            row.putString("kind", target.kind); row.putString("result", "queued"); rows.add(row);
+            row.putString("result", "queued"); rows.add(row);
         }
     }
     void start() { thread = new Thread(this::run, "HeckerVPN-tests"); thread.start(); }
@@ -108,7 +108,7 @@ final class VpnTestRunner {
                     checkNetwork();
                     state = channel.call("STATUS");
                     boolean handshake = state.optLong("handshake") > 0;
-                    if (latency >= 0 && (target.kind.equals("tcp") || handshake)) {
+                    if (latency >= 0 && handshake) {
                         outcome = "working";
                         if (speed) {
                             phase(i, "speed");
@@ -118,14 +118,12 @@ final class VpnTestRunner {
                                 mbps = 1048576.0 * 8 / Math.max(1, elapsed) / 1000;
                             } catch (java.io.IOException unavailable) { /* Connectivity still passed; speed is unavailable. */ }
                         }
-                    } else outcome = !target.kind.equals("tcp") && !handshake ? "no_handshake" : "internet_failed";
+                    } else outcome = !handshake ? "no_handshake" : "internet_failed";
                 } catch (NetworkChanged changed) { throw changed; }
                 catch (InterruptedException stopped) { throw stopped; }
                 catch (KernelChannel.Failure failure) {
                     // The daemon supplies bounded, credential-free errors, never arbitrary parser output.
                     detail = failure.getMessage();
-                    outcome = detail.startsWith("TCP core") ? "startup_failed"
-                            : detail.contains("HTTPS and tunnel DNS") ? "internet_failed" : "setup_failed";
                     if (failure.cleanupRequired) throw failure;
                 } catch (IllegalArgumentException invalid) { outcome = "invalid_configuration"; }
                 catch (Exception unavailable) { outcome = "setup_failed"; }
@@ -173,11 +171,6 @@ final class VpnTestRunner {
             } catch (Exception failure) { throw new IllegalArgumentException("Test endpoint DNS failed"); }
         };
         List<String> apps = List.of(context.getPackageName());
-        if (target.kind.equals("tcp")) {
-            ProxyConfig config = ProxyConfig.saved(target.config); List<String> addresses = resolve.apply(config.server);
-            if (addresses.isEmpty()) throw new IllegalArgumentException("No usable test endpoint");
-            checkNetwork(); return channel.call(config.request(underlay.getNetId(), addresses.get(0), "include", apps));
-        }
         String config = VpnConfig.parse(target.config).forUnderlay("include", apps, host -> {
             List<String> addresses = resolve.apply(host);
             if (addresses.isEmpty()) throw new IllegalArgumentException("No usable test endpoint");

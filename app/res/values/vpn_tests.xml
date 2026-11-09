@@ -2,10 +2,9 @@
 <resources>
     <string name="vpn_testing">Testing connections</string>
     <string name="vpn_test_title">Connection testing</string>
-    <string name="vpn_test_summary">Test saved WireGuard profiles and the available TCP list on this network. Tests run one at a time, with a 15-second internet check after setup. Your current VPN disconnects during testing and reconnects afterward. Test traffic uses a temporary route for HeckerVPN only.</string>
+    <string name="vpn_test_summary">Test saved WireGuard profiles on this network. Tests run one at a time, with a 15-second internet check after setup. Your current VPN disconnects during testing and reconnects afterward. Test traffic uses a temporary route for HeckerVPN only.</string>
+    <string name="vpn_test_log_title">WireGuard test log</string>
     <string name="vpn_test_empty">Results appear here as each configuration is tested.</string>
-    <string name="vpn_test_all_types">All types</string>
-    <string name="vpn_test_type">Connection type</string>
     <string name="vpn_test_speed">Include a 1 MiB download per working server</string>
     <string name="vpn_test_start">Test connections</string>
     <string name="vpn_test_stop">Stop tests</string>
@@ -20,7 +19,6 @@
     <string name="vpn_test_downloading">Measuring download…</string>
     <string name="vpn_test_no_handshake">No WireGuard handshake within the test window</string>
     <string name="vpn_test_internet_failed">Internet check failed</string>
-    <string name="vpn_test_startup_failed">TCP core startup failed</string>
     <string name="vpn_test_setup_failed">Tunnel setup failed</string>
     <string name="vpn_test_invalid">Configuration or endpoint DNS could not be used</string>
     <string name="vpn_test_network_changed">Network changed. Run a new test on the current network.</string>

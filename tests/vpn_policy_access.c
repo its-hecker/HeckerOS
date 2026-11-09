@@ -56,18 +56,6 @@ int main(int argc, char **argv) {
     access_check("u:r:hecker_vpnd:s0", "u:r:hecker_vpn_app:s0:c512,c768", "unix_stream_socket", "write", 1);
     access_check("u:r:netutils_wrapper:s0", "u:object_r:dnsproxyd_socket:s0", "sock_file", "write", 1);
     access_check("u:r:netutils_wrapper:s0", "u:r:netd:s0", "unix_stream_socket", "connectto", 1);
-    const char *proxy = "u:r:hecker_vpn_proxy:s0";
-    access_check("u:r:hecker_vpnd:s0", "u:object_r:hecker_vpn_proxy_exec:s0", "file", "execute", 1);
-    access_check(proxy, "u:r:hecker_vpnd:s0", "fd", "use", 1);
-    access_check(proxy, "u:r:hecker_vpnd:s0", "unix_stream_socket", "read", 1);
-    access_check(proxy, "u:r:hecker_vpnd:s0", "unix_stream_socket", "write", 1);
-    access_check(proxy, proxy, "tun_socket", "create", 1);
-    access_check(proxy, proxy, "capability", "net_admin", 1);
-    access_check(proxy, "u:object_r:tun_device:s0", "chr_file", "open", 1);
-    access_check(proxy, "u:object_r:system_security_cacerts_file:s0", "file", "read", 1);
-    access_check(proxy, "u:object_r:hecker_vpn_data_file:s0", "file", "write", 1);
-    access_check(proxy, "u:object_r:netd_service:s0", "service_manager", "find", 0);
-    access_check("u:r:untrusted_app:s0", "u:object_r:hecker_vpn_proxy_exec:s0", "file", "execute", 0);
     access_check("u:r:platform_app:s0", "u:object_r:hecker_vault_files_service:s0", "service_manager", "find", 1);
     access_check("u:r:untrusted_app:s0", "u:object_r:hecker_vault_files_service:s0", "service_manager", "find", 0);
     access_check("u:r:system_server:s0", "u:object_r:hecker_vault_files_service:s0", "service_manager", "add", 1);

@@ -2,10 +2,9 @@
 <resources>
     <string name="vpn_testing">Проверка соединений</string>
     <string name="vpn_test_title">Проверка соединений</string>
-    <string name="vpn_test_summary">Проверка сохранённых профилей WireGuard и доступных TCP-серверов в текущей сети. По одному туннелю, до 15 секунд на проверку интернета после настройки. Текущий VPN временно отключится и восстановится после проверки. Временный маршрут применяется только к HeckerVPN.</string>
+    <string name="vpn_test_summary">Проверка сохранённых профилей WireGuard в текущей сети. По одному туннелю, до 15 секунд на проверку интернета после настройки. Текущий VPN временно отключится и восстановится после проверки. Временный маршрут применяется только к HeckerVPN.</string>
+    <string name="vpn_test_log_title">Журнал проверки WireGuard</string>
     <string name="vpn_test_empty">Здесь будут появляться результаты проверки конфигураций.</string>
-    <string name="vpn_test_all_types">Все типы</string>
-    <string name="vpn_test_type">Тип соединения</string>
     <string name="vpn_test_speed">Загружать 1 МиБ через каждый рабочий сервер</string>
     <string name="vpn_test_start">Проверить соединения</string>
     <string name="vpn_test_stop">Остановить проверку</string>
@@ -20,7 +19,6 @@
     <string name="vpn_test_downloading">Измерение скорости…</string>
     <string name="vpn_test_no_handshake">Нет рукопожатия WireGuard за время проверки</string>
     <string name="vpn_test_internet_failed">Не удалось проверить доступ в интернет</string>
-    <string name="vpn_test_startup_failed">Ошибка запуска ядра TCP</string>
     <string name="vpn_test_setup_failed">Ошибка настройки туннеля</string>
     <string name="vpn_test_invalid">Не удалось использовать конфигурацию или DNS сервера</string>
     <string name="vpn_test_network_changed">Сеть изменилась. Повторите проверку в текущей сети.</string>

@@ -8,5 +8,6 @@ out/*
 /prebuilts/depth/litert.jar
 /prebuilts/depth/litert-api.jar
 /prebuilts/depth/libtensorflowlite_jni.so
+# Retain ignores for downloaded TCP assets in existing build trees.
 /prebuilts/mihomo/arm64/
 /prebuilts/mihomo/snakeyaml.jar

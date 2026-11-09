@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
 """Exercise the native protocol, actual WireGuard tools and new Android controller/UI."""
-import argparse, hashlib, json, os, re, shutil, subprocess, tempfile, zipfile
+import argparse, hashlib, json, os, re, subprocess, tempfile, zipfile
 from pathlib import Path
 from compile_sdk import fetch
 ROOT=Path(__file__).resolve().parents[1]
@@ -11,10 +11,9 @@ def host(out):
     run('java','-cp',out/'classes','HeckerVpnConfigTest')
     run('g++','-std=c++17','-Wall','-Wextra','-Werror','-I',ROOT/'vpn/native',ROOT/'vpn/native/protocol.cpp',ROOT/'tests/vpn_protocol_test.cpp','-o',out/'protocol')
     run(out/'protocol')
-    run('g++','-std=c++17','-Wall','-Wextra','-Werror',ROOT/'tests/vpn_lease_test.cpp',ROOT/'vpn/native/protocol.cpp',ROOT/'vpn/native/proxy_config.cpp','-o',out/'lease')
+    run('g++','-std=c++17','-Wall','-Wextra','-Werror',ROOT/'tests/vpn_lease_test.cpp',ROOT/'vpn/native/protocol.cpp','-o',out/'lease')
     run(out/'lease')
-    run('g++','-std=c++17','-Wall','-Wextra','-Werror',ROOT/'vpn/native/protocol.cpp',ROOT/'vpn/native/daemon.cpp',ROOT/'vpn/native/proxy_config.cpp','-o',out/'daemon')
-    run('g++','-std=c++17','-Wall','-Wextra','-Werror',ROOT/'vpn/native/proxy_config.cpp',ROOT/'vpn/native/proxy_core.cpp','-ldl','-pthread','-o',out/'tcp-core')
+    run('g++','-std=c++17','-Wall','-Wextra','-Werror',ROOT/'vpn/native/protocol.cpp',ROOT/'vpn/native/daemon.cpp','-o',out/'daemon')
     source=ROOT/'third_party/wireguard-tools'
     run('gcc','-std=gnu11','-O2','-D_GNU_SOURCE','-DRUNSTATEDIR="/data/misc/heckervpn"','-I',source/'src/uapi/linux',*sorted((source/'src').glob('*.c')),'-o',out/'wg')
     private=subprocess.check_output([out/'wg','genkey']); public=subprocess.check_output([out/'wg','pubkey'],input=private)
@@ -60,9 +59,7 @@ def android(out,sdk):
     for name in ['vpn','app']:
         run(sdk/'aapt2','compile','--dir',ROOT/name/'res','-o',out/(name+'-resources.zip'))
         run(sdk/'aapt2','link','-I',sdk/'android.jar','--manifest',ROOT/name/'AndroidManifest.xml','--java',out/(name+'-r'),'-o',out/(name+'.apk'),out/(name+'-resources.zip'))
-    from prepare_proxy_assets import prepare as prepare_proxy_assets
-    prepare_proxy_assets()
-    cp=os.pathsep.join(map(str,[sdk/'android-system.jar',sdk/'lottie.jar',sdk/'appcompat.jar',sdk/'core.jar',ROOT/'prebuilts/mihomo/snakeyaml.jar']))
+    cp=os.pathsep.join(map(str,[sdk/'android-system.jar',sdk/'lottie.jar',sdk/'appcompat.jar',sdk/'core.jar']))
     run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',cp,'-d',out/'backend',out/'vpn-r/org/hecker/vpn/R.java',*common,*sorted((ROOT/'vpn/src').rglob('*.java')))
     ui=ROOT/'app/src/org/hecker/suite'
     run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',cp,'-d',out/'ui',out/'app-r/org/hecker/suite/R.java',ROOT/'app/src/org/hecker/ui/HeckerChoiceSheet.java',*common,
@@ -73,6 +70,9 @@ def android(out,sdk):
     run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',json_jar,'-d',out/'provider-test',
         ROOT/'vpn/common/org/hecker/vpn/VpnConfig.java',ROOT/'vpn/src/org/hecker/vpn/MullvadProvider.java',ROOT/'tests/HeckerVpnProviderTest.java')
     run('java','-cp',str(out/'provider-test')+os.pathsep+str(json_jar),'org.hecker.vpn.HeckerVpnProviderTest')
+    store_cp = os.pathsep.join(map(str, [out/'backend', json_jar, sdk/'android-system.jar']))
+    run('java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',store_cp,'-d',out/'store-test',ROOT/'tests/HeckerVpnStoreTest.java')
+    run('java','-cp',str(out/'store-test')+os.pathsep+store_cp,'org.hecker.vpn.HeckerVpnStoreTest')
     platform=ROOT/'generated/vpn-platform';platform.mkdir(parents=True,exist_ok=True)
     for name,item in json.loads((ROOT/'tests/vpn-platform-inputs.lock.json').read_text()).items():fetch(platform,name,item)
     assert 'CONFIG_WIREGUARD=y' in (platform/'kernel-floral-defconfig').read_text()
