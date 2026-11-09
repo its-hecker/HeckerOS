@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
-  <remote name="heckeros" fetch="https://github.com/" revision="refs/heads/heckeros-17" />
+  <remote name="heckeros" fetch="https://github.com/" revision="refs/heads/cnb_latest_stable" />
 
   <remote  name="aosp"
            fetch="https://android.googlesource.com"

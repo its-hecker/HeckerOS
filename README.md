@@ -1,3 +1,9 @@
+# HeckerOS · Android 17
+
+## Coral stable build
+
+Use `cnb_latest_stable` in HeckerOS and HeckerOs-localmanifest for the Pixel 4 XL (`coral`). This branch carries forward the WireGuard terminal build. The [Coral build instructions](https://github.com/its-hecker/HeckerOs-localmanifest/blob/cnb_latest_stable/README.md) use the matching source pins.
+
 ## Device log feedback — 6 November 2026
 
 The `fix/device-log-20261106` track restores the shared QQS/full-QS media
@@ -16,8 +22,6 @@ backend for selected user apps, including apps with empty Android backup agents.
 See [coverage and instructions](vault/README.md)
 and [validation / pending physical acceptance](docs/heckervault-2026-11-06.md).
 Swift Backup import is deferred until HeckerVault device restore testing succeeds.
-
-# HeckerOS · Android 17
 
 ## HeckerOS 1.5 — Coral track, 6 November 2026
 
