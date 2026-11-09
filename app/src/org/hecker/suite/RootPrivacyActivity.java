@@ -58,7 +58,10 @@ public final class RootPrivacyActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
-        if (!"coral".equals(Build.DEVICE)) { finish(); return; }
+        if (!"coral".equals(Build.DEVICE) && !"flame".equals(Build.DEVICE)) {
+            finish();
+            return;
+        }
         backendAvailable = "true".equals(android.os.SystemProperties.get(
                 "ro.hecker.coral_root_privacy", "false"))
                 && android.os.SystemProperties.getInt("ro.hecker.app_compatibility", 0) >= 1;

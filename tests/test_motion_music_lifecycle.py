@@ -75,6 +75,16 @@ public class LifecycleTest{
  static int checks;static void check(boolean b){checks++;if(!b)throw new AssertionError("check "+checks);}
  static void event(Context c,MediaController m,int action,int side){SystemClock.now++;c.emit(new Intent("com.google.oslo.HECKER_MOTION_FEEDBACK").putExtra("version",1).putExtra("action",action).putExtra("user",0).putExtra("when",SystemClock.now).putExtra("direction",side).putExtra("session",m.token));}
  public static void main(String[] args){
+  Build.DEVICE="sunfish";check(HeckerMotionIsland.create(new Context())==null);
+  for(String device:new String[]{"coral","flame"}){
+   Build.DEVICE=device;SystemClock.now=10000;
+   android.provider.Settings.Secure.values.clear();
+   android.provider.Settings.Secure.values.put("aware_enabled",1);
+   exercise();
+  }
+  System.out.println("Motion music coordinator: "+checks+" checks PASS");
+ }
+ static void exercise(){
   Context c=new Context();MediaController m=new MediaController("player");m.state.state=3;c.manager.list=java.util.List.of(m);
   HeckerMotionIsland host=HeckerMotionIsland.create(c);check(host!=null&&c.windows.views.isEmpty());host.setAmbient(false);
   check(c.windows.views.size()==1);var params=c.windows.views.values().iterator().next();
@@ -123,7 +133,6 @@ public class LifecycleTest{
   check(c.windows.views.entrySet().stream().anyMatch(e->e.getKey() instanceof MotionAstronautView&&e.getValue().y==95));
   host.close();check(c.windows.views.isEmpty()&&m.callbacks.isEmpty()&&c.receivers.isEmpty()&&c.manager.listeners.isEmpty()&&c.resolver.observers.isEmpty());
   SystemClock.now+=10000;Handler.due();check(c.windows.views.isEmpty());
-  System.out.println("Motion music coordinator: "+checks+" checks PASS");
  }
 }'''
         java_run(sources, [ROOT/'framework/motionisland/HeckerMotionIsland.java',

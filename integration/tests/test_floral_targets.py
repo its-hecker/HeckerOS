@@ -96,17 +96,24 @@ print(json.dumps([DEVICE, VENDOR, PRODUCT, OVERLAY_ROOTS[-1]]))
                 addon.write_bytes((SUITE / "rom/no_addon_d.mk").read_bytes())
                 product = SUITE / "rom/products" / ("hecker_" + device + ".mk")
                 make = ("define inherit-product\n$(info INHERIT=$(1))\nendef\n"
+                        + "TARGET_COPY_OUT_PRODUCT := product\n"
+                        + "PRODUCT_COPY_FILES := addon.sh:product/addon.d/50-lineage.sh\n"
                         + "include " + str(product) + "\n"
                         + "$(info ID=$(PRODUCT_NAME)|$(PRODUCT_DEVICE)|$(PRODUCT_MODEL)|$(CUSTOM_BUILD))\n"
                         + "$(info SCREEN=$(TARGET_SCREEN_WIDTH)x$(TARGET_SCREEN_HEIGHT))\n"
-                        + "$(info FACE=$(TARGET_FACE_UNLOCK_SUPPORTED))\n"
+                        + "$(info FACE=$(TARGET_FACE_UNLOCK_SUPPORTED)|$(TARGET_PROVIDES_FACE_UNLOCK_HAL))\n"
+                        + "$(info PROPERTIES=$(PRODUCT_SYSTEM_EXT_PROPERTIES))\n"
+                        + "$(info COPIES=$(strip $(PRODUCT_COPY_FILES)))\n"
                         + "$(info PACKAGES=$(PRODUCT_PACKAGES))\nall:;@:\n")
                 result = subprocess.run(["make", "--no-print-directory", "-f", "-"],
                                         input=make, text=True, capture_output=True, cwd=root)
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertIn(f"ID=hecker_{device}|{device}|{model}|{device}", result.stdout)
                 self.assertIn(f"SCREEN={width}x{height}", result.stdout)
-                self.assertIn("FACE=false", result.stdout)
+                self.assertIn("FACE=false|true", result.stdout)
+                self.assertIn("ro.hecker.coral_root_privacy=true", result.stdout)
+                self.assertIn("ro.hecker.app_compatibility=3", result.stdout)
+                self.assertIn("COPIES=\n", result.stdout)
                 self.assertIn("HeckerLibrePods", result.stdout)
                 inherited = [line.removeprefix("INHERIT=").strip() for line in result.stdout.splitlines()
                              if line.startswith("INHERIT=")]

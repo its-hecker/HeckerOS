@@ -9,7 +9,7 @@ public final class StatusBarSettingsActivity extends Activity {
         super.onCreate(state);
         LinearLayout page=Ui.page(this,R.string.status_bar_title);
         Ui.hero(this, page, R.raw.suite_status, R.string.status_styles_summary);
-        if ("coral".equals(android.os.Build.DEVICE))
+        if (MotionFeedbackSettingsActivity.supported())
             Ui.actionCard(this, page, R.string.motion_feedback_title, R.string.motion_feedback_summary,
                     v -> startActivity(new android.content.Intent(this, MotionFeedbackSettingsActivity.class)));
         Ui.actionCard(this, page, R.string.sb_options_title, R.string.sb_options_summary,

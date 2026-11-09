@@ -24,7 +24,7 @@ import android.view.View;
 import android.view.WindowManager;
 import com.android.systemui.res.R;
 
-/** Coral music capsule and finite gesture companion, owned by the native Oslo plugin host. */
+/** Music capsule and gesture companion owned by the native Oslo plugin host. */
 public final class HeckerMotionIsland implements AutoCloseable {
     private static final String TAG = "HeckerMotionIsland";
     private static final String ACTION = "com.google.oslo.HECKER_MOTION_FEEDBACK";
@@ -51,7 +51,7 @@ public final class HeckerMotionIsland implements AutoCloseable {
     };
 
     public static HeckerMotionIsland create(Context context) {
-        if (!"coral".equals(Build.DEVICE)) return null;
+        if (!"coral".equals(Build.DEVICE) && !"flame".equals(Build.DEVICE)) return null;
         try { return new HeckerMotionIsland(context); }
         catch (RuntimeException unavailable) {
             Log.w(TAG, "Motion Island unavailable; retaining native glow", unavailable);

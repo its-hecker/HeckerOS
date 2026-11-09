@@ -10,11 +10,15 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
-/** Settings for the Coral-only native companion; the existing Motion Sense page remains intact. */
+/** Settings for the Floral Motion Sense companion. */
 public final class MotionFeedbackSettingsActivity extends Activity {
+    static boolean supported() {
+        return "coral".equals(Build.DEVICE) || "flame".equals(Build.DEVICE);
+    }
+
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
-        if (!"coral".equals(Build.DEVICE)) { finish(); return; }
+        if (!supported()) { finish(); return; }
         LinearLayout page = Ui.page(this, R.string.motion_feedback_title);
         LinearLayout intro = Ui.card(this);
         intro.addView(Ui.text(this, getString(R.string.motion_feedback_summary), 14, false));

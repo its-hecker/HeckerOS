@@ -76,9 +76,8 @@ public final class SuiteActivity extends Activity {
         if ("coral".equals(android.os.Build.DEVICE) || "flame".equals(android.os.Build.DEVICE)) {
             addRow(tile(R.string.sensor_recovery_title,R.string.sensor_recovery_summary,R.drawable.ic_motion_sense,
                             v -> open("SensorRecoveryActivity")),
-                    "coral".equals(android.os.Build.DEVICE)
-                            ? tile(R.string.root_privacy_title,R.string.root_privacy_summary,R.drawable.ic_spoofing,
-                                    v -> open("RootPrivacyActivity")) : null);
+                    tile(R.string.root_privacy_title,R.string.root_privacy_summary,R.drawable.ic_spoofing,
+                            v -> open("RootPrivacyActivity")));
         }
         addRow(tile(R.string.gestures_navigation_title,R.string.gestures_navigation_summary,
                         R.drawable.ic_navigation,v->open("GestureNavigationActivity")),

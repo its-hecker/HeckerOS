@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Run after all Coral product inheritance. Keep bundled packages and OTA tooling;
+# Run after all product inheritance. Keep bundled packages and OTA tooling;
 # omit the recovery add-on preservation scripts from the installed images.
 hecker_addon_d_roots := $(addsuffix /addon.d,$(TARGET_COPY_OUT_SYSTEM) $(TARGET_COPY_OUT_SYSTEM_EXT) $(TARGET_COPY_OUT_PRODUCT) $(TARGET_COPY_OUT_VENDOR))
 hecker_addon_d_patterns := $(hecker_addon_d_roots) $(addsuffix /%,$(hecker_addon_d_roots))

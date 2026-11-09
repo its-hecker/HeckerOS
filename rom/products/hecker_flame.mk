@@ -6,6 +6,7 @@
 # HeckerOS inherits the pinned PixelOS Android 17 platform configuration.
 # The real IR hardware provider is supplied by the Floral Face ID plugin.
 TARGET_FACE_UNLOCK_SUPPORTED := false
+TARGET_PROVIDES_FACE_UNLOCK_HAL := true
 PRODUCT_NO_CAMERA := true
 TARGET_SCREEN_WIDTH := 1080
 TARGET_SCREEN_HEIGHT := 2280
@@ -67,6 +68,8 @@ PRODUCT_DEVICE := flame
 PRODUCT_MANUFACTURER := Google
 PRODUCT_MODEL := Pixel 4
 PRODUCT_NAME := hecker_flame
+PRODUCT_SYSTEM_EXT_PROPERTIES += ro.hecker.coral_root_privacy=true
+PRODUCT_SYSTEM_EXT_PROPERTIES += ro.hecker.app_compatibility=3
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
     BuildDesc="flame-user 13 TP1A.221005.002.B2 9382335 release-keys" \
@@ -89,3 +92,6 @@ PRODUCT_PACKAGES += HeckerLibrePods
 include vendor/hecker/floral/suite/rom/boot_diagnostics/boot_capture.mk
 
 $(call inherit-product, vendor/hecker/floral/suite/rom/common.mk)
+
+# Apply after every inherited product so no later copy can restore an addon.d marker.
+include vendor/hecker/floral/suite/rom/no_addon_d.mk
