@@ -10,6 +10,10 @@ PRODUCT_PRODUCT_PROPERTIES += \
     ro.heckeros.device=$(PRODUCT_DEVICE)
 
 $(call inherit-product, vendor/hecker/floral/suite/suite.mk)
+# Ahead-of-time compile only core, frequently visible UI; keep ordinary apps
+# profile-guided to avoid an oversized system image.
+PRODUCT_DEXPREOPT_SPEED_APPS += SystemUI HeckerLauncher HeckerSuite
+
 $(call inherit-product, vendor/hecker/floral/suite/themes/themes.mk)
 $(call inherit-product, vendor/hecker/floral/suite/fonts/google-sans-cyrillic/fonts.mk)
 # Ignore the removed weather service, including stale source directories.

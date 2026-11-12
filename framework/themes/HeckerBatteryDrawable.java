@@ -21,7 +21,8 @@ import android.util.PathParser;
 
 /** Renders the Lunaris battery path resources without assuming Android 16 target IDs. */
 public final class HeckerBatteryDrawable extends Drawable implements Animatable, Runnable {
-    private static final long FRAME_DELAY_MS = 33;
+    // A soft charging shimmer needs ~20 Hz, not a 30+ Hz status-bar redraw loop.
+    private static final long FRAME_DELAY_MS = 50;
     private static final float WAVE_PERIOD_MS = 2400f;
     private final Resources res;
     private final String pkg;

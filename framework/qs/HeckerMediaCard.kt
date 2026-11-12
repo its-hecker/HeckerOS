@@ -200,7 +200,7 @@ private fun HeckerMediaGlow(playing: Boolean, motion: Boolean, modifier: Modifie
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             while (isActive) {
                 withFrameNanos { frame.longValue = SystemClock.elapsedRealtime() }
-                delay(32) // Decorative light needs no 60/90 Hz loop; phase remains absolute.
+                delay(48) // Slow decorative glow at ~20 Hz; native tiles stay 60/90 Hz.
             }
         }
     }
