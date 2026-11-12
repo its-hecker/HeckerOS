@@ -22,6 +22,19 @@ final class GestureNavigationPreference {
         toggle.setEnabled(GestureNavigationController.available(activity));
         card.addView(toggle);
         card.addView(Ui.text(activity, activity.getString(R.string.gesture_hide_pill_summary), 14, false));
+        // Upgrade safety: a previous ROM may have left the 0dp taskbar inset
+        // active. Repair that persisted RRO even if the user never retoggles
+        // the cosmetic handle. Do the overlay transaction off the UI thread.
+        WORK.execute(() -> {
+            boolean restored = GestureNavigationController.restoreLegacyInset(activity);
+            activity.runOnUiThread(() -> {
+                if (activity.isFinishing() || activity.isDestroyed()) return;
+                toggle.setChecked(GestureNavigationController.enabled(activity));
+                toggle.setEnabled(GestureNavigationController.available(activity));
+                if (!restored) Toast.makeText(activity, R.string.gesture_hide_pill_failed,
+                        Toast.LENGTH_LONG).show();
+            });
+        });
         toggle.setOnClickListener(view -> {
             boolean requested = toggle.isChecked();
             toggle.setEnabled(false);

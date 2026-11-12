@@ -23,7 +23,9 @@ PRODUCT_PACKAGES += HeckerSystemUIOverlay \
     HeckerStatusBarHeightCompact \
     HeckerStatusBarHeightBalanced \
     HeckerStatusBarHeightTall
-PRODUCT_PACKAGES += HeckerHideGesturePill HeckerGestureSpace HeckerEuiccPermissions
+# Visual-only handle overlay. Never ship the legacy 0dp stashed taskbar
+# inset overlay; it can break Quickstep/Recents input or animation geometry.
+PRODUCT_PACKAGES += HeckerHideGesturePill HeckerEuiccPermissions
 # Native window blur still observes SurfaceFlinger, thermal and power-saver capability gates.
 PRODUCT_PRODUCT_PROPERTIES += ro.surface_flinger.supports_background_blur?=1
 
