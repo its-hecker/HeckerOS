@@ -33,7 +33,8 @@ def check_source():
     media = source("framework/qs/HeckerMediaCard.kt")
     assert "delay(48)" in media and "repeatOnLifecycle(Lifecycle.State.RESUMED)" in media
     battery = source("framework/themes/HeckerBatteryDrawable.java")
-    assert "FRAME_DELAY_MS = 50;" in battery and "!isVisible()" in battery
+    assert "\n    private static final long FRAME_DELAY_MS = 50;" in battery
+    assert "!isVisible()" in battery
     product = source("rom/common.mk")
     assert "PRODUCT_DEXPREOPT_SPEED_APPS += SystemUI HeckerLauncher HeckerSuite" in product
     assert "supports_background_blur?=1" in product
