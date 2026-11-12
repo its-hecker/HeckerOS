@@ -21,8 +21,11 @@ remains unresolved and is **out of scope** for this change.
    stay native.
 3. Construct the decorative `HeckerOS` branded title span once per
    `HeckerBrandPreference` instance, rather than on every bind.
-4. Add `tests/test_settings_fluid.py` and CI source/shell guards.
-5. Add `tools/measure_settings_startup.sh` for reproducible cold/warm
+4. Render ordinary middle-row card backgrounds as rectangles, avoiding
+   rounded-path construction on every scroll frame; retain rounded corners
+   for group-start and group-end rows.
+5. Add `tests/test_settings_fluid.py` and CI source/shell guards.
+6. Add `tools/measure_settings_startup.sh` for reproducible cold/warm
    Settings launch timings and `gfxinfo` snapshots.
 
 **Scope:** This targets UI allocations on binding/rebinding and scrolling.
