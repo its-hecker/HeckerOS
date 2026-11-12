@@ -133,6 +133,37 @@ SurfaceFlinger and per-app FrameStats. Do not globally disable cached-app
 freezer, force-restart apps, alter Quickstep transaction handling or
 rewrite HWC scheduling without isolating the actual failure.
 
+## Rooted Pixel 4 XL: on-device flight recorder (no PC required)
+
+When a freeze disappears as soon as Recents opens, a log collected only
+**after** leaving the app cannot establish whether the frozen app had focus.
+Start this low-frequency recorder from Termux **before** reproducing the issue,
+then switch to the target app without exiting the rooted process:
+
+```sh
+curl -fL 'https://raw.githubusercontent.com/its-hecker/HeckerOS/perf/heckeros-2.0/tools/capture_app_freeze_ondevice.sh' -o "$HOME/hecker-freeze.sh"
+mkdir -p "$HOME/hecker-freeze"
+su -c "sh $HOME/hecker-freeze.sh $HOME/hecker-freeze 300" > "$HOME/hecker-freeze-run.log" 2>&1 &
+```
+
+Use the app normally for up to five minutes. This captures focused-window,
+foreground Activity, InputDispatcher, FrameTracker, HWC and Quickstep messages
+continuously, including before Recents changes the state; sampled Surface
+layers and pressure help separate input stalls from rendering failures. At
+five minutes it terminates, leaving timestamped snapshots under
+`$HOME/hecker-freeze/freeze-*`. It requires existing KernelSU/su permission.
+No phone property, governor, settings or app process is changed.
+
+Review/redact potentially sensitive activity titles, app details and logs,
+then package from Termux using
+`tar -czf "$HOME/hecker-freeze.tar.gz" -C "$HOME" hecker-freeze`.
+This is for evidence gathering, not a claimed freeze fix.
+
+**60Hz control**: the reported freeze persists even with Smooth Display off.
+Therefore disabling 90Hz transitions is not an effective workaround; retain
+default display behavior. Prioritize stale input focus/gesture consumers
+versus an app rendering stall at a single captured freeze timestamp.
+
 ## Rollback
 
 No main/default branches were modified. Use the previous `cnb_latest_stable` manifest for a known baseline. Do not cherry-pick only the suite without the matching framework and device tree commits; pinned revisions are part of this experiment.
