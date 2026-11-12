@@ -29,7 +29,7 @@ class SettingsFluidSourceTests(unittest.TestCase):
         script = ROOT / "tools/measure_settings_startup.sh"
         subprocess.run(["bash", "-n", str(script)], check=True)
         src = script.read_text()
-        self.assertIn('mode="\${2:-warm}"'.replace("\\", ""), src)
+        self.assertIn('mode="${2:-warm}"', src)
         self.assertIn('if [[ "$mode" == "cold" ]]', src)
         self.assertIn("adb shell am start -W -a android.settings.SETTINGS", src)
         self.assertNotIn("settings put ", src)
