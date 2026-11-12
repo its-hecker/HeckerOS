@@ -183,6 +183,65 @@ Therefore disabling 90Hz transitions is not an effective workaround; retain
 default display behavior. Prioritize stale input focus/gesture consumers
 versus an app rendering stall at a single captured freeze timestamp.
 
+
+## 12 November 20:46 PKT rooted recorder — rapid Back then Home regression
+
+The user identified a specific, cross-app reproducer: **complete an edge Back
+gesture, then immediately swipe Home**. The foreground appears frozen until
+navigating Home/Recents and returning. This also happens with 60 Hz selected.
+Prioritize predictive-back/Quickstep/WM Shell hand-off over speculative
+per-app performance tuning.
+
+The supplied `hecker-freeze.tar.gz` contains an older 19:43 PKT session and a
+second session started at 20:46:45 PKT. The second was archived early
+(after approximately two minutes) and therefore has no final dumpsys snapshots;
+its `important-events.log` and `focus-timeline.txt` are present.
+
+In the second recording:
+
+- **20:48:19.806 PKT:** InputDispatcher logs edge-swipe taking gesture
+  ownership from Settings and the swipe-up monitor.
+- **20:48:19.818:** WM Shell requests `PREDICTIVE_BACK` transition **#1525**;
+  `BackAnimationController$BackTransitionHandler` takes it.
+- **20:48:20.395–20:48:20.433:** `CLOSE_PREDICTIVE_BACK` **#1526**
+  completes; **#1525** is reported finished.
+- **20:48:20.796–20:48:20.836:** Quickstep `RecentsView`/
+  `TaskAnimationManager` begins the swipe-up/Recents animation
+  **#1527**; InputDispatcher transfers gesture ownership to swipe-up.
+  This is about 0.4 seconds after the Back transition ended.
+- **20:48:34.943:** `START_RECENTS` **#1527** finishes (14.14 s after
+  creation), coinciding with a normal Recents finish callback. Its lifetime
+  alone is **not proof of an animation deadlock**, because interactive Recents
+  transitions remain active until user navigation completes.
+- **20:48:36.116–20:48:38.401:** Another edge-swipe triggers
+  `PREDICTIVE_BACK` **#1530**; later swipe-up begins Recents
+  **#1533**. These events independently confirm the gesture pattern.
+- Input focus samples show `DispatchEnabled: true` and
+  `DispatchFrozen: false`; there is no explicit input-dispatch ANR
+  in this filtered recording. The collector sampled every ~5 s,
+  so an intermittent focus/input-consumer mismatch between samples
+  remains possible.
+
+**Interpretation:** The newly isolated reproducer and actual Back/Recents
+events make a transition hand-off / input-consumer lifecycle issue a
+stronger hypothesis than a universal application freeze. They do not establish
+whether the issue lies in Android WM Shell, Pixel Launcher's Quickstep
+(recents provider), Hecker Launcher (separate Home provider), or their
+interaction. The occasional `Unknown focus tokens`, missing-task warnings,
+and clipboard input-channel disposal must be correlated to a *confirmed freeze
+timestamp* before treating any as causal.
+
+**Next verification:** Record a known frozen interval with a clock timestamp
+from the user's observation; preserve full `WindowManagerShell`/
+`InputDispatcher`/Quickstep event stream and focused-window snapshots
+*before* opening Recents to recover. Reproduce once using Back→Home with a
+short interval and once after a deliberate pause, while keeping launchers and
+display settings unchanged. Compare whether the **focused window**,
+**resumed activity**, **Recents animation input consumer**, and
+**shell transition finish callback** agree at the failure moment.
+No speculative back/gesture serialization, input monitoring hack,
+forced transition completion, or launcher swap should enter stable.
+
 ## Rollback
 
 No main/default branches were modified. Use the previous `cnb_latest_stable` manifest for a known baseline. Do not cherry-pick only the suite without the matching framework and device tree commits; pinned revisions are part of this experiment.
