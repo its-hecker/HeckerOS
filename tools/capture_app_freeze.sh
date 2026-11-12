@@ -45,6 +45,9 @@ capture input.txt shell dumpsys input
 capture activities.txt shell dumpsys activity activities
 capture transitions.txt shell dumpsys activity service com.android.wm.shell/.ShellService
 capture surface-layers.txt shell dumpsys SurfaceFlinger --list
+# Include the compositor scheduler/active layer snapshot, not just layer names.
+# This matters if frames stop being presented while input still reaches the app.
+capture surfaceflinger-state.txt shell dumpsys SurfaceFlinger
 capture display.txt shell dumpsys display
 capture scheduler.txt shell 'for n in cpu memory io; do echo "=== $n ==="; cat /proc/pressure/$n 2>/dev/null; done'
 capture meminfo.txt shell cat /proc/meminfo
@@ -55,6 +58,8 @@ if [[ -n "$pkg" ]]; then capture app-frames.txt shell dumpsys gfxinfo "$pkg" fra
 capture logcat.txt logcat -d -v threadtime -b main -b system -b events -t 2500
 grep -E -i 'mCurrentFocus|mFocusedApp|mInputFocus|FocusedWindow|FocusedApplication|topResumedActivity|mResumedActivity|Input dispatching timed out|no focused window' \
     "$out/window.txt" "$out/input.txt" "$out/activities.txt" > "$out/focus-summary.txt" 2>/dev/null || true
+grep -E -i 'Ignoring duplicate VSYNC|Skipped [0-9]+ frames|Missed App frame|RemoteAnimationTargets|Unknown focus tokens|Input dispatching timed out|not responding|WindowManager: Finish Transition|BLASTBufferQueue|Surface failed to disconnect' \
+    "$out/logcat.txt" > "$out/rendering-signals.txt" 2>/dev/null || true
 echo "Saved read-only freeze diagnostics: $out"
 echo "Capture once as 'frozen' before Recents, then once as 'recovered' afterward."
 echo "Review/redact logcat.txt and window titles before sharing; neither apps nor services were restarted."
