@@ -18,6 +18,13 @@ class SettingsFluidSourceTests(unittest.TestCase):
         self.assertIn("GradientDrawable.OVAL", src)
         self.assertIn("disc.getColor().getDefaultColor() != iconColor", src)
 
+    def test_scrolling_card_decoration_skips_unneeded_path_builds(self):
+        src = (ROOT / "settings/src/com/android/settings/hecker/HeckerHomeDecoration.java").read_text()
+        self.assertIn("if (!first && !last)", src)
+        middle, rounded = src.split("if (!first && !last)", 1)[1].split("} else {", 1)
+        self.assertIn("canvas.drawRect(bounds, paint)", middle)
+        self.assertIn("path.addRoundRect", rounded)
+
     def test_brand_span_constructed_once_per_preference(self):
         src = (ROOT / "settings/src/com/android/settings/hecker/HeckerBrandPreference.java").read_text()
         constructor, bind = src.split("@Override public void onBindViewHolder(", 1)
