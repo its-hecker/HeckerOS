@@ -154,10 +154,29 @@ five minutes it terminates, leaving timestamped snapshots under
 `$HOME/hecker-freeze/freeze-*`. It requires existing KernelSU/su permission.
 No phone property, governor, settings or app process is changed.
 
-Review/redact potentially sensitive activity titles, app details and logs,
-then package from Termux using
-`tar -czf "$HOME/hecker-freeze.tar.gz" -C "$HOME" hecker-freeze`.
-This is for evidence gathering, not a claimed freeze fix.
+The recorder runs as root and uses a private umask, so completed capture
+directories and their files may be root-owned even though the parent directory
+belongs to Termux. **Wait for the 300-second recorder to finish** before
+changing ownership or creating an archive. Verify its exit state and files:
+
+```sh
+cat "$HOME/hecker-freeze-run.log"
+ls -la "$HOME/hecker-freeze"
+```
+
+If a `freeze-YYYYMMDD-HHMMSS` directory exists, restore read access **only**
+to the Termux app UID/GID (not world-readable), then make an archive:
+
+```sh
+su -c "chown -R $(id -u):$(id -g) $HOME/hecker-freeze"
+tar -czf "$HOME/hecker-freeze.tar.gz" -C "$HOME" hecker-freeze
+ls -lh "$HOME/hecker-freeze.tar.gz"
+```
+
+Review/redact potentially sensitive activity titles, app details and logs
+before sharing. If `hecker-freeze-run.log` reports a failure or the output
+directory is empty, include the run log (after redaction) instead of claiming
+capture succeeded. This is for evidence gathering, not a claimed freeze fix.
 
 **60Hz control**: the reported freeze persists even with Smooth Display off.
 Therefore disabling 90Hz transitions is not an effective workaround; retain
