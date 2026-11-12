@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -18,10 +19,13 @@ final class MotionIslandView extends View {
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private final TextPaint text = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect = new RectF();
+    private final Path artworkClip = new Path();
     private final float density;
     private Bitmap artwork;
     private String label = "";
-    private boolean moving, playing;
+    private String clippedLabel = "";
+    private int clippedWidth = -1;
+    private boolean moving, playing, animateRequested;
     private final Runnable frame = new Runnable() {
         @Override public void run() { invalidate(); if (moving) postDelayed(this, 33); }
     };
@@ -36,14 +40,30 @@ final class MotionIslandView extends View {
     }
     int dp(float value) { return Math.round(value * density); }
     void update(HeckerQsMedia.Snapshot media, String label, boolean animate) {
-        this.artwork = media.artwork; this.playing = media.playing; this.label = label;
+        this.artwork = media.artwork; this.playing = media.playing;
+        if (!this.label.equals(label)) { this.label = label; clippedWidth = -1; }
+        animateRequested = animate;
         setContentDescription(label + ". " + getContext().getString(com.android.systemui.res.R.string.hecker_motion_open_player));
-        boolean next = animate && playing;
-        if (next != moving) { stop(); moving = next; if (moving) post(frame); }
+        updateMotion();
         invalidate();
     }
+    private void updateMotion() {
+        boolean next = animateRequested && playing && isAttachedToWindow()
+                && getWindowVisibility() == VISIBLE && isShown();
+        if (next == moving) return;
+        stop();
+        moving = next;
+        if (moving) post(frame);
+    }
     void stop() { moving = false; removeCallbacks(frame); }
+    @Override protected void onAttachedToWindow() { super.onAttachedToWindow(); updateMotion(); }
     @Override protected void onDetachedFromWindow() { stop(); super.onDetachedFromWindow(); }
+    @Override protected void onVisibilityChanged(View view, int visibility) {
+        super.onVisibilityChanged(view, visibility); updateMotion();
+    }
+    @Override protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility); updateMotion();
+    }
     @Override protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         float top = dp(3), bottom = getHeight() - dp(3), radius = (bottom - top) / 2;
@@ -54,9 +74,9 @@ final class MotionIslandView extends View {
         rect.set(dp(7), top + dp(3), dp(27), bottom - dp(3));
         if (artwork != null && !artwork.isRecycled()) {
             int save = canvas.save();
-            android.graphics.Path clip = new android.graphics.Path();
-            clip.addRoundRect(rect, dp(7), dp(7), android.graphics.Path.Direction.CW);
-            canvas.clipPath(clip);
+            artworkClip.rewind();
+            artworkClip.addRoundRect(rect, dp(7), dp(7), Path.Direction.CW);
+            canvas.clipPath(artworkClip);
             int side = Math.min(artwork.getWidth(), artwork.getHeight());
             int x = (artwork.getWidth() - side) / 2, y = (artwork.getHeight() - side) / 2;
             canvas.drawBitmap(artwork, new Rect(x, y, x + side, y + side), rect, paint);
@@ -66,9 +86,13 @@ final class MotionIslandView extends View {
             text.setColor(0xffa8e6ff); canvas.drawText("♪", dp(12), bottom - dp(7), text);
         }
         text.setColor(0xfff0f7fa);
-        String shortened = TextUtils.ellipsize(label, text, Math.max(dp(8), getWidth() - dp(72)), TextUtils.TruncateAt.END).toString();
+        int width = Math.max(dp(8), getWidth() - dp(72));
+        if (width != clippedWidth) {
+            clippedWidth = width;
+            clippedLabel = TextUtils.ellipsize(label, text, width, TextUtils.TruncateAt.END).toString();
+        }
         Paint.FontMetrics metrics = text.getFontMetrics();
-        canvas.drawText(shortened, dp(33), getHeight() / 2f - (metrics.ascent + metrics.descent) / 2, text);
+        canvas.drawText(clippedLabel, dp(33), getHeight() / 2f - (metrics.ascent + metrics.descent) / 2, text);
         paint.setStrokeCap(Paint.Cap.ROUND); paint.setStrokeWidth(dp(1.4f));
         long now = SystemClock.elapsedRealtime();
         for (int i = 0; i < 5; i++) {
