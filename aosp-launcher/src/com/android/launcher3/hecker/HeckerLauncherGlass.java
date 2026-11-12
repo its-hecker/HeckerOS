@@ -49,14 +49,16 @@ public final class HeckerLauncherGlass {
         final BroadcastReceiver changed=new BroadcastReceiver(){@Override public void onReceive(Context c,Intent i){load();}};
         final Runnable refresh=this::refresh;
         final Runnable refrost=this::refrost;
-        final Runnable scanAfterLayout = () -> {
-            if (stopped || mode == 0) return;
-            View view = workspace.get();
-            if (view != null) scan(view.getRootView(), new int[]{0});
-        };
+        final Runnable scanAfterLayout;
         int option(String key,int fallback,int min,int max){try{return Math.max(min,Math.min(max,prefs.getInt("hecker_glass_"+key,fallback)));}catch(ClassCastException bad){return fallback;}}
         Session(View view) {
             workspace = new WeakReference<>(view);
+            // The callback must be initialized after the final workspace reference.
+            scanAfterLayout = () -> {
+                if (stopped || mode == 0) return;
+                View root = workspace.get();
+                if (root != null) scan(root.getRootView(), new int[]{0});
+            };
             app = view.getContext().getApplicationContext();
             prefs = app.getSharedPreferences(LauncherFiles.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
             wallpaperScaleResId = view.getResources().getIdentifier(
