@@ -54,7 +54,17 @@ final class HeckerGameMonitor {
             // The content observer and user switch invalidate this snapshot.
             if (!configLoaded) {
                 String text = Settings.Secure.getStringForUser(context.getContentResolver(), KEY, user);
-                cachedConfig = text == null || text.length() > 131072 ? null : new JSONObject(text);
+                cachedConfig = null;
+                if (text != null && text.length() <= 131072) {
+                    try {
+                        cachedConfig = new JSONObject(text);
+                    } catch (org.json.JSONException malformed) {
+                        android.util.Slog.w("HeckerGame",
+                                "Ignoring malformed game-monitor configuration", malformed);
+                    }
+                }
+                // Keep invalid/disabled states cached until an actual settings or
+                // user change, rather than retrying JSON parsing on each task event.
                 configLoaded = true;
             }
             JSONObject config = cachedConfig;
