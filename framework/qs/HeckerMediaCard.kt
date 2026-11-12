@@ -194,7 +194,7 @@ private fun HeckerMediaGlow(playing: Boolean, motion: Boolean, modifier: Modifie
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val frame = remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
     val strength by animateFloatAsState(if (playing) 1f else .42f,
-        if (motion) tween(500, easing = HeckerFlowEasing) else snap(), label = "mediaGlowActivity")
+        if (motion) tween(300, easing = HeckerFlowEasing) else snap(), label = "mediaGlowActivity")
     LaunchedEffect(playing, motion, lifecycle) {
         if (!playing || !motion) return@LaunchedEffect
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
