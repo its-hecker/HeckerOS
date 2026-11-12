@@ -9,6 +9,13 @@ concurrency:
   group: hecker-source-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  smoothness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify Smoothness 2.0 performance integration guards
+        run: python3 tools/check_smoothness_2.py
   heckervpn:
     runs-on: ubuntu-24.04
     timeout-minutes: 12
