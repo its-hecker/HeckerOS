@@ -38,9 +38,10 @@ public final class HeckerLauncherGlass {
         final WeakHashMap<View,Drawable> originals=new WeakHashMap<>();
         final WeakHashMap<View,Glass> panels=new WeakHashMap<>();
         Bitmap wallpaper,frosted;
-        boolean stopped,queued;
+        volatile boolean stopped;
+        boolean queued;
         boolean targetsDirty;
-        int generation;
+        volatile int generation;
         float offset=.5f;
         int mode, frostRadius, tint, border, styleRevision;
         float opacity;
@@ -128,6 +129,8 @@ public final class HeckerLauncherGlass {
                 }
             }
             if (styleChanged || rebindTargets) invalidate();
+            // When glass is re-enabled, refresh the wallpaper asynchronously.
+            if (styleChanged && mode != 0 && wallpaper == null) load();
         }
 
         void start(){
@@ -204,11 +207,14 @@ public final class HeckerLauncherGlass {
         void refrost(){
             Bitmap source=wallpaper;if(source==null||stopped)return;
             int request=++generation,radius=frostRadius;
-            WORKER.execute(()->{Bitmap soft=frost(source,radius);MAIN.post(()->{if(!stopped&&request==generation){frosted=soft;invalidate();}});});
+            WORKER.execute(()->{if(stopped||request!=generation)return;Bitmap soft=frost(source,radius);MAIN.post(()->{if(!stopped&&request==generation){frosted=soft;invalidate();}});});
         }
         void load(){
             final int request=++generation;
+            // Disabled glass needs no wallpaper decode or retained bitmap.
+            if (mode == 0) { wallpaper=null; frosted=null; invalidate(); return; }
             WORKER.execute(()->{
+                if (stopped || request != generation) return;
                 Bitmap image=null,blur=null;
                 try{
                     WallpaperManager manager=WallpaperManager.getInstance(app);
