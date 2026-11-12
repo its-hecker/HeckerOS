@@ -57,6 +57,38 @@ Core acceptance scenarios:
 
 Use the **same build variant**, apps, brightness, refresh policy, battery state and approximate device temperature on both runs. No performance gains are claimed until the traces are compared.
 
+## Intermittent foreground-app freeze triage (before switching to Recents)
+
+A frozen frame or unresponsive touch that recovers after opening and closing Recents
+does **not** prove an app ANR. Potential causes include lost input focus, a stale
+BLAST/SurfaceFlinger surface, an app-specific render-thread stall, or a refresh-rate
+transition. Earlier November logs included a Launcher input timeout with no focused
+window; do not assume all apps share that cause without a fresh freeze-time capture.
+
+From a **USB-connected Linux host with authorized ADB**, while the application
+is still frozen, run the read-only capture **before touching Recents**:
+
+```bash
+bash vendor/hecker/floral/suite/tools/capture_app_freeze.sh frozen
+# Now open Recents, return to the SAME app without force-closing it:
+bash vendor/hecker/floral/suite/tools/capture_app_freeze.sh recovered
+```
+
+Optionally give an app package as the second argument to capture its FrameStats
+(e.g. `frozen com.example.app`). Each command records a separate timestamped
+`app-freeze-<label>-*` directory with input/window focus, resumed Activity,
+surface layers, display mode, pressure, frames and bounded logcat. Compare
+`focus-summary.txt` and `window.txt` first. A null focused window with a
+resumed Activity supports investigating WM/input-focus transitions; valid focus
+with stale app frame timestamps points toward rendering. Correlate with Perfetto
+FrameTimeline and SurfaceFlinger before modifying the compositor.
+
+The capture does not restart an app, force a frame, change properties, or
+grant permissions. Dumpsys/logcat can expose application names, URLs or
+notification metadata: review and redact sensitive information before sharing.
+Do not treat the diagnostics as proof that random freezes are fixed. Verify with
+the same app and same steps on stable and the experimental 2.0 build.
+
 ## Rollback
 
 No main/default branches were modified. Use the previous `cnb_latest_stable` manifest for a known baseline. Do not cherry-pick only the suite without the matching framework and device tree commits; pinned revisions are part of this experiment.
