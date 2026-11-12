@@ -89,6 +89,50 @@ notification metadata: review and redact sensitive information before sharing.
 Do not treat the diagnostics as proof that random freezes are fixed. Verify with
 the same app and same steps on stable and the experimental 2.0 build.
 
+## 12 November 2026 LogFox capture: two reported app freezes
+
+The user reported two freezes while recording a 45-second LogFox excerpt
+(approximately 19:13:14–19:13:59 PKT). Both return-to-Recents gestures
+originate in `org.telegram.plus`, which uses the unchanged Pixel Launcher
+Quickstep/Recents provider; Hecker Launcher is the separate Home provider.
+
+Observed signals in this log, without asserting causation:
+
+- **21 HWC duplicate VSYNC warnings** from SurfaceFlinger in bursts.
+  SurfaceFlinger is filtering repeated hardware timestamps. This warrants a
+  controlled 60 Hz versus adaptive-90 Hz comparison but does not prove a
+  multi-second compositor stall.
+- Telegram resumed from **the normal cached-app freezer** at 19:13:23.233,
+  followed by **641 skipped frames** at 19:13:23.243. The ~7-second interval
+  since it was frozen explains most of that skipped-frame counter and is
+  **not** evidence of foreground main-thread overload.
+- The START_RECENTS transitions #1169 and #1174 lasted **7,718.874 ms**
+  and **13,097.082 ms** respectively because they remained active until a
+  user action completed Recents. Long lifetime alone is not a stuck
+  transition; both received finish callbacks.
+- Quickstep logged **four missing animation-target task 170** errors after
+  returning to the separate Hecker Home task, plus numerous
+  `A resource failed to call release` and one
+  `HardwareBuffer.close` warning. Review Quickstep's task-snapshot
+  lifecycle and separate Home/Recents compatibility if later traces
+  correlate them with the freeze.
+- The native launcher logged SurfaceView/BLAST disconnect cleanup warnings,
+  while SystemUI logged one 54 ms shade-collapse jank frame and several
+  duplicate blur-value warnings. The existing 2.0 blur deduplication may
+  address those warnings, **not** necessarily the reported app freezes.
+- **No explicit input-dispatch ANR, fatal app exception or focus-window
+  timeout** appears in this excerpt. Earlier November launcher ANR is a
+  separate event, not established as the same issue.
+
+**Next controlled comparison**: Disable *Smooth Display* temporarily
+(60 Hz) and repeat the same app interactions, then re-enable it and repeat
+at adaptive 90 Hz. Keep temperature, apps and gestures constant. For a
+future freeze, collect `capture_app_freeze.sh frozen` **before** entering
+Recents and `recovered` afterward; correlate input focus with
+SurfaceFlinger and per-app FrameStats. Do not globally disable cached-app
+freezer, force-restart apps, alter Quickstep transaction handling or
+rewrite HWC scheduling without isolating the actual failure.
+
 ## Rollback
 
 No main/default branches were modified. Use the previous `cnb_latest_stable` manifest for a known baseline. Do not cherry-pick only the suite without the matching framework and device tree commits; pinned revisions are part of this experiment.
