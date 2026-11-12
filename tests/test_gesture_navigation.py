@@ -30,14 +30,15 @@ public Builder setEnabled(OverlayIdentifier id, boolean state, int user) {
 t.keys.add(user + ":" + id.name); t.states.add(state); return this; }
 public OverlayManagerTransaction build() { return t; } } }""",
             "android/content/om/OverlayManager.java": """package android.content.om; public class OverlayManager {
-public boolean fail, missing, wrongTarget; public int commits;
+public boolean fail, missing, missingLegacy, wrongTarget, wrongLegacyTarget; public int commits;
 public java.util.Map<String, Boolean> states = new java.util.HashMap<>();
 public OverlayInfo getOverlayInfo(String name, android.os.UserHandle user) {
-if (missing) return null; OverlayInfo i = new OverlayInfo();
-i.target = wrongTarget ? "untrusted" : name.endsWith("hidepill") ? "com.google.android.apps.nexuslauncher" : "android";
+if (missing || (missingLegacy && name.endsWith("navspace"))) return null; OverlayInfo i = new OverlayInfo();
+i.target = wrongTarget || (wrongLegacyTarget && name.endsWith("navspace"))
+    ? "untrusted" : name.endsWith("hidepill") ? "com.google.android.apps.nexuslauncher" : "android";
 i.enabled = states.getOrDefault(user.id + ":" + name, false); return i; }
 public void commit(OverlayManagerTransaction t) { if (fail) throw new SecurityException();
-if (t.keys.size() != 2) throw new AssertionError("Overlay pair split across commits"); commits++;
+if (t.keys.size() < 1 || t.keys.size() > 2) throw new AssertionError("Invalid overlay transaction"); commits++;
 for (int n = 0; n < t.keys.size(); n++) states.put(t.keys.get(n), t.states.get(n)); } }""",
             "org/hecker/suite/GestureProbe.java": """package org.hecker.suite;
 public class GestureProbe {
@@ -46,19 +47,37 @@ public static void main(String[] args) {
 android.content.Context c = new android.content.Context();
 c.manager.states.put("0:unrelated.overlay", true);
 check(!GestureNavigationController.enabled(c));
+// Simulate the legacy ROM state: both pill and zero taskbar inset active.
+c.manager.states.put("0:org.hecker.overlay.framework.navspace", true);
+check(GestureNavigationController.restoreLegacyInset(c));
+check(!c.manager.states.get("0:org.hecker.overlay.framework.navspace"));
+c.manager.states.put("0:org.hecker.overlay.framework.navspace", true);
 check(GestureNavigationController.apply(c, true)); check(GestureNavigationController.enabled(c));
-check(c.manager.commits == 1 && c.manager.states.get("0:unrelated.overlay"));
+check(!c.manager.states.get("0:org.hecker.overlay.framework.navspace"));
+check(c.manager.states.get("0:unrelated.overlay"));
+check(c.manager.commits == 2);
 c.manager.fail = true; check(!GestureNavigationController.apply(c, false));
 check(GestureNavigationController.enabled(c)); c.manager.fail = false;
+// The migration and toggle are strictly scoped to the current user.
 android.os.Process.user = 10; check(!GestureNavigationController.enabled(c));
-check(GestureNavigationController.apply(c, true)); check(GestureNavigationController.apply(c, false));
+c.manager.states.put("10:org.hecker.overlay.framework.navspace", true);
+check(GestureNavigationController.apply(c, true));
+check(!c.manager.states.get("10:org.hecker.overlay.framework.navspace"));
+check(GestureNavigationController.apply(c, false));
 check(!GestureNavigationController.enabled(c)); android.os.Process.user = 0;
 check(GestureNavigationController.enabled(c)); check(GestureNavigationController.apply(c, false));
 check(!GestureNavigationController.enabled(c));
+// A future build may remove the legacy overlay completely.
+c.manager.missingLegacy = true; check(GestureNavigationController.available(c));
+check(GestureNavigationController.apply(c, true)); check(GestureNavigationController.enabled(c));
+c.manager.missingLegacy = false;
+c.manager.wrongLegacyTarget = true;
+check(GestureNavigationController.available(c)); check(!GestureNavigationController.apply(c, false));
+c.manager.wrongLegacyTarget = false;
 c.manager.missing = true; check(!GestureNavigationController.apply(c, true));
 c.manager.missing = false; c.manager.wrongTarget = true;
 check(!GestureNavigationController.available(c)); check(!GestureNavigationController.apply(c, true));
-System.out.println("Gesture toggle: atomic pair, failure preservation, restore, user isolation and target validation PASS");
+System.out.println("Gesture toggle: visual-only handle, zero-inset migration, failure preservation, user isolation and target validation PASS");
 } }""",
         }
         with tempfile.TemporaryDirectory(prefix="hecker-gestures-") as temp:
