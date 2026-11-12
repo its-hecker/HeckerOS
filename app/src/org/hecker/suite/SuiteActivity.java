@@ -19,6 +19,7 @@ import android.widget.Toast;
 public final class SuiteActivity extends Activity {
     private SuiteAnimation animation;
     private LinearLayout content;
+    private LinearLayout customizationsPanel, aboutPanel;
     private Button customizations, about;
     private boolean showingAbout;
     private int message;
@@ -57,34 +58,59 @@ public final class SuiteActivity extends Activity {
         Ui.scroll(this,page);
     }
     private void showTab(boolean selectedAbout) {
-        showingAbout=selectedAbout; customizations.setSelected(!selectedAbout); about.setSelected(selectedAbout); content.removeAllViews();
-        if(selectedAbout){SuiteAbout.populate(this,content);return;}
-        addRow(tile(R.string.qs_title,R.string.qs_summary,R.drawable.ic_qs,v->open("QuickSettingsActivity")),
+        showingAbout = selectedAbout;
+        customizations.setSelected(!selectedAbout);
+        about.setSelected(selectedAbout);
+        // Do not reinflate the full dashboard each time a user changes tabs.
+        // Panels are activity-local; configuration changes create fresh views.
+        LinearLayout target;
+        if (selectedAbout) {
+            if (aboutPanel == null) {
+                aboutPanel = new LinearLayout(this);
+                aboutPanel.setOrientation(LinearLayout.VERTICAL);
+                SuiteAbout.populate(this, aboutPanel);
+            }
+            target = aboutPanel;
+        } else {
+            if (customizationsPanel == null) {
+                customizationsPanel = new LinearLayout(this);
+                customizationsPanel.setOrientation(LinearLayout.VERTICAL);
+                populateCustomizations(customizationsPanel);
+            }
+            target = customizationsPanel;
+        }
+        if (content.getChildCount() == 1 && content.getChildAt(0) == target) return;
+        content.removeAllViews();
+        content.addView(target, new LinearLayout.LayoutParams(-1, -2));
+    }
+
+    private void populateCustomizations(LinearLayout target) {
+        addRow(target,tile(R.string.qs_title,R.string.qs_summary,R.drawable.ic_qs,v->open("QuickSettingsActivity")),
                 tile(R.string.lock_screen_title,R.string.lock_screen_summary,R.drawable.ic_lock,v->open("LockScreenSettingsActivity")));
-        addRow(tile(R.string.status_bar_title,R.string.status_bar_summary,R.drawable.ic_signal,v->open("StatusBarSettingsActivity")),
+        addRow(target,tile(R.string.status_bar_title,R.string.status_bar_summary,R.drawable.ic_signal,v->open("StatusBarSettingsActivity")),
                 tile(R.string.motion_sense_title,R.string.motion_sense_summary,R.drawable.ic_motion_sense,v->openMotionSense()));
-        addRow(tile(R.string.app_lock_title,R.string.app_lock_summary,R.drawable.ic_lock,v->open("AppLockActivity")),
+        addRow(target,tile(R.string.app_lock_title,R.string.app_lock_summary,R.drawable.ic_lock,v->open("AppLockActivity")),
                 tile(R.string.gaming_title,R.string.gaming_summary,R.drawable.ic_gaming,v->open("GamingActivity")));
-        addRow(tile(R.string.sandbox_title,R.string.sandbox_summary,R.drawable.ic_sandbox,v->open("SandboxActivity")),
+        addRow(target,tile(R.string.sandbox_title,R.string.sandbox_summary,R.drawable.ic_sandbox,v->open("SandboxActivity")),
                 tile(R.string.headphones_title,R.string.headphones_summary,R.drawable.ic_headphones,v->open("HeadphonesActivity")));
-        addRow(tile(R.string.ir_title,R.string.ir_summary,R.drawable.ic_face_unlock,v->open("InfraredCameraActivity")),
+        addRow(target,tile(R.string.ir_title,R.string.ir_summary,R.drawable.ic_face_unlock,v->open("InfraredCameraActivity")),
                 tile(R.string.capture_title,R.string.capture_summary,R.drawable.ic_qs,v->open("CaptureSettingsActivity")));
-        addRow(tile(R.string.launcher_title,R.string.launcher_summary,R.drawable.ic_launcher_enhanced,v->open("LauncherSettingsActivity")),
+        addRow(target,tile(R.string.launcher_title,R.string.launcher_summary,R.drawable.ic_launcher_enhanced,v->open("LauncherSettingsActivity")),
                 tile(R.string.netlab_title,R.string.netlab_summary,R.drawable.ic_netlab,v->open("NetworkLabActivity")));
-        addRow(tile(R.string.vpn_title,R.string.vpn_summary,R.drawable.ic_vpn,v->open("HeckerVpnActivity")),
+        addRow(target,tile(R.string.vpn_title,R.string.vpn_summary,R.drawable.ic_vpn,v->open("HeckerVpnActivity")),
                 tile(R.string.spoofing_title,R.string.spoofing_summary,R.drawable.ic_spoofing,v->openSpoofing()));
         if ("coral".equals(android.os.Build.DEVICE) || "flame".equals(android.os.Build.DEVICE)) {
-            addRow(tile(R.string.sensor_recovery_title,R.string.sensor_recovery_summary,R.drawable.ic_motion_sense,
+            addRow(target,tile(R.string.sensor_recovery_title,R.string.sensor_recovery_summary,R.drawable.ic_motion_sense,
                             v -> open("SensorRecoveryActivity")),
                     "coral".equals(android.os.Build.DEVICE)
                             ? tile(R.string.root_privacy_title,R.string.root_privacy_summary,R.drawable.ic_spoofing,
                                     v -> open("RootPrivacyActivity")) : null);
         }
-        addRow(tile(R.string.gestures_navigation_title,R.string.gestures_navigation_summary,
+        addRow(target,tile(R.string.gestures_navigation_title,R.string.gestures_navigation_summary,
                         R.drawable.ic_navigation,v->open("GestureNavigationActivity")),
                 tile(R.string.vault_title,R.string.vault_summary,R.drawable.ic_vault,v->open("HeckerVault")));
         LinearLayout footer=Ui.card(this); footer.addView(Ui.text(this,"HeckerOS",17,true));
-        footer.addView(Ui.text(this,getString(R.string.suite_footer),12,false));content.addView(footer);
+        footer.addView(Ui.text(this,getString(R.string.suite_footer),12,false));target.addView(footer);
     }
     private LinearLayout tile(int title,int summary,int icon,View.OnClickListener click) {
         LinearLayout card=Ui.card(this);card.setMinimumHeight(Ui.dp(this,154));
@@ -97,11 +123,11 @@ public final class SuiteActivity extends Activity {
         android.util.TypedValue selectable=new android.util.TypedValue();getTheme().resolveAttribute(android.R.attr.selectableItemBackground,selectable,true);
         if(selectable.resourceId!=0)card.setForeground(getDrawable(selectable.resourceId));return card;
     }
-    private void addRow(LinearLayout left,LinearLayout right) {
+    private void addRow(LinearLayout target,LinearLayout left,LinearLayout right) {
         LinearLayout row=new LinearLayout(this);row.setBaselineAligned(false);
         LinearLayout.LayoutParams a=new LinearLayout.LayoutParams(0,-2,1),b=new LinearLayout.LayoutParams(0,-2,1);
         a.setMarginEnd(Ui.dp(this,5));b.setMarginStart(Ui.dp(this,5));a.bottomMargin=b.bottomMargin=Ui.dp(this,10);
-        row.addView(left,a);row.addView(right != null ? right : new android.widget.Space(this),b);content.addView(row);
+        row.addView(left,a);row.addView(right != null ? right : new android.widget.Space(this),b);target.addView(row);
     }
     private void open(String page) {
         try {

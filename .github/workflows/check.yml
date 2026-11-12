@@ -9,6 +9,13 @@ concurrency:
   group: hecker-source-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  fluidity-pass2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate Settings, launcher, Suite, frame, power and gesture diagnostics guards
+        run: python3 -m unittest discover -s tests -p 'test_fluid_pass2.py' -v
   settings-fluid:
     runs-on: ubuntu-24.04
     timeout-minutes: 3

@@ -27,7 +27,7 @@ final class MotionIslandView extends View {
     private int clippedWidth = -1;
     private boolean moving, playing, animateRequested;
     private final Runnable frame = new Runnable() {
-        @Override public void run() { invalidate(); if (moving) postDelayed(this, 33); }
+        @Override public void run() { invalidate(); if (moving) postOnAnimationDelayed(this, 32); }
     };
     MotionIslandView(Context context) {
         super(context);
