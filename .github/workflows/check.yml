@@ -16,6 +16,8 @@ jobs:
       - uses: actions/checkout@v5
       - name: Verify Smoothness 2.0 performance integration guards
         run: python3 tools/check_smoothness_2.py
+      - name: Validate non-mutating foreground-app freeze capture
+        run: python3 -m unittest discover -s tests -p 'test_app_freeze_capture.py'
   heckervpn:
     runs-on: ubuntu-24.04
     timeout-minutes: 12
