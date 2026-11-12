@@ -59,10 +59,15 @@ fun HeckerGlassQuickSettings(tiles: List<TileViewModel>, listening: () -> Boolea
     val configuration = LocalConfiguration.current
     val narrow = configuration.fontScale >= 1.4f || configuration.screenWidthDp < 350
     val columns = if (configuration.fontScale >= 1.8f) 2 else if (narrow) 3 else 4
-    val connections = listOf(setOf("wifi", "internet"), setOf("bt"))
-        .mapNotNull { specs -> tiles.firstOrNull { it.spec.spec in specs } }
-    // Preserve every selected native/custom tile, including overflow, in editor order.
-    val pages = tiles.filter { it !in connections }.chunked(columns * 3).ifEmpty { listOf(emptyList()) }
+    val connections = remember(tiles) {
+        listOf(setOf("wifi", "internet"), setOf("bt"))
+            .mapNotNull { specs -> tiles.firstOrNull { it.spec.spec in specs } }
+    }
+    // Tile state changes should recompose their own cards, not rebuild every page.
+    // Changes to tile order or the active grid width still rebuild the model.
+    val pages = remember(tiles, columns, connections) {
+        tiles.filter { it !in connections }.chunked(columns * 3).ifEmpty { listOf(emptyList()) }
+    }
     val pager = rememberPagerState(pageCount = { pages.size })
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         if (narrow) Column(heckerQsElement(HeckerQsScene.Connections), verticalArrangement = Arrangement.spacedBy(10.dp)) {
