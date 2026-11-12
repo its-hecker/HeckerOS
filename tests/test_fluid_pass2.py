@@ -58,6 +58,7 @@ class FluidityPass2Tests(unittest.TestCase):
         self.assertEqual(sum("mDuration = heckerFlow ? 260 :" in p["new"] for p in folder), 1)
         self.assertIn("setDuration(140)", read("aosp-launcher/src/com/android/launcher3/hecker/HeckerStudio.java"))
         self.assertIn("postOnAnimationDelayed(this, 32)", read("framework/motionisland/MotionIslandView.java"))
+        self.assertIn("postOnAnimationDelayed(this, 32)", read("framework/motionisland/MotionAstronautView.java"))
         self.assertIn("tween(300, easing = HeckerFlowEasing)", read("framework/qs/HeckerMediaCard.kt"))
         origin = json.loads(read("aosp-launcher/ORIGIN.json"))
         self.assertEqual(origin["recents_provider"], "com.google.android.apps.nexuslauncher")
