@@ -18,6 +18,8 @@ jobs:
         run: python3 tools/check_smoothness_2.py
       - name: Validate non-mutating foreground-app freeze capture
         run: python3 -m unittest discover -s tests -p 'test_app_freeze_capture.py'
+      - name: Verify rooted on-device freeze recorder safety and shell syntax
+        run: python3 -m unittest discover -s tests -p 'test_freeze_ondevice.py'
   heckervpn:
     runs-on: ubuntu-24.04
     timeout-minutes: 12
