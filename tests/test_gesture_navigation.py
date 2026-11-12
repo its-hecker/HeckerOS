@@ -90,3 +90,22 @@ System.out.println("Gesture toggle: visual-only handle, zero-inset migration, fa
                 *map(str, out.rglob("*.java")),
                 str(ROOT / "app/src/org/hecker/suite/GestureNavigationController.java")], check=True)
             subprocess.run(["java", "-cp", str(out / "classes"), "org.hecker.suite.GestureProbe"], check=True)
+
+    def test_zero_inset_overlay_not_packaged(self):
+        common = (ROOT / "rom/common.mk").read_text()
+        active = [line.strip() for line in common.splitlines()
+                  if line.strip().startswith("PRODUCT_PACKAGES +=")]
+        self.assertFalse(any("HeckerGestureSpace" in line for line in active))
+        self.assertTrue(any("HeckerHideGesturePill" in line for line in active))
+        # Keep the legacy package name known to migration code, but not in
+        # the installed ROM so the framework's original inset is retained.
+        controller = (ROOT / "app/src/org/hecker/suite/GestureNavigationController.java").read_text()
+        self.assertIn('LEGACY_INSET = "org.hecker.overlay.framework.navspace"', controller)
+        self.assertIn('transaction.setEnabled(new OverlayIdentifier(LEGACY_INSET), false', controller)
+        self.assertIn('restoreLegacyInset(Context context)', controller)
+
+    def test_pill_overlay_only_changes_cosmetic_colors(self):
+        overlay = (ROOT / "rom/overlays/HideGesturePill/res/values/colors.xml").read_text()
+        self.assertIn("taskbar_stashed_handle_light_color", overlay)
+        self.assertIn("taskbar_stashed_handle_dark_color", overlay)
+        self.assertNotIn("taskbar_stashed_size", overlay)
