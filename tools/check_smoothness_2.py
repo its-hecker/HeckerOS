@@ -59,7 +59,7 @@ def check_android_tree(tree):
     assert "ro.surface_flinger.use_content_detection_for_refresh_rate=true" in vend
     blur = (framework / "packages/SystemUI/src/com/android/systemui/window/ui/BlurChoreographer.kt").read_text()
     assert "sameVisibleEffect" in blur and "wasUpdateScheduledForThisFrame" in blur
-    assert "Log.w(TAG, \"Multiple blur values emitted in the same frame\")" not in blur
+    assert "Multiple blur values emitted in the same frame" not in blur
     print("PASS: Power HAL, PSI LMKD, adaptive display, SystemUI blur coalescing")
 
 
