@@ -251,6 +251,46 @@ same timestamp. Avoid global gesture suppression, forced transition
 completion, launcher replacement, or stable-branch merges without a
 buildable, independently verified cause.
 
+
+## Experimental Recents task-surface restore candidate (12 November 2026)
+
+**Source patch (not yet a verified freeze fix):**
+`its-hecker/heckeros_frameworks_base` on `perf/heckeros-2.0`, source
+commit `3eaa11f515566f1499e858fdffdf581bc7aef44c`, with regression
+test commit `9394d9ea861bb82b309948eb0d0c50dcc5d378ba`.
+The Coral `HeckerOs-localmanifest` performance branch now pins
+`9394d9ea861bb82b309948eb0d0c50dcc5d378ba`.
+
+When `RecentsController.finishInner()` returns to the pausing/current app,
+it already reorders the task and calls `SurfaceControl.Transaction.show()`.
+The experiment explicitly sets that *returning task surface's* alpha to
+`1f` in the same finish transaction, to avoid carrying a stale surface
+alpha through canceled predictive Back → Recents → app re-entry.
+This **does not disable predictive Back**, affect the Recents→Home branch,
+or change touch/input dispatch policies. It targets a frozen-*looking*
+compositor surface, **not** all causes of actual unresponsive touch.
+A new `RecentsTransitionHandlerTest` verifies that this return-to-app
+transaction both shows the task surface and restores opacity.
+
+**Validation:** The linked manifest checks are green; Android WM Shell JUnit,
+full Soong build, and device reproduction **have not been run**. Treat this
+as an experimental *candidate*, not confirmation of a fixed freeze.
+
+Build the paired revisions from `perf/heckeros-2.0`. On Coral, test these
+four cases repeatedly against the previous stable image:
+1. Partially swipe Back and cancel it → Recents → re-enter same task.
+2. Commit Back → Recents → re-enter same task.
+3. Recents → re-enter task without any Back gesture.
+4. Cancel Back → wait two seconds → Recents → re-enter same task.
+
+Repeat with Settings, Chrome, Telegram and ChatGPT. Inspect touch,
+frame updates, focused window, current resumed activity and surface alpha.
+If touch is still blocked with correct focus, capture an immediate frozen
+snapshot; this change must not be claimed effective unless measured. Also
+validate translucency, PiP, split-screen, task switching, launcher/Home,
+live tiles, refresh rate and gesture cancellation. Roll back the framework
+pin if those features regress. Keep stable and OTA untouched.
+
 ## Rollback
 
 No main/default branches were modified. Use the previous `cnb_latest_stable` manifest for a known baseline. Do not cherry-pick only the suite without the matching framework and device tree commits; pinned revisions are part of this experiment.
