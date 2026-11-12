@@ -9,6 +9,13 @@ concurrency:
   group: hecker-source-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  settings-fluid:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check low-allocation homepage binding and startup measurement
+        run: python3 -m unittest discover -s tests -p 'test_settings_fluid.py' -v
   smoothness:
     runs-on: ubuntu-24.04
     timeout-minutes: 3
