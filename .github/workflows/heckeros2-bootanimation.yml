@@ -1,0 +1,42 @@
+name: HeckerOS 2.0 geometric bootanimation source lock
+on:
+  push:
+    branches: [cnb_latest_stable]
+    paths:
+      - tools/heckeros2_logo_source.py
+      - tools/heckeros2_package.py
+      - tools/heckeros2_lock_payload.py
+      - .github/workflows/heckeros2-bootanimation.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  render-and-lock:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-lato
+          python -m pip install --disable-pip-version-check pillow numpy opencv-python-headless
+      - name: Generate and verify geometric bootanimation
+        run: |
+          python tools/heckeros2_logo_source.py
+          python tools/heckeros2_package.py
+          python tools/heckeros2_lock_payload.py
+          python tools/build_bootanimation.py --check
+          python -m unittest discover -s tests -p 'test_bootanimation.py'
+      - name: Commit locked binary payload with Hecker authorship
+        run: |
+          git config user.name Hecker
+          git config user.email 118846180+its-hecker@users.noreply.github.com
+          git add bootanimation/payload.json bootanimation/README.md bootanimation/preview-coral.mp4 bootanimation/source/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'HeckerOS 2.0: install geometric bootanimation with infinite bar'
+          git push origin HEAD:cnb_latest_stable
