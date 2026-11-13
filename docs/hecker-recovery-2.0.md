@@ -103,3 +103,18 @@ Next tasks (only on the separate integration branch):
 Do not replace stable ROM boot.img or OTA boot payload with the standalone
 recovery image. No flash, boot swap, image signing, or stable promotion was
 performed here. These hashes identify the exact November samples only.
+
+
+## Android 17 recovery kernel parity staging — November 14
+
+The separate [OrangeFox/Hecker Recovery integration branch](https://github.com/its-hecker/orangefox_device_google_coral/tree/feat/hecker-recovery-2.0)
+now has an *opt-in*, fail-closed ROM-boot input path. Provide the current
+Coral HeckerOS Android 17 boot image to `HECKER_A17_ROM_BOOT`; recovery
+build preparation stages its exact compressed kernel and DTB into the
+standalone OrangeFox build and validates them again in the produced image.
+This is a prerequisite for boot compatibility, not sufficient proof of it.
+
+**ROM integration remains blocked pending dual-mode A17 ramdisk/init work
+and real-device verification.** Do not change recovery-as-boot, boot.img,
+OTA boot payload, or stable branches based solely on kernel parity.
+Automatic custom recovery shipping is intentionally not enabled yet.
