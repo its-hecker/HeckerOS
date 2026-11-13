@@ -1,11 +1,11 @@
 <resources>
-    <!-- Material You / Monet tones: keep About Phone synced to the wallpaper palette. -->
-    <color name="hecker_about_background">@android:color/system_neutral1_10</color>
-    <color name="hecker_about_surface">@android:color/system_neutral1_50</color>
+    <!-- Share the Settings homepage Material You background, card, and text tones. -->
+    <color name="hecker_about_background">@android:color/system_surface_container_light</color>
+    <color name="hecker_about_surface">@android:color/system_surface_bright_light</color>
     <color name="hecker_about_hero_start">@android:color/system_accent1_100</color>
     <color name="hecker_about_hero_end">@android:color/system_accent2_100</color>
-    <color name="hecker_about_text">@android:color/system_neutral1_900</color>
-    <color name="hecker_about_secondary">@android:color/system_neutral2_700</color>
-    <color name="hecker_about_icon">@android:color/system_accent1_600</color>
-    <color name="hecker_about_divider">@android:color/system_neutral2_200</color>
+    <color name="hecker_about_text">@android:color/system_on_surface_light</color>
+    <color name="hecker_about_secondary">@android:color/system_on_surface_variant_light</color>
+    <color name="hecker_about_icon">@android:color/system_primary_light</color>
+    <color name="hecker_about_divider">@android:color/system_outline_variant_light</color>
 </resources>

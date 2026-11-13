@@ -8,12 +8,33 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.view.View;
 import android.widget.ImageView;
+import java.lang.ref.WeakReference;
+import java.util.WeakHashMap;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 import com.android.settings.R;
 
 /** Presentation only: native controllers, restriction badges and destinations stay in charge. */
 public final class HeckerHomepageStyle {
+    // Preference rows are rebound when providers update. A row's RippleDrawable does
+    // not depend on which preference occupies that recycled holder, only selection
+    // and density. Keep the background attached to that View between binds.
+    // Weak keys and weak drawable references avoid retaining detached rows.
+    private static final WeakHashMap<View, RowBackground> ROW_BACKGROUNDS =
+            new WeakHashMap<>();
+
+    private static final class RowBackground {
+        final boolean selected;
+        final float density;
+        final WeakReference<Drawable> drawable;
+
+        RowBackground(boolean selected, float density, Drawable drawable) {
+            this.selected = selected;
+            this.density = density;
+            this.drawable = new WeakReference<>(drawable);
+        }
+    }
+
     private HeckerHomepageStyle() {}
 
     public static void bind(PreferenceViewHolder holder, Preference preference) {
@@ -23,20 +44,29 @@ public final class HeckerHomepageStyle {
         if (preference == null || preference instanceof androidx.preference.PreferenceCategory
                 || preference instanceof HeckerBrandPreference) return;
         View row = holder.itemView;
-        // The decoration is the sole card background. The theme's selectable
-        // drawable includes its own inset material card and produced a second silhouette.
-        GradientDrawable mask = new GradientDrawable();
-        mask.setColor(Color.WHITE);
-        mask.setCornerRadius(26 * row.getResources().getDisplayMetrics().density);
-        int inset = Math.round(16 * row.getResources().getDisplayMetrics().density);
-        GradientDrawable highlight = new GradientDrawable();
-        highlight.setColor(0x207daaff);
-        highlight.setCornerRadius(26 * row.getResources().getDisplayMetrics().density);
-        row.setBackground(new android.graphics.drawable.RippleDrawable(
-                android.content.res.ColorStateList.valueOf(0x287daaff),
-                selected ? new android.graphics.drawable.InsetDrawable(highlight, inset, 0, inset, 0) : null,
-                new android.graphics.drawable.InsetDrawable(mask, inset, 0, inset, 0)));
-        row.setPaddingRelative(inset * 2, 0, inset * 2, 0);
+        // The decoration is the sole card background. Rebuild the row ripple
+        // only when its state changes, not on every preference/provider rebind.
+        // This keeps selection highlighting and the original native ripple intact.
+        float density = row.getResources().getDisplayMetrics().density;
+        RowBackground cached = ROW_BACKGROUNDS.get(row);
+        if (cached == null || cached.selected != selected || cached.density != density
+                || cached.drawable.get() != row.getBackground()) {
+            int inset = Math.round(16 * density);
+            GradientDrawable mask = new GradientDrawable();
+            mask.setColor(Color.WHITE);
+            mask.setCornerRadius(26 * density);
+            GradientDrawable highlight = new GradientDrawable();
+            highlight.setColor(0x207daaff);
+            highlight.setCornerRadius(26 * density);
+            Drawable background = new android.graphics.drawable.RippleDrawable(
+                    android.content.res.ColorStateList.valueOf(0x287daaff),
+                    selected ? new android.graphics.drawable.InsetDrawable(highlight, inset, 0, inset, 0)
+                            : null,
+                    new android.graphics.drawable.InsetDrawable(mask, inset, 0, inset, 0));
+            row.setBackground(background);
+            row.setPaddingRelative(inset * 2, 0, inset * 2, 0);
+            ROW_BACKGROUNDS.put(row, new RowBackground(selected, density, background));
+        }
         View title = holder.findViewById(android.R.id.title);
         if (title instanceof android.widget.TextView) {
             ((android.widget.TextView) title).setTextSize(17);
@@ -49,10 +79,22 @@ public final class HeckerHomepageStyle {
         View frame = holder.findViewById(R.id.icon_frame);
         ImageView icon = (ImageView) holder.findViewById(android.R.id.icon);
         if (frame == null || icon == null) return;
-        GradientDrawable disc = new GradientDrawable();
-        disc.setShape(GradientDrawable.OVAL);
-        disc.setColor(color(preference.getKey()));
-        frame.setBackground(disc);
+        // Recycling a row can change its category colour; update the existing
+        // circular icon plate instead of allocating a new drawable on every bind.
+        Drawable frameBackground = frame.getBackground();
+        GradientDrawable disc;
+        if (frameBackground instanceof GradientDrawable
+                && ((GradientDrawable) frameBackground).getShape() == GradientDrawable.OVAL) {
+            disc = (GradientDrawable) frameBackground;
+        } else {
+            disc = new GradientDrawable();
+            disc.setShape(GradientDrawable.OVAL);
+            frame.setBackground(disc);
+        }
+        int iconColor = color(preference.getKey());
+        if (disc.getColor() == null || disc.getColor().getDefaultColor() != iconColor) {
+            disc.setColor(iconColor);
+        }
         Drawable glyph = preference.getIcon();
         boolean account = preference.getParent() != null
                 && "top_level_account_category".equals(preference.getParent().getKey());

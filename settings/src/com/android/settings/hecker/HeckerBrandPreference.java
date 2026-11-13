@@ -17,10 +17,20 @@ import com.android.settings.R;
 /** Decorative branding around the native Settings pages. Device summaries remain controller-owned. */
 public final class HeckerBrandPreference extends Preference {
     private final boolean maintainer, display;
+    // The title span is immutable across binds; resolve the accent once per row.
+    private final CharSequence brandedTitle;
     public HeckerBrandPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         maintainer = "hecker_maintainer".equals(getKey());
         display = "hecker_display_header".equals(getKey());
+        if (!maintainer && !display) {
+            SpannableString label = new SpannableString("HeckerOS");
+            label.setSpan(new ForegroundColorSpan(context.getColor(R.color.hecker_accent)),
+                    6, 8, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            brandedTitle = label;
+        } else {
+            brandedTitle = null;
+        }
         setLayoutResource(maintainer ? R.layout.hecker_maintainer_preference : R.layout.hecker_brand_preference);
         setSelectable(!display);
         setOnPreferenceClickListener(preference -> {
@@ -54,9 +64,7 @@ public final class HeckerBrandPreference extends Preference {
             art.setImageResource(R.drawable.hecker_phone_art);
             holder.findViewById(R.id.hecker_android_chip).setVisibility(android.view.View.GONE);
         } else {
-            SpannableString label = new SpannableString("HeckerOS");
-            label.setSpan(new ForegroundColorSpan(getContext().getColor(R.color.hecker_accent)), 6, 8, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            title.setText(label); title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            title.setText(brandedTitle); title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
             summary.setText(R.string.hecker_brand_tagline); art.setImageResource(R.drawable.hecker_mascot);
         }
     }

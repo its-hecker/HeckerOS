@@ -19,10 +19,9 @@ public final class HeckerSettingsVoiceSearch {
         if (microphone == null) return;
         Intent voice = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
                 .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        if (voice.resolveActivity(activity.getPackageManager()) == null) {
-            microphone.setVisibility(View.GONE);
-            return;
-        }
+        // PackageManager resolution is a synchronous binder call. Do not block
+        // Settings first frame on a decorative voice-search affordance: try
+        // the system recognizer only when the user explicitly taps the icon.
         microphone.setOnClickListener(view -> {
             try { activity.startActivityForResult(voice, REQUEST); }
             catch (android.content.ActivityNotFoundException | SecurityException unavailable) {

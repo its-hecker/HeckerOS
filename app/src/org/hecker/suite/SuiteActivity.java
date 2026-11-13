@@ -20,6 +20,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public final class SuiteActivity extends Activity {
+    // Android's @hide Settings.Global.DISABLE_WINDOW_BLURS is not exported by
+    // every android-system.jar host SDK. Use its framework-defined key directly.
+    private static final String WINDOW_BLUR_DISABLED_SETTING = "disable_window_blurs";
     private SuiteAnimation animation;
     private LinearLayout content;
     private Button customizations, about;
@@ -105,7 +108,7 @@ public final class SuiteActivity extends Activity {
             if (refreshingSystemBlurToggle) return;
             try {
                 if (!Settings.Global.putInt(getContentResolver(),
-                        Settings.Global.DISABLE_WINDOW_BLURS, enabled ? 0 : 1)) {
+                        WINDOW_BLUR_DISABLED_SETTING, enabled ? 0 : 1)) {
                     Toast.makeText(this, R.string.system_blur_write_failed,
                             Toast.LENGTH_SHORT).show();
                 }
@@ -129,7 +132,7 @@ public final class SuiteActivity extends Activity {
         refreshingSystemBlurToggle = true;
         try {
             systemBlurToggle.setChecked(Settings.Global.getInt(getContentResolver(),
-                    Settings.Global.DISABLE_WINDOW_BLURS, 0) == 0);
+                    WINDOW_BLUR_DISABLED_SETTING, 0) == 0);
         } finally {
             refreshingSystemBlurToggle = false;
         }

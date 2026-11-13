@@ -9,6 +9,17 @@ concurrency:
   group: hecker-source-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  gesture-pill:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Test cosmetic-only navigation pill and safe overlay migration
+        run: python3 -m unittest discover -s tests -p 'test_gesture_navigation.py' -v
   smoothness:
     runs-on: ubuntu-24.04
     timeout-minutes: 3
