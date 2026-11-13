@@ -1,10 +1,11 @@
 <resources>
-    <color name="hecker_about_background">#000000</color>
-    <color name="hecker_about_surface">#19161D</color>
-    <color name="hecker_about_hero_start">#30243E</color>
-    <color name="hecker_about_hero_end">#252536</color>
-    <color name="hecker_about_text">#F1EFF8</color>
-    <color name="hecker_about_secondary">#C3B7DA</color>
-    <color name="hecker_about_icon">#BDA9E0</color>
-    <color name="hecker_about_divider">#302D38</color>
+    <!-- Share the Settings homepage Material You background, card, and text tones. -->
+    <color name="hecker_about_background">@android:color/system_surface_container_dark</color>
+    <color name="hecker_about_surface">@android:color/system_surface_bright_dark</color>
+    <color name="hecker_about_hero_start">@android:color/system_accent1_700</color>
+    <color name="hecker_about_hero_end">@android:color/system_accent2_700</color>
+    <color name="hecker_about_text">@android:color/system_on_surface_dark</color>
+    <color name="hecker_about_secondary">@android:color/system_on_surface_variant_dark</color>
+    <color name="hecker_about_icon">@android:color/system_primary_dark</color>
+    <color name="hecker_about_divider">@android:color/system_outline_variant_dark</color>
 </resources>
