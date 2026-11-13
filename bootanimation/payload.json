@@ -1,40 +1,40 @@
 {
-  "source_filename": "bootanimation_B_terminal_boot.zip",
-  "sha256": "932d8c0d98f76e06e6b6397c402f232e01d5898f90964f18a22dcdf0ee8c91ec",
-  "size": 14584625,
+  "source_filename": "HeckerOS_2.0_Infinite_Bootanimation.zip",
+  "sha256": "e2ecd49d173d2331182aa4d738ce53b39f4532ea49816bf55d3b788acdd6a7d1",
+  "size": 9048609,
   "resolution": [
-    720,
-    1200
+    1080,
+    2280
   ],
-  "fps": 30,
-  "intro_frames": 150,
-  "loop_frames": 60,
+  "fps": 24,
+  "intro_frames": 90,
+  "loop_frames": 72,
   "parts": [
     {
-      "type": "c",
+      "type": "p",
       "repeat": 1,
       "pause": 0,
       "path": "part0",
-      "frames": 150
+      "frames": 90
     },
     {
       "type": "p",
       "repeat": 0,
       "pause": 0,
       "path": "part1",
-      "frames": 60
+      "frames": 72
     }
   ],
   "chunks": [
     {
-      "file": "source/terminal-boot.zip.000",
-      "size": 8388606,
-      "sha256": "96e5f2fe2e0cdad671d1213d5893dff8f800d76112e5220cfa45fdb0b844e29a"
+      "file": "source/heckeros2-geometric.zip.000",
+      "size": 8388608,
+      "sha256": "790688067c0c4619bb44f1b9916404671c6ba0c690daa3de93b9605cb631bfbc"
     },
     {
-      "file": "source/terminal-boot.zip.001",
-      "size": 6196019,
-      "sha256": "d41afe98c1ac28b3a726c2b752c97cd29e77058613944d4ede05d012313106ab"
+      "file": "source/heckeros2-geometric.zip.001",
+      "size": 660001,
+      "sha256": "2c168faa89e05982c6d15f604e2d5da1d93ee585f3ce8d0601292dfa19036a2f"
     }
   ]
 }
