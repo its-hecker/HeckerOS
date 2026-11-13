@@ -110,6 +110,7 @@
     <string name="emoji_styles_selected">Selected</string>
     <string name="emoji_styles_select">Choose emoji style</string>
     <string name="emoji_styles_missing">Font pack not installed</string>
+    <string name="emoji_styles_preview_unavailable">Preview unavailable</string>
     <string name="emoji_styles_pending">Reboot to apply the new emoji style</string>
     <string name="emoji_styles_reboot_question">Reboot to apply this emoji style system-wide?</string>
     <string name="emoji_styles_reboot">Reboot now</string>
