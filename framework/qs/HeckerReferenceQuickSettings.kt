@@ -31,6 +31,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -60,17 +61,24 @@ import kotlin.math.roundToInt
 /** Scoped to the reference panel and brightness mirror, not global brightness controls. */
 val LocalHeckerReferenceGlass = staticCompositionLocalOf { false }
 val LocalHeckerFlowGlass = staticCompositionLocalOf { false }
-private val Ink = Color(0xFF25323F)
-private val Glass = Color.White.copy(alpha = .13f)
-private val Disc = Color(0xFF092F4D).copy(alpha = .25f)
-private val White = Color(0xFFF2F8F8)
+// Kept as scoped composable properties so legacy QS layouts use the exact
+// wallpaper-derived Material 3 color roles of the Settings homepage.
+private val Ink: Color
+    @Composable get() = MaterialTheme.colorScheme.onPrimaryContainer
+private val Glass: Color
+    @Composable get() = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = .94f)
+private val Disc: Color
+    @Composable get() = MaterialTheme.colorScheme.surfaceContainerHighest
+private val White: Color
+    @Composable get() = MaterialTheme.colorScheme.onSurface
 
 /** Native blur capability includes power saver/thermal gates; keep a readable opaque fallback. */
 @Composable
 fun heckerReferenceScrim(blurSupported: Boolean): Color {
     val state by HeckerAmbientCharging.state.collectAsState()
     return if (blurSupported && state.shadeBlurPercent > 0)
-        Color(0xFF08283F).copy(alpha = .22f) else Color(0xFF16384A)
+        MaterialTheme.colorScheme.surfaceContainer.copy(alpha = .74f)
+    else MaterialTheme.colorScheme.surfaceContainer
 }
 
 @Composable
@@ -112,7 +120,7 @@ fun HeckerReferenceQuickSettings(
                 verticalAlignment = Alignment.CenterVertically) {
                 repeat(pages.size) { page ->
                     Box(Modifier.padding(horizontal = 2.dp).size(if (pager.currentPage == page) 24.dp else 6.dp, 3.dp)
-                        .clip(CircleShape).background(Color.White.copy(alpha = if (pager.currentPage == page) .65f else .2f)))
+                        .clip(CircleShape).background(MaterialTheme.colorScheme.onSurface.copy(alpha = if (pager.currentPage == page) .65f else .2f)))
                 }
             }
         }
@@ -158,7 +166,7 @@ fun HeckerAutoBrightnessButton(modifier: Modifier = Modifier, embedded: Boolean 
         onDispose { resolver.unregisterContentObserver(observer); context.unregisterReceiver(users) }
     }
     Box(modifier.size(if (embedded) 36.dp else 48.dp).clip(CircleShape)
-        .background(if (embedded) Color.Transparent else if (automatic) White.copy(alpha = .88f) else Disc)
+        .background(if (embedded) Color.Transparent else if (automatic) MaterialTheme.colorScheme.primaryContainer else Disc)
         .semantics {
             contentDescription = context.getString(R.string.hecker_qs_auto_brightness)
             role = Role.Switch
@@ -177,8 +185,8 @@ fun HeckerAutoBrightnessButton(modifier: Modifier = Modifier, embedded: Boolean 
             } catch (_: SecurityException) { HeckerQsActions.settings(Settings.ACTION_DISPLAY_SETTINGS) }
         }, contentAlignment = Alignment.Center) {
         androidx.compose.animation.Crossfade(automatic, label = "brightnessMode") { auto ->
-            if (auto) Text("A", color = if (embedded || automatic) Ink else White, fontSize = 19.sp, fontWeight = FontWeight.Bold)
-            else ReferenceIcon(R.drawable.hecker_qs_sun, 23, if (embedded) Ink else White)
+            if (auto) Text("A", color = if (automatic && !embedded) Ink else White, fontSize = 19.sp, fontWeight = FontWeight.Bold)
+            else ReferenceIcon(R.drawable.hecker_qs_sun, 23, White)
         }
     }
 }
@@ -205,13 +213,13 @@ private fun ReferenceConnection(tile: TileViewModel, modifier: Modifier) {
     Row(modifier.clip(RoundedCornerShape(34.dp)).background(Glass)
         .then(referenceActions(tile, toggleFirst = false)).heightIn(min = 78.dp).padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Box(Modifier.size(50.dp).clip(CircleShape).background(White.copy(alpha = if (active) 1f else .88f))
+        Box(Modifier.size(50.dp).clip(CircleShape).background(if (active) MaterialTheme.colorScheme.primaryContainer else Disc)
             .then(referenceActions(tile)),
             contentAlignment = Alignment.Center) { ReferenceIcon(iconFor(tile.spec.spec), 31, Ink) }
         Column(Modifier.weight(1f)) {
-            Text(ui.label, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+            Text(ui.label, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
-            if (ui.secondaryLabel.isNotBlank()) Text(ui.secondaryLabel, color = Color.White.copy(alpha = .72f),
+            if (ui.secondaryLabel.isNotBlank()) Text(ui.secondaryLabel, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
@@ -254,13 +262,10 @@ internal fun ReferenceTile(tile: TileViewModel, diameter: Int = 50, colored: Boo
     val state by produceState(tile.currentState, tile) { tile.state.collect { value = it } }
     val ui = state.toUiState(context.resources)
     val active = ui.visualState == Tile.STATE_ACTIVE
-    val activeColor = if (!colored) White else when (tile.spec.spec) {
-        "wifi", "internet", "bt" -> Color(0xFF258BFF)
-        "cell", "hotspot" -> Color(0xFF27A96B)
-        "dnd" -> Color(0xFF8067D8)
-        else -> White
-    }
-    val foreground = if (active && activeColor == White) Ink else Color.White
+    val scheme = MaterialTheme.colorScheme
+    val activeColor = if (colored) scheme.primary else scheme.primaryContainer
+    val foreground = if (!active) scheme.onSurface else if (colored) scheme.onPrimary
+        else scheme.onPrimaryContainer
     Box(Modifier.size(diameter.dp).clip(CircleShape).background(if (active) activeColor else Disc)
         .then(referenceActions(tile)), contentAlignment = Alignment.Center) {
         val icon = iconFor(tile.spec.spec)
@@ -274,9 +279,10 @@ internal fun ReferenceTile(tile: TileViewModel, diameter: Int = 50, colored: Boo
 }
 
 @Composable
-fun ReferenceIcon(resource: Int, size: Int = 24, tint: Color = Color.White) {
+fun ReferenceIcon(resource: Int, size: Int = 24, tint: Color = Color.Unspecified) {
+    val resolved = if (tint == Color.Unspecified) MaterialTheme.colorScheme.onSurface else tint
     AndroidView(factory = { ImageView(it).apply { importantForAccessibility = android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO } },
-        modifier = Modifier.size(size.dp), update = { it.setImageResource(resource); it.setColorFilter(tint.toArgb()) })
+        modifier = Modifier.size(size.dp), update = { it.setImageResource(resource); it.setColorFilter(resolved.toArgb()) })
 }
 
 /** Measure at the final text size so the date never overlaps a scaled clock. */
@@ -336,16 +342,20 @@ fun HeckerGlassTrack(fraction: Float, icon: Int, modifier: Modifier = Modifier, 
     val text = remember(percentage, locale) { HeckerSliderValues.label(percentage / 100f, locale) }
     val progress = HeckerSliderValues.unit(fraction)
     val thickness = HeckerSliderValues.verticalThickness(configuration.fontScale).dp
+    val restingTrack = MaterialTheme.colorScheme.surfaceContainerHighest
+    val activeTrack = MaterialTheme.colorScheme.primary
+    val onActiveTrack = MaterialTheme.colorScheme.onPrimary
+    val onRestingTrack = MaterialTheme.colorScheme.onSurfaceVariant
     Box(modifier.fillMaxWidth().height(if (vertical) thickness else 44.dp), contentAlignment = Alignment.CenterStart) {
         Canvas(Modifier.fillMaxSize()) {
             val corner = androidx.compose.ui.geometry.CornerRadius(size.height / 2)
-            drawRoundRect(Color.White.copy(alpha = .28f), cornerRadius = corner)
-            drawRoundRect(White.copy(alpha = .88f), size = androidx.compose.ui.geometry.Size(
+            drawRoundRect(restingTrack, cornerRadius = corner)
+            drawRoundRect(activeTrack, size = androidx.compose.ui.geometry.Size(
                 (size.width * progress).coerceAtLeast(size.height).coerceAtMost(size.width), size.height), cornerRadius = corner)
         }
         Box(Modifier.padding(start = 8.dp).graphicsLayer { rotationZ = if (vertical) 90f else 0f }) {
             if (icon == R.drawable.hecker_qs_sun && LocalHeckerFlowGlass.current) HeckerAutoBrightnessButton(embedded = true)
-            else Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) { ReferenceIcon(icon, 23, Ink) }
+            else Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) { ReferenceIcon(icon, 23, if (progress >= .18f) onActiveTrack else onRestingTrack) }
         }
         // The vertical control rotates its child. Counter-rotate the entire badge
         // so numbers and localized percent signs remain upright in both layouts.
@@ -353,7 +363,7 @@ fun HeckerGlassTrack(fraction: Float, icon: Int, modifier: Modifier = Modifier, 
             .padding(end = if (vertical) 0.dp else 12.dp)
             .graphicsLayer { rotationZ = if (vertical) 90f else 0f }
             .padding(horizontal = 4.dp, vertical = 2.dp).clearAndSetSemantics { }) {
-            Text(text, color = if (vertical && progress >= .5f || !vertical && progress >= .9f) Ink else White.copy(alpha = .88f),
+            Text(text, color = if (vertical && progress >= .5f || !vertical && progress >= .9f) onActiveTrack else onRestingTrack,
                 fontSize = 11.sp, fontWeight = FontWeight.Medium,
                 maxLines = 1, softWrap = false)
         }
@@ -444,23 +454,23 @@ private fun ReferenceDolby(tile: TileViewModel?, modifier: Modifier) {
     val state by produceState(tile.currentState, tile) { tile.state.collect { value = it } }
     val ui = state.toUiState(context.resources)
     val active = ui.visualState == Tile.STATE_ACTIVE
-    val accent = Color(0xFF64E4BD)
+    val accent = MaterialTheme.colorScheme.primary
     Row(modifier.clip(RoundedCornerShape(38.dp))
-        .background(if (active) accent.copy(alpha = .25f) else Glass)
+        .background(if (active) MaterialTheme.colorScheme.primaryContainer else Glass)
         // Dispatch to the existing TileService; its repository owns the effect.
         // Native long-press handling opens Lunaris's tile preferences.
         .then(referenceActions(tile, toggleFirst = false))
         .heightIn(min = 76.dp).padding(horizontal = 11.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(46.dp).background(if (active) accent.copy(alpha = .18f) else Disc, CircleShape),
+        Box(Modifier.size(46.dp).background(if (active) MaterialTheme.colorScheme.primaryContainer else Disc, CircleShape),
             contentAlignment = Alignment.Center) {
-            ReferenceIcon(R.drawable.hecker_qs_dolby, 29, if (active) accent else White)
+            ReferenceIcon(R.drawable.hecker_qs_dolby, 29, if (active) MaterialTheme.colorScheme.onPrimaryContainer else White)
         }
         Column(Modifier.weight(1f)) {
-            Text(ui.label.ifBlank { context.getString(R.string.hecker_qs_dolby) }, color = Color.White,
+            Text(ui.label.ifBlank { context.getString(R.string.hecker_qs_dolby) }, color = White,
                 fontSize = 13.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
             val subtitle = ui.secondaryLabel.ifBlank { ui.accessibilityUiState.stateDescription }
-            if (subtitle.isNotBlank()) Text(subtitle, color = Color.White.copy(alpha = .72f),
+            if (subtitle.isNotBlank()) Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
@@ -474,9 +484,9 @@ private fun ReferenceShortcut(title: Int, subtitle: Int, icon: Int, modifier: Mo
         horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(46.dp).background(Disc, CircleShape), contentAlignment = Alignment.Center) { ReferenceIcon(icon, 29) }
         Column(Modifier.weight(1f)) {
-            Text(context.getString(title), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
+            Text(context.getString(title), color = White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
                 maxLines = 2, overflow = TextOverflow.Ellipsis)
-            if (subtitle != 0) Text(context.getString(subtitle), color = Color.White.copy(alpha = .72f),
+            if (subtitle != 0) Text(context.getString(subtitle), color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
