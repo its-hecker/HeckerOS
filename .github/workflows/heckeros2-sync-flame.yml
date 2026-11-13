@@ -1,9 +1,13 @@
-name: Sync approved HeckerOS 2.0 bootanimation to Flame branches
+name: Sync HeckerOS 2.0 bootanimation and recovery UI to Flame branches
 on:
   push:
     branches: [cnb_latest_stable]
     paths:
       - .github/workflows/heckeros2-sync-flame.yml
+      - tools/recovery_port.py
+      - tools/recovery_phase1.py
+      - tests/test_recovery_phase1.py
+      - recovery/README.md
   workflow_dispatch:
 permissions:
   contents: write
@@ -15,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: true
-      - name: Copy approved checked animation to Flame without changing performance code
+      - name: Copy approved animation and recovery UI without changing performance code
         shell: bash
         run: |
           set -euo pipefail
@@ -32,16 +36,22 @@ jobs:
               bootanimation/source/heckeros2-geometric.zip.001 \
               tools/heckeros2_logo_source.py \
               tools/heckeros2_package.py \
-              tools/heckeros2_lock_payload.py
+              tools/heckeros2_lock_payload.py \\
+              tools/recovery_port.py \\
+              tools/recovery_phase1.py \\
+              tests/test_recovery_phase1.py \\
+              recovery/README.md
             git rm -f --ignore-unmatch \
               bootanimation/source/terminal-boot.zip.000 \
               bootanimation/source/terminal-boot.zip.001
             git add bootanimation tools/heckeros2_logo_source.py \
-              tools/heckeros2_package.py tools/heckeros2_lock_payload.py
+              tools/heckeros2_package.py tools/heckeros2_lock_payload.py \\
+              tools/recovery_port.py tools/recovery_phase1.py \\
+              tests/test_recovery_phase1.py recovery/README.md
             if git diff --cached --quiet; then
               echo "No changes: $branch"
             else
-              git commit -m 'HeckerOS 2.0: sync geometric infinite-bar bootanimation'
+              git commit -m 'HeckerOS: sync Phase 1 sideload UI and checked boot assets'
               git push origin "HEAD:refs/heads/$branch"
             fi
           done
