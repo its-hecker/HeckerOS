@@ -36,17 +36,17 @@ jobs:
               bootanimation/source/heckeros2-geometric.zip.001 \
               tools/heckeros2_logo_source.py \
               tools/heckeros2_package.py \
-              tools/heckeros2_lock_payload.py \\
-              tools/recovery_port.py \\
-              tools/recovery_phase1.py \\
-              tests/test_recovery_phase1.py \\
+              tools/heckeros2_lock_payload.py \
+              tools/recovery_port.py \
+              tools/recovery_phase1.py \
+              tests/test_recovery_phase1.py \
               recovery/README.md
             git rm -f --ignore-unmatch \
               bootanimation/source/terminal-boot.zip.000 \
               bootanimation/source/terminal-boot.zip.001
             git add bootanimation tools/heckeros2_logo_source.py \
-              tools/heckeros2_package.py tools/heckeros2_lock_payload.py \\
-              tools/recovery_port.py tools/recovery_phase1.py \\
+              tools/heckeros2_package.py tools/heckeros2_lock_payload.py \
+              tools/recovery_port.py tools/recovery_phase1.py \
               tests/test_recovery_phase1.py recovery/README.md
             if git diff --cached --quiet; then
               echo "No changes: $branch"
