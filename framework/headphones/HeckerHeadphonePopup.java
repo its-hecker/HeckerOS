@@ -198,6 +198,8 @@ public final class HeckerHeadphonePopup {
                 : android.R.color.system_on_primary_container_light);
         int outline = themed.getColor(dark ? android.R.color.system_outline_variant_dark
                 : android.R.color.system_outline_variant_light);
+        int chipSurface = themed.getColor(dark ? android.R.color.system_surface_container_highest_dark
+                : android.R.color.system_surface_container_highest_light);
 
         // Compact Material You connection card. Keep controls within one short
         // bottom sheet rather than stacking a full-size illustration and button.
@@ -258,12 +260,14 @@ public final class HeckerHeadphonePopup {
         title.setAccessibilityHeading(true);
         details.addView(title, new LinearLayout.LayoutParams(-1, -2));
 
-        battery = text(themed, "", 12, onContainer);
+        battery = text(themed, "", 12, onSurface);
         battery.setMaxLines(2);
         battery.setEllipsize(android.text.TextUtils.TruncateAt.END);
-        battery.setPadding(dp(9), dp(5), dp(9), dp(5));
-        battery.setBackground(shape(container, 14));
-        LinearLayout.LayoutParams batteryParams = new LinearLayout.LayoutParams(-1, -2);
+        battery.setGravity(Gravity.CENTER_VERTICAL);
+        battery.setPadding(dp(12), dp(6), dp(12), dp(6));
+        battery.setBackground(chipShape(chipSurface, outline));
+        // Battery is a content-sized chip, not an edge-to-edge progress bar.
+        LinearLayout.LayoutParams batteryParams = new LinearLayout.LayoutParams(-2, -2);
         batteryParams.topMargin = dp(6);
         details.addView(battery, batteryParams);
         content.addView(details, new LinearLayout.LayoutParams(0, -2, 1));
@@ -275,12 +279,14 @@ public final class HeckerHeadphonePopup {
         settings.setAllCaps(false);
         settings.setTextSize(13);
         settings.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
-        settings.setTextColor(onContainer);
+        settings.setTextColor(onSurface);
         settings.setGravity(Gravity.CENTER);
         settings.setBackgroundTintList(null);
-        settings.setBackground(new RippleDrawable(ColorStateList.valueOf(alpha(onContainer, .10f)),
-                shape(container, 18), null));
-        settings.setMinHeight(dp(42));
+        settings.setStateListAnimator(null);
+        settings.setPadding(dp(16), 0, dp(16), 0);
+        settings.setBackground(new RippleDrawable(ColorStateList.valueOf(alpha(primary, .12f)),
+                chipShape(chipSurface, outline), null));
+        settings.setMinHeight(dp(40));
         settings.setOnClickListener(view -> {
             int user = visibleUser;
             dismiss();
@@ -295,7 +301,11 @@ public final class HeckerHeadphonePopup {
                 Log.w(TAG, "Headphone details unavailable", unavailable);
             }
         });
-        panel.addView(settings, new LinearLayout.LayoutParams(-1, dp(42)));
+        // Same neutral tonal outline as the battery chip; no large accent bar.
+        LinearLayout.LayoutParams settingsParams = new LinearLayout.LayoutParams(-2, dp(40));
+        settingsParams.gravity = Gravity.END;
+        settingsParams.topMargin = dp(4);
+        panel.addView(settings, settingsParams);
         ScrollView scroll = new ScrollView(themed);
         scroll.setVerticalScrollBarEnabled(false);
         scroll.addView(panel);
@@ -402,6 +412,12 @@ public final class HeckerHeadphonePopup {
         drawable.setColor(color);
         drawable.setCornerRadius(dp(radius));
         return drawable;
+    }
+
+    private GradientDrawable chipShape(int fill, int outline) {
+        GradientDrawable chip = shape(fill, 14);
+        chip.setStroke(dp(1), alpha(outline, .48f));
+        return chip;
     }
 
     private static int alpha(int color, float opacity) {

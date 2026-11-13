@@ -23,8 +23,8 @@ PRODUCT_PACKAGES += HeckerSystemUIOverlay \
     HeckerStatusBarHeightCompact \
     HeckerStatusBarHeightBalanced \
     HeckerStatusBarHeightTall
-# Keep only the visual pill overlay; the old framework inset RRO caused taskbar instability.
-PRODUCT_PACKAGES += HeckerHideGesturePill HeckerEuiccPermissions
+# Retire the ineffective gesture-pill overlay; preserve Android's native gesture/inset geometry.
+PRODUCT_PACKAGES += HeckerEuiccPermissions
 # Native window blur still observes SurfaceFlinger, thermal and power-saver capability gates.
 PRODUCT_PRODUCT_PROPERTIES += ro.surface_flinger.supports_background_blur?=1
 
