@@ -3,6 +3,7 @@
 """Guarded, reversible App Lock access and Motion Sense navigation integration."""
 
 import argparse
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 import re
@@ -14,6 +15,7 @@ from customization_port import customization_plan
 from google_sans_cyrillic import google_sans_cyrillic_plan
 from native_rom_compat import native_rom_compat_plan
 from recovery_port import recovery_plan
+from recovery2_port import recovery_rom_plan
 from pakistan_ims import pakistan_ims_plan
 from vault_storage_port import vault_storage_plan
 from vault_files_port import vault_files_plan
@@ -348,6 +350,9 @@ def plan(rom, revert=False):
     changes.update(native_rom_compat_plan(rom, replace_guarded, revert))
     changes.update(aosp_launcher_plan(rom, replace_guarded, revert))
     changes.update(recovery_plan(rom, revert))
+    if os.environ.get("HECKER_RECOVERY2") == "1" or (
+            rom / "system/core/init/hecker_recovery_boot.cpp").is_file():
+        changes.update(recovery_rom_plan(rom, replace_guarded, revert))
     changes.update(pakistan_ims_plan(rom, revert))
     changes.update(vault_storage_plan(rom, replace_guarded, revert))
     changes.update(vault_files_plan(rom, replace_guarded, revert, pending=changes))
@@ -406,6 +411,12 @@ def main():
     args = parser.parse_args()
     mode = next(mode for mode in ("check", "apply", "verify", "revert") if getattr(args, mode))
     try:
+        # This is deliberately explicit: third-party font rights are not asserted by
+        # Evolution X's public GitHub hosting. No binaries enter the HeckerOS repo.
+        if mode == "apply" and os.environ.get("HECKER_IMPORT_EVOLUTION_EMOJI") == "1":
+            from import_evolution_emoji import import_assets, check_assets
+            import_assets(fetch=True)
+            check_assets()
         apply(args.rom_root.resolve(), mode)
     except (ValueError, OSError, ET.ParseError) as error:
         print("Hecker Suite setup:", error, file=sys.stderr)

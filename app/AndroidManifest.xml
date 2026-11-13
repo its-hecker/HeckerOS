@@ -64,6 +64,7 @@
         <activity android:name=".StatusBarSettingsActivity" android:exported="false" android:label="@string/status_bar_title" />
         <activity android:name=".StatusBarLayoutActivity" android:exported="false" android:label="@string/sb_options_title" />
         <activity android:name=".ThemePackActivity" android:exported="false" android:label="@string/themes_title" />
+        <activity android:name=".EmojiStylesActivity" android:exported="false" android:label="@string/emoji_styles_title" />
         <activity android:name=".CaptureSettingsActivity" android:exported="false" android:label="@string/capture_title" />
         <activity android:name=".QuickSettingsActivity" android:exported="false" android:label="@string/qs_title" />
         <activity android:name=".LyricsSettingsActivity" android:exported="false"

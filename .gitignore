@@ -11,3 +11,5 @@ out/*
 # Retain ignores for downloaded TCP assets in existing build trees.
 /prebuilts/mihomo/arm64/
 /prebuilts/mihomo/snakeyaml.jar
+# Non-redistributed, locally fetched emoji font assets.
+/fonts/emoji/prebuilt/

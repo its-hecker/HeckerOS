@@ -99,4 +99,22 @@
     <string name="sb_custom">Custom</string>
     <string name="sb_custom_colour">Custom lyric colour</string>
     <string name="sb_invalid_colour">Use #RRGGBB, for example #A8D5FF.</string>
+    <string name="emoji_styles_title">Custom Emojis</string>
+    <string name="emoji_styles_summary">Switch system emoji styles with live previews.</string>
+    <string name="emoji_styles_tip">Choose an emoji style. Changes take effect after rebooting.</string>
+    <string name="emoji_styles_stock">Stock</string>
+    <string name="emoji_styles_ios">iOS</string>
+    <string name="emoji_styles_samsung">Samsung</string>
+    <string name="emoji_styles_swiftui">SwiftUI</string>
+    <string name="emoji_styles_facebook">Facebook</string>
+    <string name="emoji_styles_selected">Selected</string>
+    <string name="emoji_styles_select">Choose emoji style</string>
+    <string name="emoji_styles_missing">Font pack not installed</string>
+    <string name="emoji_styles_preview_unavailable">Preview unavailable</string>
+    <string name="emoji_styles_pending">Reboot to apply the new emoji style</string>
+    <string name="emoji_styles_reboot_question">Reboot to apply this emoji style system-wide?</string>
+    <string name="emoji_styles_reboot">Reboot now</string>
+    <string name="emoji_styles_later">Later</string>
+    <string name="emoji_styles_failed">Cannot change emoji style on this build</string>
+    <string name="emoji_styles_stock_summary">Original Android emoji</string>
 </resources>

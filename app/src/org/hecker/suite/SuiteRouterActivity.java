@@ -44,6 +44,7 @@ public final class SuiteRouterActivity extends Activity {
             case "LyricsSettingsActivity": return LyricsSettingsActivity.class;
             case "StatusBarSettingsActivity": return StatusBarSettingsActivity.class;
             case "ThemePackActivity": return ThemePackActivity.class;
+            case "EmojiStylesActivity": return EmojiStylesActivity.class;
             case "NetworkLabActivity": return NetworkLabActivity.class;
             case "HeckerVpnActivity": return HeckerVpnActivity.class;
             case "LauncherSettingsActivity": return LauncherSettingsActivity.class;
