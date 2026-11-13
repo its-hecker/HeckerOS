@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+from recovery_phase1 import recovery_phase1_plan
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -21,4 +23,5 @@ def recovery_plan(rom, revert=False):
         expected = original if revert else replacement
         if path.read_bytes() != expected:
             changes[path] = expected
+    changes.update(recovery_phase1_plan(rom, revert))
     return changes
