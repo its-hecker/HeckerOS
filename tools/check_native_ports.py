@@ -568,7 +568,7 @@ def main():
                 from check_xmorph_clock import build as build_xmorph
                 xmorph_classes, xmorph_resources = build_xmorph(args.sdk_cache.resolve(), ROOT/'generated/compose-check', output/'xmorph')
                 launcher_cp = os.pathsep.join(map(str, [args.sdk_cache/'android.jar', xmorph_classes, ROOT/'generated/compose-check/kotlin-stdlib.jar']))
-                subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',launcher_cp,'-d',str(output/'classes'),str(fixture),str(install),*map(str,sorted((ROOT/'tests/launcher-api-stubs').rglob('*.java'))),*map(str,sorted((ROOT/'aosp-launcher/src').rglob('*.java')))],check=True)
+                subprocess.run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','-cp',launcher_cp,'-d',str(output/'classes'),str(fixture),str(install),str(launcher/'src/org/hecker/ui/HeckerChoiceSheet.java'),*map(str,sorted((ROOT/'tests/launcher-api-stubs').rglob('*.java'))),*map(str,sorted((ROOT/'aosp-launcher/src').rglob('*.java')))],check=True)
                 from check_launcher_studio import check as check_launcher_studio
                 check_launcher_studio(launcher, args.sdk_cache.resolve(), output/'classes')
                 from check_launcher_wallpaper import check_wallpaper_picker
