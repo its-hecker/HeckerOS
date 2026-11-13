@@ -139,7 +139,7 @@ void ScreenRecoveryUI::draw_screen_locked() {""",
             """void ScreenRecoveryUI::draw_screen_locked() {
   if (!show_text) {""",
             """void ScreenRecoveryUI::draw_screen_locked() {
-  if ((hecker_sideload_ui_ || current_icon_ == INSTALLING_UPDATE) && !menu_) {
+  if ((hecker_sideload_ui_ || current_icon_ == INSTALLING_UPDATE) && !menu_ && !show_text) {
     draw_hecker_install_locked();
     return;
   }
@@ -154,7 +154,7 @@ void ScreenRecoveryUI::draw_screen_locked() {""",
     }
 
     double end = now();""",
-            """      if (hecker_sideload_ui_ && !menu_ && progressBarType != DETERMINATE) {
+            """      if (hecker_sideload_ui_ && !menu_ && !show_text && progressBarType != DETERMINATE) {
         redraw = true;  // Keep the waiting-for-sideload indicator moving.
       }
       if (redraw) update_progress_locked();
@@ -216,6 +216,24 @@ def _replace_guarded(content, original, patched, name, revert):
     return content if revert else content.replace(original, patched, 1)
 
 
+
+# Build trees prepared with the previous Phase 1 adapter must upgrade safely.
+# Normalize only these known snippets, then apply the usual guarded source checks.
+PREVIOUS_UI_GUARDS = (
+    ("  if ((hecker_sideload_ui_ || current_icon_ == INSTALLING_UPDATE) && !menu_) {", "  if ((hecker_sideload_ui_ || current_icon_ == INSTALLING_UPDATE) && !menu_ && !show_text) {"),
+    ("      if (hecker_sideload_ui_ && !menu_ && progressBarType != DETERMINATE) {", "      if (hecker_sideload_ui_ && !menu_ && !show_text && progressBarType != DETERMINATE) {"),
+)
+
+def _upgrade_previous_phase1(source, relative):
+    if relative != "recovery_ui/screen_ui.cpp" or "void ScreenRecoveryUI::draw_hecker_install_locked()" not in source:
+        return source
+    for before, after in PREVIOUS_UI_GUARDS:
+        if before in source:
+            if source.count(before) != 1 or after in source:
+                raise ValueError("Unrecognized existing recovery UI: " + relative)
+            source = source.replace(before, after, 1)
+    return source
+
 def recovery_phase1_plan(rom, revert=False):
     recovery = Path(rom) / "bootable/recovery"
     if not recovery.is_dir():
@@ -224,7 +242,7 @@ def recovery_phase1_plan(rom, revert=False):
     for relative, replacements in ROOT_FILES.items():
         target = recovery / relative
         source = target.read_text()
-        changed = source
+        changed = _upgrade_previous_phase1(source, relative)
         for old, new in reversed(replacements) if revert else replacements:
             changed = _replace_guarded(changed, old, new, relative, revert)
         if source != changed:
