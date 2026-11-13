@@ -64,6 +64,13 @@ public final class EmojiStylesActivity extends Activity {
                 } catch (RuntimeException badFont) {
                     if (!stock) available = false;
                 }
+            } else if (!stock) {
+                preview.setText(R.string.emoji_styles_preview_unavailable);
+                preview.setTextSize(13);
+            }
+            if (!stock && !available) {
+                preview.setText(R.string.emoji_styles_preview_unavailable);
+                preview.setTextSize(13);
             }
             card.addView(preview);
             if (!available) {
