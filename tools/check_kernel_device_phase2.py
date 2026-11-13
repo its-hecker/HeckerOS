@@ -69,6 +69,36 @@ def check_device_kernel(root):
                  "sg_policy->last_freq_update_time = previous_update_time;",
                  "sg_policy->cached_raw_freq = 0;"):
         require(text in governor, f"schedutil retry state missing {text}")
+    # Incremental efficiency trial: static checks only, not a performance claim.
+    for cpu in (0, 4, 7):
+        path = f"/sys/devices/system/cpu/cpu{cpu}/cpufreq/schedutil/down_rate_limit_us"
+        require(f"write {path} 10000" in init, f"CPU{cpu} downscale is not 10ms")
+    for lun in ("sda", "sde", "sdf"):
+        require(f"write /sys/block/{lun}/queue/scheduler deadline" in init,
+                f"deadline trial missing on {lun}")
+        require(f"write /sys/block/{lun}/queue/scheduler cfq" not in init,
+                f"CFQ still enabled on {lun}")
+    require("write /sys/block/sda/queue/read_ahead_kb 128" in init,
+            "UFS read-ahead trial missing")
+    fstab = (device / "init/fstab.hardware").read_text()
+    require("zramsize=3221225472,max_comp_streams=8,zram_backingdev_size=512M" in fstab,
+            "3 GiB zRAM trial or existing writeback parameters changed")
+    defconfig = (kernel / "arch/arm64/configs/floral_defconfig").read_text()
+    required = (
+        "CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y",
+        "CONFIG_TCP_CONG_ADVANCED=y", "CONFIG_TCP_CONG_BBR=y",
+        "CONFIG_TCP_CONG_CUBIC=y", "CONFIG_DEFAULT_BBR=y",
+        'CONFIG_DEFAULT_TCP_CONG="bbr"',
+        "CONFIG_NET_SCH_FQ=y", "CONFIG_NET_SCH_FQ_CODEL=y",
+        "CONFIG_NET_SCH_DEFAULT=y", "CONFIG_DEFAULT_FQ=y",
+        'CONFIG_DEFAULT_NET_SCH="fq"',
+        "# CONFIG_KGDB is not set", "# CONFIG_KGDB_KDB is not set",
+        "CONFIG_SCHEDSTATS=y", "CONFIG_DYNAMIC_DEBUG=y",
+        "CONFIG_PSI=y", "CONFIG_CFI_CLANG=y",
+    )
+    for item in required:
+        require(item in defconfig, f"Missing kernel trial option: {item}")
+    print("PASS: 10ms downscale, deadline UFS, 3GiB LZ4 zRAM, workqueues and BBR/fq kernel config")
     print("PASS: bounded Power HAL, preserved camera/zRAM/cpusets and failed-DVFS recovery")
 
 
