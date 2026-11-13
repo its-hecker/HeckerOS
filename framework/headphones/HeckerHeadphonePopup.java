@@ -199,84 +199,103 @@ public final class HeckerHeadphonePopup {
         int outline = themed.getColor(dark ? android.R.color.system_outline_variant_dark
                 : android.R.color.system_outline_variant_light);
 
+        // Compact Material You connection card. Keep controls within one short
+        // bottom sheet rather than stacking a full-size illustration and button.
         LinearLayout panel = new LinearLayout(themed);
         panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setPadding(dp(24), dp(12), dp(24), dp(24));
+        panel.setPadding(dp(18), dp(10), dp(18), dp(14));
+
         LinearLayout header = new LinearLayout(themed);
         header.setGravity(Gravity.CENTER_VERTICAL);
         ImageView icon = new ImageView(themed);
         icon.setImageResource(R.drawable.hecker_headphones_bluetooth);
         icon.setImageTintList(ColorStateList.valueOf(onContainer));
-        icon.setBackground(shape(container, 20));
-        icon.setPadding(dp(10), dp(10), dp(10), dp(10));
+        icon.setBackground(shape(container, 16));
+        icon.setPadding(dp(9), dp(9), dp(9), dp(9));
         icon.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        header.addView(icon, new LinearLayout.LayoutParams(dp(40), dp(40)));
-        TextView state = text(themed, context.getString(R.string.hecker_headphones_connected), 14, secondary);
-        state.setPadding(dp(12), 0, dp(8), 0);
+        header.addView(icon, new LinearLayout.LayoutParams(dp(36), dp(36)));
+
+        TextView state = text(themed, context.getString(R.string.hecker_headphones_connected), 12, secondary);
+        state.setPadding(dp(10), 0, 0, 0);
         header.addView(state, new LinearLayout.LayoutParams(0, -2, 1));
+
         ImageButton close = new ImageButton(themed);
         close.setImageResource(R.drawable.hecker_headphones_close);
         close.setImageTintList(ColorStateList.valueOf(secondary));
         close.setBackground(new RippleDrawable(ColorStateList.valueOf(alpha(onSurface, 0.12f)),
-                null, shape(Color.WHITE, 24)));
+                null, shape(Color.WHITE, 20)));
         close.setContentDescription(context.getString(R.string.hecker_headphones_dismiss));
         close.setOnClickListener(view -> dismiss());
-        header.addView(close, new LinearLayout.LayoutParams(dp(48), dp(48)));
+        header.addView(close, new LinearLayout.LayoutParams(dp(40), dp(40)));
         panel.addView(header);
-        TextView title = text(themed, name, 24, onSurface);
-        title.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
-        title.setMaxLines(2); title.setEllipsize(android.text.TextUtils.TruncateAt.END);
-        title.setGravity(Gravity.CENTER);
-        title.setPadding(0, dp(12), 0, dp(4));
-        title.setAccessibilityHeading(true);
-        panel.addView(title, new LinearLayout.LayoutParams(-1, -2));
+
+        LinearLayout content = new LinearLayout(themed);
+        content.setGravity(Gravity.CENTER_VERTICAL);
+        content.setOrientation(LinearLayout.HORIZONTAL);
+        content.setPadding(0, dp(6), 0, dp(8));
+
         if (device != null) {
             org.hecker.earbuds.HeckerEarbudsView artwork = new org.hecker.earbuds.HeckerEarbudsView(themed);
             artwork.setDeviceName(name);
             artwork.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-            panel.addView(artwork, new LinearLayout.LayoutParams(-1, dp(180)));
+            content.addView(artwork, new LinearLayout.LayoutParams(dp(92), dp(80)));
         } else {
             ImageView artwork = new ImageView(themed);
             artwork.setImageResource(R.drawable.hecker_headphones_art);
             artwork.setImageTintList(ColorStateList.valueOf(primary));
             artwork.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-            panel.addView(artwork, new LinearLayout.LayoutParams(-1, dp(110)));
+            content.addView(artwork, new LinearLayout.LayoutParams(dp(72), dp(76)));
         }
-        battery = text(themed, "", 14, onContainer);
-        battery.setGravity(Gravity.CENTER);
-        battery.setPadding(dp(16), dp(10), dp(16), dp(10));
-        battery.setBackground(shape(container, 20));
+
+        LinearLayout details = new LinearLayout(themed);
+        details.setOrientation(LinearLayout.VERTICAL);
+        details.setGravity(Gravity.CENTER_VERTICAL);
+        details.setPadding(dp(10), 0, 0, 0);
+        TextView title = text(themed, name, 17, onSurface);
+        title.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        title.setMaxLines(2);
+        title.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        title.setAccessibilityHeading(true);
+        details.addView(title, new LinearLayout.LayoutParams(-1, -2));
+
+        battery = text(themed, "", 12, onContainer);
+        battery.setMaxLines(2);
+        battery.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        battery.setPadding(dp(9), dp(5), dp(9), dp(5));
+        battery.setBackground(shape(container, 14));
         LinearLayout.LayoutParams batteryParams = new LinearLayout.LayoutParams(-1, -2);
-        batteryParams.bottomMargin = dp(20);
-        panel.addView(battery, batteryParams);
+        batteryParams.topMargin = dp(6);
+        details.addView(battery, batteryParams);
+        content.addView(details, new LinearLayout.LayoutParams(0, -2, 1));
+        panel.addView(content, new LinearLayout.LayoutParams(-1, -2));
+
         Button settings = new Button(themed);
         settings.setText(device == null ? R.string.hecker_headphones_sound_settings
                 : R.string.hecker_headphones_settings);
         settings.setAllCaps(false);
-        settings.setTextSize(14);
+        settings.setTextSize(13);
         settings.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
-        settings.setTextColor(onPrimary);
+        settings.setTextColor(onContainer);
         settings.setGravity(Gravity.CENTER);
         settings.setBackgroundTintList(null);
-        settings.setBackground(new RippleDrawable(ColorStateList.valueOf(alpha(onPrimary, 0.12f)),
-                shape(primary, 24), null));
-        settings.setPadding(dp(24), dp(12), dp(24), dp(12));
-        settings.setMinHeight(dp(48));
+        settings.setBackground(new RippleDrawable(ColorStateList.valueOf(alpha(onContainer, .10f)),
+                shape(container, 18), null));
+        settings.setMinHeight(dp(42));
         settings.setOnClickListener(view -> {
             int user = visibleUser;
             dismiss();
-            Intent details = device == null ? null : context.getPackageManager()
+            Intent target = device == null ? null : context.getPackageManager()
                     .getLaunchIntentForPackage("org.hecker.librepods");
-            if (details == null) details = new Intent(device == null
+            if (target == null) target = new Intent(device == null
                     ? Settings.ACTION_SOUND_SETTINGS : Settings.ACTION_BLUETOOTH_SETTINGS);
-            if (device != null) details.putExtra("hecker_device_address", device.getAddress());
+            if (device != null) target.putExtra("hecker_device_address", device.getAddress());
             try {
-                context.startActivityAsUser(details.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), UserHandle.of(user));
+                context.startActivityAsUser(target.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), UserHandle.of(user));
             } catch (android.content.ActivityNotFoundException | SecurityException unavailable) {
                 Log.w(TAG, "Headphone details unavailable", unavailable);
             }
         });
-        panel.addView(settings, new LinearLayout.LayoutParams(-1, -2));
+        panel.addView(settings, new LinearLayout.LayoutParams(-1, dp(42)));
         ScrollView scroll = new ScrollView(themed);
         scroll.setVerticalScrollBarEnabled(false);
         scroll.addView(panel);
@@ -305,11 +324,11 @@ public final class HeckerHeadphonePopup {
         try {
             dialog.show();
             if (window != null) window.setLayout(
-                    Math.min(context.getResources().getDisplayMetrics().widthPixels - dp(32), dp(440)), -2);
+                    Math.min(context.getResources().getDisplayMetrics().widthPixels - dp(40), dp(396)), -2);
             if (ownedSurface != null) ownedSurface.start();
             if (android.animation.ValueAnimator.areAnimatorsEnabled()) {
-                panel.setAlpha(0); panel.setTranslationY(dp(28));
-                panel.animate().alpha(1).translationY(0).setDuration(300).start();
+                panel.setAlpha(0); panel.setTranslationY(dp(12));
+                panel.animate().alpha(1).translationY(0).setDuration(190).start();
             }
             AccessibilityManager accessibility = context.getSystemService(AccessibilityManager.class);
             int timeout = accessibility == null ? 9000 : accessibility.getRecommendedTimeoutMillis(9000,
@@ -400,7 +419,7 @@ public final class HeckerHeadphonePopup {
 
         FrostedSurface(Window window, int surface, int outline) {
             this.window = window; this.surface = surface; this.outline = outline;
-            background = shape(surface, 28);
+            background = shape(surface, 26);
             window.setBackgroundDrawable(background);
         }
 
@@ -426,12 +445,12 @@ public final class HeckerHeadphonePopup {
             try {
                 // The blur API takes pixels. Avoid density-scaling this beyond
                 // the compositor's recommended range on Floral's dense screen.
-                window.setBackgroundBlurRadius(glass ? 80 : 0);
+                window.setBackgroundBlurRadius(glass ? 56 : 0);
             } catch (RuntimeException unavailable) {
                 glass = false;
                 Log.w(TAG, "Connection card background blur unavailable", unavailable);
             }
-            background.setColor(glass ? alpha(surface, 0.86f) : surface);
+            background.setColor(glass ? alpha(surface, 0.91f) : surface);
             background.setStroke(dp(1), alpha(outline, glass ? 0.55f : 0.25f));
         }
 
