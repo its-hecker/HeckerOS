@@ -56,3 +56,50 @@ Android boot, on-device decryption, both A/B slots or OTA upgrades.
 
 No automatic boot replacement, boot signing, flash command, A/B slot changes or
 shipping integration has been added to either stable device manifest.
+
+
+## Real November boot-image audit (2026-11-13)
+
+This is a **read-only** comparison of the user's November HeckerOS coral boot image
+(uploaded 2026-11-12) against the GitHub Actions standalone artifact from
+[Coral Recovery 2.0 run 43417408737](https://github.com/its-hecker/orangefox_device_google_coral/actions/runs/43417408737)
+(device tree commit 353ac5784118f226bc6c5aee947fc5f9028a32e3).
+The SHA256SUMS inside the archive matches its recovery image.
+
+| Check | HeckerOS ROM boot | Standalone Recovery 2.0 |
+| --- | --- | --- |
+| Image SHA-256 | 3439a85c2eb3b4518e84c9f3327089abfa3b87e44ab6b76a66e2b3a35451e93d | 1065bcbe9740223d3a52ff51c9d174a127e985eb28553f70c8fd0d0930279708 |
+| Image size | 67,108,864 bytes | 67,108,864 bytes |
+| Header version / size | v2 / 1660 bytes | v2 / 1660 bytes |
+| Page size | 4096 bytes | 4096 bytes |
+| Android metadata | 17.0.0 / 2026-11 | 17.0.0 / 2026-11 |
+| Kernel size | 21,036,194 bytes | 20,930,399 bytes |
+| Kernel SHA-256 | d9de4922353d3e273957ed713e9f94c05a10f18100708917be2e25366716fc94 | f7055c524532ada097ec7bb8479ca1d3af1a6b4171b1be61c86a67a697a7cb34 |
+| DTB size | 999,136 bytes | 999,136 bytes |
+| DTB SHA-256 | e3866c5dc8051d0b9f33f7edd2b1ccdeb1b95777062f3121ea800aabb51eeb26 | a2b911929743858688cc38920f4df25d058ce259fcba670439197a85dc0845f4 |
+| Gzip ramdisk size | 18,425,402 bytes | 31,139,092 bytes |
+| Ramdisk SHA-256 | c9c543b2b3eacb928c8fd052458800fee9bb98ca462fde84ebe87aa56593e9ea | 4905cf65045bfd3d73e6ae9d42e141f6706d0ff4bd1557b556fbb1b1db69eb05 |
+| AVB footer marker | Present; signature unverified | Present; signature unverified |
+
+Both gzip ramdisks were inspected as cpio archives without executing or
+installing their contents. Each contains init, system/bin/init, and
+system/bin/recovery. The standalone recovery also includes OrangeFox twres
+resources. This does **not** demonstrate compatibility with normal Android boot.
+
+**Integration gate: BLOCKED.** The kernel and DTB hashes differ, and the
+standalone ramdisk is not proven capable of both normal boot and recovery boot.
+Identical Android patch metadata alone does not make the image ROM-compatible.
+
+Next tasks (only on the separate integration branch):
+
+1. Build recovery using the exact current HeckerOS kernel and DTB artifacts,
+   or validate another reviewed compatible baseline, then compare hashes.
+2. Review a dual-mode Android 17 ramdisk/init strategy, including fstab, SELinux,
+   decryption, fastbootd and A/B slot handling.
+3. Validate candidate boot structure, signatures with an actual AVB tool,
+   and both normal/recovery boots on hardware.
+4. Test OTA, backups, decryption and rollback before promoting anything.
+
+Do not replace stable ROM boot.img or OTA boot payload with the standalone
+recovery image. No flash, boot swap, image signing, or stable promotion was
+performed here. These hashes identify the exact November samples only.
