@@ -24,9 +24,43 @@ into `cnb_latest_stable` before full ROM and Pixel 4 XL tests.
   Fixed-color offline previews use **illustrative** palette samples; they are
   not captures of actual wallpaper-derived colors.
 
-No GPU overclock, GPU undervolt, forced 90 Hz, thermal throttling bypass, changed
-UFS scheduler, zRAM algorithm, LMKD policy, aggressive background-app killing,
-KSU/SELinux changes or 4.14 version bump has been made. These need separate
+## Follow-up efficiency experiment (November 13)
+
+These are **experimental settings requiring an on-device A/B run**:
+
+- **CPU frequency downscale**: `schedutil/down_rate_limit_us` is now 10,000
+  instead of 20,000 on Silver/Gold/Prime, while the existing 500 us upward
+  limit is unchanged. This is a shorter rate limit, **not proof** of a 2x
+  drop in frequency nor a 5x power saving. Revert if rapid navigation janks.
+- **Workqueues**: `CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y` lets workqueues
+  explicitly declaring `WQ_POWER_EFFICIENT` use unbound workers.
+  It does **not** pin all background work to efficiency cores.
+- **Kernel diagnostics**: disable unused interactive KGDB/KDB only.
+  Retain scheduling stats, dynamic debug, tracepoints, logs, CFI and KernelSU
+  needed for the previously reported navigation-pill freeze.
+- **Memory**: expand zRAM from 2 to 3 GiB with existing LZ4, 8 compression
+  streams, 512M backing-device allowance, and swappiness 100. Confirm actual
+  device uses the new size; quantify compression CPU and app reloads.
+- **UFS**: switch existing `sda`, `sde`, and `sdf` from CFQ to
+  `deadline` (supported by the kernel's I/O scheduler Kconfig), and use
+  `read_ahead_kb=128` for sda. Confirm the scheduler took effect via sysfs:
+  an unsupported sysfs write can be ignored by init. Leave `/data` F2FS
+  mounting, data encryption, discards and runtime queue depth unchanged.
+- **TCP**: build BBR with fq pacing and make it the default **only in this test
+  branch**. Keep CUBIC and fq_codel compiled as fallback. Verify
+  `/proc/sys/net/ipv4/tcp_congestion_control` and
+  `/proc/sys/net/core/default_qdisc` on-device: netd/vendor may override
+  defaults. A/B Wi-Fi and cellular TCP throughput, RTT, packet loss and battery.
+  This does not accelerate QUIC/UDP and will not fix WireGuard/Onic issues.
+
+**Explicitly excluded:** modem/radio sleep tuning. No changes to RIL, IMS,
+APNs, modem properties, call reception or idle network connectivity are intended.
+Do not modify carrier attach or incoming-call handling to pursue standby gains.
+
+No GPU overclock, GPU undervolt, forced 90 Hz, thermal throttling bypass, LMKD
+policy, aggressive background-app killing, KSU/SELinux changes or 4.14 version
+bump has been made. The kernel/device efficiency options must be measured before
+promoting them to stable. These need separate
 measurements before considering more edits. The camera, face and Motion Sense
 integration should remain isolated from this trial.
 
