@@ -52,7 +52,9 @@ class MaterialYouConsistencyTests(unittest.TestCase):
     def test_headphone_popup_is_compact_and_preserves_actions(self):
         source = (ROOT / "framework/headphones/HeckerHeadphonePopup.java").read_text()
         self.assertIn("new LinearLayout.LayoutParams(dp(92), dp(80))", source)
-        self.assertIn("new LinearLayout.LayoutParams(-1, dp(42))", source)
+        self.assertIn("new LinearLayout.LayoutParams(-2, dp(40))", source)
+        self.assertIn("battery.setBackground(chipShape(chipSurface, outline))", source)
+        self.assertNotIn("new LinearLayout.LayoutParams(-1, dp(42))", source)
         self.assertNotIn("new LinearLayout.LayoutParams(-1, dp(180))", source)
         self.assertNotIn("dp(440)", source)
         for unchanged_feature in (

@@ -96,13 +96,21 @@ System.out.println("Gesture toggle: visual-only handle, zero-inset migration, fa
         active = [line.strip() for line in common.splitlines()
                   if line.strip().startswith("PRODUCT_PACKAGES +=")]
         self.assertFalse(any("HeckerGestureSpace" in line for line in active))
-        self.assertTrue(any("HeckerHideGesturePill" in line for line in active))
+        self.assertFalse(any("HeckerHideGesturePill" in line for line in active))
         # Keep the legacy package name known to migration code, but not in
         # the installed ROM so the framework's original inset is retained.
         controller = (ROOT / "app/src/org/hecker/suite/GestureNavigationController.java").read_text()
         self.assertIn('LEGACY_SPACE_OVERLAY = "org.hecker.overlay.framework.navspace"', controller)
         self.assertIn('transaction.setEnabled(new OverlayIdentifier(LEGACY_SPACE_OVERLAY), false', controller)
         self.assertIn('restoreLegacySpacing(Context context)', controller)
+
+    def test_removed_from_suite_navigation(self):
+        suite = (ROOT / "app/src/org/hecker/suite/SuiteActivity.java").read_text()
+        router = (ROOT / "app/src/org/hecker/suite/SuiteRouterActivity.java").read_text()
+        manifest = (ROOT / "app/AndroidManifest.xml").read_text()
+        self.assertNotIn('v->open("GestureNavigationActivity")', suite)
+        self.assertNotIn('case "GestureNavigationActivity"', router)
+        self.assertNotIn('<activity android:name=".GestureNavigationActivity"', manifest)
 
     def test_migration_runs_off_ui_thread(self):
         source = (ROOT / "app/src/org/hecker/suite/GestureNavigationPreference.java").read_text()

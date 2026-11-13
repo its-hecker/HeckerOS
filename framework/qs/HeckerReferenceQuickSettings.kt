@@ -342,9 +342,13 @@ fun HeckerGlassTrack(fraction: Float, icon: Int, modifier: Modifier = Modifier, 
     val text = remember(percentage, locale) { HeckerSliderValues.label(percentage / 100f, locale) }
     val progress = HeckerSliderValues.unit(fraction)
     val thickness = HeckerSliderValues.verticalThickness(configuration.fontScale).dp
+    // In Hecker QS match the surrounding active/inactive tile containers.
+    // OneUI's horizontal sliders keep their existing primary-accent treatment.
     val restingTrack = MaterialTheme.colorScheme.surfaceContainerHighest
-    val activeTrack = MaterialTheme.colorScheme.primary
-    val onActiveTrack = MaterialTheme.colorScheme.onPrimary
+    val activeTrack = if (vertical) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.primary
+    val onActiveTrack = if (vertical) MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.onPrimary
     val onRestingTrack = MaterialTheme.colorScheme.onSurfaceVariant
     Box(modifier.fillMaxWidth().height(if (vertical) thickness else 44.dp), contentAlignment = Alignment.CenterStart) {
         Canvas(Modifier.fillMaxSize()) {
