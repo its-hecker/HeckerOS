@@ -6,23 +6,76 @@
     android:paddingHorizontal="18dp" android:paddingTop="18dp" android:paddingBottom="32dp">
     <com.android.settings.hecker.HeckerAboutGlowLayout
         android:id="@+id/hecker_about_glow" android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:minHeight="112dp"
+        android:layout_height="wrap_content" android:minHeight="218dp"
         android:background="@drawable/hecker_about_hero">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:paddingHorizontal="22dp" android:paddingTop="28dp" android:paddingBottom="18dp"
+            android:paddingHorizontal="20dp" android:paddingTop="20dp" android:paddingBottom="18dp"
             android:orientation="vertical">
+            <TextView android:id="@+id/hecker_about_build_status"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_gravity="end" android:paddingHorizontal="14dp"
+                android:paddingVertical="8dp" android:background="@drawable/hecker_about_status_pill"
+                android:textColor="@color/hecker_about_text" android:textSize="12sp"
+                android:fontFamily="sans-serif-medium" android:includeFontPadding="false" />
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:gravity="center_vertical">
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:text="@string/hecker_about_brand"
-                    android:textSize="30sp" android:fontFamily="sans-serif-medium"
-                    android:includeFontPadding="false" android:textColor="@color/hecker_about_text" />
-                <ImageView android:layout_width="18dp" android:layout_height="18dp"
-                    android:layout_marginStart="12dp" android:src="@drawable/hecker_about_caracal"
+                android:orientation="horizontal" android:gravity="center_vertical"
+                android:layout_marginTop="12dp">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="@string/hecker_about_brand" android:textSize="30sp"
+                        android:fontFamily="sans-serif-medium" android:includeFontPadding="false"
+                        android:textColor="@color/hecker_about_text" />
+                    <TextView android:id="@+id/hecker_about_version_line"
+                        style="@style/HeckerAboutReferenceCaption" android:layout_marginTop="5dp"
+                        android:textSize="13sp" />
+                </LinearLayout>
+                <ImageView android:layout_width="26dp" android:layout_height="26dp"
+                    android:src="@drawable/hecker_about_caracal" android:layout_marginStart="12dp"
                     android:importantForAccessibility="no" />
             </LinearLayout>
-            <TextView android:id="@+id/hecker_about_version_line" style="@style/HeckerAboutReferenceCaption"
-                android:layout_marginTop="12dp" android:textSize="13sp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minHeight="76dp" android:layout_marginTop="18dp"
+                android:paddingHorizontal="12dp" android:paddingVertical="10dp"
+                android:background="@drawable/hecker_about_maintainer_surface"
+                android:clipToOutline="true" android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <ImageView android:layout_width="52dp" android:layout_height="52dp"
+                    android:src="@drawable/hecker_maintainer_avatar" android:scaleType="centerCrop"
+                    android:background="@drawable/hecker_about_avatar_shape"
+                    android:clipToOutline="true" android:importantForAccessibility="no" />
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+                    <TextView style="@style/HeckerAboutReferenceCaption"
+                        android:text="@string/hecker_about_maintained_by" />
+                    <LinearLayout android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="horizontal"
+                        android:gravity="center_vertical" android:layout_marginTop="3dp">
+                        <TextView android:id="@+id/hecker_about_maintainer_name"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:singleLine="true" android:ellipsize="end"
+                            android:textSize="16sp" android:fontFamily="sans-serif-medium"
+                            android:textColor="@color/hecker_about_text" />
+                        <ImageView android:layout_width="17dp" android:layout_height="17dp"
+                            android:layout_marginStart="5dp"
+                            android:src="@drawable/hecker_about_verified"
+                            android:contentDescription="@string/hecker_about_verified_label" />
+                    </LinearLayout>
+                </LinearLayout>
+                <TextView android:id="@+id/hecker_about_support_action"
+                    android:layout_width="wrap_content" android:layout_height="48dp"
+                    android:minWidth="88dp" android:layout_marginStart="6dp"
+                    android:gravity="center" android:paddingHorizontal="11dp"
+                    android:text="@string/hecker_about_support"
+                    android:textSize="12sp" android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/hecker_about_text"
+                    android:background="@drawable/hecker_about_status_pill"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:drawableStart="@drawable/hecker_about_heart"
+                    android:drawablePadding="5dp"
+                    android:clickable="true" android:focusable="true" />
+            </LinearLayout>
         </LinearLayout>
     </com.android.settings.hecker.HeckerAboutGlowLayout>
     <LinearLayout android:id="@+id/hecker_about_name_action"

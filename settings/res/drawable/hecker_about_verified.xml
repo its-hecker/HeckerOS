@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="18dp" android:height="18dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="@color/hecker_about_icon"
+        android:pathData="M12,1.5 L14.7,3.4 L18,3.1 L19,6.2 L22,8 L20.8,11.3 L22,14.5 L19,16.5 L18,19.8 L14.7,19.6 L12,22.5 L9.3,19.6 L6,19.8 L5,16.5 L2,14.5 L3.2,11.3 L2,8 L5,6.2 L6,3.1 L9.3,3.4 Z"/>
+    <path android:strokeColor="@color/hecker_about_surface" android:strokeWidth="2.2"
+        android:strokeLineJoin="round" android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent" android:pathData="M7.2,11.8 L10.5,15.2 L16.9,8.7"/>
+</vector>

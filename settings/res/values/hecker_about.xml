@@ -81,4 +81,10 @@
     <string name="hecker_about_storage_free">%1$s free of %2$s</string>
     <string name="hecker_about_patch_title">Android security update</string>
     <string name="hecker_about_build_title">Build</string>
+    <string name="hecker_about_official_build">✓ Official build</string>
+    <string name="hecker_about_unofficial_build">Unofficial build</string>
+    <string name="hecker_about_maintained_by">Maintained by</string>
+    <string name="hecker_about_verified_label">Verified maintainer</string>
+    <string name="hecker_about_support">Support</string>
+    <string name="hecker_about_support_unavailable">Could not open the support page</string>
 </resources>
