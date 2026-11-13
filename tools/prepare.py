@@ -3,6 +3,7 @@
 """Guarded, reversible App Lock access and Motion Sense navigation integration."""
 
 import argparse
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 import re
@@ -406,6 +407,12 @@ def main():
     args = parser.parse_args()
     mode = next(mode for mode in ("check", "apply", "verify", "revert") if getattr(args, mode))
     try:
+        # This is deliberately explicit: third-party font rights are not asserted by
+        # Evolution X's public GitHub hosting. No binaries enter the HeckerOS repo.
+        if mode == "apply" and os.environ.get("HECKER_IMPORT_EVOLUTION_EMOJI") == "1":
+            from import_evolution_emoji import import_assets, check_assets
+            import_assets(fetch=True)
+            check_assets()
         apply(args.rom_root.resolve(), mode)
     except (ValueError, OSError, ET.ParseError) as error:
         print("Hecker Suite setup:", error, file=sys.stderr)
