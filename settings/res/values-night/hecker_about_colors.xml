@@ -1,10 +1,11 @@
 <resources>
-    <color name="hecker_about_background">#000000</color>
-    <color name="hecker_about_surface">#19161D</color>
-    <color name="hecker_about_hero_start">#30243E</color>
-    <color name="hecker_about_hero_end">#252536</color>
-    <color name="hecker_about_text">#F1EFF8</color>
-    <color name="hecker_about_secondary">#C3B7DA</color>
-    <color name="hecker_about_icon">#BDA9E0</color>
-    <color name="hecker_about_divider">#302D38</color>
+    <!-- Material You dark tonal surfaces, not a hard-coded black/purple theme. -->
+    <color name="hecker_about_background">@android:color/system_neutral1_900</color>
+    <color name="hecker_about_surface">@android:color/system_neutral1_800</color>
+    <color name="hecker_about_hero_start">@android:color/system_accent1_700</color>
+    <color name="hecker_about_hero_end">@android:color/system_accent2_700</color>
+    <color name="hecker_about_text">@android:color/system_neutral1_50</color>
+    <color name="hecker_about_secondary">@android:color/system_neutral2_200</color>
+    <color name="hecker_about_icon">@android:color/system_accent1_200</color>
+    <color name="hecker_about_divider">@android:color/system_neutral2_700</color>
 </resources>
