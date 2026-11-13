@@ -37,6 +37,17 @@ final class GestureNavigationPreference {
             });
         });
         page.addView(card);
+        // On upgrade, clear the legacy framework-space overlay even if the switch
+        // was previously enabled. Keep the visual handle's current state.
+        WORK.execute(() -> {
+            boolean restored = GestureNavigationController.restoreLegacySpacing(activity);
+            activity.runOnUiThread(() -> {
+                if (activity.isFinishing() || activity.isDestroyed()) return;
+                toggle.setChecked(GestureNavigationController.enabled(activity));
+                if (!restored) Toast.makeText(activity, R.string.gesture_hide_pill_failed,
+                        Toast.LENGTH_LONG).show();
+            });
+        });
     }
 
     private GestureNavigationPreference() {}
