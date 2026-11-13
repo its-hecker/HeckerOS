@@ -57,7 +57,7 @@
     "destination": "its-hecker/heckeros_build_soong",
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
-    "source_revision": "321ecf4fc740482603b917c5de30a0e27e97595e"
+    "source_revision": "3c1fe2e36f43b68d5e65a47f700a401c107b29b5"
   },
   {
     "path": "development",
@@ -86,7 +86,7 @@
     "destination": "its-hecker/heckeros_external_avb",
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
-    "source_revision": "15b4e85b56cdd7e32601074dbb269f5d3ba43eaf"
+    "source_revision": "69257421834cfe692b0e248d51472f0feddaeaac"
   },
   {
     "path": "external/bouncycastle",
@@ -266,7 +266,7 @@
     "destination": "its-hecker/heckeros_frameworks_av",
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
-    "source_revision": "3a806486c35d4825bd97d95af3e172309aed2fda"
+    "source_revision": "57b659c1e1af1c025b2e63e2cdd7e18d2037e705"
   },
   {
     "path": "frameworks/base",
@@ -287,7 +287,7 @@
     "destination": "its-hecker/heckeros_frameworks_native",
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
-    "source_revision": "fe64500f2fb0b0053667f3e1af3603122643e270"
+    "source_revision": "c7d7d74ae37fdd8cb5749abb6061713553c25cea"
   },
   {
     "path": "frameworks/opt/telephony",
@@ -297,7 +297,7 @@
     "destination": "its-hecker/heckeros_frameworks_opt_telephony",
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
-    "source_revision": "7ee96142e28c3580c2426760a4b533256743d06f"
+    "source_revision": "ec2e08f584352ed58b82625624f7bdcb7e00ef02"
   },
   {
     "path": "hardware/google/pixel",
@@ -327,7 +327,7 @@
     "destination": "its-hecker/heckeros_hardware_interfaces",
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
-    "source_revision": "7447ce416bbc527a1e7100196eddd568d084b413"
+    "source_revision": "557052f4f3c8bbf3175e4dc74d428a13f298ccc1"
   },
   {
     "path": "hardware/libhardware",
@@ -473,7 +473,7 @@
     "destination": "its-hecker/heckeros_packages_modules_Bluetooth",
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
-    "source_revision": "04618720b1bcefe990ab2d14e713a39393ae1072"
+    "source_revision": "2d8bb21cce02276acaec9d498434c7886052c872"
   },
   {
     "path": "packages/modules/Connectivity",
@@ -493,7 +493,7 @@
     "destination": "its-hecker/heckeros_packages_modules_Nfc",
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
-    "source_revision": "11ddd3b7b6cfa506f5959332dfda5390d3baac71"
+    "source_revision": "acf0a45a6cb46a9389d27837b0dd16f438a3467e"
   },
   {
     "path": "packages/modules/Permission",
@@ -513,7 +513,7 @@
     "destination": "its-hecker/heckeros_packages_modules_Telephony",
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
-    "source_revision": "bb5e4093999c322ebfdbe9acd5c06139c4f021a5"
+    "source_revision": "afe71d7b19e7f3d58ad9974690febd830a155669"
   },
   {
     "path": "packages/modules/UprobeStats",
@@ -543,7 +543,7 @@
     "destination": "its-hecker/heckeros_packages_modules_Wifi",
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
-    "source_revision": "656098301250bc79e3faa6907bdf15fa8996a93d"
+    "source_revision": "45f5aaceb42438514cf0a1c10d7b2e99f62132d9"
   },
   {
     "path": "packages/providers/ContactsProvider",
@@ -573,7 +573,7 @@
     "destination": "its-hecker/heckeros_packages_providers_MediaProvider",
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
-    "source_revision": "eaf62ef2f7f864c5345a2da747cef320690568e8"
+    "source_revision": "e34b24af01980a54d3737358b9129de0a4f657be"
   },
   {
     "path": "packages/providers/TelephonyProvider",
@@ -583,7 +583,7 @@
     "destination": "its-hecker/heckeros_packages_providers_TelephonyProvider",
     "branch": "seventeen",
     "destination_branch": "heckeros-17",
-    "source_revision": "f0b80a81153e60540ad81439d96422e90e8e7157"
+    "source_revision": "bce1c964c3447fa90e8ff7ab9173a258ba353b1e"
   },
   {
     "path": "packages/services/BuiltInPrintService",
