@@ -30,7 +30,7 @@ final class MotionAstronautView extends View {
         @Override public void run() {
             invalidate();
             if (when >= 0 && SystemClock.elapsedRealtime() - when < MotionIslandState.ACTION_DURATION)
-                postDelayed(this, 33);
+                postOnAnimationDelayed(this, 32);
         }
     };
     MotionAstronautView(Context context) {
@@ -62,7 +62,7 @@ final class MotionAstronautView extends View {
         direction = state.direction; action = state.action;
         if (sequence != state.sequence || this.animate != animate) {
             stop(); sequence = state.sequence; when = state.when;
-            if (animate) post(frame);
+            if (animate) postOnAnimation(frame);
         }
         this.animate = animate;
         invalidate();

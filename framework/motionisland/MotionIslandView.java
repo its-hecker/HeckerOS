@@ -23,7 +23,7 @@ final class MotionIslandView extends View {
     private String label = "";
     private boolean moving, playing;
     private final Runnable frame = new Runnable() {
-        @Override public void run() { invalidate(); if (moving) postDelayed(this, 33); }
+        @Override public void run() { invalidate(); if (moving) postOnAnimationDelayed(this, 32); }
     };
     MotionIslandView(Context context) {
         super(context);

@@ -38,9 +38,10 @@ public final class HeckerLauncherGlass {
         final WeakHashMap<View,Drawable> originals=new WeakHashMap<>();
         final WeakHashMap<View,Glass> panels=new WeakHashMap<>();
         Bitmap wallpaper,frosted;
-        boolean stopped,queued;
+        volatile boolean stopped;
+        boolean queued;
         boolean targetsDirty;
-        int generation;
+        volatile int generation;
         float offset=.5f;
         int mode, frostRadius, tint, border, styleRevision;
         float opacity;
@@ -49,9 +50,16 @@ public final class HeckerLauncherGlass {
         final BroadcastReceiver changed=new BroadcastReceiver(){@Override public void onReceive(Context c,Intent i){load();}};
         final Runnable refresh=this::refresh;
         final Runnable refrost=this::refrost;
+        final Runnable scanAfterLayout;
         int option(String key,int fallback,int min,int max){try{return Math.max(min,Math.min(max,prefs.getInt("hecker_glass_"+key,fallback)));}catch(ClassCastException bad){return fallback;}}
         Session(View view) {
             workspace = new WeakReference<>(view);
+            // The callback must be initialized after the final workspace reference.
+            scanAfterLayout = () -> {
+                if (stopped || mode == 0) return;
+                View root = workspace.get();
+                if (root != null && root.isShown()) scan(root.getRootView(), new int[]{0});
+            };
             app = view.getContext().getApplicationContext();
             prefs = app.getSharedPreferences(LauncherFiles.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
             wallpaperScaleResId = view.getResources().getIdentifier(
@@ -77,24 +85,40 @@ public final class HeckerLauncherGlass {
             }
         }
 
-        private void readStyle() {
-            mode = stringOption("hecker_glass", 1, 2);
-            opacity = option("opacity", 72, 0, 100) / 100f;
-            frostRadius = option("frost", 18, 0, 32);
-            tint = option("tint", 0xff30232e, Integer.MIN_VALUE, Integer.MAX_VALUE);
-            border = option("border", 1, 0, 4);
-            foldersEnabled = targetEnabled("folders");
-            for (int i = 0; i < cornerDp.length; i++) {
-                cornerDp[i] = stringOption("hecker_glass_corner_" + CORNERS[i], 28, 48);
+        private boolean readStyle() {
+            int nextMode = stringOption("hecker_glass", 1, 2);
+            float nextOpacity = option("opacity", 72, 0, 100) / 100f;
+            int nextFrostRadius = option("frost", 18, 0, 32);
+            int nextTint = option("tint", 0xff30232e, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            int nextBorder = option("border", 1, 0, 4);
+            boolean nextFolders = targetEnabled("folders");
+            int[] nextCorners = new int[CORNERS.length];
+            for (int i = 0; i < nextCorners.length; i++) {
+                nextCorners[i] = stringOption("hecker_glass_corner_" + CORNERS[i], 28, 48);
             }
+            boolean changed = mode != nextMode || Float.compare(opacity, nextOpacity) != 0
+                    || frostRadius != nextFrostRadius || tint != nextTint
+                    || border != nextBorder || foldersEnabled != nextFolders
+                    || !Arrays.equals(cornerDp, nextCorners);
+            if (!changed) return false;
+            mode = nextMode;
+            opacity = nextOpacity;
+            frostRadius = nextFrostRadius;
+            tint = nextTint;
+            border = nextBorder;
+            foldersEnabled = nextFolders;
+            System.arraycopy(nextCorners, 0, cornerDp, 0, cornerDp.length);
+            // Geometry must be recomputed only when the actual styling changes.
             styleRevision++;
+            return true;
         }
 
         void refresh() {
             queued = false;
             if (stopped) return;
-            readStyle();
-            if (targetsDirty) {
+            boolean styleChanged = readStyle();
+            boolean rebindTargets = targetsDirty;
+            if (rebindTargets) {
                 targetsDirty = false;
                 restore();
                 View view = workspace.get();
@@ -104,7 +128,9 @@ public final class HeckerLauncherGlass {
                     root.invalidate();
                 }
             }
-            invalidate();
+            if (styleChanged || rebindTargets) invalidate();
+            // When glass is re-enabled, refresh the wallpaper asynchronously.
+            if (styleChanged && mode != 0 && wallpaper == null) load();
         }
 
         void start(){
@@ -115,7 +141,7 @@ public final class HeckerLauncherGlass {
             schedule(true);
             load();
         }
-        void close(){stopped=true;generation++;MAIN.removeCallbacks(refresh);MAIN.removeCallbacks(refrost);prefs.unregisterOnSharedPreferenceChangeListener(this);
+        void close(){stopped=true;generation++;MAIN.removeCallbacks(refresh);MAIN.removeCallbacks(refrost);MAIN.removeCallbacks(scanAfterLayout);prefs.unregisterOnSharedPreferenceChangeListener(this);
             app.unregisterReceiver(changed);View v=workspace.get();if(v!=null){ViewTreeObserver observer=v.getRootView().getViewTreeObserver();if(observer.isAlive())observer.removeOnGlobalLayoutListener(this);}
             restore();panels.clear();wallpaper=null;frosted=null;
         }
@@ -151,9 +177,11 @@ public final class HeckerLauncherGlass {
         }
 
         @Override public void onGlobalLayout(){
-            if(stopped||mode==0)return;
-            // New folders/widgets are discovered after layout, not on every frame.
-            View v=workspace.get();if(v!=null)scan(v.getRootView(),new int[]{0});
+            if (stopped || mode == 0) return;
+            // Folder transitions trigger layout on every frame. Scan only after
+            // the tree settles; new widgets/folders are still discovered.
+            MAIN.removeCallbacks(scanAfterLayout);
+            MAIN.postDelayed(scanAfterLayout, 120);
         }
         void scan(View v,int[] count){
             if(++count[0]>3000||v.getVisibility()!=View.VISIBLE)return;
@@ -179,11 +207,14 @@ public final class HeckerLauncherGlass {
         void refrost(){
             Bitmap source=wallpaper;if(source==null||stopped)return;
             int request=++generation,radius=frostRadius;
-            WORKER.execute(()->{Bitmap soft=frost(source,radius);MAIN.post(()->{if(!stopped&&request==generation){frosted=soft;invalidate();}});});
+            WORKER.execute(()->{if(stopped||request!=generation)return;Bitmap soft=frost(source,radius);MAIN.post(()->{if(!stopped&&request==generation){frosted=soft;invalidate();}});});
         }
         void load(){
             final int request=++generation;
+            // Disabled glass needs no wallpaper decode or retained bitmap.
+            if (mode == 0) { wallpaper=null; frosted=null; invalidate(); return; }
             WORKER.execute(()->{
+                if (stopped || request != generation) return;
                 Bitmap image=null,blur=null;
                 try{
                     WallpaperManager manager=WallpaperManager.getInstance(app);
