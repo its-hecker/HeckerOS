@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Ensure every HeckerOS About Phone drawable is staged into native Settings."""
+"""Ensure About Phone drawable references are installed into native Settings."""
 import json
 from pathlib import Path
 import re
@@ -16,17 +16,19 @@ class AboutPhoneResourceCopyTest(unittest.TestCase):
         names = set(re.findall(r"@drawable/(hecker_[a-z0-9_]+)", layout))
         self.assertTrue(names, "Expected native About Phone drawable references")
         copies = json.loads((ROOT / "framework/customization-copies.json").read_text())
-        resources = ROOT / "settings/res"
         for name in sorted(names):
             with self.subTest(drawable=name):
-                assets = sorted(path for path in resources.rglob(name + ".*")
-                                if path.suffix in {".xml", ".png", ".webp"})
-                self.assertEqual(len(assets), 1,
-                                 f"Expected one source asset for {name}, got {assets}")
-                relative = assets[0].relative_to(resources).as_posix()
-                target = "packages/apps/Settings/res/" + relative
-                self.assertEqual(copies.get(target), "settings/res/" + relative,
-                                 f"{name} is referenced by the layout but not installed")
+                assets = [(target, source) for target, source in copies.items()
+                          if target.startswith("packages/apps/Settings/res/drawable")
+                          and Path(target).stem == name
+                          and Path(target).suffix in {".xml", ".png", ".webp"}]
+                self.assertTrue(assets, f"Missing native Settings copy for {name}")
+                for target, source in assets:
+                    expected = "settings/res/" + target.removeprefix(
+                        "packages/apps/Settings/res/")
+                    self.assertEqual(source, expected)
+                    self.assertTrue((ROOT / source).is_file(),
+                                    f"Missing source for {name}: {source}")
 
 
 if __name__ == "__main__":
