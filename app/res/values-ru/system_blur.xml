@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="system_blur_title">Размытие во всей системе</string>
+    <string name="system_blur_summary">Разрешить размытие окон и фона Android. Отключение может снизить нагрузку на графику. Эффекты стекла лаунчера настраиваются отдельно.</string>
+    <string name="system_blur_unsupported">Размытие окон не поддерживается на этом устройстве.</string>
+    <string name="system_blur_write_failed">Не удалось изменить настройку размытия.</string>
+</resources>
