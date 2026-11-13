@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """No boot images are written by the integration analyzer; fixtures are synthetic."""
 import pathlib
+import subprocess
 import struct
 import sys
 import tempfile
@@ -42,6 +43,8 @@ class CustomRecoveryCompatibility(unittest.TestCase):
         result = compare(self.a, self.b)
         self.assertTrue(result["matches"]["kernel_sha256"])
         self.assertTrue(result["matches"]["dtb_sha256"])
+        self.assertTrue(result["kernel_dtb_matched"])
+        self.assertIn("ramdisk_sha256", result["component_mismatches"])
         self.assertNotEqual(result["rom"]["ramdisk_sha256"],
                             result["standalone_recovery"]["ramdisk_sha256"])
         self.assertFalse(result["safe_to_replace_rom_boot"])
@@ -59,6 +62,9 @@ class CustomRecoveryCompatibility(unittest.TestCase):
         result = compare(self.a, self.b)
         for key in ("kernel_sha256", "dtb_sha256", "os_patch_month"):
             self.assertFalse(result["matches"][key])
+        self.assertFalse(result["kernel_dtb_matched"])
+        self.assertIn("kernel_sha256", result["component_mismatches"])
+        self.assertIn("dtb_sha256", result["component_mismatches"])
         self.assertFalse(result["safe_to_replace_rom_boot"])
 
     def test_invalid_boot_headers_fail_closed(self):
@@ -80,6 +86,26 @@ class CustomRecoveryCompatibility(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Truncated"):
             inspect(self.a)
 
+
+    def test_cli_strict_kernel_dtb_gate_is_read_only(self):
+        tool = str(pathlib.Path(__file__).resolve().parents[1] / "tools/recovery2_boot_compare.py")
+        sample(self.a, kernel=b"ROM_K", dtb=b"ROM_DTB")
+        sample(self.b, kernel=b"REC_K", dtb=b"REC_DTB")
+        first = self.a.read_bytes()
+        second = self.b.read_bytes()
+        blocked = subprocess.run([sys.executable, tool, "--rom-boot", str(self.a),
+                                  "--recovery-boot", str(self.b),
+                                  "--require-matching-kernel-dtb"],
+                                 capture_output=True, text=True)
+        self.assertNotEqual(blocked.returncode, 0)
+        self.assertIn("integration blocked", blocked.stderr)
+        report = subprocess.run([sys.executable, tool, "--rom-boot", str(self.a),
+                                 "--recovery-boot", str(self.b)],
+                                capture_output=True, text=True)
+        self.assertEqual(report.returncode, 0, report.stderr)
+        self.assertIn('"kernel_dtb_matched": false', report.stdout)
+        self.assertEqual(self.a.read_bytes(), first)
+        self.assertEqual(self.b.read_bytes(), second)
 
     def test_artifact_sha_guards(self):
         sample(self.a)
