@@ -145,7 +145,8 @@
   ],
   "packages/apps/Settings/res/values/hecker_about.xml": [
     "baa4ffbf0378f96989063ecbadf6a918abc9a367",
-    "b045327677f68551c7ce53f40c194da336509146"
+    "b045327677f68551c7ce53f40c194da336509146",
+    "8542a45757e6ee3354232568e00a0953a3f4c328"
   ],
   "packages/apps/Settings/res/drawable/hecker_about_badge.xml": [
     "13ce12648574681cc80aef09c067d6fee26f2096"
@@ -153,7 +154,8 @@
   "packages/apps/Settings/res/layout/hecker_about_phone.xml": [
     "5718081f197c2b5a8c0616fd55ce92f760ed6f16",
     "0c3c6d39c6f3345b5038345bbdd679b57a0a51f3",
-    "4985ee414689bf5efe0141f9413189ecdc46e381"
+    "4985ee414689bf5efe0141f9413189ecdc46e381",
+    "12be02056fd198820b5f135d089309a9f16b09d6"
   ],
   "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutPhonePreference.java": [
     "19e0f05a03cb342192a98c411420f5572b8d0da9",
@@ -391,7 +393,8 @@
     "09072472f5c8bc4792fda09c6b39473bb83a5182"
   ],
   "packages/apps/Settings/res/values-night/hecker_about_colors.xml": [
-    "38f85ef382b8898179015eb08306487a46a9175b"
+    "38f85ef382b8898179015eb08306487a46a9175b",
+    "ac7413d4a0cb0964fc888a9013c3fb6474c6d81b"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MediaCardGeometry.java": [
     "7257bf7b8e6cb946e85263629b4b1c3399a6001e",
@@ -431,5 +434,14 @@
   ],
   "packages/apps/Settings/res/values/hecker_home.xml": [
     "0b10066d742b3399e4271960a39106eb1cf6f523"
+  ],
+  "packages/apps/Settings/res/values/hecker_about_colors.xml": [
+    "04b30c7e2adda453c303fff4a393d948b3801ba3"
+  ],
+  "packages/apps/Settings/res/drawable/hecker_about_hero.xml": [
+    "40aa7e9e502cfa0e12b619c9ca0e26f18eb7795e"
+  ],
+  "packages/apps/Settings/res/drawable/hecker_about_surface.xml": [
+    "c4cdcdbf3bbe89a94316f7734dddb073ff0e32d5"
   ]
 }
