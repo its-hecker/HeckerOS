@@ -443,5 +443,8 @@
   ],
   "packages/apps/Settings/res/drawable/hecker_about_surface.xml": [
     "c4cdcdbf3bbe89a94316f7734dddb073ff0e32d5"
+  ],
+  "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutGlowLayout.java": [
+    "035ce5dd61d6bca52af9ca9062acd229e3bcf768"
   ]
 }
