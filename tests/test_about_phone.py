@@ -12,6 +12,11 @@ class AboutPhoneTest(unittest.TestCase):
     def test_shared_glow_and_visible_lifecycle(self):
         sources = {
             'android/util/AttributeSet.java': 'package android.util; public interface AttributeSet {}',
+            'android/R.java': '''package android; public final class R {
+ public static final class color {
+  public static final int system_accent1_300=1,system_accent2_300=2,system_accent3_300=3;
+ }
+}''',
             'android/os/Looper.java': 'package android.os; public class Looper {public static Looper getMainLooper(){return new Looper();}}',
             'android/os/Handler.java': 'package android.os; public class Handler {public Handler(Looper looper){}}',
             'android/os/SystemClock.java': 'package android.os; public class SystemClock {public static long now;public static long elapsedRealtime(){return now;}}',
@@ -32,6 +37,9 @@ public class Context {
  public final android.os.PowerManager power=new android.os.PowerManager();public BroadcastReceiver receiver;
  public ContentResolver getContentResolver(){return resolver;}
  public <T>T getSystemService(Class<T> type){return type.cast(power);}
+ public int getColor(int resourceId) {
+  return switch(resourceId) {case 1 -> 0xff123456;case 2 -> 0xff56789a;case 3 -> 0xff9abcde;default -> 0xff112233;};
+ }
  public Intent registerReceiver(BroadcastReceiver receiver,IntentFilter filter,int flags){this.receiver=receiver;return null;}
  public void unregisterReceiver(BroadcastReceiver receiver){this.receiver=null;}
 }''',
@@ -114,7 +122,7 @@ public class AboutGlowProbe {
    check(Math.abs(shader.x-324*MediaGlowSpec.centerX(i,phase))<.001);
    check(Math.abs(shader.y-112*MediaGlowSpec.centerY(i,phase))<.001);
    check(Math.abs(shader.radius-324*MediaGlowSpec.radius(i,phase))<.001);
-   check(((RadialGradient)shader).colors[0]==MediaGlowSpec.centerColor(i));
+   check(((RadialGradient)shader).colors[0]==((96<<24)|(context.getColor(i+1)&0x00ffffff)));
   }
   for(long t=0;t<30000;t+=17){
    check(Math.abs(MediaGlowSpec.phase(t)-MediaCardGeometry.glowPhase(t))<.00001);
