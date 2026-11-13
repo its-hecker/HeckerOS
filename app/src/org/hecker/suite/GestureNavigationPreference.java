@@ -44,6 +44,7 @@ final class GestureNavigationPreference {
             activity.runOnUiThread(() -> {
                 if (activity.isFinishing() || activity.isDestroyed()) return;
                 toggle.setChecked(GestureNavigationController.enabled(activity));
+                toggle.setEnabled(GestureNavigationController.available(activity));
                 if (!restored) Toast.makeText(activity, R.string.gesture_hide_pill_failed,
                         Toast.LENGTH_LONG).show();
             });
