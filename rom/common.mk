@@ -19,7 +19,8 @@ PRODUCT_PACKAGES += HeckerSystemUIOverlay \
     HeckerStatusBarHeightCompact \
     HeckerStatusBarHeightBalanced \
     HeckerStatusBarHeightTall
-PRODUCT_PACKAGES += HeckerHideGesturePill HeckerGestureSpace HeckerEuiccPermissions
+# Keep the visual handle overlay, but retain native framework navigation insets.
+PRODUCT_PACKAGES += HeckerHideGesturePill HeckerEuiccPermissions
 # Native window blur still observes SurfaceFlinger, thermal and power-saver capability gates.
 PRODUCT_PRODUCT_PROPERTIES += ro.surface_flinger.supports_background_blur?=1
 
