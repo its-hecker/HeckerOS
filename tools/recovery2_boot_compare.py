@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import re
 import struct
 
 MAX_BOOT_SIZE = 64 * 1024 * 1024
@@ -26,8 +27,13 @@ def sha(blob):
 
 def inspect(path):
     path = Path(path)
+    # Refuse oversized files before allocating memory. Only known Pixel 4
+    # header-v2 images are accepted; this tool never edits or flashes images.
+    size = path.stat().st_size
+    if not 4096 <= size <= MAX_BOOT_SIZE:
+        raise ValueError("Invalid coral/flame Android boot image size: " + str(path))
     data = path.read_bytes()
-    if not 4096 <= len(data) <= MAX_BOOT_SIZE or data[:8] != b"ANDROID!":
+    if data[:8] != b"ANDROID!":
         raise ValueError("Invalid coral/flame Android boot image: " + str(path))
     kernel_size, = struct.unpack_from("<I", data, 8)
     ramdisk_size, = struct.unpack_from("<I", data, 16)
@@ -53,10 +59,26 @@ def inspect(path):
     minor = (packed_version >> 18) & 0x7f
     patch = (packed_version >> 11) & 0x7f
     patchbits = packed_version & 2047
-    os_patch = "%04d-%02d" % (2000 + (patchbits >> 4), patchbits & 15)
+    patch_month = patchbits & 15
+    if not 1 <= patch_month <= 12:
+        raise ValueError("Invalid Android boot patch month")
+    os_patch = "%04d-%02d" % (2000 + (patchbits >> 4), patch_month)
+    ramdisk = data[ramdisk_start:ramdisk_start + ramdisk_size]
+    compression = ("gzip" if ramdisk.startswith(b"\x1f\x8b")
+                   else "lz4" if ramdisk.startswith((b"\x02\x21\x4c\x18",
+                                                      b"\x04\x22\x4d\x18"))
+                   else "xz" if ramdisk.startswith(b"\xfd7zXZ\x00")
+                   else "unknown")
     return {
         "image": str(path),
         "size": len(data),
+        "boot_image_sha256": sha(data),
+        "kernel_size": kernel_size,
+        "ramdisk_size": ramdisk_size,
+        "dtb_size": dtb_size,
+        "boot_payload_end": end,
+        "avb_footer_present": len(data) >= 64 and data[-64:-60] == b"AVBf",
+        "ramdisk_compression": compression,
         "header_version": header_version,
         "page_size": page,
         "os_version": f"{major}.{minor}.{patch}",
@@ -73,11 +95,19 @@ def compare(rom, recovery):
     a = inspect(rom)
     b = inspect(recovery)
     matches = {key: a[key] == b[key]
-               for key in ("kernel_sha256", "dtb_sha256", "os_version",
-                           "os_patch_month", "page_size", "header_version")}
+               for key in ("kernel_sha256", "dtb_sha256", "ramdisk_sha256",
+                           "os_version", "os_patch_month", "page_size",
+                           "header_version")}
     return {
         "rom": a, "standalone_recovery": b, "matches": matches,
         "safe_to_replace_rom_boot": False,
+        "verification_state": {
+            "boot_header_and_components": "inspected_read_only",
+            "ramdisk_normal_android_boot": "not_validated",
+            "recovery_boot_on_device": "not_validated",
+            "avb_signatures": "not_verified",
+            "ota_and_both_slots": "not_validated",
+        },
         "reason": (
             "Coral/flame use recovery-as-boot. Even if the kernel and DTB match, "
             "the standalone recovery ramdisk is not verified to support normal "
@@ -92,12 +122,27 @@ def compare(rom, recovery):
     }
 
 
+def verify_expected_sha(info, expected, label):
+    """Optional artifact provenance check, never a replacement for AVB validation."""
+    if not re.fullmatch(r"[0-9a-fA-F]{64}", expected):
+        raise ValueError(label + " SHA-256 must be exactly 64 hexadecimal characters")
+    if info["boot_image_sha256"] != expected.lower():
+        raise ValueError(label + " image SHA-256 mismatch")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--rom-boot", type=Path, required=True)
     parser.add_argument("--recovery-boot", type=Path, required=True)
+    parser.add_argument("--rom-sha256", help="Expected SHA-256 of the ROM boot image")
+    parser.add_argument("--recovery-sha256", help="Expected SHA-256 of the standalone recovery image")
     args = parser.parse_args()
-    print(json.dumps(compare(args.rom_boot, args.recovery_boot), indent=2))
+    report = compare(args.rom_boot, args.recovery_boot)
+    if args.rom_sha256:
+        verify_expected_sha(report["rom"], args.rom_sha256, "ROM")
+    if args.recovery_sha256:
+        verify_expected_sha(report["standalone_recovery"], args.recovery_sha256, "Recovery")
+    print(json.dumps(report, indent=2))
 
 
 if __name__ == "__main__":

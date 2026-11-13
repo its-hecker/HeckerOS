@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "tools"))
-from recovery2_boot_compare import inspect, compare, PAGE_SIZE
+from recovery2_boot_compare import inspect, compare, verify_expected_sha, PAGE_SIZE
 
 
 def sample(path, kernel=b"KERNEL", ramdisk=b"ANDROID_INIT", dtb=b"DTB", patch_month=11):
@@ -45,6 +45,11 @@ class CustomRecoveryCompatibility(unittest.TestCase):
         self.assertNotEqual(result["rom"]["ramdisk_sha256"],
                             result["standalone_recovery"]["ramdisk_sha256"])
         self.assertFalse(result["safe_to_replace_rom_boot"])
+        self.assertFalse(result["matches"]["ramdisk_sha256"])
+        self.assertEqual(len(result["rom"]["boot_image_sha256"]), 64)
+        self.assertEqual(result["rom"]["boot_payload_end"], PAGE_SIZE * 3 + 3)
+        self.assertEqual(result["rom"]["ramdisk_compression"], "unknown")
+        self.assertEqual(result["verification_state"]["avb_signatures"], "not_verified")
         self.assertEqual(result["rom"]["os_version"], "17.0.0")
         self.assertEqual(result["rom"]["os_patch_month"], "2026-11")
 
@@ -74,6 +79,42 @@ class CustomRecoveryCompatibility(unittest.TestCase):
         self.a.write_bytes(bad)
         with self.assertRaisesRegex(ValueError, "Truncated"):
             inspect(self.a)
+
+
+    def test_artifact_sha_guards(self):
+        sample(self.a)
+        meta = inspect(self.a)
+        verify_expected_sha(meta, meta["boot_image_sha256"], "ROM")
+        verify_expected_sha(meta, meta["boot_image_sha256"].upper(), "ROM")
+        with self.assertRaisesRegex(ValueError, "mismatch"):
+            verify_expected_sha(meta, "0" * 64, "ROM")
+        with self.assertRaisesRegex(ValueError, "64 hexadecimal"):
+            verify_expected_sha(meta, "not-a-sha", "ROM")
+
+    def test_ramdisk_compression_and_avb_footer_are_reported_not_verified(self):
+        sample(self.a, ramdisk=b"\x1f\x8bMOCK")
+        info = inspect(self.a)
+        self.assertEqual(info["ramdisk_compression"], "gzip")
+        self.assertFalse(info["avb_footer_present"])
+        image = bytearray(self.a.read_bytes())
+        image[-64:-60] = b"AVBf"
+        self.a.write_bytes(image)
+        self.assertTrue(inspect(self.a)["avb_footer_present"])
+
+    def test_reject_invalid_patch_month(self):
+        sample(self.a, patch_month=0)
+        with self.assertRaisesRegex(ValueError, "patch month"):
+            inspect(self.a)
+        sample(self.a, patch_month=15)
+        with self.assertRaisesRegex(ValueError, "patch month"):
+            inspect(self.a)
+
+    def test_never_swappable_even_with_identical_ramdisks(self):
+        sample(self.a)
+        sample(self.b)
+        report = compare(self.a, self.b)
+        self.assertTrue(report["matches"]["ramdisk_sha256"])
+        self.assertFalse(report["safe_to_replace_rom_boot"])
 
 
 if __name__ == "__main__":

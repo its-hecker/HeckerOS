@@ -29,3 +29,30 @@ python3 tools/recovery2_boot_compare.py --rom-boot /path/to/rom/boot.img --recov
 5. Confirm OTA upgrades and rollback before changing the ROM default.
 
 The current branch does not change the ROM's boot image, partition layout, recovery code, or OTA payload. It only prepares safe verification for future integration.
+
+## November 13 integration preflight improvements
+
+The dedicated ROM branch provides a **read-only** boot-image inventory and
+provenance comparison. It now reports complete boot-image SHA-256 values,
+kernel/ramdisk/DTB sizes, ramdisk compression, and whether an AVB footer marker
+is present. An AVB footer marker is **not** verification of its signature.
+Malformed patch months and oversized/truncated images fail closed.
+
+Optional known checksums can be required:
+
+```bash
+python3 tools/recovery2_boot_compare.py \\
+  --rom-boot /path/to/rom/boot.img \\
+  --recovery-boot /path/to/HeckerRecovery-2.0-coral.img \\
+  --rom-sha256 YOUR_64_CHARACTER_SHA256 \\
+  --recovery-sha256 YOUR_64_CHARACTER_SHA256
+```
+
+The independent OrangeFox [2026-11-13 CI build](https://github.com/its-hecker/orangefox_device_google_coral/actions/runs/43417408737)
+completed all kernel, recovery and branded-image validation jobs successfully,
+including an experimental downloadable artifact. This validates **packaging only**;
+we have not tested that artifact against an actual HeckerOS boot image, normal
+Android boot, on-device decryption, both A/B slots or OTA upgrades.
+
+No automatic boot replacement, boot signing, flash command, A/B slot changes or
+shipping integration has been added to either stable device manifest.
