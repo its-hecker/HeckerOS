@@ -98,8 +98,13 @@ def compare(rom, recovery):
                for key in ("kernel_sha256", "dtb_sha256", "ramdisk_sha256",
                            "os_version", "os_patch_month", "page_size",
                            "header_version")}
+    # Exact kernel and DTB parity is a necessary (not sufficient) preflight
+    # for considering a recovery-as-boot integration. Never label it bootable.
+    mismatches = [key for key, matched in matches.items() if not matched]
     return {
         "rom": a, "standalone_recovery": b, "matches": matches,
+        "component_mismatches": mismatches,
+        "kernel_dtb_matched": matches["kernel_sha256"] and matches["dtb_sha256"],
         "safe_to_replace_rom_boot": False,
         "verification_state": {
             "boot_header_and_components": "inspected_read_only",
@@ -136,12 +141,16 @@ def main():
     parser.add_argument("--recovery-boot", type=Path, required=True)
     parser.add_argument("--rom-sha256", help="Expected SHA-256 of the ROM boot image")
     parser.add_argument("--recovery-sha256", help="Expected SHA-256 of the standalone recovery image")
+    parser.add_argument("--require-matching-kernel-dtb", action="store_true",
+                        help="Exit with an error on mismatched kernel/DTB; parity alone is NOT boot validation")
     args = parser.parse_args()
     report = compare(args.rom_boot, args.recovery_boot)
     if args.rom_sha256:
         verify_expected_sha(report["rom"], args.rom_sha256, "ROM")
     if args.recovery_sha256:
         verify_expected_sha(report["standalone_recovery"], args.recovery_sha256, "Recovery")
+    if args.require_matching_kernel_dtb and not report["kernel_dtb_matched"]:
+        parser.error("ROM and standalone recovery kernel/DTB mismatch; integration blocked")
     print(json.dumps(report, indent=2))
 
 
