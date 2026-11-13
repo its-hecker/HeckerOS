@@ -28,6 +28,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.DropdownMenu
@@ -95,6 +96,7 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
     }
     val art = state?.artwork
     val flow = LocalHeckerFlowGlass.current
+    val scheme = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(28.dp)
     val fontScale = LocalConfiguration.current.fontScale.coerceIn(1f, 2f)
     val bounds = remember { Array(MediaCardGeometry.COUNT) { FloatArray(5) } }
@@ -108,9 +110,9 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
             else android.widget.Toast.makeText(context, R.string.hecker_media_open_failed,
                 android.widget.Toast.LENGTH_SHORT).show()
         }
-        .background(if (flow) Color(0xB3191923) else Color(0xE0141721))
-        .border(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = .24f),
-            Color(0xFFB9CFFF).copy(alpha = .32f))), shape)) {
+        .background(scheme.surfaceContainerHigh.copy(alpha = if (flow) .90f else .98f))
+        .border(1.dp, Brush.verticalGradient(listOf(scheme.outlineVariant.copy(alpha = .72f),
+            scheme.primary.copy(alpha = .30f))), shape)) {
         // Fixed-cost radial shaders provide the soft light; the text and icons are never blurred.
         HeckerMediaGlow(state?.playing == true, motion, Modifier.matchParentSize())
         Layout(modifier = Modifier.fillMaxWidth().heightIn(min = preferredHeight), content = {
@@ -119,19 +121,19 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
             val duration = state?.duration ?: 0L
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(mediaTime(position), color = Color.White.copy(alpha = .65f), fontSize = 10.sp)
+                Text(mediaTime(position), color = scheme.onSurfaceVariant, fontSize = 10.sp)
                 Slider(value = position.toFloat().coerceIn(0f, duration.coerceAtLeast(1).toFloat()),
                     valueRange = 0f..duration.coerceAtLeast(1).toFloat(),
                     enabled = !square && !compactRow && duration > 0 && state?.supports(PlaybackState.ACTION_SEEK_TO) == true,
                     onValueChange = { seeking = true; position = it.toLong() },
                     onValueChangeFinished = { media.seek(position); seeking = false }, thumb = {},
-                    track = { progress -> Box(Modifier.fillMaxWidth().height(3.dp).background(Color.White.copy(alpha = .23f), CircleShape)) {
+                    track = { progress -> Box(Modifier.fillMaxWidth().height(3.dp).background(scheme.surfaceContainerHighest, CircleShape)) {
                         Box(Modifier.fillMaxWidth((progress.value / duration.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f))
-                            .height(3.dp).background(Color(0xFFD1F7FF), CircleShape))
+                            .height(3.dp).background(scheme.primary, CircleShape))
                     } }, modifier = Modifier.weight(1f).height(28.dp)
                         .semantics { contentDescription = context.getString(R.string.hecker_media_seek) })
                 Text(if (duration > 0) "−${mediaTime((duration - position).coerceAtLeast(0))}" else "",
-                    color = Color.White.copy(alpha = .65f), fontSize = 10.sp)
+                    color = scheme.onSurfaceVariant, fontSize = 10.sp)
             }
             MediaButton(R.drawable.hecker_qs_previous, R.string.hecker_media_previous,
                 !compactRow && state?.supports(PlaybackState.ACTION_SKIP_TO_PREVIOUS) == true) { media.previous() }
@@ -168,16 +170,16 @@ fun HeckerMediaCard(modifier: Modifier = Modifier, square: Boolean = false, hide
             IconButton(onClick = { menu = true }, modifier = Modifier.size(36.dp)) {
                 Icon(painterResource(R.drawable.hecker_media_more),
                     contentDescription = context.getString(R.string.hecker_media_options),
-                    tint = Color(0xFFE0E8FF), modifier = Modifier.size(18.dp))
+                    tint = scheme.onSurface, modifier = Modifier.size(18.dp))
             }
             DropdownMenu(expanded = menu && panelVisible, onDismissRequest = { menu = false },
                 modifier = Modifier.widthIn(min = 180.dp, max = 240.dp),
-                shape = RoundedCornerShape(20.dp), containerColor = Color(0xFF242938),
+                shape = RoundedCornerShape(20.dp), containerColor = scheme.surfaceContainerHigh,
                 tonalElevation = 0.dp) {
-                DropdownMenuItem(text = { Text(context.getString(R.string.hecker_media_hide), color = Color(0xFFE0E8FF), fontSize = 14.sp) },
+                DropdownMenuItem(text = { Text(context.getString(R.string.hecker_media_hide), color = scheme.onSurface, fontSize = 14.sp) },
                     onClick = { menu = false; HeckerMediaVisibility.dismiss(state) })
                 if (state?.active == true) DropdownMenuItem(
-                    text = { Text(context.getString(R.string.hecker_media_stop_app), color = Color(0xFFE0E8FF), fontSize = 14.sp) }, onClick = {
+                    text = { Text(context.getString(R.string.hecker_media_stop_app), color = scheme.onSurface, fontSize = 14.sp) }, onClick = {
                         menu = false
                         if (media.stopApp()) HeckerMediaVisibility.dismiss(state)
                         else android.widget.Toast.makeText(context, R.string.hecker_media_stop_failed,
@@ -230,7 +232,7 @@ private fun MediaArtwork(art: android.graphics.Bitmap?) {
         else arrival.snapTo(1f)
     }
     Box(Modifier.fillMaxSize().graphicsLayer { scaleX=arrival.value;scaleY=arrival.value }
-        .clip(RoundedCornerShape(11.dp)).background(Color.White.copy(alpha=.14f)), contentAlignment=Alignment.Center) {
+        .clip(RoundedCornerShape(11.dp)).background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha=.72f)), contentAlignment=Alignment.Center) {
         Crossfade(art,animationSpec=if(motion)tween(320,easing=HeckerFlowEasing) else snap(),label="mediaArtwork") { image ->
             if(image!=null) Image(image.asImageBitmap(),null,contentScale=ContentScale.Crop,modifier=Modifier.fillMaxSize())
             else Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center){ReferenceIcon(R.drawable.hecker_qs_music,24)}
@@ -247,8 +249,8 @@ private fun MediaTitles(state: HeckerQsMedia.Snapshot?, compact: Boolean = false
     // Metadata is the target, so the playback-position clock never restarts a title animation.
     Crossfade(caption,animationSpec=if(motion)tween(280,easing=HeckerFlowEasing) else snap(),label="mediaTitles") { value ->
         Column {
-            Text(value.first,color=Color.White,fontSize=if(compact)12.sp else 14.sp,lineHeight=18.sp,fontWeight=FontWeight.SemiBold,maxLines=1,overflow=TextOverflow.Ellipsis)
-            if(value.second.isNotBlank())Text(value.second,color=Color.White.copy(alpha=.7f),fontSize=if(compact)10.sp else 12.sp,lineHeight=16.sp,maxLines=1,overflow=TextOverflow.Ellipsis)
+            Text(value.first,color=MaterialTheme.colorScheme.onSurface,fontSize=if(compact)12.sp else 14.sp,lineHeight=18.sp,fontWeight=FontWeight.SemiBold,maxLines=1,overflow=TextOverflow.Ellipsis)
+            if(value.second.isNotBlank())Text(value.second,color=MaterialTheme.colorScheme.onSurfaceVariant,fontSize=if(compact)10.sp else 12.sp,lineHeight=16.sp,maxLines=1,overflow=TextOverflow.Ellipsis)
         }
     }
 }
@@ -266,7 +268,7 @@ private fun MediaButton(icon: Int, label: Int, enabled: Boolean = true, click: (
     Box(Modifier.size(44.dp).graphicsLayer { scaleX=scale;scaleY=scale }.clip(CircleShape).semantics { contentDescription = context.getString(label); role = Role.Button }
         .clickable(enabled = enabled, interactionSource=interactions, indication=androidx.compose.foundation.LocalIndication.current, onClick = click), contentAlignment = Alignment.Center) {
         Crossfade(icon,animationSpec=if(motion)tween(180,easing=HeckerFlowEasing) else snap(),label="mediaTransport") { value ->
-            ReferenceIcon(value,24,Color.White.copy(alpha=if(enabled)1f else .3f))
+            ReferenceIcon(value,24,MaterialTheme.colorScheme.onSurface.copy(alpha=if(enabled)1f else .3f))
         }
     }
 }
