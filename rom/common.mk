@@ -23,7 +23,8 @@ PRODUCT_PACKAGES += HeckerSystemUIOverlay \
     HeckerStatusBarHeightCompact \
     HeckerStatusBarHeightBalanced \
     HeckerStatusBarHeightTall
-PRODUCT_PACKAGES += HeckerHideGesturePill HeckerGestureSpace HeckerEuiccPermissions
+# Keep only the visual pill overlay; the old framework inset RRO caused taskbar instability.
+PRODUCT_PACKAGES += HeckerHideGesturePill HeckerEuiccPermissions
 # Native window blur still observes SurfaceFlinger, thermal and power-saver capability gates.
 PRODUCT_PRODUCT_PROPERTIES += ro.surface_flinger.supports_background_blur?=1
 
