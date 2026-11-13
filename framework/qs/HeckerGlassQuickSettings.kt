@@ -14,6 +14,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,7 +39,8 @@ import com.android.systemui.qs.panels.ui.viewmodel.toUiState
 fun heckerLivingScrim(blurSupported: Boolean): Color {
     val state by HeckerAmbientCharging.state.collectAsState()
     return if (blurSupported && state.shadeBlurPercent > 0)
-        Color(0xFF110E20).copy(alpha = .72f) else Color(0xFF211F2C)
+        MaterialTheme.colorScheme.surfaceContainer.copy(alpha = .74f)
+    else MaterialTheme.colorScheme.surfaceContainer
 }
 
 @Composable
@@ -101,7 +103,7 @@ fun HeckerGlassQuickSettings(tiles: List<TileViewModel>, listening: () -> Boolea
         if (pages.size > 1) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             repeat(pages.size) { index ->
                 Box(Modifier.padding(3.dp).size(if (index == pager.currentPage) 18.dp else 5.dp, 5.dp)
-                    .background(Color.White.copy(alpha = if (index == pager.currentPage) .9f else .3f), CircleShape))
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = if (index == pager.currentPage) .9f else .3f), CircleShape))
             }
         }
     }
@@ -120,10 +122,10 @@ private fun RowScope.FlowControls(brightness: (@Composable () -> Unit)?) {
 @Composable
 private fun FlowSurface(modifier: Modifier, content: @Composable BoxScope.() -> Unit) {
     val shape = RoundedCornerShape(30.dp)
+    val scheme = MaterialTheme.colorScheme
     Box(modifier.clip(shape).background(Brush.verticalGradient(listOf(
-            Color.White.copy(alpha = .16f), Color.White.copy(alpha = .075f))))
-        .border(.8.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = .33f),
-            Color.White.copy(alpha = .07f), Color.White.copy(alpha = .17f))), shape), content = content)
+            scheme.surfaceContainerHigh.copy(alpha = .94f), scheme.surfaceContainer.copy(alpha = .88f))))
+        .border(.8.dp, scheme.outlineVariant.copy(alpha = .65f), shape), content = content)
 }
 
 @Composable
@@ -137,9 +139,9 @@ private fun FlowConnection(tile: TileViewModel, modifier: Modifier) {
             horizontalArrangement = Arrangement.spacedBy(9.dp)) {
             FlowTile(tile, 44, label = false)
             Column(Modifier.weight(1f)) {
-                Text(ui.label, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium,
+                Text(ui.label, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.Medium,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
-                if (ui.secondaryLabel.isNotBlank()) Text(ui.secondaryLabel, color = Color.White.copy(alpha = .86f),
+                if (ui.secondaryLabel.isNotBlank()) Text(ui.secondaryLabel, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
@@ -157,18 +159,19 @@ private fun FlowTile(tile: TileViewModel, diameter: Int = 58, label: Boolean = t
     val motion = heckerFlowMotionAllowed()
     val scale by animateFloatAsState(if (pressed && motion) .93f else 1f,
         spring(dampingRatio = .86f, stiffness = 650f), label = "flowTilePress")
-    val fill by animateColorAsState(if (active) Color.White.copy(alpha = .94f) else Color.White.copy(alpha = .13f),
+    val scheme = MaterialTheme.colorScheme
+    val fill by animateColorAsState(if (active) scheme.primaryContainer else scheme.surfaceContainerHighest,
         label = "flowTileState")
     Column(Modifier.widthIn(min = 48.dp).then(referenceActions(tile, interactions = interactions)),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Box(Modifier.size(diameter.dp).graphicsLayer { scaleX = scale; scaleY = scale }
             .clip(CircleShape).background(fill)
-            .border(.7.dp, Color.White.copy(alpha = if (pressed) .65f else .16f), CircleShape),
+            .border(.7.dp, scheme.outlineVariant.copy(alpha = if (pressed) .90f else .40f), CircleShape),
             contentAlignment = Alignment.Center) {
             ReferenceTileIcon(tile,
-                (if (active) Color(0xFF1E73D8) else Color.White).copy(alpha = if (ui.handlesMainClick) 1f else .38f))
+                (if (active) scheme.onPrimaryContainer else scheme.onSurface).copy(alpha = if (ui.handlesMainClick) 1f else .38f))
         }
-        if (label) Text(ui.label, color = Color.White.copy(alpha = .88f), fontSize = 11.sp,
+        if (label) Text(ui.label, color = scheme.onSurfaceVariant, fontSize = 11.sp,
             maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
     }
 }
