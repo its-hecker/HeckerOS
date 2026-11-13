@@ -1,0 +1,47 @@
+name: Sync approved HeckerOS 2.0 bootanimation to Flame branches
+on:
+  push:
+    branches: [cnb_latest_stable]
+    paths:
+      - .github/workflows/heckeros2-sync-flame.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Copy approved checked animation to Flame without changing performance code
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name Hecker
+          git config user.email 118846180+its-hecker@users.noreply.github.com
+          git fetch origin cnb_latest_stable perf/flame-smoothness flame-cnb_latest_stable
+          for branch in perf/flame-smoothness flame-cnb_latest_stable; do
+            git checkout --detach "origin/$branch"
+            git checkout origin/cnb_latest_stable -- \
+              bootanimation/README.md \
+              bootanimation/payload.json \
+              bootanimation/preview-coral.mp4 \
+              bootanimation/source/heckeros2-geometric.zip.000 \
+              bootanimation/source/heckeros2-geometric.zip.001 \
+              tools/heckeros2_logo_source.py \
+              tools/heckeros2_package.py \
+              tools/heckeros2_lock_payload.py
+            git rm -f --ignore-unmatch \
+              bootanimation/source/terminal-boot.zip.000 \
+              bootanimation/source/terminal-boot.zip.001
+            git add bootanimation tools/heckeros2_logo_source.py \
+              tools/heckeros2_package.py tools/heckeros2_lock_payload.py
+            if git diff --cached --quiet; then
+              echo "No changes: $branch"
+            else
+              git commit -m 'HeckerOS 2.0: sync geometric infinite-bar bootanimation'
+              git push origin "HEAD:refs/heads/$branch"
+            fi
+          done
