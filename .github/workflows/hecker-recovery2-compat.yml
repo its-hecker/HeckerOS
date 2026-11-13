@@ -1,0 +1,21 @@
+name: Hecker Recovery 2.0 boot integration host checks
+
+on:
+  push:
+    branches: [feat/hecker-recovery-2.0]
+    paths:
+      - 'tools/recovery2_boot_compare.py'
+      - 'tests/test_recovery2_boot_compare.py'
+      - '.github/workflows/hecker-recovery2-compat.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  boot-compat-contract:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate ROM/custom-recovery boot parser and fail-closed policy
+        run: python3 -m unittest discover -s tests -p test_recovery2_boot_compare.py -v
