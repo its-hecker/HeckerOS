@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="system_blur_title">System-wide blur</string>
+    <string name="system_blur_summary">Allow Android window and background blurs. Turning this off can reduce graphics work. Launcher glass effects are controlled separately.</string>
+    <string name="system_blur_unsupported">Window-level blurs are not supported on this device.</string>
+    <string name="system_blur_write_failed">Could not change the system blur setting.</string>
+</resources>
