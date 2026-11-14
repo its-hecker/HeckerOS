@@ -58,6 +58,25 @@ class SignatureSelectionContracts(unittest.TestCase):
         self.assertIn("sharedUser != null", text)
         self.assertIn("incoming.isCoreApp()", text)
 
+    def test_signature_mismatch_permission_fix_is_limited_to_original_owner(self):
+        # Run against the full ServerHive ROM tree; standalone Suite tests skip it.
+        base = ROOT.parents[3] / "frameworks/base/services/core/java/com/android/server/pm"
+        policy_path = base / "HeckerSignatureTestPolicy.java"
+        helper_path = base / "InstallPackageHelper.java"
+        if not policy_path.exists() or not helper_path.exists():
+            self.skipTest("Framework source not checked out")
+        policy = policy_path.read_text()
+        helper = helper_path.read_text()
+        self.assertIn("existingOwner.equals(incoming.getPackageName())", policy)
+        self.assertIn("allowMismatch(previousPackage, sharedUser, null, incoming,", policy)
+        self.assertEqual(
+            3, helper.count("HeckerSignatureTestPolicy.allowOwnPermissionRedeclaration("))
+        for error in ("INSTALL_FAILED_DUPLICATE_PERMISSION_GROUP",
+                      "INSTALL_FAILED_DUPLICATE_PERMISSION",
+                      "INSTALL_FAILED_BAD_PERMISSION_GROUP"):
+            self.assertIn(error, helper)
+        self.assertIn("ownPermissionSharedUser", helper)
+
     def test_fastbootd_uses_rebranded_hecker_logo(self):
         source = (ROOT / "tools/recovery_phase1.py").read_text()
         self.assertIn('fastbootd_logo_ = LoadBitmap("fastbootd");', source)
