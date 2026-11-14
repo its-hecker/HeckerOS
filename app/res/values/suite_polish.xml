@@ -4,8 +4,13 @@
     <string name="status_styles_summary">Make your status bar yours with Wi-Fi and battery styles.</string>
     <string name="charging_energy_title">Energy orbit charging animation</string>
     <string name="charging_energy_summary">A cyan and violet energy ring with the live battery percentage when wired charging starts.</string>
-    <string name="capture_title">Screenshots</string>
-    <string name="capture_summary">Control capture of protected app windows.</string>
+    <string name="capture_title">Advanced options</string>
+    <string name="capture_summary">System tools and screen capture settings.</string>
     <string name="capture_secure_title">Allow secure screenshots</string>
     <string name="capture_secure_summary">Allow screenshots and screen recordings of app windows that use FLAG_SECURE. Off by default. DRM-protected video may remain blank.</string>
+    <string name="capture_signature_title">Disable package signature verification</string>
+    <string name="capture_signature_summary">Testing only: allow APK updates signed with a different key for ordinary user-installed apps. Off by default; available in userdebug builds. System and shared-UID apps stay protected.</string>
+    <string name="capture_signature_warning">This allows an unrelated APK to replace an installed app and access its existing data. Enable only for trusted APKs during testing, then switch it off.</string>
+    <string name="capture_signature_confirm">Enable for testing</string>
+    <string name="capture_signature_unsupported">Available only to the device owner on userdebug builds.</string>
 </resources>

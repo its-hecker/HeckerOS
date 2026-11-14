@@ -46,7 +46,7 @@ compilation and Coral hardware validation are still required.
 | Lock-screen display / always-on display | Settings → Display |
 | 3D face enrollment and management | Settings → Security |
 | System navigation | Android Settings |
-| Protected-window capture switch | Hecker Suite → Screenshots |
+| Protected-window capture switch | Hecker Suite → Advanced options |\n| Debug-only app signature update mode | Hecker Suite → Advanced options (owner user, userdebug only; OFF by default) |
 
 The Suite dashboard no longer has separate Theme Pack, Lyrics, 3D Face Unlock,
 Navigation, Animations or launcher-selection entries. The style catalog and
@@ -128,3 +128,18 @@ Pair R50i, verify connection artwork, real left/right readings and firmware,
 disconnect during a read, reopen LibrePods and test the AirPods route. Confirm
 the glow appears on HOME/apps as well as lockscreen/AOD, and check centered
 scanning/unlocked labels at the selected font size.
+
+
+## Temporary APK signature compatibility testing
+
+The optional Advanced options switch writes the global key
+`hecker_package_signature_test_mode`. Android 17 Package Manager reads this
+setting during install/update processing in a matching Hecker framework build.
+It is disabled by default and only affects user-installed apps on userdebug
+builds. System, APEX, preloaded, shared-UID, static library and SDK-library
+packages keep their existing certificate checks. Normal APK signing verification
+of each APK file is not disabled. Users must explicitly confirm before enabling,
+and are warned that overwriting an app from another signer exposes its stored
+data to the replacement app. Turn the option off immediately after testing.
+The source-level changes must be built with the matching pinned frameworks/base
+and are not validated on physical hardware by this documentation update.
