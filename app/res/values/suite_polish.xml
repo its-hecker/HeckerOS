@@ -8,9 +8,13 @@
     <string name="capture_summary">System tools and screen capture settings.</string>
     <string name="capture_secure_title">Allow secure screenshots</string>
     <string name="capture_secure_summary">Allow screenshots and screen recordings of app windows that use FLAG_SECURE. Off by default. DRM-protected video may remain blank.</string>
-    <string name="capture_signature_title">Disable package signature verification</string>
-    <string name="capture_signature_summary">Testing only: allow APK updates signed with a different key for ordinary user-installed apps. Off by default; available in userdebug builds. System and shared-UID apps stay protected.</string>
-    <string name="capture_signature_warning">This allows an unrelated APK to replace an installed app and access its existing data. Enable only for trusted APKs during testing, then switch it off.</string>
-    <string name="capture_signature_confirm">Enable for testing</string>
-    <string name="capture_signature_unsupported">Available only to the device owner on userdebug builds.</string>
+    <string name="capture_signature_title">App signature compatibility</string>
+    <string name="capture_signature_summary">Select installed user apps that may accept updates signed with a different key. Only selected apps are affected; normal APK integrity checks remain on.</string>
+    <string name="capture_signature_warning">Allowing a differently signed update for %1$s lets the new version access this app's existing data. Select only trusted test APKs.</string>
+    <string name="capture_signature_confirm">Allow this app</string>
+    <string name="capture_signature_search">Search user apps</string>
+    <string name="capture_signature_loading">Loading installed apps…</string>
+    <string name="capture_signature_empty">No matching user apps</string>
+    <string name="capture_signature_enabled">Compatibility enabled</string>
+    <string name="capture_signature_disabled">Normal signature checks</string>
 </resources>

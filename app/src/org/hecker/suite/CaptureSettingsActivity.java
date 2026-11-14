@@ -2,22 +2,16 @@
 package org.hecker.suite;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.os.Build;
+import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
-/** Native advanced controls. Package-install test mode is owner-only and off by default. */
+/** Advanced options: screen-capture compatibility and per-app signature test configuration. */
 public final class CaptureSettingsActivity extends Activity {
-    private static final String TAG = "HeckerSignatureToggle";
     private static final String SECURE_WINDOWS_KEY = "disable_secure_windows";
-    // Read by the Android 17 Package Manager in system_server.
-    private static final String SIGNATURE_TEST_KEY = "hecker_package_signature_test_mode";
-    private Switch signatureTest;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -51,93 +45,10 @@ public final class CaptureSettingsActivity extends Activity {
                 getString(R.string.capture_secure_summary), 14, false));
         page.addView(screenshots);
 
-        LinearLayout testing = Ui.card(this);
-        signatureTest = new Switch(this);
-        signatureTest.setText(R.string.capture_signature_title);
-        signatureTest.setTextColor(getColor(R.color.hecker_foreground));
-        signatureTest.setMinHeight(Ui.dp(this, 56));
-        signatureTest.setEnabled(signatureTestSupported());
-        refreshSignatureTest();
-        signatureTest.setOnClickListener(view -> {
-            if (!signatureTestSupported()) {
-                refreshSignatureTest();
-                return;
-            }
-            if (!signatureTest.isChecked()) {
-                writeSignatureTest(false);
-                return;
-            }
-            // Never turn this sensitive development setting on without consent.
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.capture_signature_title)
-                    .setMessage(R.string.capture_signature_warning)
-                    .setNegativeButton(android.R.string.cancel,
-                            (dialog, which) -> refreshSignatureTest())
-                    .setPositiveButton(R.string.capture_signature_confirm,
-                            (dialog, which) -> writeSignatureTest(true))
-                    .setOnCancelListener(dialog -> refreshSignatureTest())
-                    .show();
-        });
-        testing.addView(signatureTest);
-        testing.addView(Ui.text(this,
-                getString(R.string.capture_signature_summary), 14, false));
-        if (!signatureTestSupported()) {
-            testing.addView(Ui.text(this,
-                    getString(R.string.capture_signature_unsupported), 12, false));
-        }
-        page.addView(testing);
+        // No global signature bypass switch. Always open the searchable per-app picker.
+        Ui.actionCard(this, page, R.string.capture_signature_title,
+                R.string.capture_signature_summary,
+                view -> startActivity(new Intent(this, SignatureTestAppsActivity.class)));
         Ui.scroll(this, page);
-    }
-
-    private boolean signatureTestSupported() {
-        // The framework enforces userdebug/eng at the actual package check.
-        // Do not gate this global Settings switch on the Activity user identity.
-        return Build.IS_DEBUGGABLE;
-    }
-
-    private void refreshSignatureTest() {
-        if (signatureTest == null) return;
-        boolean active = false;
-        if (signatureTestSupported()) {
-            try {
-                active = Settings.Global.getInt(getContentResolver(),
-                        SIGNATURE_TEST_KEY, 0) == 1;
-            } catch (RuntimeException failure) {
-                Log.e(TAG, "Unable to read signature testing setting", failure);
-                active = false;
-            }
-        }
-        signatureTest.setChecked(active);
-    }
-
-    private void writeSignatureTest(boolean enabled) {
-        boolean written = false;
-        try {
-            if (signatureTestSupported()) {
-                written = Settings.Global.putInt(getContentResolver(),
-                        SIGNATURE_TEST_KEY, enabled ? 1 : 0);
-                final int stored = Settings.Global.getInt(getContentResolver(),
-                        SIGNATURE_TEST_KEY, -1);
-                written = written && stored == (enabled ? 1 : 0);
-                if (!written) {
-                    Log.e(TAG, "Signature test toggle did not persist: requested="
-                            + enabled + " readback=" + stored);
-                }
-            } else {
-                Log.w(TAG, "Signature test toggle requires a debuggable build");
-            }
-        } catch (RuntimeException failure) {
-            Log.e(TAG, "Signature test toggle write or readback failed", failure);
-        }
-        if (!written) {
-            Toast.makeText(this, R.string.native_page_unavailable,
-                    Toast.LENGTH_LONG).show();
-        }
-        refreshSignatureTest();
-    }
-
-    @Override protected void onResume() {
-        super.onResume();
-        refreshSignatureTest();
     }
 }

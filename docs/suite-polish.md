@@ -130,16 +130,18 @@ the glow appears on HOME/apps as well as lockscreen/AOD, and check centered
 scanning/unlocked labels at the selected font size.
 
 
-## Temporary APK signature compatibility testing
+## Per-app APK signature compatibility testing
 
-The optional Advanced options switch writes the global key
-`hecker_package_signature_test_mode`. Android 17 Package Manager reads this
-setting during install/update processing in a matching Hecker framework build.
-It is disabled by default and only affects user-installed apps on userdebug
-builds. System, APEX, preloaded, shared-UID, static library and SDK-library
-packages keep their existing certificate checks. Normal APK signing verification
-of each APK file is not disabled. Users must explicitly confirm before enabling,
-and are warned that overwriting an app from another signer exposes its stored
-data to the replacement app. Turn the option off immediately after testing.
-The source-level changes must be built with the matching pinned frameworks/base
-and are not validated on physical hardware by this documentation update.
+Hecker Lab → Advanced options → App signature compatibility opens a searchable
+list of eligible, installed user applications, showing their icon, name,
+package identifier and current setting. Each app must be chosen explicitly.
+
+Suite persists a JSON object of enabled package names under
+`Settings.Global.hecker_signature_allowed_packages`; it reads the value back
+before claiming success. Package Manager only applies its test compatibility
+when the exact incoming package is explicitly enabled. System, shared-UID,
+APEX and preloaded apps remain protected, and incoming APK cryptographic
+signature validation remains in effect. The old device-wide switch is unused.
+The settings default to an empty allowlist on a new installation.
+
+This is a source checkpoint. Compile and device-install checks are required.
