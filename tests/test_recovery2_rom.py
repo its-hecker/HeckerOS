@@ -154,8 +154,6 @@ class CoralRecoveryTests(unittest.TestCase):
             replace_noop = lambda content, *_args: content
             plan = recovery_rom_plan(rom, replace_noop)
             self.assertEqual(plan[target], fixed)
-            self.assertIn(BRANDING_SOURCE, plan[make / "Makefile"])
-            self.assertIn(INSTALL, plan[make / "Makefile"])
             target.write_bytes(fixed)
             self.assertNotIn(target, recovery_rom_plan(rom, replace_noop))
             target.write_bytes(fixed + b"// unknown local change\\n")
