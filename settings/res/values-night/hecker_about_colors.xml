@@ -8,4 +8,7 @@
     <color name="hecker_about_secondary">@android:color/system_on_surface_variant_dark</color>
     <color name="hecker_about_icon">@android:color/system_primary_dark</color>
     <color name="hecker_about_divider">@android:color/system_outline_variant_dark</color>
+    <!-- Follow the same Material You container pair as the official-build badge. -->
+    <color name="hecker_about_maintainer_surface">@android:color/system_primary_container_dark</color>
+    <color name="hecker_about_maintainer_text">@android:color/system_on_primary_container_dark</color>
 </resources>
