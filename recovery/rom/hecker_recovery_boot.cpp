@@ -28,6 +28,7 @@ namespace {
 constexpr char kRoot[] = "/hecker-recovery";
 constexpr char kArchive[] = "/hecker-recovery.cpio";
 constexpr char kCpio[] = "/system/bin/cpio";
+constexpr char kToybox[] = "/system/bin/toybox";
 constexpr char kRecoveryInit[] = "/system/bin/init";
 constexpr size_t kExpandedLimit = 96 * 1024 * 1024;
 constexpr char kMisc[] = "/dev/block/by-name/misc";
@@ -52,15 +53,21 @@ bool InteractiveBoot() {
 
     if (merge.magic == MISC_VIRTUAL_AB_MAGIC_HEADER &&
         merge.version != 1 && merge.version != MISC_VIRTUAL_AB_MESSAGE_VERSION) {
+        LOG(WARNING) << "Hecker Recovery 2.0: unfamiliar Virtual A/B metadata, using stock UI";
         return false;
     }
 
     const unsigned status =
             merge.magic == MISC_VIRTUAL_AB_MAGIC_HEADER ? merge.merge_status : kNoMerge;
-    return UseTouchRecovery(std::string_view(bcb.command, strnlen(bcb.command, sizeof(bcb.command))),
-                            std::string_view(bcb.recovery,
-                                             strnlen(bcb.recovery, sizeof(bcb.recovery))),
-                            status);
+    const bool interactive = UseTouchRecovery(
+            std::string_view(bcb.command, strnlen(bcb.command, sizeof(bcb.command))),
+            std::string_view(bcb.recovery, strnlen(bcb.recovery, sizeof(bcb.recovery))),
+            status);
+    if (!interactive) {
+        LOG(INFO) << "Hecker Recovery 2.0: queued recovery command or snapshot merge; "
+                     "using Android 17 recovery";
+    }
+    return interactive;
 }
 
 bool Unpack(int input, int output) {
@@ -110,7 +117,9 @@ bool ExtractRecovery() {
     pid_t child = fork();
     if (child == 0) {
         if (chdir(kRoot) == 0 && dup2(cpio.get(), STDIN_FILENO) == STDIN_FILENO) {
+            // Recovery builds may provide cpio only as a Toybox applet.
             execl(kCpio, kCpio, "-idu", "--quiet", nullptr);
+            execl(kToybox, kToybox, "cpio", "-idu", nullptr);
         }
         _exit(127);
     }
@@ -122,7 +131,8 @@ bool ExtractRecovery() {
         access("/hecker-recovery/system/bin/recovery", X_OK) != 0 ||
         access("/hecker-recovery/twres/ui.xml", R_OK) != 0 ||
         mount(kRoot, kRoot, nullptr, MS_BIND, nullptr) != 0) {
-        LOG(ERROR) << "Could not stage the Hecker Recovery root";
+        LOG(ERROR) << "Could not stage the Hecker Recovery root (cpio exit="
+                   << (WIFEXITED(status) ? WEXITSTATUS(status) : -1) << ")";
         std::error_code error;
         std::filesystem::remove_all(kRoot, error);
         if (error) {
@@ -136,7 +146,13 @@ bool ExtractRecovery() {
 }  // namespace
 
 void StartTouchRecovery() {
-    if (!InteractiveBoot() || !ExtractRecovery()) {
+    if (!InteractiveBoot()) {
+        LOG(INFO) << "Hecker Recovery 2.0: interactive boot not selected";
+        return;
+    }
+    LOG(INFO) << "Hecker Recovery 2.0: interactive boot selected";
+    if (!ExtractRecovery()) {
+        LOG(ERROR) << "Hecker Recovery 2.0: OrangeFox staging failed; using stock recovery";
         return;
     }
     LOG(INFO) << "Starting OrangeFox-based Hecker Recovery";
