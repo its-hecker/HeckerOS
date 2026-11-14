@@ -5,17 +5,15 @@ from pathlib import Path
 
 SUITE = Path(__file__).resolve().parents[1]
 SOURCES = SUITE / "recovery/rom"
-SOURCE_PATH = "vendor/hecker/floral/suite"
 HOOK = "    SetInitAvbVersionInRecovery();\n"
 INCLUDE = '#include "first_stage_init.h"\n'
 BOARD = "$(BOARD_RECOVERY_IMAGE_PREPARE)"
 MAKE_ANCHOR = "\t" + BOARD + "\n"
-INSTALL = ("\tpython3 " + SOURCE_PATH + "/tools/recovery2_rom.py install "
+INSTALL = ("\t$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom install "
            "$(ZSTD) out/hecker-recovery2-coral.cpio.gz "
            "$(TARGET_RECOVERY_ROOT_OUT)\n")
 DEPENDENCIES = ("$(ZSTD)", "out/hecker-recovery2-coral.cpio.gz",
-                SOURCE_PATH + "/tools/recovery2_rom.py",
-                SOURCE_PATH + "/tools/recovery2_boot_compare.py")
+                "$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom")
 
 
 def recovery_rom_plan(rom, replace, revert=False):
@@ -98,8 +96,9 @@ ifeq ($(TARGET_PRODUCT),hecker_coral)
 .PHONY: hecker-recovery-ota-check
 heckeros: hecker-recovery-ota-check
 hecker-recovery-ota-check: $(INTERNAL_OTA_PACKAGE_TARGET) $(INSTALLED_BOOTIMAGE_TARGET) \\
-    $(ZSTD) $(AVBTOOL) $(HOST_OUT_EXECUTABLES)/ota_extractor
-	python3 vendor/hecker/floral/suite/tools/recovery2_rom.py verify \\
+    $(ZSTD) $(AVBTOOL) $(HOST_OUT_EXECUTABLES)/ota_extractor \\
+    $(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom
+	$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom verify \\
 	    $(ZSTD) $(AVBTOOL) $(HOST_OUT_EXECUTABLES)/ota_extractor \\
 	    $(PRODUCT_OUT)/boot.img $(INTERNAL_OTA_PACKAGE_TARGET)
 endif
