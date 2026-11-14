@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
 import io
-import base64
 from pathlib import Path
 import stat
 import subprocess
@@ -31,8 +30,8 @@ def archive(files):
 class CoralRecoveryTests(unittest.TestCase):
     def test_packaged_hecker_branding_replaces_splash_and_about(self):
         # Synthetic OrangeFox archive: exact theme contracts, no real device access.
-        logo = (PNG_MAGIC + b"fake_png_for_test" + b"\\x00\\x00\\x00\\x00"
-                + b"IEND" + b"\\x00\\x00\\x00\\x00")
+        logo = (PNG_MAGIC + b"fake_png_for_test" + b"\x00\x00\x00\x00"
+                + b"IEND" + b"\x00\x00\x00\x00")
         files = {
             FOX_INIT: b"init", FOX_RECOVERY: b"recovery", FOX_THEME: b"ui",
             FOX_SH: b"shell", RECOVERY_SEPOLICY: b"policy",
