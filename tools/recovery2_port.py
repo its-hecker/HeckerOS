@@ -15,6 +15,23 @@ INSTALL = ("\t$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom install "
 DEPENDENCIES = ("$(ZSTD)", "out/hecker-recovery2-coral.cpio.gz",
                 "$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom")
 
+# Only migrate the exact previously generated source. Any other local change
+# still fails closed, preserving the guarded ROM preparation workflow.
+LEGACY_FD_CALLS = (
+    (b"!Unpack(input.get(), cpio.get())", b"!Unpack(input, cpio)"),
+    (b"lseek(cpio.get(), 0, SEEK_SET)", b"lseek(cpio, 0, SEEK_SET)"),
+    (b"dup2(cpio.get(), STDIN_FILENO)", b"dup2(cpio, STDIN_FILENO)"),
+)
+
+
+def previous_recovery_boot_cpp(expected):
+    old = expected
+    for corrected, legacy in LEGACY_FD_CALLS:
+        if old.count(corrected) != 1:
+            raise ValueError("Unrecognized Hecker Recovery 2.0 file-descriptor patch")
+        old = old.replace(corrected, legacy, 1)
+    return old
+
 
 def recovery_rom_plan(rom, replace, revert=False):
     core = rom / "system/core/init"
@@ -23,11 +40,14 @@ def recovery_rom_plan(rom, replace, revert=False):
     for name in ("hecker_recovery_boot.cpp", "hecker_recovery_boot.h"):
         target = core / name
         expected = (SOURCES / name).read_bytes()
-        if target.exists() and target.read_bytes() != expected:
+        previous = (previous_recovery_boot_cpp(expected)
+                    if name == "hecker_recovery_boot.cpp" else expected)
+        current = target.read_bytes() if target.exists() else None
+        if current is not None and current not in (expected, previous):
             raise ValueError(f"Unfamiliar Coral recovery source: {target}")
-        if revert and target.exists():
+        if revert and current is not None:
             files[target] = None
-        elif not revert and not target.exists():
+        elif not revert and current != expected:
             files[target] = expected
 
     init = core / "first_stage_init.cpp"
