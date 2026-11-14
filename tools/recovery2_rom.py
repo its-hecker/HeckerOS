@@ -42,7 +42,7 @@ BRAND_IMAGE = "twres/images/Hecker/logo.png"
 BRAND_SPLASH = "twres/splash.xml"
 BRAND_RESOURCES = "twres/resources/images.xml"
 BRAND_SETTINGS = "twres/pages/settings.xml"
-PNG_MAGIC = b"\\x89PNG\\r\\n\\x1a\\n"
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 SOURCE_CATALOGS = {"ramdisk-files.sha256sum", "ramdisk-files.txt"}
 MUTATION_PAGES = {FOX_INSTALL_PAGE, "twres/pages/install.xml", "twres/pages/settings.xml"}
 REFLASH_ITEMS = (b'<listitem name="{@auto_reflashtwrp_chk}">',
@@ -128,10 +128,14 @@ def rebrand_theme(name, data):
                                 b'filename="Hecker/logo"', "splash logo")
         data = replace_required(data, b'<text>OrangeFox</text>',
                                 b'<text>HeckerOS</text>', "splash title")
+        data = replace_required(data,
+                                b'filename="Hecker/logo" retainaspect="1" scale="2.0"',
+                                b'filename="Hecker/logo" retainaspect="1" scale="1.0"',
+                                "splash scale")
         # Keep the requested black splash, without an old OrangeFox wallpaper.
         data, changed = re.subn(
-            rb'<image>\\s*<image resource="splash_bg"\\s*/>\\s*'
-            rb'<placement[^>]+/>\\s*</image>', b'', data, count=1)
+            rb'<image>\s*<image resource="splash_bg"\s*/>\s*'
+            rb'<placement[^>]+/>\s*</image>', b'', data, count=1)
         if changed != 1:
             raise ValueError("Unknown OrangeFox splash background")
     elif name == BRAND_RESOURCES:
@@ -139,8 +143,8 @@ def rebrand_theme(name, data):
             raise ValueError("Recovery theme already has a hecker_logo resource")
         data = replace_required(
             data, b'</resources>',
-            b'\\n        <image name="hecker_logo" filename="Hecker/logo" '
-            b'retainaspect="1"/>\\n    </resources>', "resource catalog")
+            b'\n        <image name="hecker_logo" filename="Hecker/logo" '
+            b'retainaspect="1"/>\n    </resources>', "resource catalog")
     elif name == FOX_MAIN_PAGE:
         data = replace_required(data, b'<image resource="splash_logo_o"/>',
                                 b'<image resource="hecker_logo"/>',
@@ -158,7 +162,7 @@ def rebrand_theme(name, data):
 def patch_payload(archive, output, bootprop, fstab, brand_png=None):
     if brand_png is not None:
         if (not brand_png.startswith(PNG_MAGIC) or len(brand_png) > 2 * 1024 * 1024
-                or brand_png[-12:-8] != b"IEND"):
+                or brand_png[-8:-4] != b"IEND"):
             raise ValueError("HeckerOS Recovery logo is not a valid-sized PNG")
     required = MUTATION_PAGES | {FOX_MAIN_PAGE, ROM_FSTAB, FOX_INIT,
                                 FOX_RECOVERY, FOX_THEME, FOX_SH, RECOVERY_SEPOLICY}
