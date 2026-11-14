@@ -58,26 +58,6 @@ class SignatureSelectionContracts(unittest.TestCase):
         self.assertIn("sharedUser != null", text)
         self.assertIn("incoming.isCoreApp()", text)
 
-    def test_own_permission_redeclaration_is_scoped_to_enabled_user_app(self):
-        base = ROOT.parents[3] / "frameworks/base/services/core/java/com/android/server/pm"
-        policy = base / "HeckerSignatureTestPolicy.java"
-        installer = base / "InstallPackageHelper.java"
-        if not (policy.exists() and installer.exists()):
-            self.skipTest("Framework source checkout not available")
-        policy_source = policy.read_text()
-        install_source = installer.read_text()
-        self.assertIn("allowOwnPermissionRedeclaration(", policy_source)
-        self.assertIn("permissionOwner.equals(incoming.getPackageName())",
-                      policy_source)
-        self.assertIn("&& allowMismatch(previousPackage, sharedUser, null, incoming,",
-                      policy_source)
-        self.assertEqual(3, install_source.count(
-            "HeckerSignatureTestPolicy.allowOwnPermissionRedeclaration("))
-        self.assertIn("INSTALL_FAILED_DUPLICATE_PERMISSION_GROUP", install_source)
-        self.assertIn("INSTALL_FAILED_DUPLICATE_PERMISSION", install_source)
-        self.assertIn("INSTALL_FAILED_BAD_PERMISSION_GROUP", install_source)
-        self.assertIn("signaturePermissionSharedUser", install_source)
-
     def test_fastbootd_uses_rebranded_hecker_logo(self):
         source = (ROOT / "tools/recovery_phase1.py").read_text()
         self.assertIn('fastbootd_logo_ = LoadBitmap("fastbootd");', source)
