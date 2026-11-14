@@ -5,14 +5,15 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
 /** Native advanced controls. Package-install test mode is owner-only and off by default. */
 public final class CaptureSettingsActivity extends Activity {
+    private static final String TAG = "HeckerSignatureToggle";
     private static final String SECURE_WINDOWS_KEY = "disable_secure_windows";
     // Read by the Android 17 Package Manager in system_server.
     private static final String SIGNATURE_TEST_KEY = "hecker_package_signature_test_mode";
@@ -89,7 +90,9 @@ public final class CaptureSettingsActivity extends Activity {
     }
 
     private boolean signatureTestSupported() {
-        return Build.IS_DEBUGGABLE && UserHandle.myUserId() == UserHandle.USER_SYSTEM;
+        // The framework enforces userdebug/eng at the actual package check.
+        // Do not gate this global Settings switch on the Activity user identity.
+        return Build.IS_DEBUGGABLE;
     }
 
     private void refreshSignatureTest() {
@@ -99,7 +102,8 @@ public final class CaptureSettingsActivity extends Activity {
             try {
                 active = Settings.Global.getInt(getContentResolver(),
                         SIGNATURE_TEST_KEY, 0) == 1;
-            } catch (SecurityException failure) {
+            } catch (RuntimeException failure) {
+                Log.e(TAG, "Unable to read signature testing setting", failure);
                 active = false;
             }
         }
@@ -112,9 +116,18 @@ public final class CaptureSettingsActivity extends Activity {
             if (signatureTestSupported()) {
                 written = Settings.Global.putInt(getContentResolver(),
                         SIGNATURE_TEST_KEY, enabled ? 1 : 0);
+                final int stored = Settings.Global.getInt(getContentResolver(),
+                        SIGNATURE_TEST_KEY, -1);
+                written = written && stored == (enabled ? 1 : 0);
+                if (!written) {
+                    Log.e(TAG, "Signature test toggle did not persist: requested="
+                            + enabled + " readback=" + stored);
+                }
+            } else {
+                Log.w(TAG, "Signature test toggle requires a debuggable build");
             }
-        } catch (SecurityException failure) {
-            // A denied privileged setting must never leave a misleading checked switch.
+        } catch (RuntimeException failure) {
+            Log.e(TAG, "Signature test toggle write or readback failed", failure);
         }
         if (!written) {
             Toast.makeText(this, R.string.native_page_unavailable,
