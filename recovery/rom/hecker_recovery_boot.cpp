@@ -16,6 +16,7 @@
 #include <zstd.h>
 
 #include <array>
+#include <filesystem>
 #include <memory>
 
 #include "block_dev_initializer.h"
@@ -25,7 +26,7 @@ namespace android::init::hecker_recovery {
 namespace {
 
 constexpr char kRoot[] = "/hecker-recovery";
-constexpr char kArchive[] = "/hecker-recovery/.cpio";
+constexpr char kArchive[] = "/hecker-recovery.cpio";
 constexpr char kCpio[] = "/system/bin/cpio";
 constexpr char kRecoveryInit[] = "/system/bin/init";
 constexpr size_t kExpandedLimit = 96 * 1024 * 1024;
@@ -90,18 +91,19 @@ bool Unpack(int input, int output) {
 
 bool ExtractRecovery() {
     android::base::unique_fd input(open(kPayload, O_RDONLY | O_CLOEXEC | O_NOFOLLOW));
-    if (input < 0 || mkdir(kRoot, 0755) != 0 ||
-        mount("tmpfs", kRoot, "tmpfs", 0, "mode=0755,size=192M") != 0) {
-        PLOG(ERROR) << "Could not stage Hecker Recovery";
+    if (input < 0) {
+        PLOG(ERROR) << "Could not read the Hecker Recovery payload";
         return false;
     }
-    // Write the verified archive on the original ramdisk so it can be freed
-    // before handing its separate tmpfs to OrangeFox.
+    // Use an anonymous staging file and validate decompression before cpio.
     android::base::unique_fd cpio(open(kArchive, O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, 0600));
     if (cpio < 0 || unlink(kArchive) != 0 || !Unpack(input, cpio) ||
         lseek(cpio, 0, SEEK_SET) != 0) {
         LOG(ERROR) << "Could not unpack the Hecker Recovery payload";
-        umount2(kRoot, MNT_DETACH);
+        return false;
+    }
+    if (mkdir(kRoot, 0755) != 0) {
+        PLOG(ERROR) << "Could not stage Hecker Recovery";
         return false;
     }
 
@@ -118,9 +120,14 @@ bool ExtractRecovery() {
         !WIFEXITED(status) || WEXITSTATUS(status) != 0 ||
         access("/hecker-recovery/system/bin/init", X_OK) != 0 ||
         access("/hecker-recovery/system/bin/recovery", X_OK) != 0 ||
-        access("/hecker-recovery/twres/ui.xml", R_OK) != 0) {
-        LOG(ERROR) << "Could not extract Hecker Recovery";
-        umount2(kRoot, MNT_DETACH);
+        access("/hecker-recovery/twres/ui.xml", R_OK) != 0 ||
+        mount(kRoot, kRoot, nullptr, MS_BIND, nullptr) != 0) {
+        LOG(ERROR) << "Could not stage the Hecker Recovery root";
+        std::error_code error;
+        std::filesystem::remove_all(kRoot, error);
+        if (error) {
+            LOG(WARNING) << "Could not remove the incomplete Hecker Recovery root: " << error;
+        }
         return false;
     }
     return true;

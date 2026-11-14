@@ -15,7 +15,7 @@ Coral uses header v2 recovery-as-boot and its boot partition is 64 MiB.
 Android 17 init retains the existing normal-boot switch to
 `/first_stage_ramdisk`. For an interactive recovery request, init checks the
 bootloader message and the Virtual A/B state, then extracts OrangeFox into a
-separate in-memory filesystem and starts its init. This keeps its Android
+separate root under the initramfs and starts its init. This keeps its Android
 12.1 libraries and SELinux policy together. It receives the fstab and boot
 properties from that Android 17 build.
 

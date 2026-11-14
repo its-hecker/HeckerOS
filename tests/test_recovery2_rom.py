@@ -9,7 +9,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
-from recovery2_rom import (BOOT_PROP, FASTBOOT, FLASH_ZIP, FOX_DEVICE_INIT, FOX_INIT,
+from recovery2_rom import (BOOT_PROP, FASTBOOT, FLASH_ZIP, FOX_INIT,
                           FOX_INSTALL_PAGE, FOX_RECOVERY, FOX_SH, FOX_THEME, NATIVE_FASTBOOT,
                           NATIVE_SIDELOAD, RECOVERY_SEPOLICY, REFLASH_ITEMS, ROM_FSTAB, SIDELOAD,
                           add_entry, entries, patch_payload)
@@ -30,7 +30,6 @@ class CoralRecoveryTests(unittest.TestCase):
         source = archive({
             FOX_INIT: b"init", FOX_RECOVERY: b"recovery", FOX_THEME: b"ui",
             FOX_SH: b"shell", RECOVERY_SEPOLICY: b"policy",
-            FOX_DEVICE_INIT: b"import /init.recovery.qcom_decrypt.rc\non boot\n",
             FOX_INSTALL_PAGE: SIDELOAD + b'<action function="page">action_page</action>',
             "twres/pages/main.xml": FASTBOOT,
             "twres/pages/install.xml": REFLASH_ITEMS[0] + b"</listitem>" + FLASH_ZIP * 2,
@@ -47,7 +46,6 @@ class CoralRecoveryTests(unittest.TestCase):
         self.assertNotIn(REFLASH_ITEMS[0], files["twres/pages/install.xml"])
         self.assertEqual(files["twres/pages/install.xml"].count(b"tw_auto_reflashtwrp=0"), 2)
         self.assertEqual(files[FOX_INIT], b"init")
-        self.assertTrue(files[FOX_DEVICE_INIT].startswith(b"import "))
 
     def test_rejects_truncated_or_escaping_archive(self):
         valid = archive({"system/bin/init": b"init", "TRAILER!!!": b""})

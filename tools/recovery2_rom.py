@@ -28,7 +28,6 @@ FOX_RECOVERY = "system/bin/recovery"
 FOX_THEME = "twres/ui.xml"
 FOX_INSTALL_PAGE = "twres/pages/advanced.xml"
 FOX_MAIN_PAGE = "twres/pages/main.xml"
-FOX_DEVICE_INIT = "init.recovery.coral.rc"
 FOX_SH = "system/bin/sh"
 RECOVERY_SEPOLICY = "sepolicy"
 BOOT_PROP = "system/etc/ramdisk/build.prop"
@@ -107,7 +106,7 @@ def add_entry(output, name, header, data):
 
 
 def patch_payload(archive, output, bootprop, fstab):
-    required = MUTATION_PAGES | {FOX_MAIN_PAGE, FOX_DEVICE_INIT, ROM_FSTAB, FOX_INIT,
+    required = MUTATION_PAGES | {FOX_MAIN_PAGE, ROM_FSTAB, FOX_INIT,
                                 FOX_RECOVERY, FOX_THEME, FOX_SH, RECOVERY_SEPOLICY}
     found = set()
     for name, _, header, data in entries(archive):
@@ -140,10 +139,6 @@ def patch_payload(archive, output, bootprop, fstab):
             data = data.replace(FLASH_ZIP,
                                 b'<action function="set">tw_auto_reflashtwrp=0</action>\n'
                                 b'\t\t\t\t' + FLASH_ZIP)
-        if name == FOX_DEVICE_INIT:
-            import_end = data.index(b"\n") + 1
-            data = (data[:import_end] + b"\non early-init\n"
-                    b"    restorecon_recursive /system /sbin /vendor /twres\n" + data[import_end:])
         if name == ROM_FSTAB:
             data = fstab
         if name == "TRAILER!!!":

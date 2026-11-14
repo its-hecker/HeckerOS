@@ -39,7 +39,8 @@ def recovery_rom_plan(rom, replace, revert=False):
                       '#include "hecker_recovery_boot.h"\n#endif\n', str(init), revert)
     updated = replace(updated, HOOK, HOOK + '''
 #if defined(HECKER_TOUCH_RECOVERY)
-    if (boot_mode == BootMode::RECOVERY_MODE && IsRecoveryMode() &&
+    if (boot_mode == BootMode::RECOVERY_MODE && !ForceNormalBoot(cmdline, bootconfig) &&
+        IsRecoveryMode() &&
         access(hecker_recovery::kPayload, R_OK) == 0) {
         hecker_recovery::StartTouchRecovery();
     }
