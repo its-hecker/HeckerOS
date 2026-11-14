@@ -37,7 +37,6 @@ RECOVERY_SEPOLICY = "sepolicy"
 BOOT_PROP = "system/etc/ramdisk/build.prop"
 ROM_FSTAB = "first_stage_ramdisk/fstab.sm8150"
 ROM_MARKER = b"Starting OrangeFox-based Hecker Recovery"
-BRANDING_ASSET = Path(__file__).resolve().parents[1] / "recovery/res-xxhdpi/images/logo_image.png"
 BRAND_IMAGE = "twres/images/Hecker/logo.png"
 BRAND_SPLASH = "twres/splash.xml"
 BRAND_RESOURCES = "twres/resources/images.xml"
@@ -254,13 +253,15 @@ def download(cache):
             temp.unlink(missing_ok=True)
 
 
-def install(zstd, source, root):
+def install(zstd, source, root, brand_asset):
     with source.open("rb") as stream:
         compressed = stream.read(FOX_SIZE + 1)
     if len(compressed) != FOX_SIZE or hashlib.sha256(compressed).hexdigest() != FOX_SHA256:
         raise ValueError("OrangeFox release ramdisk checksum mismatch")
     archive = load_gzip(io.BytesIO(compressed))
-    brand_png = BRANDING_ASSET.read_bytes()
+    # Source art is explicitly supplied by the build system; the Soong host
+    # executable is generated under out/ and has no adjacent source tree.
+    brand_png = brand_asset.read_bytes()
     fstab = root / ROM_FSTAB
     bootprop = fstab.parent / BOOT_PROP
     with tempfile.NamedTemporaryFile(dir=root) as cpio, tempfile.NamedTemporaryFile(
@@ -341,6 +342,7 @@ def main():
     stage.add_argument("zstd")
     stage.add_argument("source", type=Path)
     stage.add_argument("root", type=Path)
+    stage.add_argument("brand_asset", type=Path)
     check = actions.add_parser("verify")
     check.add_argument("zstd")
     check.add_argument("avbtool")
@@ -352,7 +354,7 @@ def main():
         if args.action == "download":
             download(args.cache)
         elif args.action == "install":
-            install(args.zstd, args.source, args.root)
+            install(args.zstd, args.source, args.root, args.brand_asset)
         else:
             verify(args.zstd, args.avbtool, args.extractor, args.image, args.ota)
     except (OSError, ValueError, zipfile.BadZipFile, KeyError, subprocess.CalledProcessError) as error:
