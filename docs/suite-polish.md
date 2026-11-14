@@ -46,7 +46,7 @@ compilation and Coral hardware validation are still required.
 | Lock-screen display / always-on display | Settings → Display |
 | 3D face enrollment and management | Settings → Security |
 | System navigation | Android Settings |
-| Protected-window capture switch | Hecker Suite → Screenshots |
+| Protected-window capture switch | Hecker Suite → Advanced options |
 
 The Suite dashboard no longer has separate Theme Pack, Lyrics, 3D Face Unlock,
 Navigation, Animations or launcher-selection entries. The style catalog and
