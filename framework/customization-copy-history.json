@@ -60,7 +60,8 @@
   ],
   "frameworks/base/services/core/java/com/android/server/theme/ThemeEngineManagerService.java": [
     "98f55684b508bbb90485a4db8d6af1e7f040c357",
-    "9b5712f0cd78eaf293c8a232257f9fc52915459c"
+    "9b5712f0cd78eaf293c8a232257f9fc52915459c",
+    "1d7a31bc07cee040daf1cb51911923a8712b00bd"
   ],
   "frameworks/base/core/java/android/content/res/IThemeEngineManager.aidl": [
     "77d4a4ec040b7dc0b8e754e84da3898dc549e595"
@@ -156,7 +157,8 @@
     "5718081f197c2b5a8c0616fd55ce92f760ed6f16",
     "0c3c6d39c6f3345b5038345bbdd679b57a0a51f3",
     "4985ee414689bf5efe0141f9413189ecdc46e381",
-    "12be02056fd198820b5f135d089309a9f16b09d6"
+    "12be02056fd198820b5f135d089309a9f16b09d6",
+    "521bca82497176d8717f7e0c2c4825a5deca3500"
   ],
   "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutPhonePreference.java": [
     "19e0f05a03cb342192a98c411420f5572b8d0da9",
@@ -400,7 +402,8 @@
   "packages/apps/Settings/res/values-night/hecker_about_colors.xml": [
     "38f85ef382b8898179015eb08306487a46a9175b",
     "ac7413d4a0cb0964fc888a9013c3fb6474c6d81b",
-    "cee0c4b788d2d8f8342aa01606274a97d758e25c"
+    "cee0c4b788d2d8f8342aa01606274a97d758e25c",
+    "2673cb099c04787ef3d13f3e18e732e48be721fd"
   ],
   "frameworks/base/packages/SystemUI/src/com/android/systemui/hecker/MediaCardGeometry.java": [
     "7257bf7b8e6cb946e85263629b4b1c3399a6001e",
@@ -443,7 +446,8 @@
   ],
   "packages/apps/Settings/res/values/hecker_about_colors.xml": [
     "04b30c7e2adda453c303fff4a393d948b3801ba3",
-    "ed679a8a8df9d9b5221e11ec7532d88a34f9931e"
+    "ed679a8a8df9d9b5221e11ec7532d88a34f9931e",
+    "2ef98a60f3de5fc2e9ee280ea09e8a92bdbca306"
   ],
   "packages/apps/Settings/res/drawable/hecker_about_hero.xml": [
     "40aa7e9e502cfa0e12b619c9ca0e26f18eb7795e"
@@ -453,5 +457,11 @@
   ],
   "packages/apps/Settings/src/com/android/settings/hecker/HeckerAboutGlowLayout.java": [
     "035ce5dd61d6bca52af9ca9062acd229e3bcf768"
+  ],
+  "packages/apps/Settings/res/drawable/hecker_about_maintainer_surface.xml": [
+    "dbb109d2632bf940af7938e53b03e62d7f99b29a"
+  ],
+  "packages/apps/Settings/res/drawable/hecker_about_verified.xml": [
+    "c8ae194e59030e892d4767841f605c538a89b9a2"
   ]
 }
