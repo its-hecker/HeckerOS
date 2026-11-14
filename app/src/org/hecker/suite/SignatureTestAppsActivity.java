@@ -42,6 +42,7 @@ public final class SignatureTestAppsActivity extends Activity {
     private final Set<String> selected = new HashSet<>();
     private LinearLayout list;
     private String search = "";
+    private boolean appsLoaded;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -85,6 +86,7 @@ public final class SignatureTestAppsActivity extends Activity {
                     if (isFinishing() || isDestroyed()) return;
                     apps.clear();
                     apps.addAll(eligible);
+                    appsLoaded = true;
                     render();
                 });
             } catch (RuntimeException failure) {
@@ -131,6 +133,11 @@ public final class SignatureTestAppsActivity extends Activity {
     private void render() {
         if (list == null) return;
         list.removeAllViews();
+        if (!appsLoaded) {
+            list.addView(Ui.text(this, getString(R.string.capture_signature_loading),
+                    14, false));
+            return;
+        }
         PackageManager pm = getPackageManager();
         int visible = 0;
         for (ApplicationInfo app : apps) {
@@ -215,7 +222,7 @@ public final class SignatureTestAppsActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
-        if (list != null) { reloadSelection(); render(); }
+        if (list != null && appsLoaded) { reloadSelection(); render(); }
     }
 
     @Override protected void onDestroy() {
