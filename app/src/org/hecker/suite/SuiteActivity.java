@@ -90,8 +90,8 @@ public final class SuiteActivity extends Activity {
                                     v -> open("RootPrivacyActivity")) : null);
         }
         addRow(tile(R.string.emoji_styles_title,R.string.emoji_styles_summary,
-                R.drawable.ic_palette,v->open("EmojiStylesActivity")), null);
-        addRow(tile(R.string.vault_title,R.string.vault_summary,R.drawable.ic_vault,v->open("HeckerVault")), null);
+                R.drawable.ic_palette,v->open("EmojiStylesActivity")),
+                tile(R.string.vault_title,R.string.vault_summary,R.drawable.ic_vault,v->open("HeckerVault")));
         LinearLayout footer=Ui.card(this); footer.addView(Ui.text(this,"HeckerOS",17,true));
         footer.addView(Ui.text(this,getString(R.string.suite_footer),12,false));content.addView(footer);
     }
