@@ -2,6 +2,7 @@
 """Attach the Coral recovery payload to the native recovery-as-boot build."""
 
 from pathlib import Path
+import hashlib
 
 SUITE = Path(__file__).resolve().parents[1]
 SOURCES = SUITE / "recovery/rom"
@@ -33,6 +34,23 @@ def previous_recovery_boot_cpp(expected):
     return old
 
 
+# Only exact previously shipped generated sources may be upgraded in place.
+# Do not accept arbitrary local modifications to Android init.
+LEGACY_GENERATED_GIT_BLOBS = {
+    "hecker_recovery_boot.cpp": {
+        "a54b17c738d553e0397919d3486715ce8e8d8474",
+        "67383bf3e53d40909a918c28d30d5a9e0cf53051",
+    },
+    "hecker_recovery_boot.h": {
+        "4cf7eaff1e8583a9f899bb2571cf919",
+    },
+}
+
+
+def git_blob_sha(data):
+    return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
+
+
 def recovery_rom_plan(rom, replace, revert=False):
     core = rom / "system/core/init"
     make = rom / "build/make/core/Makefile"
@@ -43,7 +61,8 @@ def recovery_rom_plan(rom, replace, revert=False):
         previous = (previous_recovery_boot_cpp(expected)
                     if name == "hecker_recovery_boot.cpp" else expected)
         current = target.read_bytes() if target.exists() else None
-        if current is not None and current not in (expected, previous):
+        if (current is not None and current not in (expected, previous)
+                and git_blob_sha(current) not in LEGACY_GENERATED_GIT_BLOBS[name]):
             raise ValueError(f"Unfamiliar Coral recovery source: {target}")
         if revert and current is not None:
             files[target] = None
