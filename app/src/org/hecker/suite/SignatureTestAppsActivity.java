@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Process;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -74,26 +73,36 @@ public final class SignatureTestAppsActivity extends Activity {
         reloadSelection();
 
         worker.execute(() -> {
-            PackageManager pm = getPackageManager();
-            List<ApplicationInfo> eligible = new ArrayList<>();
-            for (ApplicationInfo app : pm.getInstalledApplications(0)) {
-                if (eligible(pm, app)) eligible.add(app);
+            try {
+                PackageManager pm = getPackageManager();
+                List<ApplicationInfo> eligible = new ArrayList<>();
+                for (ApplicationInfo app : pm.getInstalledApplications(0)) {
+                    if (eligible(pm, app)) eligible.add(app);
+                }
+                eligible.sort(Comparator.comparing(
+                        app -> app.loadLabel(pm).toString(), String.CASE_INSENSITIVE_ORDER));
+                runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    apps.clear();
+                    apps.addAll(eligible);
+                    render();
+                });
+            } catch (RuntimeException failure) {
+                Log.e(TAG, "Failed to enumerate user apps", failure);
+                runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    list.removeAllViews();
+                    list.addView(Ui.text(this,
+                            getString(R.string.native_page_unavailable), 15, false));
+                });
             }
-            eligible.sort(Comparator.comparing(
-                    app -> app.loadLabel(pm).toString(), String.CASE_INSENSITIVE_ORDER));
-            runOnUiThread(() -> {
-                if (isFinishing() || isDestroyed()) return;
-                apps.clear();
-                apps.addAll(eligible);
-                render();
-            });
         });
     }
 
     private boolean eligible(PackageManager pm, ApplicationInfo app) {
         if ((app.flags & (ApplicationInfo.FLAG_SYSTEM
                 | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0
-                || app.uid < Process.FIRST_APPLICATION_UID
+                || app.uid < 10000  // Android application UID range begins at 10000.
                 || getPackageName().equals(app.packageName)) return false;
         String[] shared = pm.getPackagesForUid(app.uid);
         return shared != null && shared.length == 1;
