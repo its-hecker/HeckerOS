@@ -5,8 +5,15 @@ on:
     branches: [feat/hecker-recovery-2.0]
     paths:
       - 'tools/recovery2_*.py'
+      - 'tools/recovery_phase1.py'
       - 'recovery/rom/**'
       - 'tests/test_recovery2_*.py'
+      - 'tests/test_signature_app_selection.py'
+      - 'app/src/org/hecker/suite/CaptureSettingsActivity.java'
+      - 'app/src/org/hecker/suite/SignatureTestAppsActivity.java'
+      - 'app/AndroidManifest.xml'
+      - 'app/res/values/suite_polish.xml'
+      - 'app/res/values-zh-rCN/suite_polish.xml'
       - '.github/workflows/hecker-recovery2-compat.yml'
   workflow_dispatch:
 
@@ -20,3 +27,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate Coral boot routing and both ramdisks
         run: python3 -m unittest discover -s tests -p 'test_recovery2_*.py' -v
+      - name: Validate per-app signature UI, resource wiring and fastbootd branding
+        run: python3 -m unittest discover -s tests -p 'test_signature_app_selection.py' -v
