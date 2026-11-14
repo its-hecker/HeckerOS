@@ -3,11 +3,11 @@ package org.hecker.suite;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.res.ThemeEngine;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.os.SystemProperties;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
@@ -17,7 +17,6 @@ import java.io.File;
 
 /** Actual system emoji selection; absent font packs cannot be selected. */
 public final class EmojiStylesActivity extends Activity {
-    private static final String KEY = "persist.sys.ax_emoji_style";
     private static final String SAMPLE = "😀😍🎉❤️👍";
     private static final String[] VALUES = {"android", "ios", "samsung", "swiftui", "facebook"};
     private static final String[] FONTS = {
@@ -39,7 +38,10 @@ public final class EmojiStylesActivity extends Activity {
     private void populate() {
         LinearLayout page = Ui.page(this, R.string.emoji_styles_title);
         page.addView(Ui.text(this, getString(R.string.emoji_styles_tip), 14, false));
-        final String current = SystemProperties.get(KEY, "android");
+        final ThemeEngine engine = ThemeEngine.getInstance(this);
+        final String saved = engine != null ? engine.getEmojiStyle() : null;
+        final boolean serviceAvailable = saved != null;
+        final String current = serviceAvailable ? saved : "android";
         for (int i = 0; i < VALUES.length; ++i) {
             final int index = i;
             final boolean stock = i == 0;
@@ -85,14 +87,15 @@ public final class EmojiStylesActivity extends Activity {
                 border.setStroke(Ui.dp(this, 2), getColor(R.color.hecker_accent));
                 card.setBackground(border);
             }
-            card.setEnabled(available);
-            card.setAlpha(available ? 1f : 0.5f);
-            card.setFocusable(available && !selected);
-            card.setClickable(available && !selected);
+            boolean selectable = available && serviceAvailable;
+            card.setEnabled(selectable);
+            card.setAlpha(selectable ? 1f : 0.5f);
+            card.setFocusable(selectable && !selected);
+            card.setClickable(selectable && !selected);
             card.setContentDescription(getString(TITLES[i])
                     + (selected ? ", " + getString(R.string.emoji_styles_selected) : "")
                     + (!available ? ", " + getString(R.string.emoji_styles_missing) : ""));
-            if (available && !selected) {
+            if (selectable && !selected) {
                 card.setOnClickListener(v -> new AlertDialog.Builder(this)
                         .setTitle(R.string.emoji_styles_select)
                         .setMessage(getString(TITLES[index]))
@@ -106,9 +109,10 @@ public final class EmojiStylesActivity extends Activity {
 
     private void apply(String style) {
         try {
-            SystemProperties.set(KEY, style);
-            if (!style.equals(SystemProperties.get(KEY, "android"))) {
-                throw new SecurityException("Property update was not persisted");
+            ThemeEngine engine = ThemeEngine.getInstance(this);
+            if (engine == null || !engine.setEmojiStyle(style)
+                    || !style.equals(engine.getEmojiStyle())) {
+                throw new IllegalStateException("System emoji service did not save style");
             }
         } catch (RuntimeException denied) {
             android.util.Log.e("HeckerEmoji", "Could not persist emoji style", denied);
