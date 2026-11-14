@@ -77,6 +77,26 @@ class SignatureSelectionContracts(unittest.TestCase):
             self.assertIn(error, helper)
         self.assertIn("ownPermissionSharedUser", helper)
 
+    def test_corepatch_previous_signature_is_scoped_to_selected_apps(self):
+        base = ROOT.parents[3] / "frameworks/base/services/core/java/com/android/server/pm"
+        policy_path = base / "HeckerSignatureTestPolicy.java"
+        helper_path = base / "InstallPackageHelper.java"
+        if not policy_path.exists() or not helper_path.exists():
+            self.skipTest("Android framework checkout not present")
+        policy = policy_path.read_text()
+        helper = helper_path.read_text()
+        self.assertIn("allowPreviousSignatureForDeclaration(", policy)
+        self.assertIn("!allowMismatch(previousPackage, sharedUser, null, incoming,", policy)
+        self.assertIn("oldSigners.checkCapability(ownerSigners,", policy)
+        self.assertIn("ownerSigners.checkCapability(oldSigners,", policy)
+        self.assertIn("declarationOwner.isSystem()", policy)
+        self.assertIn("declarationOwner.isUpdatedSystemApp()", policy)
+        self.assertIn('"android".equals(declarationOwnerName)', policy)
+        self.assertEqual(3, helper.count("&& !allowPreviousSignatureForDeclaration("))
+        self.assertEqual(1, helper.count(
+            "HeckerSignatureTestPolicy.allowPreviousSignatureForDeclaration("))
+        self.assertIn("getPackageLPr(declarationOwnerName)", helper)
+
     def test_fastbootd_uses_rebranded_hecker_logo(self):
         source = (ROOT / "tools/recovery_phase1.py").read_text()
         self.assertIn('fastbootd_logo_ = LoadBitmap("fastbootd");', source)
