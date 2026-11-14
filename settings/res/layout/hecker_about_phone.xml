@@ -48,7 +48,9 @@
                     android:layout_weight="1" android:layout_marginStart="10dp"
                     android:orientation="vertical">
                     <TextView style="@style/HeckerAboutReferenceCaption"
-                        android:text="@string/hecker_about_maintained_by" />
+                        android:text="@string/hecker_about_maintained_by"
+                        android:textColor="@color/hecker_about_maintainer_text"
+                        android:alpha="0.82" />
                     <LinearLayout android:layout_width="match_parent"
                         android:layout_height="wrap_content" android:orientation="horizontal"
                         android:gravity="center_vertical" android:layout_marginTop="3dp">
@@ -56,7 +58,7 @@
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:singleLine="true" android:ellipsize="end"
                             android:textSize="16sp" android:fontFamily="sans-serif-medium"
-                            android:textColor="@color/hecker_about_text" />
+                            android:textColor="@color/hecker_about_maintainer_text" />
                         <ImageView android:layout_width="17dp" android:layout_height="17dp"
                             android:layout_marginStart="5dp"
                             android:src="@drawable/hecker_about_verified"
@@ -69,10 +71,11 @@
                     android:gravity="center" android:paddingHorizontal="11dp"
                     android:text="@string/hecker_about_support"
                     android:textSize="12sp" android:fontFamily="sans-serif-medium"
-                    android:textColor="@color/hecker_about_text"
-                    android:background="@drawable/hecker_about_status_pill"
+                    android:textColor="@color/hecker_about_maintainer_text"
+                    android:background="@drawable/hecker_about_maintainer_surface"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:drawableStart="@drawable/hecker_about_heart"
+                    android:drawableTint="@color/hecker_about_maintainer_text"
                     android:drawablePadding="5dp"
                     android:clickable="true" android:focusable="true" />
             </LinearLayout>
