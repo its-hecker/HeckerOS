@@ -13,6 +13,7 @@ from recovery2_rom import (BOOT_PROP, FASTBOOT, FLASH_ZIP, FOX_INIT,
                           FOX_INSTALL_PAGE, FOX_RECOVERY, FOX_SH, FOX_THEME, NATIVE_FASTBOOT,
                           NATIVE_SIDELOAD, RECOVERY_SEPOLICY, REFLASH_ITEMS, ROM_FSTAB, SIDELOAD,
                           add_entry, entries, patch_payload)
+from recovery2_port import previous_recovery_boot_cpp, recovery_rom_plan
 
 
 def archive(files):
@@ -53,6 +54,39 @@ class CoralRecoveryTests(unittest.TestCase):
             list(entries(valid[:-20]))
         with self.assertRaisesRegex(ValueError, "Invalid or duplicate"):
             list(entries(archive({"../init": b"init", "TRAILER!!!": b""})))
+
+    def test_android17_init_uses_explicit_unique_fd_descriptors(self):
+        fixed = (ROOT / "recovery/rom/hecker_recovery_boot.cpp").read_bytes()
+        self.assertEqual(fixed.count(b"!Unpack(input.get(), cpio.get())"), 1)
+        self.assertEqual(fixed.count(b"lseek(cpio.get(), 0, SEEK_SET)"), 1)
+        self.assertEqual(fixed.count(b"dup2(cpio.get(), STDIN_FILENO)"), 1)
+        old = previous_recovery_boot_cpp(fixed)
+        self.assertIn(b"!Unpack(input, cpio)", old)
+        self.assertIn(b"lseek(cpio, 0, SEEK_SET)", old)
+        self.assertIn(b"dup2(cpio, STDIN_FILENO)", old)
+
+    def test_existing_generated_cpp_is_upgraded_but_unrelated_changes_fail_closed(self):
+        fixed = (ROOT / "recovery/rom/hecker_recovery_boot.cpp").read_bytes()
+        old = previous_recovery_boot_cpp(fixed)
+        with tempfile.TemporaryDirectory() as temp:
+            rom = Path(temp)
+            core = rom / "system/core/init"
+            make = rom / "build/make/core"
+            core.mkdir(parents=True)
+            make.mkdir(parents=True)
+            (core / "Android.bp").write_text("")
+            (core / "first_stage_init.cpp").write_text("")
+            (make / "Makefile").write_text("")
+            target = core / "hecker_recovery_boot.cpp"
+            target.write_bytes(old)
+            replace_noop = lambda content, *_args: content
+            plan = recovery_rom_plan(rom, replace_noop)
+            self.assertEqual(plan[target], fixed)
+            target.write_bytes(fixed)
+            self.assertNotIn(target, recovery_rom_plan(rom, replace_noop))
+            target.write_bytes(fixed + b"// unknown local change\\n")
+            with self.assertRaisesRegex(ValueError, "Unfamiliar Coral recovery source"):
+                recovery_rom_plan(rom, replace_noop)
 
     def test_boot_control_routing(self):
         source = r'''
