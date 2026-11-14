@@ -14,7 +14,8 @@ from recovery2_rom import (BOOT_PROP, FASTBOOT, FLASH_ZIP, FOX_INIT,
                           NATIVE_SIDELOAD, RECOVERY_SEPOLICY, REFLASH_ITEMS, ROM_FSTAB, SIDELOAD,
                           BRAND_IMAGE, BRAND_SETTINGS, BRAND_SPLASH, BRAND_RESOURCES, PNG_MAGIC,
                           add_entry, entries, patch_payload)
-from recovery2_port import previous_recovery_boot_cpp, recovery_rom_plan
+from recovery2_port import (previous_recovery_boot_cpp, recovery_rom_plan,
+                            BRANDING_SOURCE, INSTALL, DEPENDENCIES)
 
 
 def archive(files):
@@ -28,6 +29,24 @@ def archive(files):
 
 
 class CoralRecoveryTests(unittest.TestCase):
+    def test_branding_path_is_supplied_to_packaged_host_executable(self):
+        # Python host executables run from out/host/linux-x86/bin rather than
+        # the source tree: __file__.parents[1] is NOT the Suite checkout.
+        from recovery2_rom import install
+        import inspect
+        self.assertEqual(len(inspect.signature(install).parameters), 4)
+        source = (ROOT / "tools/recovery2_rom.py").read_text()
+        self.assertNotIn('BRANDING_ASSET = Path(__file__)', source)
+        self.assertIn('stage.add_argument("brand_asset", type=Path)', source)
+        self.assertIn('install(args.zstd, args.source, args.root, args.brand_asset)', source)
+        self.assertIn('brand_asset.read_bytes()', source)
+        self.assertEqual(
+            BRANDING_SOURCE,
+            "vendor/hecker/floral/suite/recovery/res-xxhdpi/images/logo_image.png")
+        self.assertTrue((ROOT / "recovery/res-xxhdpi/images/logo_image.png").is_file())
+        self.assertTrue(INSTALL.rstrip().endswith(BRANDING_SOURCE))
+        self.assertIn(BRANDING_SOURCE, DEPENDENCIES)
+
     def test_packaged_hecker_branding_replaces_splash_and_about(self):
         # Synthetic OrangeFox archive: exact theme contracts, no real device access.
         logo = (PNG_MAGIC + b"fake_png_for_test" + b"\x00\x00\x00\x00"
@@ -135,6 +154,8 @@ class CoralRecoveryTests(unittest.TestCase):
             replace_noop = lambda content, *_args: content
             plan = recovery_rom_plan(rom, replace_noop)
             self.assertEqual(plan[target], fixed)
+            self.assertIn(BRANDING_SOURCE, plan[make / "Makefile"])
+            self.assertIn(INSTALL, plan[make / "Makefile"])
             target.write_bytes(fixed)
             self.assertNotIn(target, recovery_rom_plan(rom, replace_noop))
             target.write_bytes(fixed + b"// unknown local change\\n")
