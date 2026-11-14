@@ -139,8 +139,18 @@ public final class SignatureTestAppsActivity extends Activity {
             return;
         }
         PackageManager pm = getPackageManager();
+        // Selected packages always lead the list, including filtered search results.
+        // Keep the existing alphabetical order within each group.
+        List<ApplicationInfo> ordered = new ArrayList<>(apps);
+        ordered.sort((a, b) -> {
+            boolean aSelected = selected.contains(a.packageName);
+            boolean bSelected = selected.contains(b.packageName);
+            if (aSelected != bSelected) return aSelected ? -1 : 1;
+            return String.CASE_INSENSITIVE_ORDER.compare(
+                    a.loadLabel(pm).toString(), b.loadLabel(pm).toString());
+        });
         int visible = 0;
-        for (ApplicationInfo app : apps) {
+        for (ApplicationInfo app : ordered) {
             String label = app.loadLabel(pm).toString();
             if (!label.toLowerCase(Locale.ROOT).contains(search)
                     && !app.packageName.toLowerCase(Locale.ROOT).contains(search)) continue;
