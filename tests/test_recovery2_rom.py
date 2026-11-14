@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 import io
+import base64
 from pathlib import Path
 import stat
 import subprocess
@@ -12,6 +13,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 from recovery2_rom import (BOOT_PROP, FASTBOOT, FLASH_ZIP, FOX_INIT,
                           FOX_INSTALL_PAGE, FOX_RECOVERY, FOX_SH, FOX_THEME, NATIVE_FASTBOOT,
                           NATIVE_SIDELOAD, RECOVERY_SEPOLICY, REFLASH_ITEMS, ROM_FSTAB, SIDELOAD,
+                          BRAND_IMAGE, BRAND_SETTINGS, BRAND_SPLASH, BRAND_RESOURCES, PNG_MAGIC,
                           add_entry, entries, patch_payload)
 from recovery2_port import previous_recovery_boot_cpp, recovery_rom_plan
 
@@ -27,6 +29,45 @@ def archive(files):
 
 
 class CoralRecoveryTests(unittest.TestCase):
+    def test_packaged_hecker_branding_replaces_splash_and_about(self):
+        # Synthetic OrangeFox archive: exact theme contracts, no real device access.
+        logo = (PNG_MAGIC + b"fake_png_for_test" + b"\\x00\\x00\\x00\\x00"
+                + b"IEND" + b"\\x00\\x00\\x00\\x00")
+        files = {
+            FOX_INIT: b"init", FOX_RECOVERY: b"recovery", FOX_THEME: b"ui",
+            FOX_SH: b"shell", RECOVERY_SEPOLICY: b"policy",
+            FOX_INSTALL_PAGE: SIDELOAD + b'<action function="page">action_page</action>',
+            "twres/pages/main.xml": FASTBOOT + b'<image resource="splash_logo_o"/>',
+            "twres/pages/install.xml": FLASH_ZIP * 2,
+            BRAND_SETTINGS: (b'<image resource="logo_about"/>'
+                             b'<text>OrangeFox Recovery</text>'),
+            BRAND_RESOURCES: b'<recovery><resources></resources></recovery>',
+            BRAND_SPLASH: (b'<image name="splash_logo" '
+                           b'filename="SVG/Logos/logo_o.svg" retainaspect="1" scale="2.0"/>'
+                           b'<image><image resource="splash_bg"/>'
+                           b'<placement x="540" y="540"/></image>'
+                           b'<text>OrangeFox</text>'),
+            ROM_FSTAB: b"old fstab",
+            "TRAILER!!!": b"",
+        }
+        output = io.BytesIO()
+        patch_payload(archive(files), output, b"A17", b"fstab17", brand_png=logo)
+        updated = {name: data for name, _, _, data in entries(output.getvalue())}
+        self.assertEqual(updated[BRAND_IMAGE], logo)
+        self.assertEqual(updated[BRAND_SPLASH].count(b'<text>HeckerOS</text>'), 1)
+        self.assertNotIn(b'<text>OrangeFox</text>', updated[BRAND_SPLASH])
+        self.assertNotIn(b'resource="splash_bg"', updated[BRAND_SPLASH])
+        self.assertIn(b'filename="Hecker/logo" retainaspect="1" scale="1.0"',
+                      updated[BRAND_SPLASH])
+        self.assertIn(b'<text>HeckerOS Recovery</text>', updated[BRAND_SETTINGS])
+        self.assertIn(b'<image resource="hecker_logo"/>', updated[BRAND_SETTINGS])
+        self.assertIn(b'<image resource="hecker_logo"/>', updated["twres/pages/main.xml"])
+        self.assertIn(b'name="hecker_logo"', updated[BRAND_RESOURCES])
+        self.assertEqual(updated[ROM_FSTAB], b"fstab17")
+        with self.assertRaisesRegex(ValueError, "logo"):
+            patch_payload(archive(files), io.BytesIO(), b"A17", b"fstab17",
+                          brand_png=b"not a PNG")
+
     def test_recovery_ramdisk_keeps_coral_fstab_and_uses_a17_sideload(self):
         source = archive({
             FOX_INIT: b"init", FOX_RECOVERY: b"recovery", FOX_THEME: b"ui",
