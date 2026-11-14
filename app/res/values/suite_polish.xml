@@ -10,7 +10,7 @@
     <string name="capture_secure_summary">Allow screenshots and screen recordings of app windows that use FLAG_SECURE. Off by default. DRM-protected video may remain blank.</string>
     <string name="capture_signature_title">App signature compatibility</string>
     <string name="capture_signature_summary">Select installed user apps that may accept updates signed with a different key. Only selected apps are affected; normal APK integrity checks remain on.</string>
-    <string name="capture_signature_warning">Allowing a differently signed update for %1$s lets the new version access this app's existing data. Select only trusted test APKs.</string>
+    <string name="capture_signature_warning">Allowing a differently signed update for %1$s lets the new version access this app\'s existing data. Select only trusted test APKs.</string>
     <string name="capture_signature_confirm">Allow this app</string>
     <string name="capture_signature_search">Search user apps</string>
     <string name="capture_signature_loading">Loading installed apps…</string>
