@@ -29,6 +29,10 @@ ROOT_FILES = {
             "#include <chrono>\n#include <cmath>",
         ),
         (
+            'fastbootd_logo_ = LoadBitmap("fastbootd");',
+            'fastbootd_logo_ = LoadBitmap("logo_image");  // HeckerOS branding in fastbootd',
+        ),
+        (
             "void ScreenRecoveryUI::draw_screen_locked() {",
             """// Draw only during an actual sideload or installation; menus and failure
 // screens retain their native controls. All positions scale with display/dpi.
