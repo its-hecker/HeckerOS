@@ -40,7 +40,14 @@ class CoralRecoveryTests(unittest.TestCase):
             "twres/pages/install.xml": FLASH_ZIP * 2,
             BRAND_SETTINGS: (b'<image resource="logo_about"/>'
                              b'<text>OrangeFox Recovery</text>'),
-            BRAND_RESOURCES: b'<recovery><resources></resources></recovery>',
+            BRAND_RESOURCES: (b'<recovery><resources>'
+                              b'<image name="splash_logo_o" filename="SVG/Logos/logo_o.svg"/>'
+                              b'</resources></recovery>'),
+            "twres/themes/style.xml": (b'<recovery><resources>'
+                                       b'<image name="logo_about" '
+                                       b'filename="SVG/Logos/logo_o.svg"/>'
+                                       b'</resources></recovery>'),
+            "twres/pages/fox.xml": b'<text>OrangeFox Lab (Beta)</text>',
             BRAND_SPLASH: (b'<image name="splash_logo" '
                            b'filename="SVG/Logos/logo_o.svg" retainaspect="1" scale="2.0"/>'
                            b'<image><image resource="splash_bg"/>'
@@ -62,6 +69,12 @@ class CoralRecoveryTests(unittest.TestCase):
         self.assertIn(b'<image resource="hecker_logo"/>', updated[BRAND_SETTINGS])
         self.assertIn(b'<image resource="hecker_logo"/>', updated["twres/pages/main.xml"])
         self.assertIn(b'name="hecker_logo"', updated[BRAND_RESOURCES])
+        self.assertIn(b'name="splash_logo_o" filename="Hecker/logo"',
+                      updated[BRAND_RESOURCES])
+        self.assertIn(b'name="logo_about" filename="Hecker/logo"',
+                      updated["twres/themes/style.xml"])
+        self.assertIn(b'<text>Hecker Recovery Lab (Beta)</text>',
+                      updated["twres/pages/fox.xml"])
         self.assertEqual(updated[ROM_FSTAB], b"fstab17")
         with self.assertRaisesRegex(ValueError, "logo"):
             patch_payload(archive(files), io.BytesIO(), b"A17", b"fstab17",
