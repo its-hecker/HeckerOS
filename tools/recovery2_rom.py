@@ -145,6 +145,25 @@ def rebrand_theme(name, data):
             data, b'</resources>',
             b'\n        <image name="hecker_logo" filename="Hecker/logo" '
             b'retainaspect="1"/>\n    </resources>', "resource catalog")
+        # Recovery splash previews should not restore the old OrangeFox emblem.
+        for flavor in (b"d", b"o", b"w"):
+            pattern = (rb'(<image name="splash_logo_' + flavor +
+                       rb'" filename=")[^"]+(")')
+            data, count = re.subn(pattern, rb'\g<1>Hecker/logo\g<2>',
+                                  data, count=1)
+            if count > 1:
+                raise ValueError("Ambiguous recovery preview logo")
+    elif name.startswith("twres/themes/") and name.endswith(".xml"):
+        # Rebind About artwork in the default and selectable color themes.
+        data, _ = re.subn(
+            rb'(<image name="logo_about" filename=")[^"]+(")',
+            rb'\g<1>Hecker/logo\g<2>', data, count=1)
+    elif name == "twres/pages/fox.xml":
+        # The underlying OrangeFox recovery tools remain intact; rebrand UI labels.
+        data = data.replace(b'<text>OrangeFox Lab (Beta)</text>',
+                            b'<text>Hecker Recovery Lab (Beta)</text>')
+        data = data.replace(b'name="Unpack OrangeFox"', b'name="Unpack Recovery"')
+        data = data.replace(b'name="Repack OrangeFox"', b'name="Repack Recovery"')
     elif name == FOX_MAIN_PAGE:
         data = replace_required(data, b'<image resource="splash_logo_o"/>',
                                 b'<image resource="hecker_logo"/>',
