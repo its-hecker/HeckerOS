@@ -15,7 +15,10 @@ import tempfile
 import urllib.request
 import zipfile
 
-from recovery2_boot_compare import inspect, align
+if __package__:
+    from .recovery2_boot_compare import inspect, align
+else:
+    from recovery2_boot_compare import inspect, align
 
 PAYLOAD = "hecker-recovery.cpio.zst"
 FOX_SHA256 = "4905cf65045bfd3d73e6ae9d42e141f6706d0ff4bd1557b556fbb1b1db69eb05"
