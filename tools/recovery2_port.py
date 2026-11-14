@@ -10,11 +10,15 @@ HOOK = "    SetInitAvbVersionInRecovery();\n"
 INCLUDE = '#include "first_stage_init.h"\n'
 BOARD = "$(BOARD_RECOVERY_IMAGE_PREPARE)"
 MAKE_ANCHOR = "\t" + BOARD + "\n"
+# Pass the caracal bitmap from the source checkout, NOT relative to the Soong
+# host executable, which is installed under out/host/.../bin/.
+BRANDING_SOURCE = "vendor/hecker/floral/suite/recovery/res-xxhdpi/images/logo_image.png"
 INSTALL = ("\t$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom install "
            "$(ZSTD) out/hecker-recovery2-coral.cpio.gz "
-           "$(TARGET_RECOVERY_ROOT_OUT)\n")
+           "$(TARGET_RECOVERY_ROOT_OUT) " + BRANDING_SOURCE + "\n")
 DEPENDENCIES = ("$(ZSTD)", "out/hecker-recovery2-coral.cpio.gz",
-                "$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom")
+                "$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom",
+                BRANDING_SOURCE)
 
 # Only migrate the exact previously generated source. Any other local change
 # still fails closed, preserving the guarded ROM preparation workflow.
