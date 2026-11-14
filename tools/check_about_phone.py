@@ -105,6 +105,7 @@ def main():
                      "values/hecker_colors.xml", "values-night/hecker_colors.xml",
                      "drawable/hecker_about_badge.xml", "drawable/hecker_card_background.xml",
                      "drawable/hecker_caracal_mark.xml",
+                     "drawable-nodpi/hecker_maintainer_avatar.webp",
                      "layout/hecker_about_phone.xml"}
         resources.update(str(p.relative_to(ROOT / "settings/res"))
                          for p in (ROOT / "settings/res").rglob("hecker_about_*.xml"))
