@@ -97,8 +97,8 @@ bool ExtractRecovery() {
     }
     // Use an anonymous staging file and validate decompression before cpio.
     android::base::unique_fd cpio(open(kArchive, O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, 0600));
-    if (cpio < 0 || unlink(kArchive) != 0 || !Unpack(input, cpio) ||
-        lseek(cpio, 0, SEEK_SET) != 0) {
+    if (cpio < 0 || unlink(kArchive) != 0 || !Unpack(input.get(), cpio.get()) ||
+        lseek(cpio.get(), 0, SEEK_SET) != 0) {
         LOG(ERROR) << "Could not unpack the Hecker Recovery payload";
         return false;
     }
@@ -109,7 +109,7 @@ bool ExtractRecovery() {
 
     pid_t child = fork();
     if (child == 0) {
-        if (chdir(kRoot) == 0 && dup2(cpio, STDIN_FILENO) == STDIN_FILENO) {
+        if (chdir(kRoot) == 0 && dup2(cpio.get(), STDIN_FILENO) == STDIN_FILENO) {
             execl(kCpio, kCpio, "-idu", "--quiet", nullptr);
         }
         _exit(127);
