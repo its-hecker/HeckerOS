@@ -164,18 +164,29 @@ def rebind_image_declaration(data, resource, filename, scale=None):
 
 def rebrand_theme(name, data):
     """Modify only reviewed UI resources, preserving recovery services and credits."""
+    # Theme sliders traditionally clamp Coral brightness to 10 percent.
+    # Use 1 percent instead of zero to avoid an unusable black screen.
+    if name.startswith("twres/") and name.endswith(".xml"):
+        data = re.sub(
+            rb'(<data\b[^>]*\bvariable="tw_brightness_pct"[^>]*\bmin=")10("[^>]*/>)',
+            rb'\g<1>1\g<2>', data)
+
     if name == BRAND_SPLASH:
         data = rebrand_splash_logo(data)
-        # OrangeFox releases use different wording/variables in their splash
-        # title. Keep the first title's placement and font instead of requiring
-        # the exact literal <text>OrangeFox</text>.
-        titles = list(re.finditer(rb'(<text>\s*)([^<]{1,160}?)(\s*</text>)', data))
-        if not titles:
+        # The PNG already contains the complete title. Strip every static
+        # branded text label to avoid two or three overlapping copies.
+        title_pattern = rb'(<text>\s*)([^<]{1,160}?)(\s*</text>)'
+        labels = list(re.finditer(title_pattern, data))
+        if not labels:
             raise ValueError("Unknown OrangeFox splash title: no text labels")
-        title = next((item for item in titles if
-                      re.search(rb'orange\s*fox|recovery|fox', item.group(2), re.I)),
-                     titles[0])
-        data = data[:title.start(2)] + b'HeckerOS' + data[title.end(2):]
+        removed = 0
+        for label in reversed(labels):
+            if re.search(rb'orange\s*fox|hecker\s*os|hecker\s*recovery|recovery\s*2\.0',
+                         label.group(2), re.I):
+                data = data[:label.start(2)] + data[label.end(2):]
+                removed += 1
+        if not removed:
+            raise ValueError("Unknown OrangeFox splash title: no branded text labels")
         # Keep the requested black splash, without an old OrangeFox wallpaper.
         data, changed = re.subn(
             rb'<image>\s*<image resource="splash_bg"\s*/>\s*'
@@ -228,8 +239,23 @@ def rebrand_theme(name, data):
                                 b'<image resource="hecker_about"/>',
                                 "About logo")
         data = replace_required(data, b'<text>OrangeFox Recovery</text>',
-                                b'<text>HeckerOS Recovery</text>',
+                                b'<text>Maintained by Hecker</text>',
                                 "About title")
+        # Attribute the previous recovery developers without confusing them
+        # with the HeckerOS maintainer. Retain the original credits elsewhere.
+        for old in (b'<text>%of_maintainer% (Maintainer)</text>',
+                    b'<text>%of_maintainer%</text>'):
+            if old in data:
+                data = data.replace(old,
+                    b'<text>Credits: MrYacha, fordownloads, DarthJabba9</text>', 1)
+                break
+        # Official refers to this HeckerOS-branded build, not OrangeFox
+        # upstream certification. Keep original recovery binary metadata.
+        for marker in (b'<text>Unofficial</text>', b'<text>%fox_variant%</text>',
+                       b'<text>%of_variant%</text>', b'<text>%of_build_type%</text>'):
+            if marker in data:
+                data = data.replace(marker, b'<text>Official</text>', 1)
+                break
     return data
 
 
@@ -392,8 +418,9 @@ def verify(zstd, avbtool, extractor, image, ota):
             not files.get(BRAND_ABOUT_IMAGE, b"").startswith(PNG_MAGIC) or
             not files.get(BRAND_FOX_IMAGE, b"").startswith(PNG_MAGIC) or
             b'<image resource="hecker_about"/>' not in files.get(BRAND_SETTINGS, b"") or
-            b'<text>HeckerOS</text>' not in files.get(BRAND_SPLASH, b"") or
-            b'<text>HeckerOS Recovery</text>' not in files.get(BRAND_SETTINGS, b"") or
+            b'<text>HeckerOS</text>' in files.get(BRAND_SPLASH, b"") or
+            b'<text>OrangeFox</text>' in files.get(BRAND_SPLASH, b"") or
+            b'<text>Maintained by Hecker</text>' not in files.get(BRAND_SETTINGS, b"") or
             b'<image resource="hecker_logo"/>' not in files.get(FOX_MAIN_PAGE, b"") or
             b'name="hecker_logo"' not in files.get(BRAND_RESOURCES, b"") or
             b'name="hecker_about"' not in files.get(BRAND_RESOURCES, b"") or
