@@ -15,7 +15,8 @@ from recovery2_rom import (BOOT_PROP, FASTBOOT, FLASH_ZIP, FOX_INIT,
                           BRAND_IMAGE, BRAND_SETTINGS, BRAND_SPLASH, BRAND_RESOURCES, PNG_MAGIC,
                           add_entry, entries, patch_payload)
 from recovery2_port import (previous_recovery_boot_cpp, recovery_rom_plan,
-                            BRANDING_SOURCE, INSTALL, DEPENDENCIES)
+                            BRANDING_SOURCE, INSTALL, DEPENDENCIES,
+                            LEGACY_INSTALL_BLOCK, MAKE_ANCHOR)
 
 
 def archive(files):
@@ -98,6 +99,49 @@ class CoralRecoveryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "logo"):
             patch_payload(archive(files), io.BytesIO(), b"A17", b"fstab17",
                           brand_png=b"not a PNG")
+
+    def test_splash_logo_variant_is_rebranded_by_resource_name(self):
+        # Pinned OrangeFox revisions may select a different logo artwork.
+        from recovery2_rom import rebrand_theme, BRAND_SPLASH
+        original = (b'<recovery><resources><image name="splash_logo" '
+                    b'filename="SVG/Logos/logo_d.svg" retainaspect="1" scale="2.0"/>'
+                    b'</resources><pages><text>OrangeFox</text></pages></recovery>')
+        patched = rebrand_theme(BRAND_SPLASH, original)
+        self.assertIn(b'filename="Hecker/logo" retainaspect="1" scale="1.0"', patched)
+        self.assertNotIn(b'logo_d.svg', patched)
+        self.assertIn(b'<text>HeckerOS</text>', patched)
+        with self.assertRaisesRegex(ValueError, "splash logo resource"):
+            rebrand_theme(BRAND_SPLASH, original.replace(b'name="splash_logo"',
+                                                        b'name="unexpected_logo"'))
+
+    def test_migrate_duplicate_legacy_installer_on_reused_build_tree(self):
+        # The reported failure showed two install calls in one Make recipe.
+        from recovery2_port import SOURCES
+        with tempfile.TemporaryDirectory() as temp:
+            rom = Path(temp)
+            core = rom / "system/core/init"
+            make = rom / "build/make/core"
+            core.mkdir(parents=True)
+            make.mkdir(parents=True)
+            for name in ("hecker_recovery_boot.cpp", "hecker_recovery_boot.h"):
+                (core / name).write_bytes((SOURCES / name).read_bytes())
+            (core / "Android.bp").write_text("")
+            (core / "first_stage_init.cpp").write_text("")
+            makefile = make / "Makefile"
+            block = "ifeq ($(TARGET_PRODUCT),hecker_coral)\\n" + INSTALL + "endif\\n"
+            makefile.write_text(MAKE_ANCHOR + block + LEGACY_INSTALL_BLOCK)
+            # Simulate idempotent guarded integration, not Android Make internals.
+            def safe_replace(content, old, new, *_args):
+                if new in content:
+                    return content
+                return content.replace(old, new, 1) if old in content else content
+            plan = recovery_rom_plan(rom, safe_replace)
+            updated = plan[makefile]
+            self.assertEqual(updated.count(INSTALL), 1)
+            self.assertNotIn(LEGACY_INSTALL_BLOCK, updated)
+            self.assertEqual(
+                len([line for line in updated.splitlines()
+                     if "hecker_recovery2_rom install " in line]), 1)
 
     def test_recovery_ramdisk_keeps_coral_fstab_and_uses_a17_sideload(self):
         source = archive({
