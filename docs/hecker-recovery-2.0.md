@@ -19,6 +19,12 @@ separate root under the initramfs and starts its init. This keeps its Android
 12.1 libraries and SELinux policy together. It receives the fstab and boot
 properties from that Android 17 build.
 
+The recovery theme uses separate image resources for its black splash,
+transparent About-page caracal, and compact fox-replacement icon. The Wipe
+and Format Data operations are unchanged; only their theme graphics are
+rebranded. The build generates and validates both transparent assets before
+installing the pinned OrangeFox payload.
+
 The OrangeFox sideload and userspace-fastboot actions reboot into the Android
 17 recovery in the same image. That recovery handles ROM sideload, fastbootd,
 and queued update or wipe commands. Android's existing update engine and
