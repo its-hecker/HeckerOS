@@ -12,10 +12,11 @@ sys.path.insert(0, str(ROOT / "tools"))
 from recovery2_rom import (BOOT_PROP, FASTBOOT, FLASH_ZIP, FOX_INIT,
                           FOX_INSTALL_PAGE, FOX_RECOVERY, FOX_SH, FOX_THEME, NATIVE_FASTBOOT,
                           NATIVE_SIDELOAD, RECOVERY_SEPOLICY, REFLASH_ITEMS, ROM_FSTAB, SIDELOAD,
-                          BRAND_IMAGE, BRAND_SETTINGS, BRAND_SPLASH, BRAND_RESOURCES, PNG_MAGIC,
+                          BRAND_IMAGE, BRAND_ABOUT_IMAGE, BRAND_FOX_IMAGE, BRAND_WIPE, BRAND_SETTINGS,
+                          BRAND_SPLASH, BRAND_RESOURCES, PNG_MAGIC,
                           add_entry, entries, patch_payload)
 from recovery2_port import (previous_recovery_boot_cpp, recovery_rom_plan,
-                            BRANDING_SOURCE, INSTALL, DEPENDENCIES,
+                            BRANDING_SOURCE, ARTWORK_DIR, INSTALL, DEPENDENCIES,
                             LEGACY_INSTALL_BLOCK, MAKE_ANCHOR)
 
 
@@ -35,29 +36,35 @@ class CoralRecoveryTests(unittest.TestCase):
         # the source tree: __file__.parents[1] is NOT the Suite checkout.
         from recovery2_rom import install
         import inspect
-        self.assertEqual(len(inspect.signature(install).parameters), 4)
+        self.assertEqual(len(inspect.signature(install).parameters), 5)
         source = (ROOT / "tools/recovery2_rom.py").read_text()
         self.assertNotIn('BRANDING_ASSET = Path(__file__)', source)
         self.assertIn('stage.add_argument("brand_asset", type=Path)', source)
-        self.assertIn('install(args.zstd, args.source, args.root, args.brand_asset)', source)
+        self.assertIn('install(args.zstd, args.source, args.root, args.brand_asset, args.artwork_dir)', source)
         self.assertIn('brand_asset.read_bytes()', source)
         self.assertEqual(
             BRANDING_SOURCE,
             "vendor/hecker/floral/suite/recovery/res-xxhdpi/images/logo_image.png")
         self.assertTrue((ROOT / "recovery/res-xxhdpi/images/logo_image.png").is_file())
-        self.assertTrue(INSTALL.rstrip().endswith(BRANDING_SOURCE))
+        self.assertTrue(INSTALL.rstrip().endswith(ARTWORK_DIR))
         self.assertIn(BRANDING_SOURCE, DEPENDENCIES)
+        self.assertIn(ARTWORK_DIR + "/about.png", DEPENDENCIES)
+        self.assertIn(ARTWORK_DIR + "/icon.png", DEPENDENCIES)
 
     def test_packaged_hecker_branding_replaces_splash_and_about(self):
         # Synthetic OrangeFox archive: exact theme contracts, no real device access.
         logo = (PNG_MAGIC + b"fake_png_for_test" + b"\x00\x00\x00\x00"
                 + b"IEND" + b"\x00\x00\x00\x00")
+        rgba = bytearray(logo)
+        rgba[25] = 6  # PNG IHDR color type: RGBA (for synthetic resource test)
+        rgba = bytes(rgba)
         files = {
             FOX_INIT: b"init", FOX_RECOVERY: b"recovery", FOX_THEME: b"ui",
             FOX_SH: b"shell", RECOVERY_SEPOLICY: b"policy",
             FOX_INSTALL_PAGE: SIDELOAD + b'<action function="page">action_page</action>',
             "twres/pages/main.xml": FASTBOOT + b'<image resource="splash_logo_o"/>',
             "twres/pages/install.xml": FLASH_ZIP * 2,
+            BRAND_WIPE: b'<image resource="fox"/><action function="wipe"/>',
             BRAND_SETTINGS: (b'<image resource="logo_about"/>'
                              b'<text>OrangeFox Recovery</text>'),
             BRAND_RESOURCES: (b'<recovery><resources>'
@@ -66,6 +73,8 @@ class CoralRecoveryTests(unittest.TestCase):
             "twres/themes/style.xml": (b'<recovery><resources>'
                                        b'<image name="logo_about" '
                                        b'filename="SVG/Logos/logo_o.svg"/>'
+                                       b'<image name="fox" filename="SVG/Icons/fox.svg" '
+                                       b'scale="3.25"/>'
                                        b'</resources></recovery>'),
             "twres/pages/fox.xml": b'<text>OrangeFox Lab (Beta)</text>',
             BRAND_SPLASH: (b'<image name="splash_logo" '
@@ -77,22 +86,34 @@ class CoralRecoveryTests(unittest.TestCase):
             "TRAILER!!!": b"",
         }
         output = io.BytesIO()
-        patch_payload(archive(files), output, b"A17", b"fstab17", brand_png=logo)
+        patch_payload(archive(files), output, b"A17", b"fstab17", brand_png=logo,
+                      about_png=rgba, fox_png=rgba)
         updated = {name: data for name, _, _, data in entries(output.getvalue())}
         self.assertEqual(updated[BRAND_IMAGE], logo)
+        self.assertEqual(updated[BRAND_ABOUT_IMAGE], rgba)
+        self.assertEqual(updated[BRAND_FOX_IMAGE], rgba)
+        self.assertIn(b'<image resource="hecker_fox"/>', updated[BRAND_WIPE])
+        self.assertIn(b'<action function="wipe"/>', updated[BRAND_WIPE])
         self.assertEqual(updated[BRAND_SPLASH].count(b'<text>HeckerOS</text>'), 1)
         self.assertNotIn(b'<text>OrangeFox</text>', updated[BRAND_SPLASH])
         self.assertNotIn(b'resource="splash_bg"', updated[BRAND_SPLASH])
         self.assertIn(b'filename="Hecker/logo" retainaspect="1" scale="1.0"',
                       updated[BRAND_SPLASH])
         self.assertIn(b'<text>HeckerOS Recovery</text>', updated[BRAND_SETTINGS])
-        self.assertIn(b'<image resource="hecker_logo"/>', updated[BRAND_SETTINGS])
+        self.assertIn(b'<image resource="hecker_about"/>', updated[BRAND_SETTINGS])
+        self.assertNotIn(b'<image resource="hecker_logo"/>', updated[BRAND_SETTINGS])
         self.assertIn(b'<image resource="hecker_logo"/>', updated["twres/pages/main.xml"])
         self.assertIn(b'name="hecker_logo"', updated[BRAND_RESOURCES])
         self.assertIn(b'name="splash_logo_o" filename="Hecker/logo"',
                       updated[BRAND_RESOURCES])
-        self.assertIn(b'name="logo_about" filename="Hecker/logo"',
+        self.assertIn(b'name="logo_about" filename="Hecker/about"',
                       updated["twres/themes/style.xml"])
+        self.assertIn(b'name="fox" filename="Hecker/icon" scale="1.0"',
+                      updated["twres/themes/style.xml"])
+        self.assertIn(b'name="hecker_about" filename="Hecker/about"',
+                      updated[BRAND_RESOURCES])
+        self.assertIn(b'name="hecker_fox" filename="Hecker/icon"',
+                      updated[BRAND_RESOURCES])
         self.assertIn(b'<text>Hecker Recovery Lab (Beta)</text>',
                       updated["twres/pages/fox.xml"])
         self.assertEqual(updated[ROM_FSTAB], b"fstab17")
