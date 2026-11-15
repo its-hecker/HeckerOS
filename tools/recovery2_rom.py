@@ -229,11 +229,11 @@ def rebrand_theme(name, data):
         data = replace_required(data, b'<image resource="splash_logo_o"/>',
                                 b'<image resource="hecker_logo"/>',
                                 "welcome logo")
-    elif name == BRAND_WIPE:
-        # A wipe/format page may reference the fox glyph directly. The icon's
-        # theme declaration is also rebound, covering shared/page templates.
-        data = data.replace(b'<image resource="fox"/>',
-                            b'<image resource="hecker_fox"/>')
+    elif name == BRAND_WIPE or name.startswith("twres/pages/backup") or name.startswith("twres/pages/restore"):
+        # A backup empty state can use an inline fox resource even when the
+        # theme's shared fox declaration has already been rebranded.
+        data = re.sub(rb'<image\s+resource="[^"]*fox[^"]*"\s*/>',
+                      b'<image resource="hecker_fox"/>', data, flags=re.I)
     elif name == BRAND_SETTINGS:
         data = replace_required(data, b'<image resource="logo_about"/>',
                                 b'<image resource="hecker_about"/>',
