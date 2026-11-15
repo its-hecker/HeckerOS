@@ -16,6 +16,14 @@ BRANDING_SOURCE = "vendor/hecker/floral/suite/recovery/res-xxhdpi/images/logo_im
 INSTALL = ("\t$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom install "
            "$(ZSTD) out/hecker-recovery2-coral.cpio.gz "
            "$(TARGET_RECOVERY_ROOT_OUT) " + BRANDING_SOURCE + "\n")
+# Earlier builds generated the same action without a logo argument.  Reusing
+# a dirty Makefile would run both actions, causing a second failed install.
+LEGACY_INSTALL = ("\t$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom install "
+                  "$(ZSTD) out/hecker-recovery2-coral.cpio.gz "
+                  "$(TARGET_RECOVERY_ROOT_OUT)\n")
+LEGACY_INSTALL_BLOCK = (
+    "ifeq ($(TARGET_PRODUCT),hecker_coral)\n" + LEGACY_INSTALL + "endif\n"
+)
 DEPENDENCIES = ("$(ZSTD)", "out/hecker-recovery2-coral.cpio.gz",
                 "$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom",
                 BRANDING_SOURCE)
@@ -119,11 +127,15 @@ def recovery_rom_plan(rom, replace, revert=False):
         files[blueprint] = updated
 
     current = make.read_text()
+    if current.count(LEGACY_INSTALL_BLOCK) > 1:
+        raise ValueError("Duplicate legacy Recovery 2.0 installation blocks")
+    # Migrate previously generated Makefiles before applying the latest rule.
+    clean = current.replace(LEGACY_INSTALL_BLOCK, "", 1)
     anchor = '$(INTERNAL_RECOVERY_RAMDISK_FILES_TIMESTAMP): $(MKBOOTFS) \\\n'
     deps = ('ifeq ($(TARGET_PRODUCT),hecker_coral)\n'
             '$(INTERNAL_RECOVERY_RAMDISK_FILES_TIMESTAMP): ' + ' \\\n    '.join(DEPENDENCIES) +
             '\nendif\n\n')
-    updated = replace(current, anchor, deps + anchor, str(make), revert)
+    updated = replace(clean, anchor, deps + anchor, str(make), revert)
     updated = replace(updated, MAKE_ANCHOR, MAKE_ANCHOR +
                       'ifeq ($(TARGET_PRODUCT),hecker_coral)\n' + INSTALL + 'endif\n',
                       str(make), revert)
@@ -146,6 +158,10 @@ hecker-recovery-ota-check: $(INTERNAL_OTA_PACKAGE_TARGET) $(INSTALLED_BOOTIMAGE_
 	    $(PRODUCT_OUT)/boot.img $(INTERNAL_OTA_PACKAGE_TARGET)
 endif
 ''', str(make), revert)
+    install_lines = [line for line in updated.splitlines()
+                     if line.lstrip().startswith("$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom install ")]
+    if len(install_lines) > 1 or any(line != INSTALL.rstrip("\n") for line in install_lines):
+        raise ValueError("Unrecognized or duplicate Recovery 2.0 install rule")
     if updated != current:
         files[make] = updated
     return files
