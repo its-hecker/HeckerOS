@@ -53,10 +53,16 @@ and a compact **caracal icon** (48x48) from that approved artwork using
 `tools/recovery2_brand_art.py`. These replace OrangeFox's `logo_about`
 and `fox` image resources and any inline fox glyph on the Wipe page.
 This prevents the old black splash rectangle from overlapping the About
-header while keeping the splash background black. The About page still says
-**HeckerOS Recovery**; Recovery Lab labels remain rebranded. OrangeFox
-upstream attribution, wipe and format actions, and functional internals
-are retained. The generated assets live in `out/hecker-recovery2-brand-assets`
+header while keeping the splash background black. The About title is changed to **Maintained by Hecker** and the former
+maintainer row is labeled with **Credits** for MrYacha, fordownloads and
+DarthJabba9. The HeckerOS build-type label is changed to **Official** when
+exposed by the pinned theme; this does not assert OrangeFox upstream
+certification. The splash art already has words, so overlay title text is
+removed rather than drawn on top. Screen brightness can be adjusted down to
+1% rather than the original 10% floor, retaining a non-zero level so the
+recovery remains visible. The backup/restore/wipe fox glyph references are
+redirected to the caracal. Recovery Lab labels remain rebranded. OrangeFox
+upstream attribution and all functional internals are retained. The generated assets live in `out/hecker-recovery2-brand-assets`
 and are checked by the pinned ramdisk preflight and boot-image verification.
 
 The existing **Backup** navigation icon is a backup symbol, not a recovery
