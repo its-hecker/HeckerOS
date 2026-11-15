@@ -144,11 +144,11 @@ def rebrand_theme(name, data):
         # OrangeFox releases use different wording/variables in their splash
         # title. Keep the first title's placement and font instead of requiring
         # the exact literal <text>OrangeFox</text>.
-        titles = list(re.finditer(rb'(<text>\\s*)([^<]{1,160}?)(\\s*</text>)', data))
+        titles = list(re.finditer(rb'(<text>\s*)([^<]{1,160}?)(\s*</text>)', data))
         if not titles:
             raise ValueError("Unknown OrangeFox splash title: no text labels")
         title = next((item for item in titles if
-                      re.search(rb'orange\\s*fox|recovery|fox', item.group(2), re.I)),
+                      re.search(rb'orange\s*fox|recovery|fox', item.group(2), re.I)),
                      titles[0])
         data = data[:title.start(2)] + b'HeckerOS' + data[title.end(2):]
         # Keep the requested black splash, without an old OrangeFox wallpaper.
