@@ -141,8 +141,16 @@ def rebrand_theme(name, data):
     """Modify only reviewed UI resources, preserving recovery services and credits."""
     if name == BRAND_SPLASH:
         data = rebrand_splash_logo(data)
-        data = replace_required(data, b'<text>OrangeFox</text>',
-                                b'<text>HeckerOS</text>', "splash title")
+        # OrangeFox releases use different wording/variables in their splash
+        # title. Keep the first title's placement and font instead of requiring
+        # the exact literal <text>OrangeFox</text>.
+        titles = list(re.finditer(rb'(<text>\\s*)([^<]{1,160}?)(\\s*</text>)', data))
+        if not titles:
+            raise ValueError("Unknown OrangeFox splash title: no text labels")
+        title = next((item for item in titles if
+                      re.search(rb'orange\\s*fox|recovery|fox', item.group(2), re.I)),
+                     titles[0])
+        data = data[:title.start(2)] + b'HeckerOS' + data[title.end(2):]
         # Keep the requested black splash, without an old OrangeFox wallpaper.
         data, changed = re.subn(
             rb'<image>\s*<image resource="splash_bg"\s*/>\s*'
