@@ -120,22 +120,34 @@ def replace_required(data, old, new, description):
     return data.replace(old, new)
 
 
+def rebrand_splash_logo(data):
+    """Change only the named logo resource; OrangeFox themes use different logo files."""
+    matches = list(re.finditer(rb'<image\\b[^>]*\\bname="splash_logo"[^>]*/>', data))
+    if len(matches) != 1:
+        raise ValueError("Unknown OrangeFox splash logo resource")
+    match = matches[0]
+    image_tag = match.group()
+    image_tag, count = re.subn(rb'\\bfilename="[^"]+"',
+                               b'filename="Hecker/logo"', image_tag)
+    if count != 1:
+        raise ValueError("Unknown OrangeFox splash logo filename")
+    image_tag, count = re.subn(rb'\\bscale="[^"]+"', b'scale="1.0"', image_tag)
+    if count == 0:
+        image_tag = image_tag[:-2] + b' scale="1.0"/>'
+    return data[:match.start()] + image_tag + data[match.end():]
+
+
 def rebrand_theme(name, data):
     """Modify only reviewed UI resources, preserving recovery services and credits."""
     if name == BRAND_SPLASH:
-        data = replace_required(data, b'filename="SVG/Logos/logo_o.svg"',
-                                b'filename="Hecker/logo"', "splash logo")
+        data = rebrand_splash_logo(data)
         data = replace_required(data, b'<text>OrangeFox</text>',
                                 b'<text>HeckerOS</text>', "splash title")
-        data = replace_required(data,
-                                b'filename="Hecker/logo" retainaspect="1" scale="2.0"',
-                                b'filename="Hecker/logo" retainaspect="1" scale="1.0"',
-                                "splash scale")
         # Keep the requested black splash, without an old OrangeFox wallpaper.
         data, changed = re.subn(
             rb'<image>\s*<image resource="splash_bg"\s*/>\s*'
             rb'<placement[^>]+/>\s*</image>', b'', data, count=1)
-        if changed != 1:
+        if changed != 1 and b'resource="splash_bg"' in data:
             raise ValueError("Unknown OrangeFox splash background")
     elif name == BRAND_RESOURCES:
         if b'name="hecker_logo"' in data:
