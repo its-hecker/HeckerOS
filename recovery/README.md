@@ -41,3 +41,30 @@ The target is the pinned PixelOS recovery source; CI contract tests use that
 exact upstream revision. A new ROM build is required because Coral/Flame use
 recovery-as-boot; the new UI is included in `boot.img`. Verify on real devices
 before shipping an official build.
+
+## Recovery 2.0: OrangeFox-based interactive recovery branding
+
+The Recovery 2.0 build embeds the pinned Coral OrangeFox ramdisk in Android 17
+`boot.img`. The build-time `tools/recovery2_rom.py` overlay now packages the
+existing HeckerOS caracal PNG (`recovery/res-xxhdpi/images/logo_image.png`)
+directly into the interactive recovery theme. It rebinds the splash screen,
+welcome screen, About page and available splash-preview/color-theme logo
+resources. The splash keeps its black background; the About page says
+**HeckerOS Recovery**. Recovery Lab's visible tool labels are rebranded,
+while OrangeFox upstream attribution and functional internals are retained.
+
+The existing **Backup** navigation icon is a backup symbol, not a recovery
+brand logo; it stays intact for usability. Noninteractive update/fastbootd
+paths continue to use the Android 17 stock recovery and its HeckerOS bitmap.
+
+Branding is installed only when the source asset exists and is a valid-sized
+PNG, and the archived XML matches reviewed structures. `verify` checks the
+branded image exists in the extracted boot ramdisk, in addition to the
+existing recovery/sideload/fastbootd checks.
+
+**This branding work does not implement credential-free FBE decryption.**
+Android can decrypt metadata without the lockscreen user data key, but the
+remaining user files stay encrypted until valid credential authentication.
+Do not add a setting that claims to provide automatic decryption without a
+tested cryptographic recovery backend. A real Coral build and boot test are
+required to confirm the screenshot appearance and asset scaling.
