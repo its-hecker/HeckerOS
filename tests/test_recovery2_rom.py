@@ -65,6 +65,8 @@ class CoralRecoveryTests(unittest.TestCase):
             "twres/pages/main.xml": FASTBOOT + b'<image resource="splash_logo_o"/>',
             "twres/pages/install.xml": FLASH_ZIP * 2,
             BRAND_WIPE: b'<image resource="fox"/><action function="wipe"/>',
+            "twres/pages/backup.xml": b'<image resource="fox"/><text>Backup</text>',
+            "twres/pages/restore.xml": b'<image resource="fox"/><text>Restore</text>',
             BRAND_SETTINGS: (b'<image resource="logo_about"/>'
                              b'<text>OrangeFox Recovery</text>'
                              b'<text>%of_maintainer% (Maintainer)</text>'
@@ -97,6 +99,8 @@ class CoralRecoveryTests(unittest.TestCase):
         self.assertEqual(updated[BRAND_FOX_IMAGE], rgba)
         self.assertIn(b'<image resource="hecker_fox"/>', updated[BRAND_WIPE])
         self.assertIn(b'<action function="wipe"/>', updated[BRAND_WIPE])
+        self.assertIn(b'<image resource="hecker_fox"/>', updated["twres/pages/backup.xml"])
+        self.assertIn(b'<image resource="hecker_fox"/>', updated["twres/pages/restore.xml"])
         self.assertEqual(updated[BRAND_SPLASH].count(b'<text>HeckerOS</text>'), 0)
         self.assertNotIn(b'<text>OrangeFox</text>', updated[BRAND_SPLASH])
         self.assertNotIn(b'resource="splash_bg"', updated[BRAND_SPLASH])
