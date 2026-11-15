@@ -65,13 +65,8 @@ class CoralRecoveryTests(unittest.TestCase):
             "twres/pages/main.xml": FASTBOOT + b'<image resource="splash_logo_o"/>',
             "twres/pages/install.xml": FLASH_ZIP * 2,
             BRAND_WIPE: b'<image resource="fox"/><action function="wipe"/>',
-            "twres/pages/backup.xml": b'<image resource="fox"/><text>Backup</text>',
-            "twres/pages/restore.xml": b'<image resource="fox"/><text>Restore</text>',
             BRAND_SETTINGS: (b'<image resource="logo_about"/>'
-                             b'<text>OrangeFox Recovery</text>'
-                             b'<text>%of_maintainer% (Maintainer)</text>'
-                             b'<text>Unofficial</text>'
-                             b'<data variable="tw_brightness_pct" min="10" max="100"/>'),
+                             b'<text>OrangeFox Recovery</text>'),
             BRAND_RESOURCES: (b'<recovery><resources>'
                               b'<image name="splash_logo_o" filename="SVG/Logos/logo_o.svg"/>'
                               b'</resources></recovery>'),
@@ -99,19 +94,12 @@ class CoralRecoveryTests(unittest.TestCase):
         self.assertEqual(updated[BRAND_FOX_IMAGE], rgba)
         self.assertIn(b'<image resource="hecker_fox"/>', updated[BRAND_WIPE])
         self.assertIn(b'<action function="wipe"/>', updated[BRAND_WIPE])
-        self.assertIn(b'<image resource="hecker_fox"/>', updated["twres/pages/backup.xml"])
-        self.assertIn(b'<image resource="hecker_fox"/>', updated["twres/pages/restore.xml"])
         self.assertEqual(updated[BRAND_SPLASH].count(b'<text>HeckerOS</text>'), 0)
         self.assertNotIn(b'<text>OrangeFox</text>', updated[BRAND_SPLASH])
         self.assertNotIn(b'resource="splash_bg"', updated[BRAND_SPLASH])
         self.assertIn(b'filename="Hecker/logo" retainaspect="1" scale="1.0"',
                       updated[BRAND_SPLASH])
-        self.assertIn(b'<text>Maintained by Hecker</text>', updated[BRAND_SETTINGS])
-        self.assertIn(b'<text>Credits: MrYacha, fordownloads, DarthJabba9</text>',
-                      updated[BRAND_SETTINGS])
-        self.assertIn(b'<text>Official</text>', updated[BRAND_SETTINGS])
-        self.assertIn(b'variable="tw_brightness_pct" min="1" max="100"',
-                      updated[BRAND_SETTINGS])
+        self.assertIn(b'<text>HeckerOS Recovery</text>', updated[BRAND_SETTINGS])
         self.assertIn(b'<image resource="hecker_about"/>', updated[BRAND_SETTINGS])
         self.assertNotIn(b'<image resource="hecker_logo"/>', updated[BRAND_SETTINGS])
         self.assertIn(b'<image resource="hecker_logo"/>', updated["twres/pages/main.xml"])
@@ -144,16 +132,16 @@ class CoralRecoveryTests(unittest.TestCase):
         self.assertNotIn(b'logo_d.svg', patched)
         self.assertNotIn(b'<text>HeckerOS</text>', patched)
         self.assertNotIn(b'<text>OrangeFox</text>', patched)
-        with self.assertRaisesRegex(ValueError, "splash logo resource"):
-            rebrand_theme(BRAND_SPLASH, original.replace(b'name="splash_logo"',
-                                                        b'name="unexpected_logo"'))
         repeated = original.replace(b'<text>OrangeFox</text>',
                                     b'<text>OrangeFox</text><text>HeckerOS Recovery</text>'
                                     b'<text>Hecker Recovery 2.0</text>')
-        rewritten = rebrand_theme(BRAND_SPLASH, repeated)
-        self.assertNotIn(b'<text>OrangeFox</text>', rewritten)
-        self.assertNotIn(b'<text>HeckerOS Recovery</text>', rewritten)
-        self.assertNotIn(b'<text>Hecker Recovery 2.0</text>', rewritten)
+        stripped = rebrand_theme(BRAND_SPLASH, repeated)
+        self.assertNotIn(b'<text>OrangeFox</text>', stripped)
+        self.assertNotIn(b'<text>HeckerOS Recovery</text>', stripped)
+        self.assertNotIn(b'<text>Hecker Recovery 2.0</text>', stripped)
+        with self.assertRaisesRegex(ValueError, "splash logo resource"):
+            rebrand_theme(BRAND_SPLASH, original.replace(b'name="splash_logo"',
+                                                        b'name="unexpected_logo"'))
 
     def test_migrate_duplicate_legacy_installer_on_reused_build_tree(self):
         # The reported failure showed two install calls in one Make recipe.

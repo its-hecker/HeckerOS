@@ -164,13 +164,6 @@ def rebind_image_declaration(data, resource, filename, scale=None):
 
 def rebrand_theme(name, data):
     """Modify only reviewed UI resources, preserving recovery services and credits."""
-    # Theme sliders traditionally clamp Coral brightness to 10 percent.
-    # Use 1 percent instead of zero to avoid an unusable black screen.
-    if name.startswith("twres/") and name.endswith(".xml"):
-        data = re.sub(
-            rb'(<data\b[^>]*\bvariable="tw_brightness_pct"[^>]*\bmin=")10("[^>]*/>)',
-            rb'\g<1>1\g<2>', data)
-
     if name == BRAND_SPLASH:
         data = rebrand_splash_logo(data)
         # The PNG already contains the complete title. Strip every static
@@ -229,33 +222,18 @@ def rebrand_theme(name, data):
         data = replace_required(data, b'<image resource="splash_logo_o"/>',
                                 b'<image resource="hecker_logo"/>',
                                 "welcome logo")
-    elif name == BRAND_WIPE or name.startswith("twres/pages/backup") or name.startswith("twres/pages/restore"):
-        # A backup empty state can use an inline fox resource even when the
-        # theme's shared fox declaration has already been rebranded.
-        data = re.sub(rb'<image\s+resource="[^"]*fox[^"]*"\s*/>',
-                      b'<image resource="hecker_fox"/>', data, flags=re.I)
+    elif name == BRAND_WIPE:
+        # A wipe/format page may reference the fox glyph directly. The icon's
+        # theme declaration is also rebound, covering shared/page templates.
+        data = data.replace(b'<image resource="fox"/>',
+                            b'<image resource="hecker_fox"/>')
     elif name == BRAND_SETTINGS:
         data = replace_required(data, b'<image resource="logo_about"/>',
                                 b'<image resource="hecker_about"/>',
                                 "About logo")
         data = replace_required(data, b'<text>OrangeFox Recovery</text>',
-                                b'<text>Maintained by Hecker</text>',
+                                b'<text>HeckerOS Recovery</text>',
                                 "About title")
-        # Attribute the previous recovery developers without confusing them
-        # with the HeckerOS maintainer. Retain the original credits elsewhere.
-        for old in (b'<text>%of_maintainer% (Maintainer)</text>',
-                    b'<text>%of_maintainer%</text>'):
-            if old in data:
-                data = data.replace(old,
-                    b'<text>Credits: MrYacha, fordownloads, DarthJabba9</text>', 1)
-                break
-        # Official refers to this HeckerOS-branded build, not OrangeFox
-        # upstream certification. Keep original recovery binary metadata.
-        for marker in (b'<text>Unofficial</text>', b'<text>%fox_variant%</text>',
-                       b'<text>%of_variant%</text>', b'<text>%of_build_type%</text>'):
-            if marker in data:
-                data = data.replace(marker, b'<text>Official</text>', 1)
-                break
     return data
 
 
@@ -420,7 +398,7 @@ def verify(zstd, avbtool, extractor, image, ota):
             b'<image resource="hecker_about"/>' not in files.get(BRAND_SETTINGS, b"") or
             b'<text>HeckerOS</text>' in files.get(BRAND_SPLASH, b"") or
             b'<text>OrangeFox</text>' in files.get(BRAND_SPLASH, b"") or
-            b'<text>Maintained by Hecker</text>' not in files.get(BRAND_SETTINGS, b"") or
+            b'<text>HeckerOS Recovery</text>' not in files.get(BRAND_SETTINGS, b"") or
             b'<image resource="hecker_logo"/>' not in files.get(FOX_MAIN_PAGE, b"") or
             b'name="hecker_logo"' not in files.get(BRAND_RESOURCES, b"") or
             b'name="hecker_about"' not in files.get(BRAND_RESOURCES, b"") or
