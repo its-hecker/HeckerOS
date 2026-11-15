@@ -142,19 +142,19 @@ def rebrand_splash_logo(data):
 
 def rebind_image_declaration(data, resource, filename, scale=None):
     """Replace one optional theme image declaration without editing unrelated XML."""
-    pattern = rb'<image\\b[^>]*\\bname="' + re.escape(resource) + rb'"[^>]*/>'
+    pattern = rb'<image\b[^>]*\bname="' + re.escape(resource) + rb'"[^>]*/>'
     matches = list(re.finditer(pattern, data))
     if len(matches) > 1:
         raise ValueError("Ambiguous recovery theme resource: " + resource.decode())
     if not matches:
         return data
     original = matches[0]
-    tag, count = re.subn(rb'\\bfilename="[^"]+"', b'filename="' + filename + b'"',
+    tag, count = re.subn(rb'\bfilename="[^"]+"', b'filename="' + filename + b'"',
                          original.group())
     if count != 1:
         raise ValueError("Missing theme image filename: " + resource.decode())
     if scale is not None:
-        tag, count = re.subn(rb'\\bscale="[^"]+"', b'scale="' + scale + b'"', tag)
+        tag, count = re.subn(rb'\bscale="[^"]+"', b'scale="' + scale + b'"', tag)
         if count == 0:
             tag = tag[:-2] + b' scale="' + scale + b'"/>'
     return data[:original.start()] + tag + data[original.end():]
