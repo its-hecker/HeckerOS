@@ -359,6 +359,15 @@ def plan(rom, revert=False):
     return changes
 
 
+def source_backup_root(rom):
+    """Keep archived Android.bp files inside Soong's active excluded OUT_DIR.
+
+    Non-KSU uses out-nonksu; putting a copy under out/ causes Soong to scan
+    duplicate modules when out/ is no longer the active output directory.
+    """
+    return Path(rom) / (os.environ.get("OUT_DIR") or "out") / "hecker-suite-source-backups"
+
+
 def apply(rom, mode):
     changes = plan(rom, mode == "revert")
     if mode == "verify":
@@ -373,7 +382,7 @@ def apply(rom, mode):
         return
     if changes:
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-        backup = rom / "out/hecker-suite-source-backups" / stamp
+        backup = source_backup_root(rom) / stamp
         # Validate the complete plan before changing any file. Back up original tracked content.
         for path in changes:
             if path.exists():

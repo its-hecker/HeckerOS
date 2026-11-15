@@ -63,7 +63,7 @@ The development branch defaults to USB debugging without PC authorization on
 authorization. The helper verifies the resulting product properties; rebuild and
 flash before testing a mode change. See [development ADB](../rom/adb/README.md).
 
-The preparation command validates every source anchor before writing, is idempotent, and preserves backups under `out/hecker-suite-source-backups`. To undo only owned, unchanged adapters before syncing a different source baseline, run:
+The preparation command validates every source anchor before writing, is idempotent, and preserves backups under the active `OUT_DIR` (by default `out/hecker-suite-source-backups`, or `out-nonksu/hecker-suite-source-backups` for non-KSU). Backups made by older builds under `out/` must be moved into the active output directory before Soong scans source modules. To undo only owned, unchanged adapters before syncing a different source baseline, run:
 
 ```bash
 python3 vendor/hecker/floral/suite/tools/prepare.py --revert
