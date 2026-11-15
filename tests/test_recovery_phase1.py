@@ -45,8 +45,10 @@ class RecoveryPhase1Tests(unittest.TestCase):
         self.assertIn("Now send the package you want to apply", source)
         self.assertIn("Install from ADB complete", source)
         # Full-text logs always take precedence over the install panel.
-        self.assertIn("if ((hecker_sideload_ui_ || current_icon_ == INSTALLING_UPDATE) && !menu_ && !show_text) {", source)
-        self.assertIn("if (hecker_sideload_ui_ && !menu_ && !show_text && progressBarType != DETERMINATE) {", source)
+        self.assertIn("if (!menu_ && current_icon_ != ERROR &&", source)
+        self.assertIn("(hecker_sideload_ui_ || (current_icon_ == INSTALLING_UPDATE && !show_text))) {", source)
+        self.assertIn("if (hecker_sideload_ui_ && !menu_ && current_icon_ != ERROR &&", source)
+        self.assertNotIn("&& !menu_ && !show_text) {", source)
         # The generated C++ must have one backslash in the null character literal.
         self.assertIn(r"if (text_[row][0] != '\0') {", source)
         self.assertNotIn(r"if (text_[row][0] != '\\0') {", source)
@@ -66,23 +68,26 @@ class RecoveryPhase1Tests(unittest.TestCase):
 
 
 
-    def test_upgrade_prepared_v1_maintains_revert(self):
-        self.apply()
+    def test_upgrade_prepared_v1_and_v2_maintains_revert(self):
         target = self.recovery / "recovery_ui/screen_ui.cpp"
-        previous = target.read_text()
-        for old, new in PREVIOUS_UI_GUARDS:
-            self.assertEqual(previous.count(new), 1)
-            previous = previous.replace(new, old, 1)
-        target.write_text(previous)
-        self.assertEqual(set(self.apply()), {target})
-        upgraded = target.read_text()
-        for old, new in PREVIOUS_UI_GUARDS:
-            self.assertEqual(upgraded.count(new), 1)
-            self.assertNotIn(old, upgraded)
-        self.assertEqual(self.apply(), {})
-        self.assertEqual(len(self.apply(revert=True)), 2)
-        for relative, baseline in self.originals.items():
-            self.assertEqual((self.recovery / relative).read_bytes(), baseline)
+        # Exercise both historical variants of the sideload text guard.
+        for start in (0, 2):
+            self.apply()
+            previous = target.read_text()
+            legacy = PREVIOUS_UI_GUARDS[start:start + 2]
+            for old, new in legacy:
+                self.assertEqual(previous.count(new), 1)
+                previous = previous.replace(new, old, 1)
+            target.write_text(previous)
+            self.assertEqual(set(self.apply()), {target})
+            upgraded = target.read_text()
+            for old, new in legacy:
+                self.assertEqual(upgraded.count(new), 1)
+                self.assertNotIn(old, upgraded)
+            self.assertEqual(self.apply(), {})
+            self.assertEqual(len(self.apply(revert=True)), 2)
+            for relative, baseline in self.originals.items():
+                self.assertEqual((self.recovery / relative).read_bytes(), baseline)
 
 
 class HeckerOSReleaseIdentityTests(unittest.TestCase):
