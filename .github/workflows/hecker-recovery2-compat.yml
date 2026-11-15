@@ -29,3 +29,12 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_recovery2_*.py' -v
       - name: Validate per-app signature UI, resource wiring and fastbootd branding
         run: python3 -m unittest discover -s tests -p 'test_signature_app_selection.py' -v
+      - name: Validate pinned OrangeFox release ramdisk and actual theme
+        run: |
+          curl --fail --location --retry 3 --retry-delay 2 --output /tmp/hecker-recovery2-coral.cpio.gz \
+            https://github.com/its-hecker/orangefox_device_google_coral/releases/download/hecker-recovery2-coral-ramdisk-353ac57/hecker-recovery2-coral.cpio.gz
+          echo "4905cf65045bfd3d73e6ae9d42e141f6706d0ff4bd1557b556fbb1b1db69eb05  /tmp/hecker-recovery2-coral.cpio.gz" | sha256sum --check
+          python3 tools/recovery2_rom.py preflight \
+            /tmp/hecker-recovery2-coral.cpio.gz \
+            recovery/res-xxhdpi/images/logo_image.png
+
