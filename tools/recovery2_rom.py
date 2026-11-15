@@ -122,16 +122,16 @@ def replace_required(data, old, new, description):
 
 def rebrand_splash_logo(data):
     """Change only the named logo resource; OrangeFox themes use different logo files."""
-    matches = list(re.finditer(rb'<image\\b[^>]*\\bname="splash_logo"[^>]*/>', data))
+    matches = list(re.finditer(rb'<image\b[^>]*\bname="splash_logo"[^>]*/>', data))
     if len(matches) != 1:
         raise ValueError("Unknown OrangeFox splash logo resource")
     match = matches[0]
     image_tag = match.group()
-    image_tag, count = re.subn(rb'\\bfilename="[^"]+"',
+    image_tag, count = re.subn(rb'\bfilename="[^"]+"',
                                b'filename="Hecker/logo"', image_tag)
     if count != 1:
         raise ValueError("Unknown OrangeFox splash logo filename")
-    image_tag, count = re.subn(rb'\\bscale="[^"]+"', b'scale="1.0"', image_tag)
+    image_tag, count = re.subn(rb'\bscale="[^"]+"', b'scale="1.0"', image_tag)
     if count == 0:
         image_tag = image_tag[:-2] + b' scale="1.0"/>'
     return data[:match.start()] + image_tag + data[match.end():]
