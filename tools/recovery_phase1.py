@@ -143,7 +143,11 @@ void ScreenRecoveryUI::draw_screen_locked() {""",
             """void ScreenRecoveryUI::draw_screen_locked() {
   if (!show_text) {""",
             """void ScreenRecoveryUI::draw_screen_locked() {
-  if ((hecker_sideload_ui_ || current_icon_ == INSTALLING_UPDATE) && !menu_ && !show_text) {
+  // Normal "adb reboot sideload" enables ShowText(true) before the ADB prompt.
+  // Render the Hecker panel anyway, while retaining the real log buffer and
+  // the stock menu/error paths. Never fabricate package progress.
+  if (!menu_ && current_icon_ != ERROR &&
+      (hecker_sideload_ui_ || (current_icon_ == INSTALLING_UPDATE && !show_text))) {
     draw_hecker_install_locked();
     return;
   }
@@ -158,7 +162,8 @@ void ScreenRecoveryUI::draw_screen_locked() {""",
     }
 
     double end = now();""",
-            """      if (hecker_sideload_ui_ && !menu_ && !show_text && progressBarType != DETERMINATE) {
+            """      if (hecker_sideload_ui_ && !menu_ && current_icon_ != ERROR &&
+          progressBarType != DETERMINATE) {
         redraw = true;  // Keep the waiting-for-sideload indicator moving.
       }
       if (redraw) update_progress_locked();
@@ -224,8 +229,12 @@ def _replace_guarded(content, original, patched, name, revert):
 # Build trees prepared with the previous Phase 1 adapter must upgrade safely.
 # Normalize only these known snippets, then apply the usual guarded source checks.
 PREVIOUS_UI_GUARDS = (
-    ("  if ((hecker_sideload_ui_ || current_icon_ == INSTALLING_UPDATE) && !menu_) {", "  if ((hecker_sideload_ui_ || current_icon_ == INSTALLING_UPDATE) && !menu_ && !show_text) {"),
-    ("      if (hecker_sideload_ui_ && !menu_ && progressBarType != DETERMINATE) {", "      if (hecker_sideload_ui_ && !menu_ && !show_text && progressBarType != DETERMINATE) {"),
+    # Original Phase 1 and the earlier text-respecting revision both migrate
+    # to the corrected sideload panel without requiring a clean build tree.
+    ("  if ((hecker_sideload_ui_ || current_icon_ == INSTALLING_UPDATE) && !menu_) {", "  if (!menu_ && current_icon_ != ERROR &&\n      (hecker_sideload_ui_ || (current_icon_ == INSTALLING_UPDATE && !show_text))) {"),
+    ("      if (hecker_sideload_ui_ && !menu_ && progressBarType != DETERMINATE) {", "      if (hecker_sideload_ui_ && !menu_ && current_icon_ != ERROR &&\n          progressBarType != DETERMINATE) {"),
+    ("  if ((hecker_sideload_ui_ || current_icon_ == INSTALLING_UPDATE) && !menu_ && !show_text) {", "  if (!menu_ && current_icon_ != ERROR &&\n      (hecker_sideload_ui_ || (current_icon_ == INSTALLING_UPDATE && !show_text))) {"),
+    ("      if (hecker_sideload_ui_ && !menu_ && !show_text && progressBarType != DETERMINATE) {", "      if (hecker_sideload_ui_ && !menu_ && current_icon_ != ERROR &&\n          progressBarType != DETERMINATE) {"),
 )
 
 def _upgrade_previous_phase1(source, relative):

@@ -23,13 +23,18 @@ public final class HeckerWorkspaceGestures {
         }
         HeckerHomeSwipe swipe=SWIPES.get(workspace);
         if(swipe==null){swipe=new HeckerHomeSwipe();SWIPES.put(workspace,swipe);}
-        if(event.getPointerCount()>1||event.getActionMasked()==MotionEvent.ACTION_CANCEL
-                ||event.getActionMasked()==MotionEvent.ACTION_POINTER_DOWN)swipe.cancel();
-        else if(event.getActionMasked()==MotionEvent.ACTION_DOWN)swipe.down(event.getX(),event.getY(),event.getEventTime());
-        else if(event.getActionMasked()==MotionEvent.ACTION_MOVE)swipe.move(event.getX(),event.getY(),android.view.ViewConfiguration.get(context).getScaledTouchSlop());
-        else if(event.getActionMasked()==MotionEvent.ACTION_UP&&swipe.up(event.getX(),event.getY(),event.getEventTime(),
-                Math.max(48*context.getResources().getDisplayMetrics().density,android.view.ViewConfiguration.get(context).getScaledTouchSlop()*4))
-                &&prefs.getBoolean("hecker_swipe_down",true)){
+        // Trigger when the direction is established, not when the finger lifts.
+        // Keep native horizontal paging, icon taps and double-tap sleep intact.
+        final int action=event.getActionMasked();
+        final float slop=android.view.ViewConfiguration.get(context).getScaledTouchSlop();
+        final float threshold=Math.max(32f*context.getResources().getDisplayMetrics().density,slop*2.5f);
+        boolean openShade=false;
+        if(event.getPointerCount()>1||action==MotionEvent.ACTION_CANCEL
+                ||action==MotionEvent.ACTION_POINTER_DOWN)swipe.cancel();
+        else if(action==MotionEvent.ACTION_DOWN)swipe.down(event.getX(),event.getY(),event.getEventTime());
+        else if(action==MotionEvent.ACTION_MOVE)openShade=swipe.move(event.getX(),event.getY(),event.getEventTime(),slop,threshold);
+        else if(action==MotionEvent.ACTION_UP)openShade=swipe.up(event.getX(),event.getY(),event.getEventTime(),threshold);
+        if(openShade&&prefs.getBoolean("hecker_swipe_down",true)){
             cancelDetector(workspace,event);
             try{
                 Object status=context.getSystemService("statusbar");
