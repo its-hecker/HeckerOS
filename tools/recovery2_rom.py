@@ -141,23 +141,25 @@ def rebrand_splash_logo(data):
 
 
 def rebind_image_declaration(data, resource, filename, scale=None):
-    """Replace one optional theme image declaration without editing unrelated XML."""
+    """Rebrand every declaration for an image name across color/theme variants."""
     pattern = rb'<image\b[^>]*\bname="' + re.escape(resource) + rb'"[^>]*/>'
     matches = list(re.finditer(pattern, data))
-    if len(matches) > 1:
-        raise ValueError("Ambiguous recovery theme resource: " + resource.decode())
-    if not matches:
-        return data
-    original = matches[0]
-    tag, count = re.subn(rb'\bfilename="[^"]+"', b'filename="' + filename + b'"',
-                         original.group())
-    if count != 1:
-        raise ValueError("Missing theme image filename: " + resource.decode())
-    if scale is not None:
-        tag, count = re.subn(rb'\bscale="[^"]+"', b'scale="' + scale + b'"', tag)
-        if count == 0:
-            tag = tag[:-2] + b' scale="' + scale + b'"/>'
-    return data[:original.start()] + tag + data[original.end():]
+    # Some OrangeFox styles define the same icon in multiple sections.
+    if len(matches) > 24:
+        raise ValueError("Unexpectedly many recovery theme resources: " +
+                         resource.decode())
+    for match in reversed(matches):
+        tag, count = re.subn(rb'\bfilename="[^"]+"',
+                             b'filename="' + filename + b'"', match.group())
+        if count != 1:
+            raise ValueError("Missing theme image filename: " + resource.decode())
+        if scale is not None:
+            tag, count = re.subn(rb'\bscale="[^"]+"',
+                                 b'scale="' + scale + b'"', tag)
+            if count == 0:
+                tag = tag[:-2] + b' scale="' + scale + b'"/>'
+        data = data[:match.start()] + tag + data[match.end():]
+    return data
 
 
 def rebrand_theme(name, data):
