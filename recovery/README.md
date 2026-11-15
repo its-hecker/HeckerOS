@@ -47,11 +47,17 @@ before shipping an official build.
 The Recovery 2.0 build embeds the pinned Coral OrangeFox ramdisk in Android 17
 `boot.img`. The build-time `tools/recovery2_rom.py` overlay now packages the
 existing HeckerOS caracal PNG (`recovery/res-xxhdpi/images/logo_image.png`)
-directly into the interactive recovery theme. It rebinds the splash screen,
-welcome screen, About page and available splash-preview/color-theme logo
-resources. The splash keeps its black background; the About page says
-**HeckerOS Recovery**. Recovery Lab's visible tool labels are rebranded,
-while OrangeFox upstream attribution and functional internals are retained.
+into the interactive recovery theme for the splash and welcome screen only.
+The build now renders a separate **transparent About portrait** (176x204)
+and a compact **caracal icon** (48x48) from that approved artwork using
+`tools/recovery2_brand_art.py`. These replace OrangeFox's `logo_about`
+and `fox` image resources and any inline fox glyph on the Wipe page.
+This prevents the old black splash rectangle from overlapping the About
+header while keeping the splash background black. The About page still says
+**HeckerOS Recovery**; Recovery Lab labels remain rebranded. OrangeFox
+upstream attribution, wipe and format actions, and functional internals
+are retained. The generated assets live in `out/hecker-recovery2-brand-assets`
+and are checked by the pinned ramdisk preflight and boot-image verification.
 
 The existing **Backup** navigation icon is a backup symbol, not a recovery
 brand logo; it stays intact for usability. Noninteractive update/fastbootd
