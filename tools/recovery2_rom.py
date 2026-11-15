@@ -265,6 +265,18 @@ def download(cache):
             temp.unlink(missing_ok=True)
 
 
+def preflight(source, brand_asset):
+    """Reject unsupported pinned OrangeFox themes before a long ROM compilation."""
+    compressed = source.read_bytes()
+    if len(compressed) != FOX_SIZE or hashlib.sha256(compressed).hexdigest() != FOX_SHA256:
+        raise ValueError("OrangeFox release ramdisk checksum mismatch")
+    archive = load_gzip(io.BytesIO(compressed))
+    with tempfile.TemporaryFile() as output:
+        patch_payload(archive, output, b"preflight", b"preflight",
+                      brand_png=brand_asset.read_bytes())
+    print("Hecker Recovery 2.0 OrangeFox branding preflight: PASS")
+
+
 def install(zstd, source, root, brand_asset):
     with source.open("rb") as stream:
         compressed = stream.read(FOX_SIZE + 1)
@@ -350,6 +362,9 @@ def main():
     actions = parser.add_subparsers(dest="action", required=True)
     fetch = actions.add_parser("download")
     fetch.add_argument("cache", type=Path)
+    probe = actions.add_parser("preflight")
+    probe.add_argument("source", type=Path)
+    probe.add_argument("brand_asset", type=Path)
     stage = actions.add_parser("install")
     stage.add_argument("zstd")
     stage.add_argument("source", type=Path)
@@ -365,6 +380,8 @@ def main():
     try:
         if args.action == "download":
             download(args.cache)
+        elif args.action == "preflight":
+            preflight(args.source, args.brand_asset)
         elif args.action == "install":
             install(args.zstd, args.source, args.root, args.brand_asset)
         else:
