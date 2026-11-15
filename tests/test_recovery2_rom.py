@@ -128,7 +128,7 @@ class CoralRecoveryTests(unittest.TestCase):
             (core / "Android.bp").write_text("")
             (core / "first_stage_init.cpp").write_text("")
             makefile = make / "Makefile"
-            block = "ifeq ($(TARGET_PRODUCT),hecker_coral)\\n" + INSTALL + "endif\\n"
+            block = "ifeq ($(TARGET_PRODUCT),hecker_coral)\n" + INSTALL + "endif\n"
             makefile.write_text(MAKE_ANCHOR + block + LEGACY_INSTALL_BLOCK)
             # Simulate idempotent guarded integration, not Android Make internals.
             def safe_replace(content, old, new, *_args):
