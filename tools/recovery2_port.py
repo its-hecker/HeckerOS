@@ -13,9 +13,10 @@ MAKE_ANCHOR = "\t" + BOARD + "\n"
 # Pass the caracal bitmap from the source checkout, NOT relative to the Soong
 # host executable, which is installed under out/host/.../bin/.
 BRANDING_SOURCE = "vendor/hecker/floral/suite/recovery/res-xxhdpi/images/logo_image.png"
+ARTWORK_DIR = "out/hecker-recovery2-brand-assets"
 INSTALL = ("\t$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom install "
            "$(ZSTD) out/hecker-recovery2-coral.cpio.gz "
-           "$(TARGET_RECOVERY_ROOT_OUT) " + BRANDING_SOURCE + "\n")
+           "$(TARGET_RECOVERY_ROOT_OUT) " + BRANDING_SOURCE + " " + ARTWORK_DIR + "\n")
 # Earlier builds generated the same action without a logo argument.  Reusing
 # a dirty Makefile would run both actions, causing a second failed install.
 LEGACY_INSTALL = ("\t$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom install "
@@ -26,7 +27,8 @@ LEGACY_INSTALL_BLOCK = (
 )
 DEPENDENCIES = ("$(ZSTD)", "out/hecker-recovery2-coral.cpio.gz",
                 "$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom",
-                BRANDING_SOURCE)
+                BRANDING_SOURCE, ARTWORK_DIR + "/about.png",
+                ARTWORK_DIR + "/icon.png")
 
 # Only migrate the exact previously generated source. Any other local change
 # still fails closed, preserving the guarded ROM preparation workflow.
