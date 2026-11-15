@@ -38,6 +38,9 @@ BOOT_PROP = "system/etc/ramdisk/build.prop"
 ROM_FSTAB = "first_stage_ramdisk/fstab.sm8150"
 ROM_MARKER = b"Starting OrangeFox-based Hecker Recovery"
 BRAND_IMAGE = "twres/images/Hecker/logo.png"
+BRAND_ABOUT_IMAGE = "twres/images/Hecker/about.png"
+BRAND_FOX_IMAGE = "twres/images/Hecker/icon.png"
+BRAND_WIPE = "twres/pages/wipe.xml"
 BRAND_SPLASH = "twres/splash.xml"
 BRAND_RESOURCES = "twres/resources/images.xml"
 BRAND_SETTINGS = "twres/pages/settings.xml"
@@ -137,6 +140,26 @@ def rebrand_splash_logo(data):
     return data[:match.start()] + image_tag + data[match.end():]
 
 
+def rebind_image_declaration(data, resource, filename, scale=None):
+    """Replace one optional theme image declaration without editing unrelated XML."""
+    pattern = rb'<image\\b[^>]*\\bname="' + re.escape(resource) + rb'"[^>]*/>'
+    matches = list(re.finditer(pattern, data))
+    if len(matches) > 1:
+        raise ValueError("Ambiguous recovery theme resource: " + resource.decode())
+    if not matches:
+        return data
+    original = matches[0]
+    tag, count = re.subn(rb'\\bfilename="[^"]+"', b'filename="' + filename + b'"',
+                         original.group())
+    if count != 1:
+        raise ValueError("Missing theme image filename: " + resource.decode())
+    if scale is not None:
+        tag, count = re.subn(rb'\\bscale="[^"]+"', b'scale="' + scale + b'"', tag)
+        if count == 0:
+            tag = tag[:-2] + b' scale="' + scale + b'"/>'
+    return data[:original.start()] + tag + data[original.end():]
+
+
 def rebrand_theme(name, data):
     """Modify only reviewed UI resources, preserving recovery services and credits."""
     if name == BRAND_SPLASH:
@@ -163,6 +186,10 @@ def rebrand_theme(name, data):
         data = replace_required(
             data, b'</resources>',
             b'\n        <image name="hecker_logo" filename="Hecker/logo" '
+            b'retainaspect="1"/>'
+            b'\n        <image name="hecker_about" filename="Hecker/about" '
+            b'retainaspect="1"/>'
+            b'\n        <image name="hecker_fox" filename="Hecker/icon" '
             b'retainaspect="1"/>\n    </resources>', "resource catalog")
         # Recovery splash previews should not restore the old OrangeFox emblem.
         for flavor in (b"d", b"o", b"w"):
@@ -173,10 +200,12 @@ def rebrand_theme(name, data):
             if count > 1:
                 raise ValueError("Ambiguous recovery preview logo")
     elif name.startswith("twres/themes/") and name.endswith(".xml"):
-        # Rebind About artwork in the default and selectable color themes.
-        data, _ = re.subn(
-            rb'(<image name="logo_about" filename=")[^"]+(")',
-            rb'\g<1>Hecker/logo\g<2>', data, count=1)
+        # The real About slot expects a small portrait, NOT the full opaque splash.
+        # This covers the default style and selectable dark/light themes.
+        data = rebind_image_declaration(data, b"logo_about", b"Hecker/about")
+        # OrangeFox also ships an in-page fox glyph: replace its resource with
+        # the appropriately sized Hecker mascot, without changing Wipe actions.
+        data = rebind_image_declaration(data, b"fox", b"Hecker/icon", b"1.0")
     elif name == "twres/pages/fox.xml":
         # The underlying OrangeFox recovery tools remain intact; rebrand UI labels.
         data = data.replace(b'<text>OrangeFox Lab (Beta)</text>',
@@ -187,9 +216,14 @@ def rebrand_theme(name, data):
         data = replace_required(data, b'<image resource="splash_logo_o"/>',
                                 b'<image resource="hecker_logo"/>',
                                 "welcome logo")
+    elif name == BRAND_WIPE:
+        # A wipe/format page may reference the fox glyph directly. The icon's
+        # theme declaration is also rebound, covering shared/page templates.
+        data = data.replace(b'<image resource="fox"/>',
+                            b'<image resource="hecker_fox"/>')
     elif name == BRAND_SETTINGS:
         data = replace_required(data, b'<image resource="logo_about"/>',
-                                b'<image resource="hecker_logo"/>',
+                                b'<image resource="hecker_about"/>',
                                 "About logo")
         data = replace_required(data, b'<text>OrangeFox Recovery</text>',
                                 b'<text>HeckerOS Recovery</text>',
@@ -197,15 +231,22 @@ def rebrand_theme(name, data):
     return data
 
 
-def patch_payload(archive, output, bootprop, fstab, brand_png=None):
+def patch_payload(archive, output, bootprop, fstab, brand_png=None,
+                  about_png=None, fox_png=None):
     if brand_png is not None:
         if (not brand_png.startswith(PNG_MAGIC) or len(brand_png) > 2 * 1024 * 1024
                 or brand_png[-8:-4] != b"IEND"):
             raise ValueError("HeckerOS Recovery logo is not a valid-sized PNG")
+        for description, value in (("About", about_png), ("icon", fox_png)):
+            if (value is None or not value.startswith(PNG_MAGIC)
+                    or len(value) > 512 * 1024 or value[-8:-4] != b"IEND"
+                    or len(value) < 26 or value[25] != 6):
+                raise ValueError("HeckerOS Recovery " + description +
+                                 " art must be a transparent RGBA PNG")
     required = MUTATION_PAGES | {FOX_MAIN_PAGE, ROM_FSTAB, FOX_INIT,
                                 FOX_RECOVERY, FOX_THEME, FOX_SH, RECOVERY_SEPOLICY}
     if brand_png is not None:
-        required |= {BRAND_SPLASH, BRAND_RESOURCES, BRAND_SETTINGS}
+        required |= {BRAND_SPLASH, BRAND_RESOURCES, BRAND_SETTINGS, BRAND_WIPE}
     found = set()
     for name, _, header, data in entries(archive):
         if name == BOOT_PROP or name in SOURCE_CATALOGS:
@@ -247,6 +288,8 @@ def patch_payload(archive, output, bootprop, fstab, brand_png=None):
             add_entry(output, BOOT_PROP, REGULAR_FILE_HEADER, bootprop)
             if brand_png is not None:
                 add_entry(output, BRAND_IMAGE, REGULAR_FILE_HEADER, brand_png)
+                add_entry(output, BRAND_ABOUT_IMAGE, REGULAR_FILE_HEADER, about_png)
+                add_entry(output, BRAND_FOX_IMAGE, REGULAR_FILE_HEADER, fox_png)
         if name in required:
             found.add(name)
         add_entry(output, name, header, data)
@@ -273,7 +316,7 @@ def download(cache):
             temp.unlink(missing_ok=True)
 
 
-def preflight(source, brand_asset):
+def preflight(source, brand_asset, artwork_dir):
     """Reject unsupported pinned OrangeFox themes before a long ROM compilation."""
     compressed = source.read_bytes()
     if len(compressed) != FOX_SIZE or hashlib.sha256(compressed).hexdigest() != FOX_SHA256:
@@ -281,11 +324,13 @@ def preflight(source, brand_asset):
     archive = load_gzip(io.BytesIO(compressed))
     with tempfile.TemporaryFile() as output:
         patch_payload(archive, output, b"preflight", b"preflight",
-                      brand_png=brand_asset.read_bytes())
+                      brand_png=brand_asset.read_bytes(),
+                      about_png=(artwork_dir / "about.png").read_bytes(),
+                      fox_png=(artwork_dir / "icon.png").read_bytes())
     print("Hecker Recovery 2.0 OrangeFox branding preflight: PASS")
 
 
-def install(zstd, source, root, brand_asset):
+def install(zstd, source, root, brand_asset, artwork_dir):
     with source.open("rb") as stream:
         compressed = stream.read(FOX_SIZE + 1)
     if len(compressed) != FOX_SIZE or hashlib.sha256(compressed).hexdigest() != FOX_SHA256:
@@ -294,6 +339,8 @@ def install(zstd, source, root, brand_asset):
     # Source art is explicitly supplied by the build system; the Soong host
     # executable is generated under out/ and has no adjacent source tree.
     brand_png = brand_asset.read_bytes()
+    about_png = (artwork_dir / "about.png").read_bytes()
+    fox_png = (artwork_dir / "icon.png").read_bytes()
     fstab = root / ROM_FSTAB
     bootprop = fstab.parent / BOOT_PROP
     with tempfile.NamedTemporaryFile(dir=root) as cpio, tempfile.NamedTemporaryFile(
@@ -301,7 +348,7 @@ def install(zstd, source, root, brand_asset):
         destination = Path(packed.name)
         try:
             patch_payload(archive, cpio, bootprop.read_bytes(), fstab.read_bytes(),
-                          brand_png)
+                          brand_png, about_png, fox_png)
             cpio.flush()
             cpio.seek(0)
             subprocess.run([zstd, "-q", "-19", "-c", "--stream-size=" + str(os.fstat(cpio.fileno()).st_size)],
@@ -340,10 +387,15 @@ def verify(zstd, avbtool, extractor, image, ota):
             files.get(ROM_FSTAB) != outer[ROM_FSTAB] or
             files.get(BOOT_PROP) != outer["first_stage_ramdisk/" + BOOT_PROP] or
             not files.get(BRAND_IMAGE, b"").startswith(PNG_MAGIC) or
+            not files.get(BRAND_ABOUT_IMAGE, b"").startswith(PNG_MAGIC) or
+            not files.get(BRAND_FOX_IMAGE, b"").startswith(PNG_MAGIC) or
+            b'<image resource="hecker_about"/>' not in files.get(BRAND_SETTINGS, b"") or
             b'<text>HeckerOS</text>' not in files.get(BRAND_SPLASH, b"") or
             b'<text>HeckerOS Recovery</text>' not in files.get(BRAND_SETTINGS, b"") or
             b'<image resource="hecker_logo"/>' not in files.get(FOX_MAIN_PAGE, b"") or
-            b'name="hecker_logo"' not in files.get(BRAND_RESOURCES, b"")):
+            b'name="hecker_logo"' not in files.get(BRAND_RESOURCES, b"") or
+            b'name="hecker_about"' not in files.get(BRAND_RESOURCES, b"") or
+            b'name="hecker_fox"' not in files.get(BRAND_RESOURCES, b"")):
         raise ValueError("Invalid OrangeFox content in boot.img")
 
     with tempfile.TemporaryDirectory() as directory, ota.open("rb") as raw, zipfile.ZipFile(raw) as package:
@@ -373,11 +425,13 @@ def main():
     probe = actions.add_parser("preflight")
     probe.add_argument("source", type=Path)
     probe.add_argument("brand_asset", type=Path)
+    probe.add_argument("artwork_dir", type=Path)
     stage = actions.add_parser("install")
     stage.add_argument("zstd")
     stage.add_argument("source", type=Path)
     stage.add_argument("root", type=Path)
     stage.add_argument("brand_asset", type=Path)
+    stage.add_argument("artwork_dir", type=Path)
     check = actions.add_parser("verify")
     check.add_argument("zstd")
     check.add_argument("avbtool")
@@ -389,9 +443,9 @@ def main():
         if args.action == "download":
             download(args.cache)
         elif args.action == "preflight":
-            preflight(args.source, args.brand_asset)
+            preflight(args.source, args.brand_asset, args.artwork_dir)
         elif args.action == "install":
-            install(args.zstd, args.source, args.root, args.brand_asset)
+            install(args.zstd, args.source, args.root, args.brand_asset, args.artwork_dir)
         else:
             verify(args.zstd, args.avbtool, args.extractor, args.image, args.ota)
     except (OSError, ValueError, zipfile.BadZipFile, KeyError, subprocess.CalledProcessError) as error:
