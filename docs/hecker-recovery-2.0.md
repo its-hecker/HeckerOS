@@ -22,8 +22,15 @@ properties from that Android 17 build.
 The recovery theme uses separate image resources for its black splash,
 transparent About-page caracal, and compact fox-replacement icon. The Wipe
 and Format Data operations are unchanged; only their theme graphics are
-rebranded. The build generates and validates both transparent assets before
-installing the pinned OrangeFox payload.
+rebranded. Static title labels are removed from the splash because the
+HeckerOS logo already contains its own title. Backup/restore fox references
+also use the compact caracal. The screen-brightness slider's theme minimum is
+lowered from 10% to 1% (not 0%, to avoid a fully black screen). The About
+title is set to "Maintained by Hecker", credits name the OrangeFox
+contributors, and the HeckerOS build label is set to "Official" when the
+pinned theme exposes that label. This is a branded HeckerOS designation,
+not an upstream OrangeFox official-device claim. The build generates and
+validates both transparent assets before installing the pinned payload.
 
 The OrangeFox sideload and userspace-fastboot actions reboot into the Android
 17 recovery in the same image. That recovery handles ROM sideload, fastbootd,
