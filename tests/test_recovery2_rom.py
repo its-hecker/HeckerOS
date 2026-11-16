@@ -30,7 +30,7 @@ def archive(files):
     return output.getvalue()
 
 
-class CoralRecoveryTests(unittest.TestCase):
+class FlameRecoveryTests(unittest.TestCase):
     def test_branding_path_is_supplied_to_packaged_host_executable(self):
         # Python host executables run from out/host/linux-x86/bin rather than
         # the source tree: __file__.parents[1] is NOT the Suite checkout.
@@ -157,7 +157,7 @@ class CoralRecoveryTests(unittest.TestCase):
             (core / "Android.bp").write_text("")
             (core / "first_stage_init.cpp").write_text("")
             makefile = make / "Makefile"
-            block = "ifeq ($(TARGET_PRODUCT),hecker_coral)\n" + INSTALL + "endif\n"
+            block = "ifeq ($(TARGET_PRODUCT),hecker_flame)\n" + INSTALL + "endif\n"
             makefile.write_text(MAKE_ANCHOR + block + LEGACY_INSTALL_BLOCK)
             # Simulate idempotent guarded integration, not Android Make internals.
             def safe_replace(content, old, new, *_args):
@@ -172,7 +172,7 @@ class CoralRecoveryTests(unittest.TestCase):
                 len([line for line in updated.splitlines()
                      if "hecker_recovery2_rom install " in line]), 1)
 
-    def test_recovery_ramdisk_keeps_coral_fstab_and_uses_a17_sideload(self):
+    def test_recovery_ramdisk_keeps_flame_fstab_and_uses_a17_sideload(self):
         source = archive({
             FOX_INIT: b"init", FOX_RECOVERY: b"recovery", FOX_THEME: b"ui",
             FOX_SH: b"shell", RECOVERY_SEPOLICY: b"policy",
@@ -230,7 +230,7 @@ class CoralRecoveryTests(unittest.TestCase):
             target.write_bytes(fixed)
             self.assertNotIn(target, recovery_rom_plan(rom, replace_noop))
             target.write_bytes(fixed + b"// unknown local change\\n")
-            with self.assertRaisesRegex(ValueError, "Unfamiliar Coral recovery source"):
+            with self.assertRaisesRegex(ValueError, "Unfamiliar Flame recovery source"):
                 recovery_rom_plan(rom, replace_noop)
 
     def test_boot_control_routing(self):
