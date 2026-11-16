@@ -27,8 +27,8 @@ public final class HeckerSliderValuesTest {
                 check(Math.abs(parsed-percent/100.0)<.00001);
             }
         }
-        check(HeckerSliderValues.verticalThickness(1)==64&&HeckerSliderValues.verticalThickness(2)==80);
-        check(HeckerSliderValues.verticalThickness(Float.NaN)==64&&HeckerSliderValues.verticalThickness(10)==96);
+        check(HeckerSliderValues.verticalThickness(1)==48&&HeckerSliderValues.verticalThickness(2)==56);
+        check(HeckerSliderValues.verticalThickness(Float.NaN)==48&&HeckerSliderValues.verticalThickness(10)==64);
         System.out.println("Slider labels: full native gamma range, stream indices, muted/nonzero minimum, invalid ranges, five locales and font scaling PASS");
     }
 }

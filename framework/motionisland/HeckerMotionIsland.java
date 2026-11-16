@@ -24,7 +24,7 @@ import android.view.View;
 import android.view.WindowManager;
 import com.android.systemui.res.R;
 
-/** Music capsule and gesture companion owned by the native Oslo plugin host. */
+/** Floral music capsule and gesture companion, owned by the native Oslo plugin host. */
 public final class HeckerMotionIsland implements AutoCloseable {
     private static final String TAG = "HeckerMotionIsland";
     private static final String ACTION = "com.google.oslo.HECKER_MOTION_FEEDBACK";

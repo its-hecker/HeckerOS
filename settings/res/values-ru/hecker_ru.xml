@@ -53,4 +53,10 @@
     <string name="hecker_wallpaper_summary">Обои, цвета и тематические значки</string>
     <string name="hecker_open_more_display">Настройки экрана</string>
     <string name="hecker_open_more_display_summary">Дополнительные параметры экрана</string>
+    <string name="hecker_about_official_build">✓ Официальная сборка</string>
+    <string name="hecker_about_unofficial_build">Неофициальная сборка</string>
+    <string name="hecker_about_maintained_by">Разработчик сборки</string>
+    <string name="hecker_about_verified_label">Подтверждённый разработчик</string>
+    <string name="hecker_about_support">Поддержка</string>
+    <string name="hecker_about_support_unavailable">Не удалось открыть страницу поддержки</string>
 </resources>

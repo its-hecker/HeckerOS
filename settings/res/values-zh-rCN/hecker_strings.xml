@@ -40,4 +40,10 @@
     <string name="hecker_about_device_summary">硬件和规格</string>
     <string name="hecker_about_credits">由 %1$s 制作 · 致谢与法律信息</string>
     <string name="hecker_about_credits_title">致谢与法律信息</string>
+    <string name="hecker_about_official_build">✓ 官方版本</string>
+    <string name="hecker_about_unofficial_build">非官方版本</string>
+    <string name="hecker_about_maintained_by">维护者</string>
+    <string name="hecker_about_verified_label">已认证的维护者</string>
+    <string name="hecker_about_support">支持</string>
+    <string name="hecker_about_support_unavailable">无法打开支持页面</string>
 </resources>

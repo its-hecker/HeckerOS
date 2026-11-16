@@ -47,6 +47,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.LruCache;
@@ -62,6 +63,7 @@ import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,6 +85,10 @@ public class ThemeEngineManagerService extends SystemService {
     private static final String TARGET_ARRAY_SETTINGS = "target_settings";
 
     private static final int BITMAP_CACHE_SIZE = 5 * 1024 * 1024;
+    private static final String EMOJI_STYLE_PROP = "persist.sys.ax_emoji_style";
+    private static final String EMOJI_FONT_DIR = "/product/fonts/";
+    private static final String EMOJI_CONFIG_PREFIX =
+            "/product/etc/fonts_customization_emoji_";
 
     private volatile int mUserId = UserHandle.USER_SYSTEM;
     private final Context mContext;
@@ -921,6 +927,55 @@ public class ThemeEngineManagerService extends SystemService {
         public String getCategoryTheme(String category) {
             if (category == null) return null;
             return mCategoryThemes.get(category);
+        }
+
+        @Override
+        public String getEmojiStyle() {
+            final String saved = SystemProperties.get(EMOJI_STYLE_PROP, "android");
+            switch (saved) {
+                case "ios":
+                case "samsung":
+                case "swiftui":
+                case "facebook":
+                    return saved;
+                default:
+                    return "android";
+            }
+        }
+
+        @Override
+        public boolean setEmojiStyle(String style) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS, "setEmojiStyle");
+            // Only well-known font paths may be selected by a caller.
+            final String font;
+            if ("android".equals(style)) {
+                font = null;
+            } else if ("ios".equals(style)) {
+                font = "LunarisIosEmoji.ttf";
+            } else if ("samsung".equals(style)) {
+                font = "SamsungColorEmoji.ttf";
+            } else if ("swiftui".equals(style)) {
+                font = "SwiftUIEmoji.ttf";
+            } else if ("facebook".equals(style)) {
+                font = "FacebookEmoji.ttf";
+            } else {
+                return false;
+            }
+            if (font != null && (!new File(EMOJI_FONT_DIR + font).isFile()
+                    || !new File(EMOJI_CONFIG_PREFIX + style + ".xml").isFile())) {
+                return false;
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                SystemProperties.set(EMOJI_STYLE_PROP, style);
+                return style.equals(SystemProperties.get(EMOJI_STYLE_PROP, "android"));
+            } catch (RuntimeException error) {
+                Slog.w(TAG, "Unable to persist emoji style", error);
+                return false;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override

@@ -1,0 +1,3 @@
+# Emoji choices are public; only the permission-gated system service can write.
+system_public_prop(hecker_emoji_style_prop)
+set_prop(system_server, hecker_emoji_style_prop)

@@ -15,7 +15,6 @@ public final class MotionFeedbackSettingsActivity extends Activity {
     static boolean supported() {
         return "coral".equals(Build.DEVICE) || "flame".equals(Build.DEVICE);
     }
-
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
         if (!supported()) { finish(); return; }

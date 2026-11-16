@@ -28,4 +28,8 @@ interface IThemeEngineManager {
     void notifyThemeChanged(String category);
 
     List<String> getAvailableOverlays(String category);
+
+    // Selected at boot for system-wide emoji font fallback.
+    String getEmojiStyle();
+    boolean setEmojiStyle(String style);
 }

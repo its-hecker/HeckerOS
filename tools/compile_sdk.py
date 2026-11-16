@@ -87,10 +87,12 @@ def main():
         environment["LD_LIBRARY_PATH"] = str(cache / "lib64")
         run(cache / "aidl", "--lang=java", "--out=" + str(output / "aidl-generated"),
             "-I", output / "aidl", probe, env=environment)
-        for name in ("Bundle", "ParcelFileDescriptor"):
-            parcelable = output / "aidl/android/os" / (name + ".aidl")
+        for qualified_name in ("android.os.Bundle", "android.os.ParcelFileDescriptor",
+                               "android.content.ComponentName", "android.graphics.Bitmap"):
+            package, name = qualified_name.rsplit(".", 1)
+            parcelable = output / "aidl" / (qualified_name.replace(".", "/") + ".aidl")
             parcelable.parent.mkdir(parents=True, exist_ok=True)
-            parcelable.write_text("package android.os; parcelable " + name + ";\n")
+            parcelable.write_text(f"package {package}; parcelable {name};\n")
         network_aidl = output / "aidl/org/hecker/netlab/INetLabService.aidl"
         network_aidl.parent.mkdir(parents=True, exist_ok=True)
         network_aidl.write_text((ROOT / "netlab/aidl/org/hecker/netlab/INetLabService.aidl").read_text())
@@ -99,6 +101,13 @@ def main():
         vpn_aidl = ROOT / "vpn/aidl/org/hecker/vpn/IHeckerVpnService.aidl"
         run(cache / "aidl", "--lang=java", "--out=" + str(output / "vpn-aidl"),
             "-I", output / "aidl", "-I", ROOT / "vpn/aidl", vpn_aidl, env=environment)
+        theme_aidl = output / "aidl/android/content/res"
+        theme_aidl.mkdir(parents=True)
+        for interface in ("IThemeEngineCallback.aidl", "IThemeEngineManager.aidl"):
+            source = theme_aidl / interface
+            source.write_bytes((ROOT / "framework/themes" / interface).read_bytes())
+            run(cache / "aidl", "--lang=java", "--out=" + str(output / "theme-aidl"),
+                "-I", output / "aidl", source, env=environment)
         generated = (output / "aidl-generated/suite/probe/IAccessProbe.java").read_text()
         assert "android.Manifest.permission.LOCK_APPS" in generated
         assert "android.Manifest.permission.HECKER_SUITE_APP_LOCK" in generated
@@ -131,6 +140,8 @@ def main():
             *sorted((ROOT / "tests/platform-api-stubs").rglob("*.java")),
             *sorted((ROOT / "app/src").rglob("*.java")),
             ROOT / "framework/sandbox/HeckerSandboxRules.java",
+            ROOT / "framework/themes/ThemeEngine.java",
+            *sorted((output / "theme-aidl").rglob("*.java")),
             *sorted((ROOT / "netlab/common").rglob("*.java")),
             *sorted((output / "netlab-aidl").rglob("*.java")),
             *sorted((ROOT / "vpn/common").rglob("*.java")),

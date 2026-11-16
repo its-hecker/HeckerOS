@@ -42,9 +42,16 @@ public final class HeckerHomeDecoration extends RecyclerView.ItemDecoration {
             float top=first?radius:0,bottom=last?radius:0;
             bounds.set(view.getLeft()+inset,view.getTop()+view.getTranslationY(),
                     view.getRight()-inset,view.getBottom()+view.getTranslationY());
-            for(int i=0;i<8;i++)corners[i]=i<4?top:bottom;
-            path.reset();path.addRoundRect(bounds,corners,Path.Direction.CW);
-            paint.setStyle(Paint.Style.FILL);paint.setColor(card);canvas.drawPath(path,paint);
+            paint.setStyle(Paint.Style.FILL);paint.setColor(card);
+            if (!first && !last) {
+                // Middle rows have no rounded corners. Draw a rectangle directly
+                // instead of rebuilding a Path on every scroll frame.
+                canvas.drawRect(bounds, paint);
+            } else {
+                for(int i=0;i<8;i++)corners[i]=i<4?top:bottom;
+                path.reset();path.addRoundRect(bounds,corners,Path.Direction.CW);
+                canvas.drawPath(path,paint);
+            }
             // The reference has inset separators and a clean silhouette, without a card outline.
             paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(stroke*.6f);paint.setColor(border);
             if(!last)canvas.drawLine(bounds.left+64*stroke,bounds.bottom,bounds.right-18*stroke,bounds.bottom,paint);

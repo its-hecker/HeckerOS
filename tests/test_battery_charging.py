@@ -133,7 +133,7 @@ public class BatteryChargingProbe {
    int schedules=f.schedules;d.start();check(schedules==f.schedules,"start must be idempotent");
    for(int frame=0;frame<30;frame++){
     geometry(d,level);
-    if(d.isRunning())check(f.pending!=null&&f.due-SystemClock.now==33,"bounded frame cadence");
+    if(d.isRunning())check(f.pending!=null&&f.due-SystemClock.now==50,"bounded frame cadence");
     f.tick(83);
    }
    check(mask.equals(((Path)field(d,"mask")).signature()),"original overlay path mutated");

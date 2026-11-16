@@ -4,8 +4,17 @@
     <string name="status_styles_summary">使用 Wi-Fi 和电池样式打造专属状态栏。</string>
     <string name="charging_energy_title">能量轨道充电动画</string>
     <string name="charging_energy_summary">有线充电开始时显示青紫色能量环和实时电量百分比。</string>
-    <string name="capture_title">屏幕截图</string>
-    <string name="capture_summary">控制受保护应用窗口的屏幕捕获。</string>
+    <string name="capture_title">高级选项</string>
+    <string name="capture_summary">系统工具与屏幕捕获设置。</string>
     <string name="capture_secure_title">允许安全窗口截图</string>
     <string name="capture_secure_summary">允许对使用 FLAG_SECURE 的应用窗口截图和录屏。默认关闭。受 DRM 保护的视频可能仍为空白。</string>
+    <string name="capture_signature_title">应用签名兼容性</string>
+    <string name="capture_signature_summary">选择允许使用不同签名密钥更新的已安装用户应用。仅影响选中的应用；APK 完整性验证仍然有效。</string>
+    <string name="capture_signature_warning">允许不同签名的更新替换 %1$s 后，新版本可以访问该应用原有的数据。请只选择可信的测试 APK。</string>
+    <string name="capture_signature_confirm">允许此应用</string>
+    <string name="capture_signature_search">搜索用户应用</string>
+    <string name="capture_signature_loading">正在加载已安装应用…</string>
+    <string name="capture_signature_empty">没有匹配的用户应用</string>
+    <string name="capture_signature_enabled">已启用兼容模式</string>
+    <string name="capture_signature_disabled">正常签名检查</string>
 </resources>

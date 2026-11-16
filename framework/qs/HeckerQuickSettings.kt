@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -339,8 +340,7 @@ private fun HeckerBrandCard(tile: TileViewModel, modifier: Modifier = Modifier) 
 fun HeckerHeaderActions(viewModel: com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel, edit: () -> Unit) {
     val context = LocalContext.current
     val settings by viewModel.settings.collectAsState(initial = null)
-    val reference = !heckerCustomizedLayout()
-    val tint = android.graphics.Color.WHITE
+    val tint = MaterialTheme.colorScheme.onSurface.toArgb()
     Row(verticalAlignment = Alignment.CenterVertically) {
         androidx.compose.material3.IconButton(onClick = edit, modifier = Modifier.size(36.dp)) {
             AndroidView(factory = { ImageView(it) },

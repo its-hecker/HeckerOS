@@ -93,5 +93,5 @@ include vendor/hecker/floral/suite/rom/boot_diagnostics/boot_capture.mk
 
 $(call inherit-product, vendor/hecker/floral/suite/rom/common.mk)
 
-# Apply after every inherited product so no later copy can restore an addon.d marker.
+# Keep recovery add-on scripts absent after all inherited product definitions.
 include vendor/hecker/floral/suite/rom/no_addon_d.mk

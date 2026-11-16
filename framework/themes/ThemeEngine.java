@@ -286,6 +286,30 @@ public class ThemeEngine {
         }
     }
 
+    // Emoji style is persisted by the permission-checked system theme service.
+    @Nullable
+    public String getEmojiStyle() {
+        IThemeEngineManager service = getService();
+        if (service == null) return null;
+        try {
+            return service.getEmojiStyle();
+        } catch (RemoteException e) {
+            Log.w(TAG, "getEmojiStyle failed", e);
+            return null;
+        }
+    }
+
+    public boolean setEmojiStyle(@NonNull String style) {
+        IThemeEngineManager service = getService();
+        if (service == null) return false;
+        try {
+            return service.setEmojiStyle(style);
+        } catch (RemoteException e) {
+            Log.w(TAG, "setEmojiStyle failed", e);
+            return false;
+        }
+    }
+
     // Overlay scanning
 
     @Nullable

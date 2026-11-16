@@ -1,5 +1,5 @@
 {
-  "checked_on": "2026-10-30",
+  "checked_on": "2026-11-13",
   "policy": "Pinned upstream sources with owned HeckerOS customization forks; bulk migration is optional.",
   "projects": [
     {
@@ -42,7 +42,7 @@
       "repository": "PixelOS-AOSP/android_build_soong",
       "remote": "github",
       "branch": "seventeen",
-      "revision": "321ecf4fc740482603b917c5de30a0e27e97595e"
+      "revision": "3c1fe2e36f43b68d5e65a47f700a401c107b29b5"
     },
     {
       "path": "development",
@@ -63,7 +63,7 @@
       "repository": "PixelOS-AOSP/android_external_avb",
       "remote": "github",
       "branch": "seventeen",
-      "revision": "15b4e85b56cdd7e32601074dbb269f5d3ba43eaf"
+      "revision": "69257421834cfe692b0e248d51472f0feddaeaac"
     },
     {
       "path": "external/bouncycastle",
@@ -189,21 +189,21 @@
       "repository": "PixelOS-AOSP/android_frameworks_av",
       "remote": "github",
       "branch": "seventeen",
-      "revision": "3a806486c35d4825bd97d95af3e172309aed2fda"
+      "revision": "57b659c1e1af1c025b2e63e2cdd7e18d2037e705"
     },
     {
       "path": "frameworks/native",
       "repository": "PixelOS-AOSP/android_frameworks_native",
       "remote": "github",
       "branch": "seventeen",
-      "revision": "fe64500f2fb0b0053667f3e1af3603122643e270"
+      "revision": "c7d7d74ae37fdd8cb5749abb6061713553c25cea"
     },
     {
       "path": "frameworks/opt/telephony",
       "repository": "PixelOS-AOSP/android_frameworks_opt_telephony",
       "remote": "github",
       "branch": "seventeen",
-      "revision": "7ee96142e28c3580c2426760a4b533256743d06f"
+      "revision": "ec2e08f584352ed58b82625624f7bdcb7e00ef02"
     },
     {
       "path": "hardware/google/pixel",
@@ -224,7 +224,7 @@
       "repository": "PixelOS-AOSP/android_hardware_interfaces",
       "remote": "github",
       "branch": "seventeen",
-      "revision": "7447ce416bbc527a1e7100196eddd568d084b413"
+      "revision": "557052f4f3c8bbf3175e4dc74d428a13f298ccc1"
     },
     {
       "path": "hardware/libhardware",
@@ -322,7 +322,7 @@
       "repository": "PixelOS-AOSP/android_packages_modules_Bluetooth",
       "remote": "github",
       "branch": "seventeen",
-      "revision": "04618720b1bcefe990ab2d14e713a39393ae1072"
+      "revision": "2d8bb21cce02276acaec9d498434c7886052c872"
     },
     {
       "path": "packages/modules/Connectivity",
@@ -336,7 +336,7 @@
       "repository": "PixelOS-AOSP/android_packages_modules_Nfc",
       "remote": "github",
       "branch": "seventeen",
-      "revision": "11ddd3b7b6cfa506f5959332dfda5390d3baac71"
+      "revision": "acf0a45a6cb46a9389d27837b0dd16f438a3467e"
     },
     {
       "path": "packages/modules/Permission",
@@ -350,7 +350,7 @@
       "repository": "PixelOS-AOSP/android_packages_modules_Telephony",
       "remote": "github",
       "branch": "seventeen",
-      "revision": "bb5e4093999c322ebfdbe9acd5c06139c4f021a5"
+      "revision": "afe71d7b19e7f3d58ad9974690febd830a155669"
     },
     {
       "path": "packages/modules/UprobeStats",
@@ -371,7 +371,7 @@
       "repository": "PixelOS-AOSP/android_packages_modules_Wifi",
       "remote": "github",
       "branch": "seventeen",
-      "revision": "656098301250bc79e3faa6907bdf15fa8996a93d"
+      "revision": "45f5aaceb42438514cf0a1c10d7b2e99f62132d9"
     },
     {
       "path": "packages/providers/ContactsProvider",
@@ -392,14 +392,14 @@
       "repository": "PixelOS-AOSP/android_packages_providers_MediaProvider",
       "remote": "github",
       "branch": "seventeen",
-      "revision": "eaf62ef2f7f864c5345a2da747cef320690568e8"
+      "revision": "e34b24af01980a54d3737358b9129de0a4f657be"
     },
     {
       "path": "packages/providers/TelephonyProvider",
       "repository": "PixelOS-AOSP/android_packages_providers_TelephonyProvider",
       "remote": "github",
       "branch": "seventeen",
-      "revision": "f0b80a81153e60540ad81439d96422e90e8e7157"
+      "revision": "bce1c964c3447fa90e8ff7ab9173a258ba353b1e"
     },
     {
       "path": "packages/services/BuiltInPrintService",

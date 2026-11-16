@@ -320,4 +320,22 @@
     <string name="sb_custom">自定义</string>
     <string name="sb_custom_colour">自定义歌词颜色</string>
     <string name="sb_invalid_colour">请输入 #RRGGBB 格式，例如 #A8D5FF。</string>
+    <string name="emoji_styles_title">自定义表情符号</string>
+    <string name="emoji_styles_summary">切换系统表情符号样式并即时预览。</string>
+    <string name="emoji_styles_tip">请选择表情符号样式。重启后生效。</string>
+    <string name="emoji_styles_stock">默认</string>
+    <string name="emoji_styles_ios">iOS</string>
+    <string name="emoji_styles_samsung">Samsung</string>
+    <string name="emoji_styles_swiftui">SwiftUI</string>
+    <string name="emoji_styles_facebook">Facebook</string>
+    <string name="emoji_styles_selected">已选中</string>
+    <string name="emoji_styles_select">选择表情符号样式</string>
+    <string name="emoji_styles_missing">尚未安装字体包</string>
+    <string name="emoji_styles_preview_unavailable">无法预览</string>
+    <string name="emoji_styles_pending">重启后应用新的表情符号样式</string>
+    <string name="emoji_styles_reboot_question">是否重启以在整个系统中应用此表情符号样式？</string>
+    <string name="emoji_styles_reboot">立即重启</string>
+    <string name="emoji_styles_later">稍后</string>
+    <string name="emoji_styles_failed">此版本无法更改表情符号样式</string>
+    <string name="emoji_styles_stock_summary">Android 原版表情符号</string>
 </resources>

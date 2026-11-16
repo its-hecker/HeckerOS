@@ -17,3 +17,4 @@ sys.hecker.sensor_recovery.after u:object_r:hecker_sensor_recovery_status_prop:s
 sys.hecker.sensor_recovery.state.multihal20 u:object_r:hecker_sensor_recovery_status_prop:s0 exact enum stopped stopping restarting running
 sys.hecker.sensor_recovery.state.multihal21 u:object_r:hecker_sensor_recovery_status_prop:s0 exact enum stopped stopping restarting running
 sys.hecker.sensor_recovery.state.hal20 u:object_r:hecker_sensor_recovery_status_prop:s0 exact enum stopped stopping restarting running
+persist.sys.ax_emoji_style u:object_r:hecker_emoji_style_prop:s0 exact enum android ios samsung swiftui facebook

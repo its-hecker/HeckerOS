@@ -131,7 +131,7 @@ public final class HeckerStudio {
         });
         scroll.requestApplyInsets();
         if (android.animation.ValueAnimator.areAnimatorsEnabled()) {
-            page.setAlpha(0); page.animate().alpha(1).setDuration(180).start();
+            page.setAlpha(0); page.animate().alpha(1).setDuration(140).start();
         }
     }
     private HeckerStudio() {}

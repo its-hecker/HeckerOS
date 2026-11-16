@@ -1,0 +1,38 @@
+name: HeckerOS recovery Phase 1 source validation
+on:
+  push:
+    branches:
+      - cnb_latest_stable
+    paths:
+      - tools/recovery_port.py
+      - tools/recovery_phase1.py
+      - tests/test_recovery_phase1.py
+      - .github/workflows/recovery-phase1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recovery-ui-contract:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download the exact pinned PixelOS recovery source
+        run: |
+          set -euo pipefail
+          base="$RUNNER_TEMP/hecker-pixelos-recovery"
+          sha=410707c908dc61faec79bf9fec2ef17712fde8ce
+          mkdir -p "$base/recovery_ui/include/recovery_ui" "$base/recovery_ui"
+          for path in recovery_ui/include/recovery_ui/screen_ui.h recovery_ui/screen_ui.cpp; do
+            curl -fLSs --retry 3 "https://raw.githubusercontent.com/PixelOS-AOSP/android_bootable_recovery/$sha/$path" -o "$base/$path"
+          done
+          echo "HECKER_RECOVERY_BASELINE=$base" >> "$GITHUB_ENV"
+      - name: Compile patcher and apply/revert source tests
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/recovery_port.py tools/recovery_phase1.py
+          python3 -m unittest discover -v -s tests -p 'test_recovery_phase1.py'

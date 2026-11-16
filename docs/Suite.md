@@ -14,18 +14,20 @@ cross-window blur listener switches the background to a solid Material surface
 when blur becomes unavailable, and is removed when the popup closes. The close
 button, scrollable content and accessibility timeout support larger text and
 longer interaction times. Existing headset artwork and reported battery data
-remain in use for AirPods, Soundcore and generic audio devices.
+remain in use for AirPods, Soundcore and generic audio devices. Battery status
+and device details now use small matching outlined neutral-tonal chips instead
+of stretched bright-accent bars.
 
-**HeckerLab → Gestures and navigation** contains the native navigation-mode
-shortcut and **Hide gesture pill and bottom space**, moved from Status bar.
-The new offline Lottie shows a Home swipe and the reclaimed bottom inset. Moving
-the setting preserves the paired overlay state and per-user behavior.
+**Gestures and navigation** and the ineffective **Hide gesture pill** toggle were
+removed from HeckerLab in the November 13 stable revision. The pill-hide overlay
+is no longer packaged, and Android's native gesture targets and bottom inset are
+left untouched. Users can access navigation mode through Android Settings.
 
 Source checks cover complete Suite Java/resource linking, the SystemUI popup,
 Russian translations and navigation overlay transactions. Full SystemUI Soong
 compilation and phone checks remain necessary: test both color modes, change the
 wallpaper, disable cross-window blur while the popup is visible, reconnect a
-headset, and verify the navigation toggle with both gesture and button modes.
+headset, and verify native gestures with both gesture and button modes.
 
 ## Architecture
 
@@ -61,7 +63,7 @@ The development branch defaults to USB debugging without PC authorization on
 authorization. The helper verifies the resulting product properties; rebuild and
 flash before testing a mode change. See [development ADB](../rom/adb/README.md).
 
-The preparation command validates every source anchor before writing, is idempotent, and preserves backups under `out/hecker-suite-source-backups`. To undo only owned, unchanged adapters before syncing a different source baseline, run:
+The preparation command validates every source anchor before writing, is idempotent, and preserves backups under the active `OUT_DIR` (by default `out/hecker-suite-source-backups`, or `out-nonksu/hecker-suite-source-backups` for non-KSU). Backups made by older builds under `out/` must be moved into the active output directory before Soong scans source modules. To undo only owned, unchanged adapters before syncing a different source baseline, run:
 
 ```bash
 python3 vendor/hecker/floral/suite/tools/prepare.py --revert

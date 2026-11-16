@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="system_blur_title">全系统模糊效果</string>
+    <string name="system_blur_summary">允许 Android 窗口和背景模糊。关闭后可减少图形处理负担。启动器的玻璃效果需单独设置。</string>
+    <string name="system_blur_unsupported">此设备不支持窗口级模糊效果。</string>
+    <string name="system_blur_write_failed">无法更改系统模糊设置。</string>
+</resources>

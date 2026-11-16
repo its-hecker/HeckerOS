@@ -38,6 +38,10 @@
   ],
   "packages/apps/Settings/src/com/android/settings/homepage/SettingsHomepageActivity.java": [
     {
+      "old": "    private static final long HOMEPAGE_LOADING_TIMEOUT_MS = 300;",
+      "new": "    // Keep the native suggestion flow, but avoid holding the homepage hidden\n    // for the full 300 ms when the optional suggestion provider is slow.\n    private static final long HOMEPAGE_LOADING_TIMEOUT_MS = 180;"
+    },
+    {
       "old": "setContentView(R.layout.settings_homepage_container);",
       "new": "setContentView(R.layout.hecker_settings_homepage_container);"
     },

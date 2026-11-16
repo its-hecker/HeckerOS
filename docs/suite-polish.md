@@ -46,7 +46,7 @@ compilation and Coral hardware validation are still required.
 | Lock-screen display / always-on display | Settings → Display |
 | 3D face enrollment and management | Settings → Security |
 | System navigation | Android Settings |
-| Protected-window capture switch | Hecker Suite → Screenshots |
+| Protected-window capture switch | Hecker Suite → Advanced options |\n| Debug-only app signature update mode | Hecker Suite → Advanced options (owner user, userdebug only; OFF by default) |
 
 The Suite dashboard no longer has separate Theme Pack, Lyrics, 3D Face Unlock,
 Navigation, Animations or launcher-selection entries. The style catalog and
@@ -128,3 +128,20 @@ Pair R50i, verify connection artwork, real left/right readings and firmware,
 disconnect during a read, reopen LibrePods and test the AirPods route. Confirm
 the glow appears on HOME/apps as well as lockscreen/AOD, and check centered
 scanning/unlocked labels at the selected font size.
+
+
+## Per-app APK signature compatibility testing
+
+Hecker Lab → Advanced options → App signature compatibility opens a searchable
+list of eligible, installed user applications, showing their icon, name,
+package identifier and current setting. Each app must be chosen explicitly.
+
+Suite persists a JSON object of enabled package names under
+`Settings.Global.hecker_signature_allowed_packages`; it reads the value back
+before claiming success. Package Manager only applies its test compatibility
+when the exact incoming package is explicitly enabled. System, shared-UID,
+APEX and preloaded apps remain protected, and incoming APK cryptographic
+signature validation remains in effect. The old device-wide switch is unused.
+The settings default to an empty allowlist on a new installation.
+
+This is a source checkpoint. Compile and device-install checks are required.

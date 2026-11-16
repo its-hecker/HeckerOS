@@ -7,20 +7,28 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.os.SystemProperties;
+import android.provider.Settings;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public final class SuiteActivity extends Activity {
+    // Android's @hide Settings.Global.DISABLE_WINDOW_BLURS is not exported by
+    // every android-system.jar host SDK. Use its framework-defined key directly.
+    private static final String WINDOW_BLUR_DISABLED_SETTING = "disable_window_blurs";
     private SuiteAnimation animation;
     private LinearLayout content;
     private Button customizations, about;
     private boolean showingAbout;
+    private Switch systemBlurToggle;
+    private boolean refreshingSystemBlurToggle;
     private int message;
 
     @Override public void onCreate(Bundle state) {
@@ -58,7 +66,8 @@ public final class SuiteActivity extends Activity {
     }
     private void showTab(boolean selectedAbout) {
         showingAbout=selectedAbout; customizations.setSelected(!selectedAbout); about.setSelected(selectedAbout); content.removeAllViews();
-        if(selectedAbout){SuiteAbout.populate(this,content);return;}
+        if(selectedAbout){systemBlurToggle=null;SuiteAbout.populate(this,content);return;}
+        addSystemBlurToggle();
         addRow(tile(R.string.qs_title,R.string.qs_summary,R.drawable.ic_qs,v->open("QuickSettingsActivity")),
                 tile(R.string.lock_screen_title,R.string.lock_screen_summary,R.drawable.ic_lock,v->open("LockScreenSettingsActivity")));
         addRow(tile(R.string.status_bar_title,R.string.status_bar_summary,R.drawable.ic_signal,v->open("StatusBarSettingsActivity")),
@@ -77,14 +86,57 @@ public final class SuiteActivity extends Activity {
             addRow(tile(R.string.sensor_recovery_title,R.string.sensor_recovery_summary,R.drawable.ic_motion_sense,
                             v -> open("SensorRecoveryActivity")),
                     tile(R.string.root_privacy_title,R.string.root_privacy_summary,R.drawable.ic_spoofing,
-                            v -> open("RootPrivacyActivity")));
+                                    v -> open("RootPrivacyActivity")));
         }
-        addRow(tile(R.string.gestures_navigation_title,R.string.gestures_navigation_summary,
-                        R.drawable.ic_navigation,v->open("GestureNavigationActivity")),
+        addRow(tile(R.string.emoji_styles_title,R.string.emoji_styles_summary,
+                R.drawable.ic_palette,v->open("EmojiStylesActivity")),
                 tile(R.string.vault_title,R.string.vault_summary,R.drawable.ic_vault,v->open("HeckerVault")));
         LinearLayout footer=Ui.card(this); footer.addView(Ui.text(this,"HeckerOS",17,true));
         footer.addView(Ui.text(this,getString(R.string.suite_footer),12,false));content.addView(footer);
     }
+    /** Native Android window blur master switch; never changes compositor properties. */
+    private void addSystemBlurToggle() {
+        LinearLayout card = Ui.card(this);
+        Switch toggle = new Switch(this);
+        toggle.setText(R.string.system_blur_title);
+        toggle.setEnabled(SystemProperties.getBoolean(
+                "ro.surface_flinger.supports_background_blur", false));
+        systemBlurToggle = toggle;
+        refreshSystemBlurToggle();
+        toggle.setOnCheckedChangeListener((button, enabled) -> {
+            if (refreshingSystemBlurToggle) return;
+            try {
+                if (!Settings.Global.putInt(getContentResolver(),
+                        WINDOW_BLUR_DISABLED_SETTING, enabled ? 0 : 1)) {
+                    Toast.makeText(this, R.string.system_blur_write_failed,
+                            Toast.LENGTH_SHORT).show();
+                }
+            } catch (SecurityException error) {
+                Toast.makeText(this, R.string.system_blur_write_failed,
+                        Toast.LENGTH_SHORT).show();
+            }
+            // Read back the framework setting, including when another surface
+            // (Developer options/Accessibility) changed it or a write failed.
+            refreshSystemBlurToggle();
+        });
+        card.addView(toggle);
+        card.addView(Ui.text(this, getString(toggle.isEnabled()
+                ? R.string.system_blur_summary
+                : R.string.system_blur_unsupported), 12, false));
+        content.addView(card);
+    }
+
+    private void refreshSystemBlurToggle() {
+        if (systemBlurToggle == null) return;
+        refreshingSystemBlurToggle = true;
+        try {
+            systemBlurToggle.setChecked(Settings.Global.getInt(getContentResolver(),
+                    WINDOW_BLUR_DISABLED_SETTING, 0) == 0);
+        } finally {
+            refreshingSystemBlurToggle = false;
+        }
+    }
+
     private LinearLayout tile(int title,int summary,int icon,View.OnClickListener click) {
         LinearLayout card=Ui.card(this);card.setMinimumHeight(Ui.dp(this,154));
         ImageView image=new ImageView(this);image.setImageResource(icon);image.setImageTintList(ColorStateList.valueOf(getColor(R.color.hecker_accent)));
@@ -127,6 +179,7 @@ public final class SuiteActivity extends Activity {
         catch(ActivityNotFoundException|SecurityException unavailable){Toast.makeText(this,R.string.motion_sense_unavailable,Toast.LENGTH_LONG).show();}
     }
     @Override protected void onSaveInstanceState(Bundle state){state.putBoolean("about",showingAbout);state.putInt("message",message);super.onSaveInstanceState(state);}
+    @Override protected void onResume(){super.onResume();refreshSystemBlurToggle();}
     @Override protected void onStart(){super.onStart();if(animation!=null)animation.show(R.raw.suite_orbit,true);}
     @Override protected void onStop(){if(animation!=null)animation.stop();super.onStop();}
     @Override public boolean onOptionsItemSelected(MenuItem item){if(item.getItemId()==android.R.id.home){finish();return true;}return super.onOptionsItemSelected(item);}

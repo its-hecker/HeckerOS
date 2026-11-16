@@ -58,10 +58,7 @@ public final class RootPrivacyActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
-        if (!"coral".equals(Build.DEVICE) && !"flame".equals(Build.DEVICE)) {
-            finish();
-            return;
-        }
+        if (!"coral".equals(Build.DEVICE) && !"flame".equals(Build.DEVICE)) { finish(); return; }
         backendAvailable = "true".equals(android.os.SystemProperties.get(
                 "ro.hecker.coral_root_privacy", "false"))
                 && android.os.SystemProperties.getInt("ro.hecker.app_compatibility", 0) >= 1;
@@ -139,8 +136,26 @@ public final class RootPrivacyActivity extends Activity {
             if (query.isEmpty() || (app.label + " " + app.info.packageName)
                     .toLowerCase(Locale.ROOT).contains(query)) visible.add(app);
         }
+        // Prioritize apps with any enabled compatibility option, while retaining
+        // alphabetical order for enabled and disabled apps separately.
+        Collator collator = Collator.getInstance();
+        visible.sort((a, b) -> {
+            boolean aEnabled = hasEnabledOption(a.info.packageName);
+            boolean bEnabled = hasEnabledOption(b.info.packageName);
+            if (aEnabled != bEnabled) return aEnabled ? -1 : 1;
+            int byLabel = collator.compare(a.label, b.label);
+            return byLabel != 0 ? byLabel
+                    : a.info.packageName.compareTo(b.info.packageName);
+        });
         status.setText(getString(R.string.compat_app_count, visible.size(), apps.size()));
         adapter.notifyDataSetChanged();
+    }
+
+    private boolean hasEnabledOption(String packageName) {
+        for (Set<String> names : selected) {
+            if (names.contains(packageName)) return true;
+        }
+        return false;
     }
 
     private void showOptions(App app) {
@@ -170,7 +185,7 @@ public final class RootPrivacyActivity extends Activity {
                 } catch (RuntimeException denied) { /* Revert the visible switch below. */ }
                 if (saved) {
                     selected.set(option, names);
-                    adapter.notifyDataSetChanged();
+                    filter();
                 } else {
                     // Rebuild from stored values; reverting must not make a second write.
                     showSaveFailure(app);

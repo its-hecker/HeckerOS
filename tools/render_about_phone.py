@@ -20,7 +20,7 @@ CONFIG={'message':'Reference About home with the shared media glow.', 'style':'S
  'fps':FPS,'duration_seconds':COUNT/FPS,'palette':'settings/res/values[-night]/hecker_about_colors.xml',
  'layout':'settings/res/layout/hecker_about_phone.xml','glow':'framework/qs/MediaGlowSpec.java',
  'font_note':'DejaVu host labels approximate Android sans-serif; not a phone capture.',
- 'sample_data':{'name':'Google Pixel 4 XL','Android':'17','version':'1.0','processor':'Snapdragon 855'},
+ 'sample_data':{'name':'Google Pixel 4 XL','Android':'17','version':'2.0','processor':'Snapdragon 855'},
  'motion':'One 7.2-second absolute-time cycle; controls and text remain still.'}
 (OUT/'style.json').write_text(json.dumps(CONFIG,indent=2)+'\n')
 STRINGS={};STYLES={}
@@ -29,10 +29,25 @@ for p in (ROOT/'settings/res/values').glob('*.xml'):
   if n.tag=='string':STRINGS[n.get('name')]=''.join(n.itertext())
   if n.tag=='style':STYLES[n.get('name')]={i.get('name').replace('android:',''):i.text for i in n}
 
+# Representative host-only Monet colors. Android obtains the real dynamic values
+# from wallpaper-derived framework resources at runtime; screenshots aren't device captures.
+PREVIEW_MONET={
+ True:{
+  'system_neutral1_10':'#FCF8FF','system_neutral1_50':'#F1ECF4',
+  'system_accent1_100':'#E8DDFF','system_accent2_100':'#E2E0F1',
+  'system_neutral1_900':'#1E1B22','system_neutral2_700':'#625D69',
+  'system_accent1_600':'#7351A4','system_neutral2_200':'#CAC4D1'},
+ False:{
+  'system_neutral1_900':'#151218','system_neutral1_800':'#27232B',
+  'system_accent1_700':'#76559E','system_accent2_700':'#625B77',
+  'system_neutral1_50':'#F5EFF7','system_neutral2_200':'#CEC4D2',
+  'system_accent1_200':'#D6BAFA','system_neutral2_700':'#615967'}
+}
 def colors(light=False):
  d={n.get('name'):n.text for n in ET.parse(ROOT/'settings/res/values/hecker_about_colors.xml').getroot()}
  if not light:d.update({n.get('name'):n.text for n in ET.parse(ROOT/'settings/res/values-night/hecker_about_colors.xml').getroot()})
- return d
+ return {k: PREVIEW_MONET[light][v.rsplit('/',1)[-1]]
+         if v.startswith('@android:color/system_') else v for k,v in d.items()}
 
 def color(value,palette):
  if not value or value.startswith('?'):return None

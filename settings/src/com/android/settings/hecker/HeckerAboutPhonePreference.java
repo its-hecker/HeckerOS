@@ -2,7 +2,12 @@
 package com.android.settings.hecker;
 
 import android.content.Context;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.net.Uri;
 import android.database.ContentObserver;
+import android.content.res.Configuration;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
@@ -84,6 +89,16 @@ public final class HeckerAboutPhonePreference extends Preference {
                 if (mNavigate != null) mNavigate.accept(destination);
             });
         }
+        mCard.findViewById(R.id.hecker_about_support_action).setOnClickListener(view -> {
+            try {
+                getContext().startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://t.me/pixel4seriesupdates/2019")));
+            } catch (ActivityNotFoundException | SecurityException unavailable) {
+                android.widget.Toast.makeText(getContext(),
+                        R.string.hecker_about_support_unavailable,
+                        android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
         render();
     }
 
@@ -105,6 +120,35 @@ public final class HeckerAboutPhonePreference extends Preference {
         value(R.id.hecker_about_model, name == null || name.isBlank() ? Build.MODEL : name);
         value(R.id.hecker_about_version_line, context.getString(R.string.hecker_about_version_line,
                 SystemProperties.get("ro.heckeros.version", unavailable()), Build.VERSION.RELEASE));
+        String buildType = SystemProperties.get("ro.heckeros.build_type", "");
+        String badge = "OFFICIAL".equalsIgnoreCase(buildType)
+                ? context.getString(R.string.hecker_about_official_build)
+                : "UNOFFICIAL".equalsIgnoreCase(buildType)
+                ? context.getString(R.string.hecker_about_unofficial_build)
+                : context.getString(R.string.hecker_about_unspecified);
+        TextView status = (TextView) mCard.findViewById(R.id.hecker_about_build_status);
+        status.setText(badge);
+        if ("OFFICIAL".equalsIgnoreCase(buildType)) {
+            // Only verified HeckerOS release-channel builds receive an accent
+            // pill. Use the system's paired Material You container/on-container
+            // colors so contrast stays readable in light and dark themes.
+            boolean dark = (context.getResources().getConfiguration().uiMode
+                    & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+            GradientDrawable background = new GradientDrawable();
+            background.setCornerRadius(50f * context.getResources().getDisplayMetrics().density);
+            background.setColor(context.getColor(dark
+                    ? android.R.color.system_primary_container_dark
+                    : android.R.color.system_primary_container_light));
+            status.setBackground(background);
+            status.setTextColor(context.getColor(dark
+                    ? android.R.color.system_on_primary_container_dark
+                    : android.R.color.system_on_primary_container_light));
+        } else {
+            status.setBackgroundResource(R.drawable.hecker_about_status_pill);
+            status.setTextColor(context.getColor(R.color.hecker_about_text));
+        }
+        value(R.id.hecker_about_maintainer_name,
+                SystemProperties.get("ro.heckeros.maintainer", "Hecker"));
         value(R.id.hecker_about_android, Build.VERSION.RELEASE);
         value(R.id.hecker_about_processor, HeckerAboutPhoneValues.processor(Build.SOC_MODEL, Build.HARDWARE));
         android.app.ActivityManager.MemoryInfo memory = new android.app.ActivityManager.MemoryInfo();

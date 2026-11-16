@@ -22,7 +22,8 @@ public final class HeckerSliderValues {
     }
     public static int verticalThickness(float fontScale){
         if(!Float.isFinite(fontScale))fontScale=1f;
-        return Math.round(64f+16f*(Math.max(1f,Math.min(3f,fontScale))-1f));
+        // Compact MD3 controls retain a >=48dp touch target, including large-text mode.
+        return Math.round(48f+8f*(Math.max(1f,Math.min(3f,fontScale))-1f));
     }
     private HeckerSliderValues(){}
 }

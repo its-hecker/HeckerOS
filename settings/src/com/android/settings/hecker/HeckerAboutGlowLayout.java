@@ -46,9 +46,14 @@ public final class HeckerAboutGlowLayout extends FrameLayout {
         super(context, attrs);
         setWillNotDraw(false);
         setClipToOutline(true);
+        // Keep the original gentle motion path, but use Material You tones
+        // instead of the media card's fixed blue/lavender glow colors.
+        int[] accents = {android.R.color.system_accent1_300,
+                android.R.color.system_accent2_300, android.R.color.system_accent3_300};
         for (int i = 0; i < mGlow.length; i++) {
+            int accent = context.getColor(accents[i]);
             mGlow[i] = new RadialGradient(0, 0, 1,
-                    new int[] {MediaGlowSpec.centerColor(i), MediaGlowSpec.middleColor(i), Color.TRANSPARENT},
+                    new int[] {withAlpha(accent, 96), withAlpha(accent, 34), Color.TRANSPARENT},
                     new float[] {0, .5f, 1}, Shader.TileMode.CLAMP);
         }
     }
@@ -124,9 +129,15 @@ public final class HeckerAboutGlowLayout extends FrameLayout {
         super.onSizeChanged(width, height, oldWidth, oldHeight);
         if (height <= 0) return;
         mUnderlay = new LinearGradient(0, 0, 0, height, Color.TRANSPARENT,
-                MediaGlowSpec.UNDERLAY, Shader.TileMode.CLAMP);
+                withAlpha(getContext().getColor(android.R.color.system_accent2_300), 28),
+                Shader.TileMode.CLAMP);
         mRim = new LinearGradient(0, 0, 0, height, Color.TRANSPARENT,
-                MediaGlowSpec.RIM, Shader.TileMode.CLAMP);
+                withAlpha(getContext().getColor(android.R.color.system_accent1_300), 40),
+                Shader.TileMode.CLAMP);
+    }
+
+    private static int withAlpha(int color, int alpha) {
+        return (color & 0x00ffffff) | (alpha << 24);
     }
 
     @Override protected void onDraw(Canvas canvas) {

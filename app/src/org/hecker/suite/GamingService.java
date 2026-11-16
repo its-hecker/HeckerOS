@@ -61,7 +61,7 @@ public final class GamingService extends Service implements GamingOverlay.Action
     private boolean active,brightnessChanged,stateRegistered,packagesRegistered,destroyed;
     private GamingTaskObserver taskObserver;
     private float fps=Float.NaN,sessionBrightness=Float.NaN;
-    private long fpsAt,recordGrace;
+    private long fpsAt,recordGrace,lastFpsUiAt;
     private Intent battery;
     private TaskFpsCallback fpsCallback;
     private final Runnable evaluate=this::evaluate;
@@ -179,14 +179,23 @@ public final class GamingService extends Service implements GamingOverlay.Action
         if(!wanted){stopFps();return;}if(fpsCallback!=null&&fpsTask==gameTask)return;
         stopFps();int sampledTask=gameTask;
         TaskFpsCallback callback=new TaskFpsCallback(){@Override public void onFpsReported(float reported){
-            if(!active||fpsTask!=sampledTask||fpsCallback!=this)return;fps=GamingPolicy.usableFps(reported);fpsAt=SystemClock.elapsedRealtime();overlay.sample(fps);updateStatus();
+            if(!active||fpsTask!=sampledTask||fpsCallback!=this)return;
+            fps=GamingPolicy.usableFps(reported);
+            long now=SystemClock.elapsedRealtime();fpsAt=now;
+            // TaskFpsCallback may fire every presented frame. Do not query networking,
+            // reformat text and redraw the panel 60-90 times per second.
+            if(now-lastFpsUiAt>=250){
+                lastFpsUiAt=now;
+                overlay.sample(fps);
+                updateStatus();
+            }
         }};
         try{fpsTask=sampledTask;fpsCallback=callback;wm.registerTaskFpsCallback(sampledTask,getMainExecutor(),callback);}
         catch(RuntimeException e){Log.w("HeckerGaming","Task FPS unavailable",e);stopFps();}
     }
     private void stopFps(){
         if(fpsCallback!=null)try{wm.unregisterTaskFpsCallback(fpsCallback);}catch(RuntimeException ignored){}
-        fpsCallback=null;fpsTask=-1;fps=Float.NaN;fpsAt=0;
+        fpsCallback=null;fpsTask=-1;fps=Float.NaN;fpsAt=0;lastFpsUiAt=0;
     }
     private void updateStatus(){
         if(overlay==null||!active)return;

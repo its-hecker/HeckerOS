@@ -41,6 +41,15 @@ filegroup {
     srcs: ["app/src/org/hecker/ui/HeckerChoiceSheet.java"],
 }
 
+python_binary_host {
+    name: "hecker_recovery2_rom",
+    srcs: [
+        "tools/recovery2_rom.py",
+        "tools/recovery2_boot_compare.py",
+    ],
+    main: "tools/recovery2_rom.py",
+}
+
 android_app {
     name: "HeckerSuite",
     licenses: ["hecker_suite_license", "hecker_netlab_registry_license", "hecker_xmorph_license"],

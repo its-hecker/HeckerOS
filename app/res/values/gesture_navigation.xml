@@ -2,7 +2,7 @@
     <string name="gestures_navigation_title">Gestures and navigation</string>
     <string name="gestures_navigation_summary">System navigation, gesture pill and the space below apps</string>
     <string name="gesture_navigation_title">Gesture navigation</string>
-    <string name="gesture_hide_pill">Hide gesture pill and bottom space</string>
-    <string name="gesture_hide_pill_summary">Reclaim the strip below apps while keeping Home, Back and Recents gestures. Three-button navigation keeps its normal buttons.</string>
+    <string name="gesture_hide_pill">Hide gesture pill</string>
+    <string name="gesture_hide_pill_summary">Hide the visual navigation handle while keeping Android\'s native Home/Back/Recents gesture area and bottom spacing. Any old 0dp inset overlay is turned off.</string>
     <string name="gesture_hide_pill_failed">Could not change gesture navigation. Try again after restarting your phone.</string>
 </resources>

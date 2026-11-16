@@ -57,14 +57,17 @@ class UiPolishTests(unittest.TestCase):
                 target.parent.mkdir(parents=True)
                 target.write_bytes((ROOT / 'recovery/upstream' / (density + '.png')).read_bytes())
             original = {p: p.read_bytes() for p in rom.rglob('*.png')}
-            changes = recovery_port.recovery_plan(rom)
-            self.assertEqual(5, len(changes))
-            for p, data in changes.items(): p.write_bytes(data)
-            self.assertFalse(recovery_port.recovery_plan(rom))
-            for p, data in recovery_port.recovery_plan(rom, True).items(): p.write_bytes(data)
-            self.assertEqual(original, {p: p.read_bytes() for p in rom.rglob('*.png')})
-            next(iter(original)).write_bytes(b'unrelated custom recovery artwork')
-            with self.assertRaises(ValueError): recovery_port.recovery_plan(rom)
+            # This test isolates artwork roundtrips. Phase 1 UI patching has
+            # its own baseline-pinned recovery tests, so no fake screen_ui.h is needed.
+            with patch.object(recovery_port, "recovery_phase1_plan", return_value={}):
+                changes = recovery_port.recovery_plan(rom)
+                self.assertEqual(5, len(changes))
+                for p, data in changes.items(): p.write_bytes(data)
+                self.assertFalse(recovery_port.recovery_plan(rom))
+                for p, data in recovery_port.recovery_plan(rom, True).items(): p.write_bytes(data)
+                self.assertEqual(original, {p: p.read_bytes() for p in rom.rglob('*.png')})
+                next(iter(original)).write_bytes(b'unrelated custom recovery artwork')
+                with self.assertRaises(ValueError): recovery_port.recovery_plan(rom)
 
     def test_reviewed_adapter_upgrade_preserves_unrecognized_edits(self):
         with tempfile.TemporaryDirectory() as temp:
