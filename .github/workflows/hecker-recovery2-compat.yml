@@ -55,15 +55,20 @@ jobs:
           python3 - <<'PY'
           import sys
           sys.path.insert(0, "tools")
-          from recovery2_rom import (FOX_SHA256, FOX_SIZE, FLAME_IMAGE_SHA256,
-                                     FLAME_RUN_ID, FLAME_REPO)
+          from recovery2_rom import FOX_SHA256, FOX_SIZE, FLAME_IMAGE_SHA256
           from recovery2_port import INSTALL, DEPENDENCIES
           assert FOX_SIZE == 31246054
           assert FOX_SHA256 == "7be16045dba3cce2797348efd285ab3c0f63c4470fabc4335cc0ded8f9f4a3f4"
           assert FLAME_IMAGE_SHA256 == "a3ce5794ead22683e73b9d642e0394d81c64d59be7c76bdfb5d3cf7107bce5da"
-          assert FLAME_RUN_ID == "43899564692"
-          assert FLAME_REPO.endswith("orangefox_device_google_flame")
           assert "hecker-recovery2-flame.cpio.gz" in INSTALL
           assert any("hecker-recovery2-flame.cpio.gz" in dependency for dependency in DEPENDENCIES)
           print("Flame November recovery source and OTA install contracts: PASS")
           PY
+          python3 tools/recovery2_rom.py download "$RUNNER_TEMP/hecker-recovery2-flame.cpio.gz"
+          python3 tools/recovery2_brand_art.py \
+            recovery/res-xxhdpi/images/logo_image.png \
+            "$RUNNER_TEMP/hecker-recovery2-brand-assets"
+          python3 tools/recovery2_rom.py preflight \
+            "$RUNNER_TEMP/hecker-recovery2-flame.cpio.gz" \
+            recovery/res-xxhdpi/images/logo_image.png \
+            "$RUNNER_TEMP/hecker-recovery2-brand-assets"

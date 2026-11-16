@@ -9,11 +9,11 @@ import io
 import os
 from pathlib import Path
 import re
-import shutil
 import stat
 import struct
 import subprocess
 import tempfile
+import urllib.request
 import zipfile
 
 if __package__:
@@ -25,9 +25,9 @@ PAYLOAD = "hecker-recovery.cpio.zst"
 FOX_SHA256 = "7be16045dba3cce2797348efd285ab3c0f63c4470fabc4335cc0ded8f9f4a3f4"
 FOX_SIZE = 31246054
 FLAME_IMAGE_SHA256 = "a3ce5794ead22683e73b9d642e0394d81c64d59be7c76bdfb5d3cf7107bce5da"
-FLAME_RUN_ID = "43899564692"
 FLAME_REPO = "its-hecker/orangefox_device_google_flame"
-FLAME_ARTIFACT = "OrangeFox-unofficial-flame-43899564692-1"
+FOX_URL = (f"https://github.com/{FLAME_REPO}/releases/download/"
+           "hecker-recovery2-flame-ramdisk-50efc8d/hecker-recovery2-flame.cpio.gz")
 ARCHIVE_LIMIT = 96 * 1024 * 1024
 FOX_INIT = "system/bin/init"
 FOX_RECOVERY = "system/bin/recovery"
@@ -306,35 +306,26 @@ def patch_payload(archive, output, bootprop, fstab, brand_png=None,
 
 
 def download(cache):
-    """Stage the exact November Flame OrangeFox ramdisk without changing the ROM kernel."""
+    """Stage the pinned November Flame OrangeFox ramdisk."""
     if (cache.is_file() and cache.stat().st_size == FOX_SIZE and
             hashlib.sha256(cache.read_bytes()).hexdigest() == FOX_SHA256):
         return
 
     selected = os.environ.get("HECKER_FLAME_OFOX_IMAGE", "out/OrangeFox-unofficial-flame.img")
     image = Path(selected)
-    if not image.is_file():
-        if not shutil.which("gh"):
-            raise ValueError("Missing November Flame recovery image. Put it at "
-                             "out/OrangeFox-unofficial-flame.img or set "
-                             "HECKER_FLAME_OFOX_IMAGE; alternatively log into GitHub CLI.")
-        with tempfile.TemporaryDirectory() as directory:
-            try:
-                subprocess.run(
-                    ["gh", "run", "download", FLAME_RUN_ID, "--repo", FLAME_REPO,
-                     "--name", FLAME_ARTIFACT, "--dir", directory], check=True)
-            except subprocess.CalledProcessError as error:
-                raise ValueError("Cannot download pinned Flame Actions artifact; "
-                                 "use gh auth login or HECKER_FLAME_OFOX_IMAGE") from error
-            _extract_flame_ramdisk(Path(directory) / "OrangeFox-unofficial-flame.img", cache)
-    else:
+    if image.is_file():
         _extract_flame_ramdisk(image, cache)
+        return
+
+    with urllib.request.urlopen(FOX_URL, timeout=90) as response:
+        compressed = response.read(FOX_SIZE + 1)
+    if len(compressed) != FOX_SIZE or hashlib.sha256(compressed).hexdigest() != FOX_SHA256:
+        raise ValueError("Flame OrangeFox release ramdisk checksum mismatch")
+    _stage_ramdisk(cache, compressed)
 
 
 def _extract_flame_ramdisk(image, cache):
     """Read only the verified recovery ramdisk from header-v2 OrangeFox boot.img."""
-    if not image.is_file():
-        raise ValueError("Flame OrangeFox Actions artifact is missing its boot image")
     info = inspect(image)
     if (info["size"] != 67108864 or
             info["boot_image_sha256"] != FLAME_IMAGE_SHA256 or
@@ -354,6 +345,10 @@ def _extract_flame_ramdisk(image, cache):
                 FOX_MAIN_PAGE, ROM_FSTAB, RECOVERY_SEPOLICY}
     if not required.issubset(files):
         raise ValueError("Incomplete Flame OrangeFox recovery ramdisk")
+    _stage_ramdisk(cache, compressed)
+
+
+def _stage_ramdisk(cache, compressed):
     cache.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(dir=cache.parent, delete=False) as output:
         temp = Path(output.name)
@@ -364,6 +359,7 @@ def _extract_flame_ramdisk(image, cache):
         finally:
             temp.unlink(missing_ok=True)
     print("Pinned November Flame OrangeFox ramdisk staged: PASS")
+
 
 def preflight(source, brand_asset, artwork_dir):
     """Reject unsupported pinned OrangeFox themes before a long ROM compilation."""
