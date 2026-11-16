@@ -64,6 +64,6 @@ jobs:
           assert FLAME_RUN_ID == "43899564692"
           assert FLAME_REPO.endswith("orangefox_device_google_flame")
           assert "hecker-recovery2-flame.cpio.gz" in INSTALL
-          assert "hecker-recovery2-flame.cpio.gz" in DEPENDENCIES
+          assert any("hecker-recovery2-flame.cpio.gz" in dependency for dependency in DEPENDENCIES)
           print("Flame November recovery source and OTA install contracts: PASS")
           PY
