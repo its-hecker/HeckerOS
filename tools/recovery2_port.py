@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Attach the Coral recovery payload to the native recovery-as-boot build."""
+"""Attach the Flame recovery payload to the native recovery-as-boot build."""
 
 from pathlib import Path
 import hashlib
@@ -15,17 +15,17 @@ MAKE_ANCHOR = "\t" + BOARD + "\n"
 BRANDING_SOURCE = "vendor/hecker/floral/suite/recovery/res-xxhdpi/images/logo_image.png"
 ARTWORK_DIR = "out/hecker-recovery2-brand-assets"
 INSTALL = ("\t$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom install "
-           "$(ZSTD) out/hecker-recovery2-coral.cpio.gz "
+           "$(ZSTD) out/hecker-recovery2-flame.cpio.gz "
            "$(TARGET_RECOVERY_ROOT_OUT) " + BRANDING_SOURCE + " " + ARTWORK_DIR + "\n")
 # Earlier builds generated the same action without a logo argument.  Reusing
 # a dirty Makefile would run both actions, causing a second failed install.
 LEGACY_INSTALL = ("\t$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom install "
-                  "$(ZSTD) out/hecker-recovery2-coral.cpio.gz "
+                  "$(ZSTD) out/hecker-recovery2-flame.cpio.gz "
                   "$(TARGET_RECOVERY_ROOT_OUT)\n")
 LEGACY_INSTALL_BLOCK = (
-    "ifeq ($(TARGET_PRODUCT),hecker_coral)\n" + LEGACY_INSTALL + "endif\n"
+    "ifeq ($(TARGET_PRODUCT),hecker_flame)\n" + LEGACY_INSTALL + "endif\n"
 )
-DEPENDENCIES = ("$(ZSTD)", "out/hecker-recovery2-coral.cpio.gz",
+DEPENDENCIES = ("$(ZSTD)", "out/hecker-recovery2-flame.cpio.gz",
                 "$(HOST_OUT_EXECUTABLES)/hecker_recovery2_rom",
                 BRANDING_SOURCE, ARTWORK_DIR + "/about.png",
                 ARTWORK_DIR + "/icon.png")
@@ -77,7 +77,7 @@ def recovery_rom_plan(rom, replace, revert=False):
         current = target.read_bytes() if target.exists() else None
         if (current is not None and current not in (expected, previous)
                 and git_blob_sha(current) not in LEGACY_GENERATED_GIT_BLOBS[name]):
-            raise ValueError(f"Unfamiliar Coral recovery source: {target}")
+            raise ValueError(f"Unfamiliar Flame recovery source: {target}")
         if revert and current is not None:
             files[target] = None
         elif not revert and current != expected:
@@ -134,22 +134,22 @@ def recovery_rom_plan(rom, replace, revert=False):
     # Migrate previously generated Makefiles before applying the latest rule.
     clean = current.replace(LEGACY_INSTALL_BLOCK, "", 1)
     anchor = '$(INTERNAL_RECOVERY_RAMDISK_FILES_TIMESTAMP): $(MKBOOTFS) \\\n'
-    deps = ('ifeq ($(TARGET_PRODUCT),hecker_coral)\n'
+    deps = ('ifeq ($(TARGET_PRODUCT),hecker_flame)\n'
             '$(INTERNAL_RECOVERY_RAMDISK_FILES_TIMESTAMP): ' + ' \\\n    '.join(DEPENDENCIES) +
             '\nendif\n\n')
     updated = replace(clean, anchor, deps + anchor, str(make), revert)
     updated = replace(updated, MAKE_ANCHOR, MAKE_ANCHOR +
-                      'ifeq ($(TARGET_PRODUCT),hecker_coral)\n' + INSTALL + 'endif\n',
+                      'ifeq ($(TARGET_PRODUCT),hecker_flame)\n' + INSTALL + 'endif\n',
                       str(make), revert)
     # Preserve the exact AVB-processed boot image through target_files and OTA.
     copy = ('ifneq (,$(strip $(INTERNAL_PREBUILT_BOOTIMAGE) '
             '$(filter true,$(BOARD_COPY_BOOT_IMAGE_TO_TARGET_FILES))))\n')
     updated = replace(updated, copy, copy.replace('$(INTERNAL_PREBUILT_BOOTIMAGE)',
-                      '$(INTERNAL_PREBUILT_BOOTIMAGE) $(filter hecker_coral,$(TARGET_PRODUCT))'),
+                      '$(INTERNAL_PREBUILT_BOOTIMAGE) $(filter hecker_flame,$(TARGET_PRODUCT))'),
                       str(make), revert)
     ota = 'otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)\n'
     updated = replace(updated, ota, ota + '''
-ifeq ($(TARGET_PRODUCT),hecker_coral)
+ifeq ($(TARGET_PRODUCT),hecker_flame)
 .PHONY: hecker-recovery-ota-check
 heckeros: hecker-recovery-ota-check
 hecker-recovery-ota-check: $(INTERNAL_OTA_PACKAGE_TARGET) $(INSTALLED_BOOTIMAGE_TARGET) \\
