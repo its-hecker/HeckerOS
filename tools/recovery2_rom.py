@@ -306,23 +306,64 @@ def patch_payload(archive, output, bootprop, fstab, brand_png=None,
 
 
 def download(cache):
+    """Stage the exact November Flame OrangeFox ramdisk without changing the ROM kernel."""
     if (cache.is_file() and cache.stat().st_size == FOX_SIZE and
             hashlib.sha256(cache.read_bytes()).hexdigest() == FOX_SHA256):
         return
+
+    selected = os.environ.get("HECKER_FLAME_OFOX_IMAGE", "out/OrangeFox-unofficial-flame.img")
+    image = Path(selected)
+    if not image.is_file():
+        if not shutil.which("gh"):
+            raise ValueError("Missing November Flame recovery image. Put it at "
+                             "out/OrangeFox-unofficial-flame.img or set "
+                             "HECKER_FLAME_OFOX_IMAGE; alternatively log into GitHub CLI.")
+        with tempfile.TemporaryDirectory() as directory:
+            try:
+                subprocess.run(
+                    ["gh", "run", "download", FLAME_RUN_ID, "--repo", FLAME_REPO,
+                     "--name", FLAME_ARTIFACT, "--dir", directory], check=True)
+            except subprocess.CalledProcessError as error:
+                raise ValueError("Cannot download pinned Flame Actions artifact; "
+                                 "use gh auth login or HECKER_FLAME_OFOX_IMAGE") from error
+            _extract_flame_ramdisk(Path(directory) / "OrangeFox-unofficial-flame.img", cache)
+    else:
+        _extract_flame_ramdisk(image, cache)
+
+
+def _extract_flame_ramdisk(image, cache):
+    """Read only the verified recovery ramdisk from header-v2 OrangeFox boot.img."""
+    if not image.is_file():
+        raise ValueError("Flame OrangeFox Actions artifact is missing its boot image")
+    info = inspect(image)
+    if (info["size"] != 67108864 or
+            info["boot_image_sha256"] != FLAME_IMAGE_SHA256 or
+            info["header_version"] != 2 or
+            info["os_version"].split(".")[0] != "17" or
+            info["os_patch_month"] != "2026-11" or
+            not info["avb_footer_present"] or
+            info["ramdisk_compression"] != "gzip"):
+        raise ValueError("Flame November OrangeFox image SHA-256 or header mismatch")
+    with image.open("rb") as stream:
+        stream.seek(info["page_size"] + align(info["kernel_size"], info["page_size"]))
+        compressed = stream.read(info["ramdisk_size"])
+    if len(compressed) != FOX_SIZE or hashlib.sha256(compressed).hexdigest() != FOX_SHA256:
+        raise ValueError("Flame November OrangeFox ramdisk SHA-256 mismatch")
+    files = {name for name, _, _, _ in entries(load_gzip(io.BytesIO(compressed)))}
+    required = {FOX_INIT, FOX_RECOVERY, FOX_THEME, FOX_INSTALL_PAGE,
+                FOX_MAIN_PAGE, ROM_FSTAB, RECOVERY_SEPOLICY}
+    if not required.issubset(files):
+        raise ValueError("Incomplete Flame OrangeFox recovery ramdisk")
     cache.parent.mkdir(parents=True, exist_ok=True)
-    with urllib.request.urlopen(FOX_URL, timeout=90) as response, tempfile.NamedTemporaryFile(
-            dir=cache.parent, delete=False) as stream:
-        temp = Path(stream.name)
+    with tempfile.NamedTemporaryFile(dir=cache.parent, delete=False) as output:
+        temp = Path(output.name)
         try:
-            data = response.read(FOX_SIZE + 1)
-            if len(data) != FOX_SIZE or hashlib.sha256(data).hexdigest() != FOX_SHA256:
-                raise ValueError("OrangeFox release ramdisk checksum mismatch")
-            stream.write(data)
-            stream.flush()
+            output.write(compressed)
+            output.flush()
             temp.replace(cache)
         finally:
             temp.unlink(missing_ok=True)
-
+    print("Pinned November Flame OrangeFox ramdisk staged: PASS")
 
 def preflight(source, brand_asset, artwork_dir):
     """Reject unsupported pinned OrangeFox themes before a long ROM compilation."""
@@ -379,7 +420,7 @@ def embedded(image):
     if (ROM_MARKER not in files.get(FOX_INIT, b"") or ROM_FSTAB not in files or
             "first_stage_ramdisk/" + BOOT_PROP not in files or
             FOX_RECOVERY not in files or not files.get(PAYLOAD, b"").startswith(b"\x28\xb5\x2f\xfd")):
-        raise ValueError("Boot ramdisk is missing Android 17 init, Coral first-stage fstab or OrangeFox")
+        raise ValueError("Boot ramdisk is missing Android 17 init, Flame first-stage fstab or OrangeFox")
     return files
 
 
@@ -423,7 +464,7 @@ def verify(zstd, avbtool, extractor, image, ota):
         actual = hashlib.sha256((Path(directory) / "boot.img").read_bytes()).digest()
         if actual != expected:
             raise ValueError("The OTA boot partition differs from the verified dual-mode boot image")
-    print("Coral boot image and A/B OTA contain the same verified OrangeFox payload")
+    print("Flame boot image and A/B OTA contain the same verified OrangeFox payload")
 
 
 def main():
