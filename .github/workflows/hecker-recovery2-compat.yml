@@ -2,7 +2,7 @@ name: Hecker Recovery 2.0 boot integration host checks
 
 on:
   push:
-    branches: [feat/hecker-recovery-2.0, cnb_latest_stable]
+    branches: [feat/hecker-recovery-2.0, cnb_latest_stable, flame-cnb_latest_stable]
     paths:
       - 'tools/recovery2_*.py'
       - 'tools/recovery_phase1.py'
@@ -30,11 +30,12 @@ jobs:
           python-version: '3.12'
       - name: Install recovery art dependency
         run: python3 -m pip install Pillow
-      - name: Validate Coral boot routing and both ramdisks
+      - name: Validate Floral boot routing and both ramdisks
         run: python3 -m unittest discover -s tests -p 'test_recovery2_*.py' -v
       - name: Validate per-app signature UI, resource wiring and fastbootd branding
         run: python3 -m unittest discover -s tests -p 'test_signature_app_selection.py' -v
-      - name: Validate pinned OrangeFox release ramdisk and actual theme
+      - name: Validate pinned Coral OrangeFox release ramdisk and theme
+        if: github.ref_name != 'flame-cnb_latest_stable'
         run: |
           curl --fail --location --retry 3 --retry-delay 2 --output /tmp/hecker-recovery2-coral.cpio.gz \
             https://github.com/its-hecker/orangefox_device_google_coral/releases/download/hecker-recovery2-coral-ramdisk-353ac57/hecker-recovery2-coral.cpio.gz
@@ -47,3 +48,22 @@ jobs:
             recovery/res-xxhdpi/images/logo_image.png \
             /tmp/hecker-recovery2-brand-assets
 
+
+      - name: Validate Flame-only KSU hybrid recovery wiring
+        if: github.ref_name == 'flame-cnb_latest_stable'
+        run: |
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, "tools")
+          from recovery2_rom import (FOX_SHA256, FOX_SIZE, FLAME_IMAGE_SHA256,
+                                     FLAME_RUN_ID, FLAME_REPO)
+          from recovery2_port import INSTALL, DEPENDENCIES
+          assert FOX_SIZE == 31246054
+          assert FOX_SHA256 == "7be16045dba3cce2797348efd285ab3c0f63c4470fabc4335cc0ded8f9f4a3f4"
+          assert FLAME_IMAGE_SHA256 == "a3ce5794ead22683e73b9d642e0394d81c64d59be7c76bdfb5d3cf7107bce5da"
+          assert FLAME_RUN_ID == "43899564692"
+          assert FLAME_REPO.endswith("orangefox_device_google_flame")
+          assert "hecker-recovery2-flame.cpio.gz" in INSTALL
+          assert "hecker-recovery2-flame.cpio.gz" in DEPENDENCIES
+          print("Flame November recovery source and OTA install contracts: PASS")
+          PY
