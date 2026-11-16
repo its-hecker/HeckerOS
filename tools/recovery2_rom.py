@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Stage and verify the Coral recovery-as-boot payload."""
+"""Stage and verify the pinned November Flame recovery-as-boot payload."""
 
 import argparse
 import gzip
@@ -9,11 +9,11 @@ import io
 import os
 from pathlib import Path
 import re
+import shutil
 import stat
 import struct
 import subprocess
 import tempfile
-import urllib.request
 import zipfile
 
 if __package__:
@@ -22,10 +22,12 @@ else:
     from recovery2_boot_compare import inspect, align
 
 PAYLOAD = "hecker-recovery.cpio.zst"
-FOX_SHA256 = "4905cf65045bfd3d73e6ae9d42e141f6706d0ff4bd1557b556fbb1b1db69eb05"
-FOX_URL = ("https://github.com/its-hecker/orangefox_device_google_coral/releases/download/"
-           "hecker-recovery2-coral-ramdisk-353ac57/hecker-recovery2-coral.cpio.gz")
-FOX_SIZE = 31139092
+FOX_SHA256 = "7be16045dba3cce2797348efd285ab3c0f63c4470fabc4335cc0ded8f9f4a3f4"
+FOX_SIZE = 31246054
+FLAME_IMAGE_SHA256 = "a3ce5794ead22683e73b9d642e0394d81c64d59be7c76bdfb5d3cf7107bce5da"
+FLAME_RUN_ID = "43899564692"
+FLAME_REPO = "its-hecker/orangefox_device_google_flame"
+FLAME_ARTIFACT = "OrangeFox-unofficial-flame-43899564692-1"
 ARCHIVE_LIMIT = 96 * 1024 * 1024
 FOX_INIT = "system/bin/init"
 FOX_RECOVERY = "system/bin/recovery"
